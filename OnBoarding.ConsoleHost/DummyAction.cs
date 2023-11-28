@@ -3,20 +3,19 @@ using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Action.State;
 
-namespace OnBoarding
+namespace OnBoarding.ConsoleHost;
+
+sealed class DummyAction : IAction
 {
-    sealed class DummyAction : IAction
+    public IValue PlainValue => throw new NotImplementedException();
+
+    public IWorld Execute(IActionContext context)
     {
-        public IValue PlainValue => throw new NotImplementedException();
+        throw new NotImplementedException();
+    }
 
-        public IWorld Execute(IActionContext context)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LoadPlainValue(IValue plainValue)
-        {
-            throw new NotImplementedException();
-        }
+    public void LoadPlainValue(IValue plainValue)
+    {
+        throw new NotImplementedException();
     }
 }

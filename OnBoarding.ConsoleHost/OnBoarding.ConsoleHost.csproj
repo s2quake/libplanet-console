@@ -3,6 +3,12 @@
   <ItemGroup>
     <ProjectReference Include="..\.Libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\.Libplanet\Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="..\.commands\JSSoft.Library.Commands\JSSoft.Library.Commands\JSSoft.Library.Commands.csproj" />
+    <ProjectReference Include="..\.commands\JSSoft.Library.Commands\JSSoft.Library.Terminals\JSSoft.Library.Terminals.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
