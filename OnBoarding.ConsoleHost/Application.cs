@@ -21,12 +21,14 @@
 
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using Libplanet.Crypto;
 using Libplanet.Net;
 
 namespace OnBoarding.ConsoleHost;
 
 sealed class Application : IAsyncDisposable
 {
+    private readonly PrivateKey _privateKey = new();
     private readonly CompositionContainer _container;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
@@ -38,6 +40,7 @@ sealed class Application : IAsyncDisposable
     {
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
+        _container.ComposeExportedValue(_privateKey);
     }
 
     public void Cancel()
@@ -51,11 +54,11 @@ sealed class Application : IAsyncDisposable
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
-        _swarm = await SwarmFactory.CreateAsync();
+        _cancellationTokenSource = new();
+        _swarm = await SwarmFactory.CreateAsync(_privateKey);
         _container.ComposeExportedValue(_swarm);
         _swarmTask = _swarm.StartAsync();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
-        _cancellationTokenSource = new();
         await _terminal!.StartAsync(_cancellationTokenSource.Token);
     }
 

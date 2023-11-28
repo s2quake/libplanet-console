@@ -25,29 +25,12 @@ namespace OnBoarding.ConsoleHost;
 
 sealed class SwarmFactory
 {
-    public static async Task<Swarm> CreateAsync()
+    public static async Task<Swarm> CreateAsync(PrivateKey privateKey)
     {
-        var privateKey = new PrivateKey();
         var blockChain = CreateBlockChain(privateKey);
         var transport = await CreateTransportAsync(privateKey);
         return new Swarm(blockChain, privateKey, transport);
     }
-
-
-    // private static async Task Main(string[] args)
-    // {
-    //     var privateKey = new PrivateKey();
-    //     var blockChain = CreateBlockChain(privateKey);
-    //     var transport = await CreateTransportAsync(privateKey);
-    //     var swarm = new Swarm(blockChain, privateKey, transport);
-    //     var task = swarm.StartAsync();
-    //     Console.WriteLine("Press any key to quit.");
-    //     Console.ReadKey();
-    //     Console.Write("Stopping swarm.");
-    //     await swarm.StopAsync();
-    //     await task;
-    //     Console.Write("Stopped.");
-    // }
 
     private static async Task<ITransport> CreateTransportAsync(PrivateKey privateKey)
     {
@@ -71,9 +54,9 @@ sealed class SwarmFactory
         var publicKey = privateKey.PublicKey;
         var hashDigest = new HashDigest<SHA256>(hashDigest: bytes);
         var validatorList = new List<Validator>
-            {
-                new(privateKey.PublicKey, BigInteger.One),
-            };
+        {
+            new(privateKey.PublicKey, BigInteger.One),
+        };
         var validatorSet = new ValidatorSet(validatorList);
         var nonce = 0L;
         var action = new Initialize(

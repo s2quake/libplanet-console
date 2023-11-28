@@ -19,10 +19,12 @@
 // Forked from https://github.com/NtreevSoft/CommandLineParser
 // Namespaces and files starting with "Ntreev" have been renamed to "JSSoft".
 
+using System.Collections;
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Library.Commands;
 using Libplanet.Net;
+using Newtonsoft.Json.Linq;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
@@ -35,24 +37,23 @@ sealed class SwarmCommand(Swarm swarm) : CommandMethodBase
     [CommandMethod]
     public void Info()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine($"AppProtocolVersion: {_swarm.AppProtocolVersion}");
-        sb.AppendLine($"Address: {_swarm.Address}");
-        sb.AppendLine($"ConsensusRunning: {_swarm.ConsensusRunning}");
-        sb.AppendLine($"Running: {_swarm.Running}");
-        sb.AppendLine($"LastMessageTimestamp: {_swarm.LastMessageTimestamp}");
-        sb.AppendLine($"BlockChain.Id: {_swarm.BlockChain.Id}");
-        sb.AppendLine($"BlockChain.Tip: {_swarm.BlockChain.Tip}");
-        sb.AppendLine($"BlockChain.Count: {_swarm.BlockChain.Count}");
-        // sb.AppendLine($"Peers: ");
-        // sb.AppendLine($"[");
-        // for (var i = 0; i < _swarm.Peers.Count; i++)
-        // {
-        //     var item = _swarm.Peers[i];
-        //     sb.AppendLine($"    {item}");
-        // }
-        // sb.AppendLine($"]");
+        var json = new JObject
+        {
+            { "AppProtocolVersion", $"{_swarm.AppProtocolVersion}" },
+            { "Address", $"{_swarm.Address}" },
+            { "ConsensusRunning", $"{_swarm.ConsensusRunning}" },
+            { "Running", $"{_swarm.Running}" },
+            { "LastMessageTimestamp", $"{_swarm.LastMessageTimestamp}" },
+            {
+                "BlockChain", new JObject
+                {
+                    { "Id", $"{_swarm.BlockChain.Id}" },
+                    { "Tip", $"{_swarm.BlockChain.Tip}" },
+                    { "Count", $"{_swarm.BlockChain.Count}" },
+                }
+            },
+        };
 
-        Out.Write(sb.ToString());
+        Out.Write(json.ToString());
     }
 }
