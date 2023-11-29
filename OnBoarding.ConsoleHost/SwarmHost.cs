@@ -20,25 +20,76 @@ using System.Numerics;
 using Libplanet.Action.Sys;
 using System.Collections.Immutable;
 using Bencodex.Types;
+using Libplanet.Net.Consensus;
+using System.Collections;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class SwarmFactory
+sealed class SwarmHost(PrivateKey privateKey) : IAsyncDisposable
 {
-    public static async Task<Swarm> CreateAsync(PrivateKey privateKey)
+    private readonly PrivateKey _privateKey = privateKey;
+    private Swarm _swarm = Create(privateKey);
+    private Task? _startTask;
+    private bool _isDisposed;
+
+    public string Key => $"{_privateKey.PublicKey}";
+
+    public bool IsRunning => _swarm != null;
+
+    public bool IsDisposed => _isDisposed;
+
+    public Swarm Target => _swarm;
+
+    public event EventHandler? Disposed;
+
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var blockChain = CreateBlockChain(privateKey);
-        var transport = await CreateTransportAsync(privateKey);
-        return new Swarm(blockChain, privateKey, transport);
+        if (_startTask != null)
+            throw new InvalidOperationException("Swarm has been started.");
+
+        _startTask = _swarm.StartAsync(cancellationToken: default);
+        await Task.CompletedTask;
     }
 
-    private static async Task<ITransport> CreateTransportAsync(PrivateKey privateKey)
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        if (_startTask == null)
+            throw new InvalidOperationException("Swarm has been stopped.");
+
+        await _swarm.StopAsync(cancellationToken: cancellationToken);
+        await _startTask;
+        _swarm.Dispose();
+        _startTask = null;
+    }
+
+    private static Swarm Create(PrivateKey privateKey)
+    {
+        var blockChain = CreateBlockChain(privateKey);
+        var transport = CreateTransport(privateKey);
+        var swarmOptions = new SwarmOptions
+        {
+
+        };
+        var consensusReactorOption = new ConsensusReactorOption
+        {
+            SeedPeers = [],
+            ConsensusPeers = [],
+            ConsensusPort = 0,
+            ConsensusPrivateKey = privateKey,
+            ConsensusWorkers = 100,
+            TargetBlockInterval = TimeSpan.FromSeconds(10),
+        };
+        return new Swarm(blockChain, privateKey, transport, null, null, consensusOption: consensusReactorOption);
+    }
+
+    private static ITransport CreateTransport(PrivateKey privateKey)
     {
         var apv = AppProtocolVersion.Sign(privateKey, 1);
         var appProtocolVersionOptions = new AppProtocolVersionOptions { AppProtocolVersion = apv };
         var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>());
-        var transport = await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
-        return transport;
+        var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
+        task.Wait();
+        return task.Result;
     }
 
     private static BlockChain CreateBlockChain(PrivateKey privateKey)
@@ -99,5 +150,21 @@ sealed class SwarmFactory
             actionEvaluator: actionEvaluator
         );
         return blockChain;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+
+        if (_startTask != null)
+        {
+            await _swarm.StopAsync(cancellationToken: default);
+            await _startTask;
+            _swarm.Dispose();
+            _startTask = null;
+        }
+
+        _isDisposed = true;
+        Disposed?.Invoke(this, EventArgs.Empty);
     }
 }

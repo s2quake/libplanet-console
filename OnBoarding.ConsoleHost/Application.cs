@@ -21,26 +21,23 @@
 
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using Libplanet.Crypto;
-using Libplanet.Net;
+using JSSoft.Library.Commands;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class Application : IAsyncDisposable
+sealed class Application : IAsyncDisposable, IServiceProvider
 {
-    private readonly PrivateKey _privateKey = new();
     private readonly CompositionContainer _container;
+    private readonly SwarmHostCollection _swarmHosts = [];
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
-    private Swarm? _swarm;
-    private Task? _swarmTask;
 
     public Application()
     {
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
-        _container.ComposeExportedValue(_privateKey);
+        _container.ComposeExportedValue(_swarmHosts);
     }
 
     public void Cancel()
@@ -49,15 +46,17 @@ sealed class Application : IAsyncDisposable
         _cancellationTokenSource = null;
     }
 
-    public async Task StartAsync()
+    public async Task StartAsync(string[] args)
     {
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
+        if (args.Length > 0 && GetService<CommandContext>() is { } commandContext)
+        {
+            await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
+        }
+
         _cancellationTokenSource = new();
-        _swarm = await SwarmFactory.CreateAsync(_privateKey);
-        _container.ComposeExportedValue(_swarm);
-        _swarmTask = _swarm.StartAsync();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
         await _terminal!.StartAsync(_cancellationTokenSource.Token);
     }
@@ -68,11 +67,20 @@ sealed class Application : IAsyncDisposable
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
-        await _swarm!.StopAsync();
-        await _swarmTask!;
+        await _swarmHosts.DisposeAsync();
         _terminal = null;
         _container.Dispose();
         _isDisposed = true;
         GC.SuppressFinalize(this);
+    }
+
+    public T? GetService<T>()
+    {
+        return _container.GetExportedValue<T>();
+    }
+
+    public object? GetService(Type serviceType)
+    {
+        return _container.GetExportedValue<object?>(AttributedModelServices.GetContractName(serviceType));
     }
 }
