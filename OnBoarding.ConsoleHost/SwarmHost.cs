@@ -100,10 +100,7 @@ sealed class SwarmHost(PrivateKey privateKey) : IAsyncDisposable
         var store = new MemoryStore();
         var keyValueStore = new DefaultKeyValueStore(dataPath);
         var stateStore = new TrieStateStore(keyValueStore);
-        var bytes = Encoding.UTF8.GetBytes("12345678901234567890123456789012");
-        var blockHash = new BlockHash(bytes);
         var publicKey = privateKey.PublicKey;
-        var hashDigest = new HashDigest<SHA256>(hashDigest: bytes);
         var validatorList = new List<Validator>
         {
             new(privateKey.PublicKey, BigInteger.One),
