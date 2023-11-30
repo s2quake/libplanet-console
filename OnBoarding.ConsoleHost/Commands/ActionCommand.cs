@@ -5,6 +5,7 @@ using JSSoft.Library.Commands;
 using Libplanet.Action.State;
 using Libplanet.Blockchain;
 using OnBoarding.ConsoleHost.Actions;
+using OnBoarding.ConsoleHost.Extensions;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
@@ -15,6 +16,7 @@ sealed class ActionCommand(Application application, ActionCollection actions) : 
     private readonly Application _application = application;
     private readonly ActionCollection _actions = actions;
     private readonly UserCollection _users = application.GetService<UserCollection>()!;
+    private readonly BlockChain _blockChain = application.GetService<BlockChain>()!;
 
     [CommandProperty]
     public int UserIndex { get; set; }
@@ -23,7 +25,6 @@ sealed class ActionCommand(Application application, ActionCollection actions) : 
     [CommandMethodProperty(nameof(UserIndex))]
     public void Add(int value)
     {
-        var blockChain = _application.GetService<BlockChain>()!;
         var userIndex = UserIndex;
         var user = _users[userIndex];
         var action = new AddAction()
@@ -31,24 +32,11 @@ sealed class ActionCommand(Application application, ActionCollection actions) : 
             Address = user.Address,
             Value = value
         };
-        _actions.Add(action);
-        var blockIndex = blockChain.Count;
-        var block = BlockChainUtils.AppendNew(blockChain, user, _users, [action]);
-        var worldState = blockChain.GetWorldState(block.Hash);
-        var account = worldState.GetAccount(ReservedAddresses.LegacyAccount);
-
         var sb = new StringBuilder();
-        sb.AppendLine($"Block index #{blockIndex}");
-        sb.AppendLine();
-        sb.AppendLine("States");
-        sb.AppendLine("------");
-        foreach (var item in _users)
-        {
-            var state = account.GetState(item.Address) is Integer i ? (int)i : 0;
-            sb.AppendLine($"{item}: {state}");
-        }
+        _actions.Add(action);
 
-        Out.WriteLine(sb.ToString());
-
+        var block = BlockChainUtils.AppendNew(_blockChain, user, _users, _actions);
+        sb.AppendStatesLine(_blockChain, block.Index, _users);
+        Out.Write(sb.ToString());
     }
 }

@@ -1,14 +1,17 @@
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Text;
+using Bencodex.Types;
 using JSSoft.Library.Commands;
 using Libplanet.Action;
+using Libplanet.Action.State;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
 using OnBoarding.ConsoleHost.Actions;
+using OnBoarding.ConsoleHost.Extensions;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
@@ -18,25 +21,28 @@ sealed class BlockCommand(Application application, BlockChain blockChain) : Comm
 {
     private readonly Application _application = application;
     private readonly BlockChain _blockChain = blockChain;
+    private readonly UserCollection _users = application.GetService<UserCollection>()!;
+    private readonly ActionCollection _actions = application.GetService<ActionCollection>()!;
+
+    [CommandProperty]
+    public int UserIndex { get; set; }
 
     [CommandMethod]
-    public void New(int count = 1)
+    public void New()
     {
-        // for (var i = 0; i < count; i++)
-        {
-            AddNewBlock(count);
-        }
+        var userIndex = UserIndex;
+        var user = _users[userIndex];
+        var block = BlockChainUtils.AppendNew(blockChain, user, _users, _actions);
+        var sb = new StringBuilder();
+        sb.AppendStatesLine(blockChain, block.Index, _users);
+        Out.Write(sb.ToString());
     }
 
     [CommandMethod]
     public void List()
     {
         var sb = new StringBuilder();
-        for (var i = 0; i < _blockChain.Count; i++)
-        {
-            var block = _blockChain[i];
-            sb.AppendLine($"[{i}]: {block.Hash}");
-        }
+        sb.AppendStatesLine(_blockChain, _users);
         Out.Write(sb.ToString());
     }
 

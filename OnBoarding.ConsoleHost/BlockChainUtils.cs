@@ -10,7 +10,7 @@ namespace OnBoarding.ConsoleHost;
 
 static class BlockChainUtils
 {
-    public static Block AppendNew(BlockChain _blockChain, User user, UserCollection users, IAction[] actions)
+    public static Block AppendNew(BlockChain _blockChain, User user, UserCollection users, ActionCollection actions)
     {
         var privateKey = user.PrivateKey;
         var genesisBlock = _blockChain.Genesis;
@@ -51,6 +51,7 @@ static class BlockChainUtils
 
         var blockCommit = new BlockCommit(height, round, block.Hash, votes);
         _blockChain.Append(block, blockCommit);
+        actions.Clear();
         return block;
     }
 }
