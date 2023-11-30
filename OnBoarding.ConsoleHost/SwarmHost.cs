@@ -118,7 +118,7 @@ sealed class SwarmHost(PrivateKey privateKey) : IAsyncDisposable
             actions: [action.PlainValue],
             timestamp: DateTimeOffset.MinValue
             );
-        var transactions = new Transaction[] { transaction };
+        // var transactions = new Transaction[] { transaction };
         var blockMetadata = new BlockMetadata(
             protocolVersion: Block.CurrentProtocolVersion,
             index: 0,
@@ -130,14 +130,14 @@ sealed class SwarmHost(PrivateKey privateKey) : IAsyncDisposable
             lastCommit: null);
         var blockContent = new BlockContent(blockMetadata, [transaction]);
         var preEvaluationBlock = blockContent.Propose();
-        var actionEvaluator = new ActionEvaluator(_ => null, stateStore, new SingleActionLoader(typeof(DummyAction)));
+        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
+        var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
         var stateRootHash = BlockChain.DetermineGenesisStateRootHash(
             actionEvaluator,
             preEvaluationBlock,
             out _
         );
         var genesisBlock = preEvaluationBlock.Sign(privateKey, stateRootHash);
-        var actionLoader = new SingleActionLoader(typeof(DummyAction));
         var blockChain = BlockChain.Create(
             blockPolicy,
             stagePolicy,

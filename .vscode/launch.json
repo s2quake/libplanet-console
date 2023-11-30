@@ -9,6 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/OnBoarding.ConsoleHost/bin/Debug/net8.0/OnBoarding.ConsoleHost.dll",
+            "args": "block new",
             "console": "integratedTerminal"
         }
     ]

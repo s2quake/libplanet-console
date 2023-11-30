@@ -3,8 +3,8 @@ using Libplanet.Action;
 
 namespace OnBoarding.ConsoleHost.Actions;
 
-[ActionType("attack")]
-sealed class AttackAction : ActionBase
+[ActionType("heal")]
+sealed class HealAction : ActionBase
 {
     protected override void OnInitialize(Dictionary values)
     {

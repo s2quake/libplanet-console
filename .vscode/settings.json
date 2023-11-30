@@ -6,6 +6,7 @@
     "search.exclude": {
         "**/bin": true,
         "**/obj": true,
-        "**/*.code-search": true
+        "**/*.code-search": true,
+        ".commands/": true
     }
 }

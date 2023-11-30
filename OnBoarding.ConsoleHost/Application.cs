@@ -1,11 +1,15 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using JSSoft.Library.Commands;
+using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost;
 
 sealed partial class Application : IAsyncDisposable, IServiceProvider
 {
+    public static readonly PrivateKey PrivateKey = new();
+    public static readonly PublicKey PublicKey = PrivateKey.PublicKey;
+
     private readonly CompositionContainer _container;
     private readonly SwarmHostCollection _swarmHosts = [];
     private CancellationTokenSource? _cancellationTokenSource;
