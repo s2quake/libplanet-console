@@ -25,7 +25,7 @@ abstract class ActionBase : IAction
             {
                 _values = Dictionary.Empty;
                 _values = _values.Add("type_id", TypeId);
-                OnInitialize(_values);
+                _values = OnInitialize(_values);
             }
             return _values;
         }
@@ -33,9 +33,7 @@ abstract class ActionBase : IAction
 
     public IValue TypeId { get; }
 
-    protected virtual void OnInitialize(Dictionary values)
-    {
-    }
+    protected virtual Dictionary OnInitialize(Dictionary values) => values;
 
     protected virtual void OnLoadPlainValue(IValue plainValue)
     {

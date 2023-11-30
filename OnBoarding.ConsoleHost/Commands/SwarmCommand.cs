@@ -1,15 +1,14 @@
-using System.Collections;
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Library.Commands;
-using Libplanet.Net;
+using Libplanet.Blockchain;
 using Newtonsoft.Json.Linq;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
-sealed class SwarmCommand(SwarmHostCollection swarmHosts) : CommandMethodBase
+sealed class SwarmCommand(SwarmHostCollection swarmHosts, BlockChain blockChain) : CommandMethodBase
 {
     private readonly SwarmHostCollection _swarmHosts = swarmHosts;
 
@@ -62,7 +61,7 @@ sealed class SwarmCommand(SwarmHostCollection swarmHosts) : CommandMethodBase
         var sb = new StringBuilder();
         for (var i = 0; i < Count; i++)
         {
-            var swarmHost = _swarmHosts.AddNew();
+            var swarmHost = _swarmHosts.AddNew(Application.PrivateKey, blockChain);
             var task = swarmHost.StartAsync(cancellationToken);
             taskList.Add(task);
             itemList.Add(swarmHost);

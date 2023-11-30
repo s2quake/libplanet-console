@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
+using Libplanet.Blockchain;
+using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -13,9 +15,9 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public SwarmHost this[string key] => (SwarmHost)_itemById[key]!;
 
-    public SwarmHost AddNew()
+    public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain)
     {
-        var swarmHost = new SwarmHost(new());
+        var swarmHost = new SwarmHost(privateKey, blockChain);
         _itemById.Add(swarmHost.Key, swarmHost);
         swarmHost.Disposed += Item_Disposed;
         return swarmHost;
