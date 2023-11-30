@@ -50,9 +50,9 @@ sealed partial class Application
             var blockChain = BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
 
             _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(IStateStore)), stateStore);
-            _container.ComposeExportedValue<IActionLoader>(actionLoader);
-            _container.ComposeExportedValue<IStore>(store);
-            _container.ComposeExportedValue<BlockChain>(blockChain);
+            _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(IActionLoader)), actionLoader);
+            _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(IStore)), store);
+            _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(BlockChain)), blockChain);
         }
     }
 
