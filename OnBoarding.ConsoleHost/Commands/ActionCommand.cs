@@ -13,7 +13,6 @@ namespace OnBoarding.ConsoleHost.Commands;
 [method: ImportingConstructor]
 sealed class ActionCommand(Application application, ActionCollection actions) : CommandMethodBase
 {
-    private readonly Application _application = application;
     private readonly ActionCollection _actions = actions;
     private readonly UserCollection _users = application.GetService<UserCollection>()!;
     private readonly BlockChain _blockChain = application.GetService<BlockChain>()!;
@@ -32,10 +31,11 @@ sealed class ActionCommand(Application application, ActionCollection actions) : 
             Address = user.Address,
             Value = value
         };
-        var sb = new StringBuilder();
         _actions.Add(action);
 
+        // 블록이 생성하는지 확인하기 위해서 액션 추가후 바로 블록 생성
         var block = BlockChainUtils.AppendNew(_blockChain, user, _users, _actions);
+        var sb = new StringBuilder();
         sb.AppendStatesLine(_blockChain, block.Index, _users);
         Out.Write(sb.ToString());
     }

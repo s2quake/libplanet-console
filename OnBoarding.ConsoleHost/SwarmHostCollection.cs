@@ -10,6 +10,7 @@ namespace OnBoarding.ConsoleHost;
 sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
     private readonly OrderedDictionary _itemById = [];
+    private bool _isDisposed;
 
     public int Count => _itemById.Count;
 
@@ -19,6 +20,8 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain)
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+
         var swarmHost = new SwarmHost(privateKey, blockChain);
         _itemById.Add(swarmHost.Key, swarmHost);
         swarmHost.Disposed += Item_Disposed;
@@ -27,6 +30,8 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+
         for (var i = _itemById.Count - 1; i >= 0; i--)
         {
             var item = (SwarmHost)_itemById[i]!;
@@ -34,10 +39,13 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
             await item.DisposeAsync();
         }
         _itemById.Clear();
+        _isDisposed = true;
+        GC.SuppressFinalize(this);
     }
 
     public void Add(SwarmHost item)
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
         if (item.IsDisposed == true)
             throw new ArgumentException($"{nameof(item)} has already been disposed.");
         if (_itemById.Contains(item.Key) == true)

@@ -35,7 +35,7 @@ abstract class ActionBase : IAction
 
     protected virtual Dictionary OnInitialize(Dictionary values) => values;
 
-    protected virtual void OnLoadPlainValue(IValue plainValue)
+    protected virtual void OnLoadPlainValue(Dictionary values)
     {
     }
 
@@ -43,7 +43,13 @@ abstract class ActionBase : IAction
 
     #region IAction
 
-    void IAction.LoadPlainValue(IValue plainValue) => OnLoadPlainValue(plainValue);
+    void IAction.LoadPlainValue(IValue plainValue)
+    {
+        if (plainValue is Dictionary values)
+        {
+            OnLoadPlainValue(values);
+        }
+    }
 
     IWorld IAction.Execute(IActionContext context) => OnExecute(context);
 

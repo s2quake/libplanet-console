@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Numerics;
 using Bencodex.Types;
 using Libplanet.Action;
@@ -53,6 +54,10 @@ sealed partial class Application
             _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(IActionLoader)), actionLoader);
             _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(IStore)), store);
             _container.ComposeExportedValue(AttributedModelServices.GetContractName(typeof(BlockChain)), blockChain);
+        }
+        else
+        {
+            throw new UnreachableException();
         }
     }
 

@@ -12,7 +12,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain) : IAsyncDis
 {
     private readonly PrivateKey _privateKey = privateKey;
     private readonly BlockChain _blockChain = blockChain;
-    private Swarm _swarm = Create(privateKey, blockChain);
+    private readonly Swarm _swarm = Create(privateKey, blockChain);
     private Task? _startTask;
     private bool _isDisposed;
 
@@ -28,6 +28,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain) : IAsyncDis
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
         if (_startTask != null)
             throw new InvalidOperationException("Swarm has been started.");
 
@@ -37,6 +38,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain) : IAsyncDis
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
         if (_startTask == null)
             throw new InvalidOperationException("Swarm has been stopped.");
 
@@ -45,92 +47,6 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain) : IAsyncDis
         _swarm.Dispose();
         _startTask = null;
     }
-
-    private static Swarm Create(PrivateKey privateKey, BlockChain blockChain)
-    {
-        var transport = CreateTransport(privateKey);
-        var swarmOptions = new SwarmOptions
-        {
-
-        };
-        var consensusReactorOption = new ConsensusReactorOption
-        {
-            SeedPeers = [],
-            ConsensusPeers = [],
-            ConsensusPort = 0,
-            ConsensusPrivateKey = privateKey,
-            ConsensusWorkers = 100,
-            TargetBlockInterval = TimeSpan.FromSeconds(10),
-        };
-        return new Swarm(blockChain, privateKey, transport, null, null, consensusOption: consensusReactorOption);
-    }
-
-    private static ITransport CreateTransport(PrivateKey privateKey)
-    {
-        var apv = AppProtocolVersion.Sign(privateKey, 1);
-        var appProtocolVersionOptions = new AppProtocolVersionOptions { AppProtocolVersion = apv };
-        var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>());
-        var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
-        task.Wait();
-        return task.Result;
-    }
-
-    // private static BlockChain CreateBlockChain(PrivateKey privateKey)
-    // {
-    //     var dataPath = Path.Combine(Directory.GetCurrentDirectory(), ".data");
-    //     var blockPolicy = new BlockPolicy();
-    //     var stagePolicy = new VolatileStagePolicy();
-    //     var store = new MemoryStore();
-    //     var keyValueStore = new DefaultKeyValueStore(dataPath);
-    //     var stateStore = new TrieStateStore(keyValueStore);
-    //     var publicKey = privateKey.PublicKey;
-    //     var validatorList = new List<Validator>
-    //     {
-    //         new(privateKey.PublicKey, BigInteger.One),
-    //     };
-    //     var validatorSet = new ValidatorSet(validatorList);
-    //     var nonce = 0L;
-    //     var action = new Initialize(
-    //         validatorSet: validatorSet,
-    //         states: ImmutableDictionary.Create<Address, IValue>()
-    //         );
-    //     var transaction = Transaction.Create(
-    //         nonce,
-    //         privateKey,
-    //         genesisHash: null,
-    //         actions: [action.PlainValue],
-    //         timestamp: DateTimeOffset.MinValue
-    //         );
-    //     // var transactions = new Transaction[] { transaction };
-    //     var blockMetadata = new BlockMetadata(
-    //         protocolVersion: Block.CurrentProtocolVersion,
-    //         index: 0,
-    //         timestamp: DateTimeOffset.Now,
-    //         miner: new Address(privateKey.PublicKey),
-    //         publicKey,
-    //         previousHash: null,
-    //         txHash: BlockContent.DeriveTxHash([transaction]),
-    //         lastCommit: null);
-    //     var blockContent = new BlockContent(blockMetadata, [transaction]);
-    //     var preEvaluationBlock = blockContent.Propose();
-    //     var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
-    //     var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
-    //     var stateRootHash = BlockChain.DetermineGenesisStateRootHash(
-    //         actionEvaluator,
-    //         preEvaluationBlock,
-    //         out _
-    //     );
-    //     var genesisBlock = preEvaluationBlock.Sign(privateKey, stateRootHash);
-    //     var blockChain = BlockChain.Create(
-    //         blockPolicy,
-    //         stagePolicy,
-    //         store,
-    //         stateStore,
-    //         genesisBlock: genesisBlock,
-    //         actionEvaluator: actionEvaluator
-    //     );
-    //     return blockChain;
-    // }
 
     public async ValueTask DisposeAsync()
     {
@@ -146,5 +62,33 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain) : IAsyncDis
 
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private static Swarm Create(PrivateKey privateKey, BlockChain blockChain)
+    {
+        var transport = CreateTransport(privateKey);
+        var swarmOptions = new SwarmOptions
+        {
+        };
+        var consensusReactorOption = new ConsensusReactorOption
+        {
+            SeedPeers = [],
+            ConsensusPeers = [],
+            ConsensusPort = 0,
+            ConsensusPrivateKey = privateKey,
+            ConsensusWorkers = 100,
+            TargetBlockInterval = TimeSpan.FromSeconds(10),
+        };
+        return new Swarm(blockChain, privateKey, transport, null, null, consensusOption: consensusReactorOption);
+    }
+
+    private static NetMQTransport CreateTransport(PrivateKey privateKey)
+    {
+        var apv = AppProtocolVersion.Sign(privateKey, 1);
+        var appProtocolVersionOptions = new AppProtocolVersionOptions { AppProtocolVersion = apv };
+        var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>());
+        var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
+        task.Wait();
+        return task.Result;
     }
 }

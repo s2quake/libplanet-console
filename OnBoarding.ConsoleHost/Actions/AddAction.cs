@@ -18,14 +18,11 @@ sealed class AddAction : ActionBase
                      .Add("address", Address.ByteArray);
     }
 
-    protected override void OnLoadPlainValue(IValue plainValue)
+    protected override void OnLoadPlainValue(Dictionary values)
     {
-        base.OnLoadPlainValue(plainValue);
-        if (plainValue is Dictionary values)
-        {
-            Value = (Integer)values["value"];
-            Address = new Address(values["address"]);
-        }
+        base.OnLoadPlainValue(values);
+        Value = (Integer)values["value"];
+        Address = new Address(values["address"]);
     }
 
     protected override IWorld OnExecute(IActionContext context)
