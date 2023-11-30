@@ -8,8 +8,9 @@ namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
-sealed class SwarmCommand(SwarmHostCollection swarmHosts, BlockChain blockChain) : CommandMethodBase
+sealed class SwarmCommand(Application application, SwarmHostCollection swarmHosts, BlockChain blockChain) : CommandMethodBase
 {
+    private readonly Application _application = application;
     private readonly SwarmHostCollection _swarmHosts = swarmHosts;
 
     [CommandProperty(InitValue = 1)]
@@ -56,12 +57,13 @@ sealed class SwarmCommand(SwarmHostCollection swarmHosts, BlockChain blockChain)
     [CommandMethodProperty(nameof(Count))]
     public async Task NewAsync(CancellationToken cancellationToken)
     {
+        var privateKey = _application.CurrentUser.PrivateKey;
         var taskList = new List<Task>(Count);
         var itemList = new List<SwarmHost>(Count);
         var sb = new StringBuilder();
         for (var i = 0; i < Count; i++)
         {
-            var swarmHost = _swarmHosts.AddNew(Application.PrivateKey, blockChain);
+            var swarmHost = _swarmHosts.AddNew(privateKey, blockChain);
             var task = swarmHost.StartAsync(cancellationToken);
             taskList.Add(task);
             itemList.Add(swarmHost);

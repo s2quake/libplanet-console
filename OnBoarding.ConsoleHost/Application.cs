@@ -1,17 +1,15 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using JSSoft.Library.Commands;
-using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost;
 
 sealed partial class Application : IAsyncDisposable, IServiceProvider
 {
-    public static readonly PrivateKey PrivateKey = new();
-    public static readonly PublicKey PublicKey = PrivateKey.PublicKey;
-
     private readonly CompositionContainer _container;
     private readonly SwarmHostCollection _swarmHosts = [];
+    private readonly UserCollection _users = [new(), new(), new()];
+    private readonly ActionCollection _actions = [];
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
@@ -21,8 +19,13 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue(_swarmHosts);
+        _container.ComposeExportedValue(_users);
+        _container.ComposeExportedValue(_actions);
+        CurrentUser = _users.First();
         InitializeService();
     }
+
+    public User CurrentUser { get; }
 
     public void Cancel()
     {

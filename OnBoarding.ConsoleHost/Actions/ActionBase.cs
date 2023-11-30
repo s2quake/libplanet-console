@@ -43,9 +43,7 @@ abstract class ActionBase : IAction
 
     #region IAction
 
-    void IAction.LoadPlainValue(IValue plainValue)
-    {
-    }
+    void IAction.LoadPlainValue(IValue plainValue) => OnLoadPlainValue(plainValue);
 
     IWorld IAction.Execute(IActionContext context) => OnExecute(context);
 

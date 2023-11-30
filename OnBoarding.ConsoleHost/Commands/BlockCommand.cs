@@ -13,16 +13,17 @@ namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
-sealed class BlockCommand(BlockChain blockChain) : CommandMethodBase
+sealed class BlockCommand(Application application, BlockChain blockChain) : CommandMethodBase
 {
+    private readonly Application _application = application;
     private readonly BlockChain _blockChain = blockChain;
 
     [CommandMethod]
     public void New(int count = 1)
     {
-        for (var i = 0; i < count; i++)
+        // for (var i = 0; i < count; i++)
         {
-            AddNewBlock();
+            AddNewBlock(count);
         }
     }
 
@@ -38,18 +39,18 @@ sealed class BlockCommand(BlockChain blockChain) : CommandMethodBase
         Out.Write(sb.ToString());
     }
 
-    private void AddNewBlock()
+    private void AddNewBlock(int v)
     {
+        var privateKey = _application.CurrentUser.PrivateKey;
         var genesisBlock = _blockChain.Genesis;
         var actions = new IAction[]
         {
-            new AttackAction(),
-            new HealAction(),
+            new AddAction() { Value = v ,Address = privateKey.ToAddress() },
         };
-        var nonce = _blockChain.GetNextTxNonce(Application.PrivateKey.ToAddress());
+        var nonce = _blockChain.GetNextTxNonce(privateKey.ToAddress());
         var transaction = Transaction.Create(
             nonce: nonce,
-            privateKey: Application.PrivateKey,
+            privateKey: privateKey,
             genesisHash: genesisBlock.Hash,
             actions: actions.Select(item => item.PlainValue)
         );
@@ -57,7 +58,7 @@ sealed class BlockCommand(BlockChain blockChain) : CommandMethodBase
         var lastCommit = _blockChain.GetBlockCommit(previousBlock.Hash);
         var blockMetadata = new BlockMetadata(
             index: _blockChain.Count,
-            publicKey: Application.PublicKey,
+            publicKey: privateKey.PublicKey,
             timestamp: DateTimeOffset.UtcNow,
             previousHash: previousBlock.Hash,
             txHash: BlockContent.DeriveTxHash([transaction]),
@@ -68,17 +69,27 @@ sealed class BlockCommand(BlockChain blockChain) : CommandMethodBase
         var stateRootHash = _blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
         var height = _blockChain.Count;
         var round = 0;
-        var block = preEvaluationBlock.Sign(Application.PrivateKey, stateRootHash);
+        var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
         var voteMetadata = new VoteMetadata(
             height: height,
             round: round,
             blockHash: block.Hash,
             timestamp: DateTimeOffset.UtcNow,
-            validatorPublicKey: Application.PublicKey,
+            validatorPublicKey: privateKey.PublicKey,
             flag: VoteFlag.PreCommit);
-        var vote = voteMetadata.Sign(Application.PrivateKey);
+        var vote = voteMetadata.Sign(privateKey);
         var blockCommit = new BlockCommit(height, round, block.Hash, [vote]);
         _blockChain.Append(block, blockCommit);
-        Out.WriteLine(_blockChain.Count);
+        Out.WriteLine($"Block index #{blockMetadata.Index}: {block.Hash}");
+
+        // var worldState = _blockChain.GetWorldState();
+        // var account = worldState.GetAccount(ReservedAddresses.LegacyAccount);
+
+        // var s = account.GetState(privateKey.ToAddress());
+        // account.GetStates()
+        // if (s is Integer q)
+        // {
+        //     Out.WriteLine((int)q);
+        // }
     }
 }

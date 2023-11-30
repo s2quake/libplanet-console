@@ -17,23 +17,14 @@ namespace OnBoarding.ConsoleHost;
 
 sealed partial class Application
 {
-    // private IEnumerable<(Type, object)> GetApplicationServices()
-    // {
-    //     yield return (typeof(IStateStore), CreateStateStore());
-    //     // yield return (typeof(IActionLoader), TypedActionLoader.Create(typeof(Application).Assembly));
-    //     yield return (typeof(IActionLoader), new SingleActionLoader(typeof(DummyAction)));
-    // }
-
     private void InitializeService()
     {
+        var privateKey = CurrentUser.PrivateKey;
         var stateStore = CreateStateStore();
         var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var store = new MemoryStore();
         var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
-        var validatorList = new List<Validator>
-        {
-            new(Application.PublicKey, BigInteger.One),
-        };
+        var validatorList = _users.Select(item => new Validator(item.PublicKey, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);
         var nonce = 0L;
         var action = new Initialize(
@@ -42,12 +33,12 @@ sealed partial class Application
             );
         var transaction = Transaction.Create(
             nonce,
-            Application.PrivateKey,
+            privateKey,
             genesisHash: null,
             actions: [action.PlainValue],
             timestamp: DateTimeOffset.MinValue
             );
-        var genesisBlock = BlockChain.ProposeGenesisBlock(actionEvaluator, PrivateKey, [transaction]);
+        var genesisBlock = BlockChain.ProposeGenesisBlock(actionEvaluator, privateKey, [transaction]);
 
         var policy = new BlockPolicy(
             blockInterval: TimeSpan.FromMilliseconds(1),
