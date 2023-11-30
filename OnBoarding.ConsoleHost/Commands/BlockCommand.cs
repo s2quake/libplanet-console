@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Text;
 using JSSoft.Library.Commands;
 using Libplanet.Action;
@@ -41,55 +42,52 @@ sealed class BlockCommand(Application application, BlockChain blockChain) : Comm
 
     private void AddNewBlock(int v)
     {
-        var privateKey = _application.CurrentUser.PrivateKey;
-        var genesisBlock = _blockChain.Genesis;
-        var actions = new IAction[]
+        if (_application.GetService<UserCollection>() is { } users)
         {
-            new AddAction() { Value = v ,Address = privateKey.ToAddress() },
-        };
-        var nonce = _blockChain.GetNextTxNonce(privateKey.ToAddress());
-        var transaction = Transaction.Create(
-            nonce: nonce,
-            privateKey: privateKey,
-            genesisHash: genesisBlock.Hash,
-            actions: actions.Select(item => item.PlainValue)
-        );
-        var previousBlock = _blockChain[_blockChain.Count - 1];
-        var lastCommit = _blockChain.GetBlockCommit(previousBlock.Hash);
-        var blockMetadata = new BlockMetadata(
-            index: _blockChain.Count,
-            publicKey: privateKey.PublicKey,
-            timestamp: DateTimeOffset.UtcNow,
-            previousHash: previousBlock.Hash,
-            txHash: BlockContent.DeriveTxHash([transaction]),
-            lastCommit: lastCommit
-        );
-        var blockContent = new BlockContent(blockMetadata, [transaction]);
-        var preEvaluationBlock = blockContent.Propose();
-        var stateRootHash = _blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
-        var height = _blockChain.Count;
-        var round = 0;
-        var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
-        var voteMetadata = new VoteMetadata(
-            height: height,
-            round: round,
-            blockHash: block.Hash,
-            timestamp: DateTimeOffset.UtcNow,
-            validatorPublicKey: privateKey.PublicKey,
-            flag: VoteFlag.PreCommit);
-        var vote = voteMetadata.Sign(privateKey);
-        var blockCommit = new BlockCommit(height, round, block.Hash, [vote]);
-        _blockChain.Append(block, blockCommit);
-        Out.WriteLine($"Block index #{blockMetadata.Index}: {block.Hash}");
-
-        // var worldState = _blockChain.GetWorldState();
-        // var account = worldState.GetAccount(ReservedAddresses.LegacyAccount);
-
-        // var s = account.GetState(privateKey.ToAddress());
-        // account.GetStates()
-        // if (s is Integer q)
-        // {
-        //     Out.WriteLine((int)q);
-        // }
+            var privateKey = users.First().PrivateKey;
+            var genesisBlock = _blockChain.Genesis;
+            var actions = new IAction[]
+            {
+                new AddAction() { Value = v ,Address = privateKey.ToAddress() },
+            };
+            var nonce = _blockChain.GetNextTxNonce(privateKey.ToAddress());
+            var transaction = Transaction.Create(
+                nonce: nonce,
+                privateKey: privateKey,
+                genesisHash: genesisBlock.Hash,
+                actions: actions.Select(item => item.PlainValue)
+            );
+            var previousBlock = _blockChain[_blockChain.Count - 1];
+            var lastCommit = _blockChain.GetBlockCommit(previousBlock.Hash);
+            var blockMetadata = new BlockMetadata(
+                index: _blockChain.Count,
+                publicKey: privateKey.PublicKey,
+                timestamp: DateTimeOffset.UtcNow,
+                previousHash: previousBlock.Hash,
+                txHash: BlockContent.DeriveTxHash([transaction]),
+                lastCommit: lastCommit
+            );
+            var blockContent = new BlockContent(blockMetadata, [transaction]);
+            var preEvaluationBlock = blockContent.Propose();
+            var stateRootHash = _blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
+            var height = _blockChain.Count;
+            var round = 0;
+            var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
+            var voteMetadata = new VoteMetadata(
+                height: height,
+                round: round,
+                blockHash: block.Hash,
+                timestamp: DateTimeOffset.UtcNow,
+                validatorPublicKey: privateKey.PublicKey,
+                flag: VoteFlag.PreCommit);
+            var vote = voteMetadata.Sign(privateKey);
+            var blockCommit = new BlockCommit(height, round, block.Hash, [vote]);
+            _blockChain.Append(block, blockCommit);
+            Out.WriteLine($"Block index #{blockMetadata.Index}: {block.Hash}");
+        }
+        else
+        {
+            throw new UnreachableException();
+        }
     }
 }

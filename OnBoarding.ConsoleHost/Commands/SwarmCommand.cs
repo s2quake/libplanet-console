@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Text;
 using JSSoft.Library.Commands;
 using Libplanet.Blockchain;
@@ -57,24 +58,31 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     [CommandMethodProperty(nameof(Count))]
     public async Task NewAsync(CancellationToken cancellationToken)
     {
-        var privateKey = _application.CurrentUser.PrivateKey;
-        var taskList = new List<Task>(Count);
-        var itemList = new List<SwarmHost>(Count);
-        var sb = new StringBuilder();
-        for (var i = 0; i < Count; i++)
+        if (_application.GetService<UserCollection>() is { } users)
         {
-            var swarmHost = _swarmHosts.AddNew(privateKey, blockChain);
-            var task = swarmHost.StartAsync(cancellationToken);
-            taskList.Add(task);
-            itemList.Add(swarmHost);
+            var privateKey = users.First().PrivateKey;
+            var taskList = new List<Task>(Count);
+            var itemList = new List<SwarmHost>(Count);
+            var sb = new StringBuilder();
+            for (var i = 0; i < Count; i++)
+            {
+                var swarmHost = _swarmHosts.AddNew(privateKey, blockChain);
+                var task = swarmHost.StartAsync(cancellationToken);
+                taskList.Add(task);
+                itemList.Add(swarmHost);
+            }
+            await Task.WhenAll(taskList);
+            foreach (var item in itemList)
+            {
+                var index = _swarmHosts.IndexOf(item);
+                sb.AppendLine($"[{index}]-{item.Key} has been created.");
+            }
+            Out.Write(sb.ToString());
         }
-        await Task.WhenAll(taskList);
-        foreach (var item in itemList)
+        else
         {
-            var index = _swarmHosts.IndexOf(item);
-            sb.AppendLine($"[{index}]-{item.Key} has been created.");
+            throw new UnreachableException();
         }
-        Out.Write(sb.ToString());
     }
 
     [CommandMethod]

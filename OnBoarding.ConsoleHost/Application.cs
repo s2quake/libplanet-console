@@ -7,9 +7,7 @@ namespace OnBoarding.ConsoleHost;
 sealed partial class Application : IAsyncDisposable, IServiceProvider
 {
     private readonly CompositionContainer _container;
-    private readonly SwarmHostCollection _swarmHosts = [];
-    private readonly UserCollection _users = [new(), new(), new()];
-    private readonly ActionCollection _actions = [];
+    private SwarmHostCollection? _swarmHosts;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
@@ -18,14 +16,8 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     {
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
-        _container.ComposeExportedValue(_swarmHosts);
-        _container.ComposeExportedValue(_users);
-        _container.ComposeExportedValue(_actions);
-        CurrentUser = _users.First();
         InitializeService();
     }
-
-    public User CurrentUser { get; }
 
     public void Cancel()
     {
@@ -42,6 +34,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         {
             await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
         }
+        _swarmHosts = _container.GetExportedValue<SwarmHostCollection>();
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
         await _terminal!.StartAsync(_cancellationTokenSource.Token);
@@ -53,6 +46,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
+        if (_swarmHosts != null)
         await _swarmHosts.DisposeAsync();
         _terminal = null;
         _container.Dispose();

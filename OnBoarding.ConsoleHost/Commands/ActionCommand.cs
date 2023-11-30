@@ -25,14 +25,15 @@ sealed class ActionCommand(Application application, ActionCollection actions) : 
     {
         var blockChain = _application.GetService<BlockChain>()!;
         var userIndex = UserIndex;
+        var user = _users[userIndex];
         var action = new AddAction()
         {
-            Address = _users[userIndex].Address,
+            Address = user.Address,
             Value = value
         };
         _actions.Add(action);
         var blockIndex = blockChain.Count;
-        var block = BlockChainUtils.AppendNew(blockChain, _application.CurrentUser, _users, [action]);
+        var block = BlockChainUtils.AppendNew(blockChain, user, _users, [action]);
         var worldState = blockChain.GetWorldState(block.Hash);
         var account = worldState.GetAccount(ReservedAddresses.LegacyAccount);
 

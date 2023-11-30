@@ -1,10 +1,12 @@
 using System.Collections;
+using System.ComponentModel.Composition;
 
 namespace OnBoarding.ConsoleHost;
 
+[Export]
 sealed class UserCollection : IEnumerable<User>
 {
-    private readonly List<User> _itemList = [];
+    private readonly List<User> _itemList = [new(), new(), new()];
 
     public int Count => _itemList.Count;
 

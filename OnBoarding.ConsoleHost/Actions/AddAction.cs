@@ -39,6 +39,8 @@ sealed class AddAction : ActionBase
             currentValue = integer;
         }
         currentValue += Value;
+        if (currentValue < 0)
+            throw new SystemException($"Result Value is greater or equal then 0. current value is {currentValue}");
         legacyAccount = legacyAccount.SetState(Address, (Integer)currentValue);
         return previousState.SetAccount(ReservedAddresses.LegacyAccount, legacyAccount);
     }

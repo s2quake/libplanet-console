@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Specialized;
+using System.ComponentModel.Composition;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost;
 
+[Export]
 sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
     private readonly OrderedDictionary _itemById = [];

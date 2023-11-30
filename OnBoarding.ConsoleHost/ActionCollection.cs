@@ -1,8 +1,10 @@
 using System.Collections;
+using System.ComponentModel.Composition;
 using Libplanet.Action;
 
 namespace OnBoarding.ConsoleHost;
 
+[Export]
 sealed class ActionCollection : IEnumerable<IAction>
 {
     private readonly List<IAction> _itemList = [];
