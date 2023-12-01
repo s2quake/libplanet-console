@@ -9,13 +9,13 @@ c# 12.0
 
 ## Clone
 
-```plain
+```sh
 git clone https://github.com/s2quake/OnBoarding.git --recursive
 ```
 
 ## Build and Run
 
-```plain
+```sh
 dotnet build
 dotnet run --project OnBoarding.ConsoleHost
 ```
