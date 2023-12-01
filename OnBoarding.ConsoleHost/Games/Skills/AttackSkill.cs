@@ -1,0 +1,43 @@
+using JSSoft.Library.Terminals;
+
+namespace OnBoarding.ConsoleHost.Games;
+
+sealed class AttackSkill : SkillBase
+{
+    private readonly Character _character;
+    private SkillRange _damage = SkillRange.FromBeginEnd(1, 3);
+
+    public AttackSkill(Character character, long maxCoolTime)
+        : base(maxCoolTime)
+    {
+        _character = character;
+    }
+
+    protected override bool OnCanExecute(Stage stage)
+    {
+        var query = from item in stage.Characters
+                    where item.IsEnemyOf(_character) == true && item.IsDead == false
+                    select item;
+        if (query.Any() == false)
+            return false;
+        return base.OnCanExecute(stage);
+    }
+
+    protected override void OnExecute(Stage stage)
+    {
+        var query = from item in stage.Characters
+                    where item.IsEnemyOf(_character) == true && item.IsDead == false
+                    select item;
+        var enemies = query.ToArray();
+        var index = RandomUtility.GetNext(enemies.Length);
+        var amount = _damage.Get();
+        var enemy = enemies[index];
+        enemy.Deal(amount);
+        Console.WriteLine($"'{enemy.DisplayName}({enemy.Life}/{enemy.MaxLife})' has taken '{amount}' damage from '{_character.DisplayName}'.");
+
+        if (enemy.IsDead == true)
+        {
+            Console.WriteLine($"'{enemy.DisplayName}' is {TerminalStringBuilder.GetString("dead", TerminalColorType.Red)}.");
+        }
+    }
+}
