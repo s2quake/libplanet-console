@@ -17,6 +17,8 @@ sealed class MonsterCollection : IEnumerable<Monster>
 
     public int Count => _itemList.Count;
 
+    public int AliveCount { get; private set; }
+
     public Monster this[int index] => _itemList[index];
 
     public static MonsterCollection Create(int difficulty, int count)
@@ -26,8 +28,9 @@ sealed class MonsterCollection : IEnumerable<Monster>
         {
             var monster = new Monster(life: 10);
             monsters._itemList.Add(monster);
-            monster.Dead += (s, e) => monsters._itemList.Remove(monster);
+            monster.Dead += (s, e) => monsters.AliveCount--;
         }
+        monsters.AliveCount = count;
         return monsters;
     }
 

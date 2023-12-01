@@ -27,8 +27,6 @@ sealed class AddAction : ActionBase
 
     protected override IWorld OnExecute(IActionContext context)
     {
-        // var avatarAccount = previousState.GetAccount(Addresses.AvatarAddress); var avatar = new Avatar(avatarAccount.GetState(context.Signer)); var monsterAccount = previousState.GetAccount(Addresses.MonsterAddress); var monster = new Monter(monsterAccount.GetState(context.Signer)); avatar = avatar.Battle(monster); avatarAccount = avatarAccount.SetAccount(Addresses.AvatarAddress, avatar.Serialize()) return previousState.SetAccount(Addresses.AvatarAddress, avatarAccount);
-
         var previousState = context.PreviousState;
         var legacyAccount = previousState.GetAccount(ReservedAddresses.LegacyAccount);
         var currentValue = 0;

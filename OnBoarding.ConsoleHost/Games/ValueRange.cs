@@ -1,22 +1,22 @@
 namespace OnBoarding.ConsoleHost.Games;
 
-readonly struct SkillRange(long begin, long length) : IEquatable<SkillRange>
+readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
 {
     private static readonly Random Random = new();
 
-    public SkillRange(long begin)
+    public ValueRange(long begin)
         : this(begin, 0)
     {
     }
 
-    public static SkillRange FromBeginEnd(long begin, long end)
+    public static ValueRange FromBeginEnd(long begin, long end)
     {
-        return new SkillRange(begin, end - begin);
+        return new ValueRange(begin, end - begin);
     }
 
     public override readonly bool Equals(object? obj)
     {
-        if (obj is SkillRange range)
+        if (obj is ValueRange range)
         {
             return Begin == range.Begin && Length == range.Length;
         }
@@ -49,21 +49,21 @@ readonly struct SkillRange(long begin, long length) : IEquatable<SkillRange>
 
     public readonly long AbsoluteLength => Math.Abs(Length);
 
-    public static readonly SkillRange Empty = new();
+    public static readonly ValueRange Empty = new();
 
-    public static bool operator ==(SkillRange range1, SkillRange range2)
+    public static bool operator ==(ValueRange range1, ValueRange range2)
     {
         return range1.Begin == range2.Begin && range1.Length == range2.Length;
     }
 
-    public static bool operator !=(SkillRange range1, SkillRange range2)
+    public static bool operator !=(ValueRange range1, ValueRange range2)
     {
         return range1.Begin != range2.Begin || range1.Length != range2.Length;
     }
 
     #region IEquatable
 
-    readonly bool IEquatable<SkillRange>.Equals(SkillRange other)
+    readonly bool IEquatable<ValueRange>.Equals(ValueRange other)
     {
         return Begin == other.Begin && Length == other.Length;
     }

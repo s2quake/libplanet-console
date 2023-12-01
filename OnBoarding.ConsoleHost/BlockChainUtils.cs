@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
@@ -10,21 +11,28 @@ namespace OnBoarding.ConsoleHost;
 
 static class BlockChainUtils
 {
-    public static Block AppendNew(BlockChain _blockChain, User user, UserCollection users, ActionCollection actions)
+    public static Block AppendNew(BlockChain blockChain, User user, UserCollection users, IAction[] actions)
+    {
+        var block = AppendNew(blockChain, user, users, actions.Select(item => item.PlainValue).ToArray());
+        return block;
+    }
+
+    public static Block AppendNew(BlockChain blockChain, User user, UserCollection users, IValue[] values)
     {
         var privateKey = user.PrivateKey;
-        var genesisBlock = _blockChain.Genesis;
-        var nonce = _blockChain.GetNextTxNonce(privateKey.ToAddress());
+        var genesisBlock = blockChain.Genesis;
+        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
         var transaction = Transaction.Create(
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisBlock.Hash,
-            actions: actions.Select(item => item.PlainValue)
+            actions: new TxActionList(values)
         );
-        var previousBlock = _blockChain[_blockChain.Count - 1];
-        var lastCommit = _blockChain.GetBlockCommit(previousBlock.Hash);
+
+        var previousBlock = blockChain[blockChain.Count - 1];
+        var lastCommit = blockChain.GetBlockCommit(previousBlock.Hash);
         var blockMetadata = new BlockMetadata(
-            index: _blockChain.Count,
+            index: blockChain.Count,
             publicKey: privateKey.PublicKey,
             timestamp: DateTimeOffset.UtcNow,
             previousHash: previousBlock.Hash,
@@ -33,8 +41,8 @@ static class BlockChainUtils
         );
         var blockContent = new BlockContent(blockMetadata, [transaction]);
         var preEvaluationBlock = blockContent.Propose();
-        var stateRootHash = _blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
-        var height = _blockChain.Count;
+        var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
+        var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
         var votes = users.OrderBy(item => item.Address).Select(item =>
@@ -50,8 +58,7 @@ static class BlockChainUtils
         }).ToImmutableArray();
 
         var blockCommit = new BlockCommit(height, round, block.Hash, votes);
-        _blockChain.Append(block, blockCommit);
-        actions.Clear();
+        blockChain.Append(block, blockCommit);
         return block;
     }
 }

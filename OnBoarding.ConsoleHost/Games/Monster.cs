@@ -17,6 +17,8 @@ sealed class Monster : Character
         DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Red);
     }
 
+    public override Address Address => _address;
+
     public override ISkill[] Skills { get; }
 
     public override string DisplayName { get; }

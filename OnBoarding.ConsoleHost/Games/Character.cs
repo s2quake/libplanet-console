@@ -1,4 +1,5 @@
 using JSSoft.Library.Terminals;
+using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost.Games;
 
@@ -9,6 +10,8 @@ abstract class Character
         MaxLife = life;
         Life = life;
     }
+
+    public abstract Address Address { get; }
 
     public long MaxLife { get; }
 

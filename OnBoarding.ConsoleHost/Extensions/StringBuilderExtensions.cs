@@ -23,6 +23,8 @@ static class StringBuilderExtensions
         var worldState = blockChain.GetWorldState(block.Hash);
         var account = worldState.GetAccount(ReservedAddresses.LegacyAccount);
 
+
+
         tsb.IsBold = true;
         tsb.AppendLine($"Block index #{index}: {block.Hash}");
         tsb.IsBold = false;

@@ -2,16 +2,10 @@ using JSSoft.Library.Terminals;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-sealed class AttackSkill : SkillBase
+sealed class AttackSkill(Character character, long maxCoolTime) : SkillBase(maxCoolTime)
 {
-    private readonly Character _character;
-    private SkillRange _damage = SkillRange.FromBeginEnd(1, 3);
-
-    public AttackSkill(Character character, long maxCoolTime)
-        : base(maxCoolTime)
-    {
-        _character = character;
-    }
+    private readonly Character _character = character;
+    private ValueRange _damage = ValueRange.FromBeginEnd(1, 3);
 
     protected override bool OnCanExecute(Stage stage)
     {

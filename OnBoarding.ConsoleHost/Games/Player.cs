@@ -22,6 +22,8 @@ sealed class Player : Character
         DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Blue);
     }
 
+    public override Address Address => _address;
+
     public override ISkill[] Skills { get; }
 
     public override string DisplayName { get; }
