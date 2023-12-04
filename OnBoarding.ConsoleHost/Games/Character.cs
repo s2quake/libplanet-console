@@ -1,13 +1,15 @@
+using System.Runtime.Serialization;
 using JSSoft.Library.Terminals;
 using Libplanet.Crypto;
+using Libplanet.Stun.Attributes;
 
 namespace OnBoarding.ConsoleHost.Games;
 
 abstract class Character
 {
-    protected Character(long life)
+    protected Character(long life, long maxLife)
     {
-        MaxLife = life;
+        MaxLife = maxLife;
         Life = life;
     }
 
@@ -21,19 +23,9 @@ abstract class Character
 
     public virtual string DisplayName => ToString() ?? string.Empty;
 
-    public void Deal(long amount)
-    {
-        if (IsDead == true)
-            throw new InvalidOperationException();
-        ArgumentOutOfRangeException.ThrowIfLessThan(amount, 0, nameof(amount));
+    public abstract ISkill[] Skills { get; }
 
-        Life -= amount;
-        if (Life < 0)
-        {
-            IsDead = true;
-            OnDead();
-        }
-    }
+    public void Deal(Character attacker, long amount) => OnDeal(attacker, amount);
 
     public void Heal(long amount)
     {
@@ -44,11 +36,36 @@ abstract class Character
         Life = Math.Min(Life + amount, MaxLife);
     }
 
+    public void Revive()
+    {
+        if (IsDead == false)
+            throw new InvalidOperationException("Player did not die.");
+        Life = (long)(MaxLife * 0.25);
+        IsDead = false;
+
+        Revived?.Invoke(this, EventArgs.Empty);
+    }
+
     public abstract bool IsEnemyOf(Character character);
 
-    public abstract ISkill[] Skills { get; }
-
     public event EventHandler? Dead;
+
+    public event EventHandler? Revived;
+
+    protected virtual void OnDeal(Character attacker, long amount)
+    {
+        if (IsDead == true)
+            throw new InvalidOperationException();
+        ArgumentOutOfRangeException.ThrowIfLessThan(amount, 0, nameof(amount));
+
+        var life = Life;
+        Life -= amount;
+        if (Life < 0)
+        {
+            IsDead = true;
+            OnDead();
+        }
+    }
 
     protected virtual void OnDead()
     {

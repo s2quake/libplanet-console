@@ -8,7 +8,7 @@ sealed class Monster : Character
     private readonly Address _address = new PrivateKey().ToAddress();
 
     public Monster(long life)
-        : base(life)
+        : base(life, life)
     {
         Skills =
         [
@@ -29,4 +29,13 @@ sealed class Monster : Character
     }
 
     public override bool IsEnemyOf(Character character) => character is Player;
+
+    protected override void OnDeal(Character attacker, long amount)
+    {
+        base.OnDeal(attacker, amount);
+        if (attacker is Player player && IsDead == true)
+        {
+            player.Experience += 10;
+        }
+    }
 }

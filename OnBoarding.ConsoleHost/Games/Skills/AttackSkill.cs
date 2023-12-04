@@ -26,7 +26,7 @@ sealed class AttackSkill(Character character, long maxCoolTime) : SkillBase(maxC
         var index = RandomUtility.GetNext(enemies.Length);
         var amount = _damage.Get();
         var enemy = enemies[index];
-        enemy.Deal(amount);
+        enemy.Deal(_character, amount);
         Console.WriteLine($"'{enemy.DisplayName}({enemy.Life}/{enemy.MaxLife})' has taken '{amount}' damage from '{_character.DisplayName}'.");
 
         if (enemy.IsDead == true)

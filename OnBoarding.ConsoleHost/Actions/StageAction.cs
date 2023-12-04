@@ -19,7 +19,7 @@ sealed class StageAction : ActionBase
             monsters = monsters.Add($"{i}", GetCharacterValue(StageInfo.Monsters[i]));
         }
         return values.Add("turn", StageInfo.Turn)
-                     .Add("player", GetCharacterValue(StageInfo.Player))
+                     .Add("player", StageInfo.Player.ToBencodex())
                      .Add("monsters", monsters);
     }
 
@@ -34,7 +34,7 @@ sealed class StageAction : ActionBase
         StageInfo = new StageInfo
         {
             Turn = (Integer)values["turn"],
-            Player = GetCharacterInfo((Dictionary)values["player"]),
+            Player = PlayerInfo.FromBencodex(values["player"]),
             Monsters = monsterInfos,
         };
     }
@@ -44,7 +44,7 @@ sealed class StageAction : ActionBase
         var stageInfo = StageInfo;
         var previousState = context.PreviousState;
         var stageAccount = previousState.GetAccount(stageInfo.Player.Address);
-        stageAccount = stageAccount.SetState(stageInfo.Player.Address, (Integer)stageInfo.Player.Life);
+        stageAccount = stageAccount.SetState(stageInfo.Player.Address, stageInfo.Player.ToBencodex());
         return previousState.SetAccount(stageInfo.Player.Address, stageAccount);
     }
 

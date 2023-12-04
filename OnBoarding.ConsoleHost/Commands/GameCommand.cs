@@ -4,6 +4,7 @@ using JSSoft.Library.Commands;
 using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
+using Newtonsoft.Json;
 using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Games;
 
@@ -24,42 +25,34 @@ sealed class GameCommand(Application application) : CommandMethodBase
     [CommandMethodProperty(nameof(Tick))]
     public async Task PlayAsync(CancellationToken cancellationToken)
     {
-        var user = _users[0];
-        var life = GetPlayerLife(user);
-        var player = new Player(user.PublicKey, life);
+        var playerInfo = Player.GetPlayerInfo(_blockChain, Player.CurrentAddress);
+        var user = _users.First(item => item.Address == playerInfo.Address);
+        var player = new Player(playerInfo);
         var monsters = MonsterCollection.Create(difficulty: 1, count: 10);
         var stage = new Stage(player, monsters);
-        var turn = 0;
-        var actionList = new List<IAction>(100);
-        while (cancellationToken.IsCancellationRequested == false && stage.IsEnded == false)
+        var actionList = new List<IAction>(100)
         {
-            await Out.WriteLineAsync($"Turn #{turn}");
-            stage.Update();
-            actionList.Add(new StageAction() { StageInfo = (StageInfo)stage });
-            turn++;
-            await Task.Delay(Tick, cancellationToken: default);
-        }
-        if (cancellationToken.IsCancellationRequested == true)
-        {
-            Error.WriteLine("Play has been canceled.");
-        }
-        else
-        {
-            BlockChainUtils.AppendNew(_blockChain, user, _users, [.. actionList]);
-        }
+            new StageAction { StageInfo = (StageInfo)stage },
+        };
+        var stagePlayer = new StagePlayer(stage, Out);
+        var actions = await stagePlayer.StartAsync(Tick, cancellationToken);
+        // while (cancellationToken.IsCancellationRequested == false && stage.IsEnded == false)
+        // {
+        //     await Out.WriteLineAsync($"Turn #{turn}");
+        //     stage.Update();
+        //     actionList.Add(new StageAction { StageInfo = (StageInfo)stage });
+        //     turn++;
+        //     await Task.Delay(Tick, cancellationToken: default);
+        // }
+        // if (cancellationToken.IsCancellationRequested == true)
+        // {
+        //     Error.WriteLine("Play has been canceled.");
+        // }
+        // else
+        // {
+        // }
+        BlockChainUtils.AppendNew(_blockChain, user, _users, actions);
     }
 
-    public bool CanPlay => GetPlayerLife(_users[0]) > 0;
-
-    private long GetPlayerLife(User user)
-    {
-        var block = _blockChain[_blockChain.Count - 1];
-        var worldState = _blockChain.GetWorldState(block.Hash);
-        var account = worldState.GetAccount(user.Address);
-        if (account.GetState(user.Address) is Integer integer)
-        {
-            return integer;
-        }
-        return 1000;
-    }
+    public bool CanPlay => Player.GetPlayerInfo(_blockChain, Player.CurrentAddress).Life > 0;
 }

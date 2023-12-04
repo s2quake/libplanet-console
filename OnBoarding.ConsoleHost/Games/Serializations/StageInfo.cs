@@ -10,7 +10,7 @@ struct StageInfo
 
     public CharacterInfo[] Monsters { get; set; }
 
-    public CharacterInfo Player { get; set; }
+    public PlayerInfo Player { get; set; }
 
     public static explicit operator StageInfo(Stage stage)
     {
@@ -18,7 +18,7 @@ struct StageInfo
         {
             Turn = stage.Turn,
             Address = stage.Address,
-            Player = (CharacterInfo)stage.Player,
+            Player = (PlayerInfo)stage.Player,
             Monsters = stage.Monsters.Select(item => (CharacterInfo)item).ToArray(),
         };
     }
