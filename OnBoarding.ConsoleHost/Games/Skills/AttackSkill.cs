@@ -1,6 +1,7 @@
 using JSSoft.Library.Terminals;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
-namespace OnBoarding.ConsoleHost.Games;
+namespace OnBoarding.ConsoleHost.Games.Skills;
 
 sealed class AttackSkill(Character character, SkillInfo skillInfo)
     : SkillBase(skillInfo)

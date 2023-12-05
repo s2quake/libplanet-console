@@ -10,6 +10,7 @@ using Libplanet.Types.Tx;
 using Newtonsoft.Json;
 using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Games;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
@@ -85,7 +86,7 @@ sealed class GameCommand(Application application) : CommandMethodBase
         return value is Dictionary values && values["type_id"] is Text text && text == "stage";
     }
 
-    private static (ITransaction transaction, IValue aciton, int offset) GetStageInfoAction(Block block)
+    private static (ITransaction transaction, IValue action, int offset) GetStageInfoAction(Block block)
     {
         for (var i = 0; i < block.Transactions.Count; i++)
         {

@@ -1,8 +1,7 @@
-using System.Drawing;
 using Bencodex.Types;
 using Libplanet.Crypto;
 
-namespace OnBoarding.ConsoleHost.Games;
+namespace OnBoarding.ConsoleHost.Games.Serializations;
 
 record StageInfo
 {

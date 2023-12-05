@@ -1,7 +1,7 @@
 using Bencodex.Types;
 using Libplanet.Crypto;
 
-namespace OnBoarding.ConsoleHost.Games;
+namespace OnBoarding.ConsoleHost.Games.Serializations;
 
 record PlayerInfo : CharacterInfo
 {

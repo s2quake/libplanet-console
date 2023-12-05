@@ -1,5 +1,3 @@
-using Libplanet.Types.Blocks;
-
 namespace OnBoarding.ConsoleHost.Games;
 
 static class RandomUtility

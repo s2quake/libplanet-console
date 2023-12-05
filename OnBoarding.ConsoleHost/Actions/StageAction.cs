@@ -2,6 +2,7 @@ using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Action.State;
 using OnBoarding.ConsoleHost.Games;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Actions;
 

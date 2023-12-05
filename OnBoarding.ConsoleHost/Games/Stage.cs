@@ -1,4 +1,5 @@
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
 
@@ -49,11 +50,10 @@ sealed class Stage
 
     public async Task StartAsync(int tick, CancellationToken cancellationToken)
     {
-        var turn = 0;
         Turn = 0;
         while (cancellationToken.IsCancellationRequested == false && IsEnded == false)
         {
-            await Out.WriteLineAsync($"Turn #{turn}");
+            await Out.WriteLineAsync($"Turn #{Turn}");
             Update();
             Turn++;
             await Task.Delay(tick, cancellationToken: default);

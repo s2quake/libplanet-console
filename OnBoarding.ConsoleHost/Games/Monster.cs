@@ -1,5 +1,6 @@
 using JSSoft.Library.Terminals;
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
 

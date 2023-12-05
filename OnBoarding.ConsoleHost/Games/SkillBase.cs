@@ -1,15 +1,17 @@
+using OnBoarding.ConsoleHost.Games.Serializations;
+
 namespace OnBoarding.ConsoleHost.Games;
 
 abstract class SkillBase : ISkill
 {
+    private EventHandler? _canExecuteChangedEvent;
+
     protected SkillBase(SkillInfo skillInfo)
     {
         MaxCoolTime = skillInfo.MaxCoolTime;
         CoolTime = skillInfo.CoolTime;
         Value = skillInfo.Value;
     }
-
-    private EventHandler? _canExecuteChangedEvent;
 
     public ValueRange Value { get; }
 

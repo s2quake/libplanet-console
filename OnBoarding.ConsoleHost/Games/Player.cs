@@ -2,6 +2,7 @@ using Bencodex.Types;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
 

@@ -1,7 +1,4 @@
-using System.Runtime.Serialization;
-using JSSoft.Library.Terminals;
-using Libplanet.Crypto;
-using Libplanet.Stun.Attributes;
+using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
 
@@ -31,7 +28,7 @@ abstract class Character
     public void Heal(long amount)
     {
         if (IsDead == true)
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Player has died.");
         ArgumentOutOfRangeException.ThrowIfLessThan(amount, 0, nameof(amount));
 
         Life = Math.Min(Life + amount, MaxLife);
@@ -56,7 +53,7 @@ abstract class Character
     protected virtual void OnDeal(Character attacker, long amount)
     {
         if (IsDead == true)
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Player has died.");
         ArgumentOutOfRangeException.ThrowIfLessThan(amount, 0, nameof(amount));
 
         var life = Life;

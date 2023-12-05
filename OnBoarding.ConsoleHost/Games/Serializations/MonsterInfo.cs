@@ -1,6 +1,6 @@
 using Bencodex.Types;
 
-namespace OnBoarding.ConsoleHost.Games;
+namespace OnBoarding.ConsoleHost.Games.Serializations;
 
 record MonsterInfo : CharacterInfo
 {

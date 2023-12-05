@@ -21,18 +21,25 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public void Cancel()
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
     }
 
     public async Task StartAsync(string[] args)
     {
+        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
-        if (args.Length > 0 && GetService<CommandContext>() is { } commandContext)
+        if (GetService<CommandContext>() is { } commandContext)
         {
-            await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
+            await commandContext.ExecuteAsync(["--help"], cancellationToken: default, progress: new Progress<ProgressInfo>());
+            if (args.Length > 0)
+            {
+                await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
+            }
         }
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>();
         _cancellationTokenSource = new();
@@ -47,7 +54,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
         if (_swarmHosts != null)
-        await _swarmHosts.DisposeAsync();
+            await _swarmHosts.DisposeAsync();
         _terminal = null;
         _container.Dispose();
         _isDisposed = true;
