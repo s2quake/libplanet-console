@@ -2,13 +2,16 @@ namespace OnBoarding.ConsoleHost.Games;
 
 abstract class SkillBase : ISkill
 {
-    protected SkillBase(long maxCoolTime)
+    protected SkillBase(SkillInfo skillInfo)
     {
-        MaxCoolTime = maxCoolTime;
-        CoolTime = maxCoolTime;
+        MaxCoolTime = skillInfo.MaxCoolTime;
+        CoolTime = skillInfo.CoolTime;
+        Value = skillInfo.Value;
     }
 
     private EventHandler? _canExecuteChangedEvent;
+
+    public ValueRange Value { get; }
 
     public long CoolTime { get; set; }
 

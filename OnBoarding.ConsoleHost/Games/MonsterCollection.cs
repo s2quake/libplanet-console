@@ -10,9 +10,17 @@ sealed class MonsterCollection : IEnumerable<Monster>
 {
     private readonly List<Monster> _itemList;
 
-    public MonsterCollection(int capacity)
+    public MonsterCollection(MonsterInfo[] monsterInfos)
     {
-        _itemList = new(capacity);
+        _itemList = new(monsterInfos.Length);
+        for (var i = 0; i < monsterInfos.Length; i++)
+        {
+            var monsterInfo = monsterInfos[i];
+            var monster = new Monster(monsterInfo);
+            _itemList.Add(monster);
+            monster.Dead += (s, e) => AliveCount--;
+        }
+        AliveCount = Count;
     }
 
     public int Count => _itemList.Count;
@@ -20,19 +28,6 @@ sealed class MonsterCollection : IEnumerable<Monster>
     public int AliveCount { get; private set; }
 
     public Monster this[int index] => _itemList[index];
-
-    public static MonsterCollection Create(int difficulty, int count)
-    {
-        var monsters = new MonsterCollection(count);
-        for (var i = 0; i < count; i++)
-        {
-            var monster = new Monster(life: 10);
-            monsters._itemList.Add(monster);
-            monster.Dead += (s, e) => monsters.AliveCount--;
-        }
-        monsters.AliveCount = count;
-        return monsters;
-    }
 
     #region IEnumerable
 

@@ -18,7 +18,7 @@ sealed class StagePlayer(Stage stage, TextWriter @out)
         {
             await _out.WriteLineAsync($"Turn #{turn}");
             _stage.Update();
-            actionList.Add(new StageAction { StageInfo = (StageInfo)_stage });
+            // actionList.Add(new StageAction { StageInfo = (StageInfo)_stage });
             turn++;
             await Task.Delay(tick, cancellationToken: default);
         }

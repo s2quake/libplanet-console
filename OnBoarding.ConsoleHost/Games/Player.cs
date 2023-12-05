@@ -1,11 +1,7 @@
-using System.Collections;
-using System.ComponentModel.Composition;
 using Bencodex.Types;
 using JSSoft.Library.Terminals;
-using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
-using Serilog;
 
 namespace OnBoarding.ConsoleHost.Games;
 
@@ -16,22 +12,19 @@ sealed class Player : Character
     private long _level;
 
     public Player(PlayerInfo playerInfo)
-        : base(playerInfo.Life, playerInfo.MaxLife)
+        : base(playerInfo)
     {
         _address = playerInfo.Address;
         _experience = playerInfo.Experience;
         _level = playerInfo.Level;
         MaxExperience = GetExperience(_level);
-        Skills =
-        [
-            new AttackSkill(this, maxCoolTime: 3) { CoolTime = 0L },
-        ];
+        Skills = playerInfo.Skills.Select(item => SkillFactory.Create(this, item)).ToArray();
         DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Blue);
     }
 
     public static Address CurrentAddress { get; set; }
 
-    public override Address Address => _address;
+    public Address Address => _address;
 
     public override ISkill[] Skills { get; }
 
@@ -70,11 +63,21 @@ sealed class Player : Character
         var block = blockChain[blockChain.Count - 1];
         var worldState = blockChain.GetWorldState(block.Hash);
         var account = worldState.GetAccount(address);
-        if (account.GetState(address) is IValue value)
+        if (account.GetState(address) is Dictionary values)
         {
-            return PlayerInfo.FromBencodex(value);
+            return new PlayerInfo(values);
         }
-        return new PlayerInfo { Address = address, Life = 1000, MaxLife = 1000, };
+        return new PlayerInfo
+        { 
+            Name = "Player",
+            Address = address, 
+            Life = 1000, 
+            MaxLife = 1000, 
+            Skills =
+            [
+                new SkillInfo{ MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
+            ],
+        };
     }
 
     public override string ToString()

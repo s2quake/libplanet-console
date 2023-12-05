@@ -22,36 +22,21 @@ sealed class GameCommand(Application application) : CommandMethodBase
 
     [CommandMethod]
     [CommandMethodValidation(nameof(CanPlay))]
-    [CommandMethodProperty(nameof(Tick))]
-    public async Task PlayAsync(CancellationToken cancellationToken)
+    public void Play()
     {
         var playerInfo = Player.GetPlayerInfo(_blockChain, Player.CurrentAddress);
         var user = _users.First(item => item.Address == playerInfo.Address);
-        var player = new Player(playerInfo);
-        var monsters = MonsterCollection.Create(difficulty: 1, count: 10);
-        var stage = new Stage(player, monsters);
-        var actionList = new List<IAction>(100)
+        var stageInfo = new StageInfo
         {
-            new StageAction { StageInfo = (StageInfo)stage },
+            Address = new(),
+            Player = playerInfo,
+            Monsters = MonsterInfo.Create(10),
         };
-        var stagePlayer = new StagePlayer(stage, Out);
-        var actions = await stagePlayer.StartAsync(Tick, cancellationToken);
-        // while (cancellationToken.IsCancellationRequested == false && stage.IsEnded == false)
-        // {
-        //     await Out.WriteLineAsync($"Turn #{turn}");
-        //     stage.Update();
-        //     actionList.Add(new StageAction { StageInfo = (StageInfo)stage });
-        //     turn++;
-        //     await Task.Delay(Tick, cancellationToken: default);
-        // }
-        // if (cancellationToken.IsCancellationRequested == true)
-        // {
-        //     Error.WriteLine("Play has been canceled.");
-        // }
-        // else
-        // {
-        // }
-        BlockChainUtils.AppendNew(_blockChain, user, _users, actions);
+        var stageAction = new StageAction
+        {
+            StageInfo = stageInfo,
+        };
+        BlockChainUtils.AppendNew(_blockChain, user, _users, [stageAction]);
     }
 
     public bool CanPlay => Player.GetPlayerInfo(_blockChain, Player.CurrentAddress).Life > 0;

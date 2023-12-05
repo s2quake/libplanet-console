@@ -1,3 +1,5 @@
+using Bencodex.Types;
+
 namespace OnBoarding.ConsoleHost.Games;
 
 readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
@@ -35,7 +37,7 @@ readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
 
     public bool Contains(long value) => value >= Begin && value < End;
 
-    public long Get() => Random.NextInt64(Begin, End);
+    public long Get(Random random) => random.NextInt64(Begin, End);
 
     public long Begin { get; } = begin;
 
@@ -59,6 +61,19 @@ readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
     public static bool operator !=(ValueRange range1, ValueRange range2)
     {
         return range1.Begin != range2.Begin || range1.Length != range2.Length;
+    }
+
+    public IValue ToBencodex()
+    {
+        return Dictionary.Empty.Add(nameof(Begin), (Integer)Begin)
+                               .Add(nameof(Length), (Integer)Length);
+    }
+
+    public static ValueRange FromBencodex(IValue value)
+    {
+        if (value is not Dictionary values)
+            throw new ArgumentException($"'{value}' must be a '{typeof(Dictionary)}'", nameof(value));
+        return new((Integer)values[nameof(Begin)], (Integer)values[nameof(Length)]);
     }
 
     #region IEquatable

@@ -7,13 +7,14 @@ namespace OnBoarding.ConsoleHost.Games;
 
 abstract class Character
 {
-    protected Character(long life, long maxLife)
+    protected Character(CharacterInfo characterInfo)
     {
-        MaxLife = maxLife;
-        Life = life;
+        Name = characterInfo.Name;
+        MaxLife = characterInfo.MaxLife;
+        Life = characterInfo.Life;
     }
 
-    public abstract Address Address { get; }
+    public string Name { get; }
 
     public long MaxLife { get; }
 

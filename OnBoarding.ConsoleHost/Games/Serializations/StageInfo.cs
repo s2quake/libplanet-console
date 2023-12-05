@@ -1,25 +1,35 @@
+using System.Drawing;
+using Bencodex.Types;
 using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-struct StageInfo
+record StageInfo
 {
-    public long Turn { get; set; }
+    public static readonly StageInfo Empty = new();
 
-    public Address Address { get; set; }
-
-    public CharacterInfo[] Monsters { get; set; }
-
-    public PlayerInfo Player { get; set; }
-
-    public static explicit operator StageInfo(Stage stage)
+    public StageInfo()
     {
-        return new StageInfo
-        {
-            Turn = stage.Turn,
-            Address = stage.Address,
-            Player = (PlayerInfo)stage.Player,
-            Monsters = stage.Monsters.Select(item => (CharacterInfo)item).ToArray(),
-        };
+    }
+
+    public StageInfo(Dictionary values)
+    {
+        Address = new Address(values[nameof(Address)]);
+        Monsters = MonsterInfo.FromBencodex((List)values[nameof(Monsters)]);
+        Player = new PlayerInfo((Dictionary)values[nameof(Player)]);
+    }
+
+    public Address Address { get; init; }
+
+    public MonsterInfo[] Monsters { get; init; } = [];
+
+    public PlayerInfo Player { get; init; } = PlayerInfo.Empty;
+
+    public virtual Dictionary ToBencodex()
+    {
+        var items = Monsters.Aggregate(List.Empty, (l, n) => l.Add(n.ToBencodex()));
+        return Dictionary.Empty.Add(nameof(Address), Address.ToByteArray())
+                               .Add(nameof(Monsters), MonsterInfo.ToBencodex(Monsters))
+                               .Add(nameof(Player), Player.ToBencodex());
     }
 }

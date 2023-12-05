@@ -1,7 +1,6 @@
 using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Action.State;
-using Libplanet.Crypto;
 using OnBoarding.ConsoleHost.Games;
 
 namespace OnBoarding.ConsoleHost.Actions;
@@ -9,57 +8,33 @@ namespace OnBoarding.ConsoleHost.Actions;
 [ActionType("stage")]
 sealed class StageAction : ActionBase
 {
-    public StageInfo StageInfo { get; set; }
+    public StageInfo StageInfo { get; set; } = StageInfo.Empty;
 
     protected override Dictionary OnInitialize(Dictionary values)
     {
-        var monsters = Dictionary.Empty;
-        for (var i = 0; i < StageInfo.Monsters.Length; i++)
-        {
-            monsters = monsters.Add($"{i}", GetCharacterValue(StageInfo.Monsters[i]));
-        }
-        return values.Add("turn", StageInfo.Turn)
-                     .Add("player", StageInfo.Player.ToBencodex())
-                     .Add("monsters", monsters);
+        return values.Add(nameof(StageInfo), StageInfo.ToBencodex());
     }
 
     protected override void OnLoadPlainValue(Dictionary values)
     {
-        var monsterValues = (Dictionary)values["monsters"];
-        var monsterInfos = new CharacterInfo[monsterValues.Count];
-        for (var i = 0; i < monsterValues.Count; i++)
-        {
-            monsterInfos[i] = GetCharacterInfo((Dictionary)monsterValues[$"{i}"]);
-        }
-        StageInfo = new StageInfo
-        {
-            Turn = (Integer)values["turn"],
-            Player = PlayerInfo.FromBencodex(values["player"]),
-            Monsters = monsterInfos,
-        };
+        StageInfo = new StageInfo((Dictionary)values[nameof(StageInfo)]);
     }
 
     protected override IWorld OnExecute(IActionContext context)
     {
         var stageInfo = StageInfo;
+        var playerAddress = stageInfo.Player.Address;
         var previousState = context.PreviousState;
-        var stageAccount = previousState.GetAccount(stageInfo.Player.Address);
-        stageAccount = stageAccount.SetState(stageInfo.Player.Address, stageInfo.Player.ToBencodex());
-        return previousState.SetAccount(stageInfo.Player.Address, stageAccount);
-    }
+        var stageAccount = previousState.GetAccount(playerAddress);
+        var seed = context.RandomSeed;
 
-    private static Dictionary GetCharacterValue(CharacterInfo characterInfo)
-    {
-        return Dictionary.Empty.Add("address", characterInfo.Address.ByteArray)
-                               .Add("life", characterInfo.Life);
-    }
-
-    private static CharacterInfo GetCharacterInfo(Dictionary values)
-    {
-        return new CharacterInfo
+        var stage = new Stage(stageInfo, seed);
+        while (stage.IsEnded == false)
         {
-            Address = new Address(values["address"]),
-            Life = (Integer)values["life"],
-        };
+            stage.Update();
+        }
+        var playerInfo = (PlayerInfo)stage.Player;
+        stageAccount = stageAccount.SetState(playerAddress, playerInfo.ToBencodex());
+        return previousState.SetAccount(playerAddress, stageAccount);
     }
 }

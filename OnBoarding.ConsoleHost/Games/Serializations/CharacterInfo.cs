@@ -1,39 +1,37 @@
 using Bencodex.Types;
-using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-struct CharacterInfo
+record class CharacterInfo
 {
-    public Address Address { get; set; }
-
-    public long Life { get; set; }
-
-    public static explicit operator CharacterInfo(Character character)
+    public CharacterInfo()
     {
-        return new CharacterInfo
-        {
-            Address = character.Address,
-            Life = character.Life,
-        };
     }
 
-    public readonly IValue ToBencodex()
+    public CharacterInfo(Dictionary values)
     {
-        return Dictionary.Empty.Add(nameof(Address), Address.ToByteArray())
-                               .Add(nameof(Life), Life);
+        Name = (Text)values[nameof(Name)];
+        Life = (Integer)values[nameof(Life)];
+        MaxLife = (Integer)values[nameof(MaxLife)];
     }
 
-    public static CharacterInfo FromBencodex(IValue value)
+    public CharacterInfo(Character character)
     {
-        if (value is Dictionary values)
-        {
-            return new()
-            {
-                Address = new Address(values[nameof(Address)]),
-                Life = (Integer)values[nameof(Life)],
-            };
-        }
-        throw new ArgumentException($"'{value}' must be a '{typeof(Dictionary)}'", nameof(value));
+        Name = character.Name;
+        Life = character.Life;
+        MaxLife = character.MaxLife;
+    }
+
+    public string Name { get; init; } = string.Empty;
+
+    public long Life { get; init; }
+
+    public long MaxLife { get; init; }
+
+    public virtual Dictionary ToBencodex()
+    {
+        return Dictionary.Empty.Add(nameof(Name), Name)
+                               .Add(nameof(Life), Life)
+                               .Add(nameof(MaxLife), MaxLife);
     }
 }

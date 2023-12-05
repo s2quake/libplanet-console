@@ -7,17 +7,12 @@ sealed class Monster : Character
 {
     private readonly Address _address = new PrivateKey().ToAddress();
 
-    public Monster(long life)
-        : base(life, life)
+    public Monster(MonsterInfo monsterInfo)
+        : base(monsterInfo)
     {
-        Skills =
-        [
-            new AttackSkill(this, maxCoolTime: 10) { CoolTime = RandomUtility.GetNext(10) },
-        ];
+        Skills = monsterInfo.Skills.Select(item => SkillFactory.Create(this, item)).ToArray();
         DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Red);
     }
-
-    public override Address Address => _address;
 
     public override ISkill[] Skills { get; }
 

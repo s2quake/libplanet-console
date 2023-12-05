@@ -2,10 +2,26 @@ using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-sealed class Stage(Player player, MonsterCollection monsters)
+sealed class Stage
 {
-    private readonly Player _player = player;
-    private readonly MonsterCollection _monsters = monsters;
+    private readonly Player _player;
+    private readonly MonsterCollection _monsters;
+    private readonly Character[] _characters;
+
+    public Stage(StageInfo stageInfo, int seed, TextWriter @out)
+    {
+        _player = new(stageInfo.Player);
+        _monsters = new(stageInfo.Monsters);
+        _characters = [_player, .. _monsters];
+        Random = new(seed);
+        Out = @out;
+    }
+
+
+    public Stage(StageInfo stageInfo, int seed)
+        : this(stageInfo, seed, new StringWriter())
+    {
+    }
 
     public Address Address { get; } = new PrivateKey().ToAddress();
 
@@ -17,27 +33,36 @@ sealed class Stage(Player player, MonsterCollection monsters)
 
     public bool IsEnded => _player.IsDead == true || _monsters.AliveCount == 0;
 
-    public IEnumerable<Character> Characters
-    {
-        get
-        {
-            yield return _player;
-            foreach (var item in _monsters)
-            {
-                yield return item;
-            }
-        }
-    }
+    public Random Random { get; }
+
+    public TextWriter Out { get; }
+
+    public IEnumerable<Character> Characters => _characters;
 
     public void Update()
     {
-        var monsters = _monsters.ToArray();
-        UpdateSkills(_player);
-        foreach (var item in monsters)
+        foreach (var item in _characters)
         {
             UpdateSkills(item);
         }
         Turn++;
+    }
+
+    public async Task StartAsync(int tick, CancellationToken cancellationToken)
+    {
+        var turn = 0;
+        Turn = 0;
+        while (cancellationToken.IsCancellationRequested == false && IsEnded == false)
+        {
+            await Out.WriteLineAsync($"Turn #{turn}");
+            Update();
+            Turn++;
+            await Task.Delay(tick, cancellationToken: default);
+        }
+        if (cancellationToken.IsCancellationRequested == true)
+        {
+            throw new TaskCanceledException("Play has been canceled.");
+        }
     }
 
     private void UpdateSkills(Character character)
