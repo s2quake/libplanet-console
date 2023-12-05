@@ -17,7 +17,6 @@ sealed class Stage
         Out = @out;
     }
 
-
     public Stage(StageInfo stageInfo, int seed)
         : this(stageInfo, seed, new StringWriter())
     {

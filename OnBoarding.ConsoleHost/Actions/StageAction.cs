@@ -27,7 +27,6 @@ sealed class StageAction : ActionBase
         var previousState = context.PreviousState;
         var stageAccount = previousState.GetAccount(playerAddress);
         var seed = context.RandomSeed;
-
         var stage = new Stage(stageInfo, seed);
         while (stage.IsEnded == false)
         {
