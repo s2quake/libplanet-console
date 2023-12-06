@@ -38,8 +38,8 @@ sealed class PlayerCommand : CommandMethodBase
     public void Info()
     {
         var playerInfo = Player.GetPlayerInfo(_blockChain, Player.CurrentAddress);
-        var s = JsonConvert.SerializeObject(playerInfo, Formatting.Indented);
-        Out.WriteLine(s);
+        var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
+        Out.WriteLine(json);
     }
 
     public bool CanRevive => Player.GetPlayerInfo(_blockChain, Player.CurrentAddress).Life <= 0;
@@ -47,6 +47,6 @@ sealed class PlayerCommand : CommandMethodBase
     [CommandMethod]
     public void Revive()
     {
-        
+
     }
 }

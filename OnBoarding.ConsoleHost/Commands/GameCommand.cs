@@ -16,6 +16,7 @@ namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
+[CommandSummary("Play, replay, and List games.")]
 sealed class GameCommand(Application application) : CommandMethodBase
 {
     private readonly BlockChain _blockChain = application.GetService<BlockChain>()!;
@@ -54,7 +55,8 @@ sealed class GameCommand(Application application) : CommandMethodBase
         var stage = new Stage(stageInfo, seed, Out);
         await stage.StartAsync(10, cancellationToken);
         var playerInfo = (PlayerInfo)stage.Player;
-        Out.WriteLine(JsonConvert.SerializeObject(playerInfo, Formatting.Indented));
+        var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
+        Out.WriteLine(json);
     }
 
     [CommandMethod]

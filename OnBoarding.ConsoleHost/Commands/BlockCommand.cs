@@ -12,6 +12,7 @@ namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
+[CommandSummary("Display")]
 sealed class BlockCommand(Application application) : CommandMethodBase
 {
     private readonly Application _application = application;
@@ -36,7 +37,7 @@ sealed class BlockCommand(Application application) : CommandMethodBase
     public void List()
     {
         var blockChainInfo = new BlockChainInfo(_blockChain);
-        var json = JsonConvert.SerializeObject(blockChainInfo, Formatting.Indented);
+        var json = JsonUtility.SerializeObject(blockChainInfo, isColorized: true);
         Out.Write(json);
     }
 }

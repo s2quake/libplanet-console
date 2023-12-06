@@ -2,7 +2,7 @@
     "files.exclude": {
         "**/bin": true,
         "**/obj": true,
-        ".commands": true,
+        ".commands": false,
         ".Libplanet": false,
     },
     "search.exclude": {
