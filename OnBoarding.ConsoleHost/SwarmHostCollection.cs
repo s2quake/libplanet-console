@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
+using Libplanet.Net;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -18,11 +20,11 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public SwarmHost this[string key] => (SwarmHost)_itemById[key]!;
 
-    public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain)
+    public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers)
     {
         ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
 
-        var swarmHost = new SwarmHost(privateKey, blockChain);
+        var swarmHost = new SwarmHost(privateKey, blockChain, peers);
         _itemById.Add(swarmHost.Key, swarmHost);
         swarmHost.Disposed += Item_Disposed;
         return swarmHost;
@@ -61,10 +63,33 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
     {
         for (var i = 0; i < _itemById.Count; i++)
         {
-            if (object.Equals(item, _itemById[i]) == true)
+            if (Equals(item, _itemById[i]) == true)
                 return i;
         }
         return -1;
+    }
+
+    public async Task InitializeAsync(Application application, CancellationToken cancellationToken)
+    {
+        if (application.GetService<UserCollection>() is { } users)
+        {
+            var swarmHostList = new List<SwarmHost>(users.Count);
+            var peers = Array.Empty<BoundPeer>();
+            foreach (var item in users)
+            {
+                var blockChain = BlockChainUtils.CreateBlockChain(user: item, [.. users]);
+                var publicKeys = users.Where(i => i != item).Select(i => i.PublicKey).ToArray();
+                var swarmHost = AddNew(item.PrivateKey, blockChain, peers);
+                if (peers.Length == 0)
+                    peers = [swarmHost.Target.AsPeer];
+                swarmHostList.Add(swarmHost);
+            }
+            await Task.WhenAll(swarmHostList.Select(item => item.StartAsync(cancellationToken)));
+        }
+        else
+        {
+            throw new UnreachableException();
+        }
     }
 
     private void Item_Disposed(object? sender, EventArgs e)

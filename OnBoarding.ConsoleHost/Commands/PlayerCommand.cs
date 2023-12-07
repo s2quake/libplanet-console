@@ -1,52 +1,36 @@
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Library.Commands;
-using Libplanet.Blockchain;
-using Newtonsoft.Json;
-using OnBoarding.ConsoleHost.Games;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-sealed class PlayerCommand : CommandMethodBase
+[method: ImportingConstructor]
+sealed class PlayerCommand(Application application) : CommandMethodBase
 {
-    private readonly BlockChain _blockChain;
-    private readonly UserCollection _users;
-
-    [ImportingConstructor]
-    public PlayerCommand(Application application)
-    {
-        _blockChain = application.GetService<BlockChain>()!;
-        _users = application.GetService<UserCollection>()!;
-        Player.CurrentAddress = _users[0].Address;
-    }
+    private readonly Application _application = application;
+    private readonly UserCollection _users = application.GetService<UserCollection>()!;
 
     [CommandMethod]
     public void List()
     {
         var sb = new StringBuilder();
+        var currentIndex = _application.CurrentIndex;
         for (var i = 0; i < _users.Count; i++)
         {
             var item = _users[i];
-            var isCurrent = Player.CurrentAddress == item.Address ? "O" : " ";
+            var isCurrent = currentIndex == i ? "O" : " ";
             sb.AppendLine($"{isCurrent} [{i}]-{item.Address}");
         }
         Out.Write(sb.ToString());
     }
 
     [CommandMethod]
-    public void Info()
+    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    public void Info(int blockIndex = -1)
     {
-        var playerInfo = Player.GetPlayerInfo(_blockChain, Player.CurrentAddress);
+        var playerInfo = _application.GetPlayerInfo(SwarmProperties.Index, blockIndex);
         var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
         Out.WriteLine(json);
-    }
-
-    public bool CanRevive => Player.GetPlayerInfo(_blockChain, Player.CurrentAddress).Life <= 0;
-
-    [CommandMethod]
-    public void Revive()
-    {
-
     }
 }

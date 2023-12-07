@@ -1,4 +1,3 @@
-using Bencodex.Types;
 using Libplanet.Types.Blocks;
 
 namespace OnBoarding.ConsoleHost.Serializations;

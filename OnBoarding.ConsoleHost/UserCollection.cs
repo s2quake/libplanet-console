@@ -6,7 +6,7 @@ namespace OnBoarding.ConsoleHost;
 [Export]
 sealed class UserCollection : IEnumerable<User>
 {
-    private readonly List<User> _itemList = [new(), new(), new()];
+    private readonly List<User> _itemList = [new(0), new(1), new(2)];
 
     public int Count => _itemList.Count;
 
@@ -14,16 +14,9 @@ sealed class UserCollection : IEnumerable<User>
 
     public User AddNew()
     {
-        var item = new User();
+        var item = new User(Count);
         _itemList.Add(item);
         return item;
-    }
-
-    public void Add(User item)
-    {
-        if (_itemList.Contains(item) == true)
-            throw new ArgumentException($"{item} has already been included in collection");
-        _itemList.Add(item);
     }
 
     #region IEnumerable
