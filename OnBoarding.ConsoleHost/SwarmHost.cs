@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, PublicKey[] publicKeys) : IAsyncDisposable
+sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers) : IAsyncDisposable
 {
     public static readonly PrivateKey GenesisProposer = PrivateKey.FromString
     (
@@ -20,7 +20,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, PublicKey[]
 
     private readonly PrivateKey _privateKey = privateKey;
     private readonly BlockChain _blockChain = blockChain;
-    private readonly Swarm _swarm = Create(privateKey, blockChain, publicKeys);
+    private readonly Swarm _swarm = Create(privateKey, blockChain, peers);
     private Task? _startTask;
     private bool _isDisposed;
 
@@ -79,11 +79,12 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, PublicKey[]
 
     public event EventHandler? Disposed;
 
-    private static Swarm Create(PrivateKey privateKey, BlockChain blockChain, PublicKey[] publicKeys)
+    private static Swarm Create(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers)
     {
-        var transport = CreateTransport(privateKey, publicKeys);
+        var transport = CreateTransport();
         var swarmOptions = new SwarmOptions
         {
+            StaticPeers = peers.ToImmutableHashSet(),
         };
         var consensusReactorOption = new ConsensusReactorOption
         {
@@ -97,7 +98,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, PublicKey[]
         return new Swarm(blockChain, privateKey, transport, options: swarmOptions, null, null);
     }
 
-    private static NetMQTransport CreateTransport(PrivateKey privateKey, PublicKey[] publicKeys)
+    private static NetMQTransport CreateTransport()
     {
         var port = GetRandomUnusedPort();
         var apv = AppProtocolVersion.Sign(GenesisProposer, 1);
@@ -127,15 +128,14 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, PublicKey[]
         }
     }
 
-    internal async Task TestAsync(SwarmHostCollection swarmHosts)
-    {
-        var peers = swarmHosts.Where(item => item != this).Select(item => item._swarm.AsPeer).ToArray();
-        foreach(var item in peers)
-        {
-        await _swarm.AddPeersAsync([item], TimeSpan.FromSeconds(10));
-
-        }
-    }
+    // internal async Task TestAsync(SwarmHostCollection swarmHosts)
+    // {
+    //     var peers = swarmHosts.Where(item => item != this).Select(item => item._swarm.AsPeer).ToArray();
+    //     foreach (var item in peers)
+    //     {
+    //         await _swarm.AddPeersAsync([item], TimeSpan.FromSeconds(10));
+    //     }
+    // }
 
     internal void Broadcast(Block block)
     {

@@ -1,4 +1,6 @@
 using System.ComponentModel.Composition;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using OnBoarding.ConsoleHost.Serializations;
@@ -15,21 +17,24 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     [CommandProperty('i', useName: true, InitValue = -1)]
     public int Index { get; set; }
 
+    [CommandProperty('v', useName: true, InitValue = Verbosity.Minimal)]
+    public Verbosity Verbosity { get; set; }
+
     [CommandMethod]
+    [CommandMethodProperty(nameof(Verbosity))]
     public void List()
     {
-        var tsb = new TerminalStringBuilder();
-        for (var i = 0; i < _swarmHosts.Count; i++)
+        GetListAction(Verbosity).Invoke();
+
+        Action GetListAction(Verbosity verbosity) => verbosity switch
         {
-            var item = _swarmHosts[i];
-            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
-            tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"[{i}]-{item}");
-            tsb.Foreground = null;
-            tsb.IsBold = false;
-            tsb.Append(string.Empty);
-        }
-        Out.Write(tsb.ToString());
+            Verbosity.Quiet => ListQuiet,
+            Verbosity.Minimal => ListMinimal,
+            Verbosity.Normal => ListNormal,
+            Verbosity.Detailed => ListDetailed,
+            Verbosity.Diagnostic => ListDiagnostic,
+            _ => throw new SwitchExpressionException(),
+        };
     }
 
     [CommandMethod]
@@ -97,4 +102,66 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     //     await swarmHost.StopAsync(cancellationToken);
     //     Out.WriteLine($"[{swarmIndex}]-{swarmHost} has been stopped.");
     // }
+
+    private void ListQuiet()
+    {
+        var tsb = new TerminalStringBuilder();
+        for (var i = 0; i < _swarmHosts.Count; i++)
+        {
+            var item = _swarmHosts[i];
+            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
+            tsb.IsBold = item.IsRunning == true;
+            tsb.AppendLine($"[{i}]-{item}");
+            tsb.Foreground = null;
+            tsb.IsBold = false;
+            tsb.Append(string.Empty);
+        }
+        Out.Write(tsb.ToString());
+    }
+
+    private void ListMinimal()
+    {
+        var tsb = new TerminalStringBuilder();
+        for (var i = 0; i < _swarmHosts.Count; i++)
+        {
+            var item = _swarmHosts[i];
+            var blockChain = item.Target.BlockChain;
+            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
+            tsb.IsBold = item.IsRunning == true;
+            tsb.AppendLine($"[{i}]-{item}");
+            tsb.Foreground = null;
+            tsb.IsBold = false;
+            tsb.AppendLine($"  BlockCount: {blockChain.Count}");
+            tsb.Append(string.Empty);
+        }
+        Out.Write(tsb.ToString());
+    }
+
+    private void ListNormal()
+    {
+
+    }
+
+    private void ListDetailed()
+    {
+
+    }
+
+    private void ListDiagnostic()
+    {
+        var tsb = new TerminalStringBuilder();
+        for (var i = 0; i < _swarmHosts.Count; i++)
+        {
+            var item = _swarmHosts[i];
+            var swarmInfo = new SwarmInfo(item.Target);
+            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
+            tsb.IsBold = item.IsRunning == true;
+            tsb.AppendLine($"[{i}]-{item}");
+            tsb.Foreground = null;
+            tsb.IsBold = false;
+            var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
+            tsb.Append(json);
+        }
+        Out.Write(tsb.ToString());
+    }
 }
