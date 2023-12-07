@@ -9,6 +9,7 @@
         "**/bin": true,
         "**/obj": true,
         "**/*.code-search": true,
-        ".commands/": true
+        ".commands": true,
+        ".Libplanet": true,
     }
 }

@@ -19,20 +19,20 @@ namespace OnBoarding.ConsoleHost.Commands;
 [CommandSummary("Play, replay, and List games.")]
 sealed class GameCommand(Application application) : CommandMethodBase
 {
-    private readonly BlockChain _blockChain = application.GetService<BlockChain>()!;
-    private readonly UserCollection _users = application.GetService<UserCollection>()!;
+    private readonly Application _application = application;
+    private readonly SwarmHostCollection _swarmHosts = application.GetService<SwarmHostCollection>()!;
 
-    [CommandProperty(InitValue = 1)]
+    [CommandProperty(InitValue = 10)]
     public int Tick { get; set; }
 
-    public bool CanPlay => Player.GetPlayerInfo(_blockChain, Player.CurrentAddress).Life > 0;
-
     [CommandMethod]
-    [CommandMethodValidation(nameof(CanPlay))]
+    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
     public void Play()
     {
-        var playerInfo = Player.GetPlayerInfo(_blockChain, Player.CurrentAddress);
-        var user = _users.First(item => item.Address == playerInfo.Address);
+        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
+        var user = _application.GetUser(SwarmProperties.Index);
+        var playerInfo = _application.GetPlayerInfo(SwarmProperties.Index);
+        var users = _application.GetService<UserCollection>()!;
         var stageInfo = new StageInfo
         {
             Address = new(),
@@ -43,29 +43,35 @@ sealed class GameCommand(Application application) : CommandMethodBase
         {
             StageInfo = stageInfo,
         };
-        BlockChainUtils.AppendNew(_blockChain, user, _users, [stageAction]);
+        var block = BlockChainUtils.AppendNew(blockChain, user, users, [stageAction]);
         Out.WriteLine("Game Finished.");
     }
 
     [CommandMethod]
+    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    [CommandMethodProperty(nameof(Tick))]
     public async Task Replay(int blockIndex, CancellationToken cancellationToken)
     {
-        var block = _blockChain[blockIndex];
+        var tick = Tick;
+        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
+        var block = blockChain[blockIndex];
         var (stageInfo, seed) = GetStageInfo(block);
         var stage = new Stage(stageInfo, seed, Out);
-        await stage.StartAsync(10, cancellationToken);
+        await stage.StartAsync(tick, cancellationToken);
         var playerInfo = (PlayerInfo)stage.Player;
         var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
         Out.WriteLine(json);
     }
 
     [CommandMethod]
+    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
     public void List()
     {
+        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
         var sb = new StringBuilder();
-        for (var i = 0; i < _blockChain.Count; i++)
+        for (var i = 0; i < blockChain.Count; i++)
         {
-            var block = _blockChain[i];
+            var block = blockChain[i];
             if (IsStageInfo(block) == true)
             {
                 sb.AppendLine($"Block #{i}");

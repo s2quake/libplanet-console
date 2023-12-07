@@ -7,13 +7,11 @@ namespace OnBoarding.ConsoleHost;
 [Export]
 sealed class SystemTerminal : SystemTerminalBase
 {
-    private readonly Application _application;
     private readonly CommandContext _commandContext;
 
     [ImportingConstructor]
     public SystemTerminal(Application application, CommandContext commandContext)
     {
-        _application = application;
         _commandContext = commandContext;
         _commandContext.Owner = application;
         Prompt = "libplanet $ ";

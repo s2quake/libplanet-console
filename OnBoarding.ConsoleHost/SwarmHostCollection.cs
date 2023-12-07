@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 
@@ -18,11 +19,11 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public SwarmHost this[string key] => (SwarmHost)_itemById[key]!;
 
-    public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain)
+    public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain, PublicKey[] publicKeys)
     {
         ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
 
-        var swarmHost = new SwarmHost(privateKey, blockChain);
+        var swarmHost = new SwarmHost(privateKey, blockChain, publicKeys);
         _itemById.Add(swarmHost.Key, swarmHost);
         swarmHost.Disposed += Item_Disposed;
         return swarmHost;
@@ -65,6 +66,33 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
                 return i;
         }
         return -1;
+    }
+
+    public async Task InitializeAsync(Application application, CancellationToken cancellationToken)
+    {
+        if (application.GetService<UserCollection>() is { } users)
+        {
+            var taskList = new List<Task>(users.Count);
+            foreach (var item in users)
+            {
+                var blockChain = BlockChainUtils.CreateBlockChain(user: item, [.. users]);
+                var publicKeys = users.Where(i => i != item).Select(i => i.PublicKey).ToArray();
+                var swarmHost = AddNew(item.PrivateKey, blockChain, publicKeys);
+                taskList.Add(swarmHost.StartAsync(cancellationToken));
+            }
+            await Task.WhenAll(taskList);
+            var first = this.First();
+            var s1 = this[1];
+            var s2 = this[2];
+            await s1.Target.AddPeersAsync([first.Target.AsPeer], TimeSpan.FromSeconds(1));
+            await s2.Target.AddPeersAsync([first.Target.AsPeer], TimeSpan.FromSeconds(1));
+            // await this.First().TestAsync(this);
+            // await Task.WhenAll(this.Select(item => item.TestAsync(this)));
+        }
+        else
+        {
+            throw new UnreachableException();
+        }
     }
 
     private void Item_Disposed(object? sender, EventArgs e)

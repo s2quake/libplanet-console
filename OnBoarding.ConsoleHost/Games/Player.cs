@@ -23,7 +23,7 @@ sealed class Player : Character
         DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Blue);
     }
 
-    public static Address CurrentAddress { get; set; }
+    // public static Address CurrentAddress { get; set; }
 
     public Address Address => _address;
 
@@ -57,28 +57,6 @@ sealed class Player : Character
         ArgumentOutOfRangeException.ThrowIfLessThan(level, 0);
 
         return (long)(Math.Pow(level, 2) * 100);
-    }
-
-    public static PlayerInfo GetPlayerInfo(BlockChain blockChain, Address address)
-    {
-        var block = blockChain[blockChain.Count - 1];
-        var worldState = blockChain.GetWorldState(block.Hash);
-        var account = worldState.GetAccount(address);
-        if (account.GetState(address) is Dictionary values)
-        {
-            return new PlayerInfo(values);
-        }
-        return new PlayerInfo
-        { 
-            Name = "Player",
-            Address = address, 
-            Life = 1000, 
-            MaxLife = 1000, 
-            Skills =
-            [
-                new SkillInfo{ MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
-            ],
-        };
     }
 
     public override string ToString()
