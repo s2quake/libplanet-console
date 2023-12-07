@@ -28,11 +28,6 @@ record SkillInfo
                                .Add(nameof(MaxCoolTime), MaxCoolTime);
     }
 
-    public static List ToBencodex(SkillInfo[] skillInfos)
-    {
-        return skillInfos.Aggregate(List.Empty, (l, n) => l.Add(n.ToBencodex()));
-    }
-
     public static SkillInfo[] FromBencodex(List list)
     {
         var items = new SkillInfo[list.Count];

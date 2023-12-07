@@ -1,5 +1,6 @@
 using Bencodex.Types;
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Games.Serializations.Extensions;
 
 namespace OnBoarding.ConsoleHost.Games.Serializations;
 
@@ -28,7 +29,7 @@ record StageInfo
     {
         var items = Monsters.Aggregate(List.Empty, (l, n) => l.Add(n.ToBencodex()));
         return Dictionary.Empty.Add(nameof(Address), Address.ToByteArray())
-                               .Add(nameof(Monsters), MonsterInfo.ToBencodex(Monsters))
+                               .Add(nameof(Monsters), Monsters.ToBencodex())
                                .Add(nameof(Player), Player.ToBencodex());
     }
 }

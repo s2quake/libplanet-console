@@ -39,17 +39,32 @@ sealed class Stage
 
     public IEnumerable<Character> Characters => _characters;
 
-    public void Update()
+    public bool IsPlaying { get; private set; }
+
+    public void Play()
     {
-        foreach (var item in _characters)
+        if (IsEnded == true)
+            throw new InvalidOperationException("Stage has already ended.");
+        if (IsPlaying == true)
+            throw new InvalidOperationException("Stage is playing.");
+
+        using var _ = new PlayScope(this);
+        Turn = 0;
+        while (IsEnded == false)
         {
-            UpdateSkills(item);
+            Update();
+            Turn++;
         }
-        Turn++;
     }
 
-    public async Task StartAsync(int tick, CancellationToken cancellationToken)
+    public async Task PlayAsync(int tick, CancellationToken cancellationToken)
     {
+        if (IsEnded == true)
+            throw new InvalidOperationException("Stage has already ended.");
+        if (IsPlaying == true)
+            throw new InvalidOperationException("Stage is playing.");
+
+        using var _ = new PlayScope(this);
         Turn = 0;
         while (cancellationToken.IsCancellationRequested == false && IsEnded == false)
         {
@@ -64,6 +79,14 @@ sealed class Stage
         }
     }
 
+    private void Update()
+    {
+        foreach (var item in _characters)
+        {
+            UpdateSkills(item);
+        }
+    }
+
     private void UpdateSkills(Character character)
     {
         foreach (var item in character.Skills)
@@ -75,4 +98,24 @@ sealed class Stage
             item.Tick();
         }
     }
+
+    #region PlayScope
+
+    sealed class PlayScope : IDisposable
+    {
+        private readonly Stage _stage;
+
+        public PlayScope(Stage stage)
+        {
+            _stage = stage;
+            _stage.IsPlaying = true;
+        }
+
+        public void Dispose()
+        {
+            _stage.IsPlaying = false;
+        }
+    }
+
+    #endregion
 }

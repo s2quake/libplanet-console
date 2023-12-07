@@ -62,7 +62,7 @@ sealed class GameCommand(Application application) : CommandMethodBase
         var block = blockChain[blockIndex];
         var (stageInfo, seed) = GetStageInfo(block);
         var stage = new Stage(stageInfo, seed, Out);
-        await stage.StartAsync(tick, cancellationToken);
+        await stage.PlayAsync(tick, cancellationToken);
         var playerInfo = (PlayerInfo)stage.Player;
         var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
         Out.WriteLine(json);
@@ -87,11 +87,10 @@ sealed class GameCommand(Application application) : CommandMethodBase
 
     private static bool IsStageInfo(Block block)
     {
-        var query = from transaction in block.Transactions
-                    from action in transaction.Actions
-                    where IsStageAction(action) == true
-                    select action;
-        return query.Any() == true;
+        return block  
+                .Transactions  
+                .SelectMany(x => x.Actions)  
+                .Any(IsStageAction);  
     }
 
     private static bool IsStageAction(IValue value)

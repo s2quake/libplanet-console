@@ -29,10 +29,7 @@ sealed class StageAction : ActionBase
         var stageAccount = previousState.GetAccount(playerAddress);
         var seed = context.RandomSeed;
         var stage = new Stage(stageInfo, seed);
-        while (stage.IsEnded == false)
-        {
-            stage.Update();
-        }
+        stage.Play();
         var playerInfo = (PlayerInfo)stage.Player;
         stageAccount = stageAccount.SetState(playerAddress, playerInfo.ToBencodex());
         return previousState.SetAccount(playerAddress, stageAccount);

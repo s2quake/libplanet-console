@@ -1,5 +1,6 @@
 using Bencodex.Types;
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Games.Serializations.Extensions;
 
 namespace OnBoarding.ConsoleHost.Games.Serializations;
 
@@ -46,7 +47,7 @@ record PlayerInfo : CharacterInfo
         return base.ToBencodex().Add(nameof(Address), Address.ToByteArray())
                                 .Add(nameof(Experience), Experience)
                                 .Add(nameof(Level), Level)
-                                .Add(nameof(Skills), SkillInfo.ToBencodex(Skills));
+                                .Add(nameof(Skills), Skills.ToBencodex());
     }
 
     public static explicit operator PlayerInfo(Player player)

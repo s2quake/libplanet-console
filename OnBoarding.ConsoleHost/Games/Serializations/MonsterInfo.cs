@@ -1,4 +1,5 @@
 using Bencodex.Types;
+using OnBoarding.ConsoleHost.Games.Serializations.Extensions;
 
 namespace OnBoarding.ConsoleHost.Games.Serializations;
 
@@ -18,13 +19,7 @@ record MonsterInfo : CharacterInfo
 
     public override Dictionary ToBencodex()
     {
-        return base.ToBencodex().Add(nameof(Skills), SkillInfo.ToBencodex(Skills));
-    }
-
-    public static List ToBencodex(MonsterInfo[] monsterInfos)
-    {
-        var l = monsterInfos.Aggregate(List.Empty, (l, n) => l.Add(n.ToBencodex()));
-        return l;
+        return base.ToBencodex().Add(nameof(Skills), Skills.ToBencodex());
     }
 
     public static MonsterInfo[] FromBencodex(List list)
