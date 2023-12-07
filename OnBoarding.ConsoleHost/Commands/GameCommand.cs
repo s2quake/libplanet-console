@@ -9,6 +9,7 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using Newtonsoft.Json;
 using OnBoarding.ConsoleHost.Actions;
+using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
@@ -64,8 +65,7 @@ sealed class GameCommand(Application application) : CommandMethodBase
         var stage = new Stage(stageInfo, seed, Out);
         await stage.PlayAsync(tick, cancellationToken);
         var playerInfo = (PlayerInfo)stage.Player;
-        var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
-        Out.WriteLine(json);
+        Out.WriteLineAsJson(playerInfo);
     }
 
     [CommandMethod]

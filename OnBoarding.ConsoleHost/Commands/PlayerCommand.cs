@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Library.Commands;
+using OnBoarding.ConsoleHost.Extensions;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
@@ -30,7 +31,6 @@ sealed class PlayerCommand(Application application) : CommandMethodBase
     public void Info(int blockIndex = -1)
     {
         var playerInfo = _application.GetPlayerInfo(SwarmProperties.Index, blockIndex);
-        var json = JsonUtility.SerializeObject(playerInfo, isColorized: true);
-        Out.WriteLine(json);
+        Out.WriteLineAsJson(playerInfo);
     }
 }

@@ -82,8 +82,13 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[]
     private static Swarm Create(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers)
     {
         var transport = CreateTransport();
+        var bootstrapOptions = new BootstrapOptions
+        {
+            SeedPeers = [.. peers],
+        };
         var swarmOptions = new SwarmOptions
         {
+            BootstrapOptions = bootstrapOptions,
             StaticPeers = peers.ToImmutableHashSet(),
         };
         var consensusReactorOption = new ConsensusReactorOption

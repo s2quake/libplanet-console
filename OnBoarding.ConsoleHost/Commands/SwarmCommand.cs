@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
+using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Serializations;
 
 namespace OnBoarding.ConsoleHost.Commands;
@@ -39,8 +40,7 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     {
         var swarmHost = Index == -1 ? _swarmHosts[_application.CurrentIndex] : _swarmHosts[Index];
         var swarmInfo = new SwarmInfo(swarmHost.Target);
-        var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
-        Out.Write(json);
+        Out.WriteLineAsJson(swarmInfo);
     }
 
     // [CommandMethod]

@@ -1,4 +1,5 @@
 using Bencodex.Types;
+using Newtonsoft.Json;
 
 namespace OnBoarding.ConsoleHost.Games;
 
@@ -43,12 +44,16 @@ readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
 
     public long Length { get; } = length;
 
+    [JsonIgnore]
     public long End { get; } = checked((long)(begin + length));
 
+    [JsonIgnore]
     public readonly long Min => Math.Min(Begin, End);
 
+    [JsonIgnore]
     public readonly long Max => Math.Max(Begin, End);
 
+    [JsonIgnore]
     public readonly long AbsoluteLength => Math.Abs(Length);
 
     public static readonly ValueRange Empty = new();

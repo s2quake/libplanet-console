@@ -6,6 +6,7 @@ using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
+using Serilog;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -20,7 +21,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     static Application()
     {
-        // Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+        // Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
         //                                       .WriteTo.Console()
         //                                       .CreateLogger();
     }
