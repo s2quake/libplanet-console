@@ -1,12 +1,15 @@
 {
     "files.exclude": {
         "**/bin": true,
-        "**/obj": true
+        "**/obj": true,
+        ".commands": false,
+        ".Libplanet": false,
     },
     "search.exclude": {
         "**/bin": true,
         "**/obj": true,
         "**/*.code-search": true,
-        ".commands/": true
+        ".commands": true,
+        ".Libplanet": true,
     }
 }

@@ -5,9 +5,12 @@
     <ProjectReference Include="..\.Libplanet\Libplanet.Net\Libplanet.Net.csproj" />
     <ProjectReference Include="..\.commands\JSSoft.Library.Commands\JSSoft.Library.Commands\JSSoft.Library.Commands.csproj" />
     <ProjectReference Include="..\.commands\JSSoft.Library.Commands\JSSoft.Library.Terminals\JSSoft.Library.Terminals.csproj" />
+    <ProjectReference Include="..\.Libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.8.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
   </ItemGroup>

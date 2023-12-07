@@ -1,7 +1,5 @@
 using System.Text;
-using Bencodex.Types;
 using JSSoft.Library.Terminals;
-using Libplanet.Action.State;
 using Libplanet.Blockchain;
 
 namespace OnBoarding.ConsoleHost.Extensions;
@@ -20,22 +18,12 @@ static class StringBuilderExtensions
     {
         var tsb = new TerminalStringBuilder();
         var block = blockChain[index];
-        var worldState = blockChain.GetWorldState(block.Hash);
-        var account = worldState.GetAccount(ReservedAddresses.LegacyAccount);
-
         tsb.IsBold = true;
         tsb.AppendLine($"Block index #{index}: {block.Hash}");
         tsb.IsBold = false;
+        tsb.AppendLine($"    Transactions: {block.Transactions.Count}");
         tsb.AppendLine();
-        tsb.AppendLine("States");
-        tsb.IsBold = true;
-        tsb.AppendLine("------");
-        tsb.IsBold = false;
-        foreach (var item in users)
-        {
-            var state = account.GetState(item.Address) is Integer i ? (int)i : 0;
-            tsb.AppendLine($"{item}: {state}");
-        }
+
         @this.Append(tsb.ToString());
     }
 }

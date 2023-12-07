@@ -6,10 +6,13 @@ sealed class User
 {
     private readonly PrivateKey _privateKey = new();
 
-    public User()
+    public User(int index)
     {
         Address = _privateKey.ToAddress();
+        Index = index;
     }
+
+    public int Index { get; }
 
     public override string ToString() => $"{_privateKey.PublicKey}";
 

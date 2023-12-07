@@ -1,48 +1,34 @@
 using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.Text;
-using Bencodex.Types;
 using JSSoft.Library.Commands;
-using Libplanet.Action;
-using Libplanet.Action.State;
-using Libplanet.Blockchain;
-using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-using Libplanet.Types.Consensus;
-using Libplanet.Types.Tx;
-using OnBoarding.ConsoleHost.Actions;
-using OnBoarding.ConsoleHost.Extensions;
+using OnBoarding.ConsoleHost.Serializations;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
+[CommandSummary("Display block commands.")]
 sealed class BlockCommand(Application application) : CommandMethodBase
 {
     private readonly Application _application = application;
-    private readonly BlockChain _blockChain = application.GetService<BlockChain>()!;
-    private readonly UserCollection _users = application.GetService<UserCollection>()!;
-    private readonly ActionCollection _actions = application.GetService<ActionCollection>()!;
-
-    [CommandProperty]
-    public int UserIndex { get; set; }
 
     [CommandMethod]
-    public void New()
+    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    public void List()
     {
-        var userIndex = UserIndex;
-        var user = _users[userIndex];
-        var block = BlockChainUtils.AppendNew(_blockChain, user, _users, _actions);
-        var sb = new StringBuilder();
-        sb.AppendStatesLine(_blockChain, block.Index, _users);
-        Out.Write(sb.ToString());
+        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
+        var blockChainInfo = new BlockChainInfo(blockChain);
+        var json = JsonUtility.SerializeObject(blockChainInfo, isColorized: true);
+        Out.Write(json);
     }
 
     [CommandMethod]
-    public void List()
+    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    public void Info(int blockIndex = -1)
     {
-        var sb = new StringBuilder();
-        sb.AppendStatesLine(_blockChain, _users);
-        Out.Write(sb.ToString());
+        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
+        var block = blockChain[blockIndex];
+        var blockInfo = new BlockInfo(block);
+        var json = JsonUtility.SerializeObject(blockInfo, isColorized: true);
+        Out.Write(json);
     }
 }
