@@ -17,23 +17,19 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     [CommandProperty('i', useName: true, InitValue = -1)]
     public int Index { get; set; }
 
-    [CommandProperty('v', useName: true, InitValue = Verbosity.Minimal)]
-    public Verbosity Verbosity { get; set; }
+    [CommandPropertySwitch("detail")]
+    public bool IsDetailed { get; set; }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Verbosity))]
+    [CommandMethodProperty(nameof(IsDetailed))]
     public void List()
     {
-        GetListAction(Verbosity).Invoke();
+        GetListAction(IsDetailed).Invoke();
 
-        Action GetListAction(Verbosity verbosity) => verbosity switch
+        Action GetListAction(bool IsDetailed) => IsDetailed switch
         {
-            Verbosity.Quiet => ListQuiet,
-            Verbosity.Minimal => ListMinimal,
-            Verbosity.Normal => ListNormal,
-            Verbosity.Detailed => ListDetailed,
-            Verbosity.Diagnostic => ListDiagnostic,
-            _ => throw new SwitchExpressionException(),
+            false => ListMinimal,
+            true => ListDiagnostic,
         };
     }
 

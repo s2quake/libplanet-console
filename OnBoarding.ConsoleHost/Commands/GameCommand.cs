@@ -25,6 +25,9 @@ sealed class GameCommand(Application application) : CommandMethodBase
     [CommandProperty(InitValue = 10)]
     public int Tick { get; set; }
 
+    [CommandProperty(InitValue = -1)]
+    public int BlockIndex { get; set; }
+
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
     public void Play()
@@ -50,9 +53,11 @@ sealed class GameCommand(Application application) : CommandMethodBase
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
     [CommandMethodProperty(nameof(Tick))]
-    public async Task Replay(int blockIndex, CancellationToken cancellationToken)
+    [CommandMethodProperty(nameof(BlockIndex))]
+    public async Task Replay(CancellationToken cancellationToken)
     {
         var tick = Tick;
+        var blockIndex = BlockIndex;
         var blockChain = _application.GetBlockChain(SwarmProperties.Index);
         var block = blockChain[blockIndex];
         var (stageInfo, seed) = GetStageInfo(block);
