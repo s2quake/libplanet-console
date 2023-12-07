@@ -81,7 +81,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[]
 
     private static Swarm Create(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers)
     {
-        var transport = CreateTransport();
+        var transport = CreateTransport(privateKey);
         var bootstrapOptions = new BootstrapOptions
         {
             SeedPeers = [.. peers],
@@ -103,7 +103,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[]
         return new Swarm(blockChain, privateKey, transport, options: swarmOptions, null, null);
     }
 
-    private static NetMQTransport CreateTransport()
+    private static NetMQTransport CreateTransport(PrivateKey privateKey)
     {
         var port = GetRandomUnusedPort();
         var apv = AppProtocolVersion.Sign(GenesisProposer, 1);
@@ -113,7 +113,7 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[]
             // TrustedAppProtocolVersionSigners = publicKeys.ToImmutableHashSet(),
         };
         var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>(), port);
-        var task = NetMQTransport.Create(GenesisProposer, appProtocolVersionOptions, hostOptions);
+        var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
         task.Wait();
         return task.Result;
     }
