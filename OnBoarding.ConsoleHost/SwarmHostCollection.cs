@@ -83,18 +83,8 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
             for (var i = 0; i < users.Count; i++)
             {
                 swarmHosts[i] = AddNew(users[i]);
-                await swarmHosts[i].StartAsync(cancellationToken);
-                Console.WriteLine($"{i}               {i}");
-                // await Task.Delay(10000);
             }
-            // await Task.WhenAll(swarmHosts.Select(item => item.StartAsync(cancellationToken)));
-            // for (var i = 0; i < swarmHosts.Length; i++)
-            // {
-            //     var swarmHost = swarmHosts[i];
-            //     var swarm = swarmHost.Target;
-            //     var peers = swarmHosts.Where(item => item != swarmHost).Select(item => item.Target.AsPeer).ToArray();
-            //     await swarm.AddPeersAsync(peers, TimeSpan.FromSeconds(1), cancellationToken);
-            // }
+            await Task.WhenAll(swarmHosts.Select(item => item.StartAsync(cancellationToken)));
         }
         else
         {
