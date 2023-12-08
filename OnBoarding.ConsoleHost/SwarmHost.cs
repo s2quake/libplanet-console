@@ -6,6 +6,8 @@ using Libplanet.Net.Transports;
 using Libplanet.Net.Consensus;
 using Libplanet.Blockchain;
 using System.Collections.Immutable;
+using Libplanet.Action;
+using Libplanet.Types.Tx;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -40,6 +42,22 @@ sealed class SwarmHost : IAsyncDisposable
     public override string ToString()
     {
         return $"{_swarm.EndPoint.Host}:{_swarm.EndPoint.Port}";
+    }
+
+    public void StageTransaction(User user, IAction[] actions)
+    {
+        var blockChain = BlockChain;
+        var privateKey = user.PrivateKey;
+        var genesisBlock = blockChain.Genesis;
+        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
+        var values = actions.Select(item => item.PlainValue).ToArray();
+        var transaction = Transaction.Create(
+            nonce: nonce,
+            privateKey: privateKey,
+            genesisHash: genesisBlock.Hash,
+            actions: new TxActionList(values)
+        );
+        blockChain.StageTransaction(transaction);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -106,7 +124,7 @@ sealed class SwarmHost : IAsyncDisposable
             ConsensusPeers = ImmutableList.Create(consensusPeers),
             ConsensusPort = user.ConsensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
-            ConsensusWorkers = 100,
+            // ConsensusWorkers = 100,
             TargetBlockInterval = TimeSpan.FromSeconds(10),
             ContextTimeoutOptions = new(),
         };

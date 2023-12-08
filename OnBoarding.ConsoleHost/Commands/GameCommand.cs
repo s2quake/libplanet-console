@@ -37,10 +37,9 @@ sealed class GameCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
     public void Play()
     {
-        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
+        var swarmHost = _application.GetSwarmHost(SwarmProperties.Index);
         var user = _application.GetUser(SwarmProperties.Index);
-        var playerInfo = _application.GetPlayerInfo(SwarmProperties.Index);
-        var users = _application.GetService<UserCollection>()!;
+        var playerInfo = user.GetPlayerInfo(swarmHost);
         var stageInfo = new StageInfo
         {
             Address = new(),
@@ -51,8 +50,7 @@ sealed class GameCommand : CommandMethodBase
         {
             StageInfo = stageInfo,
         };
-        BlockChainUtils.Stage(blockChain, user, new IAction[] { stageAction });
-        // var block = BlockChainUtils.AppendNew(blockChain, user, users, [stageAction]);
+        swarmHost.StageTransaction(user, new IAction[] { stageAction });
         Out.WriteLine("Game Finished.");
     }
 

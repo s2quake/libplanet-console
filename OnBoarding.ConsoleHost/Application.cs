@@ -8,7 +8,7 @@ using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed partial class Application : IAsyncDisposable, IServiceProvider
+sealed partial class Application : IAsyncDisposable
 {
     private readonly CompositionContainer _container;
     private SwarmHostCollection? _swarmHosts;
@@ -47,22 +47,11 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         return index == -1 ? _swarmHosts[CurrentIndex].BlockChain : _swarmHosts[index].BlockChain;
     }
 
-    public PlayerInfo GetPlayerInfo(int swarmIndex) => GetPlayerInfo(swarmIndex, blockIndex: -1);
-
-    public PlayerInfo GetPlayerInfo(int swarmIndex, int blockIndex)
+    public SwarmHost GetSwarmHost(int index)
     {
-        var blockChain = GetBlockChain(swarmIndex);
-        var user = GetUser(swarmIndex);
-        var address = user.Address;
-        var actualBlockIndex = blockIndex == -1 ? blockChain.Count - 1 : blockIndex;
-        var block = blockChain[actualBlockIndex];
-        var worldState = blockChain.GetWorldState(block.Hash);
-        var account = worldState.GetAccount(address);
-        if (account.GetState(address) is Dictionary values)
-        {
-            return new PlayerInfo(values);
-        }
-        return PlayerInfo.CreateNew(user.Name, address);
+        if (_swarmHosts == null)
+            throw new InvalidOperationException();
+        return index == -1 ? _swarmHosts[CurrentIndex] : _swarmHosts[index];
     }
 
     public void Cancel()
@@ -83,7 +72,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
         _users = _container.GetExportedValue<UserCollection>();
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
-        await _swarmHosts.InitializeAsync(this, cancellationToken: default);
+        await _swarmHosts.InitializeAsync(cancellationToken: default);
         await PrepareCommandContext(args);
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;

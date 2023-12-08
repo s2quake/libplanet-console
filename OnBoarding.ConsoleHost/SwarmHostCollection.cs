@@ -81,21 +81,15 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         return -1;
     }
 
-    public async Task InitializeAsync(Application application, CancellationToken cancellationToken)
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        if (application.GetService<UserCollection>() is { } users)
+        var users = _users;
+        var swarmHosts = new SwarmHost[users.Count];
+        for (var i = 0; i < users.Count; i++)
         {
-            var swarmHosts = new SwarmHost[users.Count];
-            for (var i = 0; i < users.Count; i++)
-            {
-                swarmHosts[i] = AddNew(users[i]);
-            }
-            await Task.WhenAll(swarmHosts.Select(item => item.StartAsync(cancellationToken)));
+            swarmHosts[i] = AddNew(users[i]);
         }
-        else
-        {
-            throw new NotImplementedException();
-        }
+        await Task.WhenAll(swarmHosts.Select(item => item.StartAsync(cancellationToken)));
     }
 
     private void Item_Disposed(object? sender, EventArgs e)
