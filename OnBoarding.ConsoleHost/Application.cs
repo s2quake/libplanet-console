@@ -26,6 +26,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public Application()
     {
+        Thread.CurrentThread.Priority = ThreadPriority.Highest;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
     }
