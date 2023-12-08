@@ -107,7 +107,7 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
             var item = _swarmHosts[i];
             tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"[{i}]-{item}");
+            tsb.AppendLine($"[{i}] {item}");
             tsb.Foreground = null;
             tsb.IsBold = false;
             tsb.Append(string.Empty);
@@ -124,7 +124,7 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
             var blockChain = item.Target.BlockChain;
             tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"[{i}]-{item}");
+            tsb.AppendLine($"[{i}] {item}");
             tsb.Foreground = null;
             tsb.IsBold = false;
             tsb.AppendLine($"  BlockCount: {blockChain.Count}");
@@ -152,7 +152,7 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
             var swarmInfo = new SwarmInfo(item.Target);
             tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"[{i}]-{item}");
+            tsb.AppendLine($"[{i}] {item}");
             tsb.Foreground = null;
             tsb.IsBold = false;
             var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);

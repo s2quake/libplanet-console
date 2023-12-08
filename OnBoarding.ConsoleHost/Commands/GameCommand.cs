@@ -47,7 +47,8 @@ sealed class GameCommand(Application application) : CommandMethodBase
         {
             StageInfo = stageInfo,
         };
-        var block = BlockChainUtils.AppendNew(blockChain, user, users, [stageAction]);
+        BlockChainUtils.Stage(blockChain, user, [stageAction]);
+        // var block = BlockChainUtils.AppendNew(blockChain, user, users, [stageAction]);
         Out.WriteLine("Game Finished.");
     }
 

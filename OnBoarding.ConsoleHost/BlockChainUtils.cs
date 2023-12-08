@@ -22,15 +22,15 @@ static class BlockChainUtils
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
-    public static BlockChain CreateBlockChain(User user, User[] users)
+    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys)
     {
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), ".data", $"{user}");
+        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), ".data", name);
         var keyValueStore = new RocksDBKeyValueStore(dataPath);
         var stateStore = new TrieStateStore(keyValueStore);
         var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var store = new MemoryStore();
         var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
-        var validatorList = users.OrderBy(item => item.Address).Select(item => new Validator(item.PublicKey, BigInteger.One)).ToList();
+        var validatorList = validatorKeys.Select(item => new Validator(item, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);
         var nonce = 0L;
         var action = new Initialize(

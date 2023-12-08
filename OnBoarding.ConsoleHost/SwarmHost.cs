@@ -6,25 +6,23 @@ using Libplanet.Net.Transports;
 using Libplanet.Net.Consensus;
 using Libplanet.Blockchain;
 using System.Net.Sockets;
-using Libplanet.Types.Blocks;
 using System.Collections.Immutable;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers) : IAsyncDisposable
+sealed class SwarmHost(User user, PublicKey[] validatorKeys, BoundPeer[] peers, BoundPeer[] consensusPeers) : IAsyncDisposable
 {
-    public static readonly PrivateKey GenesisProposer = PrivateKey.FromString
+    public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString
     (
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
-    private readonly PrivateKey _privateKey = privateKey;
-    private readonly BlockChain _blockChain = blockChain;
-    private readonly Swarm _swarm = Create(privateKey, blockChain, peers);
+    private readonly User _user = user;
+    private readonly Swarm _swarm = Create(user, validatorKeys, peers, consensusPeers);
     private Task? _startTask;
     private bool _isDisposed;
 
-    public string Key => $"{_privateKey.PublicKey}";
+    public string Key => $"{_user.PublicKey}";
 
     public bool IsRunning => _startTask != null;
 
@@ -79,34 +77,38 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[]
 
     public event EventHandler? Disposed;
 
-    private static Swarm Create(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers)
+    private static Swarm Create(User user, PublicKey[] validatorKeys, BoundPeer[] peers, BoundPeer[] consensusPeers)
     {
-        var transport = CreateTransport(privateKey);
+        var staticPeers = peers.Where(item => item != user.Peer).ToArray();
+        var blockChain = BlockChainUtils.CreateBlockChain(user.Name, validatorKeys);
+        var privateKey = user.PrivateKey;
+        var transport = CreateTransport(privateKey, user.Peer.EndPoint.Port);
         var bootstrapOptions = new BootstrapOptions
         {
-            SeedPeers = [.. peers],
+            SeedPeers = [.. staticPeers],
         };
         var swarmOptions = new SwarmOptions
         {
+            StaticPeers = staticPeers.ToImmutableHashSet(),
             BootstrapOptions = bootstrapOptions,
-            StaticPeers = peers.ToImmutableHashSet(),
         };
+        var consensusTransport = CreateTransport(privateKey, user.ConsensusPeer.EndPoint.Port);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [],
-            ConsensusPeers = [],
-            ConsensusPort = 0,
+            SeedPeers = [.. staticPeers],
+            ConsensusPeers = [.. consensusPeers],
+            ConsensusPort = user.ConsensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
             ConsensusWorkers = 100,
             TargetBlockInterval = TimeSpan.FromSeconds(10),
+            ContextTimeoutOptions = new(),
         };
-        return new Swarm(blockChain, privateKey, transport, options: swarmOptions, null, null);
+        return new Swarm(blockChain, privateKey, transport, swarmOptions, consensusTransport, consensusReactorOption);
     }
 
-    private static NetMQTransport CreateTransport(PrivateKey privateKey)
+    private static NetMQTransport CreateTransport(PrivateKey privateKey, int port)
     {
-        var port = GetRandomUnusedPort();
-        var apv = AppProtocolVersion.Sign(GenesisProposer, 1);
+        var apv = AppProtocolVersion.Sign(AppProtocolKey, 1);
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = apv,
@@ -131,19 +133,5 @@ sealed class SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer[]
             listener.Start();
             return listener;
         }
-    }
-
-    // internal async Task TestAsync(SwarmHostCollection swarmHosts)
-    // {
-    //     var peers = swarmHosts.Where(item => item != this).Select(item => item._swarm.AsPeer).ToArray();
-    //     foreach (var item in peers)
-    //     {
-    //         await _swarm.AddPeersAsync([item], TimeSpan.FromSeconds(10));
-    //     }
-    // }
-
-    internal void Broadcast(Block block)
-    {
-        _swarm.BroadcastBlock(block);
     }
 }

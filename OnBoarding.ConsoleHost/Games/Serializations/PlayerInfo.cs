@@ -42,6 +42,21 @@ record PlayerInfo : CharacterInfo
 
     public SkillInfo[] Skills { get; init; } = [];
 
+    public static PlayerInfo CreateNew(string name, Address address)
+    {
+        return new PlayerInfo
+        {
+            Name = name,
+            Address = address,
+            Life = 1000,
+            MaxLife = 1000,
+            Skills =
+            [
+                new SkillInfo{ MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
+            ],
+        };
+    }
+
     public override Dictionary ToBencodex()
     {
         return base.ToBencodex().Add(nameof(Address), Address.ToByteArray())
