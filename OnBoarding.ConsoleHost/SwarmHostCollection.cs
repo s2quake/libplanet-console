@@ -1,21 +1,24 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
 using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost;
 
 [Export]
-[method: ImportingConstructor]
-sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>, IAsyncDisposable
+sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
-    private readonly OrderedDictionary _itemById = [];
-    private readonly UserCollection _users = users;
+    private readonly OrderedDictionary _itemById = new();
+    private readonly UserCollection _users;
     private bool _isDisposed;
-    private readonly PublicKey[] _validatorKeys = [.. users.Select(item => item.PublicKey)];
+    private readonly PublicKey[] _validatorKeys;
+
+    [ImportingConstructor]
+    public SwarmHostCollection(UserCollection users)
+    {
+        _users = users;
+        _validatorKeys = users.Select(item => item.PublicKey).ToArray();
+    }
 
     public int Count => _itemById.Count;
 
@@ -25,7 +28,8 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
 
     public SwarmHost AddNew(User user)
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
 
         var validatorKeys = _validatorKeys;
         var peers = _users.Select(item => item.Peer).ToArray();
@@ -38,7 +42,8 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
 
         for (var i = _itemById.Count - 1; i >= 0; i--)
         {
@@ -53,7 +58,8 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
 
     public void Add(SwarmHost item)
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
         if (item.IsDisposed == true)
             throw new ArgumentException($"{nameof(item)} has already been disposed.");
         if (_itemById.Contains(item.Key) == true)
@@ -88,45 +94,7 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
         }
         else
         {
-            throw new UnreachableException();
-        }
-    }
-
-    private static int GetRandomUnusedPort()
-    {
-        var listener = CreateListener();
-        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-        return port;
-
-        static TcpListener CreateListener()
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return listener;
-        }
-    }
-
-    private static int[] GetRandomUnusedPorts(int count)
-    {
-        var ports = new int[count];
-        var listeners = new TcpListener[count];
-        for (var i = 0; i < count; i++)
-        {
-            listeners[i] = CreateListener();
-            ports[i] = ((IPEndPoint)listeners[i].LocalEndpoint).Port;
-        }
-        for (var i = 0; i < count; i++)
-        {
-            listeners[i].Stop();
-        }
-        return ports;
-
-        static TcpListener CreateListener()
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return listener;
+            throw new NotImplementedException();
         }
     }
 

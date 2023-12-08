@@ -6,11 +6,17 @@ using OnBoarding.ConsoleHost.Extensions;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-[method: ImportingConstructor]
-sealed class PlayerCommand(Application application) : CommandMethodBase
+sealed class PlayerCommand : CommandMethodBase
 {
-    private readonly Application _application = application;
-    private readonly UserCollection _users = application.GetService<UserCollection>()!;
+    private readonly Application _application;
+    private readonly UserCollection _users;
+
+    [ImportingConstructor]
+    public PlayerCommand(Application application)
+    {
+        _application = application;
+        _users = application.GetService<UserCollection>()!;
+    }
 
     [CommandMethod]
     public void List()

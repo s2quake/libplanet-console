@@ -4,10 +4,8 @@ using System.Text;
 using Bencodex.Types;
 using JSSoft.Library.Commands;
 using Libplanet.Action;
-using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
-using Newtonsoft.Json;
 using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Games;
@@ -16,12 +14,18 @@ using OnBoarding.ConsoleHost.Games.Serializations;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-[method: ImportingConstructor]
 [CommandSummary("Play, replay, and List games.")]
-sealed class GameCommand(Application application) : CommandMethodBase
+sealed class GameCommand : CommandMethodBase
 {
-    private readonly Application _application = application;
-    private readonly SwarmHostCollection _swarmHosts = application.GetService<SwarmHostCollection>()!;
+    private readonly Application _application;
+    private readonly SwarmHostCollection _swarmHosts;
+
+    [ImportingConstructor]
+    public GameCommand(Application application)
+    {
+        _application = application;
+        _swarmHosts = application.GetService<SwarmHostCollection>()!;
+    }
 
     [CommandProperty(InitValue = 10)]
     public int Tick { get; set; }
@@ -47,7 +51,7 @@ sealed class GameCommand(Application application) : CommandMethodBase
         {
             StageInfo = stageInfo,
         };
-        BlockChainUtils.Stage(blockChain, user, [stageAction]);
+        BlockChainUtils.Stage(blockChain, user, new IAction[] { stageAction });
         // var block = BlockChainUtils.AppendNew(blockChain, user, users, [stageAction]);
         Out.WriteLine("Game Finished.");
     }
@@ -88,10 +92,10 @@ sealed class GameCommand(Application application) : CommandMethodBase
 
     private static bool IsStageInfo(Block block)
     {
-        return block  
-                .Transactions  
-                .SelectMany(x => x.Actions)  
-                .Any(IsStageAction);  
+        return block
+                .Transactions
+                .SelectMany(x => x.Actions)
+                .Any(IsStageAction);
     }
 
     private static bool IsStageAction(IValue value)

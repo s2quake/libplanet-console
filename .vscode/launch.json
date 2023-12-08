@@ -8,7 +8,7 @@
             "name": "C#: OnBoarding Debug",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/OnBoarding.ConsoleHost/bin/Debug/net8.0/OnBoarding.ConsoleHost.dll",
+            "program": "${workspaceFolder}/OnBoarding.ConsoleHost/bin/Debug/net6.0/OnBoarding.ConsoleHost.dll",
             "console": "integratedTerminal"
         }
     ]

@@ -1,6 +1,4 @@
 using System.ComponentModel.Composition;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using OnBoarding.ConsoleHost.Extensions;
@@ -9,11 +7,17 @@ using OnBoarding.ConsoleHost.Serializations;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-[method: ImportingConstructor]
-sealed class SwarmCommand(Application application, SwarmHostCollection swarmHosts) : CommandMethodBase
+sealed class SwarmCommand : CommandMethodBase
 {
-    private readonly Application _application = application;
-    private readonly SwarmHostCollection _swarmHosts = swarmHosts;
+    private readonly Application _application;
+    private readonly SwarmHostCollection _swarmHosts;
+
+    [ImportingConstructor]
+    public SwarmCommand(Application application, SwarmHostCollection swarmHosts)
+    {
+        _application = application;
+        _swarmHosts = swarmHosts;
+    }
 
     [CommandProperty('i', useName: true, InitValue = -1)]
     public int Index { get; set; }

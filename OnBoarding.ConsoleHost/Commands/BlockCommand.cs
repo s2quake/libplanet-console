@@ -6,11 +6,16 @@ using OnBoarding.ConsoleHost.Serializations;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-[method: ImportingConstructor]
 [CommandSummary("Display block commands.")]
-sealed class BlockCommand(Application application) : CommandMethodBase
+sealed class BlockCommand : CommandMethodBase
 {
-    private readonly Application _application = application;
+    private readonly Application _application;
+
+    [ImportingConstructor]
+    public BlockCommand(Application application)
+    {
+        _application = application;
+    }
 
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]

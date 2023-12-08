@@ -5,7 +5,6 @@ using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using OnBoarding.ConsoleHost.Games.Serializations;
-using Serilog;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -67,7 +66,8 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public void Cancel()
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
@@ -75,7 +75,8 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public async Task StartAsync(string[] args)
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
@@ -94,7 +95,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
             if (GetService<CommandContext>() is { } commandContext)
             {
                 @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-                await commandContext.ExecuteAsync(["--help"], cancellationToken: default, progress: new Progress<ProgressInfo>());
+                await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
                 @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
                 @out.WriteLine();
                 @out.WriteLine(TerminalStringBuilder.GetString("Type '--help | -h' for usage.", TerminalColorType.Red));
@@ -110,7 +111,8 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;

@@ -5,22 +5,27 @@ using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using Libplanet.Net.Consensus;
 using Libplanet.Blockchain;
-using System.Net.Sockets;
 using System.Collections.Immutable;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
+sealed class SwarmHost : IAsyncDisposable
 {
     public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString
     (
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
-    private readonly User _user = user;
-    private readonly Swarm _swarm = Create(user, users);
+    private readonly User _user;
+    private readonly Swarm _swarm;
     private Task? _startTask;
     private bool _isDisposed;
+
+    public SwarmHost(User user, UserCollection users)
+    {
+        _user = user;
+        _swarm = Create(user, users);
+    }
 
     public string Key => $"{_user.PublicKey}";
 
@@ -39,7 +44,8 @@ sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
         if (_startTask != null)
             throw new InvalidOperationException("Swarm has been started.");
 
@@ -50,7 +56,8 @@ sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
         if (_startTask == null)
             throw new InvalidOperationException("Swarm has been stopped.");
 
@@ -62,7 +69,8 @@ sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
 
         if (_startTask != null)
         {
@@ -82,26 +90,20 @@ sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
     {
         var validatorKeys = users.Select(item => item.PublicKey).ToArray();
         var index = users.IndexOf(user);
-        // var staticPeers = index == 0 ? Array.Empty<BoundPeer>() : [users[0].Peer];
         var seedUser = users.Where(item => user.Peer != item.Peer).ToArray()[new Random().Next(users.Count - 1)];
         var consensusPeers = users.Select(item => item.ConsensusPeer).ToArray();
         var blockChain = BlockChainUtils.CreateBlockChain(user.Name, validatorKeys);
         var privateKey = user.PrivateKey;
         var transport = CreateTransport(privateKey, user.Peer.EndPoint.Port);
-        var bootstrapOptions = new BootstrapOptions
-        {
-            SeedPeers = [.. users.Select(item => item.Peer)],
-        };
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = [seedUser.Peer],
-            // BootstrapOptions = bootstrapOptions,
+            StaticPeers = ImmutableHashSet.Create(seedUser.Peer),
         };
         var consensusTransport = CreateTransport(privateKey, user.ConsensusPeer.EndPoint.Port);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [seedUser.ConsensusPeer],
-            ConsensusPeers = [.. consensusPeers],
+            SeedPeers = ImmutableList.Create(seedUser.ConsensusPeer),
+            ConsensusPeers = ImmutableList.Create(consensusPeers),
             ConsensusPort = user.ConsensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
             ConsensusWorkers = 100,
@@ -117,26 +119,10 @@ sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = apv,
-            // TrustedAppProtocolVersionSigners = publicKeys.ToImmutableHashSet(),
         };
         var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>(), port);
         var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
         task.Wait();
         return task.Result;
-    }
-
-    private static int GetRandomUnusedPort()
-    {
-        var listener = CreateListener();
-        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-        return port;
-
-        static TcpListener CreateListener()
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return listener;
-        }
     }
 }

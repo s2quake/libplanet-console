@@ -29,7 +29,8 @@ abstract class Character
     {
         if (IsDead == true)
             throw new InvalidOperationException("Player has died.");
-        ArgumentOutOfRangeException.ThrowIfLessThan(amount, 0, nameof(amount));
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException(nameof(amount));
 
         Life = Math.Min(Life + amount, MaxLife);
     }
@@ -54,7 +55,8 @@ abstract class Character
     {
         if (IsDead == true)
             throw new InvalidOperationException("Player has died.");
-        ArgumentOutOfRangeException.ThrowIfLessThan(amount, 0, nameof(amount));
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException(nameof(amount));
 
         var life = Life;
         Life -= amount;

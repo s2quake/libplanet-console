@@ -13,7 +13,7 @@ sealed class Stage
     {
         _player = new(stageInfo.Player);
         _monsters = new(stageInfo.Monsters);
-        _characters = [_player, .. _monsters];
+        _characters = new Character[] { _player }.Concat(_monsters).ToArray();
         Random = new(seed);
         Out = @out;
     }

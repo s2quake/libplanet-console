@@ -41,10 +41,11 @@ static class BlockChainUtils
             nonce,
             GenesisProposer,
             genesisHash: null,
-            actions: [action.PlainValue],
+            actions: new IValue[] { action.PlainValue },
             timestamp: DateTimeOffset.MinValue
             );
-        var genesisBlock = BlockChain.ProposeGenesisBlock(actionEvaluator, GenesisProposer, [transaction], timestamp: DateTimeOffset.MinValue);
+        var transactions = ImmutableList.Create(transaction);
+        var genesisBlock = BlockChain.ProposeGenesisBlock(actionEvaluator, GenesisProposer, transactions, timestamp: DateTimeOffset.MinValue);
         var policy = new BlockPolicy(
             blockInterval: TimeSpan.FromMilliseconds(1),
             getMaxTransactionsPerBlock: _ => int.MaxValue,
@@ -93,10 +94,10 @@ static class BlockChainUtils
             publicKey: privateKey.PublicKey,
             timestamp: DateTimeOffset.UtcNow,
             previousHash: previousBlock.Hash,
-            txHash: BlockContent.DeriveTxHash([transaction]),
+            txHash: BlockContent.DeriveTxHash(new Transaction[] { transaction }),
             lastCommit: lastCommit
         );
-        var blockContent = new BlockContent(blockMetadata, [transaction]);
+        var blockContent = new BlockContent(blockMetadata, new Transaction[] { transaction });
         var preEvaluationBlock = blockContent.Propose();
         var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
         var height = blockChain.Count;

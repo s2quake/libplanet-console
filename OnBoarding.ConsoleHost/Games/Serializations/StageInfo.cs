@@ -21,7 +21,7 @@ record StageInfo
 
     public Address Address { get; init; }
 
-    public MonsterInfo[] Monsters { get; init; } = [];
+    public MonsterInfo[] Monsters { get; init; } = Array.Empty<MonsterInfo>();
 
     public PlayerInfo Player { get; init; } = PlayerInfo.Empty;
 

@@ -1,6 +1,4 @@
-using Bencodex.Types;
 using JSSoft.Library.Terminals;
-using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
@@ -22,8 +20,6 @@ sealed class Player : Character
         Skills = playerInfo.Skills.Select(item => SkillFactory.Create(this, item)).ToArray();
         DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Blue);
     }
-
-    // public static Address CurrentAddress { get; set; }
 
     public Address Address => _address;
 
@@ -54,7 +50,8 @@ sealed class Player : Character
 
     public static long GetExperience(long level)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(level, 0);
+        if (level < 0)
+            throw new ArgumentOutOfRangeException(nameof(level));
 
         return (long)(Math.Pow(level, 2) * 100);
     }

@@ -3,10 +3,14 @@ using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games.Skills;
 
-sealed class AttackSkill(Character character, SkillInfo skillInfo)
-    : SkillBase(skillInfo)
+sealed class AttackSkill : SkillBase
 {
-    private readonly Character _character = character;
+    private readonly Character _character;
+
+    public AttackSkill(Character character, SkillInfo skillInfo) : base(skillInfo)
+    {
+        _character = character;
+    }
 
     protected override bool OnCanExecute(Stage stage)
     {

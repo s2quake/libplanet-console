@@ -40,7 +40,7 @@ record PlayerInfo : CharacterInfo
 
     public long Level { get; init; }
 
-    public SkillInfo[] Skills { get; init; } = [];
+    public SkillInfo[] Skills { get; init; } = Array.Empty<SkillInfo>();
 
     public static PlayerInfo CreateNew(string name, Address address)
     {
@@ -50,10 +50,10 @@ record PlayerInfo : CharacterInfo
             Address = address,
             Life = 1000,
             MaxLife = 1000,
-            Skills =
-            [
-                new SkillInfo{ MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
-            ],
+            Skills = new SkillInfo[]
+            {
+                new() { MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
+            },
         };
     }
 
