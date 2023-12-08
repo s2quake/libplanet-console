@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class SwarmHost(User user, PublicKey[] validatorKeys, BoundPeer[] peers, BoundPeer[] consensusPeers) : IAsyncDisposable
+sealed class SwarmHost(User user, UserCollection users) : IAsyncDisposable
 {
     public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString
     (
@@ -18,7 +18,7 @@ sealed class SwarmHost(User user, PublicKey[] validatorKeys, BoundPeer[] peers, 
     );
 
     private readonly User _user = user;
-    private readonly Swarm _swarm = Create(user, validatorKeys, peers, consensusPeers);
+    private readonly Swarm _swarm = Create(user, users);
     private Task? _startTask;
     private bool _isDisposed;
 
@@ -43,6 +43,7 @@ sealed class SwarmHost(User user, PublicKey[] validatorKeys, BoundPeer[] peers, 
         if (_startTask != null)
             throw new InvalidOperationException("Swarm has been started.");
 
+        // await _swarm.BootstrapAsync(default);
         _startTask = _swarm.StartAsync(cancellationToken: default);
         await Task.CompletedTask;
     }
@@ -77,25 +78,29 @@ sealed class SwarmHost(User user, PublicKey[] validatorKeys, BoundPeer[] peers, 
 
     public event EventHandler? Disposed;
 
-    private static Swarm Create(User user, PublicKey[] validatorKeys, BoundPeer[] peers, BoundPeer[] consensusPeers)
+    private static Swarm Create(User user, UserCollection users)
     {
-        var staticPeers = peers.Where(item => item != user.Peer).ToArray();
+        var validatorKeys = users.Select(item => item.PublicKey).ToArray();
+        var index = users.IndexOf(user);
+        // var staticPeers = index == 0 ? Array.Empty<BoundPeer>() : [users[0].Peer];
+        var seedUser = users.Where(item => user.Peer != item.Peer).ToArray()[new Random().Next(users.Count - 1)];
+        var consensusPeers = users.Select(item => item.ConsensusPeer).ToArray();
         var blockChain = BlockChainUtils.CreateBlockChain(user.Name, validatorKeys);
         var privateKey = user.PrivateKey;
         var transport = CreateTransport(privateKey, user.Peer.EndPoint.Port);
         var bootstrapOptions = new BootstrapOptions
         {
-            SeedPeers = [.. staticPeers],
+            SeedPeers = [.. users.Select(item => item.Peer)],
         };
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = staticPeers.ToImmutableHashSet(),
-            BootstrapOptions = bootstrapOptions,
+            StaticPeers = [seedUser.Peer],
+            // BootstrapOptions = bootstrapOptions,
         };
         var consensusTransport = CreateTransport(privateKey, user.ConsensusPeer.EndPoint.Port);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [.. staticPeers],
+            SeedPeers = [seedUser.ConsensusPeer],
             ConsensusPeers = [.. consensusPeers],
             ConsensusPort = user.ConsensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,

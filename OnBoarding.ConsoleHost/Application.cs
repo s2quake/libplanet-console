@@ -20,9 +20,9 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     static Application()
     {
-        Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
-                                              .WriteTo.Console()
-                                              .CreateLogger();
+        // Log.Logger = new LoggerConfiguration().MinimumLevel.Error()
+        //                                       .WriteTo.Console()
+        //                                       .CreateLogger();
     }
 
     public Application()

@@ -30,7 +30,7 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
         var validatorKeys = _validatorKeys;
         var peers = _users.Select(item => item.Peer).ToArray();
         var consensusPeers = _users.Select(item => item.ConsensusPeer).ToArray();
-        var swarmHost = new SwarmHost(user, validatorKeys, peers, consensusPeers);
+        var swarmHost = new SwarmHost(user, _users);
         _itemById.Add(swarmHost.Key, swarmHost);
         swarmHost.Disposed += Item_Disposed;
         return swarmHost;
@@ -84,6 +84,8 @@ sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>,
             {
                 swarmHosts[i] = AddNew(users[i]);
                 await swarmHosts[i].StartAsync(cancellationToken);
+                Console.WriteLine($"{i}               {i}");
+                // await Task.Delay(10000);
             }
             // await Task.WhenAll(swarmHosts.Select(item => item.StartAsync(cancellationToken)));
             // for (var i = 0; i < swarmHosts.Length; i++)
