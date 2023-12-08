@@ -4,7 +4,6 @@ using Bencodex.Types;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
-using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
 using Serilog;
 
@@ -21,7 +20,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     static Application()
     {
-        // Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
+        // Log.Logger = new LoggerConfiguration().MinimumLevel.Error()
         //                                       .WriteTo.Console()
         //                                       .CreateLogger();
     }
@@ -33,28 +32,6 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     }
 
     public int CurrentIndex { get; } = 0;
-
-    public BlockChain CurrentBlockChain
-    {
-        get
-        {
-            if (_terminal == null)
-                throw new InvalidOperationException("Application has already been stopped.");
-
-            return _swarmHosts![CurrentIndex].BlockChain;
-        }
-    }
-
-    public User CurrentUser
-    {
-        get
-        {
-            if (_terminal == null)
-                throw new InvalidOperationException("Application has already been stopped.");
-
-            return _users![CurrentIndex];
-        }
-    }
 
     public User GetUser(int index)
     {
@@ -85,17 +62,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         {
             return new PlayerInfo(values);
         }
-        return new PlayerInfo
-        {
-            Name = $"Player #{user.Index}",
-            Address = address,
-            Life = 1000,
-            MaxLife = 1000,
-            Skills =
-            [
-                new SkillInfo{ MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
-            ],
-        };
+        return PlayerInfo.CreateNew(user.Name, address);
     }
 
     public void Cancel()
@@ -115,24 +82,30 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _users = _container.GetExportedValue<UserCollection>();
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         await _swarmHosts.InitializeAsync(this, cancellationToken: default);
-        Console.WriteLine();
-        if (GetService<CommandContext>() is { } commandContext)
-        {
-            Console.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-            await commandContext.ExecuteAsync(["--help"], cancellationToken: default, progress: new Progress<ProgressInfo>());
-            Console.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-            Console.WriteLine();
-            Console.WriteLine(TerminalStringBuilder.GetString("Type '--help | -h' for usage.", TerminalColorType.Red));
-            Console.WriteLine(TerminalStringBuilder.GetString("Type 'exit' to exit application.", TerminalColorType.Red));
-            Console.WriteLine();
-            if (args.Length > 0)
-            {
-                await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
-            }
-        }
+        await PrepareCommandContext(args);
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
         await _terminal!.StartAsync(_cancellationTokenSource.Token);
+
+        async Task PrepareCommandContext(string[] args)
+        {
+            var @out = Console.Out;
+            @out.WriteLine();
+            if (GetService<CommandContext>() is { } commandContext)
+            {
+                @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+                await commandContext.ExecuteAsync(["--help"], cancellationToken: default, progress: new Progress<ProgressInfo>());
+                @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+                @out.WriteLine();
+                @out.WriteLine(TerminalStringBuilder.GetString("Type '--help | -h' for usage.", TerminalColorType.Red));
+                @out.WriteLine(TerminalStringBuilder.GetString("Type 'exit' to exit application.", TerminalColorType.Red));
+                @out.WriteLine();
+                if (args.Length > 0)
+                {
+                    await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
+                }
+            }
+        }
     }
 
     public async ValueTask DisposeAsync()

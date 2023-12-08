@@ -2,17 +2,20 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using Libplanet.Blockchain;
+using System.Net;
+using System.Net.Sockets;
 using Libplanet.Crypto;
-using Libplanet.Net;
 
 namespace OnBoarding.ConsoleHost;
 
 [Export]
-sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
+[method: ImportingConstructor]
+sealed class SwarmHostCollection(UserCollection users) : IEnumerable<SwarmHost>, IAsyncDisposable
 {
     private readonly OrderedDictionary _itemById = [];
+    private readonly UserCollection _users = users;
     private bool _isDisposed;
+    private readonly PublicKey[] _validatorKeys = [.. users.Select(item => item.PublicKey)];
 
     public int Count => _itemById.Count;
 
@@ -20,11 +23,14 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public SwarmHost this[string key] => (SwarmHost)_itemById[key]!;
 
-    public SwarmHost AddNew(PrivateKey privateKey, BlockChain blockChain, BoundPeer[] peers)
+    public SwarmHost AddNew(User user)
     {
         ObjectDisposedException.ThrowIf(condition: _isDisposed, this);
 
-        var swarmHost = new SwarmHost(privateKey, blockChain, peers);
+        var validatorKeys = _validatorKeys;
+        var peers = _users.Select(item => item.Peer).ToArray();
+        var consensusPeers = _users.Select(item => item.ConsensusPeer).ToArray();
+        var swarmHost = new SwarmHost(user, _users);
         _itemById.Add(swarmHost.Key, swarmHost);
         swarmHost.Disposed += Item_Disposed;
         return swarmHost;
@@ -73,22 +79,54 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
     {
         if (application.GetService<UserCollection>() is { } users)
         {
-            var swarmHostList = new List<SwarmHost>(users.Count);
-            var peers = Array.Empty<BoundPeer>();
-            foreach (var item in users)
+            var swarmHosts = new SwarmHost[users.Count];
+            for (var i = 0; i < users.Count; i++)
             {
-                var blockChain = BlockChainUtils.CreateBlockChain(user: item, [.. users]);
-                var publicKeys = users.Where(i => i != item).Select(i => i.PublicKey).ToArray();
-                var swarmHost = AddNew(item.PrivateKey, blockChain, peers);
-                if (peers.Length == 0)
-                    peers = [swarmHost.Target.AsPeer];
-                swarmHostList.Add(swarmHost);
+                swarmHosts[i] = AddNew(users[i]);
             }
-            await Task.WhenAll(swarmHostList.Select(item => item.StartAsync(cancellationToken)));
+            await Task.WhenAll(swarmHosts.Select(item => item.StartAsync(cancellationToken)));
         }
         else
         {
             throw new UnreachableException();
+        }
+    }
+
+    private static int GetRandomUnusedPort()
+    {
+        var listener = CreateListener();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        listener.Stop();
+        return port;
+
+        static TcpListener CreateListener()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            return listener;
+        }
+    }
+
+    private static int[] GetRandomUnusedPorts(int count)
+    {
+        var ports = new int[count];
+        var listeners = new TcpListener[count];
+        for (var i = 0; i < count; i++)
+        {
+            listeners[i] = CreateListener();
+            ports[i] = ((IPEndPoint)listeners[i].LocalEndpoint).Port;
+        }
+        for (var i = 0; i < count; i++)
+        {
+            listeners[i].Stop();
+        }
+        return ports;
+
+        static TcpListener CreateListener()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            return listener;
         }
     }
 
