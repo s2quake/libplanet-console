@@ -12,19 +12,14 @@ namespace OnBoarding.ConsoleHost;
 [Export]
 sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
-    private readonly OrderedDictionary _itemById = new();
-    private readonly PrivateKey[] _validators;
-    private readonly PublicKey[] _validatorKeys;
-    private readonly SwarmHost _seedSwarmHost;
     private bool _isDisposed;
     private SwarmHost _currentSwarmHost;
-    private Queue<int> _portQueue;
+    private readonly SwarmHost[] _swarmHosts;
 
     [ImportingConstructor]
     public SwarmHostCollection(ApplicationOptions options)
         : this(CreatePrivateKeys(options.SwarmCount))
     {
-
     }
 
     public SwarmHostCollection()
@@ -32,25 +27,25 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
     {
     }
 
-    private static PrivateKey[] CreatePrivateKeys(int count)
-    {
-        var keyList = new List<PrivateKey>(count);
-        for (var i = 0; i < count; i++)
-        {
-            keyList.Add(new PrivateKey());
-        }
-        return keyList.ToArray();
-    }
-
     public SwarmHostCollection(PrivateKey[] validators)
     {
-        _portQueue = new(GetRandomUnusedPorts(validators.Length * 2));
-        _validators = validators;
-        _validatorKeys = validators.Select(item => item.PublicKey).ToArray();
-        _seedSwarmHost = new("Seed Swarm", _validators[0], _validatorKeys, _portQueue.Dequeue(), _portQueue.Dequeue());
-        _itemById.Add(_seedSwarmHost.Key, _seedSwarmHost);
-        _seedSwarmHost.Disposed += Item_Disposed;
-        _currentSwarmHost = _seedSwarmHost;
+        var portQueue = new Queue<int>(GetRandomUnusedPorts(validators.Length * 2));
+        var validatorKeys = validators.Select(item => item.PublicKey).ToArray();
+        var swarmHosts = new SwarmHost[validators.Length];
+        var peers = new BoundPeer[validators.Length];
+        var consensusPeers = new BoundPeer[validators.Length];
+        for (var i = 0; i < validators.Length; i++)
+        {
+            peers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
+            consensusPeers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
+        }
+        for (var i = 0; i < validators.Length; i++)
+        {
+            var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{i}", validatorKeys);
+            swarmHosts[i] = new SwarmHost(index: i, validators, peers, consensusPeers);
+        }
+        _swarmHosts = swarmHosts;
+        _currentSwarmHost = swarmHosts[0];
     }
 
     public SwarmHost CurrentSwarmHost
@@ -58,10 +53,45 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         get => _currentSwarmHost;
         set
         {
-            if (_itemById.Contains(value.Key) == false)
+            if (_swarmHosts.Contains(value) == false)
                 throw new ArgumentException(nameof(value));
             _currentSwarmHost = value;
         }
+    }
+
+    public int Count => _swarmHosts.Length;
+
+    public SwarmHost this[int index] => _swarmHosts[index];
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
+
+        for (var i = _swarmHosts.Length - 1; i >= 0; i--)
+        {
+            var item = _swarmHosts[i]!;
+            await item.DisposeAsync();
+        }
+        _isDisposed = true;
+        GC.SuppressFinalize(this);
+    }
+
+    public bool Contains(SwarmHost item) => _swarmHosts.Contains(item);
+
+    public int IndexOf(SwarmHost item)
+    {
+        for (var i = 0; i < _swarmHosts.Length; i++)
+        {
+            if (Equals(item, _swarmHosts[i]) == true)
+                return i;
+        }
+        return -1;
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(cancellationToken)));
     }
 
     private static int[] GetRandomUnusedPorts(int count)
@@ -87,119 +117,27 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         }
     }
 
-    public int Count => _itemById.Count;
-
-    public SwarmHost this[int index] => (SwarmHost)_itemById[index]!;
-
-    public SwarmHost this[string key] => (SwarmHost)_itemById[key]!;
-
-    public async ValueTask DisposeAsync()
+    private static PrivateKey[] CreatePrivateKeys(int count)
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-
-        for (var i = _itemById.Count - 1; i >= 0; i--)
+        var keyList = new List<PrivateKey>(count);
+        for (var i = 0; i < count; i++)
         {
-            var item = (SwarmHost)_itemById[i]!;
-            item.Disposed -= Item_Disposed;
-            await item.DisposeAsync();
+            keyList.Add(new PrivateKey());
         }
-        _itemById.Clear();
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
-    }
-
-    public void Add(SwarmHost item)
-    {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-        if (item.IsDisposed == true)
-            throw new ArgumentException($"{nameof(item)} has already been disposed.");
-        if (_itemById.Contains(item.Key) == true)
-            throw new ArgumentException($"{nameof(item)} has already been included in collection");
-
-        _itemById.Add(item.Key, item);
-        item.Disposed += Item_Disposed;
-    }
-
-    public bool Contains(SwarmHost item) => _itemById.Contains(item.Key);
-
-    public int IndexOf(SwarmHost item)
-    {
-        for (var i = 0; i < _itemById.Count; i++)
-        {
-            if (Equals(item, _itemById[i]) == true)
-                return i;
-        }
-        return -1;
-    }
-
-    public async Task InitializeAsync(CancellationToken cancellationToken)
-    {
-        var swarmHostList = new List<SwarmHost>(_validators.Length)
-        {
-            _seedSwarmHost,
-        };
-
-        for (var i = 1; i < _validators.Length; i++)
-        {
-            var swarmHost = AddNew($"Swarm {i}", _validators[i], _portQueue.Dequeue(), _portQueue.Dequeue());
-            swarmHostList.Add(swarmHost);
-            swarmHost.StaticPeers = ImmutableHashSet.Create(_seedSwarmHost.Peer);
-            swarmHost.ConsensusSeedPeers = ImmutableList.Create(_seedSwarmHost.ConsensusPeer);
-        }
-        var consensusPeers = swarmHostList.Select(item => item.ConsensusPeer).ToImmutableList();
-        for (var i = 0; i < swarmHostList.Count; i++)
-        {
-            swarmHostList[i].ConsensusPeers = consensusPeers;
-        }
-        if (swarmHostList.Count > 1)
-        {
-            _seedSwarmHost.StaticPeers = ImmutableHashSet.Create(swarmHostList[1].Peer);
-            _seedSwarmHost.ConsensusSeedPeers = ImmutableList.Create(swarmHostList[1].ConsensusPeer);
-        }
-
-        foreach (var item in swarmHostList)
-        {
-            await item.StartAsync(cancellationToken);
-        }
-    }
-
-    private SwarmHost AddNew(string name, PrivateKey privateKey, int port, int consensusPort)
-    {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-
-        var validatorKeys = _validatorKeys;
-        var swarmHost = new SwarmHost(name, privateKey, validatorKeys, port, consensusPort);
-        _itemById.Add(swarmHost.Key, swarmHost);
-        swarmHost.Disposed += Item_Disposed;
-        return swarmHost;
-    }
-
-    private void Item_Disposed(object? sender, EventArgs e)
-    {
-        if (sender is SwarmHost item)
-        {
-            item.Disposed -= Item_Disposed;
-            _itemById.Remove(item.Key);
-        }
+        return keyList.ToArray();
     }
 
     #region IEnumerable
 
     IEnumerator<SwarmHost> IEnumerable<SwarmHost>.GetEnumerator()
     {
-        foreach (var item in _itemById.Values)
+        foreach (var item in _swarmHosts)
         {
-            if (item is SwarmHost obj)
-            {
-                yield return obj;
-            }
+            yield return item;
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => _itemById.Values.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => _swarmHosts.GetEnumerator();
 
     #endregion
 }
