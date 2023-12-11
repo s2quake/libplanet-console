@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Library.Commands;
@@ -36,7 +35,7 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Info(int blockIndex = -1)
     {
-        var user = _application.GetUser(IndexProperties.SwarmIndex);
+        var user = _application.GetUser(IndexProperties.UserIndex);
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         var playerInfo = user.GetPlayerInfo(swarmHost, blockIndex);
         Out.WriteLineAsJson(playerInfo);

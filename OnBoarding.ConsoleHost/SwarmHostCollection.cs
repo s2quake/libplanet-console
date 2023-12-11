@@ -39,11 +39,15 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
             peers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
             consensusPeers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
         }
+        var indexes = new int[validators.Length];
         for (var i = 0; i < validators.Length; i++)
         {
-            var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{i}", validatorKeys);
-            swarmHosts[i] = new SwarmHost(index: i, validators, peers, consensusPeers);
+            indexes[i] = i;
         }
+        Parallel.ForEach(indexes, i =>
+        {
+            swarmHosts[i] = new SwarmHost(index: i, validators, peers, consensusPeers);
+        });
         _swarmHosts = swarmHosts;
         _currentSwarmHost = swarmHosts[0];
     }

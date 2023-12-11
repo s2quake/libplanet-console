@@ -49,7 +49,6 @@ sealed class GameCommand : CommandMethodBase
             StageInfo = stageInfo,
         };
         swarmHost.StageTransaction(user, new IAction[] { stageAction });
-        // BlockChainUtils.AppendNew(swarmHost.BlockChain, user, validators, new IAction[] { stageAction });
         Out.WriteLine("Game Finished.");
     }
 

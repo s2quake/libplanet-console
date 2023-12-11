@@ -31,7 +31,7 @@ sealed class SwarmHost : IAsyncDisposable
         var peer = peers[index];
         var consensusPeer = consensusPeers[index];
         var validatorKeys = validators.Select(item => item.PublicKey).ToArray();
-        var blockChain = BlockChainUtility.CreateBlockChain($"Swarm {index}", validatorKeys);
+        var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{index}", validatorKeys);
         var transport = CreateTransport(privateKey, peer.EndPoint.Port);
         var swarmOptions = new SwarmOptions
         {
