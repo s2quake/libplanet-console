@@ -25,6 +25,12 @@ sealed class UserCollection : IEnumerable<User>
         _currentUser = _itemList.First();
     }
 
+    [ImportingConstructor]
+    public UserCollection(ApplicationOptions options)
+            : this(options.UserCount)
+    {
+    }
+
     public int Count => _itemList.Count;
 
     public User this[int index] => _itemList[index];

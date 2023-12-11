@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using JSSoft.Library.Commands;
+using JSSoft.Library.Commands.Extensions;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
@@ -15,6 +16,7 @@ sealed partial class Application : IAsyncDisposable
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
+    private readonly ApplicationOptions _options = new();
 
     static Application()
     {
@@ -23,11 +25,13 @@ sealed partial class Application : IAsyncDisposable
         //                                       .CreateLogger();
     }
 
-    public Application()
+    public Application(ApplicationOptions options)
     {
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
+        _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
+        _container.ComposeExportedValue(_options);
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         _users = _container.GetExportedValue<UserCollection>()!;
     }
@@ -68,22 +72,20 @@ sealed partial class Application : IAsyncDisposable
         _cancellationTokenSource = null;
     }
 
-    public async Task StartAsync(string[] args)
+    public async Task StartAsync()
     {
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
-        // _users = _container.GetExportedValue<UserCollection>();
-        // _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         await _swarmHosts.InitializeAsync(cancellationToken: default);
-        await PrepareCommandContext(args);
+        await PrepareCommandContext();
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
         await _terminal!.StartAsync(_cancellationTokenSource.Token);
 
-        async Task PrepareCommandContext(string[] args)
+        async Task PrepareCommandContext()
         {
             var @out = Console.Out;
             @out.WriteLine();
@@ -96,10 +98,10 @@ sealed partial class Application : IAsyncDisposable
                 @out.WriteLine(TerminalStringBuilder.GetString("Type '--help | -h' for usage.", TerminalColorType.Red));
                 @out.WriteLine(TerminalStringBuilder.GetString("Type 'exit' to exit application.", TerminalColorType.Red));
                 @out.WriteLine();
-                if (args.Length > 0)
-                {
-                    await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
-                }
+                // if (args.Length > 0)
+                // {
+                //     await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
+                // }
             }
         }
     }

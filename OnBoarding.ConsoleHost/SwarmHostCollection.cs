@@ -20,9 +20,26 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
     private SwarmHost _currentSwarmHost;
     private Queue<int> _portQueue;
 
-    public SwarmHostCollection()
-        : this(new PrivateKey[] { new(), new(), new(), new() })
+    [ImportingConstructor]
+    public SwarmHostCollection(ApplicationOptions options)
+        : this(CreatePrivateKeys(options.SwarmCount))
     {
+
+    }
+
+    public SwarmHostCollection()
+        : this(CreatePrivateKeys(5))
+    {
+    }
+
+    private static PrivateKey[] CreatePrivateKeys(int count)
+    {
+        var keyList = new List<PrivateKey>(count);
+        for (var i = 0; i < count; i++)
+        {
+            keyList.Add(new PrivateKey());
+        }
+        return keyList.ToArray();
     }
 
     public SwarmHostCollection(PrivateKey[] validators)
@@ -136,8 +153,11 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         {
             swarmHostList[i].ConsensusPeers = consensusPeers;
         }
-        _seedSwarmHost.StaticPeers = ImmutableHashSet.Create(swarmHostList[1].Peer);
-        _seedSwarmHost.ConsensusSeedPeers = ImmutableList.Create(swarmHostList[1].ConsensusPeer);
+        if (swarmHostList.Count > 1)
+        {
+            _seedSwarmHost.StaticPeers = ImmutableHashSet.Create(swarmHostList[1].Peer);
+            _seedSwarmHost.ConsensusSeedPeers = ImmutableList.Create(swarmHostList[1].ConsensusPeer);
+        }
 
         foreach (var item in swarmHostList)
         {
