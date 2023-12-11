@@ -1,9 +1,5 @@
-using System.Net;
 using Bencodex.Types;
-using Libplanet.Action;
 using Libplanet.Crypto;
-using Libplanet.Net;
-using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost;
@@ -12,12 +8,10 @@ sealed class User
 {
     private readonly PrivateKey _privateKey = new();
 
-    public User(string name, int peerPort, int consensusPeerPort)
+    public User(string name)
     {
         Address = _privateKey.ToAddress();
         Name = name;
-        Peer = new BoundPeer(_privateKey.PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", peerPort));
-        ConsensusPeer = new BoundPeer(_privateKey.PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", consensusPeerPort));
     }
 
     public string Name { get; }
@@ -29,10 +23,6 @@ sealed class User
     public PublicKey PublicKey => _privateKey.PublicKey;
 
     public Address Address { get; }
-
-    public BoundPeer Peer { get; }
-
-    public BoundPeer ConsensusPeer { get; }
 
     public PlayerInfo GetPlayerInfo(SwarmHost swarmHost) => GetPlayerInfo(swarmHost, blockIndex: -1);
 

@@ -1,4 +1,4 @@
-namespace OnBoarding.ConsoleHost.Games;
+namespace OnBoarding.ConsoleHost;
 
 static class RandomUtility
 {

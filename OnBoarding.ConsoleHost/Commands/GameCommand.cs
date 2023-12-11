@@ -30,15 +30,13 @@ sealed class GameCommand : CommandMethodBase
     [CommandProperty(InitValue = 10)]
     public int Tick { get; set; }
 
-    [CommandProperty(InitValue = -1)]
-    public int BlockIndex { get; set; }
-
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Play()
     {
-        var swarmHost = _application.GetSwarmHost(SwarmProperties.Index);
-        var user = _application.GetUser(SwarmProperties.Index);
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var user = _application.GetUser(IndexProperties.UserIndex);
         var playerInfo = user.GetPlayerInfo(swarmHost);
         var stageInfo = new StageInfo
         {
@@ -51,19 +49,19 @@ sealed class GameCommand : CommandMethodBase
             StageInfo = stageInfo,
         };
         swarmHost.StageTransaction(user, new IAction[] { stageAction });
+        // BlockChainUtils.AppendNew(swarmHost.BlockChain, user, validators, new IAction[] { stageAction });
         Out.WriteLine("Game Finished.");
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.BlockIndex))]
     [CommandMethodProperty(nameof(Tick))]
-    [CommandMethodProperty(nameof(BlockIndex))]
     public async Task Replay(CancellationToken cancellationToken)
     {
         var tick = Tick;
-        var blockIndex = BlockIndex;
-        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
-        var block = blockChain[blockIndex];
+        var block = _application.GetBlock(IndexProperties.SwarmIndex, IndexProperties.BlockIndex);
         var (stageInfo, seed) = GetStageInfo(block);
         var stage = new Stage(stageInfo, seed, Out);
         await stage.PlayAsync(tick, cancellationToken);
@@ -72,10 +70,11 @@ sealed class GameCommand : CommandMethodBase
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void List()
     {
-        var blockChain = _application.GetBlockChain(SwarmProperties.Index);
+        var blockChain = _application.GetBlockChain(IndexProperties.SwarmIndex);
         var sb = new StringBuilder();
         for (var i = 0; i < blockChain.Count; i++)
         {

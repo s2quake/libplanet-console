@@ -1,60 +1,46 @@
 using System.Collections;
 using System.ComponentModel.Composition;
-using System.Net;
-using System.Net.Sockets;
 
 namespace OnBoarding.ConsoleHost;
 
 [Export]
 sealed class UserCollection : IEnumerable<User>
 {
-    private const int UserCount = 4;
+    private const int UserCount = 100;
     private readonly List<User> _itemList;
+    private User _currentUser;
 
     public UserCollection()
+        : this(UserCount)
     {
-        // var peerPort = 6000;
-        // var consensusPeerPort = 9000;
-        var portQueue = new Queue<int>(GetRandomUnusedPorts(UserCount * 2));
-        _itemList = new(UserCount);
+    }
+
+    public UserCollection(int count)
+    {
+        _itemList = new(count);
         for (var i = 0; i < _itemList.Capacity; i++)
         {
-            _itemList.Add(new(
-                name: $"User{i}",
-                peerPort: portQueue.Dequeue(),
-                consensusPeerPort: portQueue.Dequeue()
-            ));
+            _itemList.Add(new(name: $"User{i}"));
         }
+        _currentUser = _itemList.First();
     }
 
     public int Count => _itemList.Count;
 
     public User this[int index] => _itemList[index];
 
-    public int IndexOf(User item) => _itemList.IndexOf(item);
-
-    private static int[] GetRandomUnusedPorts(int count)
+    public User CurrentUser
     {
-        var ports = new int[count];
-        var listeners = new TcpListener[count];
-        for (var i = 0; i < count; i++)
+        get => _currentUser;
+        set
         {
-            listeners[i] = CreateListener();
-            ports[i] = ((IPEndPoint)listeners[i].LocalEndpoint).Port;
-        }
-        for (var i = 0; i < count; i++)
-        {
-            listeners[i].Stop();
-        }
-        return ports;
-
-        static TcpListener CreateListener()
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return listener;
+            if (_itemList.Contains(value) == false)
+                throw new ArgumentException(nameof(value));
+            _currentUser = value;
         }
     }
+
+    public int IndexOf(User item) => _itemList.IndexOf(item);
 
     #region IEnumerable
 

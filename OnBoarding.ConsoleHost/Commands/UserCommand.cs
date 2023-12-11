@@ -7,13 +7,13 @@ using OnBoarding.ConsoleHost.Extensions;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-sealed class PlayerCommand : CommandMethodBase
+sealed class UserCommand : CommandMethodBase
 {
     private readonly Application _application;
     private readonly UserCollection _users;
 
     [ImportingConstructor]
-    public PlayerCommand(Application application)
+    public UserCommand(Application application)
     {
         _application = application;
         _users = application.GetService<UserCollection>()!;
@@ -23,22 +23,21 @@ sealed class PlayerCommand : CommandMethodBase
     public void List()
     {
         var sb = new StringBuilder();
-        var currentIndex = _application.CurrentIndex;
         for (var i = 0; i < _users.Count; i++)
         {
             var item = _users[i];
-            var isCurrent = currentIndex == i ? "O" : " ";
-            sb.AppendLine($"{isCurrent} [{i}]-{item.Address}");
+            sb.AppendLine($"[{i}]-{item.Address}");
         }
         Out.Write(sb.ToString());
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(SwarmProperties), nameof(SwarmProperties.Index))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Info(int blockIndex = -1)
     {
-        var user = _application.GetUser(SwarmProperties.Index);
-        var swarmHost = _application.GetSwarmHost(SwarmProperties.Index);
+        var user = _application.GetUser(IndexProperties.SwarmIndex);
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         var playerInfo = user.GetPlayerInfo(swarmHost, blockIndex);
         Out.WriteLineAsJson(playerInfo);
     }

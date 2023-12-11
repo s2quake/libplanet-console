@@ -1,18 +1,17 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using Bencodex.Types;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
-using OnBoarding.ConsoleHost.Games.Serializations;
+using Libplanet.Types.Blocks;
 
 namespace OnBoarding.ConsoleHost;
 
 sealed partial class Application : IAsyncDisposable
 {
     private readonly CompositionContainer _container;
-    private SwarmHostCollection? _swarmHosts;
-    private UserCollection? _users;
+    private readonly SwarmHostCollection _swarmHosts;
+    private readonly UserCollection _users;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
@@ -29,29 +28,35 @@ sealed partial class Application : IAsyncDisposable
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
+        _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
+        _users = _container.GetExportedValue<UserCollection>()!;
     }
 
-    public int CurrentIndex { get; } = 0;
-
-    public User GetUser(int index)
+    public User GetUser(int userIndex)
     {
         if (_users == null)
             throw new InvalidOperationException();
-        return index == -1 ? _users[CurrentIndex] : _users[index];
+        return userIndex == -1 ? _users.CurrentUser : _users[userIndex];
     }
 
-    public BlockChain GetBlockChain(int index)
+    public BlockChain GetBlockChain(int swarmIndex)
     {
         if (_swarmHosts == null)
             throw new InvalidOperationException();
-        return index == -1 ? _swarmHosts[CurrentIndex].BlockChain : _swarmHosts[index].BlockChain;
+        return swarmIndex == -1 ? _swarmHosts.CurrentSwarmHost.BlockChain : _swarmHosts[swarmIndex].BlockChain;
     }
 
-    public SwarmHost GetSwarmHost(int index)
+    public Block GetBlock(int swarmIndex, int blockIndex)
+    {
+        var blockChain = GetBlockChain(swarmIndex);
+        return blockIndex == -1 ? blockChain[blockChain.Count - 1] : blockChain[blockIndex];
+    }
+
+    public SwarmHost GetSwarmHost(int swarmIndex)
     {
         if (_swarmHosts == null)
             throw new InvalidOperationException();
-        return index == -1 ? _swarmHosts[CurrentIndex] : _swarmHosts[index];
+        return swarmIndex == -1 ? _swarmHosts.CurrentSwarmHost : _swarmHosts[swarmIndex];
     }
 
     public void Cancel()
@@ -70,8 +75,8 @@ sealed partial class Application : IAsyncDisposable
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
-        _users = _container.GetExportedValue<UserCollection>();
-        _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
+        // _users = _container.GetExportedValue<UserCollection>();
+        // _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         await _swarmHosts.InitializeAsync(cancellationToken: default);
         await PrepareCommandContext(args);
         _cancellationTokenSource = new();
@@ -108,8 +113,8 @@ sealed partial class Application : IAsyncDisposable
         _cancellationTokenSource = null;
         if (_swarmHosts != null)
             await _swarmHosts.DisposeAsync();
-        _swarmHosts = null;
-        _users = null;
+        // _swarmHosts = null;
+        // _users = null;
         _terminal = null;
         _container.Dispose();
         _isDisposed = true;
