@@ -12,7 +12,7 @@ sealed class Monster : Character
         : base(monsterInfo)
     {
         Skills = monsterInfo.Skills.Select(item => SkillFactory.Create(this, item)).ToArray();
-        DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Red);
+        DisplayName = TerminalStringBuilder.GetString($"{Name}", TerminalColorType.BrightRed);
     }
 
     public override ISkill[] Skills { get; }

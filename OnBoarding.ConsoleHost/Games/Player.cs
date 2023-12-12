@@ -18,7 +18,7 @@ sealed class Player : Character
         _level = playerInfo.Level;
         MaxExperience = GetExperience(_level);
         Skills = playerInfo.Skills.Select(item => SkillFactory.Create(this, item)).ToArray();
-        DisplayName = TerminalStringBuilder.GetString($"{this}", TerminalColorType.Blue);
+        DisplayName = TerminalStringBuilder.GetString($"{Name}", TerminalColorType.BrightBlue);
     }
 
     public Address Address => _address;
@@ -54,11 +54,6 @@ sealed class Player : Character
             throw new ArgumentOutOfRangeException(nameof(level));
 
         return (long)(Math.Pow(level, 2) * 100);
-    }
-
-    public override string ToString()
-    {
-        return $"P:{_address}"[..8];
     }
 
     public override bool IsEnemyOf(Character character) => character is Monster;

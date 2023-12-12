@@ -19,9 +19,6 @@ sealed class SwarmCommand : CommandMethodBase
         _swarmHosts = swarmHosts;
     }
 
-    [CommandProperty('i', useName: true, InitValue = -1)]
-    public int Index { get; set; }
-
     [CommandPropertySwitch("detail")]
     public bool IsDetailed { get; set; }
 
@@ -33,93 +30,39 @@ sealed class SwarmCommand : CommandMethodBase
 
         Action GetListAction(bool IsDetailed) => IsDetailed switch
         {
-            false => ListMinimal,
-            true => ListDiagnostic,
+            false => ListNormal,
+            true => ListDetailed,
         };
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Index))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     public void Info()
     {
-        var swarmHost = Index == -1 ? _swarmHosts[_application.CurrentIndex] : _swarmHosts[Index];
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         var swarmInfo = new SwarmInfo(swarmHost.Target);
         Out.WriteLineAsJson(swarmInfo);
     }
 
-    // [CommandMethod]
-    // [CommandMethodProperty(nameof(Count))]
-    // public async Task NewAsync(CancellationToken cancellationToken)
-    // {
-    //     var taskList = new List<Task>(Count);
-    //     var itemList = new List<SwarmHost>(Count);
-    //     var users = _application.GetService<UserCollection>()!;
-    //     var sb = new StringBuilder();
-    //     for (var i = 0; i < Count; i++)
-    //     {
-    //         var privateKey = new PrivateKey();
-    //         var blockChain = BlockChainUtils.CreateBlockChain([.. users]);
-    //         var swarmHost = _swarmHosts.AddNew(privateKey, blockChain);
-    //         var task = swarmHost.StartAsync(cancellationToken);
-    //         taskList.Add(task);
-    //         itemList.Add(swarmHost);
-    //     }
-    //     await Task.WhenAll(taskList);
-    //     foreach (var item in itemList)
-    //     {
-    //         var index = _swarmHosts.IndexOf(item);
-    //         sb.AppendLine($"[{index}]-{item} has been created.");
-    //     }
-    //     Out.Write(sb.ToString());
-    // }
-
-    // [CommandMethod]
-    // [CommandMethodProperty(nameof(Index))]
-    // public async Task DeleteAsync(CancellationToken cancellationToken)
-    // {
-    //     var swarmHost = Index == -1 ? _swarmHosts[_application.CurrentIndex] : _swarmHosts[Index];
-    //     var swarmIndex = _swarmHosts.IndexOf(swarmHost);
-    //     await swarmHost.DisposeAsync();
-    //     Out.WriteLine($"[{swarmIndex}]-{swarmHost} has been deleted.");
-    // }
-
-    // [CommandMethod]
-    // [CommandMethodProperty(nameof(Index))]
-    // public async Task StartAsync(CancellationToken cancellationToken)
-    // {
-    //     var swarmHost = Index == -1 ? _swarmHosts[_application.CurrentIndex] : _swarmHosts[Index];
-    //     var swarmIndex = _swarmHosts.IndexOf(swarmHost);
-    //     await swarmHost.StartAsync(cancellationToken);
-    //     Out.WriteLine($"[{swarmIndex}]-{swarmHost} has been started.");
-    // }
-
-    // [CommandMethod]
-    // [CommandMethodProperty(nameof(Index))]
-    // public async Task StopAsync(CancellationToken cancellationToken)
-    // {
-    //     var swarmHost = Index == -1 ? _swarmHosts[_application.CurrentIndex] : _swarmHosts[Index];
-    //     var swarmIndex = _swarmHosts.IndexOf(swarmHost);
-    //     await swarmHost.StopAsync(cancellationToken);
-    //     Out.WriteLine($"[{swarmIndex}]-{swarmHost} has been stopped.");
-    // }
-
-    private void ListQuiet()
+    [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    public async Task Start(CancellationToken cancellationToken)
     {
-        var tsb = new TerminalStringBuilder();
-        for (var i = 0; i < _swarmHosts.Count; i++)
-        {
-            var item = _swarmHosts[i];
-            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
-            tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"[{i}] {item}");
-            tsb.Foreground = null;
-            tsb.IsBold = false;
-            tsb.Append(string.Empty);
-        }
-        Out.Write(tsb.ToString());
+        var seedPeer = _swarmHosts[0].Peer;
+        var consensusSeedPeer = _swarmHosts[0].ConsensusPeer;
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        await swarmHost.StartAsync(seedPeer, consensusSeedPeer, cancellationToken);
     }
 
-    private void ListMinimal()
+    [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    public async Task Stop(CancellationToken cancellationToken)
+    {
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        await swarmHost.StopAsync(cancellationToken);
+    }
+
+    private void ListNormal()
     {
         var tsb = new TerminalStringBuilder();
         for (var i = 0; i < _swarmHosts.Count; i++)
@@ -137,29 +80,19 @@ sealed class SwarmCommand : CommandMethodBase
         Out.Write(tsb.ToString());
     }
 
-    private void ListNormal()
-    {
-
-    }
-
     private void ListDetailed()
-    {
-
-    }
-
-    private void ListDiagnostic()
     {
         var tsb = new TerminalStringBuilder();
         for (var i = 0; i < _swarmHosts.Count; i++)
         {
             var item = _swarmHosts[i];
             var swarmInfo = new SwarmInfo(item.Target);
+            var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
             tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
             tsb.AppendLine($"[{i}] {item}");
             tsb.Foreground = null;
             tsb.IsBold = false;
-            var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
             tsb.Append(json);
         }
         Out.Write(tsb.ToString());

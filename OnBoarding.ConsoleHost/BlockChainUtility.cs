@@ -15,7 +15,7 @@ using Libplanet.Types.Tx;
 
 namespace OnBoarding.ConsoleHost;
 
-static class BlockChainUtils
+static class BlockChainUtility
 {
     public static readonly PrivateKey GenesisProposer = PrivateKey.FromString
     (
@@ -54,28 +54,13 @@ static class BlockChainUtils
         return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
     }
 
-    public static void Stage(BlockChain blockChain, User user, IAction[] actions)
+    public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)
     {
-        var privateKey = user.PrivateKey;
-        var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
-        var values = actions.Select(item => item.PlainValue).ToArray();
-        var transaction = Transaction.Create(
-            nonce: nonce,
-            privateKey: privateKey,
-            genesisHash: genesisBlock.Hash,
-            actions: new TxActionList(values)
-        );
-        blockChain.StageTransaction(transaction);
-    }
-
-    public static Block AppendNew(BlockChain blockChain, User user, UserCollection users, IAction[] actions)
-    {
-        var block = AppendNew(blockChain, user, users, actions.Select(item => item.PlainValue).ToArray());
+        var block = AppendNew(blockChain, user, validators, actions.Select(item => item.PlainValue).ToArray());
         return block;
     }
 
-    public static Block AppendNew(BlockChain blockChain, User user, UserCollection users, IValue[] values)
+    public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IValue[] values)
     {
         var privateKey = user.PrivateKey;
         var genesisBlock = blockChain.Genesis;
@@ -103,7 +88,7 @@ static class BlockChainUtils
         var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
-        var votes = users.OrderBy(item => item.Address).Select(item =>
+        var votes = validators.OrderBy(item => item.ToAddress()).Select(item =>
         {
             var voteMetadata = new VoteMetadata(
             height: height,
@@ -112,7 +97,7 @@ static class BlockChainUtils
             timestamp: DateTimeOffset.UtcNow,
             validatorPublicKey: item.PublicKey,
             flag: VoteFlag.PreCommit);
-            return voteMetadata.Sign(item.PrivateKey);
+            return voteMetadata.Sign(item);
         }).ToImmutableArray();
 
         var blockCommit = new BlockCommit(height, round, block.Hash, votes);

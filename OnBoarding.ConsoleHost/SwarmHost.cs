@@ -6,6 +6,8 @@ using Libplanet.Net.Transports;
 using Libplanet.Net.Consensus;
 using Libplanet.Blockchain;
 using System.Collections.Immutable;
+using Libplanet.Action;
+using Libplanet.Types.Tx;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -16,41 +18,89 @@ sealed class SwarmHost : IAsyncDisposable
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
-    private readonly User _user;
-    private readonly Swarm _swarm;
+    private readonly PrivateKey _privateKey;
+    private readonly BoundPeer _peer;
+    private readonly BoundPeer _consensusPeer;
+    private readonly BlockChain _blockChain;
+    private readonly SynchronizationContext _synchronizationContext = SynchronizationContext.Current!;
+    private Swarm? _swarm;
     private Task? _startTask;
     private bool _isDisposed;
+    private long _blockCount;
+    private Task? _pollingTask;
+    private CancellationTokenSource? _pollingCancellationTokenSource;
 
-    public SwarmHost(User user, UserCollection users)
+    public SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer peer, BoundPeer consensusPeer)
     {
-        _user = user;
-        _swarm = Create(user, users);
+        _privateKey = privateKey;
+        _blockChain = blockChain;
+        _peer = peer;
+        _consensusPeer = consensusPeer;
     }
 
-    public string Key => $"{_user.PublicKey}";
+    public BoundPeer Peer => _peer;
+
+    public BoundPeer ConsensusPeer => _consensusPeer;
 
     public bool IsRunning => _startTask != null;
 
     public bool IsDisposed => _isDisposed;
 
-    public Swarm Target => _swarm;
+    public Swarm Target => _swarm ?? throw new InvalidOperationException();
 
-    public BlockChain BlockChain => _swarm.BlockChain;
+    public BlockChain BlockChain => _blockChain;
 
     public override string ToString()
     {
-        return $"{_swarm.EndPoint.Host}:{_swarm.EndPoint.Port}";
+        return $"{_peer.EndPoint}";
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public void StageTransaction(User user, IAction[] actions)
+    {
+        var blockChain = BlockChain;
+        var privateKey = user.PrivateKey;
+        var genesisBlock = blockChain.Genesis;
+        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
+        var values = actions.Select(item => item.PlainValue).ToArray();
+        var transaction = Transaction.Create(
+            nonce: nonce,
+            privateKey: privateKey,
+            genesisHash: genesisBlock.Hash,
+            actions: new TxActionList(values)
+        );
+        blockChain.StageTransaction(transaction);
+    }
+
+    public async Task StartAsync(BoundPeer seedPeer, BoundPeer consensusSeedPeer, CancellationToken cancellationToken)
     {
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
         if (_startTask != null)
             throw new InvalidOperationException("Swarm has been started.");
 
-        // await _swarm.BootstrapAsync(default);
+        var privateKey = _privateKey;
+        var peer = _peer;
+        var consensusPeer = _consensusPeer;
+        var blockChain = _blockChain;
+        var transport = CreateTransport(privateKey, peer.EndPoint.Port);
+        var swarmOptions = new SwarmOptions
+        {
+            StaticPeers = seedPeer == peer ? ImmutableHashSet<BoundPeer>.Empty : ImmutableHashSet.Create(seedPeer),
+        };
+        var consensusTransport = CreateTransport(privateKey, consensusPeer.EndPoint.Port);
+        var consensusReactorOption = new ConsensusReactorOption
+        {
+            SeedPeers = consensusSeedPeer == consensusPeer ? ImmutableList<BoundPeer>.Empty : ImmutableList.Create(consensusSeedPeer),
+            ConsensusPort = consensusPeer.EndPoint.Port,
+            ConsensusPrivateKey = privateKey,
+            TargetBlockInterval = TimeSpan.FromSeconds(10),
+            ContextTimeoutOptions = new(),
+        };
+        _swarm = new Swarm(blockChain, privateKey, transport, swarmOptions, consensusTransport, consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
+        _blockCount = blockChain.Count;
+        _pollingCancellationTokenSource = new();
+        _pollingTask = Polling(_pollingCancellationTokenSource.Token);
         await Task.CompletedTask;
     }
 
@@ -58,13 +108,17 @@ sealed class SwarmHost : IAsyncDisposable
     {
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
-        if (_startTask == null)
+        if (_startTask == null || _swarm == null)
             throw new InvalidOperationException("Swarm has been stopped.");
 
+        _pollingCancellationTokenSource?.Cancel();
+        _pollingCancellationTokenSource = null;
+        await (_pollingTask ?? Task.CompletedTask);
         await _swarm.StopAsync(cancellationToken: cancellationToken);
         await _startTask;
         _swarm.Dispose();
         _startTask = null;
+        _pollingTask = null;
     }
 
     public async ValueTask DisposeAsync()
@@ -72,46 +126,20 @@ sealed class SwarmHost : IAsyncDisposable
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
 
-        if (_startTask != null)
+        _pollingCancellationTokenSource?.Cancel();
+        _pollingCancellationTokenSource = null;
+        await (_pollingTask ?? Task.CompletedTask);
+        if (_swarm != null)
         {
             await _swarm.StopAsync(cancellationToken: default);
-            await _startTask;
             _swarm.Dispose();
-            _startTask = null;
         }
-
+        await (_startTask ?? Task.CompletedTask);
+        _startTask = null;
         _isDisposed = true;
-        Disposed?.Invoke(this, EventArgs.Empty);
     }
 
-    public event EventHandler? Disposed;
-
-    private static Swarm Create(User user, UserCollection users)
-    {
-        var validatorKeys = users.Select(item => item.PublicKey).ToArray();
-        var index = users.IndexOf(user);
-        var seedUser = users.Where(item => user.Peer != item.Peer).ToArray()[new Random().Next(users.Count - 1)];
-        var consensusPeers = users.Select(item => item.ConsensusPeer).ToArray();
-        var blockChain = BlockChainUtils.CreateBlockChain(user.Name, validatorKeys);
-        var privateKey = user.PrivateKey;
-        var transport = CreateTransport(privateKey, user.Peer.EndPoint.Port);
-        var swarmOptions = new SwarmOptions
-        {
-            StaticPeers = ImmutableHashSet.Create(seedUser.Peer),
-        };
-        var consensusTransport = CreateTransport(privateKey, user.ConsensusPeer.EndPoint.Port);
-        var consensusReactorOption = new ConsensusReactorOption
-        {
-            SeedPeers = ImmutableList.Create(seedUser.ConsensusPeer),
-            ConsensusPeers = ImmutableList.Create(consensusPeers),
-            ConsensusPort = user.ConsensusPeer.EndPoint.Port,
-            ConsensusPrivateKey = privateKey,
-            ConsensusWorkers = 100,
-            TargetBlockInterval = TimeSpan.FromSeconds(10),
-            ContextTimeoutOptions = new(),
-        };
-        return new Swarm(blockChain, privateKey, transport, swarmOptions, consensusTransport, consensusReactorOption);
-    }
+    public event EventHandler? BlockAppended;
 
     private static NetMQTransport CreateTransport(PrivateKey privateKey, int port)
     {
@@ -124,5 +152,27 @@ sealed class SwarmHost : IAsyncDisposable
         var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
         task.Wait();
         return task.Result;
+    }
+
+    private async Task Polling(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (cancellationToken.IsCancellationRequested == false)
+            {
+                if (_blockCount != _blockChain.Count)
+                {
+                    _synchronizationContext.Post((s) =>
+                    {
+                        BlockAppended?.Invoke(this, EventArgs.Empty);
+                    }, null);
+                    _blockCount = _blockChain.Count;
+                }
+                await Task.Delay(1, cancellationToken);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
     }
 }

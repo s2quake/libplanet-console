@@ -1,21 +1,21 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using Bencodex.Types;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
-using OnBoarding.ConsoleHost.Games.Serializations;
+using Libplanet.Types.Blocks;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed partial class Application : IAsyncDisposable, IServiceProvider
+sealed partial class Application : IAsyncDisposable
 {
     private readonly CompositionContainer _container;
-    private SwarmHostCollection? _swarmHosts;
-    private UserCollection? _users;
+    private readonly SwarmHostCollection _swarmHosts;
+    private readonly UserCollection _users;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
+    private readonly ApplicationOptions _options = new();
 
     static Application()
     {
@@ -24,45 +24,43 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         //                                       .CreateLogger();
     }
 
-    public Application()
+    public Application(ApplicationOptions options)
     {
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
+        SynchronizationContext.SetSynchronizationContext(new());
+        _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
+        _container.ComposeExportedValue(_options);
+        _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
+        _users = _container.GetExportedValue<UserCollection>()!;
     }
 
-    public int CurrentIndex { get; } = 0;
-
-    public User GetUser(int index)
+    public User GetUser(int userIndex)
     {
         if (_users == null)
             throw new InvalidOperationException();
-        return index == -1 ? _users[CurrentIndex] : _users[index];
+        return userIndex == -1 ? _users.CurrentUser : _users[userIndex];
     }
 
-    public BlockChain GetBlockChain(int index)
+    public BlockChain GetBlockChain(int swarmIndex)
     {
         if (_swarmHosts == null)
             throw new InvalidOperationException();
-        return index == -1 ? _swarmHosts[CurrentIndex].BlockChain : _swarmHosts[index].BlockChain;
+        return swarmIndex == -1 ? _swarmHosts.CurrentSwarmHost.BlockChain : _swarmHosts[swarmIndex].BlockChain;
     }
 
-    public PlayerInfo GetPlayerInfo(int swarmIndex) => GetPlayerInfo(swarmIndex, blockIndex: -1);
-
-    public PlayerInfo GetPlayerInfo(int swarmIndex, int blockIndex)
+    public Block GetBlock(int swarmIndex, int blockIndex)
     {
         var blockChain = GetBlockChain(swarmIndex);
-        var user = GetUser(swarmIndex);
-        var address = user.Address;
-        var actualBlockIndex = blockIndex == -1 ? blockChain.Count - 1 : blockIndex;
-        var block = blockChain[actualBlockIndex];
-        var worldState = blockChain.GetWorldState(block.Hash);
-        var account = worldState.GetAccount(address);
-        if (account.GetState(address) is Dictionary values)
-        {
-            return new PlayerInfo(values);
-        }
-        return PlayerInfo.CreateNew(user.Name, address);
+        return blockIndex == -1 ? blockChain[blockChain.Count - 1] : blockChain[blockIndex];
+    }
+
+    public SwarmHost GetSwarmHost(int swarmIndex)
+    {
+        if (_swarmHosts == null)
+            throw new InvalidOperationException();
+        return swarmIndex == -1 ? _swarmHosts.CurrentSwarmHost : _swarmHosts[swarmIndex];
     }
 
     public void Cancel()
@@ -74,39 +72,32 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _cancellationTokenSource = null;
     }
 
-    public async Task StartAsync(string[] args)
+    public async Task StartAsync()
     {
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
-        _users = _container.GetExportedValue<UserCollection>();
-        _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
-        await _swarmHosts.InitializeAsync(this, cancellationToken: default);
-        await PrepareCommandContext(args);
+        await _swarmHosts.InitializeAsync(cancellationToken: default);
+        _swarmHosts.CurrentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
+        await PrepareCommandContext();
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
         await _terminal!.StartAsync(_cancellationTokenSource.Token);
 
-        async Task PrepareCommandContext(string[] args)
+        async Task PrepareCommandContext()
         {
-            var @out = Console.Out;
-            @out.WriteLine();
-            if (GetService<CommandContext>() is { } commandContext)
-            {
-                @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-                await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
-                @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-                @out.WriteLine();
-                @out.WriteLine(TerminalStringBuilder.GetString("Type '--help | -h' for usage.", TerminalColorType.Red));
-                @out.WriteLine(TerminalStringBuilder.GetString("Type 'exit' to exit application.", TerminalColorType.Red));
-                @out.WriteLine();
-                if (args.Length > 0)
-                {
-                    await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
-                }
-            }
+            var sw = new StringWriter();
+            var commandContext = GetService<CommandContext>()!;
+            commandContext.Out = sw;
+            sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
+            sw.WriteLine();
+            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default, progress: new Progress<ProgressInfo>());
+            sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+            commandContext.Out = Console.Out;
+            Console.Write(sw.ToString());
         }
     }
 
@@ -117,10 +108,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
-        if (_swarmHosts != null)
-            await _swarmHosts.DisposeAsync();
-        _swarmHosts = null;
-        _users = null;
+        await _swarmHosts.DisposeAsync();
         _terminal = null;
         _container.Dispose();
         _isDisposed = true;
@@ -135,5 +123,14 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     public object? GetService(Type serviceType)
     {
         return _container.GetExportedValue<object?>(AttributedModelServices.GetContractName(serviceType));
+    }
+
+    private void SwarmHost_BlockAppended(object? sender, EventArgs e)
+    {
+        if (sender is SwarmHost swarmHost)
+        {
+            var blockChain = swarmHost.BlockChain;
+            Console.WriteLine($"Block Appended: {blockChain.Count}");
+        }
     }
 }
