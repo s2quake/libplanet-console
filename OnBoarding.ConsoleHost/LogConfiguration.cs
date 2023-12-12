@@ -10,7 +10,8 @@ sealed class LogConfiguration : IApplicationConfiguration
 {
     public LogConfiguration()
     {
-        Log.Logger = new LoggerConfiguration().Filter.ByIncludingOnly(Predicate).MinimumLevel.Error()
+        Log.Logger = new LoggerConfiguration().Filter.ByIncludingOnly(Predicate)
+                                              .MinimumLevel.Error()
                                               .WriteTo.Console()
                                               .CreateLogger();
     }

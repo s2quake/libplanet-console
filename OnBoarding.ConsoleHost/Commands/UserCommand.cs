@@ -17,6 +17,7 @@ using OnBoarding.ConsoleHost.Games.Serializations;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
+[CommandSummary("Provides commands related to users.")]
 sealed class UserCommand : CommandMethodBase
 {
     private readonly Application _application;
@@ -39,7 +40,7 @@ sealed class UserCommand : CommandMethodBase
         for (var i = 0; i < _users.Count; i++)
         {
             var item = _users[i];
-            tsb.Foreground = _users.CurrentUser == item ? TerminalColorType.BrightGreen : null;
+            tsb.Foreground = _users.Current == item ? TerminalColorType.BrightGreen : null;
             tsb.AppendLine($"[{i}]-{item.Address}");
             tsb.Foreground = null;
             tsb.Append(string.Empty);
@@ -64,11 +65,11 @@ sealed class UserCommand : CommandMethodBase
     {
         if (value is { } index)
         {
-            _users.CurrentUser = _users[index];
+            _users.Current = _users[index];
         }
         else
         {
-            Out.WriteLine(_users.IndexOf(_users.CurrentUser));
+            Out.WriteLine(_users.IndexOf(_users.Current));
         }
     }
 

@@ -11,7 +11,7 @@ namespace OnBoarding.ConsoleHost;
 [Export]
 sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
-    private SwarmHost _currentSwarmHost;
+    private SwarmHost _current;
     private readonly SwarmHost[] _swarmHosts;
     private readonly BoundPeer _seedPeer;
     private readonly BoundPeer _consensusSeedPeer;
@@ -49,19 +49,20 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
             swarmHosts[i] = new SwarmHost(privateKey, blockChain, peer, consensusPeer);
         }
         _swarmHosts = swarmHosts;
-        _currentSwarmHost = swarmHosts[0];
+        _current = swarmHosts[0];
         _seedPeer = peers[0];
         _consensusSeedPeer = consensusPeers[0];
     }
 
-    public SwarmHost CurrentSwarmHost
+    public SwarmHost Current
     {
-        get => _currentSwarmHost;
+        get => _current;
         set
         {
             if (_swarmHosts.Contains(value) == false)
                 throw new ArgumentException($"'{value}' is not included in the collection.", nameof(value));
-            _currentSwarmHost = value;
+            _current = value;
+            CurrentChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -99,6 +100,8 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
     {
         await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
     }
+
+    public event EventHandler? CurrentChanged;
 
     private static int[] GetRandomUnusedPorts(int count)
     {

@@ -7,6 +7,7 @@ using OnBoarding.ConsoleHost.Serializations;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
+[CommandSummary("Provides commands related to swarms.")]
 sealed class SwarmCommand : CommandMethodBase
 {
     private readonly Application _application;
@@ -62,14 +63,28 @@ sealed class SwarmCommand : CommandMethodBase
         await swarmHost.StopAsync(cancellationToken);
     }
 
+    [CommandMethod]
+    public void Current(int? value = null)
+    {
+        if (value is { } index)
+        {
+            _swarmHosts.Current = _swarmHosts[index];
+        }
+        else
+        {
+            Out.WriteLine(_swarmHosts.IndexOf(_swarmHosts.Current));
+        }
+    }
+
     private void ListNormal()
     {
         var tsb = new TerminalStringBuilder();
         for (var i = 0; i < _swarmHosts.Count; i++)
         {
             var item = _swarmHosts[i];
+            var isCurrent = _swarmHosts.Current == item;
             var blockChain = item.Target.BlockChain;
-            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
+            tsb.Foreground = item.IsRunning == true ? (isCurrent == true ? TerminalColorType.BrightGreen : null) : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
             tsb.AppendLine($"[{i}] {item}");
             tsb.Foreground = null;

@@ -7,7 +7,7 @@ namespace OnBoarding.ConsoleHost;
 sealed class UserCollection : IEnumerable<User>
 {
     private readonly List<User> _itemList;
-    private User _currentUser;
+    private User _current;
 
     public UserCollection()
         : this(ApplicationOptions.DefaultUserCount)
@@ -21,7 +21,7 @@ sealed class UserCollection : IEnumerable<User>
         {
             _itemList.Add(new(name: $"User{i}"));
         }
-        _currentUser = _itemList.First();
+        _current = _itemList.First();
     }
 
     [ImportingConstructor]
@@ -34,18 +34,21 @@ sealed class UserCollection : IEnumerable<User>
 
     public User this[int index] => _itemList[index];
 
-    public User CurrentUser
+    public User Current
     {
-        get => _currentUser;
+        get => _current;
         set
         {
             if (_itemList.Contains(value) == false)
                 throw new ArgumentException($"'{value}' is not included in the collection.", nameof(value));
-            _currentUser = value;
+            _current = value;
+            CurrentChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
     public int IndexOf(User item) => _itemList.IndexOf(item);
+
+    public event EventHandler? CurrentChanged;
 
     #region IEnumerable
 
