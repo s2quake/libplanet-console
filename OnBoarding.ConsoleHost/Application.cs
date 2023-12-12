@@ -93,11 +93,9 @@ sealed partial class Application : IAsyncDisposable
             {
                 @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
                 await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
+                @out.WriteLine();
+                await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default, progress: new Progress<ProgressInfo>());
                 @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-                @out.WriteLine();
-                @out.WriteLine(TerminalStringBuilder.GetString("Type '--help | -h' for usage.", TerminalColorType.Red));
-                @out.WriteLine(TerminalStringBuilder.GetString("Type 'exit' to exit application.", TerminalColorType.Red));
-                @out.WriteLine();
                 // if (args.Length > 0)
                 // {
                 //     await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());

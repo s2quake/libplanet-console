@@ -6,12 +6,11 @@ namespace OnBoarding.ConsoleHost;
 [Export]
 sealed class UserCollection : IEnumerable<User>
 {
-    private const int UserCount = 100;
     private readonly List<User> _itemList;
     private User _currentUser;
 
     public UserCollection()
-        : this(UserCount)
+        : this(ApplicationOptions.DefaultUserCount)
     {
     }
 
@@ -27,7 +26,7 @@ sealed class UserCollection : IEnumerable<User>
 
     [ImportingConstructor]
     public UserCollection(ApplicationOptions options)
-            : this(options.UserCount)
+        : this(options.UserCount)
     {
     }
 
@@ -41,7 +40,7 @@ sealed class UserCollection : IEnumerable<User>
         set
         {
             if (_itemList.Contains(value) == false)
-                throw new ArgumentException(nameof(value));
+                throw new ArgumentException($"'{value}' is not included in the collection.", nameof(value));
             _currentUser = value;
         }
     }

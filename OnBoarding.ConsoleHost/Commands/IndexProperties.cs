@@ -5,7 +5,7 @@ namespace OnBoarding.ConsoleHost.Commands;
 static class IndexProperties
 {
     [CommandProperty('s', useName: true, InitValue = -1)]
-    [CommandDescription("Indicates the specified swarm index. If omitted, uses the current index.")]
+    [CommandSummary("Indicates the specified swarm index.")]
     public static int SwarmIndex { get; set; }
 
     [CommandProperty('u', useName: true, InitValue = -1)]

@@ -2,11 +2,9 @@
 using JSSoft.Library.Terminals;
 using OnBoarding.ConsoleHost;
 
-var options = new ApplicationOptions();
-var parser = new CommandParser(options);
 try
 {
-    parser.Parse(args);
+    var options = ApplicationOptions.Parse(args);
     var @out = Console.Out;
     @out.WriteLine(TerminalStringBuilder.GetString("Welcome to jeesu world for OnBoarding.", TerminalColorType.BrightGreen));
     await using var application = new Application(options);

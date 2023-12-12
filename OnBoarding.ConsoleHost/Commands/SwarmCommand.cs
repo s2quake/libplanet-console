@@ -30,8 +30,8 @@ sealed class SwarmCommand : CommandMethodBase
 
         Action GetListAction(bool IsDetailed) => IsDetailed switch
         {
-            false => ListMinimal,
-            true => ListDiagnostic,
+            false => ListNormal,
+            true => ListDetailed,
         };
     }
 
@@ -44,23 +44,7 @@ sealed class SwarmCommand : CommandMethodBase
         Out.WriteLineAsJson(swarmInfo);
     }
 
-    private void ListQuiet()
-    {
-        var tsb = new TerminalStringBuilder();
-        for (var i = 0; i < _swarmHosts.Count; i++)
-        {
-            var item = _swarmHosts[i];
-            tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
-            tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"[{i}] {item}");
-            tsb.Foreground = null;
-            tsb.IsBold = false;
-            tsb.Append(string.Empty);
-        }
-        Out.Write(tsb.ToString());
-    }
-
-    private void ListMinimal()
+    private void ListNormal()
     {
         var tsb = new TerminalStringBuilder();
         for (var i = 0; i < _swarmHosts.Count; i++)
@@ -78,17 +62,7 @@ sealed class SwarmCommand : CommandMethodBase
         Out.Write(tsb.ToString());
     }
 
-    private void ListNormal()
-    {
-
-    }
-
     private void ListDetailed()
-    {
-
-    }
-
-    private void ListDiagnostic()
     {
         var tsb = new TerminalStringBuilder();
         for (var i = 0; i < _swarmHosts.Count; i++)

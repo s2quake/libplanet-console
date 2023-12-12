@@ -35,12 +35,12 @@ sealed class SwarmHost : IAsyncDisposable
         var transport = CreateTransport(privateKey, peer.EndPoint.Port);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = index == 0 ? ImmutableHashSet.Create(peers[1]) : ImmutableHashSet.Create(peers[0])
+            StaticPeers = GetStaticPeers(),
         };
         var consensusTransport = CreateTransport(privateKey, consensusPeer.EndPoint.Port);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = index == 0 ? ImmutableList.Create(consensusPeers[1]) : ImmutableList.Create(consensusPeers[0]),
+            SeedPeers = GetSeedPeers(),
             ConsensusPeers = consensusPeers.ToImmutableList(),
             ConsensusPort = consensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
@@ -51,6 +51,24 @@ sealed class SwarmHost : IAsyncDisposable
         _peer = peer;
         _consensusPeer = consensusPeer;
         _swarm = new Swarm(blockChain, privateKey, transport, swarmOptions, consensusTransport, consensusReactorOption);
+
+        ImmutableHashSet<BoundPeer> GetStaticPeers()
+        {
+            if (index > 0)
+                return ImmutableHashSet.Create(peers[0]);
+            if (peers.Length > 1)
+                return ImmutableHashSet.Create(peers[1]);
+            return ImmutableHashSet<BoundPeer>.Empty;
+        }
+
+        ImmutableList<BoundPeer> GetSeedPeers()
+        {
+            if (index > 0)
+                return ImmutableList.Create(consensusPeers[0]);
+            if (peers.Length > 1)
+                return ImmutableList.Create(consensusPeers[1]);
+            return ImmutableList<BoundPeer>.Empty;
+        }
     }
 
     public string Key => $"{_privateKey.PublicKey}";
