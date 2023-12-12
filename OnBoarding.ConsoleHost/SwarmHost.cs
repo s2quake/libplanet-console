@@ -85,12 +85,12 @@ sealed class SwarmHost : IAsyncDisposable
         var transport = CreateTransport(privateKey, peer.EndPoint.Port);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = ImmutableHashSet.Create(seedPeer),
+            StaticPeers = seedPeer == peer ? ImmutableHashSet<BoundPeer>.Empty : ImmutableHashSet.Create(seedPeer),
         };
         var consensusTransport = CreateTransport(privateKey, consensusPeer.EndPoint.Port);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = ImmutableList.Create(consensusSeedPeer),
+            SeedPeers = consensusSeedPeer == consensusPeer ? ImmutableList<BoundPeer>.Empty : ImmutableList.Create(consensusSeedPeer),
             ConsensusPort = consensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(10),
