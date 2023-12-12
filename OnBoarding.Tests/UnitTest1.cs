@@ -29,6 +29,7 @@ public class UnitTest1
         var stageAction = new StageAction
         {
             StageInfo = stageInfo,
+            UserAddress = user.Address,
         };
         var count = swarmHost.BlockChain.Count;
         swarmHost.StageTransaction(user, new IAction[] { stageAction });

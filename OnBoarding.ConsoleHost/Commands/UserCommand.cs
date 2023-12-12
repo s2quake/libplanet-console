@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using Bencodex.Types;
@@ -80,9 +79,9 @@ sealed class UserCommand : CommandMethodBase
     {
         var blockChain = _application.GetBlockChain(IndexProperties.SwarmIndex);
         var user = _application.GetUser(IndexProperties.UserIndex);
-        var stageBlockData = GetStageRecords(blockChain, user.Address);
+        var stageRecords = GetStageRecords(blockChain, user.Address);
         var sb = new StringBuilder();
-        foreach (var item in stageBlockData)
+        foreach (var item in stageRecords)
         {
             sb.AppendLine($"Block #{item.Block.Index}");
         }
@@ -132,14 +131,6 @@ sealed class UserCommand : CommandMethodBase
         Out.WriteLineAsJson(playerInfo);
     }
 
-    private static bool IsStageInfo(Block block)
-    {
-        return block
-                .Transactions
-                .SelectMany(x => x.Actions)
-                .Any(IsStageAction);
-    }
-
     private static bool IsStageAction(IValue value)
     {
         return value is Dictionary values && values["type_id"] is Text text && text == "stage";
@@ -158,8 +149,8 @@ sealed class UserCommand : CommandMethodBase
     {
         for (var i = 0; i < blockChain.Count; i++)
         {
-            if (GetStageRecord(blockChain[i], userAddress) is { } stageBlockData)
-                yield return stageBlockData;
+            if (GetStageRecord(blockChain[i], userAddress) is { } stageRecord)
+                yield return stageRecord;
         }
     }
 
@@ -204,8 +195,8 @@ sealed class UserCommand : CommandMethodBase
 
         private static byte[] ComputeHash(byte[] bytes)
         {
-            using var hasher = SHA1.Create();
-            return hasher.ComputeHash(bytes);
+            using var sha = SHA1.Create();
+            return sha.ComputeHash(bytes);
         }
     }
 

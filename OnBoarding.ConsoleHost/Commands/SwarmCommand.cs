@@ -69,12 +69,12 @@ sealed class SwarmCommand : CommandMethodBase
         {
             var item = _swarmHosts[i];
             var swarmInfo = new SwarmInfo(item.Target);
+            var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
             tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
             tsb.AppendLine($"[{i}] {item}");
             tsb.Foreground = null;
             tsb.IsBold = false;
-            var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
             tsb.Append(json);
         }
         Out.Write(tsb.ToString());
