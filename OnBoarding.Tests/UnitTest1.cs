@@ -9,11 +9,11 @@ namespace OnBoarding.Tests;
 public class UnitTest1
 {
     [Fact]
-    public async Task TestAsync()
+    public async Task GamePlayTestAsync()
     {
         var random = new Random();
         var users = new UserCollection(count: 10);
-        var validators = new PrivateKey[] { new(), new(), new(), new() };
+        var validators = new PrivateKey[] { new() };
         var swarmHosts = new SwarmHostCollection(validators);
         await swarmHosts.InitializeAsync(cancellationToken: default);
 
@@ -33,10 +33,13 @@ public class UnitTest1
         };
         var count = swarmHost.BlockChain.Count;
         swarmHost.StageTransaction(user, new IAction[] { stageAction });
-        while (swarmHost.BlockChain.Count != count)
+        while (swarmHost.BlockChain.Count == count)
         {
             await Task.Delay(1);
         }
+        var playerInfo2 = user.GetPlayerInfo(swarmHost);
+        Assert.NotEqual(playerInfo.Life, playerInfo2.Life);
+        Assert.NotEqual(0, playerInfo2.Experience);
         await swarmHosts.DisposeAsync();
     }
 }
