@@ -4,6 +4,9 @@
     <ProjectReference Include="..\.Libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\.Libplanet\Libplanet.Net\Libplanet.Net.csproj" />
     <ProjectReference Include="..\.Libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+    <Reference Include="JSSoft.Library.dll">
+      <HintPath>..\Assemblies\JSSoft.Library.dll</HintPath>
+    </Reference>
     <Reference Include="JSSoft.Library.Commands.dll">
       <HintPath>..\Assemblies\JSSoft.Library.Commands.dll</HintPath>
     </Reference>

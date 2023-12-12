@@ -17,13 +17,6 @@ sealed partial class Application : IAsyncDisposable
     private SystemTerminal? _terminal;
     private readonly ApplicationOptions _options = new();
 
-    static Application()
-    {
-        // Log.Logger = new LoggerConfiguration().MinimumLevel.Error()
-        //                                       .WriteTo.Console()
-        //                                       .CreateLogger();
-    }
-
     public Application(ApplicationOptions options)
     {
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
