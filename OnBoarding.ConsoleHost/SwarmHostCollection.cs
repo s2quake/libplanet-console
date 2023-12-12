@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Net;
 using System.Net.Sockets;
@@ -12,9 +11,11 @@ namespace OnBoarding.ConsoleHost;
 [Export]
 sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
-    private bool _isDisposed;
     private SwarmHost _currentSwarmHost;
     private readonly SwarmHost[] _swarmHosts;
+    private readonly BoundPeer _seedPeer;
+    private readonly BoundPeer _consensusSeedPeer;
+    private bool _isDisposed;
 
     [ImportingConstructor]
     public SwarmHostCollection(ApplicationOptions options)
@@ -39,17 +40,18 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
             peers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
             consensusPeers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
         }
-        var indexes = new int[validators.Length];
         for (var i = 0; i < validators.Length; i++)
         {
-            indexes[i] = i;
+            var privateKey = validators[i];
+            var peer = peers[i];
+            var consensusPeer = consensusPeers[i];
+            var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{i}", validatorKeys);
+            swarmHosts[i] = new SwarmHost(privateKey, blockChain, peer, consensusPeer);
         }
-        Parallel.ForEach(indexes, i =>
-        {
-            swarmHosts[i] = new SwarmHost(index: i, validators, peers, consensusPeers);
-        });
         _swarmHosts = swarmHosts;
         _currentSwarmHost = swarmHosts[0];
+        _seedPeer = peers[0];
+        _consensusSeedPeer = consensusPeers[0];
     }
 
     public SwarmHost CurrentSwarmHost
@@ -58,7 +60,7 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         set
         {
             if (_swarmHosts.Contains(value) == false)
-                throw new ArgumentException(nameof(value));
+                throw new ArgumentException($"'{value}' is not included in the collection.", nameof(value));
             _currentSwarmHost = value;
         }
     }
@@ -95,7 +97,7 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(cancellationToken)));
+        await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
     }
 
     private static int[] GetRandomUnusedPorts(int count)

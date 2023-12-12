@@ -54,21 +54,6 @@ static class BlockChainUtility
         return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
     }
 
-    public static void Stage(BlockChain blockChain, User user, IAction[] actions)
-    {
-        var privateKey = user.PrivateKey;
-        var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
-        var values = actions.Select(item => item.PlainValue).ToArray();
-        var transaction = Transaction.Create(
-            nonce: nonce,
-            privateKey: privateKey,
-            genesisHash: genesisBlock.Hash,
-            actions: new TxActionList(values)
-        );
-        blockChain.StageTransaction(transaction);
-    }
-
     public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)
     {
         var block = AppendNew(blockChain, user, validators, actions.Select(item => item.PlainValue).ToArray());

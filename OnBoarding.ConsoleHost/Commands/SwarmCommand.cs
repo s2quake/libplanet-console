@@ -44,6 +44,24 @@ sealed class SwarmCommand : CommandMethodBase
         Out.WriteLineAsJson(swarmInfo);
     }
 
+    [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    public async Task Start(CancellationToken cancellationToken)
+    {
+        var seedPeer = _swarmHosts[0].Peer;
+        var consensusSeedPeer = _swarmHosts[0].ConsensusPeer;
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        await swarmHost.StartAsync(seedPeer, consensusSeedPeer, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    public async Task Stop(CancellationToken cancellationToken)
+    {
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        await swarmHost.StopAsync(cancellationToken);
+    }
+
     private void ListNormal()
     {
         var tsb = new TerminalStringBuilder();

@@ -1,7 +1,6 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using JSSoft.Library.Commands;
-using JSSoft.Library.Commands.Extensions;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
@@ -28,6 +27,7 @@ sealed partial class Application : IAsyncDisposable
     public Application(ApplicationOptions options)
     {
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
+        SynchronizationContext.SetSynchronizationContext(new());
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
@@ -80,6 +80,7 @@ sealed partial class Application : IAsyncDisposable
             throw new InvalidOperationException("Application has already been started.");
 
         await _swarmHosts.InitializeAsync(cancellationToken: default);
+        _swarmHosts.CurrentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
         await PrepareCommandContext();
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
@@ -87,20 +88,16 @@ sealed partial class Application : IAsyncDisposable
 
         async Task PrepareCommandContext()
         {
-            var @out = Console.Out;
-            @out.WriteLine();
-            if (GetService<CommandContext>() is { } commandContext)
-            {
-                @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-                await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
-                @out.WriteLine();
-                await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default, progress: new Progress<ProgressInfo>());
-                @out.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-                // if (args.Length > 0)
-                // {
-                //     await commandContext.ExecuteAsync(args, cancellationToken: default, progress: new Progress<ProgressInfo>());
-                // }
-            }
+            var sw = new StringWriter();
+            var commandContext = GetService<CommandContext>()!;
+            commandContext.Out = sw;
+            sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
+            sw.WriteLine();
+            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default, progress: new Progress<ProgressInfo>());
+            sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+            commandContext.Out = Console.Out;
+            Console.Write(sw.ToString());
         }
     }
 
@@ -111,10 +108,7 @@ sealed partial class Application : IAsyncDisposable
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
-        if (_swarmHosts != null)
-            await _swarmHosts.DisposeAsync();
-        // _swarmHosts = null;
-        // _users = null;
+        await _swarmHosts.DisposeAsync();
         _terminal = null;
         _container.Dispose();
         _isDisposed = true;
@@ -129,5 +123,14 @@ sealed partial class Application : IAsyncDisposable
     public object? GetService(Type serviceType)
     {
         return _container.GetExportedValue<object?>(AttributedModelServices.GetContractName(serviceType));
+    }
+
+    private void SwarmHost_BlockAppended(object? sender, EventArgs e)
+    {
+        if (sender is SwarmHost swarmHost)
+        {
+            var blockChain = swarmHost.BlockChain;
+            Console.WriteLine($"Block Appended: {blockChain.Count}");
+        }
     }
 }
