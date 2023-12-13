@@ -4,6 +4,6 @@ namespace OnBoarding.ConsoleHost;
 
 static class WorldStates
 {
-    public static readonly Address Players
-            = new("1000000000000000000000000000000000000000");
+    public static readonly Address LeaderBoard
+            = new("2000000000000000000000000000000000000001");
 }

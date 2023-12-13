@@ -148,12 +148,21 @@ sealed class UserCommand : CommandMethodBase
             Player = playerInfo,
             Monsters = MonsterInfo.Create(10),
         };
-        var stageAction = new GamePlayAction
+        var gamePlayAction = new GamePlayAction
         {
             StageInfo = stageInfo,
             UserAddress = user.Address,
         };
-        await swarmHost.AddTransactionAsync(user, new IAction[] { stageAction }, cancellationToken);
+        var leaderBoardAction = new LeaderBoardAction
+        {
+            UserAddress = user.Address,
+        };
+        var actions = new IAction[]
+        {
+            gamePlayAction,
+            leaderBoardAction,
+        };
+        await swarmHost.AddTransactionAsync(user, actions, cancellationToken);
         user.Refresh(swarmHost);
         await user.ReplayGameAsync(swarmHost, tick: 10, Out, cancellationToken);
     }
