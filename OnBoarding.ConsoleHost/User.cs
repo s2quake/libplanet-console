@@ -6,10 +6,11 @@ namespace OnBoarding.ConsoleHost;
 
 sealed class User
 {
-    private readonly PrivateKey _privateKey = new();
+    private readonly PrivateKey _privateKey;
 
     public User(string name)
     {
+        _privateKey = PrivateKeyUtility.Create(name);
         Address = _privateKey.ToAddress();
         Name = name;
     }
@@ -26,7 +27,7 @@ sealed class User
 
     public PlayerInfo GetPlayerInfo(SwarmHost swarmHost) => GetPlayerInfo(swarmHost, blockIndex: -1);
 
-    public PlayerInfo GetPlayerInfo(SwarmHost swarmHost, int blockIndex)
+    public PlayerInfo GetPlayerInfo(SwarmHost swarmHost, long blockIndex)
     {
         var blockChain = swarmHost.BlockChain;
         var address = Address;

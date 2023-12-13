@@ -3,6 +3,9 @@ using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
+using System.Text;
+using Libplanet.Common;
 using Libplanet.Crypto;
 using Libplanet.Net;
 
@@ -19,22 +22,28 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     [ImportingConstructor]
     public SwarmHostCollection(ApplicationOptions options)
-        : this(CreatePrivateKeys(options.SwarmCount))
+        : this(CreatePrivateKeys(options.SwarmCount), options.StorePath)
     {
     }
 
     public SwarmHostCollection()
-        : this(CreatePrivateKeys(5))
+        : this(CreatePrivateKeys(4), storePath: string.Empty)
     {
     }
 
     public SwarmHostCollection(PrivateKey[] validators)
+        : this(validators, storePath: string.Empty)
+    {
+    }
+
+    public SwarmHostCollection(PrivateKey[] validators, string storePath)
     {
         var portQueue = new Queue<int>(GetRandomUnusedPorts(validators.Length * 2));
         var validatorKeys = validators.Select(item => item.PublicKey).ToArray();
         var swarmHosts = new SwarmHost[validators.Length];
         var peers = new BoundPeer[validators.Length];
         var consensusPeers = new BoundPeer[validators.Length];
+        var actualStorePath = storePath != string.Empty ? storePath : ApplicationOptions.DefaultStorePath;
         for (var i = 0; i < validators.Length; i++)
         {
             peers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
@@ -45,7 +54,7 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
             var privateKey = validators[i];
             var peer = peers[i];
             var consensusPeer = consensusPeers[i];
-            var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{i}", validatorKeys);
+            var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{i}", validatorKeys, actualStorePath);
             swarmHosts[i] = new SwarmHost(privateKey, blockChain, peer, consensusPeer);
         }
         _swarmHosts = swarmHosts;
@@ -131,7 +140,7 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         var keyList = new List<PrivateKey>(count);
         for (var i = 0; i < count; i++)
         {
-            keyList.Add(new PrivateKey());
+            keyList.Add(PrivateKeyUtility.Create($"Swarm{i}"));
         }
         return keyList.ToArray();
     }

@@ -47,7 +47,7 @@ sealed partial class Application : IAsyncDisposable
         return swarmIndex == -1 ? _swarmHosts.Current.BlockChain : _swarmHosts[swarmIndex].BlockChain;
     }
 
-    public Block GetBlock(int swarmIndex, int blockIndex)
+    public Block GetBlock(int swarmIndex, long blockIndex)
     {
         var blockChain = GetBlockChain(swarmIndex);
         return blockIndex == -1 ? blockChain[blockChain.Count - 1] : blockChain[blockIndex];

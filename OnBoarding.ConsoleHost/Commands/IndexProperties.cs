@@ -14,5 +14,5 @@ static class IndexProperties
 
     [CommandProperty('b', useName: true, InitValue = -1)]
     [CommandSummary("Indicates the index of the block. If omitted, the last block in the blockchain is used.")]
-    public static int BlockIndex { get; set; }
+    public static long BlockIndex { get; set; }
 }

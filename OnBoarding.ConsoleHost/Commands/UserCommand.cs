@@ -51,13 +51,23 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.BlockIndex))]
     public void Status()
     {
         var user = _application.GetUser(IndexProperties.UserIndex);
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        var playerInfo = user.GetPlayerInfo(swarmHost, IndexProperties.BlockIndex);
-        Out.WriteLineAsJson(playerInfo);
+        var blockChain = _application.GetBlockChain(IndexProperties.SwarmIndex);
+        var stageRecords = GetStageRecords(blockChain, user.Address);
+        if (stageRecords.LastOrDefault() is { } stageRecord)
+        {
+            var index = stageRecord.Block.Index;
+            var playerInfo = user.GetPlayerInfo(swarmHost, index);
+            Out.WriteLineAsJson(playerInfo);
+        }
+        else
+        {
+            var playerInfo = PlayerInfo.CreateNew(user.Name, user.Address);
+            Out.WriteLineAsJson(playerInfo);
+        }
     }
 
     [CommandMethod]
@@ -92,7 +102,7 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
-    public void GamePlay()
+    public async Task GamePlayAsync(CancellationToken cancellationToken)
     {
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         var user = _application.GetUser(IndexProperties.UserIndex);
@@ -108,8 +118,9 @@ sealed class UserCommand : CommandMethodBase
             StageInfo = stageInfo,
             UserAddress = user.Address,
         };
-        swarmHost.StageTransaction(user, new IAction[] { stageAction });
-        Out.WriteLine("Game Finished.");
+        await swarmHost.AddTransactionAsync(user, new IAction[] { stageAction }, cancellationToken);
+        IndexProperties.BlockIndex = -1;
+        await GameReplayAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -117,7 +128,7 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.BlockIndex))]
     [CommandMethodProperty(nameof(Tick))]
-    public async Task GameReplay(CancellationToken cancellationToken)
+    public async Task GameReplayAsync(CancellationToken cancellationToken)
     {
         var tick = Tick;
         var block = _application.GetBlock(IndexProperties.SwarmIndex, IndexProperties.BlockIndex);

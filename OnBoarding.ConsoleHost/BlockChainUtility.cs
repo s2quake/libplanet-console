@@ -22,13 +22,16 @@ static class BlockChainUtility
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
-    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys)
+    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, string storePath)
     {
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), ".data", name);
-        var keyValueStore = new RocksDBKeyValueStore(dataPath);
+        var directory = Path.Combine(storePath, name);
+        var dataPath1 = Path.Combine(directory, "state");
+        var dataPath2 = Path.Combine(directory, "store");
+        var isNew = Directory.Exists(directory) == false;
+        var keyValueStore = new RocksDBKeyValueStore(dataPath1);
         var stateStore = new TrieStateStore(keyValueStore);
         var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
-        var store = new MemoryStore();
+        var store = new RocksDBStore(dataPath2);
         var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
         var validatorList = validatorKeys.Select(item => new Validator(item, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);
@@ -51,7 +54,9 @@ static class BlockChainUtility
             getMaxTransactionsPerBlock: _ => int.MaxValue,
             getMaxTransactionsBytes: _ => long.MaxValue);
         var stagePolicy = new VolatileStagePolicy();
-        return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
+        if (isNew == true)
+            return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
+        return new BlockChain(policy, stagePolicy, store, stateStore, genesisBlock, new BlockChainStates(store, stateStore), actionEvaluator);
     }
 
     public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)

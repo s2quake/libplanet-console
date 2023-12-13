@@ -71,6 +71,13 @@ sealed class SwarmHost : IAsyncDisposable
         blockChain.StageTransaction(transaction);
     }
 
+    public async Task AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
+    {
+        var count = BlockChain.Count;
+        StageTransaction(user, actions);
+        await TaskUtility.WaitIfAsync(() => BlockChain.Count <= count, cancellationToken);
+    }
+
     public async Task StartAsync(BoundPeer seedPeer, BoundPeer consensusSeedPeer, CancellationToken cancellationToken)
     {
         if (_isDisposed == true)
@@ -82,12 +89,12 @@ sealed class SwarmHost : IAsyncDisposable
         var peer = _peer;
         var consensusPeer = _consensusPeer;
         var blockChain = _blockChain;
-        var transport = CreateTransport(privateKey, peer.EndPoint.Port);
+        var transport = await CreateTransport(privateKey, peer.EndPoint.Port, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = seedPeer == peer ? ImmutableHashSet<BoundPeer>.Empty : ImmutableHashSet.Create(seedPeer),
         };
-        var consensusTransport = CreateTransport(privateKey, consensusPeer.EndPoint.Port);
+        var consensusTransport = await CreateTransport(privateKey, consensusPeer.EndPoint.Port, cancellationToken);
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = consensusSeedPeer == consensusPeer ? ImmutableList<BoundPeer>.Empty : ImmutableList.Create(consensusSeedPeer),
@@ -141,7 +148,7 @@ sealed class SwarmHost : IAsyncDisposable
 
     public event EventHandler? BlockAppended;
 
-    private static NetMQTransport CreateTransport(PrivateKey privateKey, int port)
+    private static async Task<NetMQTransport> CreateTransport(PrivateKey privateKey, int port, CancellationToken cancellationToken)
     {
         var apv = AppProtocolVersion.Sign(AppProtocolKey, 1);
         var appProtocolVersionOptions = new AppProtocolVersionOptions
@@ -149,9 +156,7 @@ sealed class SwarmHost : IAsyncDisposable
             AppProtocolVersion = apv,
         };
         var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>(), port);
-        var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
-        task.Wait();
-        return task.Result;
+        return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
     private async Task Polling(CancellationToken cancellationToken)

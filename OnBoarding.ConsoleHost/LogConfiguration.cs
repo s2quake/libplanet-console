@@ -11,16 +11,22 @@ sealed class LogConfiguration : IApplicationConfiguration
     public LogConfiguration()
     {
         Log.Logger = new LoggerConfiguration().Filter.ByIncludingOnly(Predicate)
-                                              .MinimumLevel.Error()
                                               .WriteTo.Console()
                                               .CreateLogger();
     }
 
     [ConfigurationProperty]
-    public bool IsLogVisible { get; set; }
+    public bool IsVisible { get; set; }
+
+    // [ConfigurationProperty]
+    // public LogEventLevel Level { get; set; } = LogEventLevel.Error;
 
     private bool Predicate(LogEvent logEvent)
     {
-        return IsLogVisible == true;
+        if (IsVisible == false)
+            return false;
+        // if (logEvent.Level < Level)
+        //     return false;
+        return true;
     }
 }
