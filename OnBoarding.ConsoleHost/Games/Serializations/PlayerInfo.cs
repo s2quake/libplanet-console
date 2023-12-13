@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Bencodex.Types;
 using Libplanet.Crypto;
 using OnBoarding.ConsoleHost.Games.Serializations.Extensions;
@@ -13,18 +14,17 @@ record PlayerInfo : CharacterInfo
     public PlayerInfo(Dictionary values)
         : base(values)
     {
-        Address = new Address(values[nameof(Address)]);
         Life = (Integer)values[nameof(Life)];
         MaxLife = (Integer)values[nameof(MaxLife)];
         Experience = (Integer)values[nameof(Experience)];
         Level = (Integer)values[nameof(Level)];
         Skills = SkillInfo.FromBencodex((List)values[nameof(Skills)]);
+        BlockIndex = (Integer)values[nameof(BlockIndex)];
     }
 
     public PlayerInfo(Player player)
         : base(player)
     {
-        Address = player.Address;
         Life = player.Life;
         MaxLife = player.Life;
         Experience = player.Experience;
@@ -34,20 +34,19 @@ record PlayerInfo : CharacterInfo
 
     public static readonly PlayerInfo Empty = new();
 
-    public Address Address { get; init; }
-
     public long Experience { get; init; }
 
     public long Level { get; init; }
 
     public SkillInfo[] Skills { get; init; } = Array.Empty<SkillInfo>();
 
-    public static PlayerInfo CreateNew(string name, Address address)
+    public long BlockIndex { get; set; }
+
+    public static PlayerInfo CreateNew(string name)
     {
         return new PlayerInfo
         {
             Name = name,
-            Address = address,
             Life = 1000,
             MaxLife = 1000,
             Skills = new SkillInfo[]
@@ -59,10 +58,10 @@ record PlayerInfo : CharacterInfo
 
     public override Dictionary ToBencodex()
     {
-        return base.ToBencodex().Add(nameof(Address), Address.ToByteArray())
-                                .Add(nameof(Experience), Experience)
+        return base.ToBencodex().Add(nameof(Experience), Experience)
                                 .Add(nameof(Level), Level)
-                                .Add(nameof(Skills), Skills.ToBencodex());
+                                .Add(nameof(Skills), Skills.ToBencodex())
+                                .Add(nameof(BlockIndex), BlockIndex);
     }
 
     public static explicit operator PlayerInfo(Player player)

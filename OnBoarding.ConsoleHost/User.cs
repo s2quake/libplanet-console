@@ -1,5 +1,7 @@
 using Bencodex.Types;
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Extensions;
+using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost;
@@ -25,20 +27,69 @@ sealed class User
 
     public Address Address { get; }
 
-    public PlayerInfo GetPlayerInfo(SwarmHost swarmHost) => GetPlayerInfo(swarmHost, blockIndex: -1);
+    public PlayerInfo? PlayerInfo { get; set; }
 
-    public PlayerInfo GetPlayerInfo(SwarmHost swarmHost, long blockIndex)
+    public bool IsOnline { get; private set; }
+
+    public void Login(SwarmHost swarmHost)
+    {
+        if (IsOnline == true)
+            throw new InvalidOperationException($"'{Name}' is already online.");
+
+        PlayerInfo = GetPlayerInfo(swarmHost, Address);
+        IsOnline = true;
+    }
+
+    public void Logout()
+    {
+        if (IsOnline == false)
+            throw new InvalidOperationException($"'{Name}' is not online.");
+
+        PlayerInfo = null;
+        IsOnline = false;
+    }
+
+    public void Refresh(SwarmHost swarmHost)
+    {
+        if (IsOnline == false)
+            throw new InvalidOperationException($"'{Name}' is not online.");
+
+        PlayerInfo = GetPlayerInfo(swarmHost, Address);
+    }
+
+    public Task ReplayGameAsync(SwarmHost swarmHost, int tick, TextWriter @out, CancellationToken cancellationToken)
+    {
+        if (IsOnline == false)
+            throw new InvalidOperationException($"'{Name}' is not online.");
+
+        return ReplayGameAsync(swarmHost, PlayerInfo!.BlockIndex, tick, @out, cancellationToken);
+    }
+
+    public async Task ReplayGameAsync(SwarmHost swarmHost, long blockIndex, int tick, TextWriter @out, CancellationToken cancellationToken)
+    {
+        var address = Address;
+        var block = swarmHost.BlockChain[blockIndex];
+        if (GamePlayRecord.GetGamePlayRecord(block, Address) is not { } gamePlayRecord)
+            throw new ArgumentException($"'Block #{block.Index}' does not have {nameof(StageInfo)}.");
+
+        var stageInfo = gamePlayRecord.GetStageInfo();
+        var seed = gamePlayRecord.GetSeed();
+        var stage = new Stage(stageInfo, seed, @out);
+        await stage.PlayAsync(tick, cancellationToken);
+        var playerInfo = (PlayerInfo)stage.Player;
+        @out.WriteLineAsJson(playerInfo);
+    }
+
+    public static PlayerInfo? GetPlayerInfo(SwarmHost swarmHost, Address address)
     {
         var blockChain = swarmHost.BlockChain;
-        var address = Address;
-        var actualBlockIndex = blockIndex == -1 ? blockChain.Count - 1 : blockIndex;
-        var block = blockChain[actualBlockIndex];
-        var worldState = blockChain.GetWorldState(block.Hash);
+        var worldState = blockChain.GetWorldState();
         var account = worldState.GetAccount(address);
-        if (account.GetState(address) is Dictionary values)
+        if (account.GetState(PlayerStates.PlayerInfo) is Dictionary values)
         {
             return new PlayerInfo(values);
         }
-        return PlayerInfo.CreateNew(Name, address);
+        return null;
     }
+
 }

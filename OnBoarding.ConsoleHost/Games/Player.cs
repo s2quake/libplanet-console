@@ -1,27 +1,22 @@
 using JSSoft.Library.Terminals;
-using Libplanet.Crypto;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
 
 sealed class Player : Character
 {
-    private readonly Address _address;
     private long _experience;
     private long _level;
 
     public Player(PlayerInfo playerInfo)
         : base(playerInfo)
     {
-        _address = playerInfo.Address;
         _experience = playerInfo.Experience;
         _level = playerInfo.Level;
         MaxExperience = GetExperience(_level);
         Skills = playerInfo.Skills.Select(item => SkillFactory.Create(this, item)).ToArray();
         DisplayName = TerminalStringBuilder.GetString($"{Name}", TerminalColorType.BrightBlue);
     }
-
-    public Address Address => _address;
 
     public override ISkill[] Skills { get; }
 

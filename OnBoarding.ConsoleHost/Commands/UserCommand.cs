@@ -1,17 +1,10 @@
 using System.ComponentModel.Composition;
-using System.Security.Cryptography;
 using System.Text;
-using Bencodex.Types;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
 using Libplanet.Action;
-using Libplanet.Blockchain;
-using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-using Libplanet.Types.Tx;
 using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Extensions;
-using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Commands;
@@ -40,7 +33,10 @@ sealed class UserCommand : CommandMethodBase
         for (var i = 0; i < _users.Count; i++)
         {
             var item = _users[i];
-            tsb.Foreground = _users.Current == item ? TerminalColorType.BrightGreen : null;
+            var isCurrent = _users.Current == item;
+            var s = isCurrent == true ? "*" : " ";
+            tsb.Append($"{s} ");
+            tsb.Foreground = item.IsOnline == true ? (isCurrent == true ? TerminalColorType.BrightGreen : null) : TerminalColorType.BrightBlack;
             tsb.AppendLine($"[{i}]-{item.Address}");
             tsb.Foreground = null;
             tsb.Append(string.Empty);
@@ -49,25 +45,35 @@ sealed class UserCommand : CommandMethodBase
     }
 
     [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
+    public void Login()
+    {
+        var user = _application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = _application.GetSwarmHost(-1);
+        user.Login(swarmHost);
+        Out.WriteLine($"User '{user.Address}' is logged in.");
+    }
+
+    [CommandMethod]
+    public void Logout()
+    {
+        var user = _application.GetUser(IndexProperties.UserIndex);
+        user.Logout();
+        Out.WriteLine($"User '{user.Address}' is logged out.");
+    }
+
+    [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Status()
     {
         var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        var blockChain = _application.GetBlockChain(IndexProperties.SwarmIndex);
-        var stageRecords = GetStageRecords(blockChain, user.Address);
-        if (stageRecords.LastOrDefault() is { } stageRecord)
-        {
-            var index = stageRecord.Block.Index;
-            var playerInfo = user.GetPlayerInfo(swarmHost, index);
-            Out.WriteLineAsJson(playerInfo);
-        }
-        else
-        {
-            var playerInfo = PlayerInfo.CreateNew(user.Name, user.Address);
-            Out.WriteLineAsJson(playerInfo);
-        }
+        if (user.IsOnline == false)
+            throw new InvalidOperationException($"User '{user.Address}' is not online.");
+        if (user.PlayerInfo == null)
+            throw new InvalidOperationException($"User '{user.Address}' does not have character.");
+
+        Out.WriteLineAsJson(user.PlayerInfo);
     }
 
     [CommandMethod]
@@ -86,11 +92,36 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
+    public async Task CharacterCreateAsync(CancellationToken cancellationToken)
+    {
+        var user = _application.GetUser(IndexProperties.UserIndex);
+        if (user.IsOnline == false)
+            throw new InvalidOperationException($"'{Name}' is not online.");
+        if (user.PlayerInfo != null)
+            throw new InvalidOperationException($"The character of user '{user.Address}' has already been created.");
+
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var characterCreationAction = new CharacterCreationAction()
+        {
+            UserAddress = user.Address,
+            PlayerInfo = PlayerInfo.CreateNew(user.Name),
+        };
+        await swarmHost.AddTransactionAsync(user, new IAction[] { characterCreationAction }, cancellationToken);
+        user.Refresh(swarmHost);
+        await Out.WriteLineAsync("Character has been created.");
+    }
+
+    [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void GameHistory()
     {
         var blockChain = _application.GetBlockChain(IndexProperties.SwarmIndex);
         var user = _application.GetUser(IndexProperties.UserIndex);
-        var stageRecords = GetStageRecords(blockChain, user.Address);
+        if (user.IsOnline == false)
+            throw new InvalidOperationException($"'{Name}' is not online.");
+
+        var stageRecords = GamePlayRecord.GetGamePlayRecords(blockChain, user.Address);
         var sb = new StringBuilder();
         foreach (var item in stageRecords)
         {
@@ -104,23 +135,27 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public async Task GamePlayAsync(CancellationToken cancellationToken)
     {
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         var user = _application.GetUser(IndexProperties.UserIndex);
-        var playerInfo = user.GetPlayerInfo(swarmHost);
+        if (user.IsOnline == false)
+            throw new InvalidOperationException($"'{Name}' is not online.");
+        if (user.PlayerInfo == null)
+            throw new InvalidOperationException($"User '{user.Address}' does not have character.");
+
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var playerInfo = user.PlayerInfo;
         var stageInfo = new StageInfo
         {
-            Address = new(),
             Player = playerInfo,
             Monsters = MonsterInfo.Create(10),
         };
-        var stageAction = new StageAction
+        var stageAction = new GamePlayAction
         {
             StageInfo = stageInfo,
             UserAddress = user.Address,
         };
         await swarmHost.AddTransactionAsync(user, new IAction[] { stageAction }, cancellationToken);
-        IndexProperties.BlockIndex = -1;
-        await GameReplayAsync(cancellationToken);
+        user.Refresh(swarmHost);
+        await user.ReplayGameAsync(swarmHost, tick: 10, Out, cancellationToken);
     }
 
     [CommandMethod]
@@ -131,86 +166,9 @@ sealed class UserCommand : CommandMethodBase
     public async Task GameReplayAsync(CancellationToken cancellationToken)
     {
         var tick = Tick;
-        var block = _application.GetBlock(IndexProperties.SwarmIndex, IndexProperties.BlockIndex);
+        var blockIndex = IndexProperties.BlockIndex;
         var user = _application.GetUser(IndexProperties.UserIndex);
-        if (GetStageRecord(block, user.Address) is not { } stageBlockData)
-            throw new ArgumentException($"'Block #{block.Index}' does not have {nameof(StageInfo)}.");
-        var stageInfo = stageBlockData.GetStageInfo();
-        var seed = stageBlockData.GetSeed();
-        var stage = new Stage(stageInfo, seed, Out);
-        await stage.PlayAsync(tick, cancellationToken);
-        var playerInfo = (PlayerInfo)stage.Player;
-        Out.WriteLineAsJson(playerInfo);
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        await user.ReplayGameAsync(swarmHost, blockIndex, tick, Out, cancellationToken);
     }
-
-    private static bool IsStageAction(IValue value)
-    {
-        return value is Dictionary values && values["type_id"] is Text text && text == "stage";
-    }
-
-    private static Address GetUserAddress(IValue value)
-    {
-        if (value is Dictionary values && values[nameof(StageAction.UserAddress)] is { } data)
-        {
-            return new Address(data);
-        }
-        return new Address();
-    }
-
-    private static IEnumerable<StageRecord> GetStageRecords(BlockChain blockChain, Address userAddress)
-    {
-        for (var i = 0; i < blockChain.Count; i++)
-        {
-            if (GetStageRecord(blockChain[i], userAddress) is { } stageRecord)
-                yield return stageRecord;
-        }
-    }
-
-    private static StageRecord? GetStageRecord(Block block, Address userAddress)
-    {
-        for (var i = 0; i < block.Transactions.Count; i++)
-        {
-            var transaction = block.Transactions[i];
-            for (var j = 0; j < transaction.Actions.Count; j++)
-            {
-                var action = transaction.Actions[j];
-                if (IsStageAction(action) == true && GetUserAddress(action) == userAddress)
-                {
-                    return new(block, transaction, action, j);
-                }
-            }
-        }
-        return null;
-    }
-
-    #region StageRecord
-
-    record class StageRecord(Block Block, ITransaction Transaction, IValue Action, int Offset)
-    {
-        public int GetSeed()
-        {
-            var block = Block;
-            var transaction = Transaction;
-            var offset = Offset;
-            var preEvaluationHashBytes = block.PreEvaluationHash.ToByteArray();
-            var signature = transaction.Signature;
-            var hashedSignature = ComputeHash(signature);
-            return ActionEvaluator.GenerateRandomSeed(preEvaluationHashBytes, hashedSignature, signature, offset);
-        }
-
-        public StageInfo GetStageInfo()
-        {
-            if (Action is Dictionary values)
-                return new StageInfo((Dictionary)values[nameof(StageAction.StageInfo)]);
-            throw new NotImplementedException();
-        }
-
-        private static byte[] ComputeHash(byte[] bytes)
-        {
-            using var sha = SHA1.Create();
-            return sha.ComputeHash(bytes);
-        }
-    }
-
-    #endregion
 }

@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using JSSoft.Library.Commands;
+using JSSoft.Library.Commands.Extensions;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
@@ -88,9 +89,9 @@ sealed partial class Application : IAsyncDisposable
             var commandContext = GetService<CommandContext>()!;
             commandContext.Out = sw;
             sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
+            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default);
             sw.WriteLine();
-            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default, progress: new Progress<ProgressInfo>());
+            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default);
             sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
             commandContext.Out = Console.Out;
             Console.Write(sw.ToString());
