@@ -2,8 +2,6 @@ using System.Collections;
 using Libplanet.Action.State;
 using List = Bencodex.Types.List;
 using Dictionary = Bencodex.Types.Dictionary;
-using System.Runtime.CompilerServices;
-using Libplanet.Crypto;
 
 namespace OnBoarding.ConsoleHost.Games.Serializations;
 
@@ -13,15 +11,19 @@ sealed class RankInfoCollection : IEnumerable<RankInfo>
 
     public RankInfoCollection(IAccount account)
     {
-        if (account.GetState(WorldStates.LeaderBoard) is not List list)
-            throw new ArgumentException($"Account '{account}' does not have leader board.", nameof(account));
-
-        var itemList = new List<RankInfo>(list.Count);
-        foreach (var item in list)
+        if (account.GetState(WorldStates.LeaderBoard) is List list)
         {
-            itemList.Add(new RankInfo((Dictionary)item));
+            var itemList = new List<RankInfo>(list.Count);
+            foreach (var item in list)
+            {
+                itemList.Add(new RankInfo((Dictionary)item));
+            }
+            _itemList = itemList;
         }
-        _itemList = itemList;
+        else
+        {
+            _itemList = new();
+        }
     }
 
     public int Count => _itemList.Count;
