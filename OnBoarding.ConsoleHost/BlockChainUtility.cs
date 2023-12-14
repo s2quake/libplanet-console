@@ -9,6 +9,7 @@ using Libplanet.Blockchain.Policies;
 using Libplanet.Crypto;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
+using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
@@ -24,11 +25,27 @@ static class BlockChainUtility
 
     public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys)
     {
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), ".data", name);
-        var keyValueStore = new RocksDBKeyValueStore(dataPath);
+        var keyValueStore = new MemoryKeyValueStore();
         var stateStore = new TrieStateStore(keyValueStore);
-        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var store = new MemoryStore();
+        return CreateBlockChain(name, validatorKeys, store, stateStore, isNew: true);
+    }
+
+    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, string storePath)
+    {
+        var directory = Path.Combine(storePath, name);
+        var dataPath1 = Path.Combine(directory, "state");
+        var dataPath2 = Path.Combine(directory, "store");
+        var isNew = Directory.Exists(directory) == false;
+        var keyValueStore = new RocksDBKeyValueStore(dataPath1);
+        var stateStore = new TrieStateStore(keyValueStore);
+        var store = new RocksDBStore(dataPath2);
+        return CreateBlockChain(name, validatorKeys, store, stateStore, isNew);
+    }
+
+    private static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, IStore store, IStateStore stateStore, bool isNew)
+    {
+        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
         var validatorList = validatorKeys.Select(item => new Validator(item, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);
@@ -51,7 +68,9 @@ static class BlockChainUtility
             getMaxTransactionsPerBlock: _ => int.MaxValue,
             getMaxTransactionsBytes: _ => long.MaxValue);
         var stagePolicy = new VolatileStagePolicy();
-        return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
+        if (isNew == true)
+            return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
+        return new BlockChain(policy, stagePolicy, store, stateStore, genesisBlock, new BlockChainStates(store, stateStore), actionEvaluator);
     }
 
     public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)

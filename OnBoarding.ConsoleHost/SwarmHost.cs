@@ -55,7 +55,7 @@ sealed class SwarmHost : IAsyncDisposable
         return $"{_peer.EndPoint}";
     }
 
-    public void StageTransaction(User user, IAction[] actions)
+    public TxId StageTransaction(User user, IAction[] actions)
     {
         var blockChain = BlockChain;
         var privateKey = user.PrivateKey;
@@ -69,6 +69,19 @@ sealed class SwarmHost : IAsyncDisposable
             actions: new TxActionList(values)
         );
         blockChain.StageTransaction(transaction);
+        return transaction.Id;
+    }
+
+    public async Task AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
+    {
+        var blockChain = BlockChain;
+        var count = blockChain.Count;
+        var id = StageTransaction(user, actions);
+        await TaskUtility.WaitIfAsync(() => blockChain.Count <= count, cancellationToken);
+        // var block = blockChain.Tip;
+        // var execution = blockChain.GetTxExecution(block.Hash, id);
+        // if (execution.Fail == true)
+        //     throw new InvalidOperationException("Transaction Failed.");
     }
 
     public async Task StartAsync(BoundPeer seedPeer, BoundPeer consensusSeedPeer, CancellationToken cancellationToken)
@@ -82,12 +95,12 @@ sealed class SwarmHost : IAsyncDisposable
         var peer = _peer;
         var consensusPeer = _consensusPeer;
         var blockChain = _blockChain;
-        var transport = CreateTransport(privateKey, peer.EndPoint.Port);
+        var transport = await CreateTransport(privateKey, peer.EndPoint.Port, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = seedPeer == peer ? ImmutableHashSet<BoundPeer>.Empty : ImmutableHashSet.Create(seedPeer),
         };
-        var consensusTransport = CreateTransport(privateKey, consensusPeer.EndPoint.Port);
+        var consensusTransport = await CreateTransport(privateKey, consensusPeer.EndPoint.Port, cancellationToken);
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = consensusSeedPeer == consensusPeer ? ImmutableList<BoundPeer>.Empty : ImmutableList.Create(consensusSeedPeer),
@@ -141,7 +154,7 @@ sealed class SwarmHost : IAsyncDisposable
 
     public event EventHandler? BlockAppended;
 
-    private static NetMQTransport CreateTransport(PrivateKey privateKey, int port)
+    private static async Task<NetMQTransport> CreateTransport(PrivateKey privateKey, int port, CancellationToken cancellationToken)
     {
         var apv = AppProtocolVersion.Sign(AppProtocolKey, 1);
         var appProtocolVersionOptions = new AppProtocolVersionOptions
@@ -149,9 +162,7 @@ sealed class SwarmHost : IAsyncDisposable
             AppProtocolVersion = apv,
         };
         var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>(), port);
-        var task = NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
-        task.Wait();
-        return task.Result;
+        return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
     private async Task Polling(CancellationToken cancellationToken)

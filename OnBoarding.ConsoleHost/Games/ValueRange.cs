@@ -5,8 +5,6 @@ namespace OnBoarding.ConsoleHost.Games;
 
 readonly struct ValueRange : IEquatable<ValueRange>
 {
-    private static readonly Random Random = new();
-
     public ValueRange(long begin, long length)
     {
         Begin = begin;

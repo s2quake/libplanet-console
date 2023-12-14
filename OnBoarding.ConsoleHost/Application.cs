@@ -1,28 +1,23 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using JSSoft.Library.Commands;
+using JSSoft.Library.Commands.Extensions;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed partial class Application : IAsyncDisposable
+sealed partial class Application : IAsyncDisposable, IServiceProvider
 {
     private readonly CompositionContainer _container;
     private readonly SwarmHostCollection _swarmHosts;
     private readonly UserCollection _users;
+    private readonly IAsyncDisposable[] _asyncDisposables;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
     private readonly ApplicationOptions _options = new();
-
-    static Application()
-    {
-        // Log.Logger = new LoggerConfiguration().MinimumLevel.Error()
-        //                                       .WriteTo.Console()
-        //                                       .CreateLogger();
-    }
+    private SwarmHost _currentSwarmHost;
 
     public Application(ApplicationOptions options)
     {
@@ -31,26 +26,31 @@ sealed partial class Application : IAsyncDisposable
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
+        _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_options);
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         _users = _container.GetExportedValue<UserCollection>()!;
+        _asyncDisposables = _container.GetExportedValues<IAsyncDisposable>().ToArray();
+        _currentSwarmHost = _swarmHosts.Current;
+        _currentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
+        _swarmHosts.CurrentChanged += SwarmHosts_CurrentChanged;
     }
 
     public User GetUser(int userIndex)
     {
         if (_users == null)
             throw new InvalidOperationException();
-        return userIndex == -1 ? _users.CurrentUser : _users[userIndex];
+        return userIndex == -1 ? _users.Current : _users[userIndex];
     }
 
     public BlockChain GetBlockChain(int swarmIndex)
     {
         if (_swarmHosts == null)
             throw new InvalidOperationException();
-        return swarmIndex == -1 ? _swarmHosts.CurrentSwarmHost.BlockChain : _swarmHosts[swarmIndex].BlockChain;
+        return swarmIndex == -1 ? _swarmHosts.Current.BlockChain : _swarmHosts[swarmIndex].BlockChain;
     }
 
-    public Block GetBlock(int swarmIndex, int blockIndex)
+    public Block GetBlock(int swarmIndex, long blockIndex)
     {
         var blockChain = GetBlockChain(swarmIndex);
         return blockIndex == -1 ? blockChain[blockChain.Count - 1] : blockChain[blockIndex];
@@ -60,7 +60,7 @@ sealed partial class Application : IAsyncDisposable
     {
         if (_swarmHosts == null)
             throw new InvalidOperationException();
-        return swarmIndex == -1 ? _swarmHosts.CurrentSwarmHost : _swarmHosts[swarmIndex];
+        return swarmIndex == -1 ? _swarmHosts.Current : _swarmHosts[swarmIndex];
     }
 
     public void Cancel()
@@ -80,7 +80,6 @@ sealed partial class Application : IAsyncDisposable
             throw new InvalidOperationException("Application has already been started.");
 
         await _swarmHosts.InitializeAsync(cancellationToken: default);
-        _swarmHosts.CurrentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
         await PrepareCommandContext();
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
@@ -92,9 +91,9 @@ sealed partial class Application : IAsyncDisposable
             var commandContext = GetService<CommandContext>()!;
             commandContext.Out = sw;
             sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default, progress: new Progress<ProgressInfo>());
+            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default);
             sw.WriteLine();
-            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default, progress: new Progress<ProgressInfo>());
+            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default);
             sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
             commandContext.Out = Console.Out;
             Console.Write(sw.ToString());
@@ -106,11 +105,16 @@ sealed partial class Application : IAsyncDisposable
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
 
+        _swarmHosts.CurrentChanged -= SwarmHosts_CurrentChanged;
+        _currentSwarmHost.BlockAppended -= SwarmHost_BlockAppended;
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
-        await _swarmHosts.DisposeAsync();
-        _terminal = null;
         _container.Dispose();
+        for (var i = _asyncDisposables.Length - 1; i >= 0; i--)
+        {
+            await _asyncDisposables[i].DisposeAsync();
+        }
+        _terminal = null;
         _isDisposed = true;
         GC.SuppressFinalize(this);
     }
@@ -130,7 +134,15 @@ sealed partial class Application : IAsyncDisposable
         if (sender is SwarmHost swarmHost)
         {
             var blockChain = swarmHost.BlockChain;
-            Console.WriteLine($"Block Appended: {blockChain.Count}");
+            Console.WriteLine(TerminalStringBuilder.GetString($"Block Appended: {blockChain.Count}", TerminalColorType.BrightCyan));
         }
+    }
+
+    private void SwarmHosts_CurrentChanged(object? sender, EventArgs e)
+    {
+        _currentSwarmHost.BlockAppended -= SwarmHost_BlockAppended;
+        _currentSwarmHost = _swarmHosts.Current;
+        _currentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
+        Console.WriteLine($"Current Swarm: {_currentSwarmHost}");
     }
 }

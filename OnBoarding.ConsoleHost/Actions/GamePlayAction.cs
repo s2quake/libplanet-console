@@ -7,8 +7,8 @@ using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Actions;
 
-[ActionType("stage")]
-sealed class StageAction : ActionBase
+[ActionType("game-play")]
+sealed class GamePlayAction : ActionBase
 {
     public StageInfo StageInfo { get; set; } = StageInfo.Empty;
 
@@ -29,14 +29,20 @@ sealed class StageAction : ActionBase
     protected override IWorld OnExecute(IActionContext context)
     {
         var stageInfo = StageInfo;
-        var playerAddress = stageInfo.Player.Address;
+        var userAddress = UserAddress;
         var previousState = context.PreviousState;
-        var stageAccount = previousState.GetAccount(playerAddress);
+        var account = previousState.GetAccount(userAddress);
         var seed = context.RandomSeed;
+        var playerInfo = PlayStage(stageInfo, seed);
+        playerInfo.BlockIndex = context.BlockIndex;
+        account = account.SetState(PlayerStates.PlayerInfo, playerInfo.ToBencodex());
+        return previousState.SetAccount(userAddress, account);
+    }
+
+    private static PlayerInfo PlayStage(StageInfo stageInfo, int seed)
+    {
         var stage = new Stage(stageInfo, seed);
         stage.Play();
-        var playerInfo = (PlayerInfo)stage.Player;
-        stageAccount = stageAccount.SetState(playerAddress, playerInfo.ToBencodex());
-        return previousState.SetAccount(playerAddress, stageAccount);
+        return (PlayerInfo)stage.Player;
     }
 }
