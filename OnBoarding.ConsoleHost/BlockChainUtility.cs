@@ -9,6 +9,7 @@ using Libplanet.Blockchain.Policies;
 using Libplanet.Crypto;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
+using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
@@ -22,6 +23,14 @@ static class BlockChainUtility
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
+    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys)
+    {
+        var keyValueStore = new MemoryKeyValueStore();
+        var stateStore = new TrieStateStore(keyValueStore);
+        var store = new MemoryStore();
+        return CreateBlockChain(name, validatorKeys, store, stateStore, isNew: true);
+    }
+
     public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, string storePath)
     {
         var directory = Path.Combine(storePath, name);
@@ -30,8 +39,13 @@ static class BlockChainUtility
         var isNew = Directory.Exists(directory) == false;
         var keyValueStore = new RocksDBKeyValueStore(dataPath1);
         var stateStore = new TrieStateStore(keyValueStore);
-        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var store = new RocksDBStore(dataPath2);
+        return CreateBlockChain(name, validatorKeys, store, stateStore, isNew);
+    }
+
+    private static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, IStore store, IStateStore stateStore, bool isNew)
+    {
+        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
         var validatorList = validatorKeys.Select(item => new Validator(item, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);

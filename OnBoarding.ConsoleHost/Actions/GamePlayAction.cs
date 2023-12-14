@@ -33,11 +33,16 @@ sealed class GamePlayAction : ActionBase
         var previousState = context.PreviousState;
         var account = previousState.GetAccount(userAddress);
         var seed = context.RandomSeed;
-        var stage = new Stage(stageInfo, seed);
-        stage.Play();
-        var playerInfo = (PlayerInfo)stage.Player;
+        var playerInfo = PlayStage(stageInfo, seed);
         playerInfo.BlockIndex = context.BlockIndex;
         account = account.SetState(PlayerStates.PlayerInfo, playerInfo.ToBencodex());
         return previousState.SetAccount(userAddress, account);
+    }
+
+    private static PlayerInfo PlayStage(StageInfo stageInfo, int seed)
+    {
+        var stage = new Stage(stageInfo, seed);
+        stage.Play();
+        return (PlayerInfo)stage.Player;
     }
 }

@@ -55,7 +55,7 @@ sealed class SwarmHost : IAsyncDisposable
         return $"{_peer.EndPoint}";
     }
 
-    public void StageTransaction(User user, IAction[] actions)
+    public TxId StageTransaction(User user, IAction[] actions)
     {
         var blockChain = BlockChain;
         var privateKey = user.PrivateKey;
@@ -69,13 +69,19 @@ sealed class SwarmHost : IAsyncDisposable
             actions: new TxActionList(values)
         );
         blockChain.StageTransaction(transaction);
+        return transaction.Id;
     }
 
     public async Task AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
     {
-        var count = BlockChain.Count;
-        StageTransaction(user, actions);
-        await TaskUtility.WaitIfAsync(() => BlockChain.Count <= count, cancellationToken);
+        var blockChain = BlockChain;
+        var count = blockChain.Count;
+        var id = StageTransaction(user, actions);
+        await TaskUtility.WaitIfAsync(() => blockChain.Count <= count, cancellationToken);
+        // var block = blockChain.Tip;
+        // var execution = blockChain.GetTxExecution(block.Hash, id);
+        // if (execution.Fail == true)
+        //     throw new InvalidOperationException("Transaction Failed.");
     }
 
     public async Task StartAsync(BoundPeer seedPeer, BoundPeer consensusSeedPeer, CancellationToken cancellationToken)

@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using JSSoft.Library.Commands;
 using JSSoft.Library.Commands.Extensions;
 using JSSoft.Library.Terminals;
 using Libplanet.Blockchain;
@@ -8,11 +7,12 @@ using Libplanet.Types.Blocks;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed partial class Application : IAsyncDisposable
+sealed partial class Application : IAsyncDisposable, IServiceProvider
 {
     private readonly CompositionContainer _container;
     private readonly SwarmHostCollection _swarmHosts;
     private readonly UserCollection _users;
+    private readonly IAsyncDisposable[] _asyncDisposables;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
@@ -26,9 +26,11 @@ sealed partial class Application : IAsyncDisposable
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
+        _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_options);
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         _users = _container.GetExportedValue<UserCollection>()!;
+        _asyncDisposables = _container.GetExportedValues<IAsyncDisposable>().ToArray();
         _currentSwarmHost = _swarmHosts.Current;
         _currentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
         _swarmHosts.CurrentChanged += SwarmHosts_CurrentChanged;
@@ -107,9 +109,12 @@ sealed partial class Application : IAsyncDisposable
         _currentSwarmHost.BlockAppended -= SwarmHost_BlockAppended;
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
-        await _swarmHosts.DisposeAsync();
-        _terminal = null;
         _container.Dispose();
+        for (var i = _asyncDisposables.Length - 1; i >= 0; i--)
+        {
+            await _asyncDisposables[i].DisposeAsync();
+        }
+        _terminal = null;
         _isDisposed = true;
         GC.SuppressFinalize(this);
     }

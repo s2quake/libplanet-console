@@ -1,5 +1,8 @@
 using Bencodex.Types;
+using Libplanet.Action;
 using Libplanet.Crypto;
+using Nito.AsyncEx.Interop;
+using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
@@ -38,6 +41,7 @@ sealed class User
 
         PlayerInfo = GetPlayerInfo(swarmHost, Address);
         IsOnline = true;
+        Console.WriteLine($"User '{Address}' is logged in.");
     }
 
     public void Logout()
@@ -47,6 +51,7 @@ sealed class User
 
         PlayerInfo = null;
         IsOnline = false;
+        Console.WriteLine($"User '{Address}' is logged out.");
     }
 
     public void Refresh(SwarmHost swarmHost)
@@ -65,6 +70,34 @@ sealed class User
         return ReplayGameAsync(swarmHost, PlayerInfo!.BlockIndex, tick, @out, cancellationToken);
     }
 
+    public async Task PlayGameAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
+    {
+        var playerInfo = PlayerInfo!;
+        var monsterCount = RandomUtility.GetNext(8, 12);
+        var stageInfo = new StageInfo
+        {
+            Player = playerInfo,
+            Monsters = MonsterInfo.Create(monsterCount),
+        };
+        var gamePlayAction = new GamePlayAction
+        {
+            StageInfo = stageInfo,
+            UserAddress = Address,
+        };
+        var leaderBoardAction = new LeaderBoardAction
+        {
+            UserAddress = Address,
+        };
+        var actions = new IAction[]
+        {
+            gamePlayAction,
+            leaderBoardAction,
+        };
+        await swarmHost.AddTransactionAsync(this, actions, cancellationToken);
+        Refresh(swarmHost);
+        Console.WriteLine($"User '{Address}' played the game.");
+    }
+
     public async Task ReplayGameAsync(SwarmHost swarmHost, long blockIndex, int tick, TextWriter @out, CancellationToken cancellationToken)
     {
         var address = Address;
@@ -80,6 +113,18 @@ sealed class User
         @out.WriteLineAsJson(playerInfo);
     }
 
+    public async Task CreateCharacter(SwarmHost swarmHost, CancellationToken cancellationToken)
+    {
+        var characterCreationAction = new CharacterCreationAction()
+        {
+            UserAddress = Address,
+            PlayerInfo = PlayerInfo.CreateNew(Name),
+        };
+        await swarmHost.AddTransactionAsync(this, new IAction[] { characterCreationAction }, cancellationToken);
+        Refresh(swarmHost);
+        Console.WriteLine($"User '{Address}' created the character.");
+    }
+
     public static PlayerInfo? GetPlayerInfo(SwarmHost swarmHost, Address address)
     {
         var blockChain = swarmHost.BlockChain;
@@ -91,5 +136,4 @@ sealed class User
         }
         return null;
     }
-
 }

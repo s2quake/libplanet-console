@@ -10,6 +10,7 @@ namespace OnBoarding.ConsoleHost.Actions;
 [ActionType("leader-board")]
 sealed class LeaderBoardAction : ActionBase
 {
+    public const int MaxLength = 5;
     public Address UserAddress { get; set; }
 
     protected override Dictionary OnInitialize(Dictionary values)
@@ -39,10 +40,22 @@ sealed class LeaderBoardAction : ActionBase
             Level = playerInfo.Level,
             Experience = playerInfo.Experience,
         };
-        var rankInfoList = GetList(worldAccount);
+        var rankInfos = new RankInfoCollection(worldAccount)
+        {
+            rankInfo,
+        };
+        rankInfos.Slice(MaxLength);
+        worldAccount = worldAccount.SetState(WorldStates.LeaderBoard, rankInfos.ToBencodex());
+        account = account.SetState(PlayerStates.PlayerInfo, playerInfo.ToBencodex());
+        previousState = previousState.SetAccount(WorldAccounts.Default, worldAccount);
+        return previousState.SetAccount(userAddress, account);
+    }
+
+    private static void Sort(Address address, RankInfo rankInfo, List<RankInfo> rankInfoList)
+    {
         for (var i = 0; i < rankInfoList.Count; i++)
         {
-            if (rankInfoList[i].Address == userAddress)
+            if (rankInfoList[i].Address == address)
             {
                 rankInfoList.RemoveAt(i);
                 break;
@@ -50,20 +63,10 @@ sealed class LeaderBoardAction : ActionBase
         }
         rankInfoList.Add(rankInfo);
         rankInfoList.Sort();
-        while (rankInfoList.Count > 10)
+        while (rankInfoList.Count > MaxLength)
         {
             rankInfoList.RemoveAt(rankInfoList.Count - 1);
         }
-        var d = List.Empty;
-        foreach (var item in rankInfoList)
-        {
-            d = d.Add(item.ToBencodex());
-        }
-
-        worldAccount = worldAccount.SetState(WorldStates.LeaderBoard, d);
-        account = account.SetState(PlayerStates.PlayerInfo, playerInfo.ToBencodex());
-        previousState = previousState.SetAccount(WorldAccounts.Default, worldAccount);
-        return previousState.SetAccount(userAddress, account);
     }
 
     private static List<RankInfo> GetList(IAccount account)

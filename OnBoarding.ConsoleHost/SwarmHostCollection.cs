@@ -3,15 +3,14 @@ using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
-using Libplanet.Common;
+using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
 
 namespace OnBoarding.ConsoleHost;
 
 [Export]
+[Export(typeof(IAsyncDisposable))]
 sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 {
     private SwarmHost _current;
@@ -43,7 +42,6 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         var swarmHosts = new SwarmHost[validators.Length];
         var peers = new BoundPeer[validators.Length];
         var consensusPeers = new BoundPeer[validators.Length];
-        var actualStorePath = storePath != string.Empty ? storePath : ApplicationOptions.DefaultStorePath;
         for (var i = 0; i < validators.Length; i++)
         {
             peers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
@@ -54,13 +52,20 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
             var privateKey = validators[i];
             var peer = peers[i];
             var consensusPeer = consensusPeers[i];
-            var blockChain = BlockChainUtility.CreateBlockChain($"Swarm{i}", validatorKeys, actualStorePath);
+            var blockChain = CreateBlockChain($"Swarm{i}");
             swarmHosts[i] = new SwarmHost(privateKey, blockChain, peer, consensusPeer);
         }
         _swarmHosts = swarmHosts;
         _current = swarmHosts[0];
         _seedPeer = peers[0];
         _consensusSeedPeer = consensusPeers[0];
+
+        BlockChain CreateBlockChain(string name)
+        {
+            if (storePath == string.Empty)
+                return BlockChainUtility.CreateBlockChain(name, validatorKeys);
+            return BlockChainUtility.CreateBlockChain(name, validatorKeys, storePath);
+        }
     }
 
     public SwarmHost Current

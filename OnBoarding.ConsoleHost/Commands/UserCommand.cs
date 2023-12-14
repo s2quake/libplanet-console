@@ -51,7 +51,6 @@ sealed class UserCommand : CommandMethodBase
         var user = _application.GetUser(IndexProperties.UserIndex);
         var swarmHost = _application.GetSwarmHost(-1);
         user.Login(swarmHost);
-        Out.WriteLine($"User '{user.Address}' is logged in.");
     }
 
     [CommandMethod]
@@ -59,7 +58,6 @@ sealed class UserCommand : CommandMethodBase
     {
         var user = _application.GetUser(IndexProperties.UserIndex);
         user.Logout();
-        Out.WriteLine($"User '{user.Address}' is logged out.");
     }
 
     [CommandMethod]
@@ -101,14 +99,7 @@ sealed class UserCommand : CommandMethodBase
             throw new InvalidOperationException($"The character of user '{user.Address}' has already been created.");
 
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        var characterCreationAction = new CharacterCreationAction()
-        {
-            UserAddress = user.Address,
-            PlayerInfo = PlayerInfo.CreateNew(user.Name),
-        };
-        await swarmHost.AddTransactionAsync(user, new IAction[] { characterCreationAction }, cancellationToken);
-        user.Refresh(swarmHost);
-        await Out.WriteLineAsync("Character has been created.");
+        await user.CreateCharacter(swarmHost, cancellationToken);
     }
 
     [CommandMethod]
