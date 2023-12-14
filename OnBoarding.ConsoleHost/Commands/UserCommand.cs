@@ -2,10 +2,7 @@ using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Library.Commands;
 using JSSoft.Library.Terminals;
-using Libplanet.Action;
-using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Extensions;
-using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Commands;
 
@@ -99,7 +96,7 @@ sealed class UserCommand : CommandMethodBase
             throw new InvalidOperationException($"The character of user '{user.Address}' has already been created.");
 
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        await user.CreateCharacter(swarmHost, cancellationToken);
+        await user.CreateCharacterAsync(swarmHost, cancellationToken);
     }
 
     [CommandMethod]
@@ -133,28 +130,7 @@ sealed class UserCommand : CommandMethodBase
             throw new InvalidOperationException($"User '{user.Address}' does not have character.");
 
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        var playerInfo = user.PlayerInfo;
-        var stageInfo = new StageInfo
-        {
-            Player = playerInfo,
-            Monsters = MonsterInfo.Create(10),
-        };
-        var gamePlayAction = new GamePlayAction
-        {
-            StageInfo = stageInfo,
-            UserAddress = user.Address,
-        };
-        var leaderBoardAction = new LeaderBoardAction
-        {
-            UserAddress = user.Address,
-        };
-        var actions = new IAction[]
-        {
-            gamePlayAction,
-            leaderBoardAction,
-        };
-        await swarmHost.AddTransactionAsync(user, actions, cancellationToken);
-        user.Refresh(swarmHost);
+        await user.PlayGameAsync(swarmHost, cancellationToken);
         await user.ReplayGameAsync(swarmHost, tick: 10, Out, cancellationToken);
     }
 

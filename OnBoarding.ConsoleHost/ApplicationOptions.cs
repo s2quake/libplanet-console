@@ -17,8 +17,6 @@ sealed class ApplicationOptions
     [CommandProperty]
     public string StorePath { get; set; } = string.Empty;
 
-    public static string DefaultStorePath { get; } = Path.Combine(Directory.GetCurrentDirectory(), ".data");
-
     public static ApplicationOptions Parse(string[] args)
     {
         var options = new ApplicationOptions();

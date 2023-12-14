@@ -63,7 +63,7 @@ sealed class Bot
                 else if (_user.IsOnline == true && v < 50)
                 {
                     if (_user.PlayerInfo == null)
-                        await _user.CreateCharacter(swarmHost, cancellationToken);
+                        await _user.CreateCharacterAsync(swarmHost, cancellationToken);
                     else
                         await _user.PlayGameAsync(swarmHost, cancellationToken);
                 }

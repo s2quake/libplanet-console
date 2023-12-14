@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using System.Text;
 using Bencodex.Types;
 using JSSoft.Library.Commands;
 using OnBoarding.ConsoleHost.Extensions;

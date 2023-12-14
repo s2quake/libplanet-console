@@ -1,7 +1,6 @@
 using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Crypto;
-using Nito.AsyncEx.Interop;
 using OnBoarding.ConsoleHost.Actions;
 using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Games;
@@ -113,7 +112,7 @@ sealed class User
         @out.WriteLineAsJson(playerInfo);
     }
 
-    public async Task CreateCharacter(SwarmHost swarmHost, CancellationToken cancellationToken)
+    public async Task CreateCharacterAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
     {
         var characterCreationAction = new CharacterCreationAction()
         {
