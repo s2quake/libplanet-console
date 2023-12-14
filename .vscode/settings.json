@@ -10,6 +10,6 @@
         "**/obj": true,
         "**/*.code-search": true,
         ".commands": true,
-        ".Libplanet": true,
+        ".Libplanet": false,
     }
 }

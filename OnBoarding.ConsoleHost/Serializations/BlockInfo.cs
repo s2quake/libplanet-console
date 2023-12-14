@@ -8,7 +8,7 @@ record class BlockInfo
     {
         Index = block.Index;
         Hash = block.Hash.ToString();
-        Transactions = [.. block.Transactions.Select(item => new TransactionInfo(item))];
+        Transactions = block.Transactions.Select(item => new TransactionInfo(item)).ToArray();
     }
 
     public long Index { get; }

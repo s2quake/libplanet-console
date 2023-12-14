@@ -1,10 +1,16 @@
 using Bencodex.Types;
+using Newtonsoft.Json;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
+readonly struct ValueRange : IEquatable<ValueRange>
 {
-    private static readonly Random Random = new();
+    public ValueRange(long begin, long length)
+    {
+        Begin = begin;
+        Length = length;
+        End = checked((long)(begin + length));
+    }
 
     public ValueRange(long begin)
         : this(begin, 0)
@@ -39,16 +45,20 @@ readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
 
     public long Get(Random random) => random.NextInt64(Begin, End);
 
-    public long Begin { get; } = begin;
+    public long Begin { get; }
 
-    public long Length { get; } = length;
+    public long Length { get; }
 
-    public long End { get; } = checked((long)(begin + length));
+    [JsonIgnore]
+    public long End { get; }
 
+    [JsonIgnore]
     public readonly long Min => Math.Min(Begin, End);
 
+    [JsonIgnore]
     public readonly long Max => Math.Max(Begin, End);
 
+    [JsonIgnore]
     public readonly long AbsoluteLength => Math.Abs(Length);
 
     public static readonly ValueRange Empty = new();

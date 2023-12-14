@@ -9,28 +9,45 @@ using Libplanet.Blockchain.Policies;
 using Libplanet.Crypto;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
+using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
 
 namespace OnBoarding.ConsoleHost;
 
-static class BlockChainUtils
+static class BlockChainUtility
 {
     public static readonly PrivateKey GenesisProposer = PrivateKey.FromString
     (
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
-    public static BlockChain CreateBlockChain(User user, User[] users)
+    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys)
     {
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), ".data", $"{user}");
-        var keyValueStore = new RocksDBKeyValueStore(dataPath);
+        var keyValueStore = new MemoryKeyValueStore();
         var stateStore = new TrieStateStore(keyValueStore);
-        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var store = new MemoryStore();
+        return CreateBlockChain(name, validatorKeys, store, stateStore, isNew: true);
+    }
+
+    public static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, string storePath)
+    {
+        var directory = Path.Combine(storePath, name);
+        var dataPath1 = Path.Combine(directory, "state");
+        var dataPath2 = Path.Combine(directory, "store");
+        var isNew = Directory.Exists(directory) == false;
+        var keyValueStore = new RocksDBKeyValueStore(dataPath1);
+        var stateStore = new TrieStateStore(keyValueStore);
+        var store = new RocksDBStore(dataPath2);
+        return CreateBlockChain(name, validatorKeys, store, stateStore, isNew);
+    }
+
+    private static BlockChain CreateBlockChain(string name, PublicKey[] validatorKeys, IStore store, IStateStore stateStore, bool isNew)
+    {
+        var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
-        var validatorList = users.OrderBy(item => item.Address).Select(item => new Validator(item.PublicKey, BigInteger.One)).ToList();
+        var validatorList = validatorKeys.Select(item => new Validator(item, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);
         var nonce = 0L;
         var action = new Initialize(
@@ -41,40 +58,28 @@ static class BlockChainUtils
             nonce,
             GenesisProposer,
             genesisHash: null,
-            actions: [action.PlainValue],
+            actions: new IValue[] { action.PlainValue },
             timestamp: DateTimeOffset.MinValue
             );
-        var genesisBlock = BlockChain.ProposeGenesisBlock(actionEvaluator, GenesisProposer, [transaction], timestamp: DateTimeOffset.MinValue);
+        var transactions = ImmutableList.Create(transaction);
+        var genesisBlock = BlockChain.ProposeGenesisBlock(actionEvaluator, GenesisProposer, transactions, timestamp: DateTimeOffset.MinValue);
         var policy = new BlockPolicy(
             blockInterval: TimeSpan.FromMilliseconds(1),
             getMaxTransactionsPerBlock: _ => int.MaxValue,
             getMaxTransactionsBytes: _ => long.MaxValue);
         var stagePolicy = new VolatileStagePolicy();
-        return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
+        if (isNew == true)
+            return BlockChain.Create(policy, stagePolicy, store, stateStore, genesisBlock, actionEvaluator);
+        return new BlockChain(policy, stagePolicy, store, stateStore, genesisBlock, new BlockChainStates(store, stateStore), actionEvaluator);
     }
 
-    public static void Stage(BlockChain blockChain, User user, IAction[] actions)
+    public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)
     {
-        var privateKey = user.PrivateKey;
-        var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
-        var values = actions.Select(item => item.PlainValue).ToArray();
-        var transaction = Transaction.Create(
-            nonce: nonce,
-            privateKey: privateKey,
-            genesisHash: genesisBlock.Hash,
-            actions: new TxActionList(values)
-        );
-        blockChain.StageTransaction(transaction);
-    }
-
-    public static Block AppendNew(BlockChain blockChain, User user, UserCollection users, IAction[] actions)
-    {
-        var block = AppendNew(blockChain, user, users, actions.Select(item => item.PlainValue).ToArray());
+        var block = AppendNew(blockChain, user, validators, actions.Select(item => item.PlainValue).ToArray());
         return block;
     }
 
-    public static Block AppendNew(BlockChain blockChain, User user, UserCollection users, IValue[] values)
+    public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IValue[] values)
     {
         var privateKey = user.PrivateKey;
         var genesisBlock = blockChain.Genesis;
@@ -93,16 +98,16 @@ static class BlockChainUtils
             publicKey: privateKey.PublicKey,
             timestamp: DateTimeOffset.UtcNow,
             previousHash: previousBlock.Hash,
-            txHash: BlockContent.DeriveTxHash([transaction]),
+            txHash: BlockContent.DeriveTxHash(new Transaction[] { transaction }),
             lastCommit: lastCommit
         );
-        var blockContent = new BlockContent(blockMetadata, [transaction]);
+        var blockContent = new BlockContent(blockMetadata, new Transaction[] { transaction });
         var preEvaluationBlock = blockContent.Propose();
         var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
         var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
-        var votes = users.OrderBy(item => item.Address).Select(item =>
+        var votes = validators.OrderBy(item => item.ToAddress()).Select(item =>
         {
             var voteMetadata = new VoteMetadata(
             height: height,
@@ -111,7 +116,7 @@ static class BlockChainUtils
             timestamp: DateTimeOffset.UtcNow,
             validatorPublicKey: item.PublicKey,
             flag: VoteFlag.PreCommit);
-            return voteMetadata.Sign(item.PrivateKey);
+            return voteMetadata.Sign(item);
         }).ToImmutableArray();
 
         var blockCommit = new BlockCommit(height, round, block.Hash, votes);
