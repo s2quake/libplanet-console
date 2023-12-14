@@ -10,8 +10,8 @@ using Libplanet.Net;
 namespace OnBoarding.ConsoleHost;
 
 [Export]
-[Export(typeof(IAsyncDisposable))]
-sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
+[Export(typeof(IApplicationService))]
+sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
 {
     private SwarmHost _current;
     private readonly SwarmHost[] _swarmHosts;
@@ -84,20 +84,6 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
 
     public SwarmHost this[int index] => _swarmHosts[index];
 
-    public async ValueTask DisposeAsync()
-    {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-
-        for (var i = _swarmHosts.Length - 1; i >= 0; i--)
-        {
-            var item = _swarmHosts[i]!;
-            await item.DisposeAsync();
-        }
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
-    }
-
     public bool Contains(SwarmHost item) => _swarmHosts.Contains(item);
 
     public int IndexOf(SwarmHost item)
@@ -108,11 +94,6 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
                 return i;
         }
         return -1;
-    }
-
-    public async Task InitializeAsync(CancellationToken cancellationToken)
-    {
-        await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
     }
 
     public event EventHandler? CurrentChanged;
@@ -149,6 +130,29 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IAsyncDisposable
         }
         return keyList.ToArray();
     }
+
+    #region IApplicationService
+
+    async Task IApplicationService.InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
+
+        for (var i = _swarmHosts.Length - 1; i >= 0; i--)
+        {
+            var item = _swarmHosts[i]!;
+            await item.DisposeAsync();
+        }
+        _isDisposed = true;
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
 
     #region IEnumerable
 
