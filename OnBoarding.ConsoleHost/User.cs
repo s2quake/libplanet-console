@@ -93,9 +93,9 @@ sealed class User
             gamePlayAction,
             leaderBoardAction,
         };
+        Console.WriteLine($"User '{Address}' play the game.");
         await swarmHost.AddTransactionAsync(this, actions, cancellationToken);
         Refresh(swarmHost);
-        Console.WriteLine($"User '{Address}' played the game.");
     }
 
     public async Task ReplayGameAsync(SwarmHost swarmHost, long blockIndex, int tick, TextWriter @out, CancellationToken cancellationToken)
@@ -120,9 +120,9 @@ sealed class User
             UserAddress = Address,
             PlayerInfo = PlayerInfo.CreateNew(Name),
         };
+        Console.WriteLine($"User '{Address}' create the character.");
         await swarmHost.AddTransactionAsync(this, new IAction[] { characterCreationAction }, cancellationToken);
         Refresh(swarmHost);
-        Console.WriteLine($"User '{Address}' created the character.");
     }
 
     public static PlayerInfo? GetPlayerInfo(SwarmHost swarmHost, Address address)
