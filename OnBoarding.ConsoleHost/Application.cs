@@ -23,6 +23,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     {
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
         SynchronizationContext.SetSynchronizationContext(new());
+        ConsoleTextWriter.SynchronizationContext = SynchronizationContext.Current!;
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);

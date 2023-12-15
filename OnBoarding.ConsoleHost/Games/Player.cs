@@ -34,7 +34,7 @@ sealed class Player : Character
             {
                 _level++;
                 _experience -= MaxExperience;
-                Heal(MaxLife - Life);
+                Heal((int)(MaxLife * 0.1));
                 MaxExperience = GetExperience(_level);
                 LevelIncreased?.Invoke(this, EventArgs.Empty);
             }

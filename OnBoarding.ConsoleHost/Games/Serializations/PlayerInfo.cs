@@ -24,7 +24,7 @@ record PlayerInfo : CharacterInfo
         : base(player)
     {
         Life = player.Life;
-        MaxLife = player.Life;
+        MaxLife = player.MaxLife;
         Experience = player.Experience;
         Level = player.Level;
         Skills = player.Skills.OfType<SkillBase>().Select(item => (SkillInfo)item).ToArray();
@@ -45,7 +45,7 @@ record PlayerInfo : CharacterInfo
         return new PlayerInfo
         {
             Name = name,
-            Life = 1000,
+            Life = RandomUtility.GetNext(1, 1000),
             MaxLife = 1000,
             Skills = new SkillInfo[]
             {

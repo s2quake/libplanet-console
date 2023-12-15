@@ -35,7 +35,7 @@ sealed class GamePlayAction : ActionBase
         var seed = context.RandomSeed;
         var playerInfo = PlayStage(stageInfo, seed);
         playerInfo.BlockIndex = context.BlockIndex;
-        account = account.SetState(PlayerStates.PlayerInfo, playerInfo.ToBencodex());
+        account = account.SetState(UserStates.PlayerInfo, playerInfo.ToBencodex());
         return previousState.SetAccount(userAddress, account);
     }
 

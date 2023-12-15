@@ -8,34 +8,40 @@ using Libplanet.Blockchain;
 using System.Collections.Immutable;
 using Libplanet.Action;
 using Libplanet.Types.Tx;
+using Libplanet.Blockchain.Renderers;
+using Libplanet.Types.Blocks;
+using Bencodex.Types;
+using Libplanet.Common;
+using System.Security.Cryptography;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class SwarmHost : IAsyncDisposable
+sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 {
     public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString
     (
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
     );
 
+    private readonly string _name;
     private readonly PrivateKey _privateKey;
     private readonly BoundPeer _peer;
     private readonly BoundPeer _consensusPeer;
     private readonly BlockChain _blockChain;
     private readonly SynchronizationContext _synchronizationContext = SynchronizationContext.Current!;
+    private ManualResetEvent _manualResetEvent = new(initialState: false);
     private Swarm? _swarm;
     private Task? _startTask;
     private bool _isDisposed;
-    private long _blockCount;
-    private Task? _pollingTask;
-    private CancellationTokenSource? _pollingCancellationTokenSource;
+    private readonly Dictionary<ManualResetEvent, Block> _blockByEvent = new();
 
-    public SwarmHost(PrivateKey privateKey, BlockChain blockChain, BoundPeer peer, BoundPeer consensusPeer)
+    public SwarmHost(string name, PrivateKey privateKey, PublicKey[] validatorKeys, string storePath)
     {
+        _name = name;
         _privateKey = privateKey;
-        _blockChain = blockChain;
-        _peer = peer;
-        _consensusPeer = consensusPeer;
+        _peer = new BoundPeer(privateKey.PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", PortUtility.GetPort()));
+        _consensusPeer = new BoundPeer(privateKey.PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", PortUtility.GetPort()));
+        _blockChain = BlockChainUtility.CreateBlockChain(validatorKeys, storePath, this);
     }
 
     public BoundPeer Peer => _peer;
@@ -46,17 +52,24 @@ sealed class SwarmHost : IAsyncDisposable
 
     public bool IsDisposed => _isDisposed;
 
-    public Swarm Target => _swarm ?? throw new InvalidOperationException();
+    public Swarm Target => _swarm ?? throw new InvalidOperationException("Swarm has been stopped.");
 
     public BlockChain BlockChain => _blockChain;
+
+    public string Name => _name;
 
     public override string ToString()
     {
         return $"{_peer.EndPoint}";
     }
 
-    public TxId StageTransaction(User user, IAction[] actions)
+    public async Task<Block> AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
     {
+        if (_isDisposed == true)
+            throw new ObjectDisposedException($"{this}");
+        if (_startTask == null || _swarm == null)
+            throw new InvalidOperationException("Swarm has been stopped.");
+
         var blockChain = BlockChain;
         var privateKey = user.PrivateKey;
         var genesisBlock = blockChain.Genesis;
@@ -68,21 +81,13 @@ sealed class SwarmHost : IAsyncDisposable
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values)
         );
+        var manualResetEvent = _manualResetEvent;
         blockChain.StageTransaction(transaction);
-        return transaction.Id;
+        await Task.Run(() => manualResetEvent.WaitOne(), cancellationToken);
+        return _blockByEvent[manualResetEvent];
     }
 
-    public async Task AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
-    {
-        var blockChain = BlockChain;
-        var count = blockChain.Count;
-        var id = StageTransaction(user, actions);
-        await TaskUtility.WaitIfAsync(() => blockChain.Count <= count, cancellationToken);
-        // var block = blockChain.Tip;
-        // var execution = blockChain.GetTxExecution(block.Hash, id);
-        // if (execution.Fail == true)
-        //     throw new InvalidOperationException("Transaction Failed.");
-    }
+    public Task StartAsync(CancellationToken cancellationToken) => StartAsync(_peer, _consensusPeer, cancellationToken);
 
     public async Task StartAsync(BoundPeer seedPeer, BoundPeer consensusSeedPeer, CancellationToken cancellationToken)
     {
@@ -111,9 +116,6 @@ sealed class SwarmHost : IAsyncDisposable
         };
         _swarm = new Swarm(blockChain, privateKey, transport, swarmOptions, consensusTransport, consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
-        _blockCount = blockChain.Count;
-        _pollingCancellationTokenSource = new();
-        _pollingTask = Polling(_pollingCancellationTokenSource.Token);
         await Task.CompletedTask;
     }
 
@@ -124,14 +126,10 @@ sealed class SwarmHost : IAsyncDisposable
         if (_startTask == null || _swarm == null)
             throw new InvalidOperationException("Swarm has been stopped.");
 
-        _pollingCancellationTokenSource?.Cancel();
-        _pollingCancellationTokenSource = null;
-        await (_pollingTask ?? Task.CompletedTask);
         await _swarm.StopAsync(cancellationToken: cancellationToken);
         await _startTask;
         _swarm.Dispose();
         _startTask = null;
-        _pollingTask = null;
     }
 
     public async ValueTask DisposeAsync()
@@ -139,9 +137,6 @@ sealed class SwarmHost : IAsyncDisposable
         if (_isDisposed == true)
             throw new ObjectDisposedException($"{this}");
 
-        _pollingCancellationTokenSource?.Cancel();
-        _pollingCancellationTokenSource = null;
-        await (_pollingTask ?? Task.CompletedTask);
         if (_swarm != null)
         {
             await _swarm.StopAsync(cancellationToken: default);
@@ -150,6 +145,8 @@ sealed class SwarmHost : IAsyncDisposable
         await (_startTask ?? Task.CompletedTask);
         _startTask = null;
         _isDisposed = true;
+        PortUtility.ReleasePort(_peer.EndPoint.Port);
+        PortUtility.ReleasePort(_consensusPeer.EndPoint.Port);
     }
 
     public event EventHandler? BlockAppended;
@@ -165,25 +162,30 @@ sealed class SwarmHost : IAsyncDisposable
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
-    private async Task Polling(CancellationToken cancellationToken)
+    #region IRenderer
+
+    void IRenderer.RenderBlock(Block oldTip, Block newTip)
     {
-        try
+        _blockByEvent[_manualResetEvent] = newTip;
+        _manualResetEvent.Set();
+        _manualResetEvent = new(initialState: false);
+        _synchronizationContext.Post((s) =>
         {
-            while (cancellationToken.IsCancellationRequested == false)
-            {
-                if (_blockCount != _blockChain.Count)
-                {
-                    _synchronizationContext.Post((s) =>
-                    {
-                        BlockAppended?.Invoke(this, EventArgs.Empty);
-                    }, null);
-                    _blockCount = _blockChain.Count;
-                }
-                await Task.Delay(1, cancellationToken);
-            }
-        }
-        catch (TaskCanceledException)
-        {
-        }
+            BlockAppended?.Invoke(this, EventArgs.Empty);
+        }, null);
     }
+
+    void IActionRenderer.RenderAction(IValue action, ICommittedActionContext context, HashDigest<SHA256> nextState)
+    {
+    }
+
+    void IActionRenderer.RenderActionError(IValue action, ICommittedActionContext context, Exception exception)
+    {
+    }
+
+    void IActionRenderer.RenderBlockEnd(Block oldTip, Block newTip)
+    {
+    }
+
+    #endregion
 }

@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
-using System.Net;
-using System.Net.Sockets;
-using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
 
@@ -37,35 +34,23 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
 
     public SwarmHostCollection(PrivateKey[] validators, string storePath)
     {
-        var portQueue = new Queue<int>(GetRandomUnusedPorts(validators.Length * 2));
         var validatorKeys = validators.Select(item => item.PublicKey).ToArray();
         var swarmHosts = new SwarmHost[validators.Length];
         var peers = new BoundPeer[validators.Length];
         var consensusPeers = new BoundPeer[validators.Length];
         for (var i = 0; i < validators.Length; i++)
         {
-            peers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
-            consensusPeers[i] = new BoundPeer(validators[i].PublicKey, new DnsEndPoint($"{IPAddress.Loopback}", portQueue.Dequeue()));
-        }
-        for (var i = 0; i < validators.Length; i++)
-        {
             var privateKey = validators[i];
             var peer = peers[i];
             var consensusPeer = consensusPeers[i];
-            var blockChain = CreateBlockChain($"Swarm{i}");
-            swarmHosts[i] = new SwarmHost(privateKey, blockChain, peer, consensusPeer);
+            swarmHosts[i] = new SwarmHost($"Swarm{i}", privateKey, validatorKeys, storePath);
+            peers[i] = swarmHosts[i].Peer;
+            consensusPeers[i] = swarmHosts[i].ConsensusPeer;
         }
         _swarmHosts = swarmHosts;
         _current = swarmHosts[0];
         _seedPeer = peers[0];
         _consensusSeedPeer = consensusPeers[0];
-
-        BlockChain CreateBlockChain(string name)
-        {
-            if (storePath == string.Empty)
-                return BlockChainUtility.CreateBlockChain(name, validatorKeys);
-            return BlockChainUtility.CreateBlockChain(name, validatorKeys, storePath);
-        }
     }
 
     public SwarmHost Current
@@ -97,29 +82,6 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
     }
 
     public event EventHandler? CurrentChanged;
-
-    private static int[] GetRandomUnusedPorts(int count)
-    {
-        var ports = new int[count];
-        var listeners = new TcpListener[count];
-        for (var i = 0; i < count; i++)
-        {
-            listeners[i] = CreateListener();
-            ports[i] = ((IPEndPoint)listeners[i].LocalEndpoint).Port;
-        }
-        for (var i = 0; i < count; i++)
-        {
-            listeners[i].Stop();
-        }
-        return ports;
-
-        static TcpListener CreateListener()
-        {
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return listener;
-        }
-    }
 
     private static PrivateKey[] CreatePrivateKeys(int count)
     {
