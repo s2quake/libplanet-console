@@ -64,7 +64,7 @@ sealed class Bot
                 }
                 else if (_user.IsOnline == true && v < 50)
                 {
-                    if (RandomUtility.GetNext(100) < 50)
+                    if (RandomUtility.GetNext(100) < 90)
                     {
                     }
                     else if (_user.PlayerInfo == null)
