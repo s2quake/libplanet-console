@@ -63,12 +63,8 @@ sealed class UserCommand : CommandMethodBase
     public void Status()
     {
         var user = _application.GetUser(IndexProperties.UserIndex);
-        if (user.IsOnline == false)
-            throw new InvalidOperationException($"User '{user.Address}' is not online.");
-        if (user.PlayerInfo == null)
-            throw new InvalidOperationException($"User '{user.Address}' does not have character.");
-
-        Out.WriteLineAsJson(user.PlayerInfo);
+        var playerInfo = user.GetPlayerInfo();
+        Out.WriteLineAsJson(playerInfo);
     }
 
     [CommandMethod]
@@ -90,11 +86,6 @@ sealed class UserCommand : CommandMethodBase
     public async Task CharacterCreateAsync(CancellationToken cancellationToken)
     {
         var user = _application.GetUser(IndexProperties.UserIndex);
-        if (user.IsOnline == false)
-            throw new InvalidOperationException($"'{Name}' is not online.");
-        if (user.PlayerInfo != null)
-            throw new InvalidOperationException($"The character of user '{user.Address}' has already been created.");
-
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         await user.CreateCharacterAsync(swarmHost, cancellationToken);
     }
@@ -102,19 +93,23 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
+    public async Task CharacterReviveAsync(CancellationToken cancellationToken)
+    {
+        var user = _application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        await user.ReviveCharacterAsync(swarmHost, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void GameHistory()
     {
-        var blockChain = _application.GetBlockChain(IndexProperties.SwarmIndex);
         var user = _application.GetUser(IndexProperties.UserIndex);
-        if (user.IsOnline == false)
-            throw new InvalidOperationException($"'{Name}' is not online.");
-
-        var stageRecords = GamePlayRecord.GetGamePlayRecords(blockChain, user.Address);
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var gamePlayRecords = user.GetGameHistory(swarmHost);
         var sb = new StringBuilder();
-        foreach (var item in stageRecords)
-        {
-            sb.AppendLine($"Block #{item.Block.Index}");
-        }
+        sb.AppendLines(gamePlayRecords, item => $"Block #{item.Block.Index}");
         Out.Write(sb.ToString());
     }
 
@@ -124,14 +119,9 @@ sealed class UserCommand : CommandMethodBase
     public async Task GamePlayAsync(CancellationToken cancellationToken)
     {
         var user = _application.GetUser(IndexProperties.UserIndex);
-        if (user.IsOnline == false)
-            throw new InvalidOperationException($"'{Name}' is not online.");
-        if (user.PlayerInfo == null)
-            throw new InvalidOperationException($"User '{user.Address}' does not have character.");
-
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         await user.PlayGameAsync(swarmHost, cancellationToken);
-        await user.ReplayGameAsync(swarmHost, tick: 10, Out, cancellationToken);
+        await user.ReplayGameAsync(swarmHost, tick: 10, cancellationToken);
     }
 
     [CommandMethod]
@@ -145,6 +135,6 @@ sealed class UserCommand : CommandMethodBase
         var blockIndex = IndexProperties.BlockIndex;
         var user = _application.GetUser(IndexProperties.UserIndex);
         var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        await user.ReplayGameAsync(swarmHost, blockIndex, tick, Out, cancellationToken);
+        await user.ReplayGameAsync(swarmHost, blockIndex, tick, cancellationToken);
     }
 }

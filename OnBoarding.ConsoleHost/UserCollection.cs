@@ -19,7 +19,7 @@ sealed class UserCollection : IEnumerable<User>
         _itemList = new(count);
         for (var i = 0; i < _itemList.Capacity; i++)
         {
-            _itemList.Add(new(name: $"User{i}"));
+            _itemList.Add(new(name: $"User{i}") { Out = new ConsoleTextWriter() });
         }
         _current = _itemList.First();
     }

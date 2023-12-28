@@ -5,8 +5,8 @@ using System.ComponentModel.Composition;
 namespace OnBoarding.ConsoleHost;
 
 [Export]
-[Export(typeof(IAsyncDisposable))]
-sealed class BotCollection : IEnumerable<Bot>, IAsyncDisposable
+[Export(typeof(IApplicationService))]
+sealed class BotCollection : IEnumerable<Bot>, IApplicationService
 {
     private readonly OrderedDictionary _botByUser = new();
     private readonly IServiceProvider _serviceProvider;
@@ -36,7 +36,11 @@ sealed class BotCollection : IEnumerable<Bot>, IAsyncDisposable
 
     public bool Contains(User user) => _botByUser.Contains(user);
 
-    public async ValueTask DisposeAsync()
+    #region IApplicationService
+
+    Task IApplicationService.InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
         foreach (var item in _botByUser.Values)
         {
@@ -46,6 +50,8 @@ sealed class BotCollection : IEnumerable<Bot>, IAsyncDisposable
             }
         }
     }
+
+    #endregion
 
     #region IEnumerable
 

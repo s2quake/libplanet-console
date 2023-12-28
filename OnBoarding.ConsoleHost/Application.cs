@@ -12,7 +12,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     private readonly CompositionContainer _container;
     private readonly SwarmHostCollection _swarmHosts;
     private readonly UserCollection _users;
-    private readonly IAsyncDisposable[] _asyncDisposables;
+    private readonly ApplicationServiceCollection _applicationServices;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
@@ -23,6 +23,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     {
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
         SynchronizationContext.SetSynchronizationContext(new());
+        ConsoleTextWriter.SynchronizationContext = SynchronizationContext.Current!;
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue(this);
@@ -30,7 +31,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _container.ComposeExportedValue(_options);
         _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
         _users = _container.GetExportedValue<UserCollection>()!;
-        _asyncDisposables = _container.GetExportedValues<IAsyncDisposable>().ToArray();
+        _applicationServices = new(_container.GetExportedValues<IApplicationService>());
         _currentSwarmHost = _swarmHosts.Current;
         _currentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
         _swarmHosts.CurrentChanged += SwarmHosts_CurrentChanged;
@@ -79,7 +80,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         if (_terminal != null)
             throw new InvalidOperationException("Application has already been started.");
 
-        await _swarmHosts.InitializeAsync(cancellationToken: default);
+        await _applicationServices.InitializeAsync(this, cancellationToken: default);
         await PrepareCommandContext();
         _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
@@ -110,10 +111,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
         _container.Dispose();
-        for (var i = _asyncDisposables.Length - 1; i >= 0; i--)
-        {
-            await _asyncDisposables[i].DisposeAsync();
-        }
+        await _applicationServices.DisposeAsync();
         _terminal = null;
         _isDisposed = true;
         GC.SuppressFinalize(this);

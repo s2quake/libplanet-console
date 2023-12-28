@@ -33,12 +33,12 @@ sealed class CharacterCreationAction : ActionBase
         var userAddress = UserAddress;
         var previousState = context.PreviousState;
         var account = previousState.GetAccount(UserAddress);
-        if (account.GetState(PlayerStates.PlayerInfo) is not null)
+        if (account.GetState(UserStates.PlayerInfo) is not null)
         {
             throw new InvalidOperationException($"The character of user '{userAddress}' has already been created.");
         }
         playerInfo.BlockIndex = context.BlockIndex;
-        account = account.SetState(PlayerStates.PlayerInfo, playerInfo.ToBencodex());
+        account = account.SetState(UserStates.PlayerInfo, playerInfo.ToBencodex());
         return previousState.SetAccount(userAddress, account);
     }
 }

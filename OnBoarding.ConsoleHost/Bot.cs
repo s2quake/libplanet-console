@@ -1,3 +1,5 @@
+using Org.BouncyCastle.Crypto.Modes;
+
 namespace OnBoarding.ConsoleHost;
 
 sealed class Bot
@@ -62,10 +64,27 @@ sealed class Bot
                 }
                 else if (_user.IsOnline == true && v < 50)
                 {
-                    if (_user.PlayerInfo == null)
+                    if (RandomUtility.GetNext(100) < 90)
+                    {
+                    }
+                    else if (_user.PlayerInfo == null)
+                    {
                         await _user.CreateCharacterAsync(swarmHost, cancellationToken);
+                    }
+                    else if (_user.PlayerInfo.Life <= 0)
+                    {
+                        await _user.ReviveCharacterAsync(swarmHost, cancellationToken);
+                    }
                     else
-                        await _user.PlayGameAsync(swarmHost, cancellationToken);
+                    {
+                        var @out = _user.Out;
+                        var blockIndex = await _user.PlayGameAsync(swarmHost, cancellationToken);
+                        _user.Out = new StringWriter();
+                        await @out.WriteLineAsync("replaying.");
+                        await _user.ReplayGameAsync(swarmHost, blockIndex, tick: 500, cancellationToken);
+                        _user.Out = @out;
+                        await @out.WriteLineAsync("replayed.");
+                    }
                 }
 
             }

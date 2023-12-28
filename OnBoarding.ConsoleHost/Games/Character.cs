@@ -58,7 +58,6 @@ abstract class Character
         if (amount < 0)
             throw new ArgumentOutOfRangeException(nameof(amount));
 
-        var life = Life;
         Life -= amount;
         if (Life < 0)
         {
