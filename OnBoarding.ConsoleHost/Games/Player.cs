@@ -45,8 +45,7 @@ sealed class Player : Character
 
     public static long GetExperience(long level)
     {
-        if (level < 0)
-            throw new ArgumentOutOfRangeException(nameof(level));
+        ArgumentOutOfRangeException.ThrowIfNegative(level);
 
         return (long)(Math.Pow(level, 2) * 100);
     }

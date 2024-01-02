@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using Libplanet.Net;
+using OnBoarding.ConsoleHost.Exceptions;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -90,7 +91,7 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
         {
             keyList.Add(PrivateKeyUtility.Create($"Swarm{i}"));
         }
-        return keyList.ToArray();
+        return [.. keyList];
     }
 
     #region IApplicationService
@@ -102,8 +103,7 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
         for (var i = _swarmHosts.Length - 1; i >= 0; i--)
         {

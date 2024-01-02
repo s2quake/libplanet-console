@@ -1,28 +1,19 @@
-using Org.BouncyCastle.Crypto.Modes;
+using OnBoarding.ConsoleHost.Exceptions;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class Bot
+sealed class Bot(IServiceProvider serviceProvider, User user)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly User _user;
     private Task? _task;
     private CancellationTokenSource? _cancellationTokenSource;
 
-    public Bot(IServiceProvider serviceProvider, User user)
-    {
-        _serviceProvider = serviceProvider;
-        _user = user;
-    }
-
     public bool IsRunning { get; private set; }
 
-    public User User => _user;
+    public User User => user;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (IsRunning == true)
-            throw new InvalidOperationException("Bot has been started.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Bot has been started.");
 
         _cancellationTokenSource = new();
         _task = RunAsync(_cancellationTokenSource.Token);
@@ -32,8 +23,7 @@ sealed class Bot
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (IsRunning == false)
-            throw new InvalidOperationException("Bot has been stopped.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Bot has been stopped.");
 
         _cancellationTokenSource!.Cancel();
         _cancellationTokenSource = null;
@@ -46,43 +36,43 @@ sealed class Bot
     {
         try
         {
-            var random = new Random(_user.GetHashCode());
-            var swarmHosts = (SwarmHostCollection)_serviceProvider.GetService(typeof(SwarmHostCollection))!;
+            var random = new Random(user.GetHashCode());
+            var swarmHosts = (SwarmHostCollection)serviceProvider.GetService(typeof(SwarmHostCollection))!;
             while (cancellationToken.IsCancellationRequested == false)
             {
                 var v = random.Next(100);
                 var tick = random.Next(100, 2000);
                 await Task.Delay(tick, cancellationToken);
                 var swarmHost = swarmHosts.Current;
-                if (_user.IsOnline == false && v < 50)
+                if (user.IsOnline == false && v < 50)
                 {
-                    _user.Login(swarmHost);
+                    user.Login(swarmHost);
                 }
-                else if (_user.IsOnline == true && v < 10)
+                else if (user.IsOnline == true && v < 10)
                 {
-                    _user.Logout();
+                    user.Logout();
                 }
-                else if (_user.IsOnline == true && v < 50)
+                else if (user.IsOnline == true && v < 50)
                 {
                     if (RandomUtility.GetNext(100) < 90)
                     {
                     }
-                    else if (_user.PlayerInfo == null)
+                    else if (user.PlayerInfo == null)
                     {
-                        await _user.CreateCharacterAsync(swarmHost, cancellationToken);
+                        await user.CreateCharacterAsync(swarmHost, cancellationToken);
                     }
-                    else if (_user.PlayerInfo.Life <= 0)
+                    else if (user.PlayerInfo.Life <= 0)
                     {
-                        await _user.ReviveCharacterAsync(swarmHost, cancellationToken);
+                        await user.ReviveCharacterAsync(swarmHost, cancellationToken);
                     }
                     else
                     {
-                        var @out = _user.Out;
-                        var blockIndex = await _user.PlayGameAsync(swarmHost, cancellationToken);
-                        _user.Out = new StringWriter();
+                        var @out = user.Out;
+                        var blockIndex = await user.PlayGameAsync(swarmHost, cancellationToken);
+                        user.Out = new StringWriter();
                         await @out.WriteLineAsync("replaying.");
-                        await _user.ReplayGameAsync(swarmHost, blockIndex, tick: 500, cancellationToken);
-                        _user.Out = @out;
+                        await user.ReplayGameAsync(swarmHost, blockIndex, tick: 500, cancellationToken);
+                        user.Out = @out;
                         await @out.WriteLineAsync("replayed.");
                     }
                 }

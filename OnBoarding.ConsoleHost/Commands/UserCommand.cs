@@ -8,17 +8,10 @@ namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides commands related to users.")]
-sealed class UserCommand : CommandMethodBase
+[method: ImportingConstructor]
+sealed class UserCommand(Application application) : CommandMethodBase
 {
-    private readonly Application _application;
-    private readonly UserCollection _users;
-
-    [ImportingConstructor]
-    public UserCommand(Application application)
-    {
-        _application = application;
-        _users = application.GetService<UserCollection>()!;
-    }
+    private readonly UserCollection _users = application.GetService<UserCollection>()!;
 
     [CommandProperty(InitValue = 10)]
     public int Tick { get; set; }
@@ -35,8 +28,7 @@ sealed class UserCommand : CommandMethodBase
             tsb.Append($"{s} ");
             tsb.Foreground = item.IsOnline == true ? (isCurrent == true ? TerminalColorType.BrightGreen : null) : TerminalColorType.BrightBlack;
             tsb.AppendLine($"[{i}]-{item.Address}");
-            tsb.Foreground = null;
-            tsb.Append(string.Empty);
+            tsb.ResetOptions();
         }
         Out.Write(tsb.ToString());
     }
@@ -45,15 +37,16 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Login()
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(-1);
+        var user = application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = application.GetSwarmHost(-1);
         user.Login(swarmHost);
     }
 
     [CommandMethod]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Logout()
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
         user.Logout();
     }
 
@@ -62,7 +55,7 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void Status()
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
         var playerInfo = user.GetPlayerInfo();
         Out.WriteLineAsJson(playerInfo);
     }
@@ -85,8 +78,8 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public async Task CharacterCreateAsync(CancellationToken cancellationToken)
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
         await user.CreateCharacterAsync(swarmHost, cancellationToken);
     }
 
@@ -95,8 +88,8 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public async Task CharacterReviveAsync(CancellationToken cancellationToken)
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
         await user.ReviveCharacterAsync(swarmHost, cancellationToken);
     }
 
@@ -105,8 +98,8 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public void GameHistory()
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
         var gamePlayRecords = user.GetGameHistory(swarmHost);
         var sb = new StringBuilder();
         sb.AppendLines(gamePlayRecords, item => $"Block #{item.Block.Index}");
@@ -118,8 +111,8 @@ sealed class UserCommand : CommandMethodBase
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.UserIndex))]
     public async Task GamePlayAsync(CancellationToken cancellationToken)
     {
-        var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
         await user.PlayGameAsync(swarmHost, cancellationToken);
         await user.ReplayGameAsync(swarmHost, tick: 10, cancellationToken);
     }
@@ -133,8 +126,8 @@ sealed class UserCommand : CommandMethodBase
     {
         var tick = Tick;
         var blockIndex = IndexProperties.BlockIndex;
-        var user = _application.GetUser(IndexProperties.UserIndex);
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var user = application.GetUser(IndexProperties.UserIndex);
+        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
         await user.ReplayGameAsync(swarmHost, blockIndex, tick, cancellationToken);
     }
 }

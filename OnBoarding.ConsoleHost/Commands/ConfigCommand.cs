@@ -4,16 +4,9 @@ using JSSoft.Commands;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-sealed class ConfigCommand : CommandBase
+[method: ImportingConstructor]
+sealed class ConfigCommand(ApplicationConfigurations configurations) : CommandBase
 {
-    private readonly ApplicationConfigurations _configurations;
-
-    [ImportingConstructor]
-    public ConfigCommand(ApplicationConfigurations configurations)
-    {
-        _configurations = configurations;
-    }
-
     [CommandPropertyRequired(DefaultValue = "")]
     public string Key { get; set; } = string.Empty;
 
@@ -24,18 +17,18 @@ sealed class ConfigCommand : CommandBase
     {
         if (Key == string.Empty && Value == string.Empty)
         {
-            foreach (var item in _configurations.Descriptors)
+            foreach (var item in configurations.Descriptors)
             {
                 Out.Write(item);
             }
         }
         else if (Value == string.Empty)
         {
-            Out.WriteLine($"{_configurations.GetValue(Key)}");
+            Out.WriteLine($"{configurations.GetValue(Key)}");
         }
         else
         {
-            _configurations.SetValue(Key, Value);
+            configurations.SetValue(Key, Value);
         }
     }
 }

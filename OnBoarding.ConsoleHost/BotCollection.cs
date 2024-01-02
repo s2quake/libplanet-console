@@ -1,26 +1,24 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using OnBoarding.ConsoleHost.Exceptions;
 
 namespace OnBoarding.ConsoleHost;
 
 [Export]
 [Export(typeof(IApplicationService))]
-sealed class BotCollection : IEnumerable<Bot>, IApplicationService
+[method: ImportingConstructor]
+sealed class BotCollection(IServiceProvider serviceProvider) : IEnumerable<Bot>, IApplicationService
 {
-    private readonly OrderedDictionary _botByUser = new();
-    private readonly IServiceProvider _serviceProvider;
-
-    [ImportingConstructor]
-    public BotCollection(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    private readonly OrderedDictionary _botByUser = [];
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     public Bot AddNew(User user)
     {
-        if (_botByUser.Contains(user) == true)
-            throw new ArgumentException($"'{user}' is already included in the collection.", nameof(user));
+        ArgumentExceptionUtility.ThrowIf(
+            condition: _botByUser.Contains(user) == true,
+            message: $"'{user}' is already included in the collection.",
+            paramName: nameof(user));
 
         var serviceProvider = _serviceProvider;
         var bot = new Bot(serviceProvider, user);

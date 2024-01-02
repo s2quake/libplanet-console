@@ -1,21 +1,15 @@
+using OnBoarding.ConsoleHost.Exceptions;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-abstract class Character
+abstract class Character(CharacterInfo characterInfo)
 {
-    protected Character(CharacterInfo characterInfo)
-    {
-        Name = characterInfo.Name;
-        MaxLife = characterInfo.MaxLife;
-        Life = characterInfo.Life;
-    }
+    public string Name { get; } = characterInfo.Name;
 
-    public string Name { get; }
+    public long MaxLife { get; } = characterInfo.MaxLife;
 
-    public long MaxLife { get; }
-
-    public long Life { get; private set; }
+    public long Life { get; private set; } = characterInfo.Life;
 
     public bool IsDead { get; private set; }
 
@@ -27,18 +21,16 @@ abstract class Character
 
     public void Heal(long amount)
     {
-        if (IsDead == true)
-            throw new InvalidOperationException("Player has died.");
-        if (amount < 0)
-            throw new ArgumentOutOfRangeException(nameof(amount));
+        InvalidOperationExceptionUtility.ThrowIf(IsDead == true, "Player has died.");
+        ArgumentOutOfRangeException.ThrowIfNegative(amount);
 
         Life = Math.Min(Life + amount, MaxLife);
     }
 
     public void Revive()
     {
-        if (IsDead == false)
-            throw new InvalidOperationException("Player did not die.");
+        InvalidOperationExceptionUtility.ThrowIf(IsDead != true, "Player did not die.");
+
         Life = (long)(MaxLife * 0.25);
         IsDead = false;
 
@@ -53,10 +45,8 @@ abstract class Character
 
     protected virtual void OnDeal(Character attacker, long amount)
     {
-        if (IsDead == true)
-            throw new InvalidOperationException("Player has died.");
-        if (amount < 0)
-            throw new ArgumentOutOfRangeException(nameof(amount));
+        InvalidOperationExceptionUtility.ThrowIf(IsDead == true, "Player has died.");
+        ArgumentOutOfRangeException.ThrowIfNegative(amount);
 
         Life -= amount;
         if (Life < 0)

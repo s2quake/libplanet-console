@@ -5,8 +5,8 @@ namespace OnBoarding.ConsoleHost;
 
 static class PortUtility
 {
-    private static readonly List<int> reservedPortList = new();
-    private static readonly List<int> usedPortList = new();
+    private static readonly List<int> reservedPortList = [];
+    private static readonly List<int> usedPortList = [];
 
     public static int GetPort()
     {

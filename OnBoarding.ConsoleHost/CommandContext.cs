@@ -8,19 +8,12 @@ namespace OnBoarding.ConsoleHost;
 [Export(typeof(CommandContext))]
 [CommandSummary("Provides a prompt for input and execution of commands.")]
 [CommandDescription("REPL for OnBoarding")]
-sealed class CommandContext : CommandContextBase
+[method: ImportingConstructor]
+sealed class CommandContext([ImportMany] IEnumerable<ICommand> commands, HelpCommand helpCommand, VersionCommand versionCommand) : CommandContextBase(commands)
 {
-    protected override ICommand HelpCommand { get; }
+    protected override ICommand HelpCommand { get; } = helpCommand;
 
-    protected override ICommand VersionCommand { get; }
-
-    [ImportingConstructor]
-    public CommandContext([ImportMany] IEnumerable<ICommand> commands, HelpCommand helpCommand, VersionCommand versionCommand)
-        : base(commands)
-    {
-        HelpCommand = helpCommand;
-        VersionCommand = versionCommand;
-    }
+    protected override ICommand VersionCommand { get; } = versionCommand;
 
     protected override void OnEmptyExecute()
     {
@@ -30,6 +23,8 @@ sealed class CommandContext : CommandContextBase
         };
         tsb.AppendLine("Type '--help | -h' for usage.");
         tsb.AppendLine("Type 'exit' to exit application.");
+        tsb.ResetOptions();
+        tsb.Append(string.Empty);
         Out.Write(tsb.ToString());
     }
 }

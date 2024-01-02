@@ -7,23 +7,14 @@ using OnBoarding.ConsoleHost.Games.Serializations;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-sealed class WorldCommand : CommandMethodBase
+[method: ImportingConstructor]
+sealed class WorldCommand(Application application) : CommandMethodBase
 {
-    private readonly Application _application;
-    private readonly SwarmHostCollection _swarmHosts;
-
-    [ImportingConstructor]
-    public WorldCommand(Application application, SwarmHostCollection swarmHosts)
-    {
-        _application = application;
-        _swarmHosts = swarmHosts;
-    }
-
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     public void LeaderBoard()
     {
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
         var blockChain = swarmHost.BlockChain;
 
         var world = blockChain.GetWorldState();

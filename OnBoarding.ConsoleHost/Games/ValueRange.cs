@@ -3,15 +3,8 @@ using Newtonsoft.Json;
 
 namespace OnBoarding.ConsoleHost.Games;
 
-readonly struct ValueRange : IEquatable<ValueRange>
+readonly struct ValueRange(long begin, long length) : IEquatable<ValueRange>
 {
-    public ValueRange(long begin, long length)
-    {
-        Begin = begin;
-        Length = length;
-        End = checked((long)(begin + length));
-    }
-
     public ValueRange(long begin)
         : this(begin, 0)
     {
@@ -45,12 +38,12 @@ readonly struct ValueRange : IEquatable<ValueRange>
 
     public long Get(Random random) => random.NextInt64(Begin, End);
 
-    public long Begin { get; }
+    public long Begin { get; } = begin;
 
-    public long Length { get; }
+    public long Length { get; } = length;
 
     [JsonIgnore]
-    public long End { get; }
+    public long End { get; } = checked((long)(begin + length));
 
     [JsonIgnore]
     public readonly long Min => Math.Min(Begin, End);

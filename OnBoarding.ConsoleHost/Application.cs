@@ -4,6 +4,7 @@ using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
+using OnBoarding.ConsoleHost.Exceptions;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -38,18 +39,10 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     }
 
     public User GetUser(int userIndex)
-    {
-        if (_users == null)
-            throw new InvalidOperationException();
-        return userIndex == -1 ? _users.Current : _users[userIndex];
-    }
+        => userIndex == -1 ? _users.Current : _users[userIndex];
 
     public BlockChain GetBlockChain(int swarmIndex)
-    {
-        if (_swarmHosts == null)
-            throw new InvalidOperationException();
-        return swarmIndex == -1 ? _swarmHosts.Current.BlockChain : _swarmHosts[swarmIndex].BlockChain;
-    }
+        => swarmIndex == -1 ? _swarmHosts.Current.BlockChain : _swarmHosts[swarmIndex].BlockChain;
 
     public Block GetBlock(int swarmIndex, long blockIndex)
     {
@@ -58,16 +51,11 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     }
 
     public SwarmHost GetSwarmHost(int swarmIndex)
-    {
-        if (_swarmHosts == null)
-            throw new InvalidOperationException();
-        return swarmIndex == -1 ? _swarmHosts.Current : _swarmHosts[swarmIndex];
-    }
+        => swarmIndex == -1 ? _swarmHosts.Current : _swarmHosts[swarmIndex];
 
     public void Cancel()
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
@@ -75,10 +63,8 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public async Task StartAsync()
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-        if (_terminal != null)
-            throw new InvalidOperationException("Application has already been started.");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(_terminal != null, "Application has already been started.");
 
         await _applicationServices.InitializeAsync(this, cancellationToken: default);
         await PrepareCommandContext();
@@ -103,8 +89,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
 
     public async ValueTask DisposeAsync()
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
         _swarmHosts.CurrentChanged -= SwarmHosts_CurrentChanged;
         _currentSwarmHost.BlockAppended -= SwarmHost_BlockAppended;

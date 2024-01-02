@@ -1,4 +1,5 @@
 using Libplanet.Crypto;
+using OnBoarding.ConsoleHost.Exceptions;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;
@@ -13,7 +14,7 @@ sealed class Stage
     {
         _player = new(stageInfo.Player);
         _monsters = new(stageInfo.Monsters);
-        _characters = new Character[] { _player }.Concat(_monsters).ToArray();
+        _characters = [_player, .. _monsters];
         Random = new(seed);
         Out = @out;
     }
@@ -43,10 +44,8 @@ sealed class Stage
 
     public void Play()
     {
-        if (IsEnded == true)
-            throw new InvalidOperationException("Stage has already ended.");
-        if (IsPlaying == true)
-            throw new InvalidOperationException("Stage is playing.");
+        InvalidOperationExceptionUtility.ThrowIf(IsEnded == true, "Stage has already ended.");
+        InvalidOperationExceptionUtility.ThrowIf(IsPlaying == true, "Stage is playing.");
 
         using var _ = new PlayScope(this);
         Turn = 0;
@@ -59,10 +58,8 @@ sealed class Stage
 
     public async Task PlayAsync(int tick, CancellationToken cancellationToken)
     {
-        if (IsEnded == true)
-            throw new InvalidOperationException("Stage has already ended.");
-        if (IsPlaying == true)
-            throw new InvalidOperationException("Stage is playing.");
+        InvalidOperationExceptionUtility.ThrowIf(IsEnded == true, "Stage has already ended.");
+        InvalidOperationExceptionUtility.ThrowIf(IsPlaying == true, "Stage is playing.");
 
         using var _ = new PlayScope(this);
         Turn = 0;

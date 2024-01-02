@@ -13,6 +13,7 @@ using Libplanet.Types.Blocks;
 using Bencodex.Types;
 using Libplanet.Common;
 using System.Security.Cryptography;
+using OnBoarding.ConsoleHost.Exceptions;
 
 namespace OnBoarding.ConsoleHost;
 
@@ -33,7 +34,7 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
     private Swarm? _swarm;
     private Task? _startTask;
     private bool _isDisposed;
-    private readonly Dictionary<ManualResetEvent, Block> _blockByEvent = new();
+    private readonly Dictionary<ManualResetEvent, Block> _blockByEvent = [];
 
     public SwarmHost(string name, PrivateKey privateKey, PublicKey[] validatorKeys, string storePath)
     {
@@ -65,10 +66,8 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 
     public async Task<Block> AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-        if (_startTask == null || _swarm == null)
-            throw new InvalidOperationException("Swarm has been stopped.");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(_startTask == null || _swarm == null, "Swarm has been stopped.");
 
         var blockChain = BlockChain;
         var privateKey = user.PrivateKey;
@@ -91,10 +90,8 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 
     public async Task StartAsync(BoundPeer seedPeer, BoundPeer consensusSeedPeer, CancellationToken cancellationToken)
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-        if (_startTask != null)
-            throw new InvalidOperationException("Swarm has been started.");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(_startTask != null, "Swarm has been started.");
 
         var privateKey = _privateKey;
         var peer = _peer;
@@ -121,21 +118,18 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
-        if (_startTask == null || _swarm == null)
-            throw new InvalidOperationException("Swarm has been stopped.");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(_startTask == null || _swarm == null, "Swarm has been stopped.");
 
-        await _swarm.StopAsync(cancellationToken: cancellationToken);
-        await _startTask;
+        await _swarm!.StopAsync(cancellationToken: cancellationToken);
+        await _startTask!;
         _swarm.Dispose();
         _startTask = null;
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_isDisposed == true)
-            throw new ObjectDisposedException($"{this}");
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
         if (_swarm != null)
         {

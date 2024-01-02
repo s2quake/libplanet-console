@@ -22,7 +22,7 @@ sealed class RankInfoCollection : IEnumerable<RankInfo>
         }
         else
         {
-            _itemList = new();
+            _itemList = [];
         }
     }
 

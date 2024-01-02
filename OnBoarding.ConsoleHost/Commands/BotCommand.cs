@@ -5,19 +5,11 @@ using JSSoft.Terminals;
 namespace OnBoarding.ConsoleHost.Commands;
 
 [Export(typeof(ICommand))]
-sealed class BotCommand : CommandMethodBase
+[method: ImportingConstructor]
+sealed class BotCommand(Application application) : CommandMethodBase
 {
-    private readonly Application _application;
-    private readonly UserCollection _users;
-    private readonly BotCollection _bots;
-
-    [ImportingConstructor]
-    public BotCommand(Application application)
-    {
-        _application = application;
-        _users = application.GetService<UserCollection>()!;
-        _bots = application.GetService<BotCollection>()!;
-    }
+    private readonly UserCollection _users = application.GetService<UserCollection>()!;
+    private readonly BotCollection _bots = application.GetService<BotCollection>()!;
 
     [CommandMethod]
     public async Task StartAllAsync(CancellationToken cancellationToken)

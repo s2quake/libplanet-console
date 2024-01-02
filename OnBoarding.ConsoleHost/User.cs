@@ -2,6 +2,7 @@ using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using OnBoarding.ConsoleHost.Actions;
+using OnBoarding.ConsoleHost.Exceptions;
 using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Games;
 using OnBoarding.ConsoleHost.Games.Serializations;
@@ -37,8 +38,7 @@ sealed class User
 
     public void Login(SwarmHost swarmHost)
     {
-        if (IsOnline == true)
-            throw new InvalidOperationException($"{this} is already online.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline == true, $"{this} is already online.");
 
         PlayerInfo = GetPlayerInfo(swarmHost, Address);
         IsOnline = true;
@@ -47,8 +47,7 @@ sealed class User
 
     public void Logout()
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
 
         PlayerInfo = null;
         IsOnline = false;
@@ -57,17 +56,15 @@ sealed class User
 
     public PlayerInfo GetPlayerInfo()
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
-        if (PlayerInfo == null)
-            throw new InvalidOperationException($"{this} does not have character.");
-        return PlayerInfo;
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
+
+        return PlayerInfo!;
     }
 
     public GamePlayRecord[] GetGameHistory(SwarmHost swarmHost)
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
 
         var blockChain = swarmHost.BlockChain;
         return GamePlayRecord.GetGamePlayRecords(blockChain, Address).ToArray();
@@ -75,20 +72,16 @@ sealed class User
 
     public void Refresh(SwarmHost swarmHost)
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
 
         PlayerInfo = GetPlayerInfo(swarmHost, Address);
     }
 
     public async Task<long> PlayGameAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
-        if (PlayerInfo == null)
-            throw new InvalidOperationException($"{this} does not have character.");
-        if (PlayerInfo.Life <= 0)
-            throw new InvalidOperationException($"{this} 's character has died.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo!.Life <= 0, $"{this} 's character has died.");
 
         var playerInfo = PlayerInfo!;
         var monsterCount = RandomUtility.GetNext(8, 12);
@@ -120,12 +113,10 @@ sealed class User
 
     public Task ReplayGameAsync(SwarmHost swarmHost, int tick, CancellationToken cancellationToken)
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
-        if (PlayerInfo == null)
-            throw new InvalidOperationException($"{this} does not have character.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
 
-        var blockIndex = PlayerInfo.BlockIndex;
+        var blockIndex = PlayerInfo!.BlockIndex;
         return ReplayGameAsync(swarmHost, blockIndex, tick, cancellationToken);
     }
 
@@ -147,10 +138,8 @@ sealed class User
 
     public async Task CreateCharacterAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
-        if (PlayerInfo != null)
-            throw new InvalidOperationException($"{this} already has character.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo != null, $"{this} already has character.");
 
         var characterCreationAction = new CharacterCreationAction()
         {
@@ -165,12 +154,9 @@ sealed class User
 
     public async Task ReviveCharacterAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
     {
-        if (IsOnline == false)
-            throw new InvalidOperationException($"{this} is not online.");
-        if (PlayerInfo == null)
-            throw new InvalidOperationException($"{this} does not have character.");
-        if (PlayerInfo.Life > 0)
-            throw new InvalidOperationException($"{this} 's is not dead.");
+        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
+        InvalidOperationExceptionUtility.ThrowIf(PlayerInfo!.Life > 0, $"{this} 's is not dead.");
 
         var characterResurrectionAction = new CharacterResurrectionAction()
         {

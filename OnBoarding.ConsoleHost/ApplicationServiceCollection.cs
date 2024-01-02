@@ -2,14 +2,9 @@ using System.Collections;
 
 namespace OnBoarding.ConsoleHost;
 
-sealed class ApplicationServiceCollection : IEnumerable<IApplicationService>, IAsyncDisposable
+sealed class ApplicationServiceCollection(IEnumerable<IApplicationService> applicationServices) : IEnumerable<IApplicationService>, IAsyncDisposable
 {
-    private readonly IApplicationService[] _applicationServices;
-
-    public ApplicationServiceCollection(IEnumerable<IApplicationService> applicationServices)
-    {
-        _applicationServices = applicationServices.ToArray();
-    }
+    private readonly IApplicationService[] _applicationServices = applicationServices.ToArray();
 
     public async Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
