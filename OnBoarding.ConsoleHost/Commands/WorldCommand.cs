@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition;
 using Bencodex.Types;
-using JSSoft.Library.Commands;
+using JSSoft.Commands;
 using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Games.Serializations;
 

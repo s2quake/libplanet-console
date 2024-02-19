@@ -1,5 +1,5 @@
-﻿using JSSoft.Library.Commands;
-using JSSoft.Library.Terminals;
+﻿using JSSoft.Commands;
+using JSSoft.Terminals;
 using OnBoarding.ConsoleHost;
 
 try

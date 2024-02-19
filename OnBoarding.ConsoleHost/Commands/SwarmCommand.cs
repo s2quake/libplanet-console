@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition;
-using JSSoft.Library.Commands;
-using JSSoft.Library.Terminals;
+using JSSoft.Commands;
+using JSSoft.Terminals;
 using OnBoarding.ConsoleHost.Extensions;
 using OnBoarding.ConsoleHost.Serializations;
 

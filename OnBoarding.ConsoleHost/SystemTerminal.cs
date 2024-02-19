@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition;
-using JSSoft.Library.Commands.Extensions;
-using JSSoft.Library.Terminals;
+using JSSoft.Commands.Extensions;
+using JSSoft.Terminals;
 
 namespace OnBoarding.ConsoleHost;
 

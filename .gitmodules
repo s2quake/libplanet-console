@@ -1,3 +1,6 @@
 [submodule ".Libplanet"]
 	path = .Libplanet
 	url = https://github.com/planetarium/libplanet
+[submodule ".commands"]
+	path = .commands
+	url = https://github.com/s2quake/commands

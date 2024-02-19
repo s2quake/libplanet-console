@@ -1,4 +1,4 @@
-using JSSoft.Library.Terminals;
+using JSSoft.Terminals;
 using OnBoarding.ConsoleHost.Games.Serializations;
 
 namespace OnBoarding.ConsoleHost.Games;

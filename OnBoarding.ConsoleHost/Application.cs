@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using JSSoft.Library.Commands.Extensions;
-using JSSoft.Library.Terminals;
+using JSSoft.Commands.Extensions;
+using JSSoft.Terminals;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
 

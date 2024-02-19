@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using System.Text;
-using JSSoft.Library.Commands;
-using JSSoft.Library.Terminals;
+using JSSoft.Commands;
+using JSSoft.Terminals;
 using OnBoarding.ConsoleHost.Extensions;
 
 namespace OnBoarding.ConsoleHost.Commands;

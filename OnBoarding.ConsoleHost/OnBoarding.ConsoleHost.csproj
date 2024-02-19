@@ -4,14 +4,10 @@
     <ProjectReference Include="..\.Libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\.Libplanet\Libplanet.Net\Libplanet.Net.csproj" />
     <ProjectReference Include="..\.Libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+    <ProjectReference Include="..\.commands\JSSoft.Terminals\JSSoft.Terminals.csproj" />
+    <ProjectReference Include="..\.commands\JSSoft.Commands\JSSoft.Commands.csproj" />
     <Reference Include="JSSoft.Library.dll">
       <HintPath>..\Assemblies\JSSoft.Library.dll</HintPath>
-    </Reference>
-    <Reference Include="JSSoft.Library.Commands.dll">
-      <HintPath>..\Assemblies\JSSoft.Library.Commands.dll</HintPath>
-    </Reference>
-    <Reference Include="JSSoft.Library.Terminals.dll">
-      <HintPath>..\Assemblies\JSSoft.Library.Terminals.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -25,7 +21,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>
