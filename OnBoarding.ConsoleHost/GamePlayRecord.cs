@@ -45,8 +45,7 @@ record class GamePlayRecord(Block Block, ITransaction Transaction, IValue Action
         var offset = Offset;
         var preEvaluationHashBytes = block.PreEvaluationHash.ToByteArray();
         var signature = transaction.Signature;
-        var hashedSignature = ComputeHash(signature);
-        return ActionEvaluator.GenerateRandomSeed(preEvaluationHashBytes, hashedSignature, signature, offset);
+        return ActionEvaluator.GenerateRandomSeed(preEvaluationHashBytes, signature, offset);
     }
 
     public StageInfo GetStageInfo()

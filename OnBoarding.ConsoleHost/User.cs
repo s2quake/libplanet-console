@@ -15,7 +15,7 @@ sealed class User
     public User(string name)
     {
         _privateKey = PrivateKeyUtility.Create(name);
-        Address = _privateKey.ToAddress();
+        Address = _privateKey.Address;
         Name = name;
     }
 

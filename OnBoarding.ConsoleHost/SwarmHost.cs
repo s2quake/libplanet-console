@@ -73,7 +73,7 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
         var blockChain = BlockChain;
         var privateKey = user.PrivateKey;
         var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
+        var nonce = blockChain.GetNextTxNonce(privateKey.Address);
         var values = actions.Select(item => item.PlainValue).ToArray();
         var transaction = Transaction.Create(
             nonce: nonce,

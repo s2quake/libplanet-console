@@ -23,7 +23,7 @@ sealed class Stage
     {
     }
 
-    public Address Address { get; } = new PrivateKey().ToAddress();
+    public Address Address { get; } = new PrivateKey().Address;
 
     public Player Player => _player;
 

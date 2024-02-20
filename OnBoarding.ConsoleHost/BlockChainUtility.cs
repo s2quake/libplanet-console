@@ -68,7 +68,7 @@ static class BlockChainUtility
     {
         var privateKey = user.PrivateKey;
         var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce(privateKey.ToAddress());
+        var nonce = blockChain.GetNextTxNonce(privateKey.Address);
         var transaction = Transaction.Create(
             nonce: nonce,
             privateKey: privateKey,
@@ -92,7 +92,7 @@ static class BlockChainUtility
         var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
-        var votes = validators.OrderBy(item => item.ToAddress()).Select(item =>
+        var votes = validators.OrderBy(item => item.Address).Select(item =>
         {
             var voteMetadata = new VoteMetadata(
             height: height,
