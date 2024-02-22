@@ -32,7 +32,7 @@ sealed class User
 
     public PlayerInfo? PlayerInfo { get; set; }
 
-    public bool IsOnline { get; private set; }
+    public bool IsOnline { get; private set; } = true;
 
     public TextWriter Out { get; set; } = Console.Out;
 
@@ -147,7 +147,7 @@ sealed class User
             PlayerInfo = PlayerInfo.CreateNew(Name),
         };
         await Out.WriteLineAsync($"{this} requests to create a character.");
-        await swarmHost.AddTransactionAsync(this, new IAction[] { characterCreationAction }, cancellationToken);
+        await swarmHost.AddTransactionAsync(this, [characterCreationAction], cancellationToken);
         Refresh(swarmHost);
         await Out.WriteLineAsync($"{this} created the character.");
     }
@@ -163,7 +163,7 @@ sealed class User
             UserAddress = Address,
         };
         await Out.WriteLineAsync($"{this} requests to revive a character.");
-        await swarmHost.AddTransactionAsync(this, new IAction[] { characterResurrectionAction }, cancellationToken);
+        await swarmHost.AddTransactionAsync(this, [characterResurrectionAction], cancellationToken);
         Refresh(swarmHost);
         await Out.WriteLineAsync($"{this} revived the character.");
     }
@@ -172,7 +172,7 @@ sealed class User
     {
         var blockChain = swarmHost.BlockChain;
         var worldState = blockChain.GetWorldState();
-        var account = worldState.GetAccount(address);
+        var account = worldState.GetAccountState(address);
         if (account.GetState(UserStates.PlayerInfo) is Dictionary values)
         {
             return new PlayerInfo(values);

@@ -15,7 +15,7 @@ record MonsterInfo : CharacterInfo
         Skills = SkillInfo.FromBencodex((List)values[nameof(Skills)]);
     }
 
-    public SkillInfo[] Skills { get; set; } = Array.Empty<SkillInfo>();
+    public SkillInfo[] Skills { get; set; } = [];
 
     public override Dictionary ToBencodex()
     {
@@ -42,10 +42,10 @@ record MonsterInfo : CharacterInfo
                 Name = $"Monster {i}",
                 Life = 10,
                 MaxLife = 10,
-                Skills = new SkillInfo[]
-                {
+                Skills =
+                [
                     new() { MaxCoolTime = 10, CoolTime = RandomUtility.GetNext(10), Value = new ValueRange(1, 4) },
-                },
+                ],
             };
             items[i] = item;
         }

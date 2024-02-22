@@ -17,7 +17,7 @@ record StageInfo
         Player = new PlayerInfo((Dictionary)values[nameof(Player)]);
     }
 
-    public MonsterInfo[] Monsters { get; init; } = Array.Empty<MonsterInfo>();
+    public MonsterInfo[] Monsters { get; init; } = [];
 
     public PlayerInfo Player { get; init; } = PlayerInfo.Empty;
 

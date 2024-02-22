@@ -10,15 +10,17 @@ namespace OnBoarding.ConsoleHost.Commands;
 [method: ImportingConstructor]
 sealed class WorldCommand(Application application) : CommandMethodBase
 {
+    private readonly Application _application = application;
+
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
     public void LeaderBoard()
     {
-        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
+        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
         var blockChain = swarmHost.BlockChain;
 
         var world = blockChain.GetWorldState();
-        var worldAccount = world.GetAccount(WorldAccounts.Default);
+        var worldAccount = world.GetAccountState(WorldAccounts.Default);
         if (worldAccount.GetState(WorldStates.LeaderBoard) is List rankList)
         {
             var rankInfos = RankInfo.GetRankInfos(rankList);

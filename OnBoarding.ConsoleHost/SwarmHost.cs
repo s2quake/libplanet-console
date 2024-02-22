@@ -100,12 +100,12 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
         var transport = await CreateTransport(privateKey, peer.EndPoint.Port, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = seedPeer == peer ? ImmutableHashSet<BoundPeer>.Empty : ImmutableHashSet.Create(seedPeer),
+            StaticPeers = seedPeer == peer ? [] : ImmutableHashSet.Create(seedPeer),
         };
         var consensusTransport = await CreateTransport(privateKey, consensusPeer.EndPoint.Port, cancellationToken);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = consensusSeedPeer == consensusPeer ? ImmutableList<BoundPeer>.Empty : ImmutableList.Create(consensusSeedPeer),
+            SeedPeers = consensusSeedPeer == consensusPeer ? [] : [consensusSeedPeer],
             ConsensusPort = consensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(10),
@@ -152,7 +152,7 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
         {
             AppProtocolVersion = apv,
         };
-        var hostOptions = new HostOptions($"{IPAddress.Loopback}", Array.Empty<IceServer>(), port);
+        var hostOptions = new HostOptions($"{IPAddress.Loopback}", [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 

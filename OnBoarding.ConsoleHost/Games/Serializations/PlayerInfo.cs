@@ -36,7 +36,7 @@ record PlayerInfo : CharacterInfo
 
     public long Level { get; init; }
 
-    public SkillInfo[] Skills { get; init; } = Array.Empty<SkillInfo>();
+    public SkillInfo[] Skills { get; init; } = [];
 
     public long BlockIndex { get; set; }
 
@@ -47,10 +47,10 @@ record PlayerInfo : CharacterInfo
             Name = name,
             Life = RandomUtility.GetNext(1, 1000),
             MaxLife = 1000,
-            Skills = new SkillInfo[]
-            {
+            Skills =
+            [
                 new() { MaxCoolTime = 3L, CoolTime = 0L, Value = new ValueRange(1, 4) },
-            },
+            ],
         };
     }
 

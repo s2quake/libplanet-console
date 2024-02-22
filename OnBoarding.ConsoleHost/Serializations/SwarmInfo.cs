@@ -14,7 +14,7 @@ record class SwarmInfo
         LastMessageTimestamp = $"{swarm.LastMessageTimestamp}";
         BlockChain = new(swarm.BlockChain);
         Peers = swarm.Peers.Select(item => new BoundPeerInfo(item)).ToArray();
-        Validators = swarm.Validators != null ? swarm.Validators.Select(item => new BoundPeerInfo(item)).ToArray() : Array.Empty<BoundPeerInfo>();
+        Validators = swarm.Validators != null ? swarm.Validators.Select(item => new BoundPeerInfo(item)).ToArray() : [];
         TrustedAppProtocolVersionSigners = swarm.TrustedAppProtocolVersionSigners.Select(item => $"{item}").ToArray();
     }
 
