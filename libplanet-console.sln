@@ -1,0 +1,111 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Executable", "src\LibplanetConsole.Executable\LibplanetConsole.Executable.csproj", "{D2160AF4-B7D0-4C83-9279-D032618A5A9B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".libplanet", ".libplanet", "{23C68389-8F13-48E7-9878-440917F70DAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Net", ".libplanet\Libplanet.Net\Libplanet.Net.csproj", "{247CFCAD-0FF6-4B38-974B-7B35ADC1A333}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet", ".libplanet\Libplanet\Libplanet.csproj", "{C716147E-87FF-4707-911B-C73A584DB9BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Action", ".libplanet\Libplanet.Action\Libplanet.Action.csproj", "{CC8D893E-CBA1-4CAE-BB06-BF76F13D2841}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Crypto", ".libplanet\Libplanet.Crypto\Libplanet.Crypto.csproj", "{353DE3FD-F354-450A-A196-B83B237279B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Common", ".libplanet\Libplanet.Common\Libplanet.Common.csproj", "{763C7F63-175A-4526-AD1C-8B5D10BC2B6D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Types", ".libplanet\Libplanet.Types\Libplanet.Types.csproj", "{FFBD6935-AE65-407D-875E-C565F6F5781F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Store", ".libplanet\Libplanet.Store\Libplanet.Store.csproj", "{758603E2-D8AB-49F4-8F39-66D527EC2D74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Stun", ".libplanet\Libplanet.Stun\Libplanet.Stun.csproj", "{E68EA738-7B86-4F29-8A6C-82AAE8BD9E8C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.RocksDBStore", ".libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj", "{4ED29D98-4E18-4ED9-AA50-0EBD8896177E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Tests", "test\LibplanetConsole.Tests\LibplanetConsole.Tests.csproj", "{A96B3881-AED2-4183-ABF6-1723CEC22A66}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".commands", ".commands", "{C5A3C2EF-34CA-40F5-9099-F18C40355FE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Commands", ".commands\JSSoft.Commands\JSSoft.Commands.csproj", "{C3C54771-C5BC-40FA-81DD-563F77144211}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Terminals", ".commands\JSSoft.Terminals\JSSoft.Terminals.csproj", "{BBA5CF56-1139-464F-BC32-12D049CE3B3F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2160AF4-B7D0-4C83-9279-D032618A5A9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2160AF4-B7D0-4C83-9279-D032618A5A9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2160AF4-B7D0-4C83-9279-D032618A5A9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2160AF4-B7D0-4C83-9279-D032618A5A9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{247CFCAD-0FF6-4B38-974B-7B35ADC1A333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{247CFCAD-0FF6-4B38-974B-7B35ADC1A333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{247CFCAD-0FF6-4B38-974B-7B35ADC1A333}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{247CFCAD-0FF6-4B38-974B-7B35ADC1A333}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C716147E-87FF-4707-911B-C73A584DB9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C716147E-87FF-4707-911B-C73A584DB9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C716147E-87FF-4707-911B-C73A584DB9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C716147E-87FF-4707-911B-C73A584DB9BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC8D893E-CBA1-4CAE-BB06-BF76F13D2841}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC8D893E-CBA1-4CAE-BB06-BF76F13D2841}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC8D893E-CBA1-4CAE-BB06-BF76F13D2841}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC8D893E-CBA1-4CAE-BB06-BF76F13D2841}.Release|Any CPU.Build.0 = Release|Any CPU
+		{353DE3FD-F354-450A-A196-B83B237279B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{353DE3FD-F354-450A-A196-B83B237279B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{353DE3FD-F354-450A-A196-B83B237279B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{353DE3FD-F354-450A-A196-B83B237279B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{763C7F63-175A-4526-AD1C-8B5D10BC2B6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{763C7F63-175A-4526-AD1C-8B5D10BC2B6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{763C7F63-175A-4526-AD1C-8B5D10BC2B6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{763C7F63-175A-4526-AD1C-8B5D10BC2B6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFBD6935-AE65-407D-875E-C565F6F5781F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFBD6935-AE65-407D-875E-C565F6F5781F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFBD6935-AE65-407D-875E-C565F6F5781F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFBD6935-AE65-407D-875E-C565F6F5781F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{758603E2-D8AB-49F4-8F39-66D527EC2D74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{758603E2-D8AB-49F4-8F39-66D527EC2D74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{758603E2-D8AB-49F4-8F39-66D527EC2D74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{758603E2-D8AB-49F4-8F39-66D527EC2D74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E68EA738-7B86-4F29-8A6C-82AAE8BD9E8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68EA738-7B86-4F29-8A6C-82AAE8BD9E8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68EA738-7B86-4F29-8A6C-82AAE8BD9E8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68EA738-7B86-4F29-8A6C-82AAE8BD9E8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4ED29D98-4E18-4ED9-AA50-0EBD8896177E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4ED29D98-4E18-4ED9-AA50-0EBD8896177E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4ED29D98-4E18-4ED9-AA50-0EBD8896177E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4ED29D98-4E18-4ED9-AA50-0EBD8896177E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A96B3881-AED2-4183-ABF6-1723CEC22A66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A96B3881-AED2-4183-ABF6-1723CEC22A66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A96B3881-AED2-4183-ABF6-1723CEC22A66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A96B3881-AED2-4183-ABF6-1723CEC22A66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3C54771-C5BC-40FA-81DD-563F77144211}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3C54771-C5BC-40FA-81DD-563F77144211}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3C54771-C5BC-40FA-81DD-563F77144211}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3C54771-C5BC-40FA-81DD-563F77144211}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBA5CF56-1139-464F-BC32-12D049CE3B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBA5CF56-1139-464F-BC32-12D049CE3B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBA5CF56-1139-464F-BC32-12D049CE3B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBA5CF56-1139-464F-BC32-12D049CE3B3F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{247CFCAD-0FF6-4B38-974B-7B35ADC1A333} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{C716147E-87FF-4707-911B-C73A584DB9BC} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{CC8D893E-CBA1-4CAE-BB06-BF76F13D2841} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{353DE3FD-F354-450A-A196-B83B237279B7} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{763C7F63-175A-4526-AD1C-8B5D10BC2B6D} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{FFBD6935-AE65-407D-875E-C565F6F5781F} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{758603E2-D8AB-49F4-8F39-66D527EC2D74} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{E68EA738-7B86-4F29-8A6C-82AAE8BD9E8C} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{4ED29D98-4E18-4ED9-AA50-0EBD8896177E} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{C3C54771-C5BC-40FA-81DD-563F77144211} = {C5A3C2EF-34CA-40F5-9099-F18C40355FE3}
+		{BBA5CF56-1139-464F-BC32-12D049CE3B3F} = {C5A3C2EF-34CA-40F5-9099-F18C40355FE3}
+	EndGlobalSection
+EndGlobal

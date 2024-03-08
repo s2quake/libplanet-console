@@ -16,5 +16,5 @@ git clone https://github.com/s2quake/OnBoarding.git --recursive
 
 ```sh
 dotnet build
-dotnet run --project OnBoarding.ConsoleHost
+dotnet run --project LibplanetConsole.Executable
 ```

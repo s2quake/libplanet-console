@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C#: OnBoarding Debug",
+            "name": "C#: LibplanetConsole",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/OnBoarding.ConsoleHost/bin/Debug/net8.0/OnBoarding.ConsoleHost.dll",
+            "program": "${workspaceFolder}/src/LibplanetConsole.Executable/bin/Debug/net8.0/LibplanetConsole.Executable.dll",
             "console": "integratedTerminal"
         }
     ]
