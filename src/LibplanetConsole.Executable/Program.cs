@@ -6,7 +6,7 @@ try
 {
     var options = ApplicationOptions.Parse(args);
     var @out = Console.Out;
-    @out.WriteLine(TerminalStringBuilder.GetString("Welcome to jeesu world for OnBoarding.", TerminalColorType.BrightGreen));
+    @out.WriteLine(TerminalStringBuilder.GetString("Welcome to console for Libplanet.", TerminalColorType.BrightGreen));
     await using var application = new Application(options);
     @out.WriteLine();
     await application.StartAsync();

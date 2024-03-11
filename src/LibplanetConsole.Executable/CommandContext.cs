@@ -7,7 +7,7 @@ namespace LibplanetConsole.Executable;
 
 [Export(typeof(CommandContext))]
 [CommandSummary("Provides a prompt for input and execution of commands.")]
-[CommandDescription("REPL for OnBoarding")]
+[CommandDescription("REPL for libplanet.")]
 [method: ImportingConstructor]
 sealed class CommandContext([ImportMany] IEnumerable<ICommand> commands, HelpCommand helpCommand, VersionCommand versionCommand) : CommandContextBase(commands)
 {

@@ -8,7 +8,7 @@
             "name": "C#: LibplanetConsole",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/LibplanetConsole.Executable/bin/Debug/net8.0/LibplanetConsole.Executable.dll",
+            "program": "${workspaceFolder}/src/LibplanetConsole.Executable/bin/Debug/net8.0/libplanet-console.dll",
             "console": "integratedTerminal"
         }
     ]
