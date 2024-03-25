@@ -1,6 +1,6 @@
 [submodule ".commands"]
 	path = .commands
-	url = ../commands
+	url = ../commands.git
 [submodule ".libplanet"]
 	path = .libplanet
-	url = https://github.com/planetarium/libplanet.git
+	url = ../libplanet.git

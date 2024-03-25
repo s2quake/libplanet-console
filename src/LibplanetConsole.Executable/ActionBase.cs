@@ -3,7 +3,7 @@ using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Action.State;
 
-namespace LibplanetConsole.Executable.Actions;
+namespace LibplanetConsole.Executable;
 
 abstract class ActionBase : IAction
 {

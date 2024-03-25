@@ -14,6 +14,8 @@ using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Executable.BeginActions;
+using LibplanetConsole.Executable.EndActions;
 
 namespace LibplanetConsole.Executable;
 
@@ -29,7 +31,21 @@ static class BlockChainUtility
         var isNew = storePath == string.Empty || Directory.Exists(storePath) == false;
         var (store, stateStore) = GetStore(storePath);
         var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
-        var actionEvaluator = new ActionEvaluator(_ => null, stateStore, actionLoader);
+        var beginActions = new IAction[]
+        {
+            new SlashingAction(),
+        };
+        var endActions = new IAction[]
+        {
+            new RewardAction(),
+            new ValidatorUpdatingAction(),
+        };
+        var actionEvaluator = new ActionEvaluator(
+            policyBeginBlockActionGetter: _ => beginActions.ToImmutableArray(),
+            policyEndBlockActionGetter: _ => endActions.ToImmutableArray(),
+            stateStore,
+            actionLoader
+        );
         var validatorList = validatorKeys.Select(item => new Validator(item, BigInteger.One)).ToList();
         var validatorSet = new ValidatorSet(validatorList);
         var nonce = 0L;
@@ -41,7 +57,7 @@ static class BlockChainUtility
             nonce,
             GenesisProposer,
             genesisHash: null,
-            actions: new IValue[] { action.PlainValue },
+            actions: [action.PlainValue],
             timestamp: DateTimeOffset.MinValue
             );
         var transactions = ImmutableList.Create(transaction);
@@ -58,12 +74,14 @@ static class BlockChainUtility
         return new BlockChain(policy, stagePolicy, store, stateStore, genesisBlock, blockChainStates, actionEvaluator, renderers);
     }
 
+    [Obsolete("Do not use this method. It exists to help understand how blocks can be appended to the blockchain.")]
     public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)
     {
         var block = AppendNew(blockChain, user, validators, actions.Select(item => item.PlainValue).ToArray());
         return block;
     }
 
+    [Obsolete("Do not use this method. It exists to help understand how blocks can be appended to the blockchain.")]
     public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IValue[] values)
     {
         var privateKey = user.PrivateKey;
@@ -83,10 +101,10 @@ static class BlockChainUtility
             publicKey: privateKey.PublicKey,
             timestamp: DateTimeOffset.UtcNow,
             previousHash: previousBlock.Hash,
-            txHash: BlockContent.DeriveTxHash(new Transaction[] { transaction }),
+            txHash: BlockContent.DeriveTxHash([transaction]),
             lastCommit: lastCommit
         );
-        var blockContent = new BlockContent(blockMetadata, new Transaction[] { transaction });
+        var blockContent = new BlockContent(blockMetadata, [transaction]);
         var preEvaluationBlock = blockContent.Propose();
         var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
         var height = blockChain.Count;

@@ -39,6 +39,7 @@ sealed class CharacterCreationAction : ActionBase
         }
         playerInfo.BlockIndex = context.BlockIndex;
         account = account.SetState(UserStates.PlayerInfo, playerInfo.ToBencodex());
+        Console.WriteLine($"CharacterCreationAction executed!");
         return previousState.SetAccount(userAddress, account);
     }
 }

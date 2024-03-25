@@ -78,7 +78,7 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
             var commandContext = GetService<CommandContext>()!;
             commandContext.Out = sw;
             sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
-            await commandContext.ExecuteAsync(new string[] { "--help" }, cancellationToken: default);
+            await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
             sw.WriteLine();
             await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default);
             sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
