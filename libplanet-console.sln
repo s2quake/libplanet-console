@@ -29,9 +29,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Tests", "t
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".commands", ".commands", "{C5A3C2EF-34CA-40F5-9099-F18C40355FE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Commands", ".commands\JSSoft.Commands\JSSoft.Commands.csproj", "{C3C54771-C5BC-40FA-81DD-563F77144211}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Commands", ".commands\src\JSSoft.Commands\JSSoft.Commands.csproj", "{C3C54771-C5BC-40FA-81DD-563F77144211}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Terminals", ".commands\JSSoft.Terminals\JSSoft.Terminals.csproj", "{BBA5CF56-1139-464F-BC32-12D049CE3B3F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Terminals", ".commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj", "{BBA5CF56-1139-464F-BC32-12D049CE3B3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,8 +4,8 @@
     <ProjectReference Include="..\..\.libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
     <ProjectReference Include="..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
-    <ProjectReference Include="..\..\.commands\JSSoft.Terminals\JSSoft.Terminals.csproj" />
-    <ProjectReference Include="..\..\.commands\JSSoft.Commands\JSSoft.Commands.csproj" />
+    <ProjectReference Include="..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
+    <ProjectReference Include="..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
     <Reference Include="JSSoft.Library.dll">
       <HintPath>..\..\assemblies\JSSoft.Library.dll</HintPath>
     </Reference>
