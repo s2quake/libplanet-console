@@ -11,7 +11,7 @@ sealed class ValidatorUpdatingAction : ActionBase
         var world = context.PreviousState;
         if (context.GetService(typeof(IValidatorContext)) is IValidatorContext validatorContext)
         {
-            Console.WriteLine("ValidatorUpdatingAction executed!");
+            // Console.WriteLine("ValidatorUpdatingAction executed!");
         }
         return world;
     }

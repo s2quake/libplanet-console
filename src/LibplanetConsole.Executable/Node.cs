@@ -14,10 +14,12 @@ using Bencodex.Types;
 using Libplanet.Common;
 using System.Security.Cryptography;
 using LibplanetConsole.Executable.Exceptions;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace LibplanetConsole.Executable;
 
-sealed class SwarmHost : IAsyncDisposable, IActionRenderer
+sealed class Node : IAsyncDisposable, IActionRenderer
 {
     public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString
     (
@@ -30,13 +32,13 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
     private readonly BoundPeer _consensusPeer;
     private readonly BlockChain _blockChain;
     private readonly SynchronizationContext _synchronizationContext = SynchronizationContext.Current!;
-    private ManualResetEvent _manualResetEvent = new(initialState: false);
+    private readonly ConcurrentDictionary<long, ManualResetEvent> _eventByHeight = [];
+    private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
     private Swarm? _swarm;
     private Task? _startTask;
     private bool _isDisposed;
-    private readonly Dictionary<ManualResetEvent, Block> _blockByEvent = [];
 
-    public SwarmHost(string name, PrivateKey privateKey, PublicKey[] validatorKeys, string storePath)
+    public Node(string name, PrivateKey privateKey, PublicKey[] validatorKeys, string storePath)
     {
         _name = name;
         _privateKey = privateKey;
@@ -53,24 +55,35 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 
     public bool IsDisposed => _isDisposed;
 
+    public Address Address => _privateKey.Address;
+
+    public PublicKey PublicKey => _privateKey.PublicKey;
+
     public Swarm Target => _swarm ?? throw new InvalidOperationException("Swarm has been stopped.");
 
     public BlockChain BlockChain => _blockChain;
 
     public string Name => _name;
 
+    public string Identifier { get; internal set; } = string.Empty;
+
     public override string ToString()
     {
         return $"{_peer.EndPoint}";
     }
 
-    public async Task<Block> AddTransactionAsync(User user, IAction[] actions, CancellationToken cancellationToken)
+    public Task<Block> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken)
+        => AddTransactionAsync(_privateKey, actions, cancellationToken);
+
+    public Task<Block> AddTransactionAsync(Client client, IAction[] actions, CancellationToken cancellationToken)
+        => AddTransactionAsync(client.PrivateKey, actions, cancellationToken);
+
+    public async Task<Block> AddTransactionAsync(PrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(_startTask == null || _swarm == null, "Swarm has been stopped.");
 
         var blockChain = BlockChain;
-        var privateKey = user.PrivateKey;
         var genesisBlock = blockChain.Genesis;
         var nonce = blockChain.GetNextTxNonce(privateKey.Address);
         var values = actions.Select(item => item.PlainValue).ToArray();
@@ -80,10 +93,25 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values)
         );
-        var manualResetEvent = _manualResetEvent;
+        var height = blockChain.Tip.Index + 1;
+        var manualResetEvent = _eventByHeight.GetOrAdd(height, (_) => new ManualResetEvent(initialState: false));
         blockChain.StageTransaction(transaction);
-        await Task.Run(() => manualResetEvent.WaitOne(), cancellationToken);
-        return _blockByEvent[manualResetEvent];
+        await Task.Run(manualResetEvent.WaitOne, cancellationToken);
+
+        var sb = new StringBuilder();
+        foreach (var item in values)
+        {
+            if (_exceptionByAction.TryRemove(item, out var exception) == true && exception is UnexpectedlyTerminatedActionException)
+            {
+                sb.AppendLine($"{exception.InnerException}");
+            }
+        }
+        if (sb.Length > 0)
+        {
+            throw new InvalidOperationException(sb.ToString());
+        }
+
+        return blockChain[height];
     }
 
     public Task StartAsync(CancellationToken cancellationToken) => StartAsync(_peer, _consensusPeer, cancellationToken);
@@ -108,7 +136,7 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
             SeedPeers = consensusSeedPeer == consensusPeer ? [] : [consensusSeedPeer],
             ConsensusPort = consensusPeer.EndPoint.Port,
             ConsensusPrivateKey = privateKey,
-            TargetBlockInterval = TimeSpan.FromSeconds(10),
+            TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
         };
         _swarm = new Swarm(blockChain, privateKey, transport, swarmOptions, consensusTransport, consensusReactorOption);
@@ -160,9 +188,11 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)
     {
-        _blockByEvent[_manualResetEvent] = newTip;
-        _manualResetEvent.Set();
-        _manualResetEvent = new(initialState: false);
+        var height = newTip.Index;
+        if (_eventByHeight.TryGetValue(height, out var manualResetEvent) == true)
+        {
+            manualResetEvent.Set();
+        }
         _synchronizationContext.Post((s) =>
         {
             BlockAppended?.Invoke(this, EventArgs.Empty);
@@ -171,10 +201,12 @@ sealed class SwarmHost : IAsyncDisposable, IActionRenderer
 
     void IActionRenderer.RenderAction(IValue action, ICommittedActionContext context, HashDigest<SHA256> nextState)
     {
+
     }
 
     void IActionRenderer.RenderActionError(IValue action, ICommittedActionContext context, Exception exception)
     {
+        _exceptionByAction.AddOrUpdate(action, exception, (_, _) => exception);
     }
 
     void IActionRenderer.RenderBlockEnd(Block oldTip, Block newTip)

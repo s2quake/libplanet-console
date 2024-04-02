@@ -10,29 +10,29 @@ namespace LibplanetConsole.Executable;
 [method: ImportingConstructor]
 sealed class BotCollection(IServiceProvider serviceProvider) : IEnumerable<Bot>, IApplicationService
 {
-    private readonly OrderedDictionary _botByUser = [];
+    private readonly OrderedDictionary _botByClient = [];
     private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-    public Bot AddNew(User user)
+    public Bot AddNew(Client client)
     {
         ArgumentExceptionUtility.ThrowIf(
-            condition: _botByUser.Contains(user) == true,
-            message: $"'{user}' is already included in the collection.",
-            paramName: nameof(user));
+            condition: _botByClient.Contains(client) == true,
+            message: $"'{client}' is already included in the collection.",
+            paramName: nameof(client));
 
         var serviceProvider = _serviceProvider;
-        var bot = new Bot(serviceProvider, user);
-        _botByUser.Add(user, bot);
+        var bot = new Bot(serviceProvider, client);
+        _botByClient.Add(client, bot);
         return bot;
     }
 
-    public int Count => _botByUser.Count;
+    public int Count => _botByClient.Count;
 
-    public Bot this[int index] => (Bot)_botByUser[index]!;
+    public Bot this[int index] => (Bot)_botByClient[index]!;
 
-    public Bot this[User user] => (Bot)_botByUser[user]!;
+    public Bot this[Client client] => (Bot)_botByClient[client]!;
 
-    public bool Contains(User user) => _botByUser.Contains(user);
+    public bool Contains(Client client) => _botByClient.Contains(client);
 
     #region IApplicationService
 
@@ -40,7 +40,7 @@ sealed class BotCollection(IServiceProvider serviceProvider) : IEnumerable<Bot>,
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        foreach (var item in _botByUser.Values)
+        foreach (var item in _botByClient.Values)
         {
             if (item is Bot { IsRunning: true } bot)
             {
@@ -55,7 +55,7 @@ sealed class BotCollection(IServiceProvider serviceProvider) : IEnumerable<Bot>,
 
     IEnumerator<Bot> IEnumerable<Bot>.GetEnumerator()
     {
-        foreach (var item in _botByUser.Values)
+        foreach (var item in _botByClient.Values)
         {
             if (item is Bot bot)
             {
@@ -64,7 +64,7 @@ sealed class BotCollection(IServiceProvider serviceProvider) : IEnumerable<Bot>,
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => _botByUser.Values.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => _botByClient.Values.GetEnumerator();
 
     #endregion
 }

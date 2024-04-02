@@ -33,16 +33,13 @@ static class BlockChainUtility
         var actionLoader = TypedActionLoader.Create(typeof(Application).Assembly);
         var beginActions = new IAction[]
         {
-            new SlashingAction(),
         };
         var endActions = new IAction[]
         {
-            new RewardAction(),
-            new ValidatorUpdatingAction(),
         };
         var actionEvaluator = new ActionEvaluator(
-            policyBeginBlockActionGetter: _ => beginActions.ToImmutableArray(),
-            policyEndBlockActionGetter: _ => endActions.ToImmutableArray(),
+            policyBeginBlockActionsGetter: _ => beginActions.ToImmutableArray(),
+            policyEndBlockActionsGetter: _ => endActions.ToImmutableArray(),
             stateStore,
             actionLoader
         );
@@ -75,16 +72,16 @@ static class BlockChainUtility
     }
 
     [Obsolete("Do not use this method. It exists to help understand how blocks can be appended to the blockchain.")]
-    public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IAction[] actions)
+    public static Block AppendNew(BlockChain blockChain, Client client, PrivateKey[] validators, IAction[] actions)
     {
-        var block = AppendNew(blockChain, user, validators, actions.Select(item => item.PlainValue).ToArray());
+        var block = AppendNew(blockChain, client, validators, actions.Select(item => item.PlainValue).ToArray());
         return block;
     }
 
     [Obsolete("Do not use this method. It exists to help understand how blocks can be appended to the blockchain.")]
-    public static Block AppendNew(BlockChain blockChain, User user, PrivateKey[] validators, IValue[] values)
+    public static Block AppendNew(BlockChain blockChain, Client client, PrivateKey[] validators, IValue[] values)
     {
-        var privateKey = user.PrivateKey;
+        var privateKey = client.PrivateKey;
         var genesisBlock = blockChain.Genesis;
         var nonce = blockChain.GetNextTxNonce(privateKey.Address);
         var transaction = Transaction.Create(

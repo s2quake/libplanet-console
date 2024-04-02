@@ -13,11 +13,11 @@ sealed class WorldCommand(Application application) : CommandMethodBase
     private readonly Application _application = application;
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
     public void LeaderBoard()
     {
-        var swarmHost = _application.GetSwarmHost(IndexProperties.SwarmIndex);
-        var blockChain = swarmHost.BlockChain;
+        var node = _application.GetNode(IndexProperties.NodeIndex);
+        var blockChain = node.BlockChain;
 
         var world = blockChain.GetWorldState();
         var worldAccount = world.GetAccountState(WorldAccounts.Default);

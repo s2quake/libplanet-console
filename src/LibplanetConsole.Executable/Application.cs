@@ -1,8 +1,10 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.Text.RegularExpressions;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using Libplanet.Blockchain;
+using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using LibplanetConsole.Executable.Exceptions;
 
@@ -11,14 +13,14 @@ namespace LibplanetConsole.Executable;
 sealed partial class Application : IAsyncDisposable, IServiceProvider
 {
     private readonly CompositionContainer _container;
-    private readonly SwarmHostCollection _swarmHosts;
-    private readonly UserCollection _users;
+    private readonly NodeCollection _nodes;
+    private readonly ClientCollection _clients;
     private readonly ApplicationServiceCollection _applicationServices;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isDisposed;
     private SystemTerminal? _terminal;
     private readonly ApplicationOptions _options = new();
-    private SwarmHost _currentSwarmHost;
+    private Node _currentNode;
 
     public Application(ApplicationOptions options)
     {
@@ -30,28 +32,91 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_options);
-        _swarmHosts = _container.GetExportedValue<SwarmHostCollection>()!;
-        _users = _container.GetExportedValue<UserCollection>()!;
+        _nodes = _container.GetExportedValue<NodeCollection>()!;
+        _clients = _container.GetExportedValue<ClientCollection>()!;
         _applicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _currentSwarmHost = _swarmHosts.Current;
-        _currentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
-        _swarmHosts.CurrentChanged += SwarmHosts_CurrentChanged;
+        _currentNode = _nodes.Current;
+        _currentNode.BlockAppended += Node_BlockAppended;
+        _nodes.CurrentChanged += Nodes_CurrentChanged;
     }
 
-    public User GetUser(int userIndex)
-        => userIndex == -1 ? _users.Current : _users[userIndex];
+    public Client GetClient(int clientIndex)
+        => clientIndex == -1 ? _clients.Current : _clients[clientIndex];
 
-    public BlockChain GetBlockChain(int swarmIndex)
-        => swarmIndex == -1 ? _swarmHosts.Current.BlockChain : _swarmHosts[swarmIndex].BlockChain;
-
-    public Block GetBlock(int swarmIndex, long blockIndex)
+    public Client GetClient(string identifier)
     {
-        var blockChain = GetBlockChain(swarmIndex);
+        if (Regex.Match(identifier, @"c(\d+)") is { } match && match.Success == true)
+        {
+            var index = int.Parse(match.Groups[1].Value);
+            return _clients[index];
+        }
+        return _clients[new Address(identifier)];
+    }
+
+    public BlockChain GetBlockChain(int nodeIndex)
+        => nodeIndex == -1 ? _nodes.Current.BlockChain : _nodes[nodeIndex].BlockChain;
+
+    public Block GetBlock(int nodeIndex, long blockIndex)
+    {
+        var blockChain = GetBlockChain(nodeIndex);
         return blockIndex == -1 ? blockChain[blockChain.Count - 1] : blockChain[blockIndex];
     }
 
-    public SwarmHost GetSwarmHost(int swarmIndex)
-        => swarmIndex == -1 ? _swarmHosts.Current : _swarmHosts[swarmIndex];
+    public Node GetNode(int nodeIndex)
+        => nodeIndex == -1 ? _nodes.Current : _nodes[nodeIndex];
+
+    public Node GetNode(string identifier)
+    {
+        if (Regex.Match(identifier, @"n(\d+)") is { } match && match.Success == true)
+        {
+            var index = int.Parse(match.Groups[1].Value);
+            return _nodes[index];
+        }
+        return _nodes[new Address(identifier)];
+    }
+
+    public Address GetAddress(string identifier)
+    {
+        if (Regex.Match(identifier, @"([nc])(\d+)") is { } match && match.Success == true)
+        {
+            var index = int.Parse(match.Groups[2].Value);
+            var type = match.Groups[1].Value;
+            if (type == "n")
+                return _nodes[index].Address;
+            return _clients[index].Address;
+        }
+
+        var address = new Address(identifier);
+        if (_nodes.Contains(address) == true || _clients.Contains(address) == true)
+        {
+            return address;
+        }
+
+        throw new ArgumentException("Invalid identifier.", nameof(identifier));
+    }
+
+    public string GetIdentifier(Address address)
+    {
+        if (_nodes.Contains(address) == true)
+        {
+            return $"n{_nodes.IndexOf(address)}";
+        }
+
+        if (_clients.Contains(address) == true)
+        {
+            return $"c{_clients.IndexOf(address)}";
+        }
+
+        throw new ArgumentException("Invalid address.", nameof(address));
+    }
+
+    public Address[] GetAddresses()
+    {
+        var addresses = new List<Address>();
+        addresses.AddRange(_nodes.Select(item => item.Address));
+        addresses.AddRange(_clients.Select(item => item.Address));
+        return [.. addresses];
+    }
 
     public void Cancel()
     {
@@ -91,8 +156,8 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
-        _swarmHosts.CurrentChanged -= SwarmHosts_CurrentChanged;
-        _currentSwarmHost.BlockAppended -= SwarmHost_BlockAppended;
+        _nodes.CurrentChanged -= Nodes_CurrentChanged;
+        _currentNode.BlockAppended -= Node_BlockAppended;
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
         _container.Dispose();
@@ -112,20 +177,20 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         return _container.GetExportedValue<object?>(AttributedModelServices.GetContractName(serviceType));
     }
 
-    private void SwarmHost_BlockAppended(object? sender, EventArgs e)
+    private void Node_BlockAppended(object? sender, EventArgs e)
     {
-        if (sender is SwarmHost swarmHost)
+        if (sender is Node node)
         {
-            var blockChain = swarmHost.BlockChain;
-            Console.WriteLine(TerminalStringBuilder.GetString($"Block Appended: {blockChain.Count}", TerminalColorType.BrightCyan));
+            var blockChain = node.BlockChain;
+            Console.WriteLine(TerminalStringBuilder.GetString($"Block Appended: #{blockChain.Tip.Index}", TerminalColorType.BrightCyan));
         }
     }
 
-    private void SwarmHosts_CurrentChanged(object? sender, EventArgs e)
+    private void Nodes_CurrentChanged(object? sender, EventArgs e)
     {
-        _currentSwarmHost.BlockAppended -= SwarmHost_BlockAppended;
-        _currentSwarmHost = _swarmHosts.Current;
-        _currentSwarmHost.BlockAppended += SwarmHost_BlockAppended;
-        Console.WriteLine($"Current Swarm: {_currentSwarmHost}");
+        _currentNode.BlockAppended -= Node_BlockAppended;
+        _currentNode = _nodes.Current;
+        _currentNode.BlockAppended += Node_BlockAppended;
+        Console.WriteLine($"Current Swarm: {_currentNode}");
     }
 }

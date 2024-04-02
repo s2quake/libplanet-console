@@ -4,13 +4,13 @@ namespace LibplanetConsole.Executable.Commands;
 
 static class IndexProperties
 {
-    [CommandProperty('s', useName: true, InitValue = -1)]
-    [CommandSummary("Indicates the index of the user. If omitted, the current swarm is used.")]
-    public static int SwarmIndex { get; set; }
+    [CommandProperty('n', useName: true, InitValue = -1)]
+    [CommandSummary("Indicates the index of the node. If omitted, the current node is used.")]
+    public static int NodeIndex { get; set; }
 
-    [CommandProperty('u', useName: true, InitValue = -1)]
-    [CommandSummary("Indicates the index of the user. If omitted, the current user is used.")]
-    public static int UserIndex { get; set; }
+    [CommandProperty('c', useName: true, InitValue = -1)]
+    [CommandSummary("Indicates the index of the client. If omitted, the current client is used.")]
+    public static int ClientIndex { get; set; }
 
     [CommandProperty('b', useName: true, InitValue = -1)]
     [CommandSummary("Indicates the index of the block. If omitted, the last block in the blockchain is used.")]

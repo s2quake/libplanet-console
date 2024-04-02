@@ -7,9 +7,9 @@ using LibplanetConsole.Executable.Serializations;
 namespace LibplanetConsole.Executable.Commands;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Provides commands related to swarms.")]
+[CommandSummary("Provides node-related commands.")]
 [method: ImportingConstructor]
-sealed class SwarmCommand(Application application, SwarmHostCollection swarmHosts) : CommandMethodBase
+sealed class NodeCommand(Application application, NodeCollection nodes) : CommandMethodBase
 {
     [CommandPropertySwitch("detail")]
     public bool IsDetailed { get; set; }
@@ -28,30 +28,30 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
     public void Info()
     {
-        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
-        var swarmInfo = new SwarmInfo(swarmHost.Target);
+        var node = application.GetNode(IndexProperties.NodeIndex);
+        var swarmInfo = new NodeInfo(node.Target);
         Out.WriteLineAsJson(swarmInfo);
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
     public async Task Start(CancellationToken cancellationToken)
     {
-        var seedPeer = swarmHosts[0].Peer;
-        var consensusSeedPeer = swarmHosts[0].ConsensusPeer;
-        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
-        await swarmHost.StartAsync(seedPeer, consensusSeedPeer, cancellationToken);
+        var seedPeer = nodes[0].Peer;
+        var consensusSeedPeer = nodes[0].ConsensusPeer;
+        var node = application.GetNode(IndexProperties.NodeIndex);
+        await node.StartAsync(seedPeer, consensusSeedPeer, cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.SwarmIndex))]
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
     public async Task Stop(CancellationToken cancellationToken)
     {
-        var swarmHost = application.GetSwarmHost(IndexProperties.SwarmIndex);
-        await swarmHost.StopAsync(cancellationToken);
+        var node = application.GetNode(IndexProperties.NodeIndex);
+        await node.StopAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -59,21 +59,21 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     {
         if (value is { } index)
         {
-            swarmHosts.Current = swarmHosts[index];
+            nodes.Current = nodes[index];
         }
         else
         {
-            Out.WriteLine(swarmHosts.IndexOf(swarmHosts.Current));
+            Out.WriteLine(nodes.IndexOf(nodes.Current));
         }
     }
 
     private void ListNormal()
     {
         var tsb = new TerminalStringBuilder();
-        for (var i = 0; i < swarmHosts.Count; i++)
+        for (var i = 0; i < nodes.Count; i++)
         {
-            var item = swarmHosts[i];
-            var isCurrent = swarmHosts.Current == item;
+            var item = nodes[i];
+            var isCurrent = nodes.Current == item;
             var blockChain = item.Target.BlockChain;
             tsb.Foreground = item.IsRunning == true ? (isCurrent == true ? TerminalColorType.BrightGreen : null) : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;
@@ -88,10 +88,10 @@ sealed class SwarmCommand(Application application, SwarmHostCollection swarmHost
     private void ListDetailed()
     {
         var tsb = new TerminalStringBuilder();
-        for (var i = 0; i < swarmHosts.Count; i++)
+        for (var i = 0; i < nodes.Count; i++)
         {
-            var item = swarmHosts[i];
-            var swarmInfo = new SwarmInfo(item.Target);
+            var item = nodes[i];
+            var swarmInfo = new NodeInfo(item.Target);
             var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
             tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
             tsb.IsBold = item.IsRunning == true;

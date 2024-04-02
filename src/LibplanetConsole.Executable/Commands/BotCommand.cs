@@ -8,16 +8,16 @@ namespace LibplanetConsole.Executable.Commands;
 [method: ImportingConstructor]
 sealed class BotCommand(Application application) : CommandMethodBase
 {
-    private readonly UserCollection _users = application.GetService<UserCollection>()!;
+    private readonly ClientCollection _clients = application.GetService<ClientCollection>()!;
     private readonly BotCollection _bots = application.GetService<BotCollection>()!;
 
     [CommandMethod]
     public async Task StartAllAsync(CancellationToken cancellationToken)
     {
-        for (var i = 0; i < _users.Count; i++)
+        for (var i = 0; i < _clients.Count; i++)
         {
-            var user = _users[i];
-            var bot = _bots.Contains(user) == true ? _bots[user] : _bots.AddNew(user);
+            var client = _clients[i];
+            var bot = _bots.Contains(client) == true ? _bots[client] : _bots.AddNew(client);
             if (bot.IsRunning == false)
             {
                 await bot.StartAsync(cancellationToken);
@@ -35,17 +35,17 @@ sealed class BotCommand(Application application) : CommandMethodBase
     }
 
     [CommandMethod]
-    public async Task StartAsync(int userIndex, CancellationToken cancellationToken)
+    public async Task StartAsync(int clientIndex, CancellationToken cancellationToken)
     {
-        var user = _users[userIndex];
-        var bot = _bots.Contains(user) == true ? _bots[user] : _bots.AddNew(user);
+        var client = _clients[clientIndex];
+        var bot = _bots.Contains(client) == true ? _bots[client] : _bots.AddNew(client);
         await bot.StartAsync(cancellationToken);
     }
 
     [CommandMethod]
-    public async Task StopAsync(int userIndex, CancellationToken cancellationToken)
+    public async Task StopAsync(int clientIndex, CancellationToken cancellationToken)
     {
-        var bot = _bots[userIndex];
+        var bot = _bots[clientIndex];
         await bot.StopAsync(cancellationToken);
     }
 
@@ -58,7 +58,7 @@ sealed class BotCommand(Application application) : CommandMethodBase
             var item = _bots[i];
             var isRunning = item.IsRunning;
             tsb.Foreground = isRunning == true ? null : TerminalColorType.BrightBlack;
-            tsb.AppendLine($"[{i}]-{item.User.Address}");
+            tsb.AppendLine($"[{i}]-{item.Client.Address}");
             tsb.Foreground = null;
             tsb.Append(string.Empty);
         }

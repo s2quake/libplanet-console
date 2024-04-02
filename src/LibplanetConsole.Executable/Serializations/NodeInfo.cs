@@ -2,9 +2,9 @@ using Libplanet.Net;
 
 namespace LibplanetConsole.Executable.Serializations;
 
-record class SwarmInfo
+record class NodeInfo
 {
-    public SwarmInfo(Swarm swarm)
+    public NodeInfo(Swarm swarm)
     {
         AppProtocolVersion = $"{swarm.AppProtocolVersion}";
         EndPoint = $"{swarm.EndPoint.Host}:{swarm.EndPoint.Port}";

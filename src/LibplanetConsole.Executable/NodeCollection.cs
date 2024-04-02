@@ -9,34 +9,34 @@ namespace LibplanetConsole.Executable;
 
 [Export]
 [Export(typeof(IApplicationService))]
-sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
+sealed class NodeCollection : IEnumerable<Node>, IApplicationService
 {
-    private SwarmHost _current;
-    private readonly SwarmHost[] _swarmHosts;
+    private Node _current;
+    private readonly Node[] _nodes;
     private readonly BoundPeer _seedPeer;
     private readonly BoundPeer _consensusSeedPeer;
     private bool _isDisposed;
 
     [ImportingConstructor]
-    public SwarmHostCollection(ApplicationOptions options)
+    public NodeCollection(ApplicationOptions options)
         : this(CreatePrivateKeys(options.SwarmCount), options.StorePath)
     {
     }
 
-    public SwarmHostCollection()
+    public NodeCollection()
         : this(CreatePrivateKeys(4), storePath: string.Empty)
     {
     }
 
-    public SwarmHostCollection(PrivateKey[] validators)
+    public NodeCollection(PrivateKey[] validators)
         : this(validators, storePath: string.Empty)
     {
     }
 
-    public SwarmHostCollection(PrivateKey[] validators, string storePath)
+    public NodeCollection(PrivateKey[] validators, string storePath)
     {
         var validatorKeys = validators.Select(item => item.PublicKey).ToArray();
-        var swarmHosts = new SwarmHost[validators.Length];
+        var nodes = new Node[validators.Length];
         var peers = new BoundPeer[validators.Length];
         var consensusPeers = new BoundPeer[validators.Length];
         for (var i = 0; i < validators.Length; i++)
@@ -44,39 +44,56 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
             var privateKey = validators[i];
             var peer = peers[i];
             var consensusPeer = consensusPeers[i];
-            swarmHosts[i] = new SwarmHost($"Swarm{i}", privateKey, validatorKeys, storePath);
-            peers[i] = swarmHosts[i].Peer;
-            consensusPeers[i] = swarmHosts[i].ConsensusPeer;
+            nodes[i] = new Node($"Swarm{i}", privateKey, validatorKeys, storePath)
+            {
+                Identifier = $"n{i}",
+            };
+            peers[i] = nodes[i].Peer;
+            consensusPeers[i] = nodes[i].ConsensusPeer;
         }
-        _swarmHosts = swarmHosts;
-        _current = swarmHosts[0];
+        _nodes = nodes;
+        _current = nodes[0];
         _seedPeer = peers[0];
         _consensusSeedPeer = consensusPeers[0];
     }
 
-    public SwarmHost Current
+    public Node Current
     {
         get => _current;
         set
         {
-            if (_swarmHosts.Contains(value) == false)
+            if (_nodes.Contains(value) == false)
                 throw new ArgumentException($"'{value}' is not included in the collection.", nameof(value));
             _current = value;
             CurrentChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public int Count => _swarmHosts.Length;
+    public int Count => _nodes.Length;
 
-    public SwarmHost this[int index] => _swarmHosts[index];
+    public Node this[int index] => _nodes[index];
 
-    public bool Contains(SwarmHost item) => _swarmHosts.Contains(item);
+    public Node this[Address address] => _nodes.Single(item => item.Address == address);
 
-    public int IndexOf(SwarmHost item)
+    public bool Contains(Node item) => _nodes.Contains(item);
+
+    public bool Contains(Address address) => _nodes.Any(item => item.Address == address);
+
+    public int IndexOf(Node item)
     {
-        for (var i = 0; i < _swarmHosts.Length; i++)
+        for (var i = 0; i < _nodes.Length; i++)
         {
-            if (Equals(item, _swarmHosts[i]) == true)
+            if (Equals(item, _nodes[i]) == true)
+                return i;
+        }
+        return -1;
+    }
+
+    public int IndexOf(Address address)
+    {
+        for (var i = 0; i < _nodes.Length; i++)
+        {
+            if (Equals(address, _nodes[i].Address) == true)
                 return i;
         }
         return -1;
@@ -98,16 +115,16 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
 
     async Task IApplicationService.InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_swarmHosts.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
+        await Task.WhenAll(_nodes.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
-        for (var i = _swarmHosts.Length - 1; i >= 0; i--)
+        for (var i = _nodes.Length - 1; i >= 0; i--)
         {
-            var item = _swarmHosts[i]!;
+            var item = _nodes[i]!;
             await item.DisposeAsync();
         }
         _isDisposed = true;
@@ -118,15 +135,15 @@ sealed class SwarmHostCollection : IEnumerable<SwarmHost>, IApplicationService
 
     #region IEnumerable
 
-    IEnumerator<SwarmHost> IEnumerable<SwarmHost>.GetEnumerator()
+    IEnumerator<Node> IEnumerable<Node>.GetEnumerator()
     {
-        foreach (var item in _swarmHosts)
+        foreach (var item in _nodes)
         {
             yield return item;
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => _swarmHosts.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => _nodes.GetEnumerator();
 
     #endregion
 }

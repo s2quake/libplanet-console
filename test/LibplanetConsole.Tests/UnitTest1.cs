@@ -10,11 +10,11 @@ public class UnitTest1
     {
         var privateKey = new PrivateKey();
         var validatorKeys = new PublicKey[] { privateKey.PublicKey };
-        var swarmHost = new SwarmHost("swarm", privateKey, validatorKeys, string.Empty);
-        var users = new User[1000];
+        var swarmHost = new Node("swarm", privateKey, validatorKeys, string.Empty);
+        var users = new Client[1000];
         for (var i = 0; i < users.Length; i++)
         {
-            users[i] = new User($"User{i}");
+            users[i] = new Client($"User{i}");
         }
         var cancellationToken = CancellationToken.None;
         await swarmHost.StartAsync(cancellationToken);

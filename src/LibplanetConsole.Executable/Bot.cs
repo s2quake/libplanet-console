@@ -2,14 +2,14 @@ using LibplanetConsole.Executable.Exceptions;
 
 namespace LibplanetConsole.Executable;
 
-sealed class Bot(IServiceProvider serviceProvider, User user)
+sealed class Bot(IServiceProvider serviceProvider, Client client)
 {
     private Task? _task;
     private CancellationTokenSource? _cancellationTokenSource;
 
     public bool IsRunning { get; private set; }
 
-    public User User => user;
+    public Client Client => client;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -36,43 +36,43 @@ sealed class Bot(IServiceProvider serviceProvider, User user)
     {
         try
         {
-            var random = new Random(user.GetHashCode());
-            var swarmHosts = (SwarmHostCollection)serviceProvider.GetService(typeof(SwarmHostCollection))!;
+            var random = new Random(client.GetHashCode());
+            var nodes = (NodeCollection)serviceProvider.GetService(typeof(NodeCollection))!;
             while (cancellationToken.IsCancellationRequested == false)
             {
                 var v = random.Next(100);
                 var tick = random.Next(100, 2000);
                 await Task.Delay(tick, cancellationToken);
-                var swarmHost = swarmHosts.Current;
-                if (user.IsOnline == false && v < 50)
+                var node = nodes.Current;
+                if (client.IsOnline == false && v < 50)
                 {
-                    user.Login(swarmHost);
+                    client.Login(node);
                 }
-                else if (user.IsOnline == true && v < 10)
+                else if (client.IsOnline == true && v < 10)
                 {
-                    user.Logout();
+                    client.Logout();
                 }
-                else if (user.IsOnline == true && v < 50)
+                else if (client.IsOnline == true && v < 50)
                 {
                     if (RandomUtility.GetNext(100) < 90)
                     {
                     }
-                    else if (user.PlayerInfo == null)
+                    else if (client.PlayerInfo == null)
                     {
-                        await user.CreateCharacterAsync(swarmHost, cancellationToken);
+                        await client.CreateCharacterAsync(node, cancellationToken);
                     }
-                    else if (user.PlayerInfo.Life <= 0)
+                    else if (client.PlayerInfo.Life <= 0)
                     {
-                        await user.ReviveCharacterAsync(swarmHost, cancellationToken);
+                        await client.ReviveCharacterAsync(node, cancellationToken);
                     }
                     else
                     {
-                        var @out = user.Out;
-                        var blockIndex = await user.PlayGameAsync(swarmHost, cancellationToken);
-                        user.Out = new StringWriter();
+                        var @out = client.Out;
+                        var blockIndex = await client.PlayGameAsync(node, cancellationToken);
+                        client.Out = new StringWriter();
                         await @out.WriteLineAsync("replaying.");
-                        await user.ReplayGameAsync(swarmHost, blockIndex, tick: 500, cancellationToken);
-                        user.Out = @out;
+                        await client.ReplayGameAsync(node, blockIndex, tick: 500, cancellationToken);
+                        client.Out = @out;
                         await @out.WriteLineAsync("replayed.");
                     }
                 }

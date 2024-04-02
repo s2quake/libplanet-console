@@ -9,11 +9,11 @@ using LibplanetConsole.Executable.Games.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-sealed class User
+sealed class Client
 {
     private readonly PrivateKey _privateKey;
 
-    public User(string name)
+    public Client(string name)
     {
         _privateKey = PrivateKeyUtility.Create(name);
         Address = _privateKey.Address;
@@ -36,11 +36,13 @@ sealed class User
 
     public TextWriter Out { get; set; } = Console.Out;
 
-    public void Login(SwarmHost swarmHost)
+    public string Identifier { get; internal set; } = string.Empty;
+
+    public void Login(Node node)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline == true, $"{this} is already online.");
 
-        PlayerInfo = GetPlayerInfo(swarmHost, Address);
+        PlayerInfo = GetPlayerInfo(node, Address);
         IsOnline = true;
         Out.WriteLine($"{this} is logged in.");
     }
@@ -62,22 +64,22 @@ sealed class User
         return PlayerInfo!;
     }
 
-    public GamePlayRecord[] GetGameHistory(SwarmHost swarmHost)
+    public GamePlayRecord[] GetGameHistory(Node node)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
 
-        var blockChain = swarmHost.BlockChain;
+        var blockChain = node.BlockChain;
         return GamePlayRecord.GetGamePlayRecords(blockChain, Address).ToArray();
     }
 
-    public void Refresh(SwarmHost swarmHost)
+    public void Refresh(Node node)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
 
-        PlayerInfo = GetPlayerInfo(swarmHost, Address);
+        PlayerInfo = GetPlayerInfo(node, Address);
     }
 
-    public async Task<long> PlayGameAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
+    public async Task<long> PlayGameAsync(Node node, CancellationToken cancellationToken)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
         InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
@@ -105,25 +107,25 @@ sealed class User
             leaderBoardAction,
         };
         await Out.WriteLineAsync($"{this} requests to play a game.");
-        var block = await swarmHost.AddTransactionAsync(this, actions, cancellationToken);
-        Refresh(swarmHost);
+        var block = await node.AddTransactionAsync(this, actions, cancellationToken);
+        Refresh(node);
         await Out.WriteLineAsync($"{this} played the game.");
         return block.Index;
     }
 
-    public Task ReplayGameAsync(SwarmHost swarmHost, int tick, CancellationToken cancellationToken)
+    public Task ReplayGameAsync(Node node, int tick, CancellationToken cancellationToken)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
         InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
 
         var blockIndex = PlayerInfo!.BlockIndex;
-        return ReplayGameAsync(swarmHost, blockIndex, tick, cancellationToken);
+        return ReplayGameAsync(node, blockIndex, tick, cancellationToken);
     }
 
-    public async Task ReplayGameAsync(SwarmHost swarmHost, long blockIndex, int tick, CancellationToken cancellationToken)
+    public async Task ReplayGameAsync(Node node, long blockIndex, int tick, CancellationToken cancellationToken)
     {
         var address = Address;
-        var block = swarmHost.BlockChain[blockIndex];
+        var block = node.BlockChain[blockIndex];
         if (GamePlayRecord.GetGamePlayRecord(block, Address) is not { } gamePlayRecord)
             throw new ArgumentException($"'Block #{block.Index}' does not have {nameof(StageInfo)}.");
 
@@ -136,7 +138,7 @@ sealed class User
         await Out.WriteLineAsJsonAsync(playerInfo);
     }
 
-    public async Task CreateCharacterAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
+    public async Task CreateCharacterAsync(Node node, CancellationToken cancellationToken)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
         InvalidOperationExceptionUtility.ThrowIf(PlayerInfo != null, $"{this} already has character.");
@@ -147,12 +149,12 @@ sealed class User
             PlayerInfo = PlayerInfo.CreateNew(Name),
         };
         await Out.WriteLineAsync($"{this} requests to create a character.");
-        await swarmHost.AddTransactionAsync(this, [characterCreationAction], cancellationToken);
-        Refresh(swarmHost);
+        await node.AddTransactionAsync(this, [characterCreationAction], cancellationToken);
+        Refresh(node);
         await Out.WriteLineAsync($"{this} created the character.");
     }
 
-    public async Task ReviveCharacterAsync(SwarmHost swarmHost, CancellationToken cancellationToken)
+    public async Task ReviveCharacterAsync(Node node, CancellationToken cancellationToken)
     {
         InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
         InvalidOperationExceptionUtility.ThrowIf(PlayerInfo == null, $"{this} does not have character.");
@@ -163,14 +165,14 @@ sealed class User
             UserAddress = Address,
         };
         await Out.WriteLineAsync($"{this} requests to revive a character.");
-        await swarmHost.AddTransactionAsync(this, [characterResurrectionAction], cancellationToken);
-        Refresh(swarmHost);
+        await node.AddTransactionAsync(this, [characterResurrectionAction], cancellationToken);
+        Refresh(node);
         await Out.WriteLineAsync($"{this} revived the character.");
     }
 
-    public static PlayerInfo? GetPlayerInfo(SwarmHost swarmHost, Address address)
+    public static PlayerInfo? GetPlayerInfo(Node node, Address address)
     {
-        var blockChain = swarmHost.BlockChain;
+        var blockChain = node.BlockChain;
         var worldState = blockChain.GetWorldState();
         var account = worldState.GetAccountState(address);
         if (account.GetState(UserStates.PlayerInfo) is Dictionary values)
