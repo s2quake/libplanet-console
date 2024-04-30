@@ -1,7 +1,7 @@
 // using System.ComponentModel.Composition;
 // using Bencodex.Types;
 // using JSSoft.Commands;
-// using LibplanetConsole.ClientServices.Games.Serializations;
+// using LibplanetConsole.Games.Serializations;
 // using LibplanetConsole.Common;
 // using LibplanetConsole.Common.Extensions;
 

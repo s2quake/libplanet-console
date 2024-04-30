@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\.libplanet\Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
+    <ProjectReference Include="..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

@@ -8,6 +8,7 @@
     <ProjectReference Include="..\..\.communication\JSSoft.Communication\JSSoft.Communication.csproj" />
     <ProjectReference Include="..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
     <ProjectReference Include="..\LibplanetConsole.NodeServices\LibplanetConsole.NodeServices.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Games\LibplanetConsole.Games.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

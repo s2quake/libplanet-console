@@ -1,9 +1,9 @@
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
-using LibplanetConsole.ClientServices.Games.Serializations;
 using LibplanetConsole.ClientServices.Serializations;
 using LibplanetConsole.Common;
+using LibplanetConsole.Games.Serializations;
 using LibplanetConsole.NodeServices;
 using LibplanetConsole.NodeServices.Serializations;
 

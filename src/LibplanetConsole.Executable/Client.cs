@@ -4,14 +4,13 @@ using JSSoft.Communication;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using LibplanetConsole.ClientServices;
-using LibplanetConsole.ClientServices.Games.Serializations;
 using LibplanetConsole.ClientServices.Serializations;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Games.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-internal sealed class Client :
+internal sealed partial class Client :
     IClientCallback, IAsyncDisposable, IIdentifier, IClient
 {
     private readonly PrivateKey _privateKey;
@@ -41,8 +40,6 @@ internal sealed class Client :
 
     public Address Address => _privateKey.Address;
 
-    public PlayerInfo? PlayerInfo { get; set; }
-
     public bool IsOnline { get; private set; } = true;
 
     public TextWriter Out { get; set; } = Console.Out;
@@ -56,18 +53,6 @@ internal sealed class Client :
     public EndPoint EndPoint => _clientContext.EndPoint;
 
     PrivateKey IIdentifier.PrivateKey => _privateKey;
-
-    public static PlayerInfo? GetPlayerInfo(BlockChain blockChain, Address address)
-    {
-        var worldState = blockChain.GetWorldState();
-        var account = worldState.GetAccountState(address);
-        if (account.GetState(UserStates.PlayerInfo) is Dictionary values)
-        {
-            return new PlayerInfo(values);
-        }
-
-        return null;
-    }
 
     public override string ToString()
     {
@@ -99,75 +84,6 @@ internal sealed class Client :
     public ValueTask DisposeAsync()
     {
         return ValueTask.CompletedTask;
-    }
-
-    public void Login(BlockChain blockChain)
-    {
-        InvalidOperationExceptionUtility.ThrowIf(IsOnline == true, $"{this} is already online.");
-
-        PlayerInfo = GetPlayerInfo(blockChain, Address);
-        IsOnline = true;
-        Out.WriteLine($"{this} is logged in.");
-    }
-
-    public void Logout()
-    {
-        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
-
-        PlayerInfo = null;
-        IsOnline = false;
-        Out.WriteLine($"{this} is logged out.");
-    }
-
-    public PlayerInfo GetPlayerInfo()
-    {
-        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: PlayerInfo == null,
-            message: $"{this} does not have character.");
-
-        return PlayerInfo!;
-    }
-
-    public GamePlayRecord[] GetGameHistory(BlockChain blockChain)
-    {
-        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
-
-        return GamePlayRecord.GetGamePlayRecords(blockChain, Address).ToArray();
-    }
-
-    public void Refresh(BlockChain blockChain)
-    {
-        InvalidOperationExceptionUtility.ThrowIf(IsOnline != true, $"{this} is not online.");
-
-        PlayerInfo = GetPlayerInfo(blockChain, Address);
-    }
-
-    public Task<long> PlayGameAsync(BlockChain blockChain, CancellationToken cancellationToken)
-    {
-        throw new NotSupportedException();
-    }
-
-    public Task ReplayGameAsync(
-        BlockChain blockChain, int tick, CancellationToken cancellationToken)
-    {
-        throw new NotSupportedException();
-    }
-
-    public Task ReplayGameAsync(
-        BlockChain blockChain, long blockIndex, int tick, CancellationToken cancellationToken)
-    {
-        throw new NotSupportedException();
-    }
-
-    public Task CreateCharacterAsync(Client client, CancellationToken cancellationToken)
-    {
-        throw new NotSupportedException();
-    }
-
-    public Task ReviveCharacterAsync(Client client, CancellationToken cancellationToken)
-    {
-        throw new NotSupportedException();
     }
 
     public object? GetService(Type serviceType)
