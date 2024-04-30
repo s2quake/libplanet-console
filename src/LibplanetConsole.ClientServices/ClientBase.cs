@@ -1,6 +1,7 @@
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
+using LibplanetConsole.ClientServices.Games.Serializations;
 using LibplanetConsole.ClientServices.Serializations;
 using LibplanetConsole.Common;
 using LibplanetConsole.NodeServices;
@@ -37,6 +38,10 @@ public abstract class ClientBase
     public PublicKey PublicKey => _privateKey.PublicKey;
 
     public Address Address => _privateKey.Address;
+
+    public PlayerInfo? PlayerInfo { get; set; }
+
+    public bool IsOnline { get; private set; } = true;
 
     public TextWriter Out { get; set; } = Console.Out;
 
