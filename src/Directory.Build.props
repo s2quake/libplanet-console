@@ -1,0 +1,32 @@
+﻿<Project>
+
+  <Import Condition="'$(SolutionDir)' != '' and '$(SolutionDir)' != '$(MSBuildThisFileDirectory)' and $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')) != ''"
+          Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>
+        runtime; build; native; contentfiles; analyzers
+      </IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Menees.Analyzers.2017" Version="2.0.3">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+    <AdditionalFiles Include="..\stylecop.json" />
+    <AdditionalFiles Include="..\Menees.Analyzers.Settings.xml">
+      <Link>Menees.Analyzers.Settings.xml</Link>
+    </AdditionalFiles>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <Nullable>enable</Nullable>
+    <CodeAnalysisRuleSet>..\LibplanetConsole.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>$(NoWarn);SA1200;NETSDK1206</NoWarn>
+  </PropertyGroup>
+
+</Project>

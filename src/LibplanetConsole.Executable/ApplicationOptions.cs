@@ -2,18 +2,19 @@ using JSSoft.Commands;
 
 namespace LibplanetConsole.Executable;
 
-sealed class ApplicationOptions
+internal sealed class ApplicationOptions
 {
-    public const int DefaultUserCount = 10;
+    [CommandProperty]
+    public string EndPoint { get; set; } = string.Empty;
 
-    [CommandProperty(InitValue = 1)]
-    public int SwarmCount { get; set; }
+    [CommandProperty(InitValue = 4)]
+    public int NodeCount { get; set; }
 
-    [CommandProperty(InitValue = DefaultUserCount)]
-    public int UserCount { get; set; }
+    [CommandProperty(InitValue = 2)]
+    public int ClientCount { get; set; }
 
     [CommandProperty]
-    public string StorePath { get; set; } = string.Empty;
+    public string GenesisKey { get; set; } = string.Empty;
 
     public static ApplicationOptions Parse(string[] args)
     {

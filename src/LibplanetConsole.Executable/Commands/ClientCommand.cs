@@ -1,18 +1,16 @@
 using System.ComponentModel.Composition;
-using System.Text;
 using JSSoft.Commands;
 using JSSoft.Terminals;
-using LibplanetConsole.Executable.Extensions;
+using LibplanetConsole.ClientServices;
 
 namespace LibplanetConsole.Executable.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides client-related commands.")]
 [method: ImportingConstructor]
-sealed class ClientCommand(Application application) : CommandMethodBase
+internal sealed class ClientCommand(IApplication application, ClientCollection clients)
+    : CommandMethodBase
 {
-    private readonly ClientCollection _clients = application.GetService<ClientCollection>()!;
-
     [CommandProperty(InitValue = 10)]
     public int Tick { get; set; }
 
@@ -20,114 +18,61 @@ sealed class ClientCommand(Application application) : CommandMethodBase
     public void List()
     {
         var tsb = new TerminalStringBuilder();
-        for (var i = 0; i < _clients.Count; i++)
+        for (var i = 0; i < clients.Count; i++)
         {
-            var item = _clients[i];
-            var isCurrent = _clients.Current == item;
-            var s = isCurrent == true ? "*" : " ";
-            tsb.Append($"{s} ");
-            tsb.Foreground = item.IsOnline == true ? (isCurrent == true ? TerminalColorType.BrightGreen : null) : TerminalColorType.BrightBlack;
-            tsb.AppendLine($"[{i}]-{item.Address}");
+            var item = clients[i];
+            var isCurrent = clients.Current == item;
+            tsb.Foreground = GetForeground(client: item, isCurrent);
+            tsb.IsBold = item.IsRunning == true;
+            tsb.AppendLine($"{item}");
             tsb.ResetOptions();
         }
+
         Out.Write(tsb.ToString());
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public void Login()
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.Client))]
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var node = application.GetNode(-1);
-        client.Login(node);
+        var clientOptions = new ClientOptions();
+        var client = application.GetClient(IndexProperties.Client);
+        await client.StartAsync(clientOptions, cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public void Logout()
+    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.Client))]
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        client.Logout();
+        var client = application.GetClient(IndexProperties.Client);
+        await client.StopAsync(cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public void Status()
+    public void Current(string? identifier = null)
     {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var playerInfo = client.GetPlayerInfo();
-        Out.WriteLineAsJson(playerInfo);
-    }
-
-    [CommandMethod]
-    public void Current(int? value = null)
-    {
-        if (value is { } index)
+        if (identifier is not null && application.GetClient(identifier) is { } client)
         {
-            _clients.Current = _clients[index];
+            clients.Current = client;
+        }
+
+        if (clients.Current is not null)
+        {
+            Out.WriteLine(clients.Current);
         }
         else
         {
-            Out.WriteLine(_clients.IndexOf(_clients.Current));
+            Out.WriteLine("No client is selected.");
         }
     }
 
-    [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public async Task CharacterCreateAsync(CancellationToken cancellationToken)
+    private static TerminalColorType? GetForeground(IClient client, bool isCurrent)
     {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var node = application.GetNode(IndexProperties.NodeIndex);
-        await client.CreateCharacterAsync(node, cancellationToken);
-    }
+        if (client.IsRunning == true)
+        {
+            return isCurrent == true ? TerminalColorType.BrightGreen : null;
+        }
 
-    [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public async Task CharacterReviveAsync(CancellationToken cancellationToken)
-    {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var node = application.GetNode(IndexProperties.NodeIndex);
-        await client.ReviveCharacterAsync(node, cancellationToken);
-    }
-
-    [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public void GameHistory()
-    {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var node = application.GetNode(IndexProperties.NodeIndex);
-        var gamePlayRecords = client.GetGameHistory(node);
-        var sb = new StringBuilder();
-        sb.AppendLines(gamePlayRecords, item => $"Block #{item.Block.Index}");
-        Out.Write(sb.ToString());
-    }
-
-    [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    public async Task GamePlayAsync(CancellationToken cancellationToken)
-    {
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var node = application.GetNode(IndexProperties.NodeIndex);
-        await client.PlayGameAsync(node, cancellationToken);
-        await client.ReplayGameAsync(node, tick: 10, cancellationToken);
-    }
-
-    [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.NodeIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.ClientIndex))]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.BlockIndex))]
-    [CommandMethodProperty(nameof(Tick))]
-    public async Task GameReplayAsync(CancellationToken cancellationToken)
-    {
-        var tick = Tick;
-        var blockIndex = IndexProperties.BlockIndex;
-        var client = application.GetClient(IndexProperties.ClientIndex);
-        var node = application.GetNode(IndexProperties.NodeIndex);
-        await client.ReplayGameAsync(node, blockIndex, tick, cancellationToken);
+        return TerminalColorType.BrightBlack;
     }
 }

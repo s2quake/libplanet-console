@@ -1,12 +1,14 @@
 using System.ComponentModel.Composition;
-using JSSoft.Library;
+using JSSoft.Configurations;
+using LibplanetConsole.Frameworks;
 using Serilog;
 using Serilog.Events;
 
 namespace LibplanetConsole.Executable;
 
 [Export(typeof(IApplicationConfiguration))]
-sealed class LogConfiguration : IApplicationConfiguration
+[ConfigurationName("log")]
+internal sealed class LogConfiguration : IApplicationConfiguration
 {
     public LogConfiguration()
     {
@@ -15,16 +17,18 @@ sealed class LogConfiguration : IApplicationConfiguration
                                               .CreateLogger();
     }
 
-    [ConfigurationProperty]
+    [ConfigurationProperty("visible")]
     public bool IsVisible { get; set; }
 
     // [ConfigurationProperty]
     // public LogEventLevel Level { get; set; } = LogEventLevel.Error;
-
     private bool Predicate(LogEvent logEvent)
     {
-        if (IsVisible == false)
+        if (IsVisible != true)
+        {
             return false;
+        }
+
         // if (logEvent.Level < Level)
         //     return false;
         return true;

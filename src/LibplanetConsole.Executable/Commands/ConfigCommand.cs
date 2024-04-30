@@ -1,11 +1,12 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Executable.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
-sealed class ConfigCommand(ApplicationConfigurations configurations) : CommandBase
+internal sealed class ConfigCommand(IApplicationConfigurations configurations) : CommandBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
     public string Key { get; set; } = string.Empty;
@@ -17,18 +18,18 @@ sealed class ConfigCommand(ApplicationConfigurations configurations) : CommandBa
     {
         if (Key == string.Empty && Value == string.Empty)
         {
-            foreach (var item in configurations.Descriptors)
+            foreach (var key in configurations)
             {
-                Out.Write(item);
+                Out.Write($"{key}={configurations[key]}");
             }
         }
         else if (Value == string.Empty)
         {
-            Out.WriteLine($"{configurations.GetValue(Key)}");
+            Out.WriteLine($"{configurations[Key]}");
         }
         else
         {
-            configurations.SetValue(Key, Value);
+            configurations[Key] = Value;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace LibplanetConsole.Executable.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Exit the application.")]
 [method: ImportingConstructor]
-sealed class ExitCommand(Application application) : CommandBase
+internal sealed class ExitCommand(IApplication application) : CommandBase
 {
     protected override void OnExecute()
     {

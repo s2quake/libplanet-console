@@ -5,32 +5,25 @@ using JSSoft.Terminals;
 namespace LibplanetConsole.Executable;
 
 [Export]
-sealed class SystemTerminal : SystemTerminalBase
+internal sealed class SystemTerminal : SystemTerminalBase
 {
     private readonly CommandContext _commandContext;
 
     [ImportingConstructor]
-    public SystemTerminal(Application application, CommandContext commandContext)
+    public SystemTerminal(IApplication application, CommandContext commandContext)
     {
         _commandContext = commandContext;
         _commandContext.Owner = application;
         Prompt = "libplanet $ ";
     }
 
-    protected override string FormatPrompt(string prompt)
-    {
-        return prompt;
-    }
+    protected override string FormatPrompt(string prompt) => prompt;
 
     protected override string[] GetCompletion(string[] items, string find)
-    {
-        return _commandContext.GetCompletion(items, find);
-    }
+        => _commandContext.GetCompletion(items, find);
 
     protected override Task OnExecuteAsync(string command, CancellationToken cancellationToken)
-    {
-        return _commandContext.ExecuteAsync(command, cancellationToken);
-    }
+        => _commandContext.ExecuteAsync(command, cancellationToken);
 
     protected override void OnInitialize(TextWriter @out, TextWriter error)
     {

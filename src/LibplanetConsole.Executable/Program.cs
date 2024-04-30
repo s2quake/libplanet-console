@@ -4,9 +4,11 @@ using LibplanetConsole.Executable;
 
 try
 {
+    var message = "Welcome to console for Libplanet.";
+    var coloredMessage = TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen);
     var options = ApplicationOptions.Parse(args);
     var @out = Console.Out;
-    @out.WriteLine(TerminalStringBuilder.GetString("Welcome to console for Libplanet.", TerminalColorType.BrightGreen));
+    @out.WriteLine(coloredMessage);
     await using var application = new Application(options);
     @out.WriteLine();
     await application.StartAsync();

@@ -1,110 +1,85 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Text.RegularExpressions;
 using JSSoft.Commands.Extensions;
+using JSSoft.Communication;
+using JSSoft.Communication.Extensions;
 using JSSoft.Terminals;
-using Libplanet.Blockchain;
 using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-using LibplanetConsole.Executable.Exceptions;
+using LibplanetConsole.Common;
+using LibplanetConsole.Frameworks;
+using LibplanetConsole.NodeServices;
 
 namespace LibplanetConsole.Executable;
 
-sealed partial class Application : IAsyncDisposable, IServiceProvider
+internal sealed partial class Application : ApplicationBase, IApplication
 {
     private readonly CompositionContainer _container;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
-    private readonly ApplicationServiceCollection _applicationServices;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private bool _isDisposed;
-    private SystemTerminal? _terminal;
     private readonly ApplicationOptions _options = new();
-    private Node _currentNode;
+    private readonly ServiceContext _serviceContext;
+    private SystemTerminal? _terminal;
+    private INode? _currentNode;
+    private Guid _closeToken;
 
     public Application(ApplicationOptions options)
     {
-        Thread.CurrentThread.Priority = ThreadPriority.Highest;
-        SynchronizationContext.SetSynchronizationContext(new());
         ConsoleTextWriter.SynchronizationContext = SynchronizationContext.Current!;
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
-        _container.ComposeExportedValue(this);
+        _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_options);
         _nodes = _container.GetExportedValue<NodeCollection>()!;
         _clients = _container.GetExportedValue<ClientCollection>()!;
-        _applicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _currentNode = _nodes.Current;
-        _currentNode.BlockAppended += Node_BlockAppended;
+        _serviceContext = _container.GetExportedValue<ServiceContext>()!;
+        ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         _nodes.CurrentChanged += Nodes_CurrentChanged;
     }
 
-    public Client GetClient(int clientIndex)
-        => clientIndex == -1 ? _clients.Current : _clients[clientIndex];
+    public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public Client GetClient(string identifier)
+    public GenesisOptions GenesisOptions { get; } = GenesisOptions.Default;
+
+    public IClient GetClient(string identifier)
     {
-        if (Regex.Match(identifier, @"c(\d+)") is { } match && match.Success == true)
+        if (identifier == string.Empty)
         {
-            var index = int.Parse(match.Groups[1].Value);
-            return _clients[index];
-        }
-        return _clients[new Address(identifier)];
-    }
-
-    public BlockChain GetBlockChain(int nodeIndex)
-        => nodeIndex == -1 ? _nodes.Current.BlockChain : _nodes[nodeIndex].BlockChain;
-
-    public Block GetBlock(int nodeIndex, long blockIndex)
-    {
-        var blockChain = GetBlockChain(nodeIndex);
-        return blockIndex == -1 ? blockChain[blockChain.Count - 1] : blockChain[blockIndex];
-    }
-
-    public Node GetNode(int nodeIndex)
-        => nodeIndex == -1 ? _nodes.Current : _nodes[nodeIndex];
-
-    public Node GetNode(string identifier)
-    {
-        if (Regex.Match(identifier, @"n(\d+)") is { } match && match.Success == true)
-        {
-            var index = int.Parse(match.Groups[1].Value);
-            return _nodes[index];
-        }
-        return _nodes[new Address(identifier)];
-    }
-
-    public Address GetAddress(string identifier)
-    {
-        if (Regex.Match(identifier, @"([nc])(\d+)") is { } match && match.Success == true)
-        {
-            var index = int.Parse(match.Groups[2].Value);
-            var type = match.Groups[1].Value;
-            if (type == "n")
-                return _nodes[index].Address;
-            return _clients[index].Address;
+            return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        var address = new Address(identifier);
-        if (_nodes.Contains(address) == true || _clients.Contains(address) == true)
-        {
-            return address;
-        }
-
-        throw new ArgumentException("Invalid identifier.", nameof(identifier));
+        return _clients.Where(item => $"{item.Address}".StartsWith(identifier))
+                     .Single();
     }
 
-    public string GetIdentifier(Address address)
+    public INode GetNode(string identifier)
+    {
+        if (identifier == string.Empty)
+        {
+            return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
+        }
+
+        return _nodes.Where(item => $"{item.Address}".StartsWith(identifier))
+                     .Single();
+    }
+
+    public IIdentifier GetIdentifier(string identifier)
+    {
+        return _nodes.Concat<IIdentifier>(_clients)
+                     .Where(item => $"{item.Address}".StartsWith(identifier))
+                     .Single();
+    }
+
+    public IIdentifier GetIdentifier(Address address)
     {
         if (_nodes.Contains(address) == true)
         {
-            return $"n{_nodes.IndexOf(address)}";
+            return _nodes[address];
         }
 
         if (_clients.Contains(address) == true)
         {
-            return $"c{_clients.IndexOf(address)}";
+            return _clients[address];
         }
 
         throw new ArgumentException("Invalid address.", nameof(address));
@@ -118,79 +93,67 @@ sealed partial class Application : IAsyncDisposable, IServiceProvider
         return [.. addresses];
     }
 
-    public void Cancel()
+    public override object? GetService(Type serviceType)
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
+        var contractName = AttributedModelServices.GetContractName(serviceType);
+        return _container.GetExportedValue<object?>(contractName);
     }
 
-    public async Task StartAsync()
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(_terminal != null, "Application has already been started.");
-
-        await _applicationServices.InitializeAsync(this, cancellationToken: default);
+        _closeToken = await _serviceContext.OpenAsync(cancellationToken: default);
+        await base.OnStartAsync(cancellationToken);
         await PrepareCommandContext();
-        _cancellationTokenSource = new();
         _terminal = _container.GetExportedValue<SystemTerminal>()!;
-        await _terminal!.StartAsync(_cancellationTokenSource.Token);
+        await _terminal.StartAsync(cancellationToken);
 
         async Task PrepareCommandContext()
         {
+            var separator = new string('=', 80);
             var sw = new StringWriter();
-            var commandContext = GetService<CommandContext>()!;
+            var commandContext = _container.GetExportedValue<CommandContext>()!;
             commandContext.Out = sw;
-            sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+            sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
             sw.WriteLine();
-            await commandContext.ExecuteAsync(Array.Empty<string>(), cancellationToken: default);
-            sw.WriteLine(TerminalStringBuilder.GetString("============================================================", TerminalColorType.BrightGreen));
+            await commandContext.ExecuteAsync(args: [], cancellationToken: default);
+            sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
             commandContext.Out = Console.Out;
             Console.Write(sw.ToString());
+            Console.WriteLine(EndPointUtility.ToString(_serviceContext.EndPoint));
         }
     }
 
-    public async ValueTask DisposeAsync()
+    protected override async ValueTask OnDisposeAsync()
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
+        await base.OnDisposeAsync();
+        await _serviceContext.ReleaseAsync(_closeToken);
         _nodes.CurrentChanged -= Nodes_CurrentChanged;
-        _currentNode.BlockAppended -= Node_BlockAppended;
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
         _container.Dispose();
-        await _applicationServices.DisposeAsync();
-        _terminal = null;
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
     }
 
-    public T? GetService<T>()
+    private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {
-        return _container.GetExportedValue<T>();
-    }
-
-    public object? GetService(Type serviceType)
-    {
-        return _container.GetExportedValue<object?>(AttributedModelServices.GetContractName(serviceType));
-    }
-
-    private void Node_BlockAppended(object? sender, EventArgs e)
-    {
-        if (sender is Node node)
-        {
-            var blockChain = node.BlockChain;
-            Console.WriteLine(TerminalStringBuilder.GetString($"Block Appended: #{blockChain.Tip.Index}", TerminalColorType.BrightCyan));
-        }
+        var blockInfo = e.BlockInfo;
+        var hash = blockInfo.Hash[0..8];
+        var miner = blockInfo.Miner[0..8];
+        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
+        var coloredMessage = TerminalStringBuilder.GetString(message, TerminalColorType.BrightBlue);
+        Console.WriteLine(coloredMessage);
     }
 
     private void Nodes_CurrentChanged(object? sender, EventArgs e)
     {
-        _currentNode.BlockAppended -= Node_BlockAppended;
+        if (_currentNode != null)
+        {
+            _currentNode.BlockAppended -= Node_BlockAppended;
+        }
+
         _currentNode = _nodes.Current;
-        _currentNode.BlockAppended += Node_BlockAppended;
-        Console.WriteLine($"Current Swarm: {_currentNode}");
+
+        if (_currentNode != null)
+        {
+            _currentNode.BlockAppended += Node_BlockAppended;
+        }
     }
 }

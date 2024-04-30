@@ -1,149 +1,213 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
+using System.Net;
 using Libplanet.Crypto;
 using Libplanet.Net;
-using LibplanetConsole.Executable.Exceptions;
+using LibplanetConsole.Common;
+using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Frameworks;
+using LibplanetConsole.NodeServices;
 
 namespace LibplanetConsole.Executable;
 
 [Export]
 [Export(typeof(IApplicationService))]
-sealed class NodeCollection : IEnumerable<Node>, IApplicationService
+[method: ImportingConstructor]
+internal sealed class NodeCollection(ApplicationOptions options)
+    : IEnumerable<INode>, IApplicationService
 {
-    private Node _current;
-    private readonly Node[] _nodes;
-    private readonly BoundPeer _seedPeer;
-    private readonly BoundPeer _consensusSeedPeer;
+    private static readonly object LockObject = new();
+    private readonly ApplicationOptions _options = options;
+    private readonly List<Node> _nodeList = new(options.NodeCount);
+    private Node? _genesisNode;
+    private INode? _current;
     private bool _isDisposed;
 
-    [ImportingConstructor]
-    public NodeCollection(ApplicationOptions options)
-        : this(CreatePrivateKeys(options.SwarmCount), options.StorePath)
-    {
-    }
+    public event EventHandler? CurrentChanged;
 
-    public NodeCollection()
-        : this(CreatePrivateKeys(4), storePath: string.Empty)
-    {
-    }
-
-    public NodeCollection(PrivateKey[] validators)
-        : this(validators, storePath: string.Empty)
-    {
-    }
-
-    public NodeCollection(PrivateKey[] validators, string storePath)
-    {
-        var validatorKeys = validators.Select(item => item.PublicKey).ToArray();
-        var nodes = new Node[validators.Length];
-        var peers = new BoundPeer[validators.Length];
-        var consensusPeers = new BoundPeer[validators.Length];
-        for (var i = 0; i < validators.Length; i++)
-        {
-            var privateKey = validators[i];
-            var peer = peers[i];
-            var consensusPeer = consensusPeers[i];
-            nodes[i] = new Node($"Swarm{i}", privateKey, validatorKeys, storePath)
-            {
-                Identifier = $"n{i}",
-            };
-            peers[i] = nodes[i].Peer;
-            consensusPeers[i] = nodes[i].ConsensusPeer;
-        }
-        _nodes = nodes;
-        _current = nodes[0];
-        _seedPeer = peers[0];
-        _consensusSeedPeer = consensusPeers[0];
-    }
-
-    public Node Current
+    public INode? Current
     {
         get => _current;
         set
         {
-            if (_nodes.Contains(value) == false)
-                throw new ArgumentException($"'{value}' is not included in the collection.", nameof(value));
+            if (value is not null && _nodeList.Contains(value) == false)
+            {
+                throw new ArgumentException(
+                    message: $"'{value}' is not included in the collection.",
+                    paramName: nameof(value));
+            }
+
             _current = value;
             CurrentChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    public int Count => _nodes.Length;
+    public int Count => _nodeList.Count;
 
-    public Node this[int index] => _nodes[index];
+    public INode this[int index] => _nodeList[index];
 
-    public Node this[Address address] => _nodes.Single(item => item.Address == address);
+    public INode this[Address address] => _nodeList.Single(item => item.Address == address);
 
-    public bool Contains(Node item) => _nodes.Contains(item);
+    public bool Contains(INode item) => _nodeList.Contains(item);
 
-    public bool Contains(Address address) => _nodes.Any(item => item.Address == address);
+    public bool Contains(Address address) => _nodeList.Any(item => item.Address == address);
 
-    public int IndexOf(Node item)
+    public int IndexOf(INode item)
     {
-        for (var i = 0; i < _nodes.Length; i++)
+        for (var i = 0; i < _nodeList.Count; i++)
         {
-            if (Equals(item, _nodes[i]) == true)
+            if (Equals(item, _nodeList[i]) == true)
+            {
                 return i;
+            }
         }
+
         return -1;
     }
 
     public int IndexOf(Address address)
     {
-        for (var i = 0; i < _nodes.Length; i++)
+        for (var i = 0; i < _nodeList.Count; i++)
         {
-            if (Equals(address, _nodes[i].Address) == true)
+            if (Equals(address, _nodeList[i].Address) == true)
+            {
                 return i;
+            }
         }
+
         return -1;
     }
 
-    public event EventHandler? CurrentChanged;
+    public Task<INode> AddNewAsync(CancellationToken cancellationToken)
+        => AddNewAsync(new(), cancellationToken);
 
-    private static PrivateKey[] CreatePrivateKeys(int count)
+    public async Task<INode> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
     {
-        var keyList = new List<PrivateKey>(count);
-        for (var i = 0; i < count; i++)
+        if (_genesisNode == null)
         {
-            keyList.Add(PrivateKeyUtility.Create($"Swarm{i}"));
+            throw new InvalidOperationException("Genesis node is not set.");
         }
-        return [.. keyList];
+
+        var genesisPublicKey = _genesisNode.PrivateKey.PublicKey;
+        var nodeOptions = new NodeOptions
+        {
+            SeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.SwarmEndPoint),
+            ConsensusSeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.ConsensusEndPoint),
+        };
+        var endPoint = DnsEndPointUtility.Next();
+        _ = new NodeProcess(endPoint, privateKey);
+        var node = new Node(privateKey, endPoint);
+        await node.StartAsync(nodeOptions, cancellationToken);
+        lock (LockObject)
+        {
+            _nodeList.Add(node);
+        }
+
+        node.Disposed += Node_Disposed;
+        return node;
     }
 
-    #region IApplicationService
-
-    async Task IApplicationService.InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public async Task<INode> AttachAsync(
+        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_nodes.Select(item => item.StartAsync(_seedPeer, _consensusSeedPeer, cancellationToken)));
+        if (_genesisNode == null && privateKey != GenesisOptions.DefaultGenesisKey)
+        {
+            throw new InvalidOperationException("Genesis node is not set.");
+        }
+
+        var nodeOptions = _genesisNode?.NodeOptions ?? new NodeOptions();
+        var node = new Node(privateKey, endPoint);
+        await node.StartAsync(nodeOptions, cancellationToken);
+        _nodeList.Add(node);
+        if (privateKey == GenesisOptions.DefaultGenesisKey)
+        {
+            _genesisNode = node;
+            Current = node;
+        }
+
+        return node;
+    }
+
+    async Task IApplicationService.InitializeAsync(
+        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        if (_options.NodeCount > 0)
+        {
+            await AddGenesisNodeAsync(cancellationToken);
+            await Parallel.ForAsync(1, _options.NodeCount, async (index, cancellationToken) =>
+            {
+                var privateKey = ProposePrivateKey(index);
+                await AddNewAsync(privateKey, cancellationToken);
+            });
+        }
+
+        static PrivateKey ProposePrivateKey(int index)
+        {
+            if (index < GenesisOptions.Validators.Length)
+            {
+                return GenesisOptions.Validators[index];
+            }
+
+            return new PrivateKey();
+        }
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
-        for (var i = _nodes.Length - 1; i >= 0; i--)
+        for (var i = _nodeList.Count - 1; i >= 0; i--)
         {
-            var item = _nodes[i]!;
+            var item = _nodeList[i]!;
             await item.DisposeAsync();
         }
+
         _isDisposed = true;
         GC.SuppressFinalize(this);
     }
 
-    #endregion
+    IEnumerator<INode> IEnumerable<INode>.GetEnumerator()
+        => _nodeList.GetEnumerator();
 
-    #region IEnumerable
+    IEnumerator IEnumerable.GetEnumerator()
+        => _nodeList.GetEnumerator();
 
-    IEnumerator<Node> IEnumerable<Node>.GetEnumerator()
+    internal Node RandomNode()
     {
-        foreach (var item in _nodes)
+        if (Count == 0)
         {
-            yield return item;
+            throw new InvalidOperationException("No node is available.");
         }
+
+        var nodeIndex = Random.Shared.Next(Count);
+        return _nodeList[nodeIndex];
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => _nodes.GetEnumerator();
+    private async Task<Node> AddGenesisNodeAsync(CancellationToken cancellationToken)
+    {
+        var nodeOptions = new NodeOptions();
+        var endPoint = DnsEndPointUtility.Next();
+        var privateKey = GenesisOptions.DefaultGenesisKey;
+        _ = new NodeProcess(endPoint, privateKey);
+        var node = new Node(privateKey, endPoint);
+        await node.StartAsync(nodeOptions, cancellationToken);
+        _nodeList.Add(node);
+        _genesisNode = node;
+        node.Disposed += Node_Disposed;
+        Current = node;
+        return node;
+    }
 
-    #endregion
+    private void Node_Disposed(object? sender, EventArgs e)
+    {
+        if (sender is Node node)
+        {
+            _nodeList.Remove(node);
+            if (_current == node)
+            {
+                Current = _nodeList.FirstOrDefault();
+            }
+        }
+    }
 }
