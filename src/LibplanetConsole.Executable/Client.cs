@@ -6,7 +6,7 @@ using Libplanet.Crypto;
 using LibplanetConsole.ClientServices;
 using LibplanetConsole.ClientServices.Serializations;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Games.Serializations;
+using LibplanetConsole.GameServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 

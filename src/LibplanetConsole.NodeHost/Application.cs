@@ -6,8 +6,10 @@ using JSSoft.Commands.Extensions;
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
 using JSSoft.Terminals;
+using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
+using LibplanetConsole.GameServices;
 using LibplanetConsole.NodeHost.Serializations;
 using LibplanetConsole.NodeServices;
 
@@ -26,7 +28,7 @@ internal sealed class Application : ApplicationBase, IApplication
     public Application(ApplicationOptions options)
     {
         _options = options;
-        _node = new Node(options);
+        _node = new Node(options, [new AssemblyActionLoader(typeof(Player).Assembly)]);
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);

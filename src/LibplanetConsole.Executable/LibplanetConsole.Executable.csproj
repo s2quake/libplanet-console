@@ -12,7 +12,7 @@
     <ProjectReference Include="..\LibplanetConsole.NodeServices\LibplanetConsole.NodeServices.csproj" />
     <ProjectReference Include="..\LibplanetConsole.ClientServices\LibplanetConsole.ClientServices.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Games\LibplanetConsole.Games.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.GameServices\LibplanetConsole.GameServices.csproj" />
   </ItemGroup>
 
   <ItemGroup>

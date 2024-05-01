@@ -2,8 +2,8 @@ using Bencodex.Types;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Games;
-using LibplanetConsole.Games.Serializations;
+using LibplanetConsole.GameServices;
+using LibplanetConsole.GameServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 

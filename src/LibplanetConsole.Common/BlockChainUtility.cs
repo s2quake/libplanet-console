@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Numerics;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Action.Loader;
 using Libplanet.Action.Sys;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
@@ -23,14 +24,15 @@ public static class BlockChainUtility
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
     public static BlockChain CreateBlockChain(
-        GenesisOptions genesisOptions, string storePath, IRenderer renderer)
+        GenesisOptions genesisOptions,
+        string storePath,
+        IActionLoader[] actionLoaders,
+        IRenderer renderer)
     {
         var genesisKey = genesisOptions.GenesisKey;
         var isNew = storePath == string.Empty || Directory.Exists(storePath) == false;
         var (store, stateStore) = GetStore(storePath);
-        var actionLoader = new AggregateTypedActionLoader
-        {
-        };
+        var actionLoader = new AggregateTypedActionLoader(actionLoaders);
         var actionEvaluator = new ActionEvaluator(
             policyBlockActionGetter: _ => null,
             stateStore,

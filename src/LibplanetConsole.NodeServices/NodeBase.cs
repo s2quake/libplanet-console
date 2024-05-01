@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Action.Loader;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Common;
@@ -86,6 +87,8 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
 
     public NodeOptions NodeOptions { get; private set; } = new();
 
+    public virtual IActionLoader[] ActionLoaders { get; } = [];
+
     public override string ToString()
     {
         return $"{_swarmEndPoint}";
@@ -146,6 +149,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         var blockChain = BlockChainUtility.CreateBlockChain(
             genesisOptions: nodeOptions.GenesisOptions,
             storePath: string.Empty,
+            actionLoaders: ActionLoaders,
             renderer: this);
 
         _swarm = new Swarm(
