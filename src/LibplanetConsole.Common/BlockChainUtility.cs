@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Numerics;
 using Bencodex.Types;
 using Libplanet.Action;
-using Libplanet.Action.Loader;
 using Libplanet.Action.Sys;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
@@ -14,6 +13,7 @@ using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Common.Actions;
 
 namespace LibplanetConsole.Common;
 
@@ -25,11 +25,12 @@ public static class BlockChainUtility
     public static BlockChain CreateBlockChain(
         GenesisOptions genesisOptions, string storePath, IRenderer renderer)
     {
-        var assembly = typeof(BlockChainUtility).Assembly;
         var genesisKey = genesisOptions.GenesisKey;
         var isNew = storePath == string.Empty || Directory.Exists(storePath) == false;
         var (store, stateStore) = GetStore(storePath);
-        var actionLoader = new SingleActionLoader(typeof(Initialize));
+        var actionLoader = new AggregateTypedActionLoader
+        {
+        };
         var actionEvaluator = new ActionEvaluator(
             policyBlockActionGetter: _ => null,
             stateStore,
