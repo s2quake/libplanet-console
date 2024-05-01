@@ -5,6 +5,6 @@ namespace LibplanetConsole.Executable.Commands;
 
 [Export(typeof(ICommand))]
 [Export(typeof(VersionCommand))]
-sealed class VersionCommand : VersionCommandBase
+internal sealed class VersionCommand : VersionCommandBase
 {
 }

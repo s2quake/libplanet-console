@@ -6,9 +6,12 @@
     <ProjectReference Include="..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
     <ProjectReference Include="..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
     <ProjectReference Include="..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
-    <Reference Include="JSSoft.Library.dll">
-      <HintPath>..\..\assemblies\JSSoft.Library.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
+    <ProjectReference Include="..\..\.communication\JSSoft.Communication\JSSoft.Communication.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.NodeServices\LibplanetConsole.NodeServices.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.ClientServices\LibplanetConsole.ClientServices.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,9 +24,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <AssemblyName>libplanet-console</AssemblyName>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>

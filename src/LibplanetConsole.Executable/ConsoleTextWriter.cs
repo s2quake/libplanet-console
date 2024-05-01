@@ -2,7 +2,7 @@ using System.Text;
 
 namespace LibplanetConsole.Executable;
 
-sealed class ConsoleTextWriter : TextWriter
+internal sealed class ConsoleTextWriter : TextWriter
 {
     public override Encoding Encoding => Encoding.UTF8;
 

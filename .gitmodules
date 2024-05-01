@@ -1,6 +1,12 @@
 [submodule ".commands"]
 	path = .commands
-	url = ../commands.git
+	url = https://github.com/s2quake/commands.git
 [submodule ".libplanet"]
 	path = .libplanet
-	url = ../libplanet.git
+	url = https://github.com/s2quake/libplanet.git
+[submodule ".configurations"]
+	path = .configurations
+	url = https://github.com/s2quake/configurations.git
+[submodule ".communication"]
+	path = .communication
+	url = https://github.com/s2quake/communication.git
