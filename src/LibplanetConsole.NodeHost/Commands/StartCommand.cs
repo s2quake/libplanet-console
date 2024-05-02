@@ -7,7 +7,7 @@ namespace LibplanetConsole.NodeHost.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Start node.")]
 [method: ImportingConstructor]
-internal sealed class StartCommand(INode node) : CommandAsyncBase
+internal sealed class StartCommand(INode node, ApplicationOptions options) : CommandAsyncBase
 {
     public override bool IsEnabled => node.IsRunning is false;
 
@@ -17,7 +17,7 @@ internal sealed class StartCommand(INode node) : CommandAsyncBase
     protected override async Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
-        var seedEndPoint = SeedEndPoint;
+        var seedEndPoint = SeedEndPoint != string.Empty ? SeedEndPoint : options.SeedEndPoint;
         var nodeOptions = seedEndPoint != string.Empty
             ? await NodeOptionsUtility.GetNodeOptionsAsync(seedEndPoint, cancellationToken)
             : NodeOptionsUtility.GetNodeOptions(node);

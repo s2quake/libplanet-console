@@ -33,14 +33,15 @@
             ]
         },
         {
-            "name": "C#: Libplanet Node with Private Key",
+            "name": "C#: Libplanet Node with Seed EndPoint",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/src/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
-                "--private-key",
-                "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac"
+                "-a",
+                "--seed-end-point",
+                "127.0.0.1:5353"
             ]
         },
         {

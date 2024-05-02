@@ -16,6 +16,9 @@ internal record class ApplicationOptions
     [CommandPropertySwitch('a')]
     public bool AutoStart { get; init; } = false;
 
+    [CommandProperty]
+    public string SeedEndPoint { get; init; } = string.Empty;
+
     public static ApplicationOptions Parse(string[] args)
     {
         var options = new ApplicationOptions();

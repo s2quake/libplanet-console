@@ -71,7 +71,7 @@ internal sealed class Application : ApplicationBase, IApplication
             var sw = new StringWriter();
             var commandContext = _container.GetExportedValue<CommandContext>()!;
             commandContext.Out = sw;
-            await AutoStartAsync();
+            await AutoStartAsync(cancellationToken);
             sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
             sw.WriteLine();
@@ -85,7 +85,7 @@ internal sealed class Application : ApplicationBase, IApplication
         }
         else
         {
-            await AutoStartAsync();
+            await AutoStartAsync(cancellationToken);
         }
     }
 
@@ -99,11 +99,14 @@ internal sealed class Application : ApplicationBase, IApplication
         _container.Dispose();
     }
 
-    private async Task AutoStartAsync()
+    private async Task AutoStartAsync(CancellationToken cancellationToken)
     {
         if (_options.AutoStart == true)
         {
-            var nodeOptions = NodeOptionsUtility.GetNodeOptions(_node);
+            var seedEndPoint = _options.SeedEndPoint;
+            var nodeOptions = seedEndPoint != string.Empty
+                ? await NodeOptionsUtility.GetNodeOptionsAsync(seedEndPoint, cancellationToken)
+                : NodeOptionsUtility.GetNodeOptions(_node);
             await _node.StartAsync(nodeOptions, cancellationToken: default);
         }
     }
