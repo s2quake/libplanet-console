@@ -17,7 +17,8 @@
                 "4"
             ],
             "env": {
-                "LIBPLANET_CONSOLE_WORKSPACE_PATH": "${workspaceFolder}"
+                "LIBPLANET_CONSOLE_WORKSPACE_PATH": "${workspaceFolder}",
+                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32;774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79"
             }
         },
         {
@@ -27,10 +28,15 @@
             "program": "${workspaceFolder}/src/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
+                "--private-key",
+                "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32",
                 "--end-point",
                 "127.0.0.1:5353",
                 "-a"
-            ]
+            ],
+            "env": {
+                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32;774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79"
+            }
         },
         {
             "name": "C#: Libplanet Node with Seed EndPoint",
@@ -39,6 +45,8 @@
             "program": "${workspaceFolder}/src/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
+                "--private-key",
+                "774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79",
                 "-a",
                 "--seed-end-point",
                 "127.0.0.1:5353"

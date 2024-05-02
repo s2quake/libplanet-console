@@ -22,8 +22,8 @@ internal sealed class KeyCommand : CommandMethodBase
     [CommandMethod]
     public void Public(string privateKey)
     {
-        var publicKey = PrivateKeyUtility.Parse(privateKey).PublicKey;
-        Out.WriteLine(PublicKeyUtility.ToString(publicKey));
+        var privateKeyObject = PrivateKeyUtility.Parse(privateKey);
+        Out.WriteLine(PublicKeyUtility.ToString(privateKeyObject.PublicKey));
     }
 
     [CommandMethod]
@@ -41,8 +41,9 @@ internal sealed class KeyCommand : CommandMethodBase
     }
 
     [CommandMethod]
-    public void Derive(string address, string name)
+    public void Derive(string address, string key)
     {
-        Out.WriteLine(AddressUtility.Parse(address).de);
+        var addressObject = AddressUtility.Parse(address);
+        Out.WriteLine(AddressUtility.Derive(addressObject, key));
     }
 }

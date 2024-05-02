@@ -1,4 +1,5 @@
 using JSSoft.Communication;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.NodeServices;
 using LibplanetConsole.NodeServices.Serializations;
@@ -9,12 +10,14 @@ internal static class NodeOptionsUtility
 {
     public static NodeOptions GetNodeOptions(INode node)
     {
+        var genesisKey = node.PrivateKey;
+        var genesisValidators = GetPublicKeys(genesisKey);
         return new NodeOptions
         {
             GenesisOptions = new GenesisOptions
             {
-                GenesisKey = node.PrivateKey,
-                GenesisValidators = [node.PrivateKey.PublicKey],
+                GenesisKey = genesisKey,
+                GenesisValidators = genesisValidators,
             },
         };
     }
@@ -40,5 +43,15 @@ internal static class NodeOptionsUtility
             await clientContext.AbortAsync();
             throw;
         }
+    }
+
+    private static PublicKey[] GetPublicKeys(PrivateKey privateKey)
+    {
+        if (Environment.GetEnvironmentVariable("LIBPLANET_CONSOLE_VALIDATORS") is { } values)
+        {
+            return [.. values.Split(';').Select(item => PrivateKeyUtility.Parse(item).PublicKey)];
+        }
+
+        return [privateKey.PublicKey];
     }
 }

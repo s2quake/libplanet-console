@@ -1,5 +1,6 @@
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
+using LibplanetConsole.Common;
 using LibplanetConsole.NodeServices;
 
 namespace LibplanetConsole.NodeHost;
@@ -17,6 +18,6 @@ internal sealed class Node(ApplicationOptions options)
             return new PrivateKey();
         }
 
-        return new PrivateKey(options.PrivateKey);
+        return PrivateKeyUtility.Parse(options.PrivateKey);
     }
 }
