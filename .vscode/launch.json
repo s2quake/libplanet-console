@@ -63,5 +63,14 @@
                 "127.0.0.1:5353"
             ]
         }
+    ],
+    "compounds": [
+        {
+            "name": "2 Nodes",
+            "configurations": [
+                "C#: Libplanet Node",
+                "C#: Libplanet Node with Seed EndPoint"
+            ]
+        }
     ]
 }
