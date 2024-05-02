@@ -1,6 +1,8 @@
 using JSSoft.Communication;
+using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.NodeServices;
 using LibplanetConsole.NodeServices.Serializations;
 
@@ -30,18 +32,27 @@ internal static class NodeOptionsUtility
         {
             EndPoint = DnsEndPointUtility.GetEndPoint(seedEndPoint),
         };
+        var closeToken = Guid.Empty;
 
         try
         {
-            var closeToken = await clientContext.OpenAsync(cancellationToken);
-            var seedInfo = await clientService.Server.GetSeedAsync(cancellationToken);
-            await clientContext.CloseAsync(closeToken, cancellationToken);
-            return (NodeOptionsInfo)seedInfo;
+            closeToken = await clientContext.OpenAsync(cancellationToken);
+            for (var i = 0; i < 10; i++)
+            {
+                var seedInfo = await clientService.Server.GetSeedAsync(cancellationToken);
+                if (Equals(seedInfo, SeedInfo.Empty) != true)
+                {
+                    return (NodeOptionsInfo)seedInfo;
+                }
+
+                await Task.Delay(500, cancellationToken);
+            }
+
+            throw new InvalidOperationException("No seed information is available.");
         }
-        catch
+        finally
         {
-            await clientContext.AbortAsync();
-            throw;
+            await clientContext.ReleaseAsync(closeToken);
         }
     }
 

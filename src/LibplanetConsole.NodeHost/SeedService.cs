@@ -15,18 +15,25 @@ internal sealed class SeedService(IApplication application, INode node)
         return application.InvokeAsync(() => application.Info.EndPoint);
     }
 
-    public Task<SeedInfo> GetSeedAsync(CancellationToken cancellationToken)
+    public async Task<SeedInfo> GetSeedAsync(CancellationToken cancellationToken)
     {
-        var nodeInfo = node.Info;
-        var publicKey = node.PrivateKey.PublicKey;
-        var seedPeer = BoundPeerUtility.Create(publicKey, nodeInfo.SwarmEndPoint);
-        var consensusSeedPeer = BoundPeerUtility.Create(publicKey, nodeInfo.ConsensusEndPoint);
-
-        return application.InvokeAsync(() => new SeedInfo
+        if (node.IsRunning == true)
         {
-            GenesisOptions = node.NodeOptions.GenesisOptions,
-            SeedPeer = BoundPeerUtility.ToString(seedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
-        });
+            var nodeInfo = node.Info;
+            var publicKey = node.PrivateKey.PublicKey;
+            var seedPeer = BoundPeerUtility.Create(publicKey, nodeInfo.SwarmEndPoint);
+            var consensusSeedPeer = BoundPeerUtility.Create(publicKey, nodeInfo.ConsensusEndPoint);
+
+            return await application.InvokeAsync(() => new SeedInfo
+            {
+                GenesisOptions = node.NodeOptions.GenesisOptions,
+                SeedPeer = BoundPeerUtility.ToString(seedPeer),
+                ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
+            });
+        }
+        else
+        {
+            return SeedInfo.Empty;
+        }
     }
 }
