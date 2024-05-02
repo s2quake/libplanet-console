@@ -7,7 +7,7 @@ public static class BoundPeerUtility
 {
     public static string ToString(BoundPeer boundPeer)
     {
-        var publicKey = boundPeer.PublicKey.ToHex(false);
+        var publicKey = PublicKeyUtility.ToString(boundPeer.PublicKey);
         var endPoint = DnsEndPointUtility.ToString(boundPeer.EndPoint);
         return $"{publicKey}, {endPoint}";
     }
