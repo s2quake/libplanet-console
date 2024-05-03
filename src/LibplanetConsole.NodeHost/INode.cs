@@ -1,5 +1,6 @@
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
+using Libplanet.Net;
 using Libplanet.Types.Tx;
 using LibplanetConsole.NodeServices;
 using LibplanetConsole.NodeServices.Serializations;
@@ -23,6 +24,10 @@ public interface INode
     PublicKey PublicKey => PrivateKey.PublicKey;
 
     Address Address => PrivateKey.Address;
+
+    BoundPeer BlocksyncSeedPeer { get; }
+
+    BoundPeer ConsensusSeedPeer { get; }
 
     Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
 

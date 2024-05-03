@@ -20,14 +20,13 @@ internal sealed class SeedService(IApplication application, INode node)
         if (node.IsRunning == true)
         {
             var nodeInfo = node.Info;
-            var publicKey = node.PrivateKey.PublicKey;
-            var seedPeer = BoundPeerUtility.Create(publicKey, nodeInfo.SwarmEndPoint);
-            var consensusSeedPeer = BoundPeerUtility.Create(publicKey, nodeInfo.ConsensusEndPoint);
+            var blocksyncSeedPeer = node.BlocksyncSeedPeer;
+            var consensusSeedPeer = node.ConsensusSeedPeer;
 
             return await application.InvokeAsync(() => new SeedInfo
             {
                 GenesisOptions = node.NodeOptions.GenesisOptions,
-                SeedPeer = BoundPeerUtility.ToString(seedPeer),
+                BlocksyncSeedPeer = BoundPeerUtility.ToString(blocksyncSeedPeer),
                 ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
             });
         }

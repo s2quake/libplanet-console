@@ -7,7 +7,7 @@ public record struct NodeOptionsInfo
 {
     public GenesisOptionsInfo GenesisOptions { get; set; }
 
-    public string SeedPeer { get; set; }
+    public string BlocksyncSeedPeer { get; set; }
 
     public string ConsensusSeedPeer { get; set; }
 
@@ -16,7 +16,7 @@ public record struct NodeOptionsInfo
         return new NodeOptions
         {
             GenesisOptions = info.GenesisOptions,
-            SeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.SeedPeer),
+            BlocksyncSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.ConsensusSeedPeer),
         };
     }
@@ -26,7 +26,7 @@ public record struct NodeOptionsInfo
         return new NodeOptionsInfo
         {
             GenesisOptions = nodeOptions.GenesisOptions,
-            SeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.SeedPeer),
+            BlocksyncSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.ConsensusSeedPeer),
         };
     }
@@ -36,7 +36,7 @@ public record struct NodeOptionsInfo
         return new NodeOptionsInfo
         {
             GenesisOptions = seedInfo.GenesisOptions,
-            SeedPeer = seedInfo.SeedPeer,
+            BlocksyncSeedPeer = seedInfo.BlocksyncSeedPeer,
             ConsensusSeedPeer = seedInfo.ConsensusSeedPeer,
         };
     }

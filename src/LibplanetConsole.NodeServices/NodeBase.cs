@@ -17,6 +17,7 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.NodeServices.Seeds;
 using LibplanetConsole.NodeServices.Serializations;
 
 namespace LibplanetConsole.NodeServices;
@@ -27,6 +28,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     private readonly SynchronizationContext _synchronizationContext
         = SynchronizationContext.Current!;
 
+    private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
 
@@ -35,6 +37,8 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     private Swarm? _swarm;
     private Task? _startTask;
     private bool _isDisposed;
+    private SeedNode? _blocksyncSeedNode;
+    private SeedNode? _consensusSeedNode;
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -55,7 +59,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     }
 
     public AppProtocolVersion AppProtocolVersion
-        => _swarm?.AppProtocolVersion ?? throw new InvalidOperationException();
+        => BlockChainUtility.AppProtocolVersion;
 
     public bool IsRunning => _startTask != null;
 
@@ -83,6 +87,14 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             throw new InvalidOperationException();
         }
     }
+
+    public BoundPeer BlocksyncSeedPeer
+        => _blocksyncSeedNode?.BoundPeer ?? NodeOptions.BlocksyncSeedPeer ??
+            throw new InvalidOperationException();
+
+    public BoundPeer ConsensusSeedPeer
+        => _consensusSeedNode?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
+            throw new InvalidOperationException();
 
     public NodeOptions NodeOptions { get; private set; } = new();
 
@@ -121,12 +133,14 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         var privateKey = _privateKey;
         var swarmEndPoint = _swarmEndPoint ?? DnsEndPointUtility.Next();
         var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
-        var swarmSeedPeer = nodeOptions.SeedPeer;
-        var consensusSeedPeer = nodeOptions.ConsensusSeedPeer;
+        var blocksyncSeedPeer = nodeOptions.BlocksyncSeedPeer ??
+            new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
+        var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
+            new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
         var swarmTransport = await CreateTransport(privateKey, swarmEndPoint, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = swarmSeedPeer is null ? [] : ImmutableHashSet.Create(swarmSeedPeer),
+            StaticPeers = ImmutableHashSet.Create(blocksyncSeedPeer),
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
@@ -134,7 +148,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             cancellationToken: cancellationToken);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = consensusSeedPeer is null ? [] : [consensusSeedPeer],
+            SeedPeers = [consensusSeedPeer],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
@@ -144,6 +158,28 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             genesisOptions: nodeOptions.GenesisOptions,
             storePath: string.Empty,
             renderer: this);
+
+        if (nodeOptions.BlocksyncSeedPeer is null)
+        {
+            _blocksyncSeedNode = new SeedNode(new()
+            {
+                PrivateKey = _seedNodePrivateKey,
+                EndPoint = blocksyncSeedPeer.EndPoint,
+                AppProtocolVersion = AppProtocolVersion,
+            });
+            await _blocksyncSeedNode.StartAsync(cancellationToken);
+        }
+
+        if (nodeOptions.ConsensusSeedPeer is null)
+        {
+            _consensusSeedNode = new SeedNode(new()
+            {
+                PrivateKey = _seedNodePrivateKey,
+                EndPoint = consensusSeedPeer.EndPoint,
+                AppProtocolVersion = AppProtocolVersion,
+            });
+            await _consensusSeedNode.StartAsync(cancellationToken);
+        }
 
         _swarm = new Swarm(
             blockChain: blockChain,
@@ -284,11 +320,9 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     private static async Task<NetMQTransport> CreateTransport(
         PrivateKey privateKey, DnsEndPoint endPoint, CancellationToken cancellationToken)
     {
-        var appProtocolKey = BlockChainUtility.AppProtocolKey;
-        var apv = AppProtocolVersion.Sign(appProtocolKey, 1);
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
-            AppProtocolVersion = apv,
+            AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
         };
         var hostOptions = new HostOptions(endPoint.Host, [], endPoint.Port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);

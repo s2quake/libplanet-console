@@ -112,7 +112,7 @@ internal sealed class NodeCollection(ApplicationOptions options)
         var genesisPublicKey = _genesisNode.PrivateKey.PublicKey;
         var nodeOptions = new NodeOptions
         {
-            SeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.SwarmEndPoint),
+            BlocksyncSeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.SwarmEndPoint),
             ConsensusSeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.ConsensusEndPoint),
         };
         var endPoint = DnsEndPointUtility.Next();

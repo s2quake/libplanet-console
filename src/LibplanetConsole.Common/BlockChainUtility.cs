@@ -7,6 +7,7 @@ using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Crypto;
+using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
@@ -21,6 +22,9 @@ public static class BlockChainUtility
 {
     public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString(
         "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
+
+    public static readonly AppProtocolVersion AppProtocolVersion
+        = AppProtocolVersion.Sign(AppProtocolKey, 1);
 
     public static BlockChain CreateBlockChain(
         GenesisOptions genesisOptions, string storePath, IRenderer renderer)

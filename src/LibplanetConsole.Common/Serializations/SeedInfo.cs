@@ -6,7 +6,7 @@ public record struct SeedInfo
 
     public GenesisOptionsInfo GenesisOptions { get; set; }
 
-    public string SeedPeer { get; set; }
+    public string BlocksyncSeedPeer { get; set; }
 
     public string ConsensusSeedPeer { get; set; }
 }
