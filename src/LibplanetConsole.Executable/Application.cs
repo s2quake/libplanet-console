@@ -6,6 +6,7 @@ using JSSoft.Communication.Extensions;
 using JSSoft.Terminals;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.NodeServices;
 
@@ -101,23 +102,22 @@ internal sealed partial class Application : ApplicationBase, IApplication
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
+        _terminal = _container.GetExportedValue<SystemTerminal>()!;
         _closeToken = await _serviceContext.OpenAsync(cancellationToken: default);
         await base.OnStartAsync(cancellationToken);
         await PrepareCommandContext();
-        _terminal = _container.GetExportedValue<SystemTerminal>()!;
         await _terminal.StartAsync(cancellationToken);
 
         async Task PrepareCommandContext()
         {
-            var separator = new string('=', 80);
             var sw = new StringWriter();
             var commandContext = _container.GetExportedValue<CommandContext>()!;
             commandContext.Out = sw;
-            sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
+            sw.WriteSeparator(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
             sw.WriteLine();
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
-            sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
+            sw.WriteSeparator(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
             Console.Write(sw.ToString());
             Console.WriteLine(EndPointUtility.ToString(_serviceContext.EndPoint));

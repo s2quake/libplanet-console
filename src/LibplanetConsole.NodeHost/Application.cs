@@ -62,29 +62,29 @@ internal sealed class Application : ApplicationBase, IApplication
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        _closeToken = await _nodeServiceContext.OpenAsync(cancellationToken: default);
-        await base.OnStartAsync(cancellationToken);
-
         if (_options.ParentProcessId == 0)
         {
-            var separator = new string('=', 80);
             var sw = new StringWriter();
             var commandContext = _container.GetExportedValue<CommandContext>()!;
             commandContext.Out = sw;
+            _terminal = _container.GetExportedValue<SystemTerminal>()!;
+            _closeToken = await _nodeServiceContext.OpenAsync(cancellationToken: default);
+            await base.OnStartAsync(cancellationToken);
             await AutoStartAsync(cancellationToken);
-            sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
+            sw.WriteSeparator(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
             sw.WriteLine();
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
-            sw.WriteLine(TerminalStringBuilder.GetString(separator, TerminalColorType.BrightGreen));
+            sw.WriteSeparator(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
             Console.Write(sw.ToString());
 
-            _terminal = _container.GetExportedValue<SystemTerminal>()!;
             await _terminal.StartAsync(cancellationToken);
         }
         else
         {
+            _closeToken = await _nodeServiceContext.OpenAsync(cancellationToken: default);
+            await base.OnStartAsync(cancellationToken);
             await AutoStartAsync(cancellationToken);
         }
     }

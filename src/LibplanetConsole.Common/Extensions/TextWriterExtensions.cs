@@ -1,3 +1,5 @@
+using JSSoft.Terminals;
+
 namespace LibplanetConsole.Common.Extensions;
 
 public static class TextWriterExtensions
@@ -12,5 +14,22 @@ public static class TextWriterExtensions
     {
         var json = JsonUtility.SerializeObject(obj, isColorized: true);
         return @this.WriteLineAsync(json);
+    }
+
+    public static void WriteSeparator(this TextWriter @this, int length)
+    {
+        @this.WriteLine(new string('=', length));
+    }
+
+    public static void WriteSeparator(
+        this TextWriter @this, int length, TerminalColorType colorType)
+    {
+        var text = new string('=', length);
+        @this.WriteLine(TerminalStringBuilder.GetString(text, colorType));
+    }
+
+    public static void WriteSeparator(this TextWriter @this, TerminalColorType colorType)
+    {
+        WriteSeparator(@this, length: 80, colorType);
     }
 }
