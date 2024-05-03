@@ -86,10 +86,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
 
     public NodeOptions NodeOptions { get; private set; } = new();
 
-    public override string ToString()
-    {
-        return $"{_swarmEndPoint}";
-    }
+    public override string ToString() => AddressUtility.ToString(Address);
 
     public Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken)
         => AddTransactionAsync(_privateKey, actions, cancellationToken);

@@ -28,6 +28,10 @@ internal sealed class Client :
         _clientContext.Faulted += ClientContext_Faulted;
     }
 
+    public event EventHandler? Started;
+
+    public event EventHandler? Stopped;
+
     public event EventHandler? Disposed;
 
     public PrivateKey PrivateKey => _privateKey;
@@ -63,18 +67,30 @@ internal sealed class Client :
 
     public async Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken)
     {
+        if (IsRunning == true)
+        {
+            throw new InvalidOperationException("Client is already running.");
+        }
+
         _closeToken = await _clientContext.OpenAsync(cancellationToken);
         _clientInfo = await _clientService.Server.StartAsync(clientOptions, cancellationToken);
         ClientOptions = clientOptions;
         IsRunning = true;
+        Started?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        if (IsRunning != true)
+        {
+            throw new InvalidOperationException("Client is not running.");
+        }
+
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
         await _clientService.Server.StopAsync(cancellationToken);
         await _clientContext.CloseAsync(_closeToken, cancellationToken);
+        Stopped?.Invoke(this, EventArgs.Empty);
     }
 
     public ValueTask DisposeAsync()

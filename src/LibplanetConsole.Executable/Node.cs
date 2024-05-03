@@ -36,6 +36,10 @@ internal sealed class Node
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
+    public event EventHandler? Started;
+
+    public event EventHandler? Stopped;
+
     public event EventHandler? Disposed;
 
     public DnsEndPoint SwarmEndPoint
@@ -58,6 +62,8 @@ internal sealed class Node
 
     public EndPoint EndPoint => _clientContext.EndPoint;
 
+    public NodeInfo Info => _nodeInfo;
+
     PrivateKey IIdentifier.PrivateKey => _privateKey;
 
     public async ValueTask DisposeAsync()
@@ -78,20 +84,32 @@ internal sealed class Node
 
     public async Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken)
     {
+        if (IsRunning == true)
+        {
+            throw new InvalidOperationException("Node is already running.");
+        }
+
         _closeToken = await _clientContext.OpenAsync(cancellationToken);
         _nodeInfo = await _nodeService.Server.StartAsync(nodeOptions, cancellationToken);
         _swarmEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.ConsensusEndPoint);
         NodeOptions = nodeOptions;
         IsRunning = true;
+        Started?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        if (IsRunning != true)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
+
         NodeOptions = NodeOptions.Default;
         IsRunning = false;
         await _nodeService.Server.StopAsync(cancellationToken);
         await _clientContext.CloseAsync(_closeToken, cancellationToken);
+        Stopped?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task<TxId> AddTransactionAsync(

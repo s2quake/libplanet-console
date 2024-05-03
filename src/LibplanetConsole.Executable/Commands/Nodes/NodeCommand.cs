@@ -10,7 +10,7 @@ namespace LibplanetConsole.Executable.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Provides node-related commands.")]
 [method: ImportingConstructor]
-internal sealed class NodeCommand(IApplication application, NodeCollection nodes)
+internal sealed partial class NodeCommand(IApplication application, INodeCollection nodes)
     : CommandMethodBase
 {
     [CommandPropertySwitch("detail")]
@@ -37,34 +37,30 @@ internal sealed class NodeCommand(IApplication application, NodeCollection nodes
     public async Task NewAsync(CancellationToken cancellationToken)
     {
         var node = await nodes.AddNewAsync(cancellationToken);
+        var nodeInfo = node.Info;
+        await Out.WriteLineAsJsonAsync(nodeInfo);
+    }
+
+    [CommandMethod]
+    public async Task InfoAsync(string address, CancellationToken cancellationToken)
+    {
+        var node = application.GetNode(address);
         var nodeInfo = await node.GetInfoAsync(cancellationToken);
         await Out.WriteLineAsJsonAsync(nodeInfo);
     }
 
     [CommandMethod]
-    public async Task InfoAsync(string identifier, CancellationToken cancellationToken)
+    public async Task Start(string address, CancellationToken cancellationToken)
     {
-        var node = application.GetNode(identifier);
-        var nodeInfo = await node.GetInfoAsync(cancellationToken);
-        await Out.WriteLineAsJsonAsync(nodeInfo);
-    }
-
-    [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.Node))]
-    public async Task Start(CancellationToken cancellationToken)
-    {
-        // var seedPeer = nodes[0].Peer;
-        // var consensusSeedPeer = nodes[0].ConsensusPeer;
-        // var node = application.GetNode(IndexProperties.NodeIndex);
+        // var node = application.GetNode(address);
         // await node.StartAsync(cancellationToken);
         await Task.CompletedTask;
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.Node))]
-    public async Task Stop(CancellationToken cancellationToken)
+    public async Task Stop(string address, CancellationToken cancellationToken)
     {
-        var node = application.GetNode(IndexProperties.Node);
+        var node = application.GetNode(address);
         await node.StopAsync(cancellationToken);
     }
 
@@ -79,9 +75,9 @@ internal sealed class NodeCommand(IApplication application, NodeCollection nodes
     }
 
     [CommandMethod]
-    public void Current(string? identifier = null)
+    public void Current(string? address = null)
     {
-        if (identifier is not null && application.GetNode(identifier) is { } node)
+        if (address is not null && application.GetNode(address) is { } node)
         {
             nodes.Current = node;
         }
@@ -125,18 +121,7 @@ internal sealed class NodeCommand(IApplication application, NodeCollection nodes
 
     private void ListDetailed()
     {
-        // var tsb = new TerminalStringBuilder();
-        // for (var i = 0; i < nodes.Count; i++)
-        // {
-        //     var item = nodes[i];
-        //     var swarmInfo = new NodeInfo(item.Target);
-        //     var json = JsonUtility.SerializeObject(swarmInfo, isColorized: true);
-        //     tsb.Foreground = item.IsRunning == true ? null : TerminalColorType.BrightBlack;
-        //     tsb.IsBold = item.IsRunning == true;
-        //     tsb.AppendLine($"[{i}] {item}");
-        //     tsb.ResetOptions();
-        //     tsb.Append(json);
-        // }
-        // Out.Write(tsb.ToString());
+        var infos = nodes.Select(node => node.Info).ToArray();
+        Out.WriteLineAsJson(infos);
     }
 }

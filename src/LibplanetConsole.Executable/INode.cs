@@ -10,11 +10,19 @@ public interface INode : IIdentifier, IServiceProvider
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
+    event EventHandler? Started;
+
+    event EventHandler? Stopped;
+
     bool IsRunning { get; }
 
     string Identifier { get; }
 
     EndPoint EndPoint { get; }
+
+    NodeInfo Info { get; }
+
+    NodeOptions NodeOptions { get; }
 
     Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken);
 

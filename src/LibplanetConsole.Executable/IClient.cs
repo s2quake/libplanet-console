@@ -5,6 +5,10 @@ namespace LibplanetConsole.Executable;
 
 public interface IClient : IIdentifier, IServiceProvider
 {
+    event EventHandler? Started;
+
+    event EventHandler? Stopped;
+
     bool IsRunning { get; }
 
     string Identifier { get; }

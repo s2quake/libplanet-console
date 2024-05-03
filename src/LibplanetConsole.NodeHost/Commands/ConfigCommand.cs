@@ -5,6 +5,7 @@ using LibplanetConsole.Frameworks;
 namespace LibplanetConsole.NodeHost.Commands;
 
 [Export(typeof(ICommand))]
+[CommandSummary("Get and set options")]
 [method: ImportingConstructor]
 internal sealed class ConfigCommand(IApplicationConfigurations configurations) : CommandBase
 {

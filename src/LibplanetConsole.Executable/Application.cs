@@ -24,7 +24,6 @@ internal sealed partial class Application : ApplicationBase, IApplication
 
     public Application(ApplicationOptions options)
     {
-        ConsoleTextWriter.SynchronizationContext = SynchronizationContext.Current!;
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue<IApplication>(this);
@@ -44,32 +43,32 @@ internal sealed partial class Application : ApplicationBase, IApplication
 
     public GenesisOptions GenesisOptions { get; } = GenesisOptions.Default;
 
-    public IClient GetClient(string identifier)
+    public Client GetClient(string address)
     {
-        if (identifier == string.Empty)
+        if (address == string.Empty)
         {
             return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _clients.Where(item => $"{item.Address}".StartsWith(identifier))
-                     .Single();
+        return _clients.Where<Client>(item => $"{item.Address}".StartsWith(address))
+                       .Single();
     }
 
-    public INode GetNode(string identifier)
+    public Node GetNode(string address)
     {
-        if (identifier == string.Empty)
+        if (address == string.Empty)
         {
             return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _nodes.Where(item => $"{item.Address}".StartsWith(identifier))
+        return _nodes.Where<Node>(item => $"{item.Address}".StartsWith(address))
                      .Single();
     }
 
-    public IIdentifier GetIdentifier(string identifier)
+    public IIdentifier GetIdentifier(string address)
     {
         return _nodes.Concat<IIdentifier>(_clients)
-                     .Where(item => $"{item.Address}".StartsWith(identifier))
+                     .Where(item => $"{item.Address}".StartsWith(address))
                      .Single();
     }
 
@@ -88,19 +87,17 @@ internal sealed partial class Application : ApplicationBase, IApplication
         throw new ArgumentException("Invalid address.", nameof(address));
     }
 
-    public Address[] GetAddresses()
-    {
-        var addresses = new List<Address>();
-        addresses.AddRange(_nodes.Select(item => item.Address));
-        addresses.AddRange(_clients.Select(item => item.Address));
-        return [.. addresses];
-    }
-
     public override object? GetService(Type serviceType)
     {
         var contractName = AttributedModelServices.GetContractName(serviceType);
         return _container.GetExportedValue<object?>(contractName);
     }
+
+    IClient IApplication.GetClient(string identifier)
+        => GetClient(identifier);
+
+    INode IApplication.GetNode(string identifier)
+        => GetNode(identifier);
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {

@@ -17,8 +17,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
         Prompt = "libplanet-node $ ";
     }
 
-    protected override string FormatPrompt(string prompt)
-        => prompt;
+    protected override string FormatPrompt(string prompt) => prompt;
 
     protected override string[] GetCompletion(string[] items, string find)
         => _commandContext.GetCompletion(items, find);

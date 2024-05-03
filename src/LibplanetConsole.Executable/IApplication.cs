@@ -1,4 +1,3 @@
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Executable;
@@ -13,11 +12,9 @@ public interface IApplication : IAsyncDisposable, IServiceProvider
 
     void Cancel();
 
-    IClient GetClient(string identifier);
+    IClient GetClient(string address);
 
-    INode GetNode(string identifier);
+    INode GetNode(string address);
 
-    IIdentifier GetIdentifier(string identifier);
-
-    IIdentifier GetIdentifier(Address address);
+    IIdentifier GetIdentifier(string address);
 }

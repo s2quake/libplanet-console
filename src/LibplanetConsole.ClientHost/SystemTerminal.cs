@@ -17,20 +17,13 @@ internal sealed class SystemTerminal : SystemTerminalBase
         Prompt = "libplanet-client $ ";
     }
 
-    protected override string FormatPrompt(string prompt)
-    {
-        return prompt;
-    }
+    protected override string FormatPrompt(string prompt) => prompt;
 
     protected override string[] GetCompletion(string[] items, string find)
-    {
-        return _commandContext.GetCompletion(items, find);
-    }
+        => _commandContext.GetCompletion(items, find);
 
     protected override Task OnExecuteAsync(string command, CancellationToken cancellationToken)
-    {
-        return _commandContext.ExecuteAsync(command, cancellationToken);
-    }
+        => _commandContext.ExecuteAsync(command, cancellationToken);
 
     protected override void OnInitialize(TextWriter @out, TextWriter error)
     {

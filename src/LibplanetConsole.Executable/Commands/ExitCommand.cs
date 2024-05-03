@@ -8,8 +8,5 @@ namespace LibplanetConsole.Executable.Commands;
 [method: ImportingConstructor]
 internal sealed class ExitCommand(IApplication application) : CommandBase
 {
-    protected override void OnExecute()
-    {
-        application.Cancel();
-    }
+    protected override void OnExecute() => application.Cancel();
 }

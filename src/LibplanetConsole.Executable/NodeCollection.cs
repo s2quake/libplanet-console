@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Net;
 using Libplanet.Crypto;
@@ -12,21 +11,22 @@ using LibplanetConsole.NodeServices;
 namespace LibplanetConsole.Executable;
 
 [Export]
+[Export(typeof(INodeCollection))]
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(ApplicationOptions options)
-    : IEnumerable<INode>, IApplicationService
+    : IEnumerable<Node>, INodeCollection, IApplicationService
 {
     private static readonly object LockObject = new();
     private readonly ApplicationOptions _options = options;
     private readonly List<Node> _nodeList = new(options.NodeCount);
     private Node? _genesisNode;
-    private INode? _current;
+    private Node? _current;
     private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
 
-    public INode? Current
+    public Node? Current
     {
         get => _current;
         set
@@ -45,15 +45,35 @@ internal sealed class NodeCollection(ApplicationOptions options)
 
     public int Count => _nodeList.Count;
 
-    public INode this[int index] => _nodeList[index];
+    INode? INodeCollection.Current
+    {
+        get => Current;
+        set
+        {
+            if (value is not Node node)
+            {
+                throw new ArgumentException(
+                    message: $"'{value}' is not included in the collection.",
+                    paramName: nameof(value));
+            }
 
-    public INode this[Address address] => _nodeList.Single(item => item.Address == address);
+            Current = node;
+        }
+    }
 
-    public bool Contains(INode item) => _nodeList.Contains(item);
+    public Node this[int index] => _nodeList[index];
+
+    public Node this[Address address] => _nodeList.Single(item => item.Address == address);
+
+    INode INodeCollection.this[int index] => this[index];
+
+    INode INodeCollection.this[Address address] => this[address];
+
+    public bool Contains(Node item) => _nodeList.Contains(item);
 
     public bool Contains(Address address) => _nodeList.Any(item => item.Address == address);
 
-    public int IndexOf(INode item)
+    public int IndexOf(Node item)
     {
         for (var i = 0; i < _nodeList.Count; i++)
         {
@@ -79,10 +99,10 @@ internal sealed class NodeCollection(ApplicationOptions options)
         return -1;
     }
 
-    public Task<INode> AddNewAsync(CancellationToken cancellationToken)
+    public Task<Node> AddNewAsync(CancellationToken cancellationToken)
         => AddNewAsync(new(), cancellationToken);
 
-    public async Task<INode> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
+    public async Task<Node> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
     {
         if (_genesisNode == null)
         {
@@ -108,7 +128,7 @@ internal sealed class NodeCollection(ApplicationOptions options)
         return node;
     }
 
-    public async Task<INode> AttachAsync(
+    public async Task<Node> AttachAsync(
         EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
         if (_genesisNode == null && privateKey != GenesisOptions.DefaultGenesisKey)
@@ -166,6 +186,29 @@ internal sealed class NodeCollection(ApplicationOptions options)
         _isDisposed = true;
         GC.SuppressFinalize(this);
     }
+
+    async Task<INode> INodeCollection.AddNewAsync(
+        PrivateKey privateKey, CancellationToken cancellationToken)
+        => await AddNewAsync(privateKey, cancellationToken);
+
+    async Task<INode> INodeCollection.AttachAsync(
+        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
+        => await AttachAsync(endPoint, privateKey, cancellationToken);
+
+    bool INodeCollection.Contains(INode item) => item switch
+    {
+        Node node => Contains(node),
+        _ => false,
+    };
+
+    int INodeCollection.IndexOf(INode item) => item switch
+    {
+        Node node => IndexOf(node),
+        _ => -1,
+    };
+
+    IEnumerator<Node> IEnumerable<Node>.GetEnumerator()
+        => _nodeList.GetEnumerator();
 
     IEnumerator<INode> IEnumerable<INode>.GetEnumerator()
         => _nodeList.GetEnumerator();

@@ -10,21 +10,22 @@ using LibplanetConsole.Frameworks;
 namespace LibplanetConsole.Executable;
 
 [Export]
+[Export(typeof(IClientCollection))]
 [Export(typeof(IApplicationService))]
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
 internal sealed class ClientCollection(ApplicationOptions options, NodeCollection nodes)
-    : IEnumerable<IClient>, IApplicationService
+    : IEnumerable<Client>, IClientCollection, IApplicationService
 {
     private static readonly object LockObject = new();
     private readonly ApplicationOptions _options = options;
     private readonly List<Client> _clientList = new(options.ClientCount);
-    private IClient? _current;
+    private Client? _current;
     private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
 
-    public IClient? Current
+    public Client? Current
     {
         get => _current;
         set
@@ -43,15 +44,35 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
 
     public int Count => _clientList.Count;
 
-    public IClient this[int index] => _clientList[index];
+    IClient? IClientCollection.Current
+    {
+        get => Current;
+        set
+        {
+            if (value is not Client client)
+            {
+                throw new ArgumentException(
+                    message: $"'{value}' is not included in the collection.",
+                    paramName: nameof(value));
+            }
 
-    public IClient this[Address address] => _clientList.Single(item => item.Address == address);
+            Current = client;
+        }
+    }
 
-    public bool Contains(IClient item) => _clientList.Contains(item);
+    public Client this[int index] => _clientList[index];
+
+    public Client this[Address address] => _clientList.Single(item => item.Address == address);
+
+    IClient IClientCollection.this[int index] => this[index];
+
+    IClient IClientCollection.this[Address address] => this[address];
+
+    public bool Contains(Client item) => _clientList.Contains(item);
 
     public bool Contains(Address address) => _clientList.Any(item => item.Address == address);
 
-    public int IndexOf(IClient item)
+    public int IndexOf(Client item)
     {
         for (var i = 0; i < _clientList.Count; i++)
         {
@@ -146,6 +167,29 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
         _isDisposed = true;
         GC.SuppressFinalize(this);
     }
+
+    async Task<IClient> IClientCollection.AddNewAsync(
+        PrivateKey privateKey, CancellationToken cancellationToken)
+        => await AddNewAsync(privateKey, cancellationToken);
+
+    async Task<IClient> IClientCollection.AttachAsync(
+        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
+        => await AttachAsync(endPoint, privateKey, cancellationToken);
+
+    bool IClientCollection.Contains(IClient item) => item switch
+    {
+        Client client => Contains(client),
+        _ => false,
+    };
+
+    int IClientCollection.IndexOf(IClient item) => item switch
+    {
+        Client client => IndexOf(client),
+        _ => -1,
+    };
+
+    IEnumerator<Client> IEnumerable<Client>.GetEnumerator()
+        => _clientList.GetEnumerator();
 
     IEnumerator<IClient> IEnumerable<IClient>.GetEnumerator()
         => _clientList.GetEnumerator();

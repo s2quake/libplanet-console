@@ -8,7 +8,7 @@ namespace LibplanetConsole.Executable.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Provides client-related commands.")]
 [method: ImportingConstructor]
-internal sealed class ClientCommand(IApplication application, ClientCollection clients)
+internal sealed partial class ClientCommand(IApplication application, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandProperty(InitValue = 10)]
