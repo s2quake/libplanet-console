@@ -1,10 +1,12 @@
 using System.Net;
 using JSSoft.Communication;
+using JSSoft.Communication.Extensions;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.NodeServices;
 using LibplanetConsole.NodeServices.Serializations;
 
@@ -14,24 +16,25 @@ internal sealed class Node
     : INodeCallback, IAsyncDisposable, IAddressable, INode
 {
     private readonly PrivateKey _privateKey;
-    private readonly ClientContext _clientContext;
-    private readonly ClientService<INodeService, INodeCallback> _nodeService;
+    private readonly RemoteContext _remoteContext;
+    private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private DnsEndPoint? _swarmEndPoint;
     private DnsEndPoint? _consensusEndPoint;
     private Guid _closeToken;
     private NodeInfo _nodeInfo = new();
+    private bool _isDisposed;
 
     public Node(PrivateKey privateKey, EndPoint endPoint)
     {
         _privateKey = privateKey;
-        _nodeService = new(this);
-        _clientContext = new ClientContext(
-            _nodeService)
+        _remoteService = new(this);
+        _remoteContext = new RemoteContext(
+            _remoteService)
         {
             EndPoint = endPoint,
         };
-        _clientContext.Disconnected += ClientContext_Disconnected;
-        _clientContext.Faulted += ClientContext_Faulted;
+        _remoteContext.Disconnected += RemoteContext_Disconnected;
+        _remoteContext.Faulted += RemoteContext_Faulted;
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -58,35 +61,31 @@ internal sealed class Node
 
     public NodeOptions NodeOptions { get; private set; } = NodeOptions.Default;
 
-    public EndPoint EndPoint => _clientContext.EndPoint;
+    public EndPoint EndPoint => _remoteContext.EndPoint;
 
     public NodeInfo Info => _nodeInfo;
 
-    public async ValueTask DisposeAsync()
-    {
-        await _clientContext.CloseAsync(_closeToken, cancellationToken: default);
-    }
-
     public override string ToString()
     {
-        return $"{Address.ToString()[0..8]}: {EndPointUtility.ToString(EndPoint)}";
+        return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
     }
 
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
-        _nodeInfo = await _nodeService.Server.GetInfoAsync(cancellationToken);
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
+
+        _nodeInfo = await _remoteService.Server.GetInfoAsync(cancellationToken);
         return _nodeInfo;
     }
 
     public async Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken)
     {
-        if (IsRunning == true)
-        {
-            throw new InvalidOperationException("Node is already running.");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
 
-        _closeToken = await _clientContext.OpenAsync(cancellationToken);
-        _nodeInfo = await _nodeService.Server.StartAsync(nodeOptions, cancellationToken);
+        _closeToken = await _remoteContext.OpenAsync(cancellationToken);
+        _nodeInfo = await _remoteService.Server.StartAsync(nodeOptions, cancellationToken);
         _swarmEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.ConsensusEndPoint);
         NodeOptions = nodeOptions;
@@ -96,15 +95,13 @@ internal sealed class Node
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (IsRunning != true)
-        {
-            throw new InvalidOperationException("Node is not running.");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
 
+        await _remoteService.Server.StopAsync(cancellationToken);
+        await _remoteContext.CloseAsync(_closeToken, cancellationToken);
         NodeOptions = NodeOptions.Default;
         IsRunning = false;
-        await _nodeService.Server.StopAsync(cancellationToken);
-        await _clientContext.CloseAsync(_closeToken, cancellationToken);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -113,7 +110,7 @@ internal sealed class Node
     {
         var address = Address.ToString();
         var values = actions.Select(item => item.PlainValue).ToArray();
-        var nonce = await _nodeService.Server.GetNextNonceAsync(address, cancellationToken);
+        var nonce = await _remoteService.Server.GetNextNonceAsync(address, cancellationToken);
         var transaction = Transaction.Create(
             nonce: nonce,
             privateKey: _privateKey,
@@ -121,11 +118,25 @@ internal sealed class Node
             actions: new TxActionList(values)
         );
 
-        var bytes = await _nodeService.Server.SendTransactionAsync(
+        var bytes = await _remoteService.Server.SendTransactionAsync(
             transaction: transaction.Serialize(),
             cancellationToken: cancellationToken);
 
         return new TxId(bytes);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+
+        _remoteContext.Disconnected -= RemoteContext_Disconnected;
+        _remoteContext.Faulted -= RemoteContext_Faulted;
+        await _remoteContext.ReleaseAsync(_closeToken);
+        NodeOptions = NodeOptions.Default;
+        IsRunning = false;
+        _isDisposed = true;
+        Disposed?.Invoke(this, EventArgs.Empty);
+        GC.SuppressFinalize(this);
     }
 
     void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
@@ -133,13 +144,19 @@ internal sealed class Node
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
-    private void ClientContext_Disconnected(object? sender, EventArgs e)
+    private void RemoteContext_Disconnected(object? sender, EventArgs e)
     {
+        NodeOptions = NodeOptions.Default;
+        IsRunning = false;
+        _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
     }
 
-    private void ClientContext_Faulted(object? sender, EventArgs e)
+    private void RemoteContext_Faulted(object? sender, EventArgs e)
     {
+        NodeOptions = NodeOptions.Default;
+        IsRunning = false;
+        _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
     }
 }

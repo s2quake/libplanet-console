@@ -13,8 +13,8 @@ internal sealed class Client :
     IClientCallback, IAsyncDisposable, IAddressable, IClient
 {
     private readonly PrivateKey _privateKey;
-    private readonly ClientContext _clientContext;
-    private readonly ClientService<IClientService, IClientCallback> _clientService;
+    private readonly RemoteContext _remoteContext;
+    private readonly RemoteService<IClientService, IClientCallback> _remoteService;
     private Guid _closeToken;
     private ClientInfo _clientInfo = new();
     private bool _isDisposed;
@@ -22,14 +22,14 @@ internal sealed class Client :
     public Client(PrivateKey privateKey, EndPoint endPoint)
     {
         _privateKey = privateKey;
-        _clientService = new(this);
-        _clientContext = new ClientContext(
-            _clientService)
+        _remoteService = new(this);
+        _remoteContext = new RemoteContext(
+            _remoteService)
         {
             EndPoint = endPoint,
         };
-        _clientContext.Disconnected += ClientContext_Disconnected;
-        _clientContext.Faulted += ClientContext_Faulted;
+        _remoteContext.Disconnected += RemoteContext_Disconnected;
+        _remoteContext.Faulted += RemoteContext_Faulted;
     }
 
     public event EventHandler? Started;
@@ -46,13 +46,11 @@ internal sealed class Client :
 
     public bool IsOnline { get; private set; } = true;
 
-    public TextWriter Out { get; set; } = Console.Out;
-
     public bool IsRunning { get; private set; }
 
     public ClientOptions ClientOptions { get; private set; } = ClientOptions.Default;
 
-    public EndPoint EndPoint => _clientContext.EndPoint;
+    public EndPoint EndPoint => _remoteContext.EndPoint;
 
     public override string ToString()
     {
@@ -64,7 +62,7 @@ internal sealed class Client :
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
-        _clientInfo = await _clientService.Server.GetInfoAsync(cancellationToken);
+        _clientInfo = await _remoteService.Server.GetInfoAsync(cancellationToken);
         return _clientInfo;
     }
 
@@ -73,8 +71,8 @@ internal sealed class Client :
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Client is already running.");
 
-        _closeToken = await _clientContext.OpenAsync(cancellationToken);
-        _clientInfo = await _clientService.Server.StartAsync(clientOptions, cancellationToken);
+        _closeToken = await _remoteContext.OpenAsync(cancellationToken);
+        _clientInfo = await _remoteService.Server.StartAsync(clientOptions, cancellationToken);
         ClientOptions = clientOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
@@ -85,8 +83,8 @@ internal sealed class Client :
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
-        await _clientService.Server.StopAsync(cancellationToken);
-        await _clientContext.CloseAsync(_closeToken, cancellationToken);
+        await _remoteService.Server.StopAsync(cancellationToken);
+        await _remoteContext.CloseAsync(_closeToken, cancellationToken);
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -96,9 +94,9 @@ internal sealed class Client :
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        _clientContext.Disconnected -= ClientContext_Disconnected;
-        _clientContext.Faulted -= ClientContext_Faulted;
-        await _clientContext.ReleaseAsync(_closeToken);
+        _remoteContext.Disconnected -= RemoteContext_Disconnected;
+        _remoteContext.Faulted -= RemoteContext_Faulted;
+        await _remoteContext.ReleaseAsync(_closeToken);
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
         _isDisposed = true;
@@ -106,7 +104,7 @@ internal sealed class Client :
         GC.SuppressFinalize(this);
     }
 
-    private void ClientContext_Disconnected(object? sender, EventArgs e)
+    private void RemoteContext_Disconnected(object? sender, EventArgs e)
     {
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
@@ -114,7 +112,7 @@ internal sealed class Client :
         Disposed?.Invoke(this, EventArgs.Empty);
     }
 
-    private void ClientContext_Faulted(object? sender, EventArgs e)
+    private void RemoteContext_Faulted(object? sender, EventArgs e)
     {
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
