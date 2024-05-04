@@ -3,11 +3,13 @@ using LibplanetConsole.ClientServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-public interface IClient : IIdentifier, IServiceProvider
+public interface IClient : IIdentifier, IAsyncDisposable
 {
     event EventHandler? Started;
 
     event EventHandler? Stopped;
+
+    event EventHandler? Disposed;
 
     bool IsRunning { get; }
 

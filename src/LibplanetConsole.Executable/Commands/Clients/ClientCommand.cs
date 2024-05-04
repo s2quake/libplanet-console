@@ -32,26 +32,28 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.Client))]
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(string address, CancellationToken cancellationToken)
     {
-        var clientOptions = new ClientOptions();
-        var client = application.GetClient(IndexProperties.Client);
+        var client = application.GetClient(address);
+        var node = GetRandomNode(application);
+        var clientOptions = new ClientOptions()
+        {
+            NodeEndPoint = node.EndPoint,
+        };
         await client.StartAsync(clientOptions, cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodStaticProperty(typeof(IndexProperties), nameof(IndexProperties.Client))]
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(string address, CancellationToken cancellationToken)
     {
-        var client = application.GetClient(IndexProperties.Client);
+        var client = application.GetClient(address);
         await client.StopAsync(cancellationToken);
     }
 
     [CommandMethod]
-    public void Current(string? identifier = null)
+    public void Current(string? address = null)
     {
-        if (identifier is not null && application.GetClient(identifier) is { } client)
+        if (address is not null && application.GetClient(address) is { } client)
         {
             clients.Current = client;
         }
@@ -74,5 +76,21 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         }
 
         return TerminalColorType.BrightBlack;
+    }
+
+    private static INode GetRandomNode(IApplication application)
+    {
+        if (application.GetService(typeof(INodeCollection)) is not INodeCollection nodes)
+        {
+            throw new InvalidOperationException("The node collection is not found.");
+        }
+
+        if (nodes.Count == 0)
+        {
+            throw new InvalidOperationException("There is no node.");
+        }
+
+        var nodeIndex = Random.Shared.Next(nodes.Count);
+        return nodes[nodeIndex];
     }
 }

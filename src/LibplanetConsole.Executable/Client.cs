@@ -1,8 +1,11 @@
 using System.Net;
 using JSSoft.Communication;
+using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
 using LibplanetConsole.ClientServices;
 using LibplanetConsole.ClientServices.Serializations;
+using LibplanetConsole.Common;
+using LibplanetConsole.Common.Exceptions;
 
 namespace LibplanetConsole.Executable;
 
@@ -14,6 +17,7 @@ internal sealed class Client :
     private readonly ClientService<IClientService, IClientCallback> _clientService;
     private Guid _closeToken;
     private ClientInfo _clientInfo = new();
+    private bool _isDisposed;
 
     public Client(PrivateKey privateKey, EndPoint endPoint)
     {
@@ -46,7 +50,7 @@ internal sealed class Client :
 
     public bool IsRunning { get; private set; }
 
-    public string Identifier => Address.ToString()[0..8];
+    public string Identifier => (ShortAddress)Address;
 
     public ClientOptions ClientOptions { get; private set; } = ClientOptions.Default;
 
@@ -56,21 +60,22 @@ internal sealed class Client :
 
     public override string ToString()
     {
-        return $"{Address.ToString()[0..8]}: {EndPointUtility.ToString(EndPoint)}";
+        return $"{Identifier}: {EndPointUtility.ToString(EndPoint)}";
     }
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
+
         _clientInfo = await _clientService.Server.GetInfoAsync(cancellationToken);
         return _clientInfo;
     }
 
     public async Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken)
     {
-        if (IsRunning == true)
-        {
-            throw new InvalidOperationException("Client is already running.");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Client is already running.");
 
         _closeToken = await _clientContext.OpenAsync(cancellationToken);
         _clientInfo = await _clientService.Server.StartAsync(clientOptions, cancellationToken);
@@ -81,35 +86,43 @@ internal sealed class Client :
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (IsRunning != true)
-        {
-            throw new InvalidOperationException("Client is not running.");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
-        ClientOptions = ClientOptions.Default;
-        IsRunning = false;
         await _clientService.Server.StopAsync(cancellationToken);
         await _clientContext.CloseAsync(_closeToken, cancellationToken);
+        ClientOptions = ClientOptions.Default;
+        IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        return ValueTask.CompletedTask;
-    }
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-    public object? GetService(Type serviceType)
-    {
-        return null;
+        _clientContext.Disconnected -= ClientContext_Disconnected;
+        _clientContext.Faulted -= ClientContext_Faulted;
+        await _clientContext.ReleaseAsync(_closeToken);
+        ClientOptions = ClientOptions.Default;
+        IsRunning = false;
+        _isDisposed = true;
+        Disposed?.Invoke(this, EventArgs.Empty);
+        GC.SuppressFinalize(this);
     }
 
     private void ClientContext_Disconnected(object? sender, EventArgs e)
     {
+        ClientOptions = ClientOptions.Default;
+        IsRunning = false;
+        _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
     }
 
     private void ClientContext_Faulted(object? sender, EventArgs e)
     {
+        ClientOptions = ClientOptions.Default;
+        IsRunning = false;
+        _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
     }
 }

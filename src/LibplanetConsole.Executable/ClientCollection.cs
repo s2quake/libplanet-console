@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Net;
 using Libplanet.Crypto;
@@ -24,6 +25,8 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
     private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
+
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
     public Client? Current
     {
@@ -98,10 +101,10 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
         return -1;
     }
 
-    public Task<IClient> AddNewAsync(CancellationToken cancellationToken)
+    public Task<Client> AddNewAsync(CancellationToken cancellationToken)
         => AddNewAsync(new(), cancellationToken);
 
-    public async Task<IClient> AddNewAsync(
+    public async Task<Client> AddNewAsync(
         PrivateKey privateKey, CancellationToken cancellationToken)
     {
         var node = nodes.RandomNode();
@@ -113,16 +116,11 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
         _ = new ClientProcess(endPoint, privateKey);
         var client = new Client(privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
-        lock (LockObject)
-        {
-            _clientList.Add(client);
-        }
-
-        client.Disposed += Client_Disposed;
+        InsertClient(client);
         return client;
     }
 
-    public async Task<IClient> AttachAsync(
+    public async Task<Client> AttachAsync(
         EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
         var node = nodes.RandomNode();
@@ -132,12 +130,7 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
         };
         var client = new Client(privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
-        _clientList.Add(client);
-        if (_current is null)
-        {
-            Current = client;
-        }
-
+        InsertClient(client);
         return client;
     }
 
@@ -146,11 +139,14 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
     {
         if (_options.ClientCount > 0)
         {
-            await Parallel.ForAsync(0, _options.NodeCount, async (index, cancellationToken) =>
-            {
-                var privateKey = new PrivateKey();
-                await AddNewAsync(privateKey, cancellationToken);
-            });
+            await Parallel.ForAsync(0, _options.ClientCount, cancellationToken, BodyAsync);
+            Current = _clientList.FirstOrDefault();
+        }
+
+        async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
+        {
+            var privateKey = new PrivateKey();
+            await AddNewAsync(privateKey, cancellationToken);
         }
     }
 
@@ -201,7 +197,33 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
     {
         if (sender is Client client)
         {
-            _clientList.Remove(client);
+            RemoveClient(client);
+        }
+    }
+
+    private void InsertClient(Client client)
+    {
+        lock (LockObject)
+        {
+            var action = NotifyCollectionChangedAction.Add;
+            var index = _clientList.Count;
+            var args = new NotifyCollectionChangedEventArgs(action, client, index);
+            _clientList.Add(client);
+            client.Disposed += Client_Disposed;
+            CollectionChanged?.Invoke(this, args);
+        }
+    }
+
+    private void RemoveClient(Client client)
+    {
+        lock (LockObject)
+        {
+            var action = NotifyCollectionChangedAction.Remove;
+            var index = _clientList.IndexOf(client);
+            var args = new NotifyCollectionChangedEventArgs(action, client, index);
+            client.Disposed -= Client_Disposed;
+            _clientList.RemoveAt(index);
+            CollectionChanged?.Invoke(this, args);
             if (_current == client)
             {
                 Current = _clientList.FirstOrDefault();

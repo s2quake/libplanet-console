@@ -16,6 +16,12 @@ public static class TextWriterExtensions
         return @this.WriteLineAsync(json);
     }
 
+    public static void WriteColoredLine(
+        this TextWriter @this, string text, TerminalColorType colorType)
+    {
+        @this.WriteLine(TerminalStringBuilder.GetString(text, colorType));
+    }
+
     public static void WriteSeparator(this TextWriter @this, int length)
     {
         @this.WriteLine(new string('=', length));

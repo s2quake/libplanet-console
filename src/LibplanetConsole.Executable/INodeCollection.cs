@@ -1,9 +1,10 @@
+using System.Collections.Specialized;
 using System.Net;
 using Libplanet.Crypto;
 
 namespace LibplanetConsole.Executable;
 
-public interface INodeCollection : IEnumerable<INode>
+public interface INodeCollection : IEnumerable<INode>, INotifyCollectionChanged
 {
     event EventHandler? CurrentChanged;
 

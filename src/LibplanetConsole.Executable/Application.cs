@@ -8,7 +8,6 @@ using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.NodeServices;
 
 namespace LibplanetConsole.Executable;
 
@@ -20,7 +19,6 @@ internal sealed partial class Application : ApplicationBase, IApplication
     private readonly ApplicationOptions _options = new();
     private readonly ConsoleContext _serviceContext;
     private SystemTerminal? _terminal;
-    private INode? _currentNode;
     private Guid _closeToken;
 
     public Application(ApplicationOptions options)
@@ -37,7 +35,6 @@ internal sealed partial class Application : ApplicationBase, IApplication
         _serviceContext = _container.GetExportedValue<ConsoleContext>() ??
             throw new InvalidOperationException($"'{typeof(ConsoleContext)}' is not found.");
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _nodes.CurrentChanged += Nodes_CurrentChanged;
     }
 
     public override ApplicationServiceCollection ApplicationServices { get; }
@@ -128,32 +125,6 @@ internal sealed partial class Application : ApplicationBase, IApplication
     {
         await base.OnDisposeAsync();
         await _serviceContext.ReleaseAsync(_closeToken);
-        _nodes.CurrentChanged -= Nodes_CurrentChanged;
         _container.Dispose();
-    }
-
-    private void Node_BlockAppended(object? sender, BlockEventArgs e)
-    {
-        var blockInfo = e.BlockInfo;
-        var hash = blockInfo.Hash[0..8];
-        var miner = blockInfo.Miner[0..8];
-        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
-        var coloredMessage = TerminalStringBuilder.GetString(message, TerminalColorType.BrightBlue);
-        Console.WriteLine(coloredMessage);
-    }
-
-    private void Nodes_CurrentChanged(object? sender, EventArgs e)
-    {
-        if (_currentNode != null)
-        {
-            _currentNode.BlockAppended -= Node_BlockAppended;
-        }
-
-        _currentNode = _nodes.Current;
-
-        if (_currentNode != null)
-        {
-            _currentNode.BlockAppended += Node_BlockAppended;
-        }
     }
 }

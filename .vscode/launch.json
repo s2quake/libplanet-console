@@ -14,7 +14,9 @@
                 "--node-count",
                 "4",
                 "--client-count",
-                "4"
+                "1",
+                "--end-point",
+                "127.0.0.1:4343",
             ],
             "env": {
                 "LIBPLANET_CONSOLE_WORKSPACE_PATH": "${workspaceFolder}",
@@ -60,7 +62,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--seed-end-point",
-                "127.0.0.1:5353"
+                "127.0.0.1:4343"
             ]
         }
     ],

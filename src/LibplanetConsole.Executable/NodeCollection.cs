@@ -1,8 +1,8 @@
 using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Net;
 using Libplanet.Crypto;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Frameworks;
@@ -13,18 +13,23 @@ namespace LibplanetConsole.Executable;
 [Export]
 [Export(typeof(INodeCollection))]
 [Export(typeof(IApplicationService))]
+[Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
-internal sealed class NodeCollection(ApplicationOptions options)
+internal sealed class NodeCollection(
+    IApplication application, ApplicationOptions options, SeedService seedService)
     : IEnumerable<Node>, INodeCollection, IApplicationService
 {
     private static readonly object LockObject = new();
+    private readonly IApplication _application = application;
     private readonly ApplicationOptions _options = options;
+    private readonly SeedService _seedService = seedService;
     private readonly List<Node> _nodeList = new(options.NodeCount);
-    private Node? _genesisNode;
     private Node? _current;
     private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
+
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
     public Node? Current
     {
@@ -104,47 +109,32 @@ internal sealed class NodeCollection(ApplicationOptions options)
 
     public async Task<Node> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
     {
-        if (_genesisNode == null)
-        {
-            throw new InvalidOperationException("Genesis node is not set.");
-        }
-
-        var genesisPublicKey = _genesisNode.PrivateKey.PublicKey;
         var nodeOptions = new NodeOptions
         {
-            BlocksyncSeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.SwarmEndPoint),
-            ConsensusSeedPeer = new BoundPeer(genesisPublicKey, _genesisNode.ConsensusEndPoint),
+            GenesisOptions = _application.GenesisOptions,
+            BlocksyncSeedPeer = _seedService.BlocksyncSeedPeer,
+            ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
         };
         var endPoint = DnsEndPointUtility.Next();
         _ = new NodeProcess(endPoint, privateKey);
         var node = new Node(privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
-        lock (LockObject)
-        {
-            _nodeList.Add(node);
-        }
-
-        node.Disposed += Node_Disposed;
+        InsertNode(node);
         return node;
     }
 
     public async Task<Node> AttachAsync(
         EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
-        if (_genesisNode == null && privateKey != GenesisOptions.DefaultGenesisKey)
+        var nodeOptions = new NodeOptions
         {
-            throw new InvalidOperationException("Genesis node is not set.");
-        }
-
-        var nodeOptions = _genesisNode?.NodeOptions ?? new NodeOptions();
+            GenesisOptions = _application.GenesisOptions,
+            BlocksyncSeedPeer = _seedService.BlocksyncSeedPeer,
+            ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
+        };
         var node = new Node(privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
-        _nodeList.Add(node);
-        if (privateKey == GenesisOptions.DefaultGenesisKey)
-        {
-            _genesisNode = node;
-            Current = node;
-        }
+        InsertNode(node);
 
         return node;
     }
@@ -154,12 +144,14 @@ internal sealed class NodeCollection(ApplicationOptions options)
     {
         if (_options.NodeCount > 0)
         {
-            await AddGenesisNodeAsync(cancellationToken);
-            await Parallel.ForAsync(1, _options.NodeCount, async (index, cancellationToken) =>
-            {
-                var privateKey = ProposePrivateKey(index);
-                await AddNewAsync(privateKey, cancellationToken);
-            });
+            await Parallel.ForAsync(0, _options.NodeCount, cancellationToken, BodyAsync);
+            Current = _nodeList.FirstOrDefault();
+        }
+
+        async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
+        {
+            var privateKey = ProposePrivateKey(index);
+            await AddNewAsync(privateKey, cancellationToken);
         }
 
         static PrivateKey ProposePrivateKey(int index)
@@ -227,26 +219,37 @@ internal sealed class NodeCollection(ApplicationOptions options)
         return _nodeList[nodeIndex];
     }
 
-    private async Task<Node> AddGenesisNodeAsync(CancellationToken cancellationToken)
-    {
-        var nodeOptions = new NodeOptions();
-        var endPoint = DnsEndPointUtility.Next();
-        var privateKey = GenesisOptions.DefaultGenesisKey;
-        _ = new NodeProcess(endPoint, privateKey);
-        var node = new Node(privateKey, endPoint);
-        await node.StartAsync(nodeOptions, cancellationToken);
-        _nodeList.Add(node);
-        _genesisNode = node;
-        node.Disposed += Node_Disposed;
-        Current = node;
-        return node;
-    }
-
     private void Node_Disposed(object? sender, EventArgs e)
     {
         if (sender is Node node)
         {
-            _nodeList.Remove(node);
+            RemoveNode(node);
+        }
+    }
+
+    private void InsertNode(Node node)
+    {
+        lock (LockObject)
+        {
+            var action = NotifyCollectionChangedAction.Add;
+            var index = _nodeList.Count;
+            var args = new NotifyCollectionChangedEventArgs(action, node, index);
+            _nodeList.Add(node);
+            node.Disposed += Node_Disposed;
+            CollectionChanged?.Invoke(this, args);
+        }
+    }
+
+    private void RemoveNode(Node node)
+    {
+        lock (LockObject)
+        {
+            var action = NotifyCollectionChangedAction.Remove;
+            var index = _nodeList.IndexOf(node);
+            var args = new NotifyCollectionChangedEventArgs(action, node, index);
+            node.Disposed -= Node_Disposed;
+            _nodeList.RemoveAt(index);
+            CollectionChanged?.Invoke(this, args);
             if (_current == node)
             {
                 Current = _nodeList.FirstOrDefault();

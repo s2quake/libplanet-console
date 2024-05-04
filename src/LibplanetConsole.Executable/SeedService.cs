@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Communication;
 using Libplanet.Crypto;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Frameworks;
@@ -8,22 +9,21 @@ using LibplanetConsole.NodeServices.Seeds;
 
 namespace LibplanetConsole.Executable;
 
+[Export]
 [Export(typeof(IService))]
 [Export(typeof(IApplicationService))]
 internal sealed class SeedService : ServerService<ISeedService>,
     ISeedService, IApplicationService
 {
     private readonly IApplication _application;
-    private readonly NodeCollection _nodes;
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 
     [ImportingConstructor]
-    public SeedService(IApplication application, NodeCollection nodes)
+    public SeedService(IApplication application)
     {
         _application = application;
-        _nodes = nodes;
         _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
@@ -37,6 +37,10 @@ internal sealed class SeedService : ServerService<ISeedService>,
             AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
         });
     }
+
+    public BoundPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
+
+    public BoundPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
     public async Task<SeedInfo> GetSeedAsync(CancellationToken cancellationToken)
     {
@@ -53,8 +57,13 @@ internal sealed class SeedService : ServerService<ISeedService>,
 
     public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
     {
-        var node = _nodes.RandomNode();
-        return _application.InvokeAsync(() => EndPointUtility.ToString(node.EndPoint));
+        if (_application.GetService(typeof(NodeCollection)) is NodeCollection nodes)
+        {
+            var node = nodes.RandomNode();
+            return _application.InvokeAsync(() => EndPointUtility.ToString(node.EndPoint));
+        }
+
+        throw new InvalidOperationException("NodeCollection is not found.");
     }
 
     async Task IApplicationService.InitializeAsync(

@@ -132,11 +132,6 @@ internal sealed class Node
         return new TxId(bytes);
     }
 
-    public object? GetService(Type serviceType)
-    {
-        return null;
-    }
-
     void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
     {
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));

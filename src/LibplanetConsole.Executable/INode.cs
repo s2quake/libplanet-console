@@ -6,7 +6,7 @@ using LibplanetConsole.NodeServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-public interface INode : IIdentifier, IServiceProvider
+public interface INode : IIdentifier
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
