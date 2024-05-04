@@ -16,5 +16,5 @@ public interface IApplication : IAsyncDisposable, IServiceProvider
 
     INode GetNode(string address);
 
-    IIdentifier GetIdentifier(string address);
+    IAddressable GetAddressable(string address);
 }

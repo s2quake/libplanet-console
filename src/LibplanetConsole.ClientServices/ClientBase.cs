@@ -39,8 +39,6 @@ public abstract class ClientBase
 
     public TextWriter Out { get; set; } = Console.Out;
 
-    public string Identifier { get; internal set; } = string.Empty;
-
     public ClientInfo Info => new(this);
 
     public bool IsRunning { get; private set; }

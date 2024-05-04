@@ -63,14 +63,14 @@ internal sealed partial class Application : ApplicationBase, IApplication
                      .Single();
     }
 
-    public IIdentifier GetIdentifier(string address)
+    public IAddressable GetAddressable(string address)
     {
-        return _nodes.Concat<IIdentifier>(_clients)
+        return _nodes.Concat<IAddressable>(_clients)
                      .Where(item => $"{item.Address}".StartsWith(address))
                      .Single();
     }
 
-    public IIdentifier GetIdentifier(Address address)
+    public IAddressable GetAddressable(Address address)
     {
         if (_nodes.Contains(address) == true)
         {
@@ -91,11 +91,11 @@ internal sealed partial class Application : ApplicationBase, IApplication
         return _container.GetExportedValue<object?>(contractName);
     }
 
-    IClient IApplication.GetClient(string identifier)
-        => GetClient(identifier);
+    IClient IApplication.GetClient(string address)
+        => GetClient(address);
 
-    INode IApplication.GetNode(string identifier)
-        => GetNode(identifier);
+    INode IApplication.GetNode(string address)
+        => GetNode(address);
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {

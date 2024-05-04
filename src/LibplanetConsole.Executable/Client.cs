@@ -10,7 +10,7 @@ using LibplanetConsole.Common.Exceptions;
 namespace LibplanetConsole.Executable;
 
 internal sealed class Client :
-    IClientCallback, IAsyncDisposable, IIdentifier, IClient
+    IClientCallback, IAsyncDisposable, IAddressable, IClient
 {
     private readonly PrivateKey _privateKey;
     private readonly ClientContext _clientContext;
@@ -50,17 +50,13 @@ internal sealed class Client :
 
     public bool IsRunning { get; private set; }
 
-    public string Identifier => (ShortAddress)Address;
-
     public ClientOptions ClientOptions { get; private set; } = ClientOptions.Default;
 
     public EndPoint EndPoint => _clientContext.EndPoint;
 
-    PrivateKey IIdentifier.PrivateKey => _privateKey;
-
     public override string ToString()
     {
-        return $"{Identifier}: {EndPointUtility.ToString(EndPoint)}";
+        return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
     }
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)

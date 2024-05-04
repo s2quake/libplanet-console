@@ -6,7 +6,7 @@ using LibplanetConsole.NodeServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-public interface INode : IIdentifier
+public interface INode : IAddressable
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -15,8 +15,6 @@ public interface INode : IIdentifier
     event EventHandler? Stopped;
 
     bool IsRunning { get; }
-
-    string Identifier { get; }
 
     EndPoint EndPoint { get; }
 

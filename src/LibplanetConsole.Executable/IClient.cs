@@ -3,7 +3,7 @@ using LibplanetConsole.ClientServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-public interface IClient : IIdentifier, IAsyncDisposable
+public interface IClient : IAddressable, IAsyncDisposable
 {
     event EventHandler? Started;
 
@@ -12,8 +12,6 @@ public interface IClient : IIdentifier, IAsyncDisposable
     event EventHandler? Disposed;
 
     bool IsRunning { get; }
-
-    string Identifier { get; }
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 

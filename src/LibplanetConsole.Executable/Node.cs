@@ -11,7 +11,7 @@ using LibplanetConsole.NodeServices.Serializations;
 namespace LibplanetConsole.Executable;
 
 internal sealed class Node
-    : INodeCallback, IAsyncDisposable, IIdentifier, INode
+    : INodeCallback, IAsyncDisposable, IAddressable, INode
 {
     private readonly PrivateKey _privateKey;
     private readonly ClientContext _clientContext;
@@ -56,15 +56,11 @@ internal sealed class Node
 
     public bool IsRunning { get; private set; }
 
-    public string Identifier => Address.ToString()[0..8];
-
     public NodeOptions NodeOptions { get; private set; } = NodeOptions.Default;
 
     public EndPoint EndPoint => _clientContext.EndPoint;
 
     public NodeInfo Info => _nodeInfo;
-
-    PrivateKey IIdentifier.PrivateKey => _privateKey;
 
     public async ValueTask DisposeAsync()
     {
