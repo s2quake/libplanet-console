@@ -15,10 +15,12 @@ namespace LibplanetConsole.Executable;
 [Export(typeof(IApplicationService))]
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
-internal sealed class ClientCollection(ApplicationOptions options, NodeCollection nodes)
+internal sealed class ClientCollection(
+    Application application, ApplicationOptions options, NodeCollection nodes)
     : IEnumerable<Client>, IClientCollection, IApplicationService
 {
     private static readonly object LockObject = new();
+    private readonly Application _application = application;
     private readonly ApplicationOptions _options = options;
     private readonly List<Client> _clientList = new(options.ClientCount);
     private Client? _current;
@@ -113,8 +115,9 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
             NodeEndPoint = node.EndPoint,
         };
         var endPoint = DnsEndPointUtility.Next();
+        var container = _application.CreateChildContainer();
         _ = new ClientProcess(endPoint, privateKey);
-        var client = new Client(privateKey, endPoint);
+        var client = new Client(container, privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;
@@ -128,7 +131,8 @@ internal sealed class ClientCollection(ApplicationOptions options, NodeCollectio
         {
             NodeEndPoint = node.EndPoint,
         };
-        var client = new Client(privateKey, endPoint);
+        var container = _application.CreateChildContainer();
+        var client = new Client(container, privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;

@@ -19,7 +19,7 @@ public sealed class ApplicationServiceCollection(
 
     public async ValueTask DisposeAsync()
     {
-        for (var i = _applicationServices.Length - 1; i >= _applicationServices.Length; i--)
+        for (var i = _applicationServices.Length - 1; i >= 0; i--)
         {
             await _applicationServices[i].DisposeAsync();
         }

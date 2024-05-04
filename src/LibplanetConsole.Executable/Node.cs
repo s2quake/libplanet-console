@@ -1,3 +1,6 @@
+using System.Collections;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
@@ -15,17 +18,20 @@ namespace LibplanetConsole.Executable;
 internal sealed class Node
     : INodeCallback, IAsyncDisposable, IAddressable, INode
 {
+    private readonly CompositionContainer _container;
     private readonly PrivateKey _privateKey;
     private readonly RemoteContext _remoteContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
-    private DnsEndPoint? _swarmEndPoint;
+    private readonly INodeContent[] _contents;
+    private DnsEndPoint? _blocksyncEndPoint;
     private DnsEndPoint? _consensusEndPoint;
     private Guid _closeToken;
     private NodeInfo _nodeInfo = new();
     private bool _isDisposed;
 
-    public Node(PrivateKey privateKey, EndPoint endPoint)
+    public Node(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
     {
+        _container = container;
         _privateKey = privateKey;
         _remoteService = new(this);
         _remoteContext = new RemoteContext(
@@ -33,6 +39,8 @@ internal sealed class Node
         {
             EndPoint = endPoint,
         };
+        _container.ComposeExportedValue<INode>(this);
+        _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteContext.Disconnected += RemoteContext_Disconnected;
         _remoteContext.Faulted += RemoteContext_Faulted;
     }
@@ -46,7 +54,7 @@ internal sealed class Node
     public event EventHandler? Disposed;
 
     public DnsEndPoint SwarmEndPoint
-        => _swarmEndPoint ?? throw new InvalidOperationException("Peer is not set.");
+        => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
 
     public DnsEndPoint ConsensusEndPoint
         => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
@@ -64,6 +72,35 @@ internal sealed class Node
     public EndPoint EndPoint => _remoteContext.EndPoint;
 
     public NodeInfo Info => _nodeInfo;
+
+    public object? GetService(Type serviceType)
+    {
+        if (serviceType == typeof(IServiceProvider))
+        {
+            return this;
+        }
+
+        if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
+            serviceType.GenericTypeArguments.Length == 1)
+        {
+            var itemType = serviceType.GenericTypeArguments.First();
+            var items = GetInstances(itemType);
+            var listGenericType = typeof(List<>);
+            var list = listGenericType.MakeGenericType(itemType);
+            var ci = list.GetConstructor([typeof(int)])!;
+            var instance = (IList)ci.Invoke([items.Count(),]);
+            foreach (var item in items)
+            {
+                instance.Add(item);
+            }
+
+            return instance;
+        }
+        else
+        {
+            return GetInstance(serviceType);
+        }
+    }
 
     public override string ToString()
     {
@@ -86,7 +123,7 @@ internal sealed class Node
 
         _closeToken = await _remoteContext.OpenAsync(cancellationToken);
         _nodeInfo = await _remoteService.Server.StartAsync(nodeOptions, cancellationToken);
-        _swarmEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.SwarmEndPoint);
+        _blocksyncEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.ConsensusEndPoint);
         NodeOptions = nodeOptions;
         IsRunning = true;
@@ -134,6 +171,7 @@ internal sealed class Node
         await _remoteContext.ReleaseAsync(_closeToken);
         NodeOptions = NodeOptions.Default;
         IsRunning = false;
+        _container.Dispose();
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
@@ -142,6 +180,18 @@ internal sealed class Node
     void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
     {
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
+    }
+
+    private object? GetInstance(Type serviceType)
+    {
+        var contractName = AttributedModelServices.GetContractName(serviceType);
+        return _container.GetExportedValue<object>(contractName);
+    }
+
+    private IEnumerable<object> GetInstances(Type service)
+    {
+        var contractName = AttributedModelServices.GetContractName(service);
+        return _container.GetExportedValues<object>(contractName);
     }
 
     private void RemoteContext_Disconnected(object? sender, EventArgs e)

@@ -16,11 +16,11 @@ namespace LibplanetConsole.Executable;
 [Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
-    IApplication application, ApplicationOptions options, SeedService seedService)
+    Application application, ApplicationOptions options, SeedService seedService)
     : IEnumerable<Node>, INodeCollection, IApplicationService
 {
     private static readonly object LockObject = new();
-    private readonly IApplication _application = application;
+    private readonly Application _application = application;
     private readonly ApplicationOptions _options = options;
     private readonly SeedService _seedService = seedService;
     private readonly List<Node> _nodeList = new(options.NodeCount);
@@ -116,8 +116,9 @@ internal sealed class NodeCollection(
             ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
         };
         var endPoint = DnsEndPointUtility.Next();
+        var container = _application.CreateChildContainer();
         _ = new NodeProcess(endPoint, privateKey);
-        var node = new Node(privateKey, endPoint);
+        var node = new Node(container, privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
         return node;
@@ -132,7 +133,8 @@ internal sealed class NodeCollection(
             BlocksyncSeedPeer = _seedService.BlocksyncSeedPeer,
             ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
         };
-        var node = new Node(privateKey, endPoint);
+        var container = _application.CreateChildContainer();
+        var node = new Node(container, privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
 

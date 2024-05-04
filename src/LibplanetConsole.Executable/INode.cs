@@ -6,13 +6,15 @@ using LibplanetConsole.NodeServices.Serializations;
 
 namespace LibplanetConsole.Executable;
 
-public interface INode : IAddressable
+public interface INode : IAddressable, IAsyncDisposable, IServiceProvider
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
     event EventHandler? Started;
 
     event EventHandler? Stopped;
+
+    event EventHandler? Disposed;
 
     bool IsRunning { get; }
 

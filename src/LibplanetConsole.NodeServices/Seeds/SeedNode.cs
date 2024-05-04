@@ -7,6 +7,7 @@ namespace LibplanetConsole.NodeServices.Seeds;
 public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
 {
     private readonly SeedNodeOptions _seedNodeOptions = seedNodeOptions;
+    private CancellationTokenSource? _cancellationTokenSource;
     private Seed? _seed;
     private Task? _seedTask;
 
@@ -30,10 +31,11 @@ public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
             appProtocolVersion: _seedNodeOptions.AppProtocolVersion,
             trustedAppProtocolVersionSigners: ImmutableHashSet<PublicKey>.Empty,
             maximumPeersToToRefresh: int.MaxValue,
-            refreshInterval: TimeSpan.FromSeconds(5),
+            refreshInterval: TimeSpan.FromSeconds(120),
             peerLifetime: TimeSpan.FromSeconds(120),
-            pingTimeout: TimeSpan.FromSeconds(5));
-        _seedTask = _seed.StartAsync(staticPeers: [], cancellationToken);
+            pingTimeout: TimeSpan.FromSeconds(120));
+        _cancellationTokenSource = new();
+        _seedTask = _seed.StartAsync(staticPeers: [], _cancellationTokenSource.Token);
         await Task.CompletedTask;
     }
 
@@ -44,6 +46,8 @@ public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
             throw new InvalidOperationException("Seed node is not running.");
         }
 
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource = null;
         if (_seed != null)
         {
             await _seed.StopAsync(TimeSpan.FromSeconds(5));

@@ -32,7 +32,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
 
-    private DnsEndPoint? _swarmEndPoint;
+    private DnsEndPoint? _blocksyncEndPoint;
     private DnsEndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task? _startTask;
@@ -48,8 +48,8 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
 
     public DnsEndPoint SwarmEndPoint
     {
-        get => _swarmEndPoint ?? throw new InvalidOperationException();
-        set => _swarmEndPoint = value;
+        get => _blocksyncEndPoint ?? throw new InvalidOperationException();
+        set => _blocksyncEndPoint = value;
     }
 
     public DnsEndPoint ConsensusEndPoint
@@ -131,13 +131,13 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         InvalidOperationExceptionUtility.ThrowIf(_startTask != null, "Swarm has been started.");
 
         var privateKey = _privateKey;
-        var swarmEndPoint = _swarmEndPoint ?? DnsEndPointUtility.Next();
+        var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
         var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
         var blocksyncSeedPeer = nodeOptions.BlocksyncSeedPeer ??
             new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
         var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
             new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
-        var swarmTransport = await CreateTransport(privateKey, swarmEndPoint, cancellationToken);
+        var swarmTransport = await CreateTransport(privateKey, blocksyncEndPoint, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = ImmutableHashSet.Create(blocksyncSeedPeer),
@@ -189,7 +189,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             consensusTransport: consensusTransport,
             consensusOption: consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
-        _swarmEndPoint = swarmEndPoint;
+        _blocksyncEndPoint = blocksyncEndPoint;
         _consensusEndPoint = consensusEndPoint;
         NodeOptions = nodeOptions;
         Started?.Invoke(this, EventArgs.Empty);
@@ -203,7 +203,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             message: "Swarm has been stopped.");
 
         NodeOptions = new();
-        _swarmEndPoint = null;
+        _blocksyncEndPoint = null;
         _consensusEndPoint = null;
         await _swarm!.StopAsync(cancellationToken: cancellationToken);
         await _startTask!;
@@ -265,7 +265,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
-        DnsEndPointUtility.Release(ref _swarmEndPoint);
+        DnsEndPointUtility.Release(ref _blocksyncEndPoint);
         DnsEndPointUtility.Release(ref _consensusEndPoint);
 
         if (_swarm != null)

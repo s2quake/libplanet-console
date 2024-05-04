@@ -25,6 +25,7 @@ internal sealed partial class Application : ApplicationBase, IApplication
     {
         _options = options;
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
+        _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_options);
@@ -89,6 +90,13 @@ internal sealed partial class Application : ApplicationBase, IApplication
     {
         var contractName = AttributedModelServices.GetContractName(serviceType);
         return _container.GetExportedValue<object?>(contractName);
+    }
+
+    public CompositionContainer CreateChildContainer()
+    {
+        return new(
+            catalog: new AssemblyCatalog(typeof(Application).Assembly),
+            providers: _container);
     }
 
     IClient IApplication.GetClient(string address)
