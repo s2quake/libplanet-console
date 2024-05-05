@@ -13,7 +13,7 @@ using LibplanetConsole.Common.Exceptions;
 namespace LibplanetConsole.Executable;
 
 internal sealed class Client :
-    IClientCallback, IAsyncDisposable, IAddressable, IClient
+    IClientCallback, IAsyncDisposable, IAddressable, IClient, IRemoteServiceProvider
 {
     private readonly CompositionContainer _container;
     private readonly PrivateKey _privateKey;
@@ -28,14 +28,13 @@ internal sealed class Client :
     {
         _container = container;
         _privateKey = privateKey;
+        _container.ComposeExportedValue<IClient>(this);
+        _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
-        _remoteContext = new RemoteContext(
-            _remoteService)
+        _remoteContext = new RemoteContext(this, _contents)
         {
             EndPoint = endPoint,
         };
-        _container.ComposeExportedValue<IClient>(this);
-        _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteContext.Disconnected += RemoteContext_Disconnected;
         _remoteContext.Faulted += RemoteContext_Faulted;
     }
@@ -143,6 +142,8 @@ internal sealed class Client :
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
     }
+
+    IService IRemoteServiceProvider.GetService(object obj) => _remoteService;
 
     private object? GetInstance(Type serviceType)
     {

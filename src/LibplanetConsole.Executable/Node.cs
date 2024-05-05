@@ -16,7 +16,7 @@ using LibplanetConsole.NodeServices.Serializations;
 namespace LibplanetConsole.Executable;
 
 internal sealed class Node
-    : INodeCallback, IAsyncDisposable, IAddressable, INode
+    : INodeCallback, IAsyncDisposable, IAddressable, INode, IRemoteServiceProvider
 {
     private readonly CompositionContainer _container;
     private readonly PrivateKey _privateKey;
@@ -33,14 +33,13 @@ internal sealed class Node
     {
         _container = container;
         _privateKey = privateKey;
+        _container.ComposeExportedValue<INode>(this);
+        _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteService = new(this);
-        _remoteContext = new RemoteContext(
-            _remoteService)
+        _remoteContext = new RemoteContext(this, _contents)
         {
             EndPoint = endPoint,
         };
-        _container.ComposeExportedValue<INode>(this);
-        _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteContext.Disconnected += RemoteContext_Disconnected;
         _remoteContext.Faulted += RemoteContext_Faulted;
     }
@@ -181,6 +180,8 @@ internal sealed class Node
     {
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
+
+    IService IRemoteServiceProvider.GetService(object obj) => _remoteService;
 
     private object? GetInstance(Type serviceType)
     {
