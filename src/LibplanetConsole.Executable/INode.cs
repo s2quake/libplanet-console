@@ -1,5 +1,6 @@
 using System.Net;
 using Libplanet.Action;
+using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.NodeServices;
 using LibplanetConsole.NodeServices.Serializations;
@@ -23,6 +24,10 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider
     NodeInfo Info { get; }
 
     NodeOptions NodeOptions { get; }
+
+    PrivateKey PrivateKey { get; }
+
+    PublicKey PublicKey => PrivateKey.PublicKey;
 
     Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken);
 

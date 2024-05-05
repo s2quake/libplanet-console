@@ -1,4 +1,5 @@
 using System.Net;
+using Libplanet.Crypto;
 using LibplanetConsole.ClientServices;
 using LibplanetConsole.ClientServices.Serializations;
 
@@ -19,6 +20,10 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider
     ClientInfo Info { get; }
 
     ClientOptions ClientOptions { get; }
+
+    PrivateKey PrivateKey { get; }
+
+    PublicKey PublicKey => PrivateKey.PublicKey;
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 
