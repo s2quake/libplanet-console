@@ -137,7 +137,8 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
         var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
             new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
-        var swarmTransport = await CreateTransport(privateKey, blocksyncEndPoint, cancellationToken);
+        var swarmTransport
+            = await CreateTransport(privateKey, blocksyncEndPoint, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = ImmutableHashSet.Create(blocksyncSeedPeer),

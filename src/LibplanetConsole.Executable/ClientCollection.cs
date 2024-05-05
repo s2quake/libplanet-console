@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.ClientServices;
@@ -117,7 +118,7 @@ internal sealed class ClientCollection(
         var endPoint = DnsEndPointUtility.Next();
         var container = _application.CreateChildContainer();
         _ = new ClientProcess(endPoint, privateKey);
-        var client = new Client(container, privateKey, endPoint);
+        var client = CreateNew(container, privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;
@@ -132,7 +133,7 @@ internal sealed class ClientCollection(
             NodeEndPoint = node.EndPoint,
         };
         var container = _application.CreateChildContainer();
-        var client = new Client(container, privateKey, endPoint);
+        var client = CreateNew(container, privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;
@@ -196,6 +197,15 @@ internal sealed class ClientCollection(
 
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
+
+    private static Client CreateNew(
+        CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    {
+        lock (LockObject)
+        {
+            return new Client(container, privateKey, endPoint);
+        }
+    }
 
     private void Client_Disposed(object? sender, EventArgs e)
     {

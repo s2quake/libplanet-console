@@ -9,6 +9,5 @@ internal sealed class EmptyNodeContent(INode node)
 {
     public void Dispose()
     {
-        int wqer = 0;
     }
 }

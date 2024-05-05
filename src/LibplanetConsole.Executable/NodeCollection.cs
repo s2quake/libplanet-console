@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -118,7 +119,7 @@ internal sealed class NodeCollection(
         var endPoint = DnsEndPointUtility.Next();
         var container = _application.CreateChildContainer();
         _ = new NodeProcess(endPoint, privateKey);
-        var node = new Node(container, privateKey, endPoint);
+        var node = CreateNew(container, privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
         return node;
@@ -134,7 +135,7 @@ internal sealed class NodeCollection(
             ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
         };
         var container = _application.CreateChildContainer();
-        var node = new Node(container, privateKey, endPoint);
+        var node = CreateNew(container, privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
 
@@ -219,6 +220,15 @@ internal sealed class NodeCollection(
 
         var nodeIndex = Random.Shared.Next(Count);
         return _nodeList[nodeIndex];
+    }
+
+    private static Node CreateNew(
+        CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    {
+        lock (LockObject)
+        {
+            return new Node(container, privateKey, endPoint);
+        }
     }
 
     private void Node_Disposed(object? sender, EventArgs e)
