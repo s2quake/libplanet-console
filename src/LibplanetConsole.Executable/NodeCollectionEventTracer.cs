@@ -4,7 +4,7 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.NodeServices;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Executable;
 

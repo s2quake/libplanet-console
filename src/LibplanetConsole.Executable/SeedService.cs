@@ -5,7 +5,7 @@ using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.NodeServices.Seeds;
+using LibplanetConsole.Nodes.Seeds;
 
 namespace LibplanetConsole.Executable;
 

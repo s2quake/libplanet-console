@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
-using LibplanetConsole.NodeServices;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.NodeHost;
 

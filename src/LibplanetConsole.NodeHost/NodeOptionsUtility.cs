@@ -3,8 +3,8 @@ using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
-using LibplanetConsole.NodeServices;
-using LibplanetConsole.NodeServices.Serializations;
+using LibplanetConsole.Nodes;
+using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.NodeHost;
 

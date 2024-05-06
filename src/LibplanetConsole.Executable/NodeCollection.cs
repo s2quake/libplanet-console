@@ -7,7 +7,7 @@ using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.NodeServices;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Executable;
 

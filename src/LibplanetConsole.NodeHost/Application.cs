@@ -9,7 +9,8 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.NodeHost.Serializations;
-using LibplanetConsole.NodeServices;
+using LibplanetConsole.NodeHost.Services;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.NodeHost;
 
@@ -18,7 +19,8 @@ internal sealed class Application : ApplicationBase, IApplication
     private readonly CompositionContainer _container;
     private readonly ApplicationOptions _options = new();
     private readonly Node _node;
-    private readonly NodeContext _nodeServiceContext;
+    private readonly NodeContext _nodeContext;
+    private readonly INodeContent[] _nodeContents;
     private readonly Process? _parentProcess;
     private SystemTerminal? _terminal;
     private Guid _closeToken;
@@ -32,7 +34,8 @@ internal sealed class Application : ApplicationBase, IApplication
         _container.ComposeExportedValue(_options);
         _node = _container.GetExportedValue<Node>() ??
             throw new InvalidOperationException($"'{typeof(Node)}' is not found.");
-        _nodeServiceContext = _container.GetExportedValue<NodeContext>() ??
+        _nodeContents = _container.GetExportedValues<INodeContent>().ToArray();
+        _nodeContext = _container.GetExportedValue<NodeContext>() ??
             throw new InvalidOperationException($"'{typeof(NodeContext)}' is not found.");
         _node.BlockAppended += Node_BlockAppended;
         _node.Started += Node_Started;
@@ -44,7 +47,7 @@ internal sealed class Application : ApplicationBase, IApplication
         }
     }
 
-    public EndPoint EndPoint => _nodeServiceContext.EndPoint;
+    public EndPoint EndPoint => _nodeContext.EndPoint;
 
     public ApplicationInfo Info => new()
     {
@@ -68,7 +71,7 @@ internal sealed class Application : ApplicationBase, IApplication
             var commandContext = _container.GetExportedValue<CommandContext>()!;
             commandContext.Out = sw;
             _terminal = _container.GetExportedValue<SystemTerminal>()!;
-            _closeToken = await _nodeServiceContext.OpenAsync(cancellationToken: default);
+            _closeToken = await _nodeContext.OpenAsync(cancellationToken: default);
             await base.OnStartAsync(cancellationToken);
             await AutoStartAsync(cancellationToken);
             sw.WriteSeparator(TerminalColorType.BrightGreen);
@@ -83,7 +86,7 @@ internal sealed class Application : ApplicationBase, IApplication
         }
         else
         {
-            _closeToken = await _nodeServiceContext.OpenAsync(cancellationToken: default);
+            _closeToken = await _nodeContext.OpenAsync(cancellationToken: default);
             await base.OnStartAsync(cancellationToken);
             await AutoStartAsync(cancellationToken);
         }
@@ -92,7 +95,7 @@ internal sealed class Application : ApplicationBase, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _nodeServiceContext.ReleaseAsync(_closeToken);
+        await _nodeContext.ReleaseAsync(_closeToken);
         _node.BlockAppended -= Node_BlockAppended;
         _node.Started -= Node_Started;
         _node.Stopped -= Node_Stopped;
@@ -123,7 +126,7 @@ internal sealed class Application : ApplicationBase, IApplication
 
     private void Node_Started(object? sender, EventArgs e)
     {
-        var endPoint = EndPointUtility.ToString(_nodeServiceContext.EndPoint);
+        var endPoint = EndPointUtility.ToString(_nodeContext.EndPoint);
         var message = $"BlockChain has been started.: {endPoint}";
         Console.WriteLine(
             TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
@@ -132,7 +135,7 @@ internal sealed class Application : ApplicationBase, IApplication
 
     private void Node_Stopped(object? sender, EventArgs e)
     {
-        var endPoint = EndPointUtility.ToString(_nodeServiceContext.EndPoint);
+        var endPoint = EndPointUtility.ToString(_nodeContext.EndPoint);
         var message = $"BlockChain has been stopped.: {endPoint}";
         Console.WriteLine(
             TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));

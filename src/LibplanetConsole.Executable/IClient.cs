@@ -1,7 +1,7 @@
 using System.Net;
 using Libplanet.Crypto;
-using LibplanetConsole.ClientServices;
-using LibplanetConsole.ClientServices.Serializations;
+using LibplanetConsole.Clients;
+using LibplanetConsole.Clients.Serializations;
 
 namespace LibplanetConsole.Executable;
 

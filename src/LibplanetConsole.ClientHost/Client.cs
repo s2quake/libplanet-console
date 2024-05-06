@@ -1,16 +1,15 @@
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
-using LibplanetConsole.ClientServices;
+using LibplanetConsole.ClientHost.Services;
+using LibplanetConsole.Clients;
 
 namespace LibplanetConsole.ClientHost;
 
 [Export]
 [Export(typeof(IClient))]
 [method: ImportingConstructor]
-internal sealed class Client(
-    ApplicationOptions options,
-    [ImportMany] IEnumerable<IRemoteService> services)
-    : ClientBase(GetPrivateKey(options), [.. services]), IClient
+internal sealed class Client(ApplicationOptions options, RemoteNodeContext remoteNodeContext)
+    : ClientBase(GetPrivateKey(options), remoteNodeContext), IClient
 {
     public static PrivateKey GetPrivateKey(ApplicationOptions options)
     {

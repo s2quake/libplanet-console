@@ -10,8 +10,9 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.NodeServices;
-using LibplanetConsole.NodeServices.Serializations;
+using LibplanetConsole.Nodes;
+using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes.Services;
 
 namespace LibplanetConsole.Executable;
 

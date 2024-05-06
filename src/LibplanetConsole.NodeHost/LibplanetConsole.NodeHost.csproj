@@ -9,7 +9,7 @@
     <ProjectReference Include="..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
     <ProjectReference Include="..\..\.communication\JSSoft.Communication\JSSoft.Communication.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.NodeServices\LibplanetConsole.NodeServices.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
   </ItemGroup>
 

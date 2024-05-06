@@ -1,5 +1,6 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
+using LibplanetConsole.Clients;
 
 namespace LibplanetConsole.ClientHost.Commands;
 

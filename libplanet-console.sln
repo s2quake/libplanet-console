@@ -45,9 +45,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.NodeHost",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Common", "src\LibplanetConsole.Common\LibplanetConsole.Common.csproj", "{D38E8B95-216D-4044-9CF6-F5E7D6AFDE92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.NodeServices", "src\LibplanetConsole.NodeServices\LibplanetConsole.NodeServices.csproj", "{972C298C-99E8-44B8-AED9-721E41D92004}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Nodes", "src\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj", "{972C298C-99E8-44B8-AED9-721E41D92004}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.ClientServices", "src\LibplanetConsole.ClientServices\LibplanetConsole.ClientServices.csproj", "{A6713DA7-BB14-4CE1-8A33-9FC2296C068F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Clients", "src\LibplanetConsole.Clients\LibplanetConsole.Clients.csproj", "{A6713DA7-BB14-4CE1-8A33-9FC2296C068F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.ClientHost", "src\LibplanetConsole.ClientHost\LibplanetConsole.ClientHost.csproj", "{F9BB758F-577A-4C46-B38E-6E003FCFDDF3}"
 EndProject

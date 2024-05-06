@@ -7,20 +7,24 @@ using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.ClientHost.Serializations;
-using LibplanetConsole.ClientServices;
+using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.NodeServices;
+using LibplanetConsole.Nodes;
+using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes.Services;
+using ClientContext = LibplanetConsole.ClientHost.Services.ClientContext;
 
 namespace LibplanetConsole.ClientHost;
 
-internal sealed partial class Application : ApplicationBase, IApplication
+internal sealed partial class Application : ApplicationBase, IApplication, INodeCallback
 {
     private readonly CompositionContainer _container;
     private readonly ApplicationOptions _options = new();
     private readonly Client _client;
-    private readonly ClientContext _clientServiceContext;
+    private readonly IClientContent[] _clientContents;
+    private readonly ClientContext _clientContext;
     private readonly Process? _parentProcess;
     private SystemTerminal? _terminal;
     private Guid _closeToken;
@@ -31,12 +35,13 @@ internal sealed partial class Application : ApplicationBase, IApplication
         _container = new(new AssemblyCatalog(typeof(Application).Assembly));
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
+        _container.ComposeExportedValue<INodeCallback>(this);
         _container.ComposeExportedValue(_options);
         _client = _container.GetExportedValue<Client>() ??
             throw new InvalidOperationException($"'{typeof(Client)}' is not found.");
-        _clientServiceContext = _container.GetExportedValue<ClientContext>() ??
+        _clientContents = _container.GetExportedValues<IClientContent>().ToArray();
+        _clientContext = _container.GetExportedValue<ClientContext>() ??
             throw new InvalidOperationException($"'{typeof(ClientContext)}' is not found.");
-        _client.BlockAppended += Client_BlockAppended;
         _client.Started += Client_Started;
         _client.Stopped += Client_Stopped;
         if (_options.ParentProcessId != 0 &&
@@ -46,7 +51,7 @@ internal sealed partial class Application : ApplicationBase, IApplication
         }
     }
 
-    public EndPoint EndPoint => _clientServiceContext.EndPoint;
+    public EndPoint EndPoint => _clientContext.EndPoint;
 
     public ApplicationInfo Info => new()
     {
@@ -62,6 +67,15 @@ internal sealed partial class Application : ApplicationBase, IApplication
         return _container.GetExportedValue<object?>(contractName);
     }
 
+    void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
+    {
+        var hash = blockInfo.Hash[0..8];
+        var miner = blockInfo.Miner[0..8];
+        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
+        Console.WriteLine(
+            TerminalStringBuilder.GetString(message, TerminalColorType.BrightMagenta));
+    }
+
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         if (_options.ParentProcessId == 0)
@@ -70,7 +84,7 @@ internal sealed partial class Application : ApplicationBase, IApplication
             var commandContext = _container.GetExportedValue<CommandContext>()!;
             commandContext.Out = sw;
             _terminal = _container.GetExportedValue<SystemTerminal>()!;
-            _closeToken = await _clientServiceContext.OpenAsync(cancellationToken: default);
+            _closeToken = await _clientContext.OpenAsync(cancellationToken: default);
             await base.OnStartAsync(cancellationToken);
             await AutoStartAsync();
             sw.WriteSeparator(TerminalColorType.BrightGreen);
@@ -85,7 +99,7 @@ internal sealed partial class Application : ApplicationBase, IApplication
         }
         else
         {
-            _closeToken = await _clientServiceContext.OpenAsync(cancellationToken: default);
+            _closeToken = await _clientContext.OpenAsync(cancellationToken: default);
             await base.OnStartAsync(cancellationToken);
             await AutoStartAsync();
         }
@@ -94,8 +108,7 @@ internal sealed partial class Application : ApplicationBase, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _clientServiceContext.ReleaseAsync(_closeToken);
-        _client.BlockAppended -= Client_BlockAppended;
+        await _clientContext.ReleaseAsync(_closeToken);
         _client.Started -= Client_Started;
         _client.Stopped -= Client_Stopped;
         _container.Dispose();
@@ -116,19 +129,9 @@ internal sealed partial class Application : ApplicationBase, IApplication
         }
     }
 
-    private void Client_BlockAppended(object? sender, BlockEventArgs e)
-    {
-        var blockInfo = e.BlockInfo;
-        var hash = blockInfo.Hash[0..8];
-        var miner = blockInfo.Miner[0..8];
-        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightMagenta));
-    }
-
     private void Client_Started(object? sender, EventArgs e)
     {
-        var endPoint = EndPointUtility.ToString(_clientServiceContext.EndPoint);
+        var endPoint = EndPointUtility.ToString(_clientContext.EndPoint);
         var message = $"Client has been started.: {endPoint}";
         Console.WriteLine(
             TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
@@ -137,7 +140,7 @@ internal sealed partial class Application : ApplicationBase, IApplication
 
     private void Client_Stopped(object? sender, StopEventArgs e)
     {
-        var endPoint = EndPointUtility.ToString(_clientServiceContext.EndPoint);
+        var endPoint = EndPointUtility.ToString(_clientContext.EndPoint);
         var message = $"Client has been stopped.: {e.Reason}";
         Console.WriteLine(
             TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));

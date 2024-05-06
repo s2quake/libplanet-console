@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using Libplanet.Crypto;
-using LibplanetConsole.ClientServices;
+using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Frameworks;

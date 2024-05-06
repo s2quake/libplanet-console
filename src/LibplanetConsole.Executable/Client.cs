@@ -5,8 +5,9 @@ using System.Net;
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
-using LibplanetConsole.ClientServices;
-using LibplanetConsole.ClientServices.Serializations;
+using LibplanetConsole.Clients;
+using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 

@@ -2,8 +2,8 @@ using System.Net;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using Libplanet.Types.Tx;
-using LibplanetConsole.NodeServices;
-using LibplanetConsole.NodeServices.Serializations;
+using LibplanetConsole.Nodes;
+using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Executable;
 
