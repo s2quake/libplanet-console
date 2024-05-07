@@ -32,7 +32,12 @@ public abstract class ClientBase : IAsyncDisposable
 
     public TextWriter Out { get; set; } = Console.Out;
 
-    public ClientInfo Info => new(this);
+    public ClientInfo Info => new()
+    {
+        PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
+        PublicKey = PublicKeyUtility.ToString(PublicKey),
+        Address = AddressUtility.ToString(Address),
+    };
 
     public bool IsRunning { get; private set; }
 

@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\console\LibplanetConsole.Executable\LibplanetConsole.Executable.csproj" />
+    <ProjectReference Include="..\..\src\console\LibplanetConsole.ConsoleHost\LibplanetConsole.ConsoleHost.csproj" />
   </ItemGroup>
 
 </Project>

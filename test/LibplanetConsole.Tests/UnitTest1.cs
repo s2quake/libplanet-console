@@ -1,5 +1,5 @@
 using Libplanet.Crypto;
-using LibplanetConsole.Executable;
+using LibplanetConsole.ConsoleHost;
 
 namespace LibplanetConsole.Tests;
 

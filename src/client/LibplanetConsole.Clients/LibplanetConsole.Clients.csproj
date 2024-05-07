@@ -7,8 +7,10 @@
     <ProjectReference Include="..\..\..\.communication\JSSoft.Communication\JSSoft.Communication.csproj" />
     <ProjectReference Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
-    <ProjectReference Include="..\..\node\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj" />
   </ItemGroup>
+
+  <Import Project="..\..\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems" Label="Shared" />
+  <Import Project="..\..\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems" Label="Shared" />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>

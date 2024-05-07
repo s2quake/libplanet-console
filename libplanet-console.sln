@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Executable", "src\console\LibplanetConsole.Executable\LibplanetConsole.Executable.csproj", "{D2160AF4-B7D0-4C83-9279-D032618A5A9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.ConsoleHost", "src\console\LibplanetConsole.ConsoleHost\LibplanetConsole.ConsoleHost.csproj", "{D2160AF4-B7D0-4C83-9279-D032618A5A9B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".libplanet", ".libplanet", "{23C68389-8F13-48E7-9878-440917F70DAF}"
 EndProject
@@ -52,6 +52,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.ClientHost", "src\client\LibplanetConsole.ClientHost\LibplanetConsole.ClientHost.csproj", "{F9BB758F-577A-4C46-B38E-6E003FCFDDF3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Frameworks", "src\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj", "{901699F6-D534-40DD-A6CE-62CCBF81096A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{0F5944E2-178A-44BF-8A09-29CAD668764A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Seeds", "src\common\LibplanetConsole.Seeds\LibplanetConsole.Seeds.csproj", "{E91A50E1-2E90-446B-BDB0-D88E0F153290}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "console", "console", "{CAB76DA9-6E57-4422-98C6-DD2D6299F675}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Consoles", "src\console\LibplanetConsole.Consoles\LibplanetConsole.Consoles.csproj", "{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -142,6 +150,14 @@ Global
 		{901699F6-D534-40DD-A6CE-62CCBF81096A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{901699F6-D534-40DD-A6CE-62CCBF81096A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{901699F6-D534-40DD-A6CE-62CCBF81096A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E91A50E1-2E90-446B-BDB0-D88E0F153290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E91A50E1-2E90-446B-BDB0-D88E0F153290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E91A50E1-2E90-446B-BDB0-D88E0F153290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E91A50E1-2E90-446B-BDB0-D88E0F153290}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{247CFCAD-0FF6-4B38-974B-7B35ADC1A333} = {23C68389-8F13-48E7-9878-440917F70DAF}
@@ -163,5 +179,9 @@ Global
 		{A6713DA7-BB14-4CE1-8A33-9FC2296C068F} = {4194F59A-6D6B-4651-B133-3FE6081BF1F9}
 		{F9BB758F-577A-4C46-B38E-6E003FCFDDF3} = {4194F59A-6D6B-4651-B133-3FE6081BF1F9}
 		{901699F6-D534-40DD-A6CE-62CCBF81096A} = {4194F59A-6D6B-4651-B133-3FE6081BF1F9}
+		{0F5944E2-178A-44BF-8A09-29CAD668764A} = {4194F59A-6D6B-4651-B133-3FE6081BF1F9}
+		{E91A50E1-2E90-446B-BDB0-D88E0F153290} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
+		{CAB76DA9-6E57-4422-98C6-DD2D6299F675} = {4194F59A-6D6B-4651-B133-3FE6081BF1F9}
+		{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
 	EndGlobalSection
 EndGlobal

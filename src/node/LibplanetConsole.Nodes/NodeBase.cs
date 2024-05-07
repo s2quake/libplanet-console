@@ -17,8 +17,8 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Nodes.Seeds;
 using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Seeds;
 
 namespace LibplanetConsole.Nodes;
 
@@ -73,7 +73,20 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
 
     public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
 
-    public NodeInfo Info => new(this);
+    public NodeInfo Info => new()
+    {
+        PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
+        PublicKey = PublicKeyUtility.ToString(PublicKey),
+        Address = AddressUtility.ToString(Address),
+        AppProtocolVersion = IsRunning == true ? $"{AppProtocolVersion}" : string.Empty,
+        SwarmEndPoint
+            = IsRunning == true ? DnsEndPointUtility.ToString(SwarmEndPoint) : string.Empty,
+        ConsensusEndPoint
+            = IsRunning == true ? DnsEndPointUtility.ToString(ConsensusEndPoint) : string.Empty,
+        GenesisHash = IsRunning == true ? $"{BlockChain.Genesis.Hash}" : string.Empty,
+        TipHash = IsRunning == true ? $"{BlockChain.Tip.Hash}" : string.Empty,
+        Peers = IsRunning == true ? [.. Peers.Select(peer => new BoundPeerInfo(peer))] : [],
+    };
 
     public BoundPeer[] Peers
     {

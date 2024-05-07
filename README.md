@@ -19,5 +19,5 @@ git clone https://github.com/s2quake/libplanet-console.git --recursive
 
 ```sh
 dotnet build
-dotnet run --project src/LibplanetConsole.Executable --framework net8.0
+dotnet run --project src/LibplanetConsole.ConsoleHost --framework net8.0
 ```

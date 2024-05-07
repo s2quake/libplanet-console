@@ -8,7 +8,7 @@
             "name": "C#: Libplanet Console",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/console/LibplanetConsole.Executable/bin/Debug/net8.0/libplanet-console.dll",
+            "program": "${workspaceFolder}/src/console/LibplanetConsole.ConsoleHost/bin/Debug/net8.0/libplanet-console.dll",
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
