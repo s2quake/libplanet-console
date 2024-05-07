@@ -60,7 +60,7 @@ internal static class ProcessUtility
                 $"src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
                 $"{Framework}/libplanet-node.dll",
             };
-            nodePath = Path.Combine(paths);
+            nodePath = Path.GetFullPath(Path.Combine(paths));
 
             if (File.Exists(nodePath) != true)
             {
@@ -95,7 +95,7 @@ internal static class ProcessUtility
                 $"src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
                 $"{Framework}/libplanet-client.dll",
             };
-            clientPath = Path.Combine(paths);
+            clientPath = Path.GetFullPath(Path.Combine(paths));
 
             if (File.Exists(clientPath) != true)
             {

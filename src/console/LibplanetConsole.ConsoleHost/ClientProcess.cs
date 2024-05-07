@@ -3,13 +3,12 @@ using System.Net;
 using JSSoft.Communication;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
+using static LibplanetConsole.ConsoleHost.ProcessUtility;
 
 namespace LibplanetConsole.ConsoleHost;
 
 internal sealed class ClientProcess : IDisposable
 {
-    private static readonly string ClientPath = ProcessUtility.GetClientPath();
-
     private readonly Process _process;
 
     public ClientProcess(EndPoint endPoint, PrivateKey privateKey)

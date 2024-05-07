@@ -19,6 +19,7 @@
     <AssemblyName>libplanet-console</AssemblyName>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <PlatformTarget Condition="'$(OS)'=='Windows_NT' And '$(NETCoreSdkPortableRuntimeIdentifier)'=='win-arm64'">x64</PlatformTarget>
   </PropertyGroup>
 
 </Project>
