@@ -155,18 +155,8 @@ internal sealed class NodeCollection(
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = ProposePrivateKey(index);
+            var privateKey = _application.ReservedKeys[index];
             await AddNewAsync(privateKey, cancellationToken);
-        }
-
-        static PrivateKey ProposePrivateKey(int index)
-        {
-            if (index < GenesisOptions.Validators.Length)
-            {
-                return GenesisOptions.Validators[index];
-            }
-
-            return new PrivateKey();
         }
     }
 

@@ -1,6 +1,5 @@
 using Libplanet.Net;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes;
 
@@ -8,7 +7,7 @@ public record class NodeOptions
 {
     public static NodeOptions Default { get; } = new NodeOptions();
 
-    public GenesisOptions GenesisOptions { get; init; } = GenesisOptions.Default;
+    public GenesisOptions GenesisOptions { get; init; } = new();
 
     public BoundPeer? BlocksyncSeedPeer { get; init; }
 

@@ -19,6 +19,8 @@ internal sealed partial class Application : ApplicationBase, IApplication
     private readonly ClientCollection _clients;
     private readonly ApplicationOptions _options = new();
     private readonly ConsoleContext _serviceContext;
+    private readonly PrivateKey[] _reservedKeys;
+
     private SystemTerminal? _terminal;
     private Guid _closeToken;
 
@@ -37,12 +39,22 @@ internal sealed partial class Application : ApplicationBase, IApplication
             throw new InvalidOperationException($"'{typeof(ClientCollection)}' is not found.");
         _serviceContext = _container.GetExportedValue<ConsoleContext>() ??
             throw new InvalidOperationException($"'{typeof(ConsoleContext)}' is not found.");
+        _reservedKeys
+            = [.. Enumerable.Range(0, options.NodeCount).Select(item => new PrivateKey())];
+        GenesisOptions = new()
+        {
+            GenesisKey = new(),
+            GenesisValidators = [.. _reservedKeys.Select(item => item.PublicKey)],
+            Timestamp = DateTimeOffset.UtcNow,
+        };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
     }
 
     public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public GenesisOptions GenesisOptions { get; } = GenesisOptions.Default;
+    public PrivateKey[] ReservedKeys => _reservedKeys;
+
+    public GenesisOptions GenesisOptions { get; }
 
     public Client GetClient(string address)
     {

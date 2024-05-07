@@ -12,15 +12,14 @@
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
-                "4",
+                "1",
                 "--client-count",
                 "1",
                 "--end-point",
                 "127.0.0.1:4343",
             ],
             "env": {
-                "LIBPLANET_CONSOLE_WORKSPACE_PATH": "${workspaceFolder}",
-                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32"
+                "LIBPLANET_CONSOLE_WORKSPACE_PATH": "${workspaceFolder}"
             }
         },
         {
