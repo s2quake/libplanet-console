@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Nodes.Serializations;
 
 public record class NodeInfo
