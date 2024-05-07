@@ -23,7 +23,6 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>..\..\LibplanetConsole.ruleset</CodeAnalysisRuleSet>
     <NoWarn>$(NoWarn);SA1200;NETSDK1206</NoWarn>
