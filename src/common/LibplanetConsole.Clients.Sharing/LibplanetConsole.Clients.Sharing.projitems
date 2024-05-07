@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>LibplanetConsole.Nodes</Import_RootNamespace>
+    <Import_RootNamespace>LibplanetConsole.Clients</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" />

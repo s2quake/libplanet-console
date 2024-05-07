@@ -28,7 +28,8 @@ internal sealed class Application : ApplicationBase, IApplication
     public Application(ApplicationOptions options)
     {
         _options = options;
-        _container = new(new AssemblyCatalog(typeof(Application).Assembly));
+        _container = new(
+            new DirectoryCatalog(Path.GetDirectoryName(typeof(Application).Assembly.Location)!));
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_options);

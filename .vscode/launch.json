@@ -20,7 +20,7 @@
             ],
             "env": {
                 "LIBPLANET_CONSOLE_WORKSPACE_PATH": "${workspaceFolder}",
-                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32;774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79"
+                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32"
             }
         },
         {
@@ -62,7 +62,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--seed-end-point",
-                "127.0.0.1:4343"
+                "127.0.0.1:5353"
             ]
         }
     ],

@@ -1,14 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
-    <ProjectReference Include="..\..\..\.communication\JSSoft.Communication\JSSoft.Communication.csproj" />
-    <ProjectReference Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
-    <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
-  </ItemGroup>
-
   <Import Project="..\..\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems" Label="Shared" />
   <Import Project="..\..\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems" Label="Shared" />
 

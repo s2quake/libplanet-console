@@ -1,6 +1,4 @@
-using LibplanetConsole.Consoles;
-
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
 public abstract class NodeContentBase(INode node) : INodeContent
 {
