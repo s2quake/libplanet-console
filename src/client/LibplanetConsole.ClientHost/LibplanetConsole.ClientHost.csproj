@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+    <ProjectReference Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
+    <ProjectReference Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
+    <ProjectReference Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
+    <ProjectReference Include="..\..\..\.communication\JSSoft.Communication\JSSoft.Communication.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Clients\LibplanetConsole.Clients.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.8.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>libplanet-client</AssemblyName>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+</Project>

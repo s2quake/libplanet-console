@@ -8,7 +8,7 @@
             "name": "C#: Libplanet Console",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/LibplanetConsole.Executable/bin/Debug/net8.0/libplanet-console.dll",
+            "program": "${workspaceFolder}/src/console/LibplanetConsole.Executable/bin/Debug/net8.0/libplanet-console.dll",
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
@@ -27,7 +27,7 @@
             "name": "C#: Libplanet Node",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--private-key",
@@ -37,14 +37,14 @@
                 "-a"
             ],
             "env": {
-                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32;774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79"
+                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32"
             }
         },
         {
             "name": "C#: Libplanet Node with Seed EndPoint",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--private-key",
@@ -58,7 +58,7 @@
             "name": "C#: Libplanet Client",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/LibplanetConsole.ClientHost/bin/Debug/net8.0/libplanet-client.dll",
+            "program": "${workspaceFolder}/src/client/LibplanetConsole.ClientHost/bin/Debug/net8.0/libplanet-client.dll",
             "console": "integratedTerminal",
             "args": [
                 "--seed-end-point",

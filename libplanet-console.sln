@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Executable", "src\LibplanetConsole.Executable\LibplanetConsole.Executable.csproj", "{D2160AF4-B7D0-4C83-9279-D032618A5A9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Executable", "src\console\LibplanetConsole.Executable\LibplanetConsole.Executable.csproj", "{D2160AF4-B7D0-4C83-9279-D032618A5A9B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".libplanet", ".libplanet", "{23C68389-8F13-48E7-9878-440917F70DAF}"
 EndProject
@@ -41,17 +41,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSSoft.Configurations", ".c
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4194F59A-6D6B-4651-B133-3FE6081BF1F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.NodeHost", "src\LibplanetConsole.NodeHost\LibplanetConsole.NodeHost.csproj", "{09F12A15-75DA-4A10-A856-015BA4DF4DC9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.NodeHost", "src\node\LibplanetConsole.NodeHost\LibplanetConsole.NodeHost.csproj", "{09F12A15-75DA-4A10-A856-015BA4DF4DC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Common", "src\LibplanetConsole.Common\LibplanetConsole.Common.csproj", "{D38E8B95-216D-4044-9CF6-F5E7D6AFDE92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Common", "src\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj", "{D38E8B95-216D-4044-9CF6-F5E7D6AFDE92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Nodes", "src\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj", "{972C298C-99E8-44B8-AED9-721E41D92004}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Nodes", "src\node\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj", "{972C298C-99E8-44B8-AED9-721E41D92004}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Clients", "src\LibplanetConsole.Clients\LibplanetConsole.Clients.csproj", "{A6713DA7-BB14-4CE1-8A33-9FC2296C068F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Clients", "src\client\LibplanetConsole.Clients\LibplanetConsole.Clients.csproj", "{A6713DA7-BB14-4CE1-8A33-9FC2296C068F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.ClientHost", "src\LibplanetConsole.ClientHost\LibplanetConsole.ClientHost.csproj", "{F9BB758F-577A-4C46-B38E-6E003FCFDDF3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.ClientHost", "src\client\LibplanetConsole.ClientHost\LibplanetConsole.ClientHost.csproj", "{F9BB758F-577A-4C46-B38E-6E003FCFDDF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Frameworks", "src\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj", "{901699F6-D534-40DD-A6CE-62CCBF81096A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Frameworks", "src\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj", "{901699F6-D534-40DD-A6CE-62CCBF81096A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
