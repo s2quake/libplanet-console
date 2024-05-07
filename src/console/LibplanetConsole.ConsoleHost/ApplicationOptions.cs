@@ -25,6 +25,11 @@ internal sealed class ApplicationOptions
         };
         var parser = new CommandParser(options, parserSettings);
         parser.Parse(args);
+        if (options.NodeCount < 1)
+        {
+            throw new InvalidOperationException("Node count must be greater than or equal to 1.");
+        }
+
         return options;
     }
 }
