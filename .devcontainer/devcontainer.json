@@ -1,0 +1,10 @@
+{
+    "postCreateCommand": "git submodule update --init --",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csharp"
+            ]
+        }
+    }
+}
