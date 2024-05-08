@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
-                "4",
+                "2",
                 "--client-count",
                 "1",
                 "--end-point",
@@ -29,15 +29,8 @@
             "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
-                "--private-key",
-                "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32",
-                "--end-point",
-                "127.0.0.1:5353",
                 "-a"
-            ],
-            "env": {
-                "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32"
-            }
+            ]
         },
         {
             "name": "C#: Libplanet Two Nodes (1/2)",

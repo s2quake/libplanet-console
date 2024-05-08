@@ -4,3 +4,4 @@ obj/
 .store
 .DS_Store
 .vs/
+.lib9c/
