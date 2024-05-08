@@ -53,7 +53,7 @@ public static class DnsEndPointUtility
 
     public static void Release(ref DnsEndPoint? endPoint)
     {
-        if (endPoint != null)
+        if (endPoint is not null)
         {
             PortUtility.ReleasePort(endPoint.Port);
             endPoint = null;

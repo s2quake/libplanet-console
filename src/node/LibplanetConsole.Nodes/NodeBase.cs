@@ -58,10 +58,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         set => _consensusEndPoint = value;
     }
 
-    public AppProtocolVersion AppProtocolVersion
-        => BlockChainUtility.AppProtocolVersion;
-
-    public bool IsRunning => _startTask != null;
+    public bool IsRunning { get; private set; }
 
     public bool IsDisposed => _isDisposed;
 
@@ -78,7 +75,6 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
         PublicKey = PublicKeyUtility.ToString(PublicKey),
         Address = AddressUtility.ToString(Address),
-        AppProtocolVersion = IsRunning == true ? $"{AppProtocolVersion}" : string.Empty,
         SwarmEndPoint
             = IsRunning == true ? DnsEndPointUtility.ToString(SwarmEndPoint) : string.Empty,
         ConsensusEndPoint
@@ -92,7 +88,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     {
         get
         {
-            if (_swarm != null)
+            if (_swarm is not null)
             {
                 return [.. _swarm.Peers];
             }
@@ -121,7 +117,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask == null || _swarm == null,
+            condition: _startTask is null || _swarm is null,
             message: "Swarm has been stopped.");
 
         var blockChain = BlockChain;
@@ -141,7 +137,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     public async Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(_startTask != null, "Swarm has been started.");
+        InvalidOperationExceptionUtility.ThrowIf(_startTask is not null, "Swarm has been started.");
 
         var privateKey = _privateKey;
         var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
@@ -183,7 +179,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = blocksyncSeedPeer.EndPoint,
-                AppProtocolVersion = AppProtocolVersion,
+                AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
             });
             await _blocksyncSeedNode.StartAsync(cancellationToken);
         }
@@ -194,7 +190,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = consensusSeedPeer.EndPoint,
-                AppProtocolVersion = AppProtocolVersion,
+                AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
             });
             await _consensusSeedNode.StartAsync(cancellationToken);
         }
@@ -211,6 +207,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         _blocksyncEndPoint = blocksyncEndPoint;
         _consensusEndPoint = consensusEndPoint;
         NodeOptions = nodeOptions;
+        IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -218,7 +215,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask == null || _swarm == null,
+            condition: _startTask is null || _swarm is null,
             message: "Swarm has been stopped.");
 
         NodeOptions = new();
@@ -229,6 +226,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         _swarm.Dispose();
         _swarm = null;
         _startTask = null;
+        IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -237,7 +235,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask == null || _swarm == null,
+            condition: _startTask is null || _swarm is null,
             message: "Swarm has been stopped.");
 
         var blockChain = BlockChain;
@@ -271,7 +269,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask == null || _swarm == null,
+            condition: _startTask is null || _swarm is null,
             message: "Swarm has been stopped.");
 
         var blockChain = BlockChain;
@@ -287,7 +285,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         DnsEndPointUtility.Release(ref _blocksyncEndPoint);
         DnsEndPointUtility.Release(ref _consensusEndPoint);
 
-        if (_swarm != null)
+        if (_swarm is not null)
         {
             await _swarm.StopAsync(cancellationToken: default);
             _swarm.Dispose();

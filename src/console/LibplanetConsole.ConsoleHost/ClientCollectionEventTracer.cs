@@ -46,13 +46,13 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
 
     private void UpdateCurrent(IClient? client)
     {
-        if (_current != null)
+        if (_current is not null)
         {
         }
 
         _current = client;
 
-        if (_current != null)
+        if (_current is not null)
         {
         }
     }

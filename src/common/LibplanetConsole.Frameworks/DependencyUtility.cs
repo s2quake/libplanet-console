@@ -53,7 +53,7 @@ public static class DependencyUtility
             visited[item] = true;
 
             var dependencies = getDependencies(item);
-            if (dependencies != null)
+            if (dependencies is not null)
             {
                 foreach (var dependency in dependencies)
                 {

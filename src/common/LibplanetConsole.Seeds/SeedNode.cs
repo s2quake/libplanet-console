@@ -39,7 +39,7 @@ public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
         }
 
         _cancellationTokenSource?.Cancel();
-        if (_seed != null)
+        if (_seed is not null)
         {
             await _seed.StopAsync(cancellationToken);
             _seed = null;

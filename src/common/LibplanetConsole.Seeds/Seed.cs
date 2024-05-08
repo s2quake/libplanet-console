@@ -23,7 +23,7 @@ internal class Seed(SeedOptions seedOptions)
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_transport != null)
+        if (_transport is not null)
         {
             throw new InvalidOperationException("Seed node is already running.");
         }
@@ -39,7 +39,7 @@ internal class Seed(SeedOptions seedOptions)
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_transport == null)
+        if (_transport is null)
         {
             throw new InvalidOperationException("Seed node is not running.");
         }
@@ -89,7 +89,7 @@ internal class Seed(SeedOptions seedOptions)
 
     private async Task ReceiveMessageAsync(Message message)
     {
-        if (_transport == null || _cancellationTokenSource == null)
+        if (_transport is null || _cancellationTokenSource is null)
         {
             throw new InvalidOperationException("Seed node is not running.");
         }

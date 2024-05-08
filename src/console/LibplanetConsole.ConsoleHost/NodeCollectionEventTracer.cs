@@ -47,14 +47,14 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
 
     private void UpdateCurrent(INode? node)
     {
-        if (_current != null)
+        if (_current is not null)
         {
             _current.BlockAppended -= Node_BlockAppended;
         }
 
         _current = node;
 
-        if (_current != null)
+        if (_current is not null)
         {
             _current.BlockAppended += Node_BlockAppended;
         }
