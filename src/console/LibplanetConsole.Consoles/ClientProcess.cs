@@ -3,15 +3,15 @@ using System.Net;
 using JSSoft.Communication;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
-using static LibplanetConsole.ConsoleHost.ProcessUtility;
+using static LibplanetConsole.Consoles.ProcessUtility;
 
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
-internal sealed class NodeProcess : IDisposable
+internal sealed class ClientProcess : IDisposable
 {
     private readonly Process _process;
 
-    public NodeProcess(EndPoint endPoint, PrivateKey privateKey)
+    public ClientProcess(EndPoint endPoint, PrivateKey privateKey)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -28,11 +28,11 @@ internal sealed class NodeProcess : IDisposable
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            FileName = IsWindows() ? NodePath : "dotnet",
+            FileName = IsWindows() ? ClientPath : "dotnet",
         };
         if (IsWindows() != true)
         {
-            startInfo.ArgumentList.Insert(0, NodePath);
+            startInfo.ArgumentList.Insert(0, ClientPath);
         }
 
         _process = new Process

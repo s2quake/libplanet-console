@@ -4,11 +4,10 @@ using Libplanet.Crypto;
 using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
-using LibplanetConsole.Consoles;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Seeds;
 
-namespace LibplanetConsole.ConsoleHost.Services;
+namespace LibplanetConsole.Consoles.Services;
 
 [Export]
 [Export(typeof(IService))]

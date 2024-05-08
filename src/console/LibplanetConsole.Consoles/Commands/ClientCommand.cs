@@ -2,9 +2,8 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Clients;
-using LibplanetConsole.Consoles;
 
-namespace LibplanetConsole.ConsoleHost.Commands;
+namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides client-related commands.")]

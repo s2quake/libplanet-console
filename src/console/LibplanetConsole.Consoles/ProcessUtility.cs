@@ -1,4 +1,4 @@
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
 internal static class ProcessUtility
 {

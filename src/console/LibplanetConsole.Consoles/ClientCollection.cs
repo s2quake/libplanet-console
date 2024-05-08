@@ -7,10 +7,9 @@ using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Consoles;
 using LibplanetConsole.Frameworks;
 
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
 [Export]
 [Export(typeof(IClientCollection))]
@@ -18,11 +17,11 @@ namespace LibplanetConsole.ConsoleHost;
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
 internal sealed class ClientCollection(
-    Application application, ApplicationOptions options, NodeCollection nodes)
+    ApplicationBase application, ApplicationOptions options, NodeCollection nodes)
     : IEnumerable<Client>, IClientCollection, IApplicationService
 {
     private static readonly object LockObject = new();
-    private readonly Application _application = application;
+    private readonly ApplicationBase _application = application;
     private readonly ApplicationOptions _options = options;
     private readonly List<Client> _clientList = new(options.ClientCount);
     private Client? _current;

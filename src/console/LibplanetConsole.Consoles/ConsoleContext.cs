@@ -3,7 +3,7 @@ using System.Net;
 using JSSoft.Communication;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
 [Export]
 internal sealed class ConsoleContext : ServerContext

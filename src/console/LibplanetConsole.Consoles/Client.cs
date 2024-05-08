@@ -4,40 +4,34 @@ using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
-using Libplanet.Action;
 using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-using Libplanet.Types.Tx;
+using LibplanetConsole.Clients;
+using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Consoles;
 using LibplanetConsole.Consoles.Services;
-using LibplanetConsole.Nodes;
-using LibplanetConsole.Nodes.Serializations;
-using LibplanetConsole.Nodes.Services;
 
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
-internal sealed class Node
-    : INodeCallback, IAsyncDisposable, IAddressable, INode, IRemoteServiceProvider
+internal sealed class Client :
+    IClientCallback, IAsyncDisposable, IAddressable, IClient, IRemoteServiceProvider
 {
     private readonly CompositionContainer _container;
     private readonly PrivateKey _privateKey;
     private readonly RemoteContext _remoteContext;
-    private readonly RemoteService<INodeService, INodeCallback> _remoteService;
-    private readonly INodeContent[] _contents;
-    private DnsEndPoint? _blocksyncEndPoint;
-    private DnsEndPoint? _consensusEndPoint;
+    private readonly RemoteService<IClientService, IClientCallback> _remoteService;
+    private readonly IClientContent[] _contents;
     private Guid _closeToken;
-    private NodeInfo _nodeInfo = new();
+    private ClientInfo _clientInfo = new();
     private bool _isDisposed;
 
-    public Node(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    public Client(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
     {
         _container = container;
         _privateKey = privateKey;
-        _container.ComposeExportedValue<INode>(this);
-        _contents = [.. _container.GetExportedValues<INodeContent>()];
+        _container.ComposeExportedValue<IClient>(this);
+        _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
         _remoteContext = new RemoteContext(this, _contents)
         {
@@ -47,19 +41,11 @@ internal sealed class Node
         _remoteContext.Faulted += RemoteContext_Faulted;
     }
 
-    public event EventHandler<BlockEventArgs>? BlockAppended;
-
     public event EventHandler? Started;
 
     public event EventHandler? Stopped;
 
     public event EventHandler? Disposed;
-
-    public DnsEndPoint SwarmEndPoint
-        => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
-
-    public DnsEndPoint ConsensusEndPoint
-        => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
     public PrivateKey PrivateKey => _privateKey;
 
@@ -67,13 +53,15 @@ internal sealed class Node
 
     public Address Address => _privateKey.Address;
 
+    public bool IsOnline { get; private set; } = true;
+
     public bool IsRunning { get; private set; }
 
-    public NodeOptions NodeOptions { get; private set; } = NodeOptions.Default;
+    public ClientOptions ClientOptions { get; private set; } = ClientOptions.Default;
 
     public EndPoint EndPoint => _remoteContext.EndPoint;
 
-    public NodeInfo Info => _nodeInfo;
+    public ClientInfo Info => _clientInfo;
 
     public object? GetService(Type serviceType)
     {
@@ -109,25 +97,23 @@ internal sealed class Node
         return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
     }
 
-    public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
+    public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
-        _nodeInfo = await _remoteService.Server.GetInfoAsync(cancellationToken);
-        return _nodeInfo;
+        _clientInfo = await _remoteService.Server.GetInfoAsync(cancellationToken);
+        return _clientInfo;
     }
 
-    public async Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken)
+    public async Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Client is already running.");
 
         _closeToken = await _remoteContext.OpenAsync(cancellationToken);
-        _nodeInfo = await _remoteService.Server.StartAsync(nodeOptions, cancellationToken);
-        _blocksyncEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.ConsensusEndPoint);
-        NodeOptions = nodeOptions;
+        _clientInfo = await _remoteService.Server.StartAsync(clientOptions, cancellationToken);
+        ClientOptions = clientOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -135,33 +121,13 @@ internal sealed class Node
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
         await _remoteService.Server.StopAsync(cancellationToken);
         await _remoteContext.CloseAsync(_closeToken, cancellationToken);
-        NodeOptions = NodeOptions.Default;
+        ClientOptions = ClientOptions.Default;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
-    }
-
-    public async Task<TxId> AddTransactionAsync(
-        IAction[] actions, CancellationToken cancellationToken)
-    {
-        var address = Address.ToString();
-        var values = actions.Select(item => item.PlainValue).ToArray();
-        var nonce = await _remoteService.Server.GetNextNonceAsync(address, cancellationToken);
-        var transaction = Transaction.Create(
-            nonce: nonce,
-            privateKey: _privateKey,
-            genesisHash: BlockHash.FromString(_nodeInfo.GenesisHash),
-            actions: new TxActionList(values)
-        );
-
-        var bytes = await _remoteService.Server.SendTransactionAsync(
-            transaction: transaction.Serialize(),
-            cancellationToken: cancellationToken);
-
-        return new TxId(bytes);
     }
 
     public async ValueTask DisposeAsync()
@@ -171,17 +137,12 @@ internal sealed class Node
         _remoteContext.Disconnected -= RemoteContext_Disconnected;
         _remoteContext.Faulted -= RemoteContext_Faulted;
         await _remoteContext.ReleaseAsync(_closeToken);
-        NodeOptions = NodeOptions.Default;
+        ClientOptions = ClientOptions.Default;
         IsRunning = false;
         _container.Dispose();
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
-    }
-
-    void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
-    {
-        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
     IService IRemoteServiceProvider.GetService(object obj) => _remoteService;
@@ -200,7 +161,7 @@ internal sealed class Node
 
     private void RemoteContext_Disconnected(object? sender, EventArgs e)
     {
-        NodeOptions = NodeOptions.Default;
+        ClientOptions = ClientOptions.Default;
         IsRunning = false;
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
@@ -208,7 +169,7 @@ internal sealed class Node
 
     private void RemoteContext_Faulted(object? sender, EventArgs e)
     {
-        NodeOptions = NodeOptions.Default;
+        ClientOptions = ClientOptions.Default;
         IsRunning = false;
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);

@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Consoles;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
 
@@ -10,10 +11,10 @@ namespace LibplanetConsole.ConsoleHost;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
-internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplicationService
+internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplicationService
 {
-    private readonly NodeCollection _nodes = nodes;
-    private Node? _current;
+    private readonly INodeCollection _nodes = nodes;
+    private INode? _current;
 
     public static TextWriter Writer => Console.Out;
 
@@ -21,7 +22,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         UpdateCurrent(_nodes.Current);
-        foreach (var node in _nodes.OfType<Node>())
+        foreach (var node in _nodes)
         {
             AttachEvent(node);
         }
@@ -34,7 +35,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
     public ValueTask DisposeAsync()
     {
         UpdateCurrent(null);
-        foreach (var node in _nodes.OfType<Node>())
+        foreach (var node in _nodes)
         {
             DetachEvent(node);
         }
@@ -44,7 +45,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
         return ValueTask.CompletedTask;
     }
 
-    private void UpdateCurrent(Node? node)
+    private void UpdateCurrent(INode? node)
     {
         if (_current != null)
         {
@@ -59,13 +60,13 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
         }
     }
 
-    private void AttachEvent(Node node)
+    private void AttachEvent(INode node)
     {
         node.Started += Node_Started;
         node.Stopped += Node_Stopped;
     }
 
-    private void DetachEvent(Node node)
+    private void DetachEvent(INode node)
     {
         node.Started -= Node_Started;
         node.Stopped -= Node_Stopped;
@@ -80,7 +81,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
     {
         if (e.Action == NotifyCollectionChangedAction.Add)
         {
-            foreach (Node node in e.NewItems!)
+            foreach (INode node in e.NewItems!)
             {
                 var message = $"Node attached: {(ShortAddress)node.Address}";
                 var colorType = TerminalColorType.BrightBlue;
@@ -91,7 +92,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
         }
         else if (e.Action == NotifyCollectionChangedAction.Remove)
         {
-            foreach (Node node in e.OldItems!)
+            foreach (INode node in e.OldItems!)
             {
                 var message = $"Node detached: {(ShortAddress)node.Address}";
                 var colorType = TerminalColorType.BrightBlue;
@@ -113,7 +114,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
 
     private void Node_Started(object? sender, EventArgs e)
     {
-        if (sender is Node node)
+        if (sender is INode node)
         {
             var message = $"Node started: {(ShortAddress)node.Address}";
             var colorType = TerminalColorType.BrightBlue;
@@ -123,7 +124,7 @@ internal sealed class NodeCollectionEventTracer(NodeCollection nodes) : IApplica
 
     private void Node_Stopped(object? sender, EventArgs e)
     {
-        if (sender is Node node)
+        if (sender is INode node)
         {
             var message = $"Node stopped: {(ShortAddress)node.Address}";
             var colorType = TerminalColorType.BrightBlue;

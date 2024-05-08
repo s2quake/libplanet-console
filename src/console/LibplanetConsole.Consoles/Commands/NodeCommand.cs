@@ -4,9 +4,8 @@ using JSSoft.Communication;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Consoles;
 
-namespace LibplanetConsole.ConsoleHost.Commands;
+namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides node-related commands.")]

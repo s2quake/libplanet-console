@@ -6,12 +6,11 @@ using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.ConsoleHost.Services;
-using LibplanetConsole.Consoles;
+using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
 
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
 [Export]
 [Export(typeof(INodeCollection))]
@@ -19,11 +18,11 @@ namespace LibplanetConsole.ConsoleHost;
 [Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
-    Application application, ApplicationOptions options, SeedService seedService)
+    ApplicationBase application, ApplicationOptions options, SeedService seedService)
     : IEnumerable<Node>, INodeCollection, IApplicationService
 {
     private static readonly object LockObject = new();
-    private readonly Application _application = application;
+    private readonly ApplicationBase _application = application;
     private readonly ApplicationOptions _options = options;
     private readonly SeedService _seedService = seedService;
     private readonly List<Node> _nodeList = new(options.NodeCount);

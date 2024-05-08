@@ -1,9 +1,8 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using LibplanetConsole.Consoles;
 
-namespace LibplanetConsole.ConsoleHost;
+namespace LibplanetConsole.Consoles;
 
 internal sealed class ApplicationExportProvider(CompositionContainer compositionContainer)
         : ExportProvider

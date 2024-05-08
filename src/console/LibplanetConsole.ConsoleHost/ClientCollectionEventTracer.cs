@@ -3,16 +3,17 @@ using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Consoles;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.ConsoleHost;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
-internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IApplicationService
+internal sealed class ClientCollectionEventTracer(IClientCollection clients) : IApplicationService
 {
-    private readonly ClientCollection _clients = clients;
-    private Client? _current;
+    private readonly IClientCollection _clients = clients;
+    private IClient? _current;
 
     public static TextWriter Writer => Console.Out;
 
@@ -20,7 +21,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         UpdateCurrent(_clients.Current);
-        foreach (var client in _clients.OfType<Client>())
+        foreach (var client in _clients)
         {
             AttachEvent(client);
         }
@@ -33,7 +34,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
     public ValueTask DisposeAsync()
     {
         UpdateCurrent(null);
-        foreach (var client in _clients.OfType<Client>())
+        foreach (var client in _clients)
         {
             DetachEvent(client);
         }
@@ -43,7 +44,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
         return ValueTask.CompletedTask;
     }
 
-    private void UpdateCurrent(Client? client)
+    private void UpdateCurrent(IClient? client)
     {
         if (_current != null)
         {
@@ -56,13 +57,13 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
         }
     }
 
-    private void AttachEvent(Client client)
+    private void AttachEvent(IClient client)
     {
         client.Started += Client_Started;
         client.Stopped += Client_Stopped;
     }
 
-    private void DetachEvent(Client client)
+    private void DetachEvent(IClient client)
     {
         client.Started -= Client_Started;
         client.Stopped -= Client_Stopped;
@@ -77,7 +78,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
     {
         if (e.Action == NotifyCollectionChangedAction.Add)
         {
-            foreach (Client client in e.NewItems!)
+            foreach (IClient client in e.NewItems!)
             {
                 var message = $"Client attached: {(ShortAddress)client.Address}";
                 var colorType = TerminalColorType.BrightBlue;
@@ -87,7 +88,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
         }
         else if (e.Action == NotifyCollectionChangedAction.Remove)
         {
-            foreach (Client client in e.OldItems!)
+            foreach (IClient client in e.OldItems!)
             {
                 var message = $"Client detached: {(ShortAddress)client.Address}";
                 var colorType = TerminalColorType.BrightBlue;
@@ -99,7 +100,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
 
     private void Client_Started(object? sender, EventArgs e)
     {
-        if (sender is Client client)
+        if (sender is IClient client)
         {
             var message = $"Client started: {(ShortAddress)client.Address}";
             var colorType = TerminalColorType.BrightBlue;
@@ -109,7 +110,7 @@ internal sealed class ClientCollectionEventTracer(ClientCollection clients) : IA
 
     private void Client_Stopped(object? sender, EventArgs e)
     {
-        if (sender is Client client)
+        if (sender is IClient client)
         {
             var message = $"Client stopped: {(ShortAddress)client.Address}";
             var colorType = TerminalColorType.BrightBlue;
