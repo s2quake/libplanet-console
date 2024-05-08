@@ -154,7 +154,11 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             = await CreateTransport(privateKey, blocksyncEndPoint, cancellationToken);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = ImmutableHashSet.Create(blocksyncSeedPeer),
+            StaticPeers = [blocksyncSeedPeer],
+            BootstrapOptions = new()
+            {
+                SeedPeers = [blocksyncSeedPeer],
+            },
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
@@ -165,7 +169,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             SeedPeers = [consensusSeedPeer],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
-            TargetBlockInterval = TimeSpan.FromSeconds(2),
+            TargetBlockInterval = TimeSpan.FromSeconds(8),
             ContextTimeoutOptions = new(),
         };
         var blockChain = BlockChainUtility.CreateBlockChain(
@@ -203,6 +207,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
             consensusTransport: consensusTransport,
             consensusOption: consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
+        await _swarm.BootstrapAsync(cancellationToken: default);
         _blocksyncEndPoint = blocksyncEndPoint;
         _consensusEndPoint = consensusEndPoint;
         NodeOptions = nodeOptions;
