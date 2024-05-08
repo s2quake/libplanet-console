@@ -15,10 +15,8 @@ internal sealed class NodeProcess : IDisposable
     {
         var startInfo = new ProcessStartInfo
         {
-            FileName = "dotnet",
             ArgumentList =
             {
-                NodePath,
                 "--end-point",
                 EndPointUtility.ToString(endPoint),
                 "--private-key",
@@ -30,7 +28,13 @@ internal sealed class NodeProcess : IDisposable
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            FileName = IsWindows() ? NodePath : "dotnet",
         };
+        if (IsWindows() != true)
+        {
+            startInfo.ArgumentList.Insert(0, NodePath);
+        }
+
         _process = new Process
         {
             StartInfo = startInfo,

@@ -58,7 +58,7 @@ internal static class ProcessUtility
             {
                 WorkspacePath,
                 $"src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node.dll",
+                $"{Framework}/libplanet-node{Extension}",
             };
             nodePath = Path.GetFullPath(Path.Combine(paths));
 
@@ -93,7 +93,7 @@ internal static class ProcessUtility
             {
                 WorkspacePath,
                 $"src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client.dll",
+                $"{Framework}/libplanet-client{Extension}",
             };
             clientPath = Path.GetFullPath(Path.Combine(paths));
 
@@ -107,6 +107,8 @@ internal static class ProcessUtility
         }
     }
 
+    public static string Extension => IsWindows() ? ".exe" : ".dll";
+
     public static string GetNodePath()
     {
         try
@@ -117,7 +119,7 @@ internal static class ProcessUtility
         {
             var message =
                 $"Use 'src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/{Framework}/" +
-                $"libplanet-node.dll' by setting the directory path " +
+                $"libplanet-node{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
                 $"'{NodePathVariableName}'.";
@@ -135,11 +137,21 @@ internal static class ProcessUtility
         {
             var message =
                 $"Use 'src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client.dll' by setting the directory path " +
+                $"{Framework}/libplanet-client{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
                 $"'{ClientPathVariableName}'.";
             throw new InvalidOperationException(message, innerException: e);
         }
+    }
+
+    public static bool IsWindows()
+    {
+#if !NETSTANDARD && !NETFRAMEWORK && !NETCOREAPP
+        return OperatingSystem.IsWindows();
+#else
+        return System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.Windows);
+#endif
     }
 }

@@ -15,10 +15,8 @@ internal sealed class ClientProcess : IDisposable
     {
         var startInfo = new ProcessStartInfo
         {
-            FileName = "dotnet",
             ArgumentList =
             {
-                ClientPath,
                 "--end-point",
                 EndPointUtility.ToString(endPoint),
                 "--private-key",
@@ -30,7 +28,13 @@ internal sealed class ClientProcess : IDisposable
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            FileName = IsWindows() ? ClientPath : "dotnet",
         };
+        if (IsWindows() != true)
+        {
+            startInfo.ArgumentList.Insert(0, ClientPath);
+        }
+
         _process = new Process
         {
             StartInfo = startInfo,
