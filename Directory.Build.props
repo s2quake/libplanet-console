@@ -6,5 +6,11 @@
   <PropertyGroup>
     <LibplanetSolutionPath>$(SolutionDir).libplanet\</LibplanetSolutionPath>
   </PropertyGroup>
+  
+  <Target Name="DisplayInformation" BeforeTargets="Build">
+    <Message Text="TargetFramework: $(TargetFramework)" Importance="High" />
+    <Message Text="NETCoreSdkPortableRuntimeIdentifier: $(NETCoreSdkPortableRuntimeIdentifier)" Importance="High" />
+    <Message Text="OS: $(OS)" Importance="High" />
+  </Target>
 
 </Project>
