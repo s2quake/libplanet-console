@@ -1,5 +1,6 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.ComponentModel.Composition.Primitives;
 using JSSoft.Commands.Extensions;
 using JSSoft.Communication;
 using JSSoft.Communication.Extensions;
@@ -108,9 +109,10 @@ internal sealed partial class Application : ApplicationBase, IApplication
 
     public CompositionContainer CreateChildContainer()
     {
+        var directoryName = Path.GetDirectoryName(typeof(Application).Assembly.Location)!;
         return new(
-            catalog: new AssemblyCatalog(typeof(Application).Assembly),
-            providers: _container);
+            catalog: new DirectoryCatalog(directoryName),
+            providers: new ApplicationExportProvider(_container));
     }
 
     IClient IApplication.GetClient(string address)
