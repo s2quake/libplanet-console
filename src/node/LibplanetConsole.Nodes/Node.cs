@@ -1,9 +1,8 @@
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
 
-namespace LibplanetConsole.NodeHost;
+namespace LibplanetConsole.Nodes;
 
 [Export]
 [Export(typeof(INode))]

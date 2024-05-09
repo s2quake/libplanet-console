@@ -2,9 +2,8 @@ using System.ComponentModel.Composition;
 using JSSoft.Communication;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
-using LibplanetConsole.Nodes;
 
-namespace LibplanetConsole.NodeHost.Services;
+namespace LibplanetConsole.Nodes.Services;
 
 [Export(typeof(IService))]
 [method: ImportingConstructor]

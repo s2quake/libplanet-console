@@ -1,9 +1,8 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Nodes;
 
-namespace LibplanetConsole.NodeHost.Commands;
+namespace LibplanetConsole.Nodes.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Start node.")]

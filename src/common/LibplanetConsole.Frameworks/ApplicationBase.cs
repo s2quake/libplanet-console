@@ -34,10 +34,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     public void Cancel()
     {
-        if (_isDisposed == true)
-        {
-            throw new ObjectDisposedException($"{this}");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
@@ -46,10 +43,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     public async Task StartAsync()
     {
-        if (_isDisposed == true)
-        {
-            throw new ObjectDisposedException($"{this}");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
         _cancellationTokenSource = new();
         await OnStartAsync(_cancellationTokenSource.Token);
@@ -63,10 +57,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     public async ValueTask DisposeAsync()
     {
-        if (_isDisposed == true)
-        {
-            throw new ObjectDisposedException($"{this}");
-        }
+        ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
         await OnDisposeAsync();
         _isDisposed = true;

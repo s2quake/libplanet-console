@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Seeds\LibplanetConsole.Seeds.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems" Label="Shared" />

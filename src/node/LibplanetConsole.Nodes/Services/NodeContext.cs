@@ -3,7 +3,7 @@ using System.Net;
 using JSSoft.Communication;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.NodeHost.Services;
+namespace LibplanetConsole.Nodes.Services;
 
 [Export]
 internal sealed class NodeContext : ServerContext

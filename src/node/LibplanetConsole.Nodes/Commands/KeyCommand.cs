@@ -3,7 +3,7 @@ using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.NodeHost.Commands;
+namespace LibplanetConsole.Nodes.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides Key-related commands.")]

@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 
-namespace LibplanetConsole.NodeHost.Commands;
+namespace LibplanetConsole.Nodes.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Exit the application.")]

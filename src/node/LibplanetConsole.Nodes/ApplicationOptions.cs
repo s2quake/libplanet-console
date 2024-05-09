@@ -1,8 +1,8 @@
 using JSSoft.Commands;
 
-namespace LibplanetConsole.NodeHost;
+namespace LibplanetConsole.Nodes;
 
-internal record class ApplicationOptions
+public record class ApplicationOptions
 {
     [CommandProperty]
     public string EndPoint { get; init; } = string.Empty;

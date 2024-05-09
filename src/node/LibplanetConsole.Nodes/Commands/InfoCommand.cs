@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.NodeHost.Commands;
+namespace LibplanetConsole.Nodes.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Print node information.")]

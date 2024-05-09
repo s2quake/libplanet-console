@@ -1,6 +1,6 @@
-using LibplanetConsole.NodeHost.Serializations;
+using LibplanetConsole.Nodes.Serializations;
 
-namespace LibplanetConsole.NodeHost;
+namespace LibplanetConsole.Nodes;
 
 public interface IApplication : IAsyncDisposable, IServiceProvider
 {
