@@ -118,8 +118,9 @@ internal sealed class NodeCollection(
             ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
         };
         var endPoint = DnsEndPointUtility.Next();
+        var storeDirectory = _options.StorePath;
         var container = _application.CreateChildContainer();
-        _ = new NodeProcess(endPoint, privateKey);
+        _ = new NodeProcess(endPoint, privateKey, storeDirectory);
         var node = CreateNew(container, privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);

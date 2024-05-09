@@ -25,6 +25,7 @@ public record class ApplicationOptions
 
     [CommandProperty]
     [CommandPropertyCondition(nameof(Volatile), false)]
+    [CommandSummary("The directory path to store state of each node.")]
     public string StorePath { get; init; } = string.Empty;
 
     [CommandPropertySwitch]

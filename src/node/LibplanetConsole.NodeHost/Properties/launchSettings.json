@@ -2,7 +2,8 @@
   "profiles": {
     "LibplanetConsole.NodeHost": {
       "commandName": "Project",
-      "commandLineArgs": "-a --end-point 127.0.0.1:5353"
+      "commandLineArgs": "-a --end-point 127.0.0.1:5353",
+      "workingDirectory": "$(SolutionDir)"
     }
   }
 }

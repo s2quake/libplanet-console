@@ -20,7 +20,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _options = options;
+        _options = options.GetActualOptions();
         _container = new(
             new DirectoryCatalog(Path.GetDirectoryName(GetType().Assembly.Location)!));
         _container.ComposeExportedValue(this);

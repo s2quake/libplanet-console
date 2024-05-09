@@ -11,7 +11,7 @@ internal sealed class NodeProcess : IDisposable
 {
     private readonly Process _process;
 
-    public NodeProcess(EndPoint endPoint, PrivateKey privateKey)
+    public NodeProcess(EndPoint endPoint, PrivateKey privateKey, string storeDirectory)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -33,6 +33,17 @@ internal sealed class NodeProcess : IDisposable
         if (IsWindows() != true)
         {
             startInfo.ArgumentList.Insert(0, NodePath);
+        }
+
+        if (storeDirectory != string.Empty)
+        {
+            startInfo.ArgumentList.Add("--store-path");
+            startInfo.ArgumentList.Add(
+                Path.Combine(storeDirectory, (ShortAddress)privateKey.Address));
+        }
+        else
+        {
+            startInfo.ArgumentList.Add("--volatile");
         }
 
         _process = new Process
