@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes;
@@ -8,15 +7,8 @@ namespace LibplanetConsole.Nodes;
 [Export(typeof(INode))]
 [method: ImportingConstructor]
 internal sealed class Node(ApplicationOptions options)
-    : NodeBase(GetPrivateKey(options)), INode
+    : NodeBase(
+        privateKey: PrivateKeyUtility.Parse(options.PrivateKey),
+        storePath: options.StorePath), INode
 {
-    public static PrivateKey GetPrivateKey(ApplicationOptions options)
-    {
-        if (options.PrivateKey == string.Empty)
-        {
-            return new PrivateKey();
-        }
-
-        return PrivateKeyUtility.Parse(options.PrivateKey);
-    }
 }

@@ -21,9 +21,11 @@ using LibplanetConsole.Seeds;
 
 namespace LibplanetConsole.Nodes;
 
-public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActionRenderer
+public abstract class NodeBase(PrivateKey privateKey, string storePath)
+    : IAsyncDisposable, IActionRenderer
 {
     private readonly PrivateKey _privateKey = privateKey;
+    private readonly string _storePath = storePath;
     private readonly SynchronizationContext _synchronizationContext
         = SynchronizationContext.Current!;
 
@@ -139,6 +141,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         InvalidOperationExceptionUtility.ThrowIf(_startTask is not null, "Swarm has been started.");
 
         var privateKey = _privateKey;
+        var storePath = _storePath;
         var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
         var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
         var blocksyncSeedPeer = nodeOptions.BlocksyncSeedPeer ??
@@ -169,7 +172,7 @@ public abstract class NodeBase(PrivateKey privateKey) : IAsyncDisposable, IActio
         };
         var blockChain = BlockChainUtility.CreateBlockChain(
             genesisOptions: nodeOptions.GenesisOptions,
-            storePath: string.Empty,
+            storePath: storePath,
             renderer: this);
 
         if (nodeOptions.BlocksyncSeedPeer is null)
