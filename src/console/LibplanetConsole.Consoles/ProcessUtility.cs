@@ -31,8 +31,7 @@ internal static class ProcessUtility
             }
             else
             {
-                throw new InvalidOperationException(
-                    $"Environment variable '{WorkspacePathVariableName}' is not set.");
+                return Environment.CurrentDirectory;
             }
         }
     }
@@ -57,8 +56,7 @@ internal static class ProcessUtility
             var paths = new string[]
             {
                 WorkspacePath,
-                $"src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{Extension}",
+                $".bin/libplanet-node/{Congiguration}/{Framework}/libplanet-node{Extension}",
             };
             nodePath = Path.GetFullPath(Path.Combine(paths));
 
@@ -92,8 +90,7 @@ internal static class ProcessUtility
             var paths = new string[]
             {
                 WorkspacePath,
-                $"src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client{Extension}",
+                $".bin/libplanet-client/{Congiguration}/{Framework}/libplanet-client{Extension}",
             };
             clientPath = Path.GetFullPath(Path.Combine(paths));
 
@@ -118,7 +115,7 @@ internal static class ProcessUtility
         catch (Exception e)
         {
             var message =
-                $"Use 'src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/{Framework}/" +
+                $"Use '.bin/libplanet-node/{Congiguration}/{Framework}/" +
                 $"libplanet-node{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
@@ -136,7 +133,7 @@ internal static class ProcessUtility
         catch (Exception e)
         {
             var message =
-                $"Use 'src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
+                $"Use '.bin/libplanet-client/{Congiguration}/" +
                 $"{Framework}/libplanet-client{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
