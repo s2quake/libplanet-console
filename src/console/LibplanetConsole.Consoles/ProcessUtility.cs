@@ -56,7 +56,8 @@ internal static class ProcessUtility
             var paths = new string[]
             {
                 WorkspacePath,
-                $".bin/libplanet-node/{Congiguration}/{Framework}/libplanet-node{Extension}",
+                $"src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
+                $"{Framework}/libplanet-node{Extension}",
             };
             nodePath = Path.GetFullPath(Path.Combine(paths));
 
@@ -90,7 +91,8 @@ internal static class ProcessUtility
             var paths = new string[]
             {
                 WorkspacePath,
-                $".bin/libplanet-client/{Congiguration}/{Framework}/libplanet-client{Extension}",
+                $"src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
+                $"{Framework}/libplanet-client{Extension}",
             };
             clientPath = Path.GetFullPath(Path.Combine(paths));
 
@@ -115,7 +117,7 @@ internal static class ProcessUtility
         catch (Exception e)
         {
             var message =
-                $"Use '.bin/libplanet-node/{Congiguration}/{Framework}/" +
+                $"Use 'src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/{Framework}/" +
                 $"libplanet-node{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
@@ -133,7 +135,7 @@ internal static class ProcessUtility
         catch (Exception e)
         {
             var message =
-                $"Use '.bin/libplanet-client/{Congiguration}/" +
+                $"Use 'src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
                 $"{Framework}/libplanet-client{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
