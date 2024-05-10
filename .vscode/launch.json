@@ -8,7 +8,7 @@
             "name": "C#: Libplanet Console",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/.bin/libplanet-console/Debug/net8.0/libplanet-console.dll",
+            "program": "${workspaceFolder}/src/console/LibplanetConsole.ConsoleHost/bin/Debug/net8.0/libplanet-console.dll",
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
@@ -17,30 +17,33 @@
                 "1",
                 "--end-point",
                 "127.0.0.1:4343",
+                "--volatile"
             ]
         },
         {
             "name": "C#: Libplanet Single Node",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/.bin/libplanet-node/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
-                "-a"
+                "-a",
+                "--volatile"
             ]
         },
         {
             "name": "C#: Libplanet Two Nodes (1/2)",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/.bin/libplanet-node/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--private-key",
                 "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32",
                 "--end-point",
                 "127.0.0.1:5353",
-                "-a"
+                "-a",
+                "--volatile"
             ],
             "env": {
                 "LIBPLANET_CONSOLE_VALIDATORS": "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32;774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79"
@@ -50,21 +53,22 @@
             "name": "C#: Libplanet Two Nodes (2/2)",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/.bin/libplanet-node/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--private-key",
                 "774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79",
-                "-a",
                 "--seed-end-point",
-                "127.0.0.1:5353"
+                "127.0.0.1:5353",
+                "-a",
+                "--volatile"
             ]
         },
         {
             "name": "C#: Libplanet Client",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/.bin/libplanet-client/Debug/net8.0/libplanet-client.dll",
+            "program": "${workspaceFolder}/src/client/LibplanetConsole.ClientHost/bin/Debug/net8.0/libplanet-client.dll",
             "console": "integratedTerminal",
             "args": [
                 "--seed-end-point",
