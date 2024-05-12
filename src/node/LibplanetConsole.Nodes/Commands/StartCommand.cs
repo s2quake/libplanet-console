@@ -17,7 +17,7 @@ internal sealed class StartCommand(INode node, ApplicationOptions options) : Com
     protected override async Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
-        var seedEndPoint = SeedEndPoint != string.Empty ? SeedEndPoint : options.SeedEndPoint;
+        var seedEndPoint = SeedEndPoint != string.Empty ? SeedEndPoint : options.NodeEndPoint;
         var nodeOptions = seedEndPoint != string.Empty
             ? await NodeOptionsUtility.GetNodeOptionsAsync(seedEndPoint, cancellationToken)
             : NodeOptionsUtility.GetNodeOptions(node);

@@ -1,27 +1,25 @@
-// File may only contain a single type
-#pragma warning disable SA1402
-using JSSoft.Communication;
+using System.ComponentModel.Composition;
+using LibplanetConsole.Common.Services;
+using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes.Services;
 
 namespace LibplanetConsole.Clients.Services;
 
-public class RemoteNodeService<TServer, TClient> : ClientService<TServer, TClient>
-    where TServer : class
-    where TClient : class
+[Export(typeof(INodeService))]
+[Export(typeof(IRemoteService))]
+[method: ImportingConstructor]
+internal sealed class RemoteNodeService(IApplication application)
+    : RemoteService<INodeService, INodeCallback>, INodeCallback
 {
-    public RemoteNodeService()
+    void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
     {
-    }
-
-    public RemoteNodeService(TClient callback)
-        : base(callback)
-    {
-    }
-}
-
-public class RemoteNodeService<TServer> : ClientService<TServer>
-    where TServer : class
-{
-    public RemoteNodeService()
-    {
+        if (application.GetService(typeof(Client)) is Client client)
+        {
+            client.InvokeBlockAppendedEvent(blockInfo);
+        }
+        else
+        {
+            throw new InvalidOperationException("The client does not support.");
+        }
     }
 }

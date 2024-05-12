@@ -1,18 +1,18 @@
 using System.ComponentModel.Composition;
-using JSSoft.Communication;
 using Libplanet.Crypto;
 using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
+using LibplanetConsole.Common.Services;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Seeds;
 
 namespace LibplanetConsole.Consoles.Services;
 
 [Export]
-[Export(typeof(IService))]
+[Export(typeof(ILocalService))]
 [Export(typeof(IApplicationService))]
-internal sealed class SeedService : ServerService<ISeedService>,
+internal sealed class SeedService : LocalService<ISeedService>,
     ISeedService, IApplicationService
 {
     private readonly IApplication _application;

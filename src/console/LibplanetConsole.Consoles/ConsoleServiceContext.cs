@@ -2,16 +2,16 @@ using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Nodes.Services;
+namespace LibplanetConsole.Consoles;
 
 [Export]
-internal sealed class NodeContext : LocalServiceContext
+internal sealed class ConsoleServiceContext : LocalServiceContext
 {
     [ImportingConstructor]
-    public NodeContext(
+    public ConsoleServiceContext(
         [ImportMany] IEnumerable<ILocalService> localServices, ApplicationOptions options)
-        : base(localServices)
+        : base([.. localServices])
     {
-        EndPoint = EndPointUtility.Parse(options.EndPoint);
+        EndPoint = DnsEndPointUtility.Parse(options.EndPoint);
     }
 }

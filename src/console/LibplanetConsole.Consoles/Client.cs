@@ -2,24 +2,23 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Net;
-using JSSoft.Communication;
-using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 
 namespace LibplanetConsole.Consoles;
 
 internal sealed class Client :
-    IClientCallback, IAsyncDisposable, IAddressable, IClient, IRemoteServiceProvider
+    IClientCallback, IAsyncDisposable, IAddressable, IClient
 {
     private readonly CompositionContainer _container;
     private readonly PrivateKey _privateKey;
-    private readonly RemoteContext _remoteContext;
+    private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<IClientService, IClientCallback> _remoteService;
     private readonly IClientContent[] _contents;
     private Guid _closeToken;
@@ -33,12 +32,12 @@ internal sealed class Client :
         _container.ComposeExportedValue<IClient>(this);
         _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
-        _remoteContext = new RemoteContext(this, _contents)
+        _remoteServiceContext = new RemoteServiceContext(
+            [_remoteService, .. GetRemoteServices(container)])
         {
             EndPoint = endPoint,
         };
-        _remoteContext.Disconnected += RemoteContext_Disconnected;
-        _remoteContext.Faulted += RemoteContext_Faulted;
+        _remoteServiceContext.Closed += RemoteServiceContext_Closed;
     }
 
     public event EventHandler? Started;
@@ -59,7 +58,7 @@ internal sealed class Client :
 
     public ClientOptions ClientOptions { get; private set; } = ClientOptions.Default;
 
-    public EndPoint EndPoint => _remoteContext.EndPoint;
+    public EndPoint EndPoint => _remoteServiceContext.EndPoint;
 
     public ClientInfo Info => _clientInfo;
 
@@ -102,7 +101,7 @@ internal sealed class Client :
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
-        _clientInfo = await _remoteService.Server.GetInfoAsync(cancellationToken);
+        _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         return _clientInfo;
     }
 
@@ -111,8 +110,8 @@ internal sealed class Client :
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Client is already running.");
 
-        _closeToken = await _remoteContext.OpenAsync(cancellationToken);
-        _clientInfo = await _remoteService.Server.StartAsync(clientOptions, cancellationToken);
+        _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
+        _clientInfo = await _remoteService.Service.StartAsync(clientOptions, cancellationToken);
         ClientOptions = clientOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
@@ -123,8 +122,8 @@ internal sealed class Client :
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
 
-        await _remoteService.Server.StopAsync(cancellationToken);
-        await _remoteContext.CloseAsync(_closeToken, cancellationToken);
+        await _remoteService.Service.StopAsync(cancellationToken);
+        await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -134,9 +133,8 @@ internal sealed class Client :
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        _remoteContext.Disconnected -= RemoteContext_Disconnected;
-        _remoteContext.Faulted -= RemoteContext_Faulted;
-        await _remoteContext.ReleaseAsync(_closeToken);
+        _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+        await _remoteServiceContext.CloseAsync(_closeToken);
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
         _container.Dispose();
@@ -145,7 +143,14 @@ internal sealed class Client :
         GC.SuppressFinalize(this);
     }
 
-    IService IRemoteServiceProvider.GetService(object obj) => _remoteService;
+    private static IEnumerable<IRemoteService> GetRemoteServices(
+        CompositionContainer compositionContainer)
+    {
+        foreach (var item in compositionContainer.GetExportedValues<IClientContentService>())
+        {
+            yield return item.RemoteService;
+        }
+    }
 
     private object? GetInstance(Type serviceType)
     {
@@ -159,15 +164,7 @@ internal sealed class Client :
         return _container.GetExportedValues<object>(contractName);
     }
 
-    private void RemoteContext_Disconnected(object? sender, EventArgs e)
-    {
-        ClientOptions = ClientOptions.Default;
-        IsRunning = false;
-        _isDisposed = true;
-        Disposed?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void RemoteContext_Faulted(object? sender, EventArgs e)
+    private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {
         ClientOptions = ClientOptions.Default;
         IsRunning = false;

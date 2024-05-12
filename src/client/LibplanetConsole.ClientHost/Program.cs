@@ -1,5 +1,6 @@
 ﻿using JSSoft.Commands;
 using LibplanetConsole.ClientHost;
+using LibplanetConsole.Clients;
 
 try
 {

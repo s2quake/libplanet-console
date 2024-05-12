@@ -1,8 +1,7 @@
-using JSSoft.Communication;
-using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
+using LibplanetConsole.Common.Services;
 using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes;
@@ -26,19 +25,18 @@ internal static class NodeOptionsUtility
     public static async Task<NodeOptions> GetNodeOptionsAsync(
         string seedEndPoint, CancellationToken cancellationToken)
     {
-        var clientService = new ClientService<ISeedService>();
-        var clientContext = new ClientContext(clientService)
+        var remoteService = new RemoteService<ISeedService>();
+        var remoteServiceContext = new RemoteServiceContext([remoteService])
         {
-            EndPoint = DnsEndPointUtility.GetEndPoint(seedEndPoint),
+            EndPoint = DnsEndPointUtility.Parse(seedEndPoint),
         };
-        var closeToken = Guid.Empty;
 
+        var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
         try
         {
-            closeToken = await clientContext.OpenAsync(cancellationToken);
             for (var i = 0; i < 10; i++)
             {
-                var seedInfo = await clientService.Server.GetSeedAsync(cancellationToken);
+                var seedInfo = await remoteService.Service.GetSeedAsync(cancellationToken);
                 if (Equals(seedInfo, SeedInfo.Empty) != true)
                 {
                     return (NodeOptionsInfo)seedInfo;
@@ -51,7 +49,7 @@ internal static class NodeOptionsUtility
         }
         finally
         {
-            await clientContext.ReleaseAsync(closeToken);
+            await remoteServiceContext.CloseAsync(closeToken);
         }
     }
 

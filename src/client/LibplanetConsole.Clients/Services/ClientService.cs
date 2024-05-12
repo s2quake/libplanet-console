@@ -1,12 +1,16 @@
-using JSSoft.Communication;
+using System.ComponentModel.Composition;
 using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Clients.Services;
 
-public abstract class ClientServiceBase(IClient client)
-        : ServerService<IClientService, IClientCallback>, IClientService
+[Export(typeof(ILocalService))]
+[Export(typeof(IClientService))]
+[method: ImportingConstructor]
+internal sealed class ClientService(Client client)
+    : LocalService<IClientService, IClientCallback>, IClientService
 {
-    private readonly IClient _client = client;
+    private readonly Client _client = client;
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -23,14 +27,4 @@ public abstract class ClientServiceBase(IClient client)
 
     public Task StopAsync(CancellationToken cancellationToken)
         => _client.StopAsync(cancellationToken);
-
-    protected override IClientService CreateServer(IPeer peer)
-    {
-        return base.CreateServer(peer);
-    }
-
-    protected override void DestroyServer(IPeer peer, IClientService server)
-    {
-        base.DestroyServer(peer, server);
-    }
 }

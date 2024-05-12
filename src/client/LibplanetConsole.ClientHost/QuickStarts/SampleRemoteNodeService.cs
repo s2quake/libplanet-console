@@ -1,18 +1,14 @@
 using System.ComponentModel.Composition;
-using JSSoft.Communication;
-using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common.QuickStarts;
+using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.ClientHost.QuickStarts;
 
 [Export]
-[Export(typeof(IRemoteNodeServiceProvider))]
 internal sealed class SampleRemoteNodeService
-    : RemoteNodeService<ISampleNodeService, ISampleNodeCallbak>, IRemoteNodeServiceProvider,
+    : RemoteService<ISampleNodeService, ISampleNodeCallbak>,
     ISampleNodeCallbak
 {
-    IService IRemoteNodeServiceProvider.Service => this;
-
     public void OnSubscribed(string address)
     {
     }

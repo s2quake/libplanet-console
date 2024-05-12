@@ -1,8 +1,7 @@
 using System.ComponentModel.Composition;
-using JSSoft.Communication;
 using LibplanetConsole.Common.QuickStarts;
+using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles;
-using LibplanetConsole.Consoles.Services;
 
 namespace LibplanetConsole.ConsoleHost.QuickStarts;
 
@@ -10,15 +9,13 @@ namespace LibplanetConsole.ConsoleHost.QuickStarts;
 [Export(typeof(IClientContent))]
 [method: ImportingConstructor]
 internal sealed class SampleClientContent(IClient client)
-    : ClientContentBase(client), IRemoteServiceProvider, ISampleClient
+    : ClientContentBase(client), ISampleClient
 {
-    private readonly RemoteService<ISampleClientService> _service = new();
+    private readonly RemoteService<ISampleClientService> _remoteService = new();
 
-    private ISampleClientService Server => _service.Server;
+    private ISampleClientService Service => _remoteService.Service;
 
-    public void Subscribe() => Server.Subscribe();
+    public void Subscribe() => Service.Subscribe();
 
-    public void Unsubscribe() => Server.Unsubscribe();
-
-    IService IRemoteServiceProvider.GetService(object obj) => _service;
+    public void Unsubscribe() => Service.Unsubscribe();
 }

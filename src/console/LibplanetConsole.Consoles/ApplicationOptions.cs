@@ -1,7 +1,6 @@
 using System.Net;
 using System.Reflection;
 using JSSoft.Commands;
-using JSSoft.Communication;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;
@@ -12,17 +11,21 @@ public record class ApplicationOptions
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty(InitValue = 4)]
+    [CommandSummary("The number of nodes to run.")]
     public int NodeCount { get; init; }
 
     [CommandProperty(InitValue = 2)]
+    [CommandSummary("The number of clients to run.")]
     public int ClientCount { get; init; }
 
     [CommandProperty]
     [CommandPropertyCondition(nameof(Volatile), false)]
-    [CommandSummary("The directory path to store state.")]
+    [CommandSummary("The directory path to store state of each node." +
+                    "If omitted, a directory named '.store' is created in the current directory.")]
     public string StorePath { get; init; } = string.Empty;
 
     [CommandPropertySwitch]
+    [CommandSummary("Indicates whether the state is stored in memory.")]
     public bool Volatile { get; init; }
 
     public static ApplicationOptions Parse(string[] args)

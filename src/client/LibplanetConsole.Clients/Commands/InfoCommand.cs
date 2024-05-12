@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.ClientHost.Commands;
+namespace LibplanetConsole.Clients.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Print client information.")]

@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using JSSoft.Communication.Extensions;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
@@ -13,7 +12,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
     private readonly ApplicationOptions _options = new();
-    private readonly ConsoleContext _consoleContext;
+    private readonly ConsoleServiceContext _consoleContext;
     private readonly PrivateKey[] _reservedKeys;
 
     private Guid _closeToken;
@@ -31,8 +30,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             throw new InvalidOperationException($"'{typeof(NodeCollection)}' is not found.");
         _clients = _container.GetExportedValue<ClientCollection>() ??
             throw new InvalidOperationException($"'{typeof(ClientCollection)}' is not found.");
-        _consoleContext = _container.GetExportedValue<ConsoleContext>() ??
-            throw new InvalidOperationException($"'{typeof(ConsoleContext)}' is not found.");
+        _consoleContext = _container.GetExportedValue<ConsoleServiceContext>() ??
+            throw new InvalidOperationException($"'{typeof(ConsoleServiceContext)}' is not found.");
         _reservedKeys
             = [.. Enumerable.Range(0, options.NodeCount).Select(item => new PrivateKey())];
         GenesisOptions = new()
@@ -111,13 +110,13 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         await base.OnStartAsync(cancellationToken);
-        _closeToken = await _consoleContext.OpenAsync(cancellationToken: default);
+        _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _consoleContext.ReleaseAsync(_closeToken);
+        await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
         _container.Dispose();
     }
 }

@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
-using JSSoft.Communication;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;

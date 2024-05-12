@@ -1,24 +1,30 @@
-using JSSoft.Communication.Extensions;
+using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes;
+using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Clients;
 
-public abstract class ClientBase : IAsyncDisposable
+[Export]
+[Export(typeof(IClient))]
+internal sealed class Client : IClient
 {
     private readonly PrivateKey _privateKey;
-    private readonly IRemoteNodeContext _remoteNodeContext;
+    private readonly RemoteNodeContext _remoteNodeContext;
     private Guid _closeToken;
 
-    public ClientBase(PrivateKey privateKey, IRemoteNodeContext remoteNodeContext)
+    [ImportingConstructor]
+    public Client(ApplicationOptions options, RemoteNodeContext remoteNodeContext)
     {
-        _privateKey = privateKey;
+        _privateKey = PrivateKeyUtility.Parse(options.PrivateKey);
         _remoteNodeContext = remoteNodeContext;
-        _remoteNodeContext.Disconnected += RemoteNodeContext_Disconnected;
-        _remoteNodeContext.Faulted += RemoteNodeContext_Faulted;
+        _remoteNodeContext.Closed += RemoteNodeContext_Closed;
     }
+
+    public event EventHandler<BlockEventArgs>? BlockAppended;
 
     public event EventHandler? Started;
 
@@ -63,26 +69,21 @@ public abstract class ClientBase : IAsyncDisposable
         Stopped?.Invoke(this, new(StopReason.None));
     }
 
-    public async ValueTask DisposeAsync()
+    public void InvokeBlockAppendedEvent(BlockInfo blockInfo)
     {
-        await _remoteNodeContext.ReleaseAsync(_closeToken);
-        GC.SuppressFinalize(this);
+        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
-    private void RemoteNodeContext_Disconnected(object? sender, EventArgs e)
+    public async ValueTask DisposeAsync()
+    {
+        await _remoteNodeContext.CloseAsync(_closeToken);
+    }
+
+    private void RemoteNodeContext_Closed(object? sender, EventArgs e)
     {
         _closeToken = Guid.Empty;
         ClientOptions = new();
         IsRunning = false;
         Stopped?.Invoke(this, new(StopReason.Disconnected));
-    }
-
-    private async void RemoteNodeContext_Faulted(object? sender, EventArgs e)
-    {
-        _closeToken = Guid.Empty;
-        ClientOptions = new();
-        IsRunning = false;
-        await _remoteNodeContext.AbortAsync();
-        Stopped?.Invoke(this, new(StopReason.Faulted));
     }
 }

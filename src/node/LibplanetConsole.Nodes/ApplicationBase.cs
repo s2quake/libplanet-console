@@ -2,8 +2,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Net;
-using JSSoft.Communication;
-using JSSoft.Communication.Extensions;
+using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
@@ -61,7 +60,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        _closeToken = await _nodeContext.OpenAsync(cancellationToken: default);
+        _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
         await base.OnStartAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
     }
@@ -69,7 +68,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _nodeContext.ReleaseAsync(_closeToken);
+        await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
         _container.Dispose();
     }
 
@@ -77,7 +76,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         if (_options.AutoStart == true)
         {
-            var seedEndPoint = _options.SeedEndPoint;
+            var seedEndPoint = _options.NodeEndPoint;
             var nodeOptions = seedEndPoint != string.Empty
                 ? await NodeOptionsUtility.GetNodeOptionsAsync(seedEndPoint, cancellationToken)
                 : NodeOptionsUtility.GetNodeOptions(_node);

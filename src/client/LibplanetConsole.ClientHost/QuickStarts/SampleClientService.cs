@@ -1,13 +1,13 @@
 using System.ComponentModel.Composition;
-using JSSoft.Communication;
 using LibplanetConsole.Common.QuickStarts;
+using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.ClientHost.QuickStarts;
 
-[Export(typeof(IService))]
+[Export(typeof(ILocalService))]
 [method: ImportingConstructor]
 internal sealed class SampleClientService(ISampleClient sampleClient)
-    : ServerService<ISampleClientService>, ISampleClientService
+    : LocalService<ISampleClientService>, ISampleClientService
 {
     public void Subscribe()
     {

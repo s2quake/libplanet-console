@@ -2,14 +2,13 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Net;
-using JSSoft.Communication;
-using JSSoft.Communication.Extensions;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Serializations;
@@ -18,11 +17,11 @@ using LibplanetConsole.Nodes.Services;
 namespace LibplanetConsole.Consoles;
 
 internal sealed class Node
-    : INodeCallback, IAsyncDisposable, IAddressable, INode, IRemoteServiceProvider
+    : INodeCallback, IAsyncDisposable, IAddressable, INode
 {
     private readonly CompositionContainer _container;
     private readonly PrivateKey _privateKey;
-    private readonly RemoteContext _remoteContext;
+    private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private readonly INodeContent[] _contents;
     private DnsEndPoint? _blocksyncEndPoint;
@@ -38,12 +37,12 @@ internal sealed class Node
         _container.ComposeExportedValue<INode>(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteService = new(this);
-        _remoteContext = new RemoteContext(this, _contents)
+        _remoteServiceContext = new RemoteServiceContext(
+            [_remoteService, .. GetRemoteServices(container)])
         {
             EndPoint = endPoint,
         };
-        _remoteContext.Disconnected += RemoteContext_Disconnected;
-        _remoteContext.Faulted += RemoteContext_Faulted;
+        _remoteServiceContext.Closed += RemoteServiceContext_Closed;
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -70,7 +69,7 @@ internal sealed class Node
 
     public NodeOptions NodeOptions { get; private set; } = NodeOptions.Default;
 
-    public EndPoint EndPoint => _remoteContext.EndPoint;
+    public EndPoint EndPoint => _remoteServiceContext.EndPoint;
 
     public NodeInfo Info => _nodeInfo;
 
@@ -113,7 +112,7 @@ internal sealed class Node
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
 
-        _nodeInfo = await _remoteService.Server.GetInfoAsync(cancellationToken);
+        _nodeInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         return _nodeInfo;
     }
 
@@ -122,10 +121,10 @@ internal sealed class Node
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
 
-        _closeToken = await _remoteContext.OpenAsync(cancellationToken);
-        _nodeInfo = await _remoteService.Server.StartAsync(nodeOptions, cancellationToken);
-        _blocksyncEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = DnsEndPointUtility.GetEndPoint(_nodeInfo.ConsensusEndPoint);
+        _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
+        _nodeInfo = await _remoteService.Service.StartAsync(nodeOptions, cancellationToken);
+        _blocksyncEndPoint = DnsEndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
+        _consensusEndPoint = DnsEndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
         NodeOptions = nodeOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
@@ -136,8 +135,8 @@ internal sealed class Node
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
 
-        await _remoteService.Server.StopAsync(cancellationToken);
-        await _remoteContext.CloseAsync(_closeToken, cancellationToken);
+        await _remoteService.Service.StopAsync(cancellationToken);
+        await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         NodeOptions = NodeOptions.Default;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -148,7 +147,7 @@ internal sealed class Node
     {
         var address = Address.ToString();
         var values = actions.Select(item => item.PlainValue).ToArray();
-        var nonce = await _remoteService.Server.GetNextNonceAsync(address, cancellationToken);
+        var nonce = await _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
         var transaction = Transaction.Create(
             nonce: nonce,
             privateKey: _privateKey,
@@ -156,7 +155,7 @@ internal sealed class Node
             actions: new TxActionList(values)
         );
 
-        var bytes = await _remoteService.Server.SendTransactionAsync(
+        var bytes = await _remoteService.Service.SendTransactionAsync(
             transaction: transaction.Serialize(),
             cancellationToken: cancellationToken);
 
@@ -167,9 +166,8 @@ internal sealed class Node
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        _remoteContext.Disconnected -= RemoteContext_Disconnected;
-        _remoteContext.Faulted -= RemoteContext_Faulted;
-        await _remoteContext.ReleaseAsync(_closeToken);
+        _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+        await _remoteServiceContext.CloseAsync(_closeToken);
         NodeOptions = NodeOptions.Default;
         IsRunning = false;
         _container.Dispose();
@@ -183,7 +181,14 @@ internal sealed class Node
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
-    IService IRemoteServiceProvider.GetService(object obj) => _remoteService;
+    private static IEnumerable<IRemoteService> GetRemoteServices(
+        CompositionContainer compositionContainer)
+    {
+        foreach (var item in compositionContainer.GetExportedValues<INodeContentService>())
+        {
+            yield return item.RemoteService;
+        }
+    }
 
     private object? GetInstance(Type serviceType)
     {
@@ -197,15 +202,7 @@ internal sealed class Node
         return _container.GetExportedValues<object>(contractName);
     }
 
-    private void RemoteContext_Disconnected(object? sender, EventArgs e)
-    {
-        NodeOptions = NodeOptions.Default;
-        IsRunning = false;
-        _isDisposed = true;
-        Disposed?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void RemoteContext_Faulted(object? sender, EventArgs e)
+    private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {
         NodeOptions = NodeOptions.Default;
         IsRunning = false;

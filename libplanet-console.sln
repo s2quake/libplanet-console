@@ -51,7 +51,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Tests", "t
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".communication", ".communication", "{7A94091A-DF2E-4901-8242-F2840FCA075D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JSSoft.Communication", ".communication\JSSoft.Communication\JSSoft.Communication.csproj", "{C65901D5-A4DB-4296-AB49-B8319FC88DD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JSSoft.Communication", ".communication\src\JSSoft.Communication\JSSoft.Communication.csproj", "{C65901D5-A4DB-4296-AB49-B8319FC88DD2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Common", "src\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj", "{EE8624C9-0976-4F28-8AE4-5D217D33D5BF}"
 EndProject

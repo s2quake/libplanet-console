@@ -1,14 +1,14 @@
 using System.ComponentModel.Composition;
-using JSSoft.Communication;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
+using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Nodes.Services;
 
-[Export(typeof(IService))]
+[Export(typeof(ILocalService))]
 [method: ImportingConstructor]
 internal sealed class SeedService(IApplication application, INode node)
-    : ServerService<ISeedService>, ISeedService
+    : LocalService<ISeedService>, ISeedService
 {
     public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
     {

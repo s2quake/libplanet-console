@@ -1,4 +1,4 @@
-using JSSoft.Communication;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Clients.Serializations;
 

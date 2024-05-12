@@ -11,7 +11,7 @@ public static class DnsEndPointUtility
     public static string ToSafeString(DnsEndPoint? endPoint)
          => endPoint is not null ? $"{endPoint.Host}:{endPoint.Port}" : string.Empty;
 
-    public static DnsEndPoint GetEndPoint(string endPoint)
+    public static DnsEndPoint Parse(string endPoint)
     {
         var items = endPoint.Split(':');
         if (items.Length == 2)

@@ -17,7 +17,7 @@ internal sealed class SampleClient(
 
     public Address Address => Client.Address;
 
-    private ISampleNodeService Server => _remoteNodeService.Server;
+    private ISampleNodeService Server => _remoteNodeService.Service;
 
     public void Subscribe()
     {

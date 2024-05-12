@@ -1,23 +1,29 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.ClientHost.Commands;
+namespace LibplanetConsole.Clients.Commands;
 
 [Export(typeof(ICommand))]
+[CommandSummary("Start client.")]
 [method: ImportingConstructor]
 internal sealed class StartCommand(IClient client) : CommandAsyncBase
 {
     public override bool IsEnabled => client.IsRunning is false;
 
     [CommandPropertyRequired]
-    public string SeedEndPoint { get; set; } = string.Empty;
+    [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    public string NodeEndPoint { get; set; } = string.Empty;
+
+    [CommandProperty("seed")]
+    [CommandSummary("Use --node-end-point as the Seed EndPoint. " +
+                    "Get the EndPoint of the Node to connect to from Seed.")]
+    public bool IsSeed { get; init; }
 
     protected override async Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
-        var seedEndPoint = SeedEndPoint;
+        var seedEndPoint = NodeEndPoint;
         var clientOptions = new ClientOptions
         {
             NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(seedEndPoint, cancellationToken),

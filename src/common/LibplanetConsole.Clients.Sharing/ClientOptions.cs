@@ -7,5 +7,5 @@ public record class ClientOptions
 {
     public static ClientOptions Default { get; } = new ClientOptions();
 
-    public EndPoint NodeEndPoint { get; init; } = DnsEndPointUtility.GetEndPoint("0.0.0.0:0");
+    public EndPoint NodeEndPoint { get; init; } = DnsEndPointUtility.Parse("0.0.0.0:0");
 }

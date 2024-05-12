@@ -1,6 +1,4 @@
-using LibplanetConsole.Clients.Serializations;
-
-namespace LibplanetConsole.ClientHost.Serializations;
+namespace LibplanetConsole.Clients.Serializations;
 
 public readonly record struct ApplicationInfo
 {

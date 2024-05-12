@@ -27,6 +27,8 @@
             "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
+                "--end-point",
+                "127.0.0.1:5353",
                 "-a",
                 "--volatile"
             ]
@@ -71,7 +73,7 @@
             "program": "${workspaceFolder}/src/client/LibplanetConsole.ClientHost/bin/Debug/net8.0/libplanet-client.dll",
             "console": "integratedTerminal",
             "args": [
-                "--seed-end-point",
+                "--node-end-point",
                 "127.0.0.1:5353"
             ]
         }

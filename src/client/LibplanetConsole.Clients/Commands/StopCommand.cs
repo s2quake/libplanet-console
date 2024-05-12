@@ -1,8 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
-using LibplanetConsole.Clients;
 
-namespace LibplanetConsole.ClientHost.Commands;
+namespace LibplanetConsole.Clients.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Stop client.")]

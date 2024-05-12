@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net;
-using JSSoft.Communication;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessUtility;

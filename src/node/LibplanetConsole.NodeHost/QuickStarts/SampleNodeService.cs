@@ -1,19 +1,19 @@
 using System.ComponentModel.Composition;
-using JSSoft.Communication;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.QuickStarts;
+using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.NodeHost.QuickStarts;
 
-[Export(typeof(IService))]
-internal sealed class SampleNodeService
-    : ServerService<ISampleNodeService, ISampleNodeCallbak>, ISampleNodeService, IDisposable
+[Export(typeof(ILocalService))]
+internal sealed class SampleNodeService : LocalService<ISampleNodeService, ISampleNodeCallbak>,
+    ISampleNodeService, IDisposable
 {
-    private readonly ISampleNode _sampleNode;
+    private readonly SampleNode _sampleNode;
 
     [ImportingConstructor]
-    public SampleNodeService(ISampleNode sampleNode)
+    public SampleNodeService(SampleNode sampleNode)
     {
         _sampleNode = sampleNode;
         _sampleNode.Subscribed += SampleNode_Subscribed;
@@ -26,7 +26,11 @@ internal sealed class SampleNodeService
         _sampleNode.Unsubscribed -= SampleNode_Unsubscribed;
     }
 
-    public int GetAddressCount() => _sampleNode.Count;
+    public async Task<int> GetAddressCountAsync(CancellationToken cancellationToken)
+    {
+        var addresses = await _sampleNode.GetAddressesAsync(cancellationToken);
+        return addresses.Length;
+    }
 
     public async Task<string[]> GetAddressesAsync(CancellationToken cancellationToken)
     {
@@ -46,11 +50,11 @@ internal sealed class SampleNodeService
 
     private void SampleNode_Subscribed(object? sender, ItemEventArgs<Address> e)
     {
-        Client.OnSubscribed(AddressUtility.ToString(e.Item));
+        Callback.OnSubscribed(AddressUtility.ToString(e.Item));
     }
 
     private void SampleNode_Unsubscribed(object? sender, ItemEventArgs<Address> e)
     {
-        Client.OnUnsubscribed(AddressUtility.ToString(e.Item));
+        Callback.OnUnsubscribed(AddressUtility.ToString(e.Item));
     }
 }

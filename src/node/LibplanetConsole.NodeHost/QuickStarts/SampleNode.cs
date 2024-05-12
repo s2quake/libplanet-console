@@ -7,6 +7,7 @@ namespace LibplanetConsole.NodeHost.QuickStarts;
 
 [Export(typeof(ISampleNode))]
 [Export(typeof(INodeContent))]
+[Export]
 [method: ImportingConstructor]
 internal sealed class SampleNode(IApplication application, INode node)
     : NodeContentBase(node), INodeContent, ISampleNode
