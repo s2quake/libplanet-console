@@ -1,3 +1,16 @@
-[submodule ".Libplanet"]
-	path = .Libplanet
-	url = https://github.com/planetarium/libplanet
+[submodule ".commands"]
+	path = .commands
+	url = https://github.com/s2quake/commands.git
+	fetchRecurseSubmodules = no
+[submodule ".libplanet"]
+	path = .libplanet
+	url = https://github.com/s2quake/libplanet.git
+	fetchRecurseSubmodules = no
+[submodule ".configurations"]
+	path = .configurations
+	url = https://github.com/s2quake/configurations.git
+	fetchRecurseSubmodules = no
+[submodule ".communication"]
+	path = .communication
+	url = https://github.com/s2quake/communication.git
+	fetchRecurseSubmodules = no

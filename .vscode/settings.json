@@ -1,15 +1,24 @@
 {
+    "[csharp]": {
+        "editor.rulers": [
+            100
+        ]
+    },
     "files.exclude": {
         "**/bin": true,
         "**/obj": true,
         ".commands": false,
-        ".Libplanet": false,
+        ".communication": false,
+        ".configurations": false,
+        ".libplanet": false,
     },
     "search.exclude": {
         "**/bin": true,
         "**/obj": true,
         "**/*.code-search": true,
         ".commands": true,
-        ".Libplanet": false,
+        ".communication": true,
+        ".configurations": true,
+        ".libplanet": false,
     }
 }

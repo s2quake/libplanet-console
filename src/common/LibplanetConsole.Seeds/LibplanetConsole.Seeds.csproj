@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
+  </ItemGroup>
+
+</Project>

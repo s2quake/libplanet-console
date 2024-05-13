@@ -3,3 +3,6 @@ obj/
 .data
 .store
 .DS_Store
+.vs/
+.lib9c/
+.bin/

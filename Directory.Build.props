@@ -1,0 +1,16 @@
+﻿<Project>
+
+  <Import Condition="'$(SolutionDir)' != '' and '$(SolutionDir)' != '$(MSBuildThisFileDirectory)' and $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')) != ''"
+          Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <LibplanetSolutionPath>$(SolutionDir).libplanet\</LibplanetSolutionPath>
+  </PropertyGroup>
+  
+  <!-- <Target Name="DisplayInformation" BeforeTargets="Build">
+    <Message Text="TargetFramework: $(TargetFramework)" Importance="High" />
+    <Message Text="NETCoreSdkPortableRuntimeIdentifier: $(NETCoreSdkPortableRuntimeIdentifier)" Importance="High" />
+    <Message Text="OS: $(OS)" Importance="High" />
+  </Target> -->
+
+</Project>
