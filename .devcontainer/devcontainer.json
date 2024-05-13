@@ -1,5 +1,5 @@
 {
-    "postCreateCommand": "git submodule update --init --",
+    "postCreateCommand": "bash ./.devcontainer/postCreateCommand.sh",
     "customizations": {
         "vscode": {
             "extensions": [
