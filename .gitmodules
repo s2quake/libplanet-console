@@ -14,3 +14,6 @@
 	path = .communication
 	url = https://github.com/s2quake/communication.git
 	fetchRecurseSubmodules = no
+[submodule ".netmq"]
+	path = .netmq
+	url = https://github.com/planetarium/netmq.git
