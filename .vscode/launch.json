@@ -60,7 +60,7 @@
             "args": [
                 "--private-key",
                 "774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79",
-                "--seed-end-point",
+                "--node-end-point",
                 "127.0.0.1:5353",
                 "-a",
                 "--volatile"
