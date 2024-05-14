@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Crypto\Libplanet.Crypto.csproj" />
   </ItemGroup>
 
 </Project>
