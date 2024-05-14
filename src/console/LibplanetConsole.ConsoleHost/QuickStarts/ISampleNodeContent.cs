@@ -3,7 +3,7 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.ConsoleHost.QuickStarts;
 
-public interface ISampleNode
+public interface ISampleNodeContent
 {
     event EventHandler<ItemEventArgs<Address>>? Subscribed;
 

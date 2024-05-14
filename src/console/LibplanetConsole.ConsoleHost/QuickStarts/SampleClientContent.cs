@@ -5,11 +5,11 @@ using LibplanetConsole.Consoles;
 
 namespace LibplanetConsole.ConsoleHost.QuickStarts;
 
-[Export(typeof(ISampleClient))]
+[Export(typeof(ISampleClientContent))]
 [Export(typeof(IClientContent))]
 [method: ImportingConstructor]
 internal sealed class SampleClientContent(IClient client)
-    : ClientContentBase(client), ISampleClient
+    : ClientContentBase(client), ISampleClientContent
 {
     private readonly RemoteService<ISampleClientService> _remoteService = new();
 

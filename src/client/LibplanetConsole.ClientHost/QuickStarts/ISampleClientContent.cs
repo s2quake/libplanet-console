@@ -1,6 +1,6 @@
 namespace LibplanetConsole.ClientHost.QuickStarts;
 
-public interface ISampleClient
+public interface ISampleClientContent
 {
     void Subscribe();
 

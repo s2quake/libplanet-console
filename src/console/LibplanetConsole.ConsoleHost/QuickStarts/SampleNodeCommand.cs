@@ -16,7 +16,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(ISampleNode)) is ISampleNode sampleNode)
+        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
         {
             sampleNode.Subscribe(client.Address);
         }
@@ -33,7 +33,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(ISampleNode)) is ISampleNode sampleNode)
+        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
         {
             sampleNode.Unsubscribe(client.Address);
         }
@@ -49,7 +49,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(ISampleNode)) is ISampleNode sampleNode)
+        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
         {
             Out.WriteLine(sampleNode.Count);
         }
@@ -65,7 +65,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(ISampleNode)) is ISampleNode sampleNode)
+        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
         {
             var addresses = await sampleNode.GetAddressesAsync(cancellationToken);
             var sb = new StringBuilder();

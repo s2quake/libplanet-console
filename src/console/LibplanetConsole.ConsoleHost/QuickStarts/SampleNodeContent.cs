@@ -5,15 +5,14 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.QuickStarts;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles;
-using LibplanetConsole.Consoles.Services;
 
 namespace LibplanetConsole.ConsoleHost.QuickStarts;
 
-[Export(typeof(ISampleNode))]
+[Export(typeof(ISampleNodeContent))]
 [Export(typeof(INodeContent))]
-[Export(typeof(ISampleNode))]
+[Export(typeof(ISampleNodeContent))]
 internal sealed class SampleNodeContent
-    : NodeContentBase, ISampleNodeCallbak, ISampleNode
+    : NodeContentBase, ISampleNodeCallbak, ISampleNodeContent
 {
     private readonly RemoteService<ISampleNodeService, ISampleNodeCallbak> _service;
     private readonly StringBuilder _log = new();
