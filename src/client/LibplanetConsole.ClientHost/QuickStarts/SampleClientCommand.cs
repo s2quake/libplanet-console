@@ -6,7 +6,7 @@ namespace LibplanetConsole.ClientHost.QuickStarts;
 [Export(typeof(ICommand))]
 [CommandSummary("Sample client commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class SampleClientCommand(ISampleClient sampleClient)
+internal sealed class SampleClientCommand(ISampleClientContent sampleClient)
     : CommandMethodBase
 {
     [CommandMethod]

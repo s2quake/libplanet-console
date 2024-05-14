@@ -14,7 +14,7 @@ internal sealed class SampleClientCommand(IApplication application) : CommandMet
     {
         var client = application.GetClient(clientAddress);
 
-        if (client.GetService(typeof(ISampleClient)) is ISampleClient sampleClient)
+        if (client.GetService(typeof(ISampleClientContent)) is ISampleClientContent sampleClient)
         {
             sampleClient.Subscribe();
         }
@@ -30,7 +30,7 @@ internal sealed class SampleClientCommand(IApplication application) : CommandMet
     {
         var client = application.GetClient(clientAddress);
 
-        if (client.GetService(typeof(ISampleClient)) is ISampleClient sampleClient)
+        if (client.GetService(typeof(ISampleClientContent)) is ISampleClientContent sampleClient)
         {
             sampleClient.Unsubscribe();
         }

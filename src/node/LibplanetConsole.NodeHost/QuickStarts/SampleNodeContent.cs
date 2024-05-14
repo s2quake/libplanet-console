@@ -5,12 +5,12 @@ using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.NodeHost.QuickStarts;
 
-[Export(typeof(ISampleNode))]
+[Export(typeof(ISampleNodeContent))]
 [Export(typeof(INodeContent))]
 [Export]
 [method: ImportingConstructor]
-internal sealed class SampleNode(IApplication application, INode node)
-    : NodeContentBase(node), INodeContent, ISampleNode
+internal sealed class SampleNodeContent(IApplication application, INode node)
+    : NodeContentBase(node), INodeContent, ISampleNodeContent
 {
     private readonly IApplication _application = application;
     private readonly HashSet<Address> _addresses = [];

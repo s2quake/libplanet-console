@@ -6,12 +6,12 @@ using LibplanetConsole.Common.QuickStarts;
 
 namespace LibplanetConsole.ClientHost.QuickStarts;
 
-[Export(typeof(ISampleClient))]
+[Export(typeof(ISampleClientContent))]
 [Export(typeof(IClientContent))]
 [method: ImportingConstructor]
-internal sealed class SampleClient(
+internal sealed class SampleClientContent(
     IClient client, SampleRemoteNodeService remoteNodeService)
-    : ClientContentBase(client), ISampleClient
+    : ClientContentBase(client), ISampleClientContent
 {
     private readonly SampleRemoteNodeService _remoteNodeService = remoteNodeService;
 

@@ -6,7 +6,7 @@ namespace LibplanetConsole.ClientHost.QuickStarts;
 
 [Export(typeof(ILocalService))]
 [method: ImportingConstructor]
-internal sealed class SampleClientService(ISampleClient sampleClient)
+internal sealed class SampleClientService(ISampleClientContent sampleClient)
     : LocalService<ISampleClientService>, ISampleClientService
 {
     public void Subscribe()
