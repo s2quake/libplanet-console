@@ -71,6 +71,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.NodeHost",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes", "src\node\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj", "{217938CF-B2B8-41BB-A193-475430421265}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Clients.Sharing", "src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.shproj", "{2FFED165-D285-415D-B421-64D41B5199D0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Nodes.Sharing", "src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.shproj", "{F656916C-C43A-4427-BD74-8742401B2D29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -202,12 +206,16 @@ Global
 		{8749087F-5DE0-46AB-82D6-5009B3D9E2AF} = {1DEAA4CE-E29B-4379-BAF6-20B79A5946CB}
 		{F5DCB11A-EA32-441A-AF34-B66359C3EA50} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{217938CF-B2B8-41BB-A193-475430421265} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
+		{2FFED165-D285-415D-B421-64D41B5199D0} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
+		{F656916C-C43A-4427-BD74-8742401B2D29} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{217938cf-b2b8-41bb-a193-475430421265}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{2ffed165-d285-415d-b421-64d41b5199d0}*SharedItemsImports = 13
 		src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{7b2d3bf1-a244-4868-a6b7-b717db7bcaa2}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{7b2d3bf1-a244-4868-a6b7-b717db7bcaa2}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{f656916c-c43a-4427-bd74-8742401b2d29}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
