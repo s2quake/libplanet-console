@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Crypto\Libplanet.Crypto.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
     <ProjectReference Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
     <ProjectReference Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
