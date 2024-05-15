@@ -3,6 +3,7 @@ using Libplanet.Crypto;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Serializations;
 
@@ -10,19 +11,14 @@ namespace LibplanetConsole.Clients;
 
 [Export]
 [Export(typeof(IClient))]
-internal sealed class Client : IClient
+[method: ImportingConstructor]
+internal sealed class Client(IApplication application, ApplicationOptions options)
+    : IClient
 {
-    private readonly PrivateKey _privateKey;
-    private readonly RemoteNodeContext _remoteNodeContext;
+    private readonly IApplication _application = application;
+    private readonly PrivateKey _privateKey = PrivateKeyUtility.Parse(options.PrivateKey);
+    private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
-
-    [ImportingConstructor]
-    public Client(ApplicationOptions options, RemoteNodeContext remoteNodeContext)
-    {
-        _privateKey = PrivateKeyUtility.Parse(options.PrivateKey);
-        _remoteNodeContext = remoteNodeContext;
-        _remoteNodeContext.Closed += RemoteNodeContext_Closed;
-    }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -49,12 +45,26 @@ internal sealed class Client : IClient
 
     public ClientOptions ClientOptions { get; private set; } = new();
 
+    private RemoteNodeContext RemoteNodeContext
+    {
+        get
+        {
+            if (_remoteNodeContext is null)
+            {
+                _remoteNodeContext = _application.GetService<RemoteNodeContext>();
+                _remoteNodeContext.Closed += RemoteNodeContext_Closed;
+            }
+
+            return _remoteNodeContext;
+        }
+    }
+
     public override string ToString() => $"[{Address}]";
 
     public async Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken)
     {
-        _remoteNodeContext.EndPoint = clientOptions.NodeEndPoint;
-        _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
+        RemoteNodeContext.EndPoint = clientOptions.NodeEndPoint;
+        _closeToken = await RemoteNodeContext.OpenAsync(cancellationToken);
         ClientOptions = clientOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
@@ -62,7 +72,7 @@ internal sealed class Client : IClient
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _remoteNodeContext.CloseAsync(_closeToken, cancellationToken);
+        await RemoteNodeContext.CloseAsync(_closeToken, cancellationToken);
         _closeToken = Guid.Empty;
         ClientOptions = new();
         IsRunning = false;
@@ -76,7 +86,7 @@ internal sealed class Client : IClient
 
     public async ValueTask DisposeAsync()
     {
-        await _remoteNodeContext.CloseAsync(_closeToken);
+        await RemoteNodeContext.CloseAsync(_closeToken);
     }
 
     private void RemoteNodeContext_Closed(object? sender, EventArgs e)

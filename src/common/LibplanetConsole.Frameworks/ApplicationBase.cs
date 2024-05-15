@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace LibplanetConsole.Frameworks;
 
 public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider

@@ -12,7 +12,7 @@ internal sealed partial class Application(ApplicationOptions options)
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        _terminal = (SystemTerminal)GetService(typeof(SystemTerminal))!;
+        _terminal = this.GetService<SystemTerminal>();
         await base.OnStartAsync(cancellationToken);
         await PrepareCommandContext();
         await _terminal.StartAsync(cancellationToken);
@@ -20,7 +20,7 @@ internal sealed partial class Application(ApplicationOptions options)
         async Task PrepareCommandContext()
         {
             var sw = new StringWriter();
-            var commandContext = (CommandContext)GetService(typeof(CommandContext))!;
+            var commandContext = this.GetService<CommandContext>();
             commandContext.Out = sw;
             sw.WriteSeparator(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
