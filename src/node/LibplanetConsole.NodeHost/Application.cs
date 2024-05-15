@@ -16,9 +16,9 @@ internal sealed class Application(ApplicationOptions options)
         if (_options.ParentProcessId == 0)
         {
             var sw = new StringWriter();
-            var commandContext = (CommandContext)GetService(typeof(CommandContext))!;
+            var commandContext = this.GetService<CommandContext>();
             commandContext.Out = sw;
-            _terminal = (SystemTerminal)GetService(typeof(SystemTerminal))!;
+            _terminal = this.GetService<SystemTerminal>();
             await base.OnStartAsync(cancellationToken);
             sw.WriteSeparator(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
