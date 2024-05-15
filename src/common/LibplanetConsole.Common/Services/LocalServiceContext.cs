@@ -5,11 +5,11 @@ namespace LibplanetConsole.Common.Services;
 
 public class LocalServiceContext
 {
-    private readonly ServerContext _serverContext;
+    private readonly InternalServerContext _serverContext;
 
     public LocalServiceContext(IEnumerable<ILocalService> localServices)
     {
-        _serverContext = new ServerContext([.. localServices.Select(service => service.Service)]);
+        _serverContext = new([.. localServices.Select(service => service.Service)]);
         _serverContext.Opened += (s, e) => Started?.Invoke(this, EventArgs.Empty);
         _serverContext.Closed += (s, e)
             => Stopped?.Invoke(this, new StopEventArgs(StopReason.None));
@@ -56,5 +56,10 @@ public class LocalServiceContext
         {
             await _serverContext.AbortAsync();
         }
+    }
+
+    private sealed class InternalServerContext(IService[] services) : ServerContext(services)
+    {
+        public override ISerializerProvider SerializerProvider => ServiceSerializerProvider.Default;
     }
 }

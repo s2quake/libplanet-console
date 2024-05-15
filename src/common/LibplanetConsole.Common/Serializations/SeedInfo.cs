@@ -1,12 +1,30 @@
+using Libplanet.Crypto;
+
 namespace LibplanetConsole.Common.Serializations;
 
-public record struct SeedInfo
+public readonly record struct SeedInfo
 {
     public static SeedInfo Empty { get; } = default;
 
-    public GenesisOptionsInfo GenesisOptions { get; set; }
+    public GenesisOptionsInfo GenesisOptions { get; init; }
 
-    public string BlocksyncSeedPeer { get; set; }
+    public string BlocksyncSeedPeer { get; init; }
 
-    public string ConsensusSeedPeer { get; set; }
+    public string ConsensusSeedPeer { get; init; }
+
+    public SeedInfo Encrypt(PublicKey publicKey)
+    {
+        return this with
+        {
+            GenesisOptions = GenesisOptions.Encrypt(publicKey),
+        };
+    }
+
+    public SeedInfo Decrypt(PrivateKey privateKey)
+    {
+        return this with
+        {
+            GenesisOptions = GenesisOptions.Decrypt(privateKey),
+        };
+    }
 }

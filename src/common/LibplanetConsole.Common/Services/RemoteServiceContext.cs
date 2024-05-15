@@ -1,15 +1,16 @@
 using System.Net;
 using JSSoft.Communication;
+using Org.BouncyCastle.Crypto.Operators;
 
 namespace LibplanetConsole.Common.Services;
 
 public class RemoteServiceContext
 {
-    private readonly ClientContext _clientContext;
+    private readonly InternalClientContext _clientContext;
 
     public RemoteServiceContext(IEnumerable<IRemoteService> remoteServices)
     {
-        _clientContext = new ClientContext([.. remoteServices.Select(service => service.Service)]);
+        _clientContext = new([.. remoteServices.Select(service => service.Service)]);
         _clientContext.Opened += (s, e) => Opened?.Invoke(this, EventArgs.Empty);
         _clientContext.Closed += (s, e) => Closed?.Invoke(this, EventArgs.Empty);
         _clientContext.Disconnected += (s, e) => Closed?.Invoke(this, EventArgs.Empty);
@@ -53,5 +54,10 @@ public class RemoteServiceContext
         {
             await _clientContext.AbortAsync();
         }
+    }
+
+    private sealed class InternalClientContext(IService[] services) : ClientContext(services)
+    {
+        public override ISerializerProvider SerializerProvider => ServiceSerializerProvider.Default;
     }
 }

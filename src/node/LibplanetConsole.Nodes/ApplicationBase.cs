@@ -2,6 +2,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Net;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
@@ -77,9 +78,10 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         if (_options.AutoStart == true)
         {
             var seedEndPoint = _options.NodeEndPoint;
+            var privateKey = _node.PrivateKey;
             var nodeOptions = seedEndPoint != string.Empty
-                ? await NodeOptionsUtility.GetNodeOptionsAsync(seedEndPoint, cancellationToken)
-                : NodeOptionsUtility.GetNodeOptions(_node);
+                ? await NodeOptionsUtility.CreateAsync(seedEndPoint, privateKey, cancellationToken)
+                : NodeOptionsUtility.Create(_node);
             await _node.StartAsync(nodeOptions, cancellationToken: default);
         }
     }

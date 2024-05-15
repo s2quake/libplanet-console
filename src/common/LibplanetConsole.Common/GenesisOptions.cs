@@ -26,4 +26,16 @@ public record class GenesisOptions
         var s = Encoding.UTF8.GetString(bytes);
         return JsonUtility.DeserializeObject<GenesisOptionsInfo>(s);
     }
+
+    // public string Encrypt(PublicKey publicKey)
+    // {
+    //     var json = JsonUtility.SerializeObject((GenesisOptionsInfo)this);
+    //     return PublicKeyUtility.Encrypt(publicKey, json);
+    // }
+
+    // public static GenesisOptions Decrypt(PrivateKey privateKey, string text)
+    // {
+    //     var json = PrivateKeyUtility.Decrypt(privateKey, text);
+    //     return JsonUtility.DeserializeObject<GenesisOptionsInfo>(json);
+    // }
 }

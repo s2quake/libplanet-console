@@ -8,7 +8,7 @@ namespace LibplanetConsole.Nodes;
 
 internal static class NodeOptionsUtility
 {
-    public static NodeOptions GetNodeOptions(INode node)
+    public static NodeOptions Create(Node node)
     {
         var genesisKey = node.PrivateKey;
         var genesisValidators = GetPublicKeys(genesisKey);
@@ -22,21 +22,23 @@ internal static class NodeOptionsUtility
         };
     }
 
-    public static async Task<NodeOptions> GetNodeOptionsAsync(
-        string seedEndPoint, CancellationToken cancellationToken)
+    public static async Task<NodeOptions> CreateAsync(
+        string seedEndPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
         var remoteService = new RemoteService<ISeedService>();
         var remoteServiceContext = new RemoteServiceContext([remoteService])
         {
             EndPoint = DnsEndPointUtility.Parse(seedEndPoint),
         };
-
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
+        var service = remoteService.Service;
+        var publicKey = privateKey.PublicKey;
         try
         {
             for (var i = 0; i < 10; i++)
             {
-                var seedInfo = await remoteService.Service.GetSeedAsync(cancellationToken);
+                var decrypted = await service.GetSeedAsync(publicKey, cancellationToken);
+                var seedInfo = decrypted.Decrypt(privateKey);
                 if (Equals(seedInfo, SeedInfo.Empty) != true)
                 {
                     return (NodeOptionsInfo)seedInfo;
@@ -49,7 +51,7 @@ internal static class NodeOptionsUtility
         }
         finally
         {
-            await remoteServiceContext.CloseAsync(closeToken);
+            await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
         }
     }
 
