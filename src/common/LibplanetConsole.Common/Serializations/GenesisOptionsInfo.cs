@@ -1,3 +1,5 @@
+using Libplanet.Crypto;
+
 namespace LibplanetConsole.Common.Serializations;
 
 public readonly record struct GenesisOptionsInfo
@@ -28,5 +30,28 @@ public readonly record struct GenesisOptionsInfo
                 [.. genesisOptions.GenesisValidators.Select(PublicKeyUtility.ToString)],
             Timestamp = genesisOptions.Timestamp.ToString("O"),
         };
+    }
+
+    public GenesisOptionsInfo Encrypt(PublicKey publicKey)
+    {
+        return this with
+        {
+            GenesisKey = PublicKeyUtility.Encrypt(publicKey, GenesisKey),
+            GenesisValidators
+                = [.. GenesisValidators.Select(item => PublicKeyUtility.Encrypt(publicKey, item))],
+        };
+    }
+
+    public GenesisOptionsInfo Decrypt(PrivateKey privateKey)
+    {
+        return this with
+        {
+            GenesisKey = Decrypt(privateKey, GenesisKey),
+            GenesisValidators
+                = [.. GenesisValidators.Select(item => Decrypt(privateKey, item))],
+        };
+
+        static string Decrypt(PrivateKey privateKey, string text)
+            => PrivateKeyUtility.Decrypt<string>(privateKey, text);
     }
 }

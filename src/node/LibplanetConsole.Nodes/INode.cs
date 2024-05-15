@@ -22,11 +22,9 @@ public interface INode
 
     BlockChain BlockChain { get; }
 
-    PrivateKey PrivateKey { get; }
+    PublicKey PublicKey { get; }
 
-    PublicKey PublicKey => PrivateKey.PublicKey;
-
-    Address Address => PrivateKey.Address;
+    Address Address => PublicKey.Address;
 
     BoundPeer BlocksyncSeedPeer { get; }
 

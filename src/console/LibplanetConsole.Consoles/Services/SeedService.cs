@@ -42,17 +42,20 @@ internal sealed class SeedService : LocalService<ISeedService>,
 
     public BoundPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
-    public async Task<SeedInfo> GetSeedAsync(CancellationToken cancellationToken)
+    public async Task<SeedInfo> GetSeedAsync(
+        PublicKey publicKey, CancellationToken cancellationToken)
     {
         var seedPeer = _blocksyncSeedNode.BoundPeer;
         var consensusSeedPeer = _consensusSeedNode.BoundPeer;
-
-        return await _application.InvokeAsync(() => new SeedInfo
+        var genesisOptions = (GenesisOptionsInfo)_application.GenesisOptions;
+        var seedInfo = new SeedInfo
         {
-            GenesisOptions = _application.GenesisOptions,
+            GenesisOptions = genesisOptions.Encrypt(publicKey),
             BlocksyncSeedPeer = BoundPeerUtility.ToString(seedPeer),
             ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
-        });
+        };
+
+        return await _application.InvokeAsync(() => seedInfo);
     }
 
     public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)

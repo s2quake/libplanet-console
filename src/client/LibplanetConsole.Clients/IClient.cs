@@ -17,11 +17,7 @@ public interface IClient
 
     bool IsRunning { get; }
 
-    PrivateKey PrivateKey { get; }
-
-    PublicKey PublicKey => PrivateKey.PublicKey;
-
-    Address Address => PrivateKey.Address;
+    Address Address { get; }
 
     Task StartAsync(ClientOptions nodeOptions, CancellationToken cancellationToken);
 

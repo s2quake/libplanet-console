@@ -8,10 +8,6 @@ public record class NodeInfo
 
     public string ConsensusEndPoint { get; init; } = string.Empty;
 
-    public string PrivateKey { get; init; } = string.Empty;
-
-    public string PublicKey { get; init; } = string.Empty;
-
     public string Address { get; init; } = string.Empty;
 
     public string GenesisHash { get; init; } = string.Empty;

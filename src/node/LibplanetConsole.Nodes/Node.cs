@@ -76,8 +76,6 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
 
     public NodeInfo Info => new()
     {
-        PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
-        PublicKey = PublicKeyUtility.ToString(PublicKey),
         Address = AddressUtility.ToString(Address),
         SwarmEndPoint
             = IsRunning == true ? DnsEndPointUtility.ToString(SwarmEndPoint) : string.Empty,
