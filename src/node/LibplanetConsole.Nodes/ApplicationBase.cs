@@ -2,7 +2,6 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Net;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
@@ -13,29 +12,42 @@ namespace LibplanetConsole.Nodes;
 public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 {
     private readonly CompositionContainer _container;
-    private readonly ApplicationOptions _options = new();
     private readonly Node _node;
     private readonly NodeContext _nodeContext;
-    private readonly INodeContent[] _nodeContents;
     private readonly Process? _parentProcess;
+    private readonly bool _isAutoStart;
+    private readonly ApplicationInfo _info;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _options = options.GetActualOptions();
+        _isAutoStart = options.AutoStart;
+        _node = new Node(options);
         _container = new(
             new DirectoryCatalog(Path.GetDirectoryName(GetType().Assembly.Location)!));
         _container.ComposeExportedValue<IApplication>(this);
+        _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
-        _container.ComposeExportedValue(_options);
-        _node = _container.GetExportedValue<Node>() ??
-            throw new InvalidOperationException($"'{typeof(Node)}' is not found.");
-        _nodeContents = _container.GetExportedValues<INodeContent>().ToArray();
+        _container.ComposeExportedValue(_node);
+        _container.ComposeExportedValue<INode>(_node);
         _nodeContext = _container.GetExportedValue<NodeContext>() ??
             throw new InvalidOperationException($"'{typeof(NodeContext)}' is not found.");
+        _nodeContext.EndPoint = options.EndPoint;
+        _info = new()
+        {
+            EndPoint = EndPointUtility.ToString(_nodeContext.EndPoint),
+            NodeEndPoint = $"{options.NodeEndPoint}",
+            StorePath = _node.StorePath,
+        };
+        DefaultGenesisOptions = new GenesisOptions
+        {
+            GenesisKey = new(),
+            GenesisValidators = options.GenesisValidators,
+            Timestamp = DateTimeOffset.UtcNow,
+        };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        if (_options.ParentProcessId != 0 &&
-            Process.GetProcessById(_options.ParentProcessId) is { } parentProcess)
+        if (options.ParentProcessId != 0 &&
+            Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcess = parentProcess;
         }
@@ -45,11 +57,9 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public EndPoint EndPoint => _nodeContext.EndPoint;
 
-    public ApplicationInfo Info => new()
-    {
-        EndPoint = EndPointUtility.ToString(EndPoint),
-        NodeInfo = _node.Info,
-    };
+    public ApplicationInfo Info => _info;
+
+    internal GenesisOptions DefaultGenesisOptions { get; }
 
     protected override bool CanClose => _parentProcess?.HasExited == true;
 
@@ -75,13 +85,15 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     private async Task AutoStartAsync(CancellationToken cancellationToken)
     {
-        if (_options.AutoStart == true)
+        if (_isAutoStart == true)
         {
-            var seedEndPoint = _options.NodeEndPoint;
-            var privateKey = _node.PrivateKey;
+            var seedEndPoint = _info.NodeEndPoint;
             var nodeOptions = seedEndPoint != string.Empty
-                ? await NodeOptionsUtility.CreateAsync(seedEndPoint, privateKey, cancellationToken)
-                : NodeOptionsUtility.Create(_node);
+                ? await NodeOptions.CreateAsync(seedEndPoint, cancellationToken)
+                : new NodeOptions
+                {
+                    GenesisOptions = DefaultGenesisOptions,
+                };
             await _node.StartAsync(nodeOptions, cancellationToken: default);
         }
     }

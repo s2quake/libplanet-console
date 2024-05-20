@@ -1,6 +1,9 @@
+using Libplanet.Crypto;
+using Libplanet.Types.Blocks;
+
 namespace LibplanetConsole.Nodes.Serializations;
 
-public record class NodeInfo
+public sealed record class NodeInfo
 {
     public string AppProtocolVersion { get; init; } = string.Empty;
 
@@ -8,11 +11,13 @@ public record class NodeInfo
 
     public string ConsensusEndPoint { get; init; } = string.Empty;
 
-    public string Address { get; init; } = string.Empty;
+    public Address Address { get; init; }
 
-    public string GenesisHash { get; init; } = string.Empty;
+    public BlockHash GenesisHash { get; init; }
 
-    public string TipHash { get; init; } = string.Empty;
+    public BlockHash TipHash { get; init; }
+
+    public bool IsRunning { get; init; }
 
     public int ProcessId { get; init; } = Environment.ProcessId;
 

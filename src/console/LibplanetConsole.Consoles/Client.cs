@@ -2,6 +2,7 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Net;
+using System.Security;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Serializations;
@@ -17,10 +18,11 @@ internal sealed class Client :
     IClientCallback, IAsyncDisposable, IAddressable, IClient
 {
     private readonly CompositionContainer _container;
-    private readonly PrivateKey _privateKey;
+    private readonly SecureString _privateKey;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<IClientService, IClientCallback> _remoteService;
     private readonly IClientContent[] _contents;
+    private readonly ApplicationBase _application;
     private Guid _closeToken;
     private ClientInfo _clientInfo = new();
     private bool _isDisposed;
@@ -28,7 +30,7 @@ internal sealed class Client :
     public Client(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
     {
         _container = container;
-        _privateKey = privateKey;
+        _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
         _container.ComposeExportedValue<IClient>(this);
         _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
@@ -37,6 +39,9 @@ internal sealed class Client :
         {
             EndPoint = endPoint,
         };
+        _application = container.GetExportedValue<ApplicationBase>() ??
+            throw new InvalidOperationException("ApplicationBase is not found.");
+        PublicKey = privateKey.PublicKey;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
     }
 
@@ -46,11 +51,9 @@ internal sealed class Client :
 
     public event EventHandler? Disposed;
 
-    public PrivateKey PrivateKey => _privateKey;
+    public PublicKey PublicKey { get; }
 
-    public PublicKey PublicKey => _privateKey.PublicKey;
-
-    public Address Address => _privateKey.Address;
+    public Address Address => PublicKey.Address;
 
     public bool IsOnline { get; private set; } = true;
 
@@ -94,6 +97,12 @@ internal sealed class Client :
     public override string ToString()
     {
         return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
+    }
+
+    public byte[] Sign(object obj)
+    {
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        return PrivateKeyUtility.Sign(privateKey, obj);
     }
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
@@ -141,6 +150,16 @@ internal sealed class Client :
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
+    }
+
+    void IClientCallback.OnStarted(ClientInfo clientInfo)
+    {
+        _clientInfo = clientInfo;
+    }
+
+    void IClientCallback.OnStopped()
+    {
+        _clientInfo = new();
     }
 
     private static IEnumerable<IRemoteService> GetRemoteServices(

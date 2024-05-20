@@ -4,7 +4,7 @@ using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Nodes.Commands;
+namespace LibplanetConsole.Clients.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides Key-related commands.")]

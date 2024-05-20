@@ -8,7 +8,7 @@ namespace LibplanetConsole.NodeHost.QuickStarts;
 [Export(typeof(ICommand))]
 [CommandSummary("Sample node commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class SampleNodeCommand(ISampleNodeContent sampleNode)
+internal sealed class SampleNodeCommand(ISampleNode sampleNode)
     : CommandMethodBase
 {
     [CommandMethod]

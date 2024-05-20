@@ -1,3 +1,4 @@
+using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
@@ -30,11 +31,15 @@ public interface INode
 
     BoundPeer ConsensusSeedPeer { get; }
 
+    bool Verify(object obj, byte[] signature);
+
     Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 
+    Task<TxId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken);
+
     Task AddTransactionAsync(Transaction transaction, CancellationToken cancellationToken);
 
-    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
+    long GetNextNonce(Address address);
 }

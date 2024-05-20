@@ -1,11 +1,7 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Consoles;
 
 public interface IApplication : IAsyncDisposable, IServiceProvider
 {
-    GenesisOptions GenesisOptions { get; }
-
     Task InvokeAsync(Action action);
 
     Task<T> InvokeAsync<T>(Func<T> func);

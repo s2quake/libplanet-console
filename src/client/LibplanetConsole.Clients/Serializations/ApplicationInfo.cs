@@ -2,7 +2,7 @@ namespace LibplanetConsole.Clients.Serializations;
 
 public readonly record struct ApplicationInfo
 {
-    public string ServiceEndPoint { get; init; }
+    public string EndPoint { get; init; }
 
-    public ClientInfo ClientInfo { get; init; }
+    public string NodeEndPoint { get; init; }
 }

@@ -1,10 +1,9 @@
 ﻿using JSSoft.Commands;
 using LibplanetConsole.ClientHost;
-using LibplanetConsole.Clients;
 
 try
 {
-    var options = ApplicationOptions.Parse(args);
+    var options = ApplicationCommandOptions.Parse(args);
     var @out = Console.Out;
     await using var application = new Application(options);
     @out.WriteLine();

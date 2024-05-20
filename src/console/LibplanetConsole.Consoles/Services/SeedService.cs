@@ -15,13 +15,13 @@ namespace LibplanetConsole.Consoles.Services;
 internal sealed class SeedService : LocalService<ISeedService>,
     ISeedService, IApplicationService
 {
-    private readonly IApplication _application;
+    private readonly ApplicationBase _application;
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 
     [ImportingConstructor]
-    public SeedService(IApplication application)
+    public SeedService(ApplicationBase application)
     {
         _application = application;
         _blocksyncSeedNode = new SeedNode(new()

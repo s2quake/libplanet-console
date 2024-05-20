@@ -5,7 +5,7 @@ using LibplanetConsole.Common.Serializations;
 
 namespace LibplanetConsole.Common;
 
-public record class GenesisOptions
+public sealed record class GenesisOptions
 {
     public PrivateKey GenesisKey { get; init; } = new PrivateKey();
 

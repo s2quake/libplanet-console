@@ -21,9 +21,9 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider
 
     ClientOptions ClientOptions { get; }
 
-    PrivateKey PrivateKey { get; }
+    PublicKey PublicKey { get; }
 
-    PublicKey PublicKey => PrivateKey.PublicKey;
+    byte[] Sign(object obj);
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 

@@ -1,14 +1,14 @@
+using Libplanet.Crypto;
+
 namespace LibplanetConsole.Clients.Serializations;
 
-public record class ClientInfo
+public sealed record class ClientInfo
 {
     public ClientInfo()
     {
     }
 
-    public string PrivateKey { get; init; } = string.Empty;
+    public Address Address { get; init; }
 
-    public string PublicKey { get; init; } = string.Empty;
-
-    public string Address { get; init; } = string.Empty;
+    public Address NodeAddress { get; init; }
 }

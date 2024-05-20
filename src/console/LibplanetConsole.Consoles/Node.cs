@@ -2,9 +2,9 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Net;
+using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
@@ -20,7 +20,7 @@ internal sealed class Node
     : INodeCallback, IAsyncDisposable, IAddressable, INode
 {
     private readonly CompositionContainer _container;
-    private readonly PrivateKey _privateKey;
+    private readonly SecureString _privateKey;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private readonly INodeContent[] _contents;
@@ -33,7 +33,7 @@ internal sealed class Node
     public Node(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
     {
         _container = container;
-        _privateKey = privateKey;
+        _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
         _container.ComposeExportedValue<INode>(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteService = new(this);
@@ -42,6 +42,7 @@ internal sealed class Node
         {
             EndPoint = endPoint,
         };
+        PublicKey = privateKey.PublicKey;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
     }
 
@@ -59,11 +60,9 @@ internal sealed class Node
     public DnsEndPoint ConsensusEndPoint
         => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
-    public PrivateKey PrivateKey => _privateKey;
+    public PublicKey PublicKey { get; }
 
-    public PublicKey PublicKey => _privateKey.PublicKey;
-
-    public Address Address => _privateKey.Address;
+    public Address Address => PublicKey.Address;
 
     public bool IsRunning { get; private set; }
 
@@ -107,6 +106,12 @@ internal sealed class Node
         return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
     }
 
+    public byte[] Sign(object obj)
+    {
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        return PrivateKeyUtility.Sign(privateKey, obj);
+    }
+
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
@@ -142,24 +147,34 @@ internal sealed class Node
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task<TxId> AddTransactionAsync(
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+        => _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
+
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var address = Address.ToString();
-        var values = actions.Select(item => item.PlainValue).ToArray();
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var address = privateKey.Address;
         var nonce = await _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
-        var transaction = Transaction.Create(
+        var genesisHash = _nodeInfo.GenesisHash;
+        var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: _privateKey,
-            genesisHash: BlockHash.FromString(_nodeInfo.GenesisHash),
-            actions: new TxActionList(values)
+            privateKey: privateKey,
+            genesisHash: genesisHash,
+            actions: [.. actions.Select(item => item.PlainValue)]
         );
-
-        var bytes = await _remoteService.Service.SendTransactionAsync(
-            transaction: transaction.Serialize(),
+        var txId = await _remoteService.Service.SendTransactionAsync(
+            transaction: tx.Serialize(),
             cancellationToken: cancellationToken);
 
-        return new TxId(bytes);
+        return txId;
+    }
+
+    public Task<TxId> SendTransactionAsync(
+        Transaction transaction, CancellationToken cancellationToken)
+    {
+        return _remoteService.Service.SendTransactionAsync(
+            transaction.Serialize(), cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
@@ -176,8 +191,19 @@ internal sealed class Node
         GC.SuppressFinalize(this);
     }
 
+    void INodeCallback.OnStarted(NodeInfo nodeInfo)
+    {
+        _nodeInfo = nodeInfo;
+    }
+
+    void INodeCallback.OnStopped()
+    {
+        _nodeInfo = new();
+    }
+
     void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
     {
+        _nodeInfo = _nodeInfo with { TipHash = blockInfo.Hash };
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 

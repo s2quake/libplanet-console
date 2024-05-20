@@ -7,12 +7,12 @@ namespace LibplanetConsole.Clients;
 internal static class SeedUtility
 {
     public static async Task<EndPoint> GetNodeEndPointAsync(
-        string seedEndPoint, CancellationToken cancellationToken)
+        EndPoint seedEndPoint, CancellationToken cancellationToken)
     {
         var remoteService = new RemoteService<ISeedService>();
         var remoteServiceContext = new RemoteServiceContext([remoteService])
         {
-            EndPoint = EndPointUtility.Parse(seedEndPoint),
+            EndPoint = seedEndPoint,
         };
 
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);

@@ -1,17 +1,11 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Clients.Services;
 
 [Export]
-internal sealed class ClientServiceContext : LocalServiceContext
+[method: ImportingConstructor]
+internal sealed class ClientServiceContext(
+    [ImportMany] IEnumerable<ILocalService> localServices) : LocalServiceContext([.. localServices])
 {
-    [ImportingConstructor]
-    public ClientServiceContext(
-        [ImportMany] IEnumerable<ILocalService> localServices, ApplicationOptions options)
-        : base([.. localServices])
-    {
-        EndPoint = EndPointUtility.Parse(options.EndPoint);
-    }
 }

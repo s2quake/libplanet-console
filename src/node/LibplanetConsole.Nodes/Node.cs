@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using System.ComponentModel.Composition;
 using System.Net;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Bencodex.Types;
@@ -22,13 +22,10 @@ using LibplanetConsole.Seeds;
 
 namespace LibplanetConsole.Nodes;
 
-[Export]
-[Export(typeof(INode))]
-[method: ImportingConstructor]
-internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActionRenderer, INode
+internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
 {
-    private readonly PrivateKey _privateKey = PrivateKeyUtility.Parse(options.PrivateKey);
-    private readonly string _storePath = options.StorePath;
+    private readonly SecureString _privateKey;
+    private readonly string _storePath;
     private readonly SynchronizationContext _synchronizationContext
         = SynchronizationContext.Current!;
 
@@ -43,6 +40,14 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
     private bool _isDisposed;
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
+
+    public Node(ApplicationOptions options)
+    {
+        _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
+        _storePath = options.StorePath;
+        PublicKey = options.PrivateKey.PublicKey;
+        UpdateNodeInfo();
+    }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -62,29 +67,19 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
         set => _consensusEndPoint = value;
     }
 
+    public string StorePath => _storePath;
+
     public bool IsRunning { get; private set; }
 
     public bool IsDisposed => _isDisposed;
 
-    public Address Address => _privateKey.Address;
+    public PublicKey PublicKey { get; }
 
-    public PublicKey PublicKey => _privateKey.PublicKey;
-
-    public PrivateKey PrivateKey => _privateKey;
+    public Address Address => PublicKey.Address;
 
     public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
 
-    public NodeInfo Info => new()
-    {
-        Address = AddressUtility.ToString(Address),
-        SwarmEndPoint
-            = IsRunning == true ? DnsEndPointUtility.ToString(SwarmEndPoint) : string.Empty,
-        ConsensusEndPoint
-            = IsRunning == true ? DnsEndPointUtility.ToString(ConsensusEndPoint) : string.Empty,
-        GenesisHash = IsRunning == true ? $"{BlockChain.Genesis.Hash}" : string.Empty,
-        TipHash = IsRunning == true ? $"{BlockChain.Tip.Hash}" : string.Empty,
-        Peers = IsRunning == true ? [.. Peers.Select(peer => new BoundPeerInfo(peer))] : [],
-    };
+    public NodeInfo Info { get; private set; } = new();
 
     public BoundPeer[] Peers
     {
@@ -111,8 +106,12 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
 
     public override string ToString() => AddressUtility.ToString(Address);
 
+    public bool Verify(object obj, byte[] signature)
+        => PublicKeyUtility.Verify(PublicKey, obj, signature);
+
     public Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken)
-        => AddTransactionAsync(_privateKey, actions, cancellationToken);
+        => AddTransactionAsync(
+            PrivateKeyUtility.FromSecureString(_privateKey), actions, cancellationToken);
 
     public async Task<TxId> AddTransactionAsync(
         PrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
@@ -141,7 +140,7 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(_startTask is not null, "Swarm has been started.");
 
-        var privateKey = _privateKey;
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var storePath = _storePath;
         var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
         var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
@@ -211,6 +210,7 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
         _consensusEndPoint = consensusEndPoint;
         NodeOptions = nodeOptions;
         IsRunning = true;
+        UpdateNodeInfo();
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -230,6 +230,7 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
         _swarm = null;
         _startTask = null;
         IsRunning = false;
+        UpdateNodeInfo();
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -268,7 +269,7 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
         }
     }
 
-    public async Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+    public long GetNextNonce(Address address)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
@@ -277,7 +278,6 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
 
         var blockChain = BlockChain;
         var nonce = blockChain.GetNextTxNonce(address);
-        await Task.CompletedTask;
         return nonce;
     }
 
@@ -317,7 +317,7 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
 
             var blockChain = _swarm!.BlockChain;
             var blockInfo = new BlockInfo(blockChain.Tip);
-
+            UpdateNodeInfo();
             BlockAppended?.Invoke(this, new(blockInfo));
         }
     }
@@ -346,5 +346,29 @@ internal sealed class Node(ApplicationOptions options) : IAsyncDisposable, IActi
         };
         var hostOptions = new HostOptions(endPoint.Host, [], endPoint.Port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
+    }
+
+    private void UpdateNodeInfo()
+    {
+        var nodeInfo = new NodeInfo
+        {
+            Address = Address,
+            AppProtocolVersion = $"{BlockChainUtility.AppProtocolVersion}",
+        };
+
+        if (IsRunning == true)
+        {
+            nodeInfo = nodeInfo with
+            {
+                SwarmEndPoint = DnsEndPointUtility.ToString(SwarmEndPoint),
+                ConsensusEndPoint = DnsEndPointUtility.ToString(ConsensusEndPoint),
+                GenesisHash = BlockChain.Genesis.Hash,
+                TipHash = BlockChain.Tip.Hash,
+                IsRunning = IsRunning,
+                Peers = [.. Peers.Select(peer => new BoundPeerInfo(peer))],
+            };
+        }
+
+        Info = nodeInfo;
     }
 }

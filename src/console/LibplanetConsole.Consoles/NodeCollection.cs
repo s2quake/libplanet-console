@@ -6,26 +6,23 @@ using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Consoles;
 
-[Export]
-[Export(typeof(INodeCollection))]
-[Export(typeof(IApplicationService))]
 [Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
-    ApplicationBase application, ApplicationOptions options, SeedService seedService)
+    ApplicationBase application, PrivateKey[] privateKeys, string storeDirectory)
     : IEnumerable<Node>, INodeCollection, IApplicationService
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
-    private readonly ApplicationOptions _options = options;
-    private readonly SeedService _seedService = seedService;
-    private readonly List<Node> _nodeList = new(options.NodeCount);
+    private readonly List<Node> _nodeList = new(privateKeys.Length);
+    private readonly string _storeDirectory = storeDirectory;
     private Node? _current;
     private bool _isDisposed;
 
@@ -111,14 +108,15 @@ internal sealed class NodeCollection(
 
     public async Task<Node> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
     {
+        var seedService = _application.GetService<SeedService>();
         var nodeOptions = new NodeOptions
         {
             GenesisOptions = _application.GenesisOptions,
-            BlocksyncSeedPeer = _seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
+            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
+            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
         };
         var endPoint = DnsEndPointUtility.Next();
-        var storeDirectory = _options.StorePath;
+        var storeDirectory = _storeDirectory;
         var container = _application.CreateChildContainer();
         _ = new NodeProcess(endPoint, privateKey, storeDirectory);
         var node = CreateNew(container, privateKey, endPoint);
@@ -130,11 +128,12 @@ internal sealed class NodeCollection(
     public async Task<Node> AttachAsync(
         EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
+        var seedService = _application.GetService<SeedService>();
         var nodeOptions = new NodeOptions
         {
             GenesisOptions = _application.GenesisOptions,
-            BlocksyncSeedPeer = _seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = _seedService.ConsensusSeedPeer,
+            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
+            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
         };
         var container = _application.CreateChildContainer();
         var node = CreateNew(container, privateKey, endPoint);
@@ -147,15 +146,12 @@ internal sealed class NodeCollection(
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        if (_options.NodeCount > 0)
-        {
-            await Parallel.ForAsync(0, _options.NodeCount, cancellationToken, BodyAsync);
-            Current = _nodeList.FirstOrDefault();
-        }
+        await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
+        Current = _nodeList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = _application.ReservedKeys[index];
+            var privateKey = privateKeys[index];
             await AddNewAsync(privateKey, cancellationToken);
         }
     }

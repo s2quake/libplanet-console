@@ -6,11 +6,17 @@ namespace LibplanetConsole.Clients.Services;
 
 [Export(typeof(ILocalService))]
 [Export(typeof(IClientService))]
-[method: ImportingConstructor]
-internal sealed class ClientService(Client client)
-    : LocalService<IClientService, IClientCallback>, IClientService
+internal sealed class ClientService : LocalService<IClientService, IClientCallback>, IClientService
 {
-    private readonly Client _client = client;
+    private readonly Client _client;
+
+    [ImportingConstructor]
+    public ClientService(Client client)
+    {
+        _client = client;
+        _client.Started += (s, e) => Callback.OnStarted(_client.Info);
+        _client.Stopped += (s, e) => Callback.OnStopped();
+    }
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {

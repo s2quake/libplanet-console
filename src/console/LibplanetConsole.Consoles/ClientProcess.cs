@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Net;
+using JSSoft.Terminals;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
@@ -38,6 +40,7 @@ internal sealed class ClientProcess : IDisposable
         {
             StartInfo = startInfo,
         };
+        _process.ErrorDataReceived += Process_ErrorDataReceived;
         _process.Start();
     }
 
@@ -54,6 +57,14 @@ internal sealed class ClientProcess : IDisposable
         if (_process.HasExited != true)
         {
             _process.Close();
+        }
+    }
+
+    private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (e.Data is string text)
+        {
+            Console.Error.WriteColoredLine(text, TerminalColorType.Red);
         }
     }
 }

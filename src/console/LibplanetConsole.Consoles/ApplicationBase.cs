@@ -11,33 +11,32 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     private readonly CompositionContainer _container;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
-    private readonly ApplicationOptions _options = new();
     private readonly ConsoleServiceContext _consoleContext;
-    private readonly PrivateKey[] _reservedKeys;
 
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _options = options.GetActualOptions();
         _container = new(
             new DirectoryCatalog(Path.GetDirectoryName(GetType().Assembly.Location)!));
+        _nodes = new NodeCollection(this, options.Nodes, options.StoreDirectory);
+        _clients = new ClientCollection(this, options.Clients);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
-        _container.ComposeExportedValue(_options);
-        _nodes = _container.GetExportedValue<NodeCollection>() ??
-            throw new InvalidOperationException($"'{typeof(NodeCollection)}' is not found.");
-        _clients = _container.GetExportedValue<ClientCollection>() ??
-            throw new InvalidOperationException($"'{typeof(ClientCollection)}' is not found.");
+        _container.ComposeExportedValue(_nodes);
+        _container.ComposeExportedValue<INodeCollection>(_nodes);
+        _container.ComposeExportedValue<IApplicationService>(_nodes);
+        _container.ComposeExportedValue(_clients);
+        _container.ComposeExportedValue<IClientCollection>(_clients);
+        _container.ComposeExportedValue<IApplicationService>(_clients);
         _consoleContext = _container.GetExportedValue<ConsoleServiceContext>() ??
             throw new InvalidOperationException($"'{typeof(ConsoleServiceContext)}' is not found.");
-        _reservedKeys
-            = [.. Enumerable.Range(0, options.NodeCount).Select(item => new PrivateKey())];
+        _consoleContext.EndPoint = options.EndPoint;
         GenesisOptions = new()
         {
             GenesisKey = new(),
-            GenesisValidators = [.. _reservedKeys.Select(item => item.PublicKey)],
+            GenesisValidators = [.. options.Nodes.Select(item => item.PublicKey)],
             Timestamp = DateTimeOffset.UtcNow,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
@@ -45,9 +44,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public PrivateKey[] ReservedKeys => _reservedKeys;
-
-    public GenesisOptions GenesisOptions { get; }
+    internal GenesisOptions GenesisOptions { get; }
 
     public IClient GetClient(string address)
     {
