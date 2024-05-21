@@ -2,6 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Clients;
+using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Consoles.Commands;
 
@@ -11,10 +12,8 @@ namespace LibplanetConsole.Consoles.Commands;
 internal sealed partial class ClientCommand(IApplication application, IClientCollection clients)
     : CommandMethodBase
 {
-    [CommandProperty(InitValue = 10)]
-    public int Tick { get; set; }
-
     [CommandMethod]
+    [CommandSummary("Displays the list of clients.")]
     public void List()
     {
         var tsb = new TerminalStringBuilder();
@@ -26,13 +25,34 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
             tsb.IsBold = item.IsRunning == true;
             tsb.AppendLine($"{item}");
             tsb.ResetOptions();
+            tsb.Append(string.Empty);
         }
 
         Out.Write(tsb.ToString());
     }
 
     [CommandMethod]
-    public async Task StartAsync(string address, CancellationToken cancellationToken)
+    [CommandSummary("Creates a new client.")]
+    public async Task NewAsync(CancellationToken cancellationToken)
+    {
+        var client = await clients.AddNewAsync(cancellationToken);
+        var clientInfo = client.Info;
+        await Out.WriteLineAsJsonAsync(clientInfo);
+    }
+
+    [CommandMethod]
+    [CommandSummary("Deletes a client of the specified address.\n" +
+                    "If the address is not specified, current client is used.")]
+    public async Task DeleteAsync(string address = "")
+    {
+        var client = application.GetClient(address);
+        await client.DisposeAsync();
+    }
+
+    [CommandMethod]
+    [CommandSummary("Starts a client of the specified address.\n" +
+                    "If the address is not specified, current client is used.")]
+    public async Task StartAsync(string address = "", CancellationToken cancellationToken = default)
     {
         var client = application.GetClient(address);
         var node = GetRandomNode(application);
@@ -44,16 +64,20 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
     }
 
     [CommandMethod]
-    public async Task StopAsync(string address, CancellationToken cancellationToken)
+    [CommandSummary("Stops a client of the specified address.\n" +
+                    "If the address is not specified, current client is used.")]
+    public async Task StopAsync(string address = "", CancellationToken cancellationToken = default)
     {
         var client = application.GetClient(address);
         await client.StopAsync(cancellationToken);
     }
 
     [CommandMethod]
-    public void Current(string? address = null)
+    [CommandSummary("Selects a client of the specified address.\n" +
+                    "If the address is not specified, displays the current client.")]
+    public void Current(string address = "")
     {
-        if (address is not null && application.GetClient(address) is { } client)
+        if (address != string.Empty && application.GetClient(address) is { } client)
         {
             clients.Current = client;
         }

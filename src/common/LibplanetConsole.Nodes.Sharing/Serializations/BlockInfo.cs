@@ -1,14 +1,15 @@
+using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public record class BlockInfo
+public sealed record class BlockInfo
 {
     public BlockInfo(Block block)
     {
         Index = block.Index;
-        Hash = block.Hash.ToString();
-        Miner = block.Miner.ToString();
+        Hash = block.Hash;
+        Miner = block.Miner;
         Transactions = block.Transactions.Select(item => new TransactionInfo(item)).ToArray();
     }
 
@@ -18,9 +19,9 @@ public record class BlockInfo
 
     public long Index { get; init; }
 
-    public string Hash { get; init; } = string.Empty;
+    public BlockHash Hash { get; init; }
 
-    public string Miner { get; init; } = string.Empty;
+    public Address Miner { get; init; }
 
     public TransactionInfo[] Transactions { get; init; } = [];
 }

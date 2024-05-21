@@ -16,12 +16,10 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     public NodeService(Node node)
     {
         _node = node;
+        _node.Started += (s, e) => Callback.OnStarted(_node.Info);
+        _node.Stopped += (s, e) => Callback.OnStopped();
         _node.BlockAppended += Node_BlockAppended;
     }
-
-    public NodeInfo Info => _node.Info;
-
-    public bool IsRunning => _node.IsRunning;
 
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -39,16 +37,18 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     public Task StopAsync(CancellationToken cancellationToken)
         => _node.StopAsync(cancellationToken);
 
-    public async Task<byte[]> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         byte[] transaction, CancellationToken cancellationToken)
     {
         var tx = Transaction.Deserialize(transaction);
         await _node.AddTransactionAsync(tx, cancellationToken);
-        return [.. tx.Id.ByteArray];
+        return tx.Id;
     }
 
-    public Task<long> GetNextNonceAsync(string address, CancellationToken cancellationToken)
-        => _node.GetNextNonceAsync(new Address(address), cancellationToken);
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+    {
+        return Task.Run(() => _node.GetNextNonce(address), cancellationToken);
+    }
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {

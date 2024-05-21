@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -16,8 +19,50 @@ public static class PrivateKeyUtility
 
     public static PrivateKey Parse(string text) => new(text);
 
+    public static bool TryParse(string text, [MaybeNullWhen(false)] out PrivateKey privateKey)
+    {
+        try
+        {
+            privateKey = Parse(text);
+            return true;
+        }
+        catch
+        {
+            privateKey = null;
+            return false;
+        }
+    }
+
     public static string ToString(PrivateKey privateKey) =>
         ByteUtil.Hex(privateKey.ByteArray);
+
+    public static PrivateKey FromSecureString(SecureString secureString)
+    {
+        var ptr = IntPtr.Zero;
+        try
+        {
+            ptr = Marshal.SecureStringToGlobalAllocUnicode(secureString);
+            var text = Marshal.PtrToStringUni(ptr)!;
+            var bytes = ByteUtil.ParseHex(text);
+            return new(bytes);
+        }
+        finally
+        {
+            Marshal.ZeroFreeGlobalAllocUnicode(ptr);
+        }
+    }
+
+    public static SecureString ToSecureString(PrivateKey privateKey)
+    {
+        var secureString = new SecureString();
+        var text = ByteUtil.Hex(privateKey.ByteArray);
+        foreach (var item in text)
+        {
+            secureString.AppendChar(item);
+        }
+
+        return secureString;
+    }
 
     public static object? Decrypt(PrivateKey privateKey, string text, Type type)
     {
@@ -36,5 +81,12 @@ public static class PrivateKeyUtility
         }
 
         throw new InvalidOperationException($"Failed to decrypt {text} as {typeof(T)}.");
+    }
+
+    public static byte[] Sign(PrivateKey privateKey, object obj)
+    {
+        var json = JsonSerializer.Serialize(obj);
+        var bytes = Encoding.UTF8.GetBytes(json);
+        return privateKey.Sign(bytes);
     }
 }

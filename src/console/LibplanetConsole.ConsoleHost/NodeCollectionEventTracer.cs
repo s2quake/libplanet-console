@@ -106,8 +106,8 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
-        var hash = blockInfo.Hash[0..8];
-        var miner = blockInfo.Miner[0..8];
+        var hash = (ShortBlockHash)blockInfo.Hash;
+        var miner = (ShortAddress)blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
         Writer.WriteColoredLine(message, TerminalColorType.BrightBlue);
     }

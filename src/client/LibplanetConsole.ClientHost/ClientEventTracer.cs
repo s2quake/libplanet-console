@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Clients;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
@@ -32,8 +33,8 @@ internal sealed class ClientEventTracer(IClient client)
     private void Client_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
-        var hash = blockInfo.Hash[0..8];
-        var miner = blockInfo.Miner[0..8];
+        var hash = (ShortBlockHash)blockInfo.Hash;
+        var miner = (ShortAddress)blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
         Console.WriteLine(
             TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
@@ -42,15 +43,13 @@ internal sealed class ClientEventTracer(IClient client)
     private void Client_Started(object? sender, EventArgs e)
     {
         var message = $"Client has been started.";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
         Console.Out.WriteLineAsJson(client.Info);
     }
 
-    private void Client_Stopped(object? sender, EventArgs e)
+    private void Client_Stopped(object? sender, StopEventArgs e)
     {
-        var message = $"BlockChain has been stopped.";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
+        var message = $"Client has been stopped: {e.Reason}.";
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 }

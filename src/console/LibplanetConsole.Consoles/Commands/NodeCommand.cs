@@ -3,23 +3,23 @@ using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides node-related commands.")]
 [method: ImportingConstructor]
-internal sealed partial class NodeCommand(IApplication application, INodeCollection nodes)
+internal sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
     : CommandMethodBase
 {
     [CommandPropertySwitch("detail")]
     public bool IsDetailed { get; set; }
 
-    [CommandProperty("promote", 'p', DefaultValue = 10)]
-    public double PromoteAmount { get; set; }
-
     [CommandMethod]
     [CommandMethodProperty(nameof(IsDetailed))]
+    [CommandSummary("Displays the list of nodes.")]
     public void List()
     {
         GetListAction(IsDetailed).Invoke();
@@ -32,7 +32,7 @@ internal sealed partial class NodeCommand(IApplication application, INodeCollect
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(PromoteAmount))]
+    [CommandSummary("Creates a new node.")]
     public async Task NewAsync(CancellationToken cancellationToken)
     {
         var node = await nodes.AddNewAsync(cancellationToken);
@@ -41,23 +41,45 @@ internal sealed partial class NodeCommand(IApplication application, INodeCollect
     }
 
     [CommandMethod]
-    public async Task InfoAsync(string address, CancellationToken cancellationToken)
+    [CommandSummary("Deletes a node of the specified address.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public async Task DeleteAsync(string address = "")
     {
         var node = application.GetNode(address);
-        var nodeInfo = await node.GetInfoAsync(cancellationToken);
-        await Out.WriteLineAsJsonAsync(nodeInfo);
+        await node.DisposeAsync();
     }
 
     [CommandMethod]
-    public async Task Start(string address, CancellationToken cancellationToken)
+    [CommandSummary("Displays the node information of the specified address.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public void Info(string address = "")
     {
-        // var node = application.GetNode(address);
-        // await node.StartAsync(cancellationToken);
+        var node = application.GetNode(address);
+        var nodeInfo = node.Info;
+        Out.WriteLineAsJson(nodeInfo);
+    }
+
+    [CommandMethod]
+    [CommandSummary("Starts a node of the specified address.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public async Task Start(string address = "", CancellationToken cancellationToken = default)
+    {
+        var node = application.GetNode(address);
+        var seedService = application.GetService<SeedService>();
+        var nodeOptions = new NodeOptions
+        {
+            GenesisOptions = application.GenesisOptions,
+            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
+            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
+        };
+        await node.StartAsync(nodeOptions, cancellationToken);
         await Task.CompletedTask;
     }
 
     [CommandMethod]
-    public async Task Stop(string address, CancellationToken cancellationToken)
+    [CommandSummary("Stops a node of the specified address.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public async Task Stop(string address = "", CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(address);
         await node.StopAsync(cancellationToken);
@@ -74,9 +96,11 @@ internal sealed partial class NodeCommand(IApplication application, INodeCollect
     }
 
     [CommandMethod]
-    public void Current(string? address = null)
+    [CommandSummary("Selects a node of the specified address.\n" +
+                    "If the address is not specified, displays the current node.")]
+    public void Current(string address = "")
     {
-        if (address is not null && application.GetNode(address) is { } node)
+        if (address != string.Empty && application.GetNode(address) is { } node)
         {
             nodes.Current = node;
         }

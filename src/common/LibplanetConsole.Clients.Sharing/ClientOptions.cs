@@ -3,7 +3,7 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Clients;
 
-public record class ClientOptions
+public sealed record class ClientOptions
 {
     public static ClientOptions Default { get; } = new ClientOptions();
 

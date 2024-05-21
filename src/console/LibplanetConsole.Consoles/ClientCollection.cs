@@ -7,23 +7,20 @@ using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles;
 
-[Export]
-[Export(typeof(IClientCollection))]
-[Export(typeof(IApplicationService))]
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
 internal sealed class ClientCollection(
-    ApplicationBase application, ApplicationOptions options, NodeCollection nodes)
+    ApplicationBase application, PrivateKey[] clients)
     : IEnumerable<Client>, IClientCollection, IApplicationService
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
-    private readonly ApplicationOptions _options = options;
-    private readonly List<Client> _clientList = new(options.ClientCount);
+    private readonly List<Client> _clientList = new(clients.Length);
     private Client? _current;
     private bool _isDisposed;
 
@@ -110,6 +107,7 @@ internal sealed class ClientCollection(
     public async Task<Client> AddNewAsync(
         PrivateKey privateKey, CancellationToken cancellationToken)
     {
+        var nodes = _application.GetService<NodeCollection>();
         var node = nodes.RandomNode();
         var clientOptions = new ClientOptions()
         {
@@ -127,6 +125,7 @@ internal sealed class ClientCollection(
     public async Task<Client> AttachAsync(
         EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
     {
+        var nodes = _application.GetService<NodeCollection>();
         var node = nodes.RandomNode();
         var clientOptions = new ClientOptions()
         {
@@ -142,15 +141,12 @@ internal sealed class ClientCollection(
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        if (_options.ClientCount > 0)
-        {
-            await Parallel.ForAsync(0, _options.ClientCount, cancellationToken, BodyAsync);
-            Current = _clientList.FirstOrDefault();
-        }
+        await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
+        Current = _clientList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = new PrivateKey();
+            var privateKey = clients[index];
             await AddNewAsync(privateKey, cancellationToken);
         }
     }

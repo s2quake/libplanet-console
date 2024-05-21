@@ -1,17 +1,18 @@
 using System.ComponentModel.Composition;
+using System.Net;
 using JSSoft.Commands;
-using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Clients.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Start client.")]
 [method: ImportingConstructor]
-internal sealed class StartCommand(IClient client) : CommandAsyncBase
+internal sealed class StartCommand(ApplicationBase application, Client client) : CommandAsyncBase
 {
     public override bool IsEnabled => client.IsRunning is false;
 
-    [CommandPropertyRequired]
+    [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
     public string NodeEndPoint { get; set; } = string.Empty;
 
@@ -23,12 +24,22 @@ internal sealed class StartCommand(IClient client) : CommandAsyncBase
     protected override async Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
-        var seedEndPoint = NodeEndPoint;
         var clientOptions = new ClientOptions
         {
-            NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(seedEndPoint, cancellationToken),
+            NodeEndPoint = await GetNodeEndPointAsync(cancellationToken),
         };
         await client.StartAsync(clientOptions, cancellationToken);
-        await Out.WriteLineAsJsonAsync(client.Info);
+    }
+
+    private async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
+    {
+        var text = NodeEndPoint != string.Empty ? NodeEndPoint : application.Info.NodeEndPoint;
+        var nodeEndPoint = EndPointUtility.Parse(text);
+        if (IsSeed == true)
+        {
+            return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);
+        }
+
+        return nodeEndPoint;
     }
 }

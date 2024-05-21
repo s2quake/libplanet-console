@@ -10,10 +10,10 @@ namespace LibplanetConsole.NodeHost.QuickStarts;
 internal sealed class SampleNodeService : LocalService<ISampleNodeService, ISampleNodeCallbak>,
     ISampleNodeService, IDisposable
 {
-    private readonly SampleNodeContent _sampleNode;
+    private readonly SampleNode _sampleNode;
 
     [ImportingConstructor]
-    public SampleNodeService(SampleNodeContent sampleNode)
+    public SampleNodeService(SampleNode sampleNode)
     {
         _sampleNode = sampleNode;
         _sampleNode.Subscribed += SampleNode_Subscribed;

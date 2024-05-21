@@ -1,5 +1,6 @@
 using System.ComponentModel.Composition;
 using JSSoft.Terminals;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
@@ -30,8 +31,8 @@ internal sealed class NodeEventTracer(IApplication application, INode node) : IA
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
-        var hash = blockInfo.Hash[0..8];
-        var miner = blockInfo.Miner[0..8];
+        var hash = (ShortBlockHash)blockInfo.Hash;
+        var miner = (ShortAddress)blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
         Console.WriteLine(
             TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));

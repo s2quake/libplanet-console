@@ -4,5 +4,7 @@ public readonly record struct ApplicationInfo
 {
     public string EndPoint { get; init; }
 
-    public NodeInfo NodeInfo { get; init; }
+    public string NodeEndPoint { get; init; }
+
+    public string StorePath { get; init; }
 }

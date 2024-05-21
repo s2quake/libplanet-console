@@ -25,15 +25,15 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider
 
     NodeOptions NodeOptions { get; }
 
-    PrivateKey PrivateKey { get; }
+    PublicKey PublicKey { get; }
 
-    PublicKey PublicKey => PrivateKey.PublicKey;
-
-    Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken);
+    byte[] Sign(object obj);
 
     Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+
+    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 }
