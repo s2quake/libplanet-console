@@ -5,6 +5,8 @@
     <ProjectReference Include="..\..\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
     <ProjectReference Include="..\..\node\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj" />
     <ProjectReference Include="..\..\node\LibplanetConsole.Nodes.Examples\LibplanetConsole.Nodes.Examples.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Nodes.Banks\LibplanetConsole.Nodes.Banks.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Nodes.Stakings\LibplanetConsole.Nodes.Stakings.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,6 +3,7 @@ using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Consoles.Extensions;
 using LibplanetConsole.Consoles.Services;
 
 namespace LibplanetConsole.Consoles.Commands;
