@@ -300,13 +300,18 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
         GC.SuppressFinalize(this);
     }
 
-    void IRenderer.RenderBlock(Block oldTip, Block newTip)
+    async void IRenderer.RenderBlock(Block oldTip, Block newTip)
     {
+        var blockChain = _swarm!.BlockChain;
+        while (blockChain.Tip.Index < newTip.Index)
+        {
+            await Task.Delay(100);
+        }
+
         _synchronizationContext.Post(Action, state: null);
 
         void Action(object? state)
         {
-            var height = newTip.Index;
             foreach (var transaction in newTip.Transactions)
             {
                 if (_eventByTxId.TryGetValue(transaction.Id, out var manualResetEvent) == true)
@@ -315,7 +320,6 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
                 }
             }
 
-            var blockChain = _swarm!.BlockChain;
             var blockInfo = new BlockInfo(blockChain.Tip);
             UpdateNodeInfo();
             BlockAppended?.Invoke(this, new(blockInfo));

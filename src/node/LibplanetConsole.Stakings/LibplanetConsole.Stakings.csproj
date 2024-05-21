@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\node\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Banks\LibplanetConsole.Banks.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\common\LibplanetConsole.Stakings.Sharing\LibplanetConsole.Stakings.Sharing.projitems" Label="Shared" />
+
+</Project>

@@ -46,48 +46,31 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     internal GenesisOptions GenesisOptions { get; }
 
-    public IClient GetClient(string address)
+    public IClient GetClient(Address? address)
     {
-        if (address == string.Empty)
+        if (address is null)
         {
-            return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
+            return _clients.Current ??
+                throw new InvalidOperationException("No client is selected.");
         }
 
-        return _clients.Where<Client>(item => $"{item.Address}".StartsWith(address))
-                       .Single();
+        return _clients.First<Client>(item => item.Address == address);
     }
 
-    public INode GetNode(string address)
+    public INode GetNode(Address? address)
     {
-        if (address == string.Empty)
+        if (address is null)
         {
             return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _nodes.Where<Node>(item => $"{item.Address}".StartsWith(address))
-                     .Single();
-    }
-
-    public IAddressable GetAddressable(string address)
-    {
-        return _nodes.Concat<IAddressable>(_clients)
-                     .Where(item => $"{item.Address}".StartsWith(address))
-                     .Single();
+        return _nodes.First<Node>(item => item.Address == address);
     }
 
     public IAddressable GetAddressable(Address address)
     {
-        if (_nodes.Contains(address) == true)
-        {
-            return _nodes[address];
-        }
-
-        if (_clients.Contains(address) == true)
-        {
-            return _clients[address];
-        }
-
-        throw new ArgumentException("Invalid address.", nameof(address));
+        return _nodes.Concat<IAddressable>(_clients)
+                     .First(item => item.Address == address);
     }
 
     public override object? GetService(Type serviceType)

@@ -14,3 +14,7 @@
 	path = .communication
 	url = https://github.com/s2quake/communication.git
 	fetchRecurseSubmodules = no
+[submodule ".lib9c"]
+	path = .lib9c
+	url = https://github.com/s2quake/lib9c.git
+	fetchRecurseSubmodules = no

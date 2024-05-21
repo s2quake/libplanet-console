@@ -75,6 +75,30 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Clients.Sh
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Nodes.Sharing", "src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.shproj", "{F656916C-C43A-4427-BD74-8742401B2D29}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".lib9c", ".lib9c", "{D90BA5D5-244A-4745-AE1B-792C8CCE3460}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib9c", ".lib9c\Lib9c\Lib9c.csproj", "{1582C19B-5887-42C0-8353-9ABF43A21952}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Stakings", "src\node\LibplanetConsole.Stakings\LibplanetConsole.Stakings.csproj", "{E6A28693-FFEF-4A15-AC82-3224142F6090}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Banks", "src\node\LibplanetConsole.Banks\LibplanetConsole.Banks.csproj", "{CD5E1777-22A7-4A10-ADC9-5E9ACCEE5042}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Banks", "src\console\LibplanetConsole.Banks\LibplanetConsole.Banks.csproj", "{85B8EB45-27FC-4189-B402-08E84F4C070A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Stakings", "src\console\LibplanetConsole.Stakings\LibplanetConsole.Stakings.csproj", "{10B29B77-C2E6-4309-B7B9-E5B77C7931CD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Banks", "src\client\LibplanetConsole.Banks\LibplanetConsole.Banks.csproj", "{B097CDF3-D01B-406A-9252-B81780ADD347}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Banks.Sharing", "src\common\LibplanetConsole.Banks.Sharing\LibplanetConsole.Banks.Sharing.shproj", "{125F65DB-F9CF-4006-BE9C-C0270A24FA83}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Stakings.Sharing", "src\common\LibplanetConsole.Stakings.Sharing\LibplanetConsole.Stakings.Sharing.shproj", "{BA57A542-645F-4D4C-BD4D-9D36BE423F51}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib9c.Abstractions", ".lib9c\Lib9c.Abstractions\Lib9c.Abstractions.csproj", "{EB2569A0-89E4-444E-8BA8-C93AB0DA46C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Analyzers", ".libplanet\Libplanet.Analyzers\Libplanet.Analyzers.csproj", "{72D5B587-6DB5-4FC2-AD25-CB1DD1ED581E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Stakings", "src\client\LibplanetConsole.Stakings\LibplanetConsole.Stakings.csproj", "{91C204EB-40CE-48C9-B633-35A53E5FBCB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -173,6 +197,42 @@ Global
 		{217938CF-B2B8-41BB-A193-475430421265}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{217938CF-B2B8-41BB-A193-475430421265}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{217938CF-B2B8-41BB-A193-475430421265}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1582C19B-5887-42C0-8353-9ABF43A21952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1582C19B-5887-42C0-8353-9ABF43A21952}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1582C19B-5887-42C0-8353-9ABF43A21952}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1582C19B-5887-42C0-8353-9ABF43A21952}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6A28693-FFEF-4A15-AC82-3224142F6090}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6A28693-FFEF-4A15-AC82-3224142F6090}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6A28693-FFEF-4A15-AC82-3224142F6090}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6A28693-FFEF-4A15-AC82-3224142F6090}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD5E1777-22A7-4A10-ADC9-5E9ACCEE5042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD5E1777-22A7-4A10-ADC9-5E9ACCEE5042}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD5E1777-22A7-4A10-ADC9-5E9ACCEE5042}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD5E1777-22A7-4A10-ADC9-5E9ACCEE5042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85B8EB45-27FC-4189-B402-08E84F4C070A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85B8EB45-27FC-4189-B402-08E84F4C070A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85B8EB45-27FC-4189-B402-08E84F4C070A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85B8EB45-27FC-4189-B402-08E84F4C070A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10B29B77-C2E6-4309-B7B9-E5B77C7931CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10B29B77-C2E6-4309-B7B9-E5B77C7931CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10B29B77-C2E6-4309-B7B9-E5B77C7931CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10B29B77-C2E6-4309-B7B9-E5B77C7931CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B097CDF3-D01B-406A-9252-B81780ADD347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B097CDF3-D01B-406A-9252-B81780ADD347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B097CDF3-D01B-406A-9252-B81780ADD347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B097CDF3-D01B-406A-9252-B81780ADD347}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB2569A0-89E4-444E-8BA8-C93AB0DA46C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB2569A0-89E4-444E-8BA8-C93AB0DA46C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB2569A0-89E4-444E-8BA8-C93AB0DA46C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB2569A0-89E4-444E-8BA8-C93AB0DA46C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72D5B587-6DB5-4FC2-AD25-CB1DD1ED581E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72D5B587-6DB5-4FC2-AD25-CB1DD1ED581E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72D5B587-6DB5-4FC2-AD25-CB1DD1ED581E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72D5B587-6DB5-4FC2-AD25-CB1DD1ED581E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91C204EB-40CE-48C9-B633-35A53E5FBCB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91C204EB-40CE-48C9-B633-35A53E5FBCB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91C204EB-40CE-48C9-B633-35A53E5FBCB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91C204EB-40CE-48C9-B633-35A53E5FBCB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -208,14 +268,36 @@ Global
 		{217938CF-B2B8-41BB-A193-475430421265} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{2FFED165-D285-415D-B421-64D41B5199D0} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
 		{F656916C-C43A-4427-BD74-8742401B2D29} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
+		{1582C19B-5887-42C0-8353-9ABF43A21952} = {D90BA5D5-244A-4745-AE1B-792C8CCE3460}
+		{E6A28693-FFEF-4A15-AC82-3224142F6090} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
+		{CD5E1777-22A7-4A10-ADC9-5E9ACCEE5042} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
+		{85B8EB45-27FC-4189-B402-08E84F4C070A} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
+		{10B29B77-C2E6-4309-B7B9-E5B77C7931CD} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
+		{B097CDF3-D01B-406A-9252-B81780ADD347} = {1DEAA4CE-E29B-4379-BAF6-20B79A5946CB}
+		{125F65DB-F9CF-4006-BE9C-C0270A24FA83} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
+		{BA57A542-645F-4D4C-BD4D-9D36BE423F51} = {0F5944E2-178A-44BF-8A09-29CAD668764A}
+		{EB2569A0-89E4-444E-8BA8-C93AB0DA46C8} = {D90BA5D5-244A-4745-AE1B-792C8CCE3460}
+		{72D5B587-6DB5-4FC2-AD25-CB1DD1ED581E} = {23C68389-8F13-48E7-9878-440917F70DAF}
+		{91C204EB-40CE-48C9-B633-35A53E5FBCB9} = {1DEAA4CE-E29B-4379-BAF6-20B79A5946CB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17923332-7B94-40B9-9A98-5556630B4B2F}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\common\LibplanetConsole.Stakings.Sharing\LibplanetConsole.Stakings.Sharing.projitems*{10b29b77-c2e6-4309-b7b9-e5b77c7931cd}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Banks.Sharing\LibplanetConsole.Banks.Sharing.projitems*{125f65db-f9cf-4006-be9c-c0270a24fa83}*SharedItemsImports = 13
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{217938cf-b2b8-41bb-a193-475430421265}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{2ffed165-d285-415d-b421-64d41b5199d0}*SharedItemsImports = 13
 		src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{7b2d3bf1-a244-4868-a6b7-b717db7bcaa2}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{7b2d3bf1-a244-4868-a6b7-b717db7bcaa2}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Banks.Sharing\LibplanetConsole.Banks.Sharing.projitems*{85b8eb45-27fc-4189-b402-08e84f4c070a}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Stakings.Sharing\LibplanetConsole.Stakings.Sharing.projitems*{91c204eb-40ce-48c9-b633-35a53e5fbcb9}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Banks.Sharing\LibplanetConsole.Banks.Sharing.projitems*{b097cdf3-d01b-406a-9252-b81780add347}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Stakings.Sharing\LibplanetConsole.Stakings.Sharing.projitems*{ba57a542-645f-4d4c-bd4d-9d36be423f51}*SharedItemsImports = 13
+		src\common\LibplanetConsole.Banks.Sharing\LibplanetConsole.Banks.Sharing.projitems*{cd5e1777-22a7-4a10-adc9-5e9accee5042}*SharedItemsImports = 5
+		src\common\LibplanetConsole.Stakings.Sharing\LibplanetConsole.Stakings.Sharing.projitems*{e6a28693-ffef-4a15-ac82-3224142f6090}*SharedItemsImports = 5
 		src\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{f656916c-c43a-4427-bd74-8742401b2d29}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
