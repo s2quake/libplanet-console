@@ -1,5 +1,4 @@
 using System.Net;
-using System.Reflection;
 using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -43,6 +42,10 @@ public sealed record class ApplicationCommandOptions
                     "If genesis block does not need to create, this option is ignored.")]
     public string[] GenesisValidators { get; init; } = [];
 
+    [CommandProperty]
+    [CommandSummary("The file path to store log.")]
+    public string LogPath { get; set; } = string.Empty;
+
     public static implicit operator ApplicationOptions(ApplicationCommandOptions options)
     {
         var endPoint = options.GetEndPoint();
@@ -52,9 +55,13 @@ public sealed record class ApplicationCommandOptions
             ParentProcessId = options.ParentProcessId,
             AutoStart = options.AutoStart,
             NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(options.NodeEndPoint),
-            StorePath = options.StorePath,
             GenesisValidators = options.GetGenesisValidators(privateKey.PublicKey),
+            StorePath = GetFullPath(options.StorePath),
+            LogPath = GetFullPath(options.LogPath),
         };
+
+        static string GetFullPath(string path)
+            => path != string.Empty ? Path.GetFullPath(path) : path;
     }
 
     public static ApplicationCommandOptions Parse(string[] args)

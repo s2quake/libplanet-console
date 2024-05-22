@@ -115,7 +115,11 @@ internal sealed class ClientCollection(
         };
         var endPoint = DnsEndPointUtility.Next();
         var container = _application.CreateChildContainer();
-        _ = new ClientProcess(endPoint, privateKey);
+        var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
+        {
+            LogDirectory = _application.Info.LogDirectory,
+        };
+        _ = new ClientProcess(clientProcessOptions);
         var client = CreateNew(container, privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);

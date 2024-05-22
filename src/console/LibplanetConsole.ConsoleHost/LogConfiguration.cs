@@ -10,18 +10,22 @@ namespace LibplanetConsole.ConsoleHost;
 [ConfigurationName("log")]
 internal sealed class LogConfiguration : IApplicationConfiguration
 {
-    public LogConfiguration()
+    [ImportingConstructor]
+    public LogConfiguration(ILogger logger)
     {
-        Log.Logger = new LoggerConfiguration().Filter.ByIncludingOnly(Predicate)
-                                              .WriteTo.Console()
+        Log.Logger = new LoggerConfiguration().WriteTo.Logger(logger)
+                                              .WriteTo.Logger(WriteToConsole)
                                               .CreateLogger();
+
+        void WriteToConsole(LoggerConfiguration loggerConfiguration)
+        {
+            loggerConfiguration.Filter.ByIncludingOnly(Predicate).WriteTo.Console();
+        }
     }
 
     [ConfigurationProperty("visible")]
     public bool IsVisible { get; set; }
 
-    // [ConfigurationProperty]
-    // public LogEventLevel Level { get; set; } = LogEventLevel.Error;
     private bool Predicate(LogEvent logEvent)
     {
         if (IsVisible != true)
@@ -29,8 +33,6 @@ internal sealed class LogConfiguration : IApplicationConfiguration
             return false;
         }
 
-        // if (logEvent.Level < Level)
-        //     return false;
         return true;
     }
 }

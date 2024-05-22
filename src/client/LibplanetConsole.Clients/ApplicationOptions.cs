@@ -20,4 +20,6 @@ public sealed record class ApplicationOptions
     public bool IsSeed { get; init; }
 
     public EndPoint? NodeEndPoint { get; init; }
+
+    public string LogPath { get; init; } = string.Empty;
 }

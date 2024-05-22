@@ -3,18 +3,17 @@ using Libplanet.Crypto;
 
 namespace LibplanetConsole.Consoles;
 
-public sealed record class ApplicationOptions
+internal sealed record class NodeProcessOptions
 {
-    public ApplicationOptions(EndPoint endPoint)
+    public NodeProcessOptions(EndPoint endPoint, PrivateKey privateKey)
     {
         EndPoint = endPoint;
+        PrivateKey = privateKey;
     }
 
     public EndPoint EndPoint { get; }
 
-    public PrivateKey[] Nodes { get; init; } = [];
-
-    public PrivateKey[] Clients { get; init; } = [];
+    public PrivateKey PrivateKey { get; }
 
     public string StoreDirectory { get; init; } = string.Empty;
 

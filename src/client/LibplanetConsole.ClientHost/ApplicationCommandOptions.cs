@@ -32,6 +32,10 @@ public sealed record class ApplicationCommandOptions
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
     public string NodeEndPoint { get; init; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("The file path to store log.")]
+    public string LogPath { get; set; } = string.Empty;
+
     public static implicit operator ApplicationOptions(ApplicationCommandOptions options)
     {
         var endPoint = options.GetEndPoint();
@@ -41,7 +45,11 @@ public sealed record class ApplicationCommandOptions
             ParentProcessId = options.ParentProcessId,
             IsSeed = options.IsSeed,
             NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(options.NodeEndPoint),
+            LogPath = GetFullPath(options.LogPath),
         };
+
+        static string GetFullPath(string path)
+            => path != string.Empty ? Path.GetFullPath(path) : path;
     }
 
     public static ApplicationCommandOptions Parse(string[] args)

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="LibplanetConsole.Tests" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
   </ItemGroup>
 

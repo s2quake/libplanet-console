@@ -2,6 +2,7 @@ bin/
 obj/
 .data
 .store
+.log
 .DS_Store
 .vs/
 .lib9c/

@@ -3,10 +3,10 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Clients.Commands;
+namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Print client application information.")]
+[CommandSummary("Print node information.")]
 [method: ImportingConstructor]
 internal sealed class InfoCommand(IApplication application) : CommandBase
 {
