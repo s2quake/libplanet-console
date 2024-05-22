@@ -7,6 +7,7 @@
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Store\Libplanet.Store.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
     <ProjectReference Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
+    <ProjectReference Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
     <ProjectReference Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
     <ProjectReference Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
   </ItemGroup>
