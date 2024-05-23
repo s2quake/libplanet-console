@@ -27,6 +27,9 @@ public static class PublicKeyUtility
     public static string ToString(PublicKey publicKey)
         => publicKey.ToHex(compress: false);
 
+    public static string ToShortString(PublicKey publicKey)
+        => publicKey.ToHex(compress: true);
+
     public static string Encrypt(PublicKey publicKey, object obj)
     {
         var json = JsonSerializer.Serialize(obj);

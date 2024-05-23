@@ -33,6 +33,7 @@ internal sealed class ClientProcess : IDisposable
         {
             startInfo.ArgumentList.Insert(0, ClientPath);
         }
+
         if (options.LogDirectory != string.Empty)
         {
             startInfo.ArgumentList.Add("--log-path");
