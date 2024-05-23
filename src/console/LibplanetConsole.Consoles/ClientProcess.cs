@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using System.Net;
 using JSSoft.Terminals;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using static LibplanetConsole.Consoles.ProcessUtility;
@@ -12,16 +10,16 @@ internal sealed class ClientProcess : IDisposable
 {
     private readonly Process _process;
 
-    public ClientProcess(EndPoint endPoint, PrivateKey privateKey)
+    public ClientProcess(ClientProcessOptions options)
     {
         var startInfo = new ProcessStartInfo
         {
             ArgumentList =
             {
                 "--end-point",
-                EndPointUtility.ToString(endPoint),
+                EndPointUtility.ToString(options.EndPoint),
                 "--private-key",
-                PrivateKeyUtility.ToString(privateKey),
+                PrivateKeyUtility.ToString(options.PrivateKey),
                 "--parent",
                 Environment.ProcessId.ToString(),
             },
@@ -34,6 +32,14 @@ internal sealed class ClientProcess : IDisposable
         if (IsWindows() != true)
         {
             startInfo.ArgumentList.Insert(0, ClientPath);
+        }
+        if (options.LogDirectory != string.Empty)
+        {
+            startInfo.ArgumentList.Add("--log-path");
+            startInfo.ArgumentList.Add(
+                Path.Combine(
+                    options.LogDirectory,
+                    $"{(ShortAddress)options.PrivateKey.Address}.log"));
         }
 
         _process = new Process

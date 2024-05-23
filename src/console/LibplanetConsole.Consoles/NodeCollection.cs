@@ -16,13 +16,12 @@ namespace LibplanetConsole.Consoles;
 [Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
-    ApplicationBase application, PrivateKey[] privateKeys, string storeDirectory)
+    ApplicationBase application, PrivateKey[] privateKeys)
     : IEnumerable<Node>, INodeCollection, IApplicationService
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
     private readonly List<Node> _nodeList = new(privateKeys.Length);
-    private readonly string _storeDirectory = storeDirectory;
     private Node? _current;
     private bool _isDisposed;
 
@@ -116,9 +115,13 @@ internal sealed class NodeCollection(
             ConsensusSeedPeer = seedService.ConsensusSeedPeer,
         };
         var endPoint = DnsEndPointUtility.Next();
-        var storeDirectory = _storeDirectory;
         var container = _application.CreateChildContainer();
-        _ = new NodeProcess(endPoint, privateKey, storeDirectory);
+        var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
+        {
+            StoreDirectory = _application.Info.StoreDirectory,
+            LogDirectory = _application.Info.LogDirectory,
+        };
+        _ = new NodeProcess(nodeProcessOptions);
         var node = CreateNew(container, privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);

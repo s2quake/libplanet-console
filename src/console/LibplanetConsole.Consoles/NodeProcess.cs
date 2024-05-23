@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using System.Net;
 using JSSoft.Terminals;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using static LibplanetConsole.Consoles.ProcessUtility;
@@ -12,16 +10,16 @@ internal sealed class NodeProcess : IDisposable
 {
     private readonly Process _process;
 
-    public NodeProcess(EndPoint endPoint, PrivateKey privateKey, string storeDirectory)
+    public NodeProcess(NodeProcessOptions options)
     {
         var startInfo = new ProcessStartInfo
         {
             ArgumentList =
             {
                 "--end-point",
-                EndPointUtility.ToString(endPoint),
+                EndPointUtility.ToString(options.EndPoint),
                 "--private-key",
-                PrivateKeyUtility.ToString(privateKey),
+                PrivateKeyUtility.ToString(options.PrivateKey),
                 "--parent",
                 Environment.ProcessId.ToString(),
             },
@@ -36,11 +34,20 @@ internal sealed class NodeProcess : IDisposable
             startInfo.ArgumentList.Insert(0, NodePath);
         }
 
-        if (storeDirectory != string.Empty)
+        if (options.StoreDirectory != string.Empty)
         {
             startInfo.ArgumentList.Add("--store-path");
             startInfo.ArgumentList.Add(
-                Path.Combine(storeDirectory, (ShortAddress)privateKey.Address));
+                Path.Combine(options.StoreDirectory, (ShortAddress)options.PrivateKey.Address));
+        }
+
+        if (options.LogDirectory != string.Empty)
+        {
+            startInfo.ArgumentList.Add("--log-path");
+            startInfo.ArgumentList.Add(
+                Path.Combine(
+                    options.LogDirectory,
+                    $"{(ShortAddress)options.PrivateKey.Address}.log"));
         }
 
         _process = new Process

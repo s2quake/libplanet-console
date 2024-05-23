@@ -2,6 +2,7 @@ using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Nodes;
+using Serilog;
 
 namespace LibplanetConsole.NodeHost;
 

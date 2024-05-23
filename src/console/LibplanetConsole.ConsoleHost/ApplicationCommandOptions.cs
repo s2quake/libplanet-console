@@ -1,5 +1,4 @@
 using System.Net;
-using System.Reflection;
 using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -42,6 +41,10 @@ public sealed record class ApplicationCommandOptions
                     "If omitted, the data is stored in memory.")]
     public string StorePath { get; init; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("The directory path to store log.")]
+    public string LogPath { get; set; } = string.Empty;
+
     public static implicit operator ApplicationOptions(ApplicationCommandOptions options)
     {
         var endPoint = options.GetEndPoint();
@@ -49,8 +52,12 @@ public sealed record class ApplicationCommandOptions
         {
             Nodes = options.GetNodes(),
             Clients = options.GetClients(),
-            StoreDirectory = options.StorePath,
+            StoreDirectory = GetFullPath(options.StorePath),
+            LogDirectory = GetFullPath(options.LogPath),
         };
+
+        static string GetFullPath(string path)
+            => path != string.Empty ? Path.GetFullPath(path) : path;
     }
 
     public static ApplicationCommandOptions Parse(string[] args)

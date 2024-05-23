@@ -1,6 +1,3 @@
-using Libplanet.Crypto;
-using LibplanetConsole.ConsoleHost;
-
 namespace LibplanetConsole.Tests;
 
 public class UnitTest1

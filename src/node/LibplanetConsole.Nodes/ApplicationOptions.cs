@@ -23,5 +23,7 @@ public sealed record class ApplicationOptions
 
     public string StorePath { get; init; } = string.Empty;
 
+    public string LogPath { get; set; } = string.Empty;
+
     public PublicKey[] GenesisValidators { get; init; } = [];
 }
