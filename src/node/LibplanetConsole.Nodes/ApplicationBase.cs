@@ -71,6 +71,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public ApplicationInfo Info => _info;
 
+    public override ILogger Logger => _logger;
+
     internal GenesisOptions DefaultGenesisOptions { get; }
 
     protected override bool CanClose => _parentProcess?.HasExited == true;

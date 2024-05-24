@@ -1,3 +1,5 @@
+using Serilog;
+
 namespace LibplanetConsole.Frameworks;
 
 public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
@@ -11,9 +13,12 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
     {
         SynchronizationContext.SetSynchronizationContext(new());
         _synchronizationContext = SynchronizationContext.Current!;
+        ApplicationLogger.SetApplication(this);
     }
 
     public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
+
+    public abstract ILogger Logger { get; }
 
     protected virtual bool CanClose => false;
 
