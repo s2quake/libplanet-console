@@ -21,22 +21,32 @@ git clone https://github.com/s2quake/libplanet-console.git --recursive
 dotnet build
 ```
 
-# Run Node
-
-```sh
-dotnet src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll -a --end-point 127.0.0.1:5353
-```
-
-> Option `-a` automatically starts the node when the application runs
-
-# Run Client
-
-```sh
-dotnet src/client/LibplanetConsole.ClientHost/bin/Debug/net8.0/libplanet-client.dll --node-end-point 127.0.0.1:5353
-```
-
 # Run Console
 
 ```sh
-dotnet src/console/LibplanetConsole.ConsoleHost/bin/Debug/net8.0/libplanet-console.dll
+dotnet .bin/libplanet-console/libplanet-console.dll
+```
+
+## Show Help
+
+```sh
+dotnet .bin/libplanet-console/libplanet-console.dll --help
+```
+
+## Node Count
+
+```sh
+dotnet .bin/libplanet-console/libplanet-console.dll --node-count 2
+```
+
+## Save states
+
+```sh
+dotnet .bin/libplanet-console/libplanet-console.dll --store-path .store
+```
+
+## Save logs
+
+```sh
+dotnet .bin/libplanet-console/libplanet-console.dll --log-path .log
 ```

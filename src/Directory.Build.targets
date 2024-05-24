@@ -1,12 +1,12 @@
 ﻿<Project>
 
-  <PropertyGroup Condition="'$(OutputType)'=='Exe'">
+  <PropertyGroup Condition="'$(OutputType)'=='Exe' And '$(NoDeploy)'!='true'">
     <BuildDependsOn>$(BuildDependsOn);CustomAfterBuild</BuildDependsOn>
     <CleanDependsOn>$(CleanDependsOn);CustomClean</CleanDependsOn>
     <_OutputCopyLocation>$(MSBuildThisFileDirectory)..\.bin\$(AssemblyName)\</_OutputCopyLocation>
   </PropertyGroup>
 
-  <Target Condition="'$(OutputType)'=='Exe'" Name="CustomAfterBuild">
+  <Target Condition="'$(OutputType)'=='Exe' And '$(NoDeploy)'!='true'" Name="CustomAfterBuild">
     <ItemGroup>
       <_FilesToCopy Include="$(OutputPath)**\*"/>
     </ItemGroup>
@@ -16,7 +16,7 @@
           DestinationFiles="@(_FilesToCopy-&gt;'$(_OutputCopyLocation)%(RecursiveDir)%(Filename)%(Extension)')"/>
   </Target>
 
-  <Target Condition="'$(OutputType)'=='Exe'" Name="CustomClean">
+  <Target Condition="'$(OutputType)'=='Exe' And '$(NoDeploy)'!='true'" Name="CustomClean">
     <Message Importance="high" Text="Inside Custom Clean"/>
     <ItemGroup>
       <_CustomFilesToDelete Include="$(_OutputCopyLocation)**\*"/>

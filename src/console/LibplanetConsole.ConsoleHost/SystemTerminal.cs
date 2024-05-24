@@ -15,7 +15,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
     {
         _commandContext = commandContext;
         _commandContext.Owner = application;
-        Prompt = "libplanet $ ";
+        Prompt = "libplanet-console $ ";
     }
 
     protected override string FormatPrompt(string prompt) => prompt;
