@@ -66,6 +66,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public ApplicationInfo Info => _info;
 
+    public override ILogger Logger => _logger;
+
     protected override bool CanClose => _parentProcess?.HasExited == true;
 
     public override object? GetService(Type serviceType)

@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
@@ -43,6 +45,9 @@ internal sealed class ClientProcess : IDisposable
                     $"{(ShortAddress)options.PrivateKey.Address}.log"));
         }
 
+        var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
+        ApplicationLogger.Information(
+            $"Starting a client process with the following arguments: {arguments}");
         _process = new Process
         {
             StartInfo = startInfo,
@@ -64,6 +69,8 @@ internal sealed class ClientProcess : IDisposable
         if (_process.HasExited != true)
         {
             _process.Close();
+            ApplicationLogger.Information(
+                $"Closed the client process (PID: {_process.Id}).");
         }
     }
 
@@ -71,6 +78,7 @@ internal sealed class ClientProcess : IDisposable
     {
         if (e.Data is string text)
         {
+            ApplicationLogger.Error(text);
             Console.Error.WriteColoredLine(text, TerminalColorType.Red);
         }
     }
