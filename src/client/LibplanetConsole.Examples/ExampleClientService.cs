@@ -1,13 +1,13 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common.QuickStarts;
+using LibplanetConsole.Examples;
 using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.ClientHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
 [Export(typeof(ILocalService))]
 [method: ImportingConstructor]
-internal sealed class SampleClientService(ISampleClientContent sampleClient)
-    : LocalService<ISampleClientService>, ISampleClientService
+internal sealed class ExampleClientService(IExampleClientContent sampleClient)
+    : LocalService<IExampleClientService>, IExampleClientService
 {
     public void Subscribe()
     {

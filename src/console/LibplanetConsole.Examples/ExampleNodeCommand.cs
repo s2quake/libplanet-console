@@ -3,12 +3,12 @@ using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Consoles;
 
-namespace LibplanetConsole.ConsoleHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Sample node commands for a quick start.")]
+[CommandSummary("Example node commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class SampleNodeCommand(IApplication application) : CommandMethodBase
+internal sealed class ExampleNodeCommand(IApplication application) : CommandMethodBase
 {
     [CommandMethod]
     public void Subscribe(string nodeAddress, string clientAddress)
@@ -16,7 +16,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
         {
             sampleNode.Subscribe(client.Address);
         }
@@ -33,7 +33,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
         {
             sampleNode.Unsubscribe(client.Address);
         }
@@ -49,7 +49,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
         {
             Out.WriteLine(sampleNode.Count);
         }
@@ -65,7 +65,7 @@ internal sealed class SampleNodeCommand(IApplication application) : CommandMetho
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(ISampleNodeContent)) is ISampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
         {
             var addresses = await sampleNode.GetAddressesAsync(cancellationToken);
             var sb = new StringBuilder();

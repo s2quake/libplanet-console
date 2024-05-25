@@ -1,6 +1,6 @@
-namespace LibplanetConsole.Common.QuickStarts;
+namespace LibplanetConsole.Examples;
 
-public interface ISampleNodeService
+public interface IExampleNodeService
 {
     void Subscribe(string address);
 

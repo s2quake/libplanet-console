@@ -2,20 +2,20 @@ using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.QuickStarts;
+using LibplanetConsole.Examples;
 
-namespace LibplanetConsole.ClientHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
-[Export(typeof(ISampleClientContent))]
+[Export(typeof(IExampleClientContent))]
 [method: ImportingConstructor]
-internal sealed class SampleClientContent(
-    IClient client, SampleRemoteNodeService remoteNodeService) : ISampleClientContent
+internal sealed class ExampleClientContent(
+    IClient client, ExampleRemoteNodeService remoteNodeService) : IExampleClientContent
 {
-    private readonly SampleRemoteNodeService _remoteNodeService = remoteNodeService;
+    private readonly ExampleRemoteNodeService _remoteNodeService = remoteNodeService;
 
     public Address Address => client.Address;
 
-    private ISampleNodeService Server => _remoteNodeService.Service;
+    private IExampleNodeService Server => _remoteNodeService.Service;
 
     public void Subscribe()
     {

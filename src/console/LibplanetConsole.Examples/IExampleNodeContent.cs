@@ -1,9 +1,9 @@
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.ConsoleHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
-public interface ISampleNodeContent
+public interface IExampleNodeContent
 {
     event EventHandler<ItemEventArgs<Address>>? Subscribed;
 

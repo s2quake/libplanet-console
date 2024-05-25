@@ -1,12 +1,12 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 
-namespace LibplanetConsole.ClientHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Sample client commands for a quick start.")]
+[CommandSummary("Example client commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class SampleClientCommand(ISampleClientContent sampleClient)
+internal sealed class ExampleClientCommand(IExampleClientContent sampleClient)
     : CommandMethodBase
 {
     [CommandMethod]

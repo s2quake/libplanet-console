@@ -2,19 +2,19 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Consoles;
 
-namespace LibplanetConsole.ConsoleHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Sample client commands for a quick start.")]
+[CommandSummary("Example client commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class SampleClientCommand(IApplication application) : CommandMethodBase
+internal sealed class ExampleClientCommand(IApplication application) : CommandMethodBase
 {
     [CommandMethod]
     public void Subscribe(string clientAddress)
     {
         var client = application.GetClient(clientAddress);
 
-        if (client.GetService(typeof(ISampleClientContent)) is ISampleClientContent sampleClient)
+        if (client.GetService(typeof(IExampleClientContent)) is IExampleClientContent sampleClient)
         {
             sampleClient.Subscribe();
         }
@@ -30,7 +30,7 @@ internal sealed class SampleClientCommand(IApplication application) : CommandMet
     {
         var client = application.GetClient(clientAddress);
 
-        if (client.GetService(typeof(ISampleClientContent)) is ISampleClientContent sampleClient)
+        if (client.GetService(typeof(IExampleClientContent)) is IExampleClientContent sampleClient)
         {
             sampleClient.Unsubscribe();
         }

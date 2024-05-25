@@ -2,26 +2,25 @@ using System.ComponentModel.Composition;
 using System.Text;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.QuickStarts;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles;
 
-namespace LibplanetConsole.ConsoleHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
-[Export(typeof(ISampleNodeContent))]
+[Export(typeof(IExampleNodeContent))]
 [Export(typeof(INodeContent))]
-[Export(typeof(ISampleNodeContent))]
-internal sealed class SampleNodeContent
-    : NodeContentBase, ISampleNodeCallbak, ISampleNodeContent
+[Export(typeof(IExampleNodeContent))]
+internal sealed class ExampleNodeContent
+    : NodeContentBase, IExampleNodeCallbak, IExampleNodeContent
 {
-    private readonly RemoteService<ISampleNodeService, ISampleNodeCallbak> _service;
+    private readonly RemoteService<IExampleNodeService, IExampleNodeCallbak> _service;
     private readonly StringBuilder _log = new();
 
     [ImportingConstructor]
-    public SampleNodeContent(INode node)
+    public ExampleNodeContent(INode node)
         : base(node)
     {
-        _service = new RemoteService<ISampleNodeService, ISampleNodeCallbak>(this);
+        _service = new RemoteService<IExampleNodeService, IExampleNodeCallbak>(this);
     }
 
     public event EventHandler<ItemEventArgs<Address>>? Subscribed;
@@ -30,7 +29,7 @@ internal sealed class SampleNodeContent
 
     public int Count { get; private set; }
 
-    private ISampleNodeService Service => _service.Service;
+    private IExampleNodeService Service => _service.Service;
 
     public async Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
     {
@@ -44,17 +43,17 @@ internal sealed class SampleNodeContent
     public void Unsubscribe(Address address)
         => Service.Unsubscribe(AddressUtility.ToString(address));
 
-    async void ISampleNodeCallbak.OnSubscribed(string address)
+    async void IExampleNodeCallbak.OnSubscribed(string address)
     {
         Count = await Service.GetAddressCountAsync(CancellationToken.None);
-        _log.AppendLine($"{nameof(ISampleNodeCallbak.OnSubscribed)}: {address}");
+        _log.AppendLine($"{nameof(IExampleNodeCallbak.OnSubscribed)}: {address}");
         Subscribed?.Invoke(this, new ItemEventArgs<Address>(AddressUtility.Parse(address)));
     }
 
-    async void ISampleNodeCallbak.OnUnsubscribed(string address)
+    async void IExampleNodeCallbak.OnUnsubscribed(string address)
     {
         Count = await Service.GetAddressCountAsync(CancellationToken.None);
-        _log.AppendLine($"{nameof(ISampleNodeCallbak.OnUnsubscribed)}: {address}");
+        _log.AppendLine($"{nameof(IExampleNodeCallbak.OnUnsubscribed)}: {address}");
         Unsubscribed?.Invoke(this, new ItemEventArgs<Address>(AddressUtility.Parse(address)));
     }
 }
