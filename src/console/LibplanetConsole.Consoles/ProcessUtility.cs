@@ -1,3 +1,6 @@
+using System.Reflection;
+using System.Text.RegularExpressions;
+
 namespace LibplanetConsole.Consoles;
 
 internal static class ProcessUtility
@@ -17,6 +20,7 @@ internal static class ProcessUtility
     {
         get
         {
+            var s = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
             if (Environment.GetEnvironmentVariable(WorkspacePathVariableName) is { } workspacePath)
             {
                 if (Directory.Exists(workspacePath) != true)
@@ -27,7 +31,7 @@ internal static class ProcessUtility
                     throw new InvalidOperationException(message);
                 }
 
-                return workspacePath;
+                return Regex.Replace(workspacePath, "[/\\\\]$", string.Empty);
             }
             else
             {
@@ -53,21 +57,14 @@ internal static class ProcessUtility
                 return nodePath;
             }
 
-            var paths = new string[]
+            var actualNodePath = IsInProject ? NodePathInProject : NodePathInBin;
+            if (File.Exists(actualNodePath) != true)
             {
-                WorkspacePath,
-                $"src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{Extension}",
-            };
-            nodePath = Path.GetFullPath(Path.Combine(paths));
-
-            if (File.Exists(nodePath) != true)
-            {
-                var message = $"File '{nodePath}' does not exist.";
+                var message = $"File '{actualNodePath}' does not exist.";
                 throw new FileNotFoundException(message);
             }
 
-            return nodePath;
+            return actualNodePath;
         }
     }
 
@@ -88,25 +85,63 @@ internal static class ProcessUtility
                 return clientPath;
             }
 
-            var paths = new string[]
+            var actualClientPath = IsInProject ? ClientPathInProject : ClientPathInBin;
+            if (File.Exists(actualClientPath) != true)
             {
-                WorkspacePath,
-                $"src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client{Extension}",
-            };
-            clientPath = Path.GetFullPath(Path.Combine(paths));
-
-            if (File.Exists(clientPath) != true)
-            {
-                var message = $"File '{clientPath}' does not exist.";
+                var message = $"File '{actualClientPath}' does not exist.";
                 throw new FileNotFoundException(message);
             }
 
-            return clientPath;
+            return actualClientPath;
         }
     }
 
-    public static string Extension => IsWindows() ? ".exe" : ".dll";
+    public static string Extension => IsWindows() && IsArm64() ? ".exe" : ".dll";
+
+    private static bool IsInProject
+    {
+        get
+        {
+            var location = Assembly.GetExecutingAssembly().Location ??
+                throw new InvalidOperationException("Executing assembly location is not found.");
+            var directory = Path.GetDirectoryName(location) ??
+                throw new InvalidOperationException(
+                    $"Directory of the executing assembly location '{location}' is not found.");
+            var expectedDirectory = $"{WorkspacePath}/src/console/LibplanetConsole.ConsoleHost/" +
+                                    $"bin/{Congiguration}/{Framework}";
+            var d1 = Path.GetFullPath(expectedDirectory);
+            var d2 = Path.GetFullPath(directory);
+            return d1 == d2;
+        }
+    }
+
+    private static string NodePathInProject
+    {
+        get
+        {
+            return Path.GetFullPath(
+                $"{WorkspacePath}/src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
+                $"{Framework}/libplanet-node{Extension}"
+            );
+        }
+    }
+
+    private static string NodePathInBin
+        => Path.GetFullPath($"{WorkspacePath}/.bin/libplanet-node/libplanet-node{Extension}");
+
+    private static string ClientPathInProject
+    {
+        get
+        {
+            return Path.GetFullPath(
+                $"{WorkspacePath}/src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
+                $"{Framework}/libplanet-client{Extension}"
+            );
+        }
+    }
+
+    private static string ClientPathInBin
+        => Path.GetFullPath($"{WorkspacePath}/.bin/libplanet-client/libplanet-client{Extension}");
 
     public static string GetNodePath()
     {
@@ -146,11 +181,13 @@ internal static class ProcessUtility
 
     public static bool IsWindows()
     {
-#if !NETSTANDARD && !NETFRAMEWORK && !NETCOREAPP
-        return OperatingSystem.IsWindows();
-#else
         return System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
             System.Runtime.InteropServices.OSPlatform.Windows);
-#endif
+    }
+
+    public static bool IsArm64()
+    {
+        return System.Runtime.InteropServices.RuntimeInformation.OSArchitecture ==
+               System.Runtime.InteropServices.Architecture.Arm64;
     }
 }

@@ -14,6 +14,7 @@ internal sealed class NodeProcess : IDisposable
 
     public NodeProcess(NodeProcessOptions options)
     {
+        var isArm64Windows = IsWindows() && IsArm64();
         var startInfo = new ProcessStartInfo
         {
             ArgumentList =
@@ -29,9 +30,9 @@ internal sealed class NodeProcess : IDisposable
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            FileName = IsWindows() ? NodePath : "dotnet",
+            FileName = isArm64Windows ? NodePath : "dotnet",
         };
-        if (IsWindows() != true)
+        if (isArm64Windows != true)
         {
             startInfo.ArgumentList.Insert(0, NodePath);
         }
@@ -52,9 +53,10 @@ internal sealed class NodeProcess : IDisposable
                     $"{(ShortAddress)options.PrivateKey.Address}.log"));
         }
 
+        var filename = startInfo.FileName;
         var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
         ApplicationLogger.Information(
-            $"Starting a node process with the following arguments: {arguments}");
+            $"Starting a node process: {filename} {arguments}");
         _process = new Process
         {
             StartInfo = startInfo,

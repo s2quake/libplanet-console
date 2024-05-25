@@ -9,6 +9,8 @@ namespace LibplanetConsole.ConsoleHost;
 public sealed record class ApplicationCommandOptions
 {
     [CommandProperty]
+    [CommandSummary("The endpoint of the console to run." +
+                    "If omitted, one of the random ports will be used.")]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty(InitValue = 4)]
@@ -19,7 +21,8 @@ public sealed record class ApplicationCommandOptions
     public int NodeCount { get; init; }
 
     [CommandProperty]
-    [CommandSummary("The private keys of the nodes to run.")]
+    [CommandSummary("The private keys of the nodes to run.\n" +
+                    "Example: --nodes \"key1,key2,...\"")]
     [CommandPropertyCondition(nameof(NodeCount), null, IsSet = true)]
     public string[] Nodes { get; init; } = [];
 
@@ -31,12 +34,12 @@ public sealed record class ApplicationCommandOptions
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to run.")]
+    [CommandSummary("The private keys of the clients to run.\n" +
+                    "Example: --clients \"key1,key2,...\"")]
     [CommandPropertyCondition(nameof(ClientCount), null, IsSet = true)]
     public string[] Clients { get; init; } = [];
 
     [CommandProperty]
-    [CommandPropertyCondition(nameof(Volatile), false)]
     [CommandSummary("The directory path to store data of each node. " +
                     "If omitted, the data is stored in memory.")]
     public string StorePath { get; init; } = string.Empty;
