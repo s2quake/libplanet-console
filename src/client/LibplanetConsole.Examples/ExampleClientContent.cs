@@ -2,7 +2,6 @@ using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
-using LibplanetConsole.Examples;
 
 namespace LibplanetConsole.Examples;
 

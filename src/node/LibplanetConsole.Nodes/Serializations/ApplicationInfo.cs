@@ -9,4 +9,6 @@ public sealed record class ApplicationInfo
     public string StorePath { get; init; } = string.Empty;
 
     public string LogPath { get; init; } = string.Empty;
+
+    public int ParentProcessId { get; init; }
 }

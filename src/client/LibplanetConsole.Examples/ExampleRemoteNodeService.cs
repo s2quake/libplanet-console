@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Examples;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Examples;

@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
@@ -31,8 +32,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Initializing the application...");
         _isAutoStart = options.AutoStart;
         _node = new Node(options);
-        _container = new(
-            new DirectoryCatalog(Path.GetDirectoryName(GetType().Assembly.Location)!));
+        _container = new(GetCatalog(GetAssemblies(this)));
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
@@ -138,6 +138,25 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         };
 
         return logger;
+    }
+
+    private static AggregateCatalog GetCatalog(IEnumerable<Assembly> assemblies)
+    {
+        var assemblyCatalogs = assemblies.Select(item => new AssemblyCatalog(item));
+        return new AggregateCatalog([.. assemblyCatalogs]);
+    }
+
+    private static IEnumerable<Assembly> GetAssemblies(object owner)
+    {
+        var assembly = owner.GetType().Assembly;
+        var directory = Path.GetDirectoryName(assembly.Location)!;
+        var directoryCatalog = new DirectoryCatalog(directory, "LibplanetConsole.*.dll");
+        string[] paths =
+        [
+            assembly.Location,
+            .. directoryCatalog.LoadedFiles,
+        ];
+        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
     }
 
     private async Task AutoStartAsync(CancellationToken cancellationToken)
