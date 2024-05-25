@@ -3,12 +3,12 @@ using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes;
 
-namespace LibplanetConsole.NodeHost.QuickStarts;
+namespace LibplanetConsole.Examples;
 
-[Export(typeof(ISampleNode))]
+[Export(typeof(IExampleNode))]
 [Export]
 [method: ImportingConstructor]
-internal sealed class SampleNode(IApplication application) : ISampleNode
+internal sealed class ExampleNode(IApplication application) : IExampleNode
 {
     private readonly IApplication _application = application;
     private readonly HashSet<Address> _addresses = [];

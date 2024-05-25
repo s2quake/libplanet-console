@@ -1,6 +1,6 @@
-namespace LibplanetConsole.Common.QuickStarts;
+namespace LibplanetConsole.Examples;
 
-public interface ISampleNodeCallbak
+public interface IExampleNodeCallbak
 {
     void OnSubscribed(string address);
 

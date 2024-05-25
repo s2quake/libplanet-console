@@ -4,6 +4,7 @@
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Consoles\LibplanetConsole.Consoles.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Examples\LibplanetConsole.Examples.csproj" />
   </ItemGroup>
 
   <ItemGroup>

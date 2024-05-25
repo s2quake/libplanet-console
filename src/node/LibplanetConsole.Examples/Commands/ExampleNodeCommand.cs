@@ -3,12 +3,12 @@ using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.NodeHost.QuickStarts;
+namespace LibplanetConsole.Examples.Commands;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Sample node commands for a quick start.")]
+[CommandSummary("Example node commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class SampleNodeCommand(ISampleNode sampleNode)
+internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
     : CommandMethodBase
 {
     [CommandMethod]
