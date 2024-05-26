@@ -1,0 +1,1 @@
+powershell -executionpolicy remotesigned -File %~dp0\libplanet-console.ps1 %*
