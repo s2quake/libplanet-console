@@ -3,10 +3,12 @@ using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Consoles;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.ConsoleHost;
 
-public sealed record class ApplicationCommandOptions
+[ApplicationSettings]
+internal sealed record class ApplicationSettings
 {
     [CommandProperty]
     [CommandSummary("The endpoint of the console to run." +
@@ -48,24 +50,24 @@ public sealed record class ApplicationCommandOptions
     [CommandSummary("The directory path to store log.")]
     public string LogPath { get; set; } = string.Empty;
 
-    public static implicit operator ApplicationOptions(ApplicationCommandOptions options)
+    public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = options.GetEndPoint();
+        var endPoint = settings.GetEndPoint();
         return new ApplicationOptions(endPoint)
         {
-            Nodes = options.GetNodes(),
-            Clients = options.GetClients(),
-            StoreDirectory = GetFullPath(options.StorePath),
-            LogDirectory = GetFullPath(options.LogPath),
+            Nodes = settings.GetNodes(),
+            Clients = settings.GetClients(),
+            StoreDirectory = GetFullPath(settings.StorePath),
+            LogDirectory = GetFullPath(settings.LogPath),
         };
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
     }
 
-    public static ApplicationCommandOptions Parse(string[] args)
+    public static ApplicationSettings Parse(string[] args)
     {
-        var options = new ApplicationCommandOptions();
+        var options = new ApplicationSettings();
         var parserSettings = new CommandSettings()
         {
             AllowEmpty = true,

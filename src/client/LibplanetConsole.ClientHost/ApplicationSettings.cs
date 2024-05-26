@@ -3,10 +3,12 @@ using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.ClientHost;
 
-public sealed record class ApplicationCommandOptions
+[ApplicationSettings]
+internal sealed record class ApplicationSettings
 {
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint on which the Client Service will run. " +
@@ -36,25 +38,25 @@ public sealed record class ApplicationCommandOptions
     [CommandSummary("The file path to store log.")]
     public string LogPath { get; set; } = string.Empty;
 
-    public static implicit operator ApplicationOptions(ApplicationCommandOptions options)
+    public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = options.GetEndPoint();
-        var privateKey = options.GetPrivateKey();
+        var endPoint = settings.GetEndPoint();
+        var privateKey = settings.GetPrivateKey();
         return new ApplicationOptions(endPoint, privateKey)
         {
-            ParentProcessId = options.ParentProcessId,
-            IsSeed = options.IsSeed,
-            NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(options.NodeEndPoint),
-            LogPath = GetFullPath(options.LogPath),
+            ParentProcessId = settings.ParentProcessId,
+            IsSeed = settings.IsSeed,
+            NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(settings.NodeEndPoint),
+            LogPath = GetFullPath(settings.LogPath),
         };
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
     }
 
-    public static ApplicationCommandOptions Parse(string[] args)
+    public static ApplicationSettings Parse(string[] args)
     {
-        var options = new ApplicationCommandOptions();
+        var options = new ApplicationSettings();
         var commandSettings = new CommandSettings
         {
             AllowEmpty = true,

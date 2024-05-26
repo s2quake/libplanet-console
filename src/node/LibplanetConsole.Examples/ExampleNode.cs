@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
+using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Examples;
@@ -18,6 +19,9 @@ internal sealed class ExampleNode(IApplication application) : IExampleNode
     public event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
 
     public int Count => _addresses.Count;
+
+    public bool IsExample { get; }
+        = ApplicationSettingsParser.Peek<ExampleNodeSettings>().IsExample;
 
     public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
     {

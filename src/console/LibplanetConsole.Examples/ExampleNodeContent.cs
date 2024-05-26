@@ -4,12 +4,12 @@ using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Examples;
 
 [Export(typeof(IExampleNodeContent))]
 [Export(typeof(INodeContent))]
-[Export(typeof(IExampleNodeContent))]
 internal sealed class ExampleNodeContent
     : NodeContentBase, IExampleNodeCallbak, IExampleNodeContent
 {
@@ -28,6 +28,9 @@ internal sealed class ExampleNodeContent
     public event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
 
     public int Count { get; private set; }
+
+    public bool IsExample { get; }
+        = ApplicationSettingsParser.Peek<ExampleClientSettings>().IsClientExample;
 
     private IExampleNodeService Service => _service.Service;
 

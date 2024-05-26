@@ -2,14 +2,15 @@
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.ConsoleHost;
+using LibplanetConsole.Frameworks;
 
 try
 {
     var message = "Welcome to console for Libplanet.";
-    var options = ApplicationCommandOptions.Parse(args);
+    var settings = ApplicationSettingsParser.Parse<ApplicationSettings>(args);
     var @out = Console.Out;
     @out.WriteColoredLine(message, TerminalColorType.BrightGreen);
-    await using var application = new Application(options);
+    await using var application = new Application(settings);
     @out.WriteLine();
     await application.StartAsync();
     @out.WriteLine("\u001b0");

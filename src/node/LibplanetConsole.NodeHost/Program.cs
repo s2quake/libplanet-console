@@ -1,11 +1,12 @@
 ﻿using JSSoft.Commands;
+using LibplanetConsole.Frameworks;
 using LibplanetConsole.NodeHost;
 
 try
 {
-    var options = ApplicationCommandOptions.Parse(args);
+    var settings = ApplicationSettingsParser.Parse<ApplicationSettings>(args);
     var @out = Console.Out;
-    await using var application = new Application(options);
+    await using var application = new Application(settings);
     @out.WriteLine();
     await application.StartAsync();
     @out.WriteLine("\u001b0");
