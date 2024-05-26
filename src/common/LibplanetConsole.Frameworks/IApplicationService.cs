@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Frameworks;
 
-public interface IApplicationService : IAsyncDisposable
+public interface IApplicationService
 {
     Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken);
 }

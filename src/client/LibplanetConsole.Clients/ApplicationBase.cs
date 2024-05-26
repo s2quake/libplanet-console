@@ -1,6 +1,5 @@
 using System.Collections;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Net;
 using LibplanetConsole.Clients.Serializations;
@@ -15,7 +14,7 @@ namespace LibplanetConsole.Clients;
 
 public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 {
-    private readonly CompositionContainer _container;
+    private readonly ApplicationContainer _container;
     private readonly Client _client;
     private readonly ClientServiceContext _clientServiceContext;
     private readonly Process? _parentProcess;
@@ -31,8 +30,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Initializing the application...");
         _client = new(this, options.PrivateKey);
         _isSeed = options.IsSeed;
-        _container = new(
-            new DirectoryCatalog(Path.GetDirectoryName(GetType().Assembly.Location)!));
+        _container = new(this);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
@@ -112,7 +110,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Disposing the application...");
         await base.OnDisposeAsync();
         await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
-        _container.Dispose();
+        await _container.DisposeAsync();
         _logger.Information("Disposed the application.");
     }
 

@@ -78,6 +78,6 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     protected virtual async ValueTask OnDisposeAsync()
     {
-        await ApplicationServices.DisposeAsync();
+        await ValueTask.CompletedTask;
     }
 }

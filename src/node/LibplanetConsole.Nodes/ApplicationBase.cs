@@ -1,9 +1,7 @@
 using System.Collections;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
@@ -16,7 +14,7 @@ namespace LibplanetConsole.Nodes;
 
 public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 {
-    private readonly CompositionContainer _container;
+    private readonly ApplicationContainer _container;
     private readonly Node _node;
     private readonly NodeContext _nodeContext;
     private readonly Process? _parentProcess;
@@ -32,7 +30,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Initializing the application...");
         _isAutoStart = options.AutoStart;
         _node = new Node(options);
-        _container = new(GetCatalog(GetAssemblies(this)));
+        _container = new(this);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
@@ -119,7 +117,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Disposing the application...");
         await base.OnDisposeAsync();
         await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
-        _container.Dispose();
+        await _container.DisposeAsync();
         _logger.Information("Disposed the application.");
     }
 
@@ -138,25 +136,6 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         };
 
         return logger;
-    }
-
-    private static AggregateCatalog GetCatalog(IEnumerable<Assembly> assemblies)
-    {
-        var assemblyCatalogs = assemblies.Select(item => new AssemblyCatalog(item));
-        return new AggregateCatalog([.. assemblyCatalogs]);
-    }
-
-    private static IEnumerable<Assembly> GetAssemblies(object owner)
-    {
-        var assembly = owner.GetType().Assembly;
-        var directory = Path.GetDirectoryName(assembly.Location)!;
-        var directoryCatalog = new DirectoryCatalog(directory, "LibplanetConsole.*.dll");
-        string[] paths =
-        [
-            assembly.Location,
-            .. directoryCatalog.LoadedFiles,
-        ];
-        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
     }
 
     private async Task AutoStartAsync(CancellationToken cancellationToken)

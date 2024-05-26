@@ -13,7 +13,7 @@ namespace LibplanetConsole.Consoles.Services;
 [Export(typeof(ILocalService))]
 [Export(typeof(IApplicationService))]
 internal sealed class SeedService : LocalService<ISeedService>,
-    ISeedService, IApplicationService
+    ISeedService, IApplicationService, IAsyncDisposable
 {
     private readonly ApplicationBase _application;
     private readonly PrivateKey _seedNodePrivateKey = new();

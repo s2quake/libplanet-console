@@ -1,6 +1,5 @@
 using System.Collections;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -14,7 +13,7 @@ namespace LibplanetConsole.Consoles;
 
 public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 {
-    private readonly CompositionContainer _container;
+    private readonly ApplicationContainer _container;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
     private readonly ConsoleServiceContext _consoleContext;
@@ -27,8 +26,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger = CreateLogger(options.LogDirectory);
         _logger.Information(Environment.CommandLine);
         _logger.Information("Initializing the application...");
-        _container = new(
-            new DirectoryCatalog(Path.GetDirectoryName(GetType().Assembly.Location)!));
+        _container = new(this);
         _nodes = new NodeCollection(this, options.Nodes);
         _clients = new ClientCollection(this, options.Clients);
         _container.ComposeExportedValue(this);
@@ -140,13 +138,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         }
     }
 
-    public CompositionContainer CreateChildContainer()
-    {
-        var directoryName = Path.GetDirectoryName(GetType().Assembly.Location)!;
-        return new(
-            catalog: new DirectoryCatalog(directoryName),
-            providers: new ApplicationExportProvider(_container));
-    }
+    public ApplicationContainer CreateChildContainer(object owner)
+        => new(owner, _container, new ApplicationExportProvider(_container));
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
@@ -161,7 +154,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Disposing the application...");
         await base.OnDisposeAsync();
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
-        _container.Dispose();
+        await _container.DisposeAsync();
         _logger.Information("Disposed the application.");
     }
 
