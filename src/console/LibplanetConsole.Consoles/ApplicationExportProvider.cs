@@ -1,10 +1,11 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class ApplicationExportProvider(CompositionContainer compositionContainer)
+internal sealed class ApplicationExportProvider(ApplicationContainer container)
         : ExportProvider
 {
     private static readonly Type[] ExcludeContractTypes =
@@ -16,7 +17,7 @@ internal sealed class ApplicationExportProvider(CompositionContainer composition
     private static readonly string[] ExcludeContractTypeNames
         = [.. ExcludeContractTypes.Select(AttributedModelServices.GetContractName)];
 
-    private readonly CompositionContainer _compositionContainer = compositionContainer;
+    private readonly ApplicationContainer _containerContainer = container;
 
     protected override IEnumerable<Export>? GetExportsCore(
         ImportDefinition definition, AtomicComposition? atomicComposition)
@@ -26,6 +27,6 @@ internal sealed class ApplicationExportProvider(CompositionContainer composition
             return null;
         }
 
-        return _compositionContainer.GetExports(definition);
+        return _containerContainer.GetExports(definition);
     }
 }

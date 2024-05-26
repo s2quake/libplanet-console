@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -17,7 +16,7 @@ namespace LibplanetConsole.Consoles;
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
     ApplicationBase application, PrivateKey[] privateKeys)
-    : IEnumerable<Node>, INodeCollection, IApplicationService
+    : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
@@ -115,14 +114,13 @@ internal sealed class NodeCollection(
             ConsensusSeedPeer = seedService.ConsensusSeedPeer,
         };
         var endPoint = DnsEndPointUtility.Next();
-        var container = _application.CreateChildContainer();
         var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
         {
             StoreDirectory = _application.Info.StoreDirectory,
             LogDirectory = _application.Info.LogDirectory,
         };
         _ = new NodeProcess(nodeProcessOptions);
-        var node = CreateNew(container, privateKey, endPoint);
+        var node = CreateNew(privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
         return node;
@@ -138,8 +136,7 @@ internal sealed class NodeCollection(
             BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
             ConsensusSeedPeer = seedService.ConsensusSeedPeer,
         };
-        var container = _application.CreateChildContainer();
-        var node = CreateNew(container, privateKey, endPoint);
+        var node = CreateNew(privateKey, endPoint);
         await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
 
@@ -213,12 +210,11 @@ internal sealed class NodeCollection(
         return _nodeList[nodeIndex];
     }
 
-    private static Node CreateNew(
-        CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    private Node CreateNew(PrivateKey privateKey, EndPoint endPoint)
     {
         lock (LockObject)
         {
-            return new Node(container, privateKey, endPoint);
+            return new Node(_application, privateKey, endPoint);
         }
     }
 

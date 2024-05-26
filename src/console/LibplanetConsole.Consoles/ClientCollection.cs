@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Clients;
@@ -16,7 +15,7 @@ namespace LibplanetConsole.Consoles;
 [method: ImportingConstructor]
 internal sealed class ClientCollection(
     ApplicationBase application, PrivateKey[] clients)
-    : IEnumerable<Client>, IClientCollection, IApplicationService
+    : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
@@ -114,13 +113,12 @@ internal sealed class ClientCollection(
             NodeEndPoint = node.EndPoint,
         };
         var endPoint = DnsEndPointUtility.Next();
-        var container = _application.CreateChildContainer();
         var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
         {
             LogDirectory = _application.Info.LogDirectory,
         };
         _ = new ClientProcess(clientProcessOptions);
-        var client = CreateNew(container, privateKey, endPoint);
+        var client = CreateNew(privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;
@@ -135,8 +133,7 @@ internal sealed class ClientCollection(
         {
             NodeEndPoint = node.EndPoint,
         };
-        var container = _application.CreateChildContainer();
-        var client = CreateNew(container, privateKey, endPoint);
+        var client = CreateNew(privateKey, endPoint);
         await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;
@@ -198,12 +195,11 @@ internal sealed class ClientCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
 
-    private static Client CreateNew(
-        CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    private Client CreateNew(PrivateKey privateKey, EndPoint endPoint)
     {
         lock (LockObject)
         {
-            return new Client(container, privateKey, endPoint);
+            return new Client(_application, privateKey, endPoint);
         }
     }
 

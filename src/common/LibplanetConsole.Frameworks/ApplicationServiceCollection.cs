@@ -4,7 +4,7 @@ namespace LibplanetConsole.Frameworks;
 
 public sealed class ApplicationServiceCollection(
     IEnumerable<IApplicationService> applicationServices)
-    : IEnumerable<IApplicationService>, IAsyncDisposable
+    : IEnumerable<IApplicationService>
 {
     private readonly IApplicationService[] _applicationServices = Sort(applicationServices);
 
@@ -14,14 +14,6 @@ public sealed class ApplicationServiceCollection(
         for (var i = 0; i < _applicationServices.Length; i++)
         {
             await _applicationServices[i].InitializeAsync(serviceProvider, cancellationToken);
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        for (var i = _applicationServices.Length - 1; i >= 0; i--)
-        {
-            await _applicationServices[i].DisposeAsync();
         }
     }
 

@@ -14,9 +14,7 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
 
     private ApplicationSettingsParser()
     {
-        var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var directoryCatalog = new DirectoryCatalog(directory);
-        var assemblies = GetAssemblies();
+        var assemblies = ApplicationContainer.GetAssemblies();
         var query = from assembly in assemblies
                     from type in assembly.GetTypes()
                     where IsApplicationSettings(type) == true

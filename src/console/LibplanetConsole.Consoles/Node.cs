@@ -10,6 +10,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
@@ -19,7 +20,7 @@ namespace LibplanetConsole.Consoles;
 internal sealed class Node
     : INodeCallback, IAsyncDisposable, IAddressable, INode
 {
-    private readonly CompositionContainer _container;
+    private readonly ApplicationContainer _container;
     private readonly SecureString _privateKey;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
@@ -30,15 +31,15 @@ internal sealed class Node
     private NodeInfo _nodeInfo = new();
     private bool _isDisposed;
 
-    public Node(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    public Node(ApplicationBase application, PrivateKey privateKey, EndPoint endPoint)
     {
-        _container = container;
+        _container = application.CreateChildContainer(this);
         _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
         _container.ComposeExportedValue<INode>(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(container)])
+            [_remoteService, .. GetRemoteServices(_container)])
         {
             EndPoint = endPoint,
         };
@@ -185,7 +186,7 @@ internal sealed class Node
         await _remoteServiceContext.CloseAsync(_closeToken);
         NodeOptions = NodeOptions.Default;
         IsRunning = false;
-        _container.Dispose();
+        await _container.DisposeAsync();
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);

@@ -11,13 +11,14 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles;
 
 internal sealed class Client :
     IClientCallback, IAsyncDisposable, IAddressable, IClient
 {
-    private readonly CompositionContainer _container;
+    private readonly ApplicationContainer _container;
     private readonly SecureString _privateKey;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<IClientService, IClientCallback> _remoteService;
@@ -27,20 +28,19 @@ internal sealed class Client :
     private ClientInfo _clientInfo = new();
     private bool _isDisposed;
 
-    public Client(CompositionContainer container, PrivateKey privateKey, EndPoint endPoint)
+    public Client(ApplicationBase application, PrivateKey privateKey, EndPoint endPoint)
     {
-        _container = container;
+        _container = application.CreateChildContainer(this);
         _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
         _container.ComposeExportedValue<IClient>(this);
         _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(container)])
+            [_remoteService, .. GetRemoteServices(_container)])
         {
             EndPoint = endPoint,
         };
-        _application = container.GetExportedValue<ApplicationBase>() ??
-            throw new InvalidOperationException("ApplicationBase is not found.");
+        _application = application;
         PublicKey = privateKey.PublicKey;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
     }
@@ -146,7 +146,7 @@ internal sealed class Client :
         await _remoteServiceContext.CloseAsync(_closeToken);
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
-        _container.Dispose();
+        await _container.DisposeAsync();
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
