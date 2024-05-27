@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\console\LibplanetConsole.ConsoleHost\LibplanetConsole.ConsoleHost.csproj" />
+    <ProjectReference Include="..\..\src\console\LibplanetConsole.Consoles.Executable\LibplanetConsole.Consoles.Executable.csproj" />
   </ItemGroup>
 
 </Project>

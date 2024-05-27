@@ -107,7 +107,8 @@ internal static class ProcessUtility
             var directory = Path.GetDirectoryName(location) ??
                 throw new InvalidOperationException(
                     $"Directory of the executing assembly location '{location}' is not found.");
-            var expectedDirectory = $"{WorkspacePath}/src/console/LibplanetConsole.ConsoleHost/" +
+            var expectedDirectory = $"{WorkspacePath}/src/console/" +
+                                    $"LibplanetConsole.Consoles.Executable/" +
                                     $"bin/{Congiguration}/{Framework}";
             var d1 = Path.GetFullPath(expectedDirectory);
             var d2 = Path.GetFullPath(directory);
@@ -120,7 +121,7 @@ internal static class ProcessUtility
         get
         {
             return Path.GetFullPath(
-                $"{WorkspacePath}/src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/" +
+                $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
                 $"{Framework}/libplanet-node{Extension}"
             );
         }
@@ -134,8 +135,8 @@ internal static class ProcessUtility
         get
         {
             return Path.GetFullPath(
-                $"{WorkspacePath}/src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client{Extension}"
+                $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
+                $"{Congiguration}/{Framework}/libplanet-client{Extension}"
             );
         }
     }
@@ -152,8 +153,8 @@ internal static class ProcessUtility
         catch (Exception e)
         {
             var message =
-                $"Use 'src/node/LibplanetConsole.NodeHost/bin/{Congiguration}/{Framework}/" +
-                $"libplanet-node{Extension}' by setting the directory path " +
+                $"Use 'src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
+                $"{Framework}/libplanet-node{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
                 $"'{NodePathVariableName}'.";
@@ -170,7 +171,7 @@ internal static class ProcessUtility
         catch (Exception e)
         {
             var message =
-                $"Use 'src/client/LibplanetConsole.ClientHost/bin/{Congiguration}/" +
+                $"Use 'src/client/LibplanetConsole.Clients.Executable/bin/{Congiguration}/" +
                 $"{Framework}/libplanet-client{Extension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
