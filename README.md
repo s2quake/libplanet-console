@@ -13,6 +13,7 @@ c# 12.0
 
 ```sh
 git clone https://github.com/s2quake/libplanet-console.git --recursive
+cd libplanet-console
 ```
 
 ## Build
@@ -23,7 +24,7 @@ dotnet build
 
 # Run Console
 
-Run 4 Node processes and 2 Client processes and control each of them.
+Run 4 Node processes and 2 Client processes to control each of them.
 
 ```sh
 dotnet .bin/libplanet-console/libplanet-console.dll
