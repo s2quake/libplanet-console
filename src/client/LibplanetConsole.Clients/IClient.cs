@@ -3,7 +3,6 @@ using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Clients;

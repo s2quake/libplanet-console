@@ -1,6 +1,5 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Clients.Executable;
@@ -25,6 +24,7 @@ internal sealed class Application(ApplicationOptions options) : ApplicationBase(
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
             sw.WriteSeparator(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
+            sw.WriteLineIf(_options.NodeEndPoint is null, GetStartupMessage());
             Console.Write(sw.ToString());
 
             await _terminal!.StartAsync(cancellationToken);
@@ -33,5 +33,11 @@ internal sealed class Application(ApplicationOptions options) : ApplicationBase(
         {
             await base.OnStartAsync(cancellationToken);
         }
+    }
+
+    private static string GetStartupMessage()
+    {
+        var startText = TerminalStringBuilder.GetString("start", TerminalColorType.Green);
+        return $"\nType '{startText} <node-end-point>' to connect to the node.";
     }
 }

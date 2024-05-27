@@ -1,7 +1,6 @@
 using System.Net;
 using JSSoft.Commands;
 using Libplanet.Crypto;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 

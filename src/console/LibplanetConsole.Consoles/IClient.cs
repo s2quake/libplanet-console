@@ -1,6 +1,5 @@
 using System.Net;
 using Libplanet.Crypto;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Serializations;
 
 namespace LibplanetConsole.Consoles;

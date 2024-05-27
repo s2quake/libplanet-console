@@ -2,7 +2,6 @@ using System.Net;
 using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
-using LibplanetConsole.Consoles;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles.Executable;

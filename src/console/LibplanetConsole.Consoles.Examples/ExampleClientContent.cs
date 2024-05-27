@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles;
 using LibplanetConsole.Examples.Services;
 using LibplanetConsole.Frameworks;
 

@@ -1,7 +1,6 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Consoles;
 
 namespace LibplanetConsole.Consoles.Executable;
 
@@ -12,6 +11,8 @@ internal sealed partial class Application(ApplicationOptions options)
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
+        var message = "Welcome to console for Libplanet.";
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
         _terminal = this.GetService<SystemTerminal>();
         await base.OnStartAsync(cancellationToken);
         await PrepareCommandContext();

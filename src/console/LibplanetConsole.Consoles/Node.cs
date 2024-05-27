@@ -11,7 +11,6 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
 
