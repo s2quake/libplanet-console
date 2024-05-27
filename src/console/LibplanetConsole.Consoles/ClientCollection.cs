@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Net;
 using Libplanet.Crypto;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;

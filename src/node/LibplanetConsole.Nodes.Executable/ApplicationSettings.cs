@@ -3,7 +3,6 @@ using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Nodes.Executable;
 

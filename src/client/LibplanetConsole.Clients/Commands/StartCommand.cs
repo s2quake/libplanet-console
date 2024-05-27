@@ -12,7 +12,7 @@ internal sealed class StartCommand(ApplicationBase application, Client client) :
 {
     public override bool IsEnabled => client.IsRunning is false;
 
-    [CommandProperty]
+    [CommandPropertyRequired]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
     public string NodeEndPoint { get; set; } = string.Empty;
 
@@ -33,8 +33,7 @@ internal sealed class StartCommand(ApplicationBase application, Client client) :
 
     private async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
     {
-        var text = NodeEndPoint != string.Empty ? NodeEndPoint : application.Info.NodeEndPoint;
-        var nodeEndPoint = EndPointUtility.Parse(text);
+        var nodeEndPoint = EndPointUtility.Parse(NodeEndPoint);
         if (IsSeed == true)
         {
             return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);

@@ -7,7 +7,6 @@ using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
 

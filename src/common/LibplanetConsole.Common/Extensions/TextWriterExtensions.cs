@@ -38,4 +38,12 @@ public static class TextWriterExtensions
     {
         WriteSeparator(@this, length: 80, colorType);
     }
+
+    public static void WriteLineIf(this TextWriter @this, bool condition, string message)
+    {
+        if (condition == true)
+        {
+            @this.WriteLine(message);
+        }
+    }
 }

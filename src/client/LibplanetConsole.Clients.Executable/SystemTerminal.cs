@@ -1,7 +1,6 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
-using LibplanetConsole.Clients;
 
 namespace LibplanetConsole.Clients.Executable;
 

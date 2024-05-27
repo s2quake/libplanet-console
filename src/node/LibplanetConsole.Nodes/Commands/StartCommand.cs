@@ -25,6 +25,5 @@ internal sealed class StartCommand(ApplicationBase application, Node node) : Com
                 GenesisOptions = application.DefaultGenesisOptions,
             };
         await node.StartAsync(nodeOptions, cancellationToken);
-        await Out.WriteLineAsJsonAsync(node.Info);
     }
 }

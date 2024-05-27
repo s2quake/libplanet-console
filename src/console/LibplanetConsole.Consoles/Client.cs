@@ -4,7 +4,6 @@ using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using System.Security;
 using Libplanet.Crypto;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
