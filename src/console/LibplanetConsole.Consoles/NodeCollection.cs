@@ -8,7 +8,6 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Consoles;
 

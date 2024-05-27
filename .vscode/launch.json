@@ -8,7 +8,7 @@
             "name": "C#: Libplanet Console",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/console/LibplanetConsole.ConsoleHost/bin/Debug/net8.0/libplanet-console.dll",
+            "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
@@ -23,7 +23,7 @@
             "name": "C#: Libplanet Node",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--end-point",
@@ -35,7 +35,7 @@
             "name": "C#: Libplanet Client",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/client/LibplanetConsole.ClientHost/bin/Debug/net8.0/libplanet-client.dll",
+            "program": "${workspaceFolder}/src/client/LibplanetConsole.Clients.Executable/bin/Debug/net8.0/libplanet-client.dll",
             "console": "integratedTerminal",
             "args": [
                 "--node-end-point",
@@ -46,7 +46,7 @@
             "name": "C#: Libplanet Two Nodes (1/2)",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--private-key",
@@ -62,7 +62,7 @@
             "name": "C#: Libplanet Two Nodes (2/2)",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceFolder}/src/node/LibplanetConsole.NodeHost/bin/Debug/net8.0/libplanet-node.dll",
+            "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
             "console": "integratedTerminal",
             "args": [
                 "--private-key",

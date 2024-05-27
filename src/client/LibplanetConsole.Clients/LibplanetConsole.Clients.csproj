@@ -9,7 +9,11 @@
     <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
   </ItemGroup>
 
-  <Import Project="..\..\common\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems" Label="Shared" />
-  <Import Project="..\..\common\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems" Label="Shared" />
+  <Import Project="..\..\shared\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems" Label="Shared" />
+  <Import Project="..\..\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems" Label="Shared" />
+
+  <PropertyGroup>
+    <DefineConstants>LIBPLANET_CLIENT</DefineConstants>
+  </PropertyGroup>
 
 </Project>
