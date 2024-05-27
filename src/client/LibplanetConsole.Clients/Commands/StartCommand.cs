@@ -8,7 +8,7 @@ namespace LibplanetConsole.Clients.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Start client.")]
 [method: ImportingConstructor]
-internal sealed class StartCommand(ApplicationBase application, Client client) : CommandAsyncBase
+internal sealed class StartCommand(Client client) : CommandAsyncBase
 {
     public override bool IsEnabled => client.IsRunning is false;
 
