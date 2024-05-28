@@ -25,7 +25,7 @@ internal sealed class Application(ApplicationOptions options)
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
             sw.WriteSeparator(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
-            sw.WriteLineIf(_options.AutoStart != true, GetStartupMessage());
+            sw.WriteLineIf(_options.ManualStart == true, GetStartupMessage());
             Console.Write(sw.ToString());
 
             await _terminal.StartAsync(cancellationToken);

@@ -61,6 +61,6 @@ dotnet .bin/libplanet-console/libplanet-console.dll --log-path .log
 Run one node and one client independently.
 
 ```sh
-dotnet .bin/libplanet-node/libplanet-node.dll -a --end-point "127.0.0.1:4343"
+dotnet .bin/libplanet-node/libplanet-node.dll --end-point "127.0.0.1:4343"
 dotnet .bin/libplanet-client/libplanet-client.dll --node-end-point "127.0.0.1:4343"
 ```

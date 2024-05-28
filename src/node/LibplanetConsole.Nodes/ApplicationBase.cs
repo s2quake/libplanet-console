@@ -28,7 +28,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger = CreateLogger(options.LogPath);
         _logger.Information(Environment.CommandLine);
         _logger.Information("Initializing the application...");
-        _isAutoStart = options.AutoStart;
+        _isAutoStart = options.ManualStart != true;
         _node = new Node(options);
         _container = new(this);
         _container.ComposeExportedValue<IApplication>(this);

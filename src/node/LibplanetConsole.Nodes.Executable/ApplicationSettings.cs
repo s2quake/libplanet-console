@@ -23,9 +23,10 @@ public sealed class ApplicationSettings
     [CommandSummary("Reserved option used by libplanet-console.")]
     public int ParentProcessId { get; set; }
 
-    [CommandPropertySwitch('a')]
-    [CommandSummary("Indicates whether the node starts automatically when the application starts.")]
-    public bool AutoStart { get; set; } = false;
+    [CommandPropertySwitch('m')]
+    [CommandSummary("If set, the node does not start automatically. " +
+                    "Instead, it waits for the user to start it manually.")]
+    public bool ManualStart { get; set; } = false;
 
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
@@ -54,7 +55,7 @@ public sealed class ApplicationSettings
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = settings.ParentProcessId,
-            AutoStart = settings.AutoStart,
+            ManualStart = settings.ManualStart,
             NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(settings.NodeEndPoint),
             GenesisValidators = settings.GetGenesisValidators(privateKey.PublicKey),
             StorePath = GetFullPath(settings.StorePath),

@@ -27,8 +27,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--end-point",
-                "127.0.0.1:5353",
-                "-a"
+                "127.0.0.1:5353"
             ]
         },
         {
@@ -53,7 +52,6 @@
                 "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32",
                 "--end-point",
                 "127.0.0.1:5353",
-                "-a",
                 "--genesis-validators",
                 "0422ef31e8dbf5b20231f78ddc9868fc84646f2c33bfcdd2e865959e90ab54d39645dcd938aa4ef9f3ebf2eab24b418da3d23128ae9438cfec30ae71ca8b653651,04f209039cc2ded9ca13eb2ce30947994186a52585e7c6cc6d59c29aa78d5050c6c0a2f700f9d5dd21049be476cbb3e4f2d62d22d0e1d9063ebe585a1789214dc4"
             ]
@@ -68,8 +66,7 @@
                 "--private-key",
                 "774a9eafcf8e589f522db284cb629aac2c29c9608d8d75139fb4906c248a9a79",
                 "--node-end-point",
-                "127.0.0.1:5353",
-                "-a"
+                "127.0.0.1:5353"
             ]
         }
     ],
