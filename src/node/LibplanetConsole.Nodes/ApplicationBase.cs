@@ -43,7 +43,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _info = new()
         {
             EndPoint = EndPointUtility.ToString(_nodeContext.EndPoint),
-            NodeEndPoint = $"{options.NodeEndPoint}",
+            NodeEndPoint = EndPointUtility.ToSafeString(options.NodeEndPoint),
             StorePath = options.StorePath,
             LogPath = options.LogPath,
         };
