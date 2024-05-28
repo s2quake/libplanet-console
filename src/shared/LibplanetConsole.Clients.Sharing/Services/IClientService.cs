@@ -1,3 +1,4 @@
+using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 
 namespace LibplanetConsole.Clients.Services;
@@ -10,4 +11,7 @@ public interface IClientService
     Task StopAsync(CancellationToken cancellationToken);
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
+
+    Task<TxId> SendTransactionAsync(
+        byte[] signature, string text, CancellationToken cancellationToken);
 }

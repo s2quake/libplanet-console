@@ -1,5 +1,6 @@
 using System.Net;
 using Libplanet.Crypto;
+using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 
 namespace LibplanetConsole.Consoles;
@@ -29,4 +30,6 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider
     Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken);
 }
