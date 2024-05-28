@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 
   <PropertyGroup Condition="'$(OutputType)'=='Exe' And '$(NoDeploy)'!='true'">
     <BuildDependsOn>$(BuildDependsOn);CustomAfterBuild</BuildDependsOn>
