@@ -81,6 +81,8 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
 
     public NodeInfo Info { get; private set; } = new();
 
+    public Swarm Swarm => _swarm ?? throw new InvalidOperationException();
+
     public BoundPeer[] Peers
     {
         get

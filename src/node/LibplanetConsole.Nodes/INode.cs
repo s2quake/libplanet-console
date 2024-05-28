@@ -26,6 +26,8 @@ public interface INode : IVerifier
 
     PublicKey PublicKey { get; }
 
+    Swarm Swarm { get; }
+
     Address Address => PublicKey.Address;
 
     BoundPeer BlocksyncSeedPeer { get; }
