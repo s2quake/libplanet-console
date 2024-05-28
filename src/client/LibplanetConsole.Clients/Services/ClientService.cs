@@ -1,5 +1,7 @@
 using System.ComponentModel.Composition;
+using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Clients.Services;
@@ -33,4 +35,20 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
 
     public Task StopAsync(CancellationToken cancellationToken)
         => _client.StopAsync(cancellationToken);
+
+    public async Task<TxId> SendTransactionAsync(
+        byte[] signature, string text, CancellationToken cancellationToken)
+    {
+        if (_client.Verify(text, signature) == true)
+        {
+            var action = new StringAction
+            {
+                Value = text,
+            };
+
+            return await _client.SendTransactionAsync([action], cancellationToken);
+        }
+
+        throw new InvalidOperationException("The signature is invalid.");
+    }
 }

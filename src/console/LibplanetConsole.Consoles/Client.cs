@@ -4,6 +4,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Net;
 using System.Security;
 using Libplanet.Crypto;
+using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
@@ -135,6 +136,13 @@ internal sealed class Client :
         ClientOptions = ClientOptions.Default;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken)
+    {
+        var signature = Sign(text);
+        return await _remoteService.Service.SendTransactionAsync(
+            signature, text, cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
