@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Consoles;
 using LibplanetConsole.Consoles.Extensions;
 
 namespace LibplanetConsole.Consoles.Stakings.Commands;

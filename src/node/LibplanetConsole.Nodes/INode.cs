@@ -25,6 +25,8 @@ public interface INode
 
     PublicKey PublicKey { get; }
 
+    Swarm Swarm { get; }
+
     Address Address => PublicKey.Address;
 
     BoundPeer BlocksyncSeedPeer { get; }
