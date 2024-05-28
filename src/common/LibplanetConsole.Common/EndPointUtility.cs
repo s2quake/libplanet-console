@@ -11,6 +11,16 @@ public static class EndPointUtility
     public static string ToString(EndPoint endPoint)
         => JSSoft.Communication.EndPointUtility.ToString(endPoint);
 
+    public static string ToSafeString(EndPoint? endPoint)
+    {
+        if (endPoint is not null)
+        {
+            return JSSoft.Communication.EndPointUtility.ToString(endPoint);
+        }
+
+        return string.Empty;
+    }
+
     public static EndPoint Parse(string text)
         => JSSoft.Communication.EndPointUtility.Parse(text);
 
