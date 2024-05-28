@@ -49,6 +49,11 @@ internal sealed record class ApplicationSettings
     [CommandSummary("The directory path to store log.")]
     public string LogPath { get; set; } = string.Empty;
 
+    [CommandPropertySwitch('m')]
+    [CommandSummary("If set, the node and the client do not start automatically. " +
+                    "Instead, it waits for the user to start it manually.")]
+    public bool ManualStart { get; set; }
+
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
         var endPoint = settings.GetEndPoint();
@@ -58,6 +63,7 @@ internal sealed record class ApplicationSettings
             Clients = settings.GetClients(),
             StoreDirectory = GetFullPath(settings.StorePath),
             LogDirectory = GetFullPath(settings.LogPath),
+            ManualStart = settings.ManualStart,
         };
 
         static string GetFullPath(string path)

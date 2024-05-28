@@ -106,12 +106,6 @@ internal sealed class NodeCollection(
     public async Task<Node> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
     {
         var seedService = _application.GetService<SeedService>();
-        var nodeOptions = new NodeOptions
-        {
-            GenesisOptions = _application.GenesisOptions,
-            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
-        };
         var endPoint = DnsEndPointUtility.Next();
         var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
         {
@@ -120,7 +114,17 @@ internal sealed class NodeCollection(
         };
         _ = new NodeProcess(nodeProcessOptions);
         var node = CreateNew(privateKey, endPoint);
-        await node.StartAsync(nodeOptions, cancellationToken);
+        if (_application.Info.ManualStart != true)
+        {
+            var nodeOptions = new NodeOptions
+            {
+                GenesisOptions = _application.GenesisOptions,
+                BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
+                ConsensusSeedPeer = seedService.ConsensusSeedPeer,
+            };
+            await node.StartAsync(nodeOptions, cancellationToken);
+        }
+
         InsertNode(node);
         return node;
     }

@@ -47,6 +47,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             EndPoint = EndPointUtility.ToString(_consoleContext.EndPoint),
             StoreDirectory = options.StoreDirectory,
             LogDirectory = options.LogDirectory,
+            ManualStart = options.ManualStart,
         };
         GenesisOptions = new()
         {

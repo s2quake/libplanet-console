@@ -107,10 +107,6 @@ internal sealed class ClientCollection(
     {
         var nodes = _application.GetService<NodeCollection>();
         var node = nodes.RandomNode();
-        var clientOptions = new ClientOptions()
-        {
-            NodeEndPoint = node.EndPoint,
-        };
         var endPoint = DnsEndPointUtility.Next();
         var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
         {
@@ -118,7 +114,15 @@ internal sealed class ClientCollection(
         };
         _ = new ClientProcess(clientProcessOptions);
         var client = CreateNew(privateKey, endPoint);
-        await client.StartAsync(clientOptions, cancellationToken);
+        if (_application.Info.ManualStart != true)
+        {
+            var clientOptions = new ClientOptions()
+            {
+                NodeEndPoint = node.EndPoint,
+            };
+            await client.StartAsync(clientOptions, cancellationToken);
+        }
+
         InsertClient(client);
         return client;
     }
