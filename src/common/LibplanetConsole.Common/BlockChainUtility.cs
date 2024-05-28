@@ -13,6 +13,7 @@ using Libplanet.Store;
 using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
+using Libplanet.Types.Evidences;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common.Actions;
 using Nekoyume.Action.DPoS.Misc;
@@ -91,7 +92,6 @@ public static class BlockChainUtility
             timestamp: DateTimeOffset.MinValue);
         var transactions = ImmutableList.Create(transaction);
         var genesisBlock = BlockChain.ProposeGenesisBlock(
-            actionEvaluator: actionEvaluator,
             privateKey: genesisKey,
             transactions: transactions,
             timestamp: DateTimeOffset.MinValue);
@@ -153,6 +153,7 @@ public static class BlockChainUtility
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values)
         );
+        var evidences = ImmutableHashSet<Evidence>.Empty;
 
         var previousBlock = blockChain[blockChain.Count - 1];
         var lastCommit = blockChain.GetBlockCommit(previousBlock.Hash);
@@ -162,11 +163,12 @@ public static class BlockChainUtility
             publicKey: privateKey.PublicKey,
             previousHash: previousBlock.Hash,
             txHash: BlockContent.DeriveTxHash([transaction]),
-            lastCommit: lastCommit
+            lastCommit: lastCommit,
+            evidenceHash: null
         );
-        var blockContent = new BlockContent(blockMetadata, [transaction]);
+        var blockContent = new BlockContent(blockMetadata, [transaction], evidences);
         var preEvaluationBlock = blockContent.Propose();
-        var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
+        var stateRootHash = blockChain.DetermineNextBlockStateRootHash(blockChain.Tip, out _);
         var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
