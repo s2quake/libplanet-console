@@ -57,6 +57,5 @@ public class RemoteServiceContext
 
     private sealed class InternalClientContext(IService[] services) : ClientContext(services)
     {
-        public override ISerializerProvider SerializerProvider => ServiceSerializerProvider.Default;
     }
 }
