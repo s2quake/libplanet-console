@@ -72,6 +72,17 @@ internal sealed class Client :
             return this;
         }
 
+        if (serviceType == typeof(INode))
+        {
+            var address = AddressUtility.ToSafeString(Address);
+            if (IsRunning == true && _application.TryGetNode(address, out var node) == true)
+            {
+                return node;
+            }
+
+            return null;
+        }
+
         if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
             serviceType.GenericTypeArguments.Length == 1)
         {

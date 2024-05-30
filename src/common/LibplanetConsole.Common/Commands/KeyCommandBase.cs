@@ -8,7 +8,10 @@ namespace LibplanetConsole.Common.Commands;
 public abstract class KeyCommandBase : CommandMethodBase
 {
     [CommandMethod]
-    public void New(int count = 1)
+    [CommandSummary("Generates a new private key.")]
+    public void New(
+        [CommandSummary("The number of private keys to generate.")]
+        int count = 1)
     {
         if (count < 1)
         {
@@ -31,17 +34,22 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    public void Public(string privateKey)
+    [CommandSummary("Displays the public key of the private key.")]
+    public void Public(
+        [CommandSummary("The private key.")]
+        string privateKey)
     {
         var key = PrivateKeyUtility.Parse(privateKey);
         var info = new
         {
             PublicKey = PublicKeyUtility.ToString(key.PublicKey),
+            PublicKeyShort = PublicKeyUtility.ToShortString(key.PublicKey),
         };
         Out.WriteLineAsJson(info);
     }
 
     [CommandMethod]
+    [CommandSummary("Displays the address of the private key or public key.")]
     public void Address(
         [CommandSummary("The private key or public key.")]
         string key)
@@ -71,12 +79,17 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    public void Derive(string address, string key)
+    [CommandSummary("Derives a new address from the given address and keyword.")]
+    public void Derive(
+        [CommandSummary("The address.")]
+        string address,
+        [CommandSummary("The keyword.")]
+        string keyword)
     {
         var addressObject = AddressUtility.Parse(address);
         var info = new
         {
-            Address = AddressUtility.ToString(AddressUtility.Derive(addressObject, key)),
+            Address = AddressUtility.ToString(AddressUtility.Derive(addressObject, keyword)),
         };
         Out.WriteLineAsJson(info);
     }

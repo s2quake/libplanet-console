@@ -1,7 +1,7 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using Libplanet.Crypto;
+using System.Diagnostics.CodeAnalysis;
 using LibplanetConsole.Common;
 using LibplanetConsole.Consoles.Serializations;
 using LibplanetConsole.Frameworks;
@@ -73,7 +73,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _clients.Where<Client>(item => $"{item.Address}".StartsWith(address))
+        return _clients.Where<Client>(item => IsEquals(item, address))
                        .Single();
     }
 
@@ -84,30 +84,41 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _nodes.Where<Node>(item => $"{item.Address}".StartsWith(address))
+        return _nodes.Where<Node>(item => IsEquals(item, address))
                      .Single();
+    }
+
+    public bool TryGetClient(string address, [MaybeNullWhen(false)] out IClient client)
+    {
+        if (address == string.Empty)
+        {
+            client = _clients.Current;
+            return client != null;
+        }
+
+        client = _clients.Where<Client>(item => IsEquals(item, address))
+                         .SingleOrDefault();
+        return client != null;
+    }
+
+    public bool TryGetNode(string address, [MaybeNullWhen(false)] out INode node)
+    {
+        if (address == string.Empty)
+        {
+            node = _nodes.Current;
+            return node != null;
+        }
+
+        node = _nodes.Where<Node>(item => IsEquals(item, address))
+                     .SingleOrDefault();
+        return node != null;
     }
 
     public IAddressable GetAddressable(string address)
     {
         return _nodes.Concat<IAddressable>(_clients)
-                     .Where(item => $"{item.Address}".StartsWith(address))
+                     .Where(item => IsEquals(item, address))
                      .Single();
-    }
-
-    public IAddressable GetAddressable(Address address)
-    {
-        if (_nodes.Contains(address) == true)
-        {
-            return _nodes[address];
-        }
-
-        if (_clients.Contains(address) == true)
-        {
-            return _clients[address];
-        }
-
-        throw new ArgumentException("Invalid address.", nameof(address));
     }
 
     public override object? GetService(Type serviceType)
@@ -175,4 +186,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
         return logger;
     }
+
+    private static bool IsEquals(IAddressable addressable, string address)
+        => $"{addressable.Address}".StartsWith(address);
 }

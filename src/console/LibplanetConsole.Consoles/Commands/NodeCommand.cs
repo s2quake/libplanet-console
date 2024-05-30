@@ -2,6 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Consoles.Services;
 
@@ -13,8 +14,13 @@ namespace LibplanetConsole.Consoles.Commands;
 internal sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
     : CommandMethodBase
 {
+    [CommandPropertyRequired(DefaultValue = "")]
+    [CommandSummary("The address of the client. If not specified, the current client is used.")]
+    public static string Address { get; set; } = string.Empty;
+
     [CommandPropertySwitch("detail")]
-    public bool IsDetailed { get; set; }
+    [CommandSummary("Displays the detailed information.")]
+    public static bool IsDetailed { get; set; }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(IsDetailed))]
@@ -31,6 +37,27 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
+    [CommandSummary("Deletes a node of the specified address.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public async Task DeleteAsync()
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        await node.DisposeAsync();
+    }
+
+    [CommandMethod]
+    [CommandSummary("Displays the node information of the specified address.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public void Info()
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        var nodeInfo = node.Info;
+        Out.WriteLineAsJson(nodeInfo);
+    }
+
+    [CommandMethod]
     [CommandSummary("Creates a new node.")]
     public async Task NewAsync(CancellationToken cancellationToken)
     {
@@ -40,29 +67,11 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
-    [CommandSummary("Deletes a node of the specified address.\n" +
-                    "If the address is not specified, the current node is used.")]
-    public async Task DeleteAsync(string address = "")
-    {
-        var node = application.GetNode(address);
-        await node.DisposeAsync();
-    }
-
-    [CommandMethod]
-    [CommandSummary("Displays the node information of the specified address.\n" +
-                    "If the address is not specified, the current node is used.")]
-    public void Info(string address = "")
-    {
-        var node = application.GetNode(address);
-        var nodeInfo = node.Info;
-        Out.WriteLineAsJson(nodeInfo);
-    }
-
-    [CommandMethod]
     [CommandSummary("Starts a node of the specified address.\n" +
                     "If the address is not specified, the current node is used.")]
-    public async Task Start(string address = "", CancellationToken cancellationToken = default)
+    public async Task StartAsync(CancellationToken cancellationToken = default)
     {
+        var address = Address;
         var node = application.GetNode(address);
         var seedService = application.GetService<SeedService>();
         var nodeOptions = new NodeOptions
@@ -78,8 +87,9 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     [CommandMethod]
     [CommandSummary("Stops a node of the specified address.\n" +
                     "If the address is not specified, the current node is used.")]
-    public async Task Stop(string address = "", CancellationToken cancellationToken = default)
+    public async Task StopAsync(CancellationToken cancellationToken = default)
     {
+        var address = Address;
         var node = application.GetNode(address);
         await node.StopAsync(cancellationToken);
     }
@@ -112,6 +122,22 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
         {
             Out.WriteLine("No node is selected.");
         }
+    }
+
+    [CommandMethod]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Sends a transaction to store a simple string.\n" +
+                    "If the address is not specified, the current node is used.")]
+    public async Task TxAsync(
+        [CommandSummary("The text to send.")]
+        string text,
+        CancellationToken cancellationToken)
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        var action = new StringAction { Value = text };
+        await node.SendTransactionAsync([action], cancellationToken);
+        Out.WriteLine($"{(ShortAddress)node.Address}: {text}");
     }
 
     private static TerminalColorType? GetForeground(INode node, bool isCurrent)
