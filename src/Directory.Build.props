@@ -26,6 +26,8 @@
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>..\..\LibplanetConsole.ruleset</CodeAnalysisRuleSet>
     <NoWarn>$(NoWarn);SA1200;NETSDK1206</NoWarn>
+    <CommandsProjectPath>$(MSBuildThisFileDirectory)..\.commands/src/JSSoft.Commands/JSSoft.Commands.csproj</CommandsProjectPath>
+    <TerminalsProjectPath>$(MSBuildThisFileDirectory)..\.commands/src/JSSoft.Terminals/JSSoft.Terminals.csproj</TerminalsProjectPath>
   </PropertyGroup>
 
 </Project>

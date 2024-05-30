@@ -1,7 +1,3 @@
-[submodule ".commands"]
-	path = .commands
-	url = https://github.com/s2quake/commands.git
-	fetchRecurseSubmodules = no
 [submodule ".libplanet"]
 	path = .libplanet
 	url = https://github.com/s2quake/libplanet.git
