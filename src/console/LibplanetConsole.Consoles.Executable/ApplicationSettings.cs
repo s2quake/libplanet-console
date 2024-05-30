@@ -18,26 +18,26 @@ internal sealed record class ApplicationSettings
     [CommandSummary("The number of nodes to run.\n" +
                     "If omitted, the default value is 4.\n" +
                     "If --nodes option is set, this option is ignored.")]
-    [CommandPropertyCondition(nameof(Nodes), null, IsSet = true)]
+    [CommandPropertyCondition(nameof(Nodes), null, OnSet = true)]
     public int NodeCount { get; init; }
 
     [CommandProperty]
     [CommandSummary("The private keys of the nodes to run.\n" +
                     "Example: --nodes \"key1,key2,...\"")]
-    [CommandPropertyCondition(nameof(NodeCount), null, IsSet = true)]
+    [CommandPropertyCondition(nameof(NodeCount), null, OnSet = true)]
     public string[] Nodes { get; init; } = [];
 
     [CommandProperty(InitValue = 2)]
     [CommandSummary("The number of clients to run.\n" +
                     "If omitted, the default value is 2.\n" +
                     "If --clients option is set, this option is ignored.")]
-    [CommandPropertyCondition(nameof(Clients), null, IsSet = true)]
+    [CommandPropertyCondition(nameof(Clients), null, OnSet = true)]
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
     [CommandSummary("The private keys of the clients to run.\n" +
                     "Example: --clients \"key1,key2,...\"")]
-    [CommandPropertyCondition(nameof(ClientCount), null, IsSet = true)]
+    [CommandPropertyCondition(nameof(ClientCount), null, OnSet = true)]
     public string[] Clients { get; init; } = [];
 
     [CommandProperty]

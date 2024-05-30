@@ -5,8 +5,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
-    <ProjectReference Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
   </ItemGroup>
 
