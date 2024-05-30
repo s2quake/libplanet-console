@@ -60,6 +60,5 @@ public class LocalServiceContext
 
     private sealed class InternalServerContext(IService[] services) : ServerContext(services)
     {
-        public override ISerializerProvider SerializerProvider => ServiceSerializerProvider.Default;
     }
 }
