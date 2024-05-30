@@ -13,12 +13,12 @@ namespace LibplanetConsole.Consoles;
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
 internal sealed class ClientCollection(
-    ApplicationBase application, PrivateKey[] clients)
+    ApplicationBase application, PrivateKey[] privateKeys)
     : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
-    private readonly List<Client> _clientList = new(clients.Length);
+    private readonly List<Client> _clientList = new(privateKeys.Length);
     private Client? _current;
     private bool _isDisposed;
 
@@ -146,7 +146,7 @@ internal sealed class ClientCollection(
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = clients[index];
+            var privateKey = privateKeys[index];
             await AddNewAsync(privateKey, cancellationToken);
         }
     }
