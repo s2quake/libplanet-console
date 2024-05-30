@@ -10,6 +10,8 @@ public static class AddressUtility
 
     public static string ToString(Address address) => $"{address}";
 
+    public static string ToSafeString(Address? address) => $"{address}";
+
     public static Address Derive(Address address, byte[] key)
     {
         var bytes = address.ToByteArray();
