@@ -28,6 +28,7 @@
     <NoWarn>$(NoWarn);SA1200;NETSDK1206</NoWarn>
     <CommandsProjectPath>$(MSBuildThisFileDirectory)..\.commands/src/JSSoft.Commands/JSSoft.Commands.csproj</CommandsProjectPath>
     <TerminalsProjectPath>$(MSBuildThisFileDirectory)..\.commands/src/JSSoft.Terminals/JSSoft.Terminals.csproj</TerminalsProjectPath>
+    <ConfigurationsProjectPath>$(MSBuildThisFileDirectory)..\.configurations/src/JSSoft.Configurations/JSSoft.Configurations.csproj</ConfigurationsProjectPath>
   </PropertyGroup>
 
 </Project>

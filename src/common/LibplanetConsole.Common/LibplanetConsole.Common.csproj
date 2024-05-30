@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
@@ -7,7 +7,6 @@
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Store\Libplanet.Store.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
     <ProjectReference Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
-    <ProjectReference Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +16,9 @@
     <!-- Commands -->
     <ProjectReference Condition="Exists('$(CommandsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
     <PackageReference Condition="!Exists('$(CommandsProjectPath)')" Include="JSSoft.Commands" Version="6.0.0" />
+    <!-- Configurations -->
+    <ProjectReference Condition="Exists('$(ConfigurationsProjectPath)')" Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
+    <PackageReference Condition="!Exists('$(ConfigurationsProjectPath)')" Include="JSSoft.Configurations" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
