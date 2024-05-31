@@ -7,7 +7,7 @@ using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Clients;
 
-public interface IClient
+public interface IClient : IVerifier
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -24,8 +24,6 @@ public interface IClient
     PublicKey PublicKey { get; }
 
     Address Address { get; }
-
-    bool Verify(object obj, byte[] signature);
 
     Task StartAsync(ClientOptions nodeOptions, CancellationToken cancellationToken);
 

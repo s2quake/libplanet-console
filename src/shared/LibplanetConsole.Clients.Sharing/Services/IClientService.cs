@@ -13,5 +13,5 @@ public interface IClientService
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 
     Task<TxId> SendTransactionAsync(
-        byte[] signature, string text, CancellationToken cancellationToken);
+        TransactionOptions transactionOptions, CancellationToken cancellationToken);
 }

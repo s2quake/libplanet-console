@@ -151,9 +151,12 @@ internal sealed class Client :
 
     public async Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken)
     {
-        var signature = Sign(text);
+        var transactionOptions = new TransactionOptions
+        {
+            Text = text,
+        };
         return await _remoteService.Service.SendTransactionAsync(
-            signature, text, cancellationToken);
+            transactionOptions.Sign(this), cancellationToken);
     }
 
     public async ValueTask DisposeAsync()

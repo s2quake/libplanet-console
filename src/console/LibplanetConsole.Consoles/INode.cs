@@ -2,11 +2,12 @@ using System.Net;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Consoles;
 
-public interface INode : IAddressable, IAsyncDisposable, IServiceProvider
+public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -25,8 +26,6 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider
     NodeOptions NodeOptions { get; }
 
     PublicKey PublicKey { get; }
-
-    byte[] Sign(object obj);
 
     Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
 

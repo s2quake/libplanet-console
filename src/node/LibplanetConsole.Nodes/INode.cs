@@ -3,11 +3,12 @@ using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes;
 
-public interface INode
+public interface INode : IVerifier
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -30,8 +31,6 @@ public interface INode
     BoundPeer BlocksyncSeedPeer { get; }
 
     BoundPeer ConsensusSeedPeer { get; }
-
-    bool Verify(object obj, byte[] signature);
 
     Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
 
