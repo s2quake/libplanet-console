@@ -37,13 +37,13 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
         => _client.StopAsync(cancellationToken);
 
     public async Task<TxId> SendTransactionAsync(
-        byte[] signature, string text, CancellationToken cancellationToken)
+        TransactionOptions transactionOptions, CancellationToken cancellationToken)
     {
-        if (_client.Verify(text, signature) == true)
+        if (transactionOptions.Verify(_client) == true)
         {
             var action = new StringAction
             {
-                Value = text,
+                Value = transactionOptions.Text,
             };
 
             return await _client.SendTransactionAsync([action], cancellationToken);

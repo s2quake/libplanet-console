@@ -2,10 +2,11 @@ using System.Net;
 using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;
 
-public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider
+public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {
     event EventHandler? Started;
 
@@ -22,8 +23,6 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider
     ClientOptions ClientOptions { get; }
 
     PublicKey PublicKey { get; }
-
-    byte[] Sign(object obj);
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 
