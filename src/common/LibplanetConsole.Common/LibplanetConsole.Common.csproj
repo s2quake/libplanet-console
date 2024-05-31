@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\.lib9c\Lib9c\Lib9c.csproj" />
+  </ItemGroup>
+
   <!-- $(LibplanetDirectory) exists. -->
   <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
     <ProjectReference Include="$(LibplanetDirectory)Libplanet\Libplanet.csproj" />
