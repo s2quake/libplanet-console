@@ -7,14 +7,39 @@ public abstract record class OptionsBase<T>
 
     public T Sign(ISigner signer)
     {
+        if (Signature.Length > 0)
+        {
+            throw new InvalidOperationException("Already signed.");
+        }
+
         var signature = signer.Sign(this);
         return (T)this with { Signature = signature };
     }
 
-    public bool Verify(IVerifier verifier)
+    public bool TryVerify(IVerifier verifier)
     {
+        if (Signature.Length == 0)
+        {
+            throw new InvalidOperationException("Not signed yet.");
+        }
+
         var obj = this with { Signature = [] };
         var signature = Signature;
         return verifier.Verify(obj, signature);
+    }
+
+    public void Verify(IVerifier verifier)
+    {
+        if (Signature.Length == 0)
+        {
+            throw new InvalidOperationException("Not signed yet.");
+        }
+
+        var obj = this with { Signature = [] };
+        var signature = Signature;
+        if (verifier.Verify(obj, signature) != true)
+        {
+            throw new InvalidOperationException("Invalid signature.");
+        }
     }
 }
