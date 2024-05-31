@@ -11,10 +11,10 @@
   <ItemGroup>
     <!-- Terminals -->
     <ProjectReference Condition="Exists('$(TerminalsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
-    <PackageReference Condition="!Exists('$(TerminalsProjectPath)')" Include="JSSoft.Terminals" Version="6.0.0" />
+    <PackageReference Condition="!Exists('$(TerminalsProjectPath)')" Include="JSSoft.Terminals" Version="6.0.1" />
     <!-- Commands -->
     <ProjectReference Condition="Exists('$(CommandsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
-    <PackageReference Condition="!Exists('$(CommandsProjectPath)')" Include="JSSoft.Commands" Version="6.0.0" />
+    <PackageReference Condition="!Exists('$(CommandsProjectPath)')" Include="JSSoft.Commands" Version="6.0.1" />
     <!-- Configurations -->
     <ProjectReference Condition="Exists('$(ConfigurationsProjectPath)')" Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
     <PackageReference Condition="!Exists('$(ConfigurationsProjectPath)')" Include="JSSoft.Configurations" Version="1.0.0" />
