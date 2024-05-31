@@ -39,7 +39,7 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     public async Task<TxId> SendTransactionAsync(
         TransactionOptions transactionOptions, CancellationToken cancellationToken)
     {
-        if (transactionOptions.Verify(_client) == true)
+        if (transactionOptions.TryVerify(_client) == true)
         {
             var action = new StringAction
             {
