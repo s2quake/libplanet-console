@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
 
   <Import Condition="'$(SolutionDir)' != '' and '$(SolutionDir)' != '$(MSBuildThisFileDirectory)' and $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')) != ''"
           Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
@@ -7,7 +7,6 @@
     <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Crypto\Libplanet.Crypto.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
-    <ProjectReference Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
   </ItemGroup>
 
   <ItemGroup>
