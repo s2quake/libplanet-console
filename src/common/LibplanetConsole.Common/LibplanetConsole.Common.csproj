@@ -6,7 +6,6 @@
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Crypto\Libplanet.Crypto.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.Store\Libplanet.Store.csproj" />
     <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
-    <ProjectReference Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +18,9 @@
     <!-- Configurations -->
     <ProjectReference Condition="Exists('$(ConfigurationsProjectPath)')" Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
     <PackageReference Condition="!Exists('$(ConfigurationsProjectPath)')" Include="JSSoft.Configurations" Version="1.0.0" />
+    <!-- Communication -->
+    <ProjectReference Condition="Exists('$(CommunicationProjectPath)')" Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
+    <PackageReference Condition="!Exists('$(CommunicationProjectPath)')" Include="JSSoft.Communication" Version="2.0.0" />
   </ItemGroup>
 
 </Project>
