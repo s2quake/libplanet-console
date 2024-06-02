@@ -4,7 +4,6 @@
           Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
   </ItemGroup>
 
