@@ -26,10 +26,10 @@
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>..\..\LibplanetConsole.ruleset</CodeAnalysisRuleSet>
     <NoWarn>$(NoWarn);SA1200;NETSDK1206</NoWarn>
-    <CommandsDirectory>$(MSBuildThisFileDirectory)..\.commands</CommandsDirectory>
-    <CommunicationDirectory>$(MSBuildThisFileDirectory)..\.communication</CommunicationDirectory>
-    <ConfigurationDirectory>$(MSBuildThisFileDirectory)..\.configurations</ConfigurationDirectory>
-    <LibplanetDirectory>$(MSBuildThisFileDirectory)..\.libplanet</LibplanetDirectory>
+    <CommandsDirectory>$(MSBuildThisFileDirectory)..\.commands\</CommandsDirectory>
+    <CommunicationDirectory>$(MSBuildThisFileDirectory)..\.communication\</CommunicationDirectory>
+    <ConfigurationDirectory>$(MSBuildThisFileDirectory)..\.configurations\</ConfigurationDirectory>
+    <LibplanetDirectory>$(MSBuildThisFileDirectory)..\.libplanet\</LibplanetDirectory>
   </PropertyGroup>
 
   <Target Name="DisplaySourceUsage" BeforeTargets="Build">
