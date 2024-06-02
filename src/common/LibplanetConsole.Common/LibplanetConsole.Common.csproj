@@ -1,26 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Net\Libplanet.Net.csproj" />
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Crypto\Libplanet.Crypto.csproj" />
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet.Store\Libplanet.Store.csproj" />
-    <ProjectReference Include="..\..\..\.libplanet\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+  <!-- $(LibplanetDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
+    <ProjectReference Include="$(LibplanetDirectory)Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Crypto\Libplanet.Crypto.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Store\Libplanet.Store.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Terminals -->
-    <ProjectReference Condition="Exists('$(TerminalsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
-    <PackageReference Condition="!Exists('$(TerminalsProjectPath)')" Include="JSSoft.Terminals" Version="6.0.1" />
-    <!-- Commands -->
-    <ProjectReference Condition="Exists('$(CommandsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
-    <PackageReference Condition="!Exists('$(CommandsProjectPath)')" Include="JSSoft.Commands" Version="6.0.1" />
-    <!-- Configurations -->
-    <ProjectReference Condition="Exists('$(ConfigurationsProjectPath)')" Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
-    <PackageReference Condition="!Exists('$(ConfigurationsProjectPath)')" Include="JSSoft.Configurations" Version="1.0.0" />
-    <!-- Communication -->
-    <ProjectReference Condition="Exists('$(CommunicationProjectPath)')" Include="..\..\..\.communication\src\JSSoft.Communication\JSSoft.Communication.csproj" />
-    <PackageReference Condition="!Exists('$(CommunicationProjectPath)')" Include="JSSoft.Communication" Version="2.0.0" />
+  <!-- $(LibplanetDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
+    <PackageReference Include="Libplanet" Version="4.4.1" />
+    <PackageReference Include="Libplanet.Net" Version="4.4.1" />
+    <PackageReference Include="Libplanet.Crypto" Version="4.4.1" />
+    <PackageReference Include="Libplanet.Store" Version="4.4.1" />
+    <PackageReference Include="Libplanet.RocksDBStore" Version="4.4.1" />
+  </ItemGroup>
+
+  <!-- $(TerminalsDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(TerminalsDirectory)')">
+    <ProjectReference Include="$(TerminalsDirectory)src\JSSoft.Commands\JSSoft.Commands.csproj" />
+    <ProjectReference Include="$(TerminalsDirectory)src\JSSoft.Commands\JSSoft.Terminals.csproj" />
+  </ItemGroup>
+
+  <!-- $(TerminalsDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(TerminalsDirectory)')">
+    <PackageReference Include="JSSoft.Commands" Version="6.0.1" />
+    <PackageReference Include="JSSoft.Terminals" Version="6.0.1" />
+  </ItemGroup>
+
+  <!-- $(CommunicationDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(CommunicationDirectory)')">
+    <ProjectReference Include="$(CommunicationDirectory)src\JSSoft.Communication\JSSoft.Communication.csproj" />
+  </ItemGroup>
+
+  <!-- $(CommunicationDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(CommunicationDirectory)')">
+    <PackageReference Include="JSSoft.Communication" Version="2.0.0" />
+  </ItemGroup>
+
+  <!-- $(ConfigurationsDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(ConfigurationsDirectory)')">
+    <ProjectReference Include="$(ConfigurationsDirectory)src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
+  </ItemGroup>
+
+  <!-- $(ConfigurationsDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
+    <PackageReference Include="JSSoft.Configurations" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
