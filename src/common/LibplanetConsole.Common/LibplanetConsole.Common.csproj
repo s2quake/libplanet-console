@@ -37,7 +37,7 @@
 
   <!-- $(CommunicationDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(CommunicationDirectory)')">
-    <PackageReference Include="JSSoft.Communication" Version="2.0.0" />
+    <PackageReference Include="JSSoft.Communication" Version="2.0.1" />
   </ItemGroup>
 
   <!-- $(ConfigurationsDirectory) exists. -->
