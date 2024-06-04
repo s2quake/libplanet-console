@@ -12,32 +12,34 @@ c# 12.0
 ## Clone
 
 ```sh
-git clone https://github.com/s2quake/libplanet-console.git --recursive
+git clone https://github.com/s2quake/libplanet-console.git
 cd libplanet-console
 ```
 
 ## Build
 
 ```sh
-dotnet build
+dotnet publish
 ```
+
+> It's `publish`, not build.
 
 # Run Console
 
 Run 4 Node processes and 2 Client processes to control each of them.
 
 ```sh
-dotnet .bin/libplanet-console/libplanet-console.dll
+.bin/libplanet-console
 ```
 
-> On arm64 windows, run `.bin/libplanet-console/libplanet-console.exe` without dotnet.
+> If platform is windows, run `.bin\libplanet-console.exe`.
 
 ## Show Help
 
 Display the run options for libplanet-console.
 
 ```sh
-dotnet .bin/libplanet-console/libplanet-console.dll --help
+.bin/libplanet-console --help
 ```
 
 ## Save data
@@ -45,7 +47,7 @@ dotnet .bin/libplanet-console/libplanet-console.dll --help
 Specify a path to save the data.
 
 ```sh
-dotnet .bin/libplanet-console/libplanet-console.dll --store-path .store
+.bin/libplanet-console --store-path .store
 ```
 
 ## Save logs
@@ -53,7 +55,7 @@ dotnet .bin/libplanet-console/libplanet-console.dll --store-path .store
 Specify a path to save the logs.
 
 ```sh
-dotnet .bin/libplanet-console/libplanet-console.dll --log-path .log
+.bin/libplanet-console --log-path .log
 ```
 
 ## One node and One Client
@@ -61,6 +63,6 @@ dotnet .bin/libplanet-console/libplanet-console.dll --log-path .log
 Run one node and one client independently.
 
 ```sh
-dotnet .bin/libplanet-node/libplanet-node.dll -a --end-point "127.0.0.1:4343"
-dotnet .bin/libplanet-client/libplanet-client.dll --node-end-point "127.0.0.1:4343"
+.bin/libplanet-node -a --end-point "127.0.0.1:4343"
+.bin/libplanet-client --node-end-point "127.0.0.1:4343"
 ```

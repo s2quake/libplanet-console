@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace LibplanetConsole.Consoles;
@@ -20,7 +21,6 @@ internal static class ProcessUtility
     {
         get
         {
-            var s = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
             if (Environment.GetEnvironmentVariable(WorkspacePathVariableName) is { } workspacePath)
             {
                 if (Directory.Exists(workspacePath) != true)
@@ -96,7 +96,30 @@ internal static class ProcessUtility
         }
     }
 
-    public static string Extension => IsWindows() && IsArm64() ? ".exe" : ".dll";
+    public static string PublishExtension => IsWindows() ? ".exe" : ".dll";
+
+    public static string DotnetPath
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+            {
+                return @"C:\Program Files\dotnet\dotnet.exe";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
+            {
+                return "/usr/local/share/dotnet/dotnet";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
+            {
+                return "/usr/bin/dotnet";
+            }
+
+            throw new NotSupportedException("Unsupported OS platform.");
+        }
+    }
 
     private static bool IsInProject
     {
@@ -122,13 +145,29 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{Extension}"
+                $"{Framework}/libplanet-node{PublishExtension}"
             );
         }
     }
 
     private static string NodePathInBin
-        => Path.GetFullPath($"{WorkspacePath}/.bin/libplanet-node/libplanet-node{Extension}");
+    {
+        get
+        {
+            if (Environment.ProcessPath is { } processPath)
+            {
+                var directoryName = Path.GetDirectoryName(processPath) ??
+                    throw new InvalidOperationException(
+                        $"Directory of the process path '{processPath}' is not found.");
+                var extension = Path.GetExtension(processPath) ??
+                    throw new InvalidOperationException(
+                        $"Extension of the process path '{processPath}' is not found.");
+                return Path.Combine(directoryName, $"libplanet-node{extension}");
+            }
+
+            throw new InvalidOperationException("Environment.ProcessPath is not found.");
+        }
+    }
 
     private static string ClientPathInProject
     {
@@ -136,13 +175,39 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
-                $"{Congiguration}/{Framework}/libplanet-client{Extension}"
+                $"{Congiguration}/{Framework}/libplanet-client{PublishExtension}"
             );
         }
     }
 
     private static string ClientPathInBin
-        => Path.GetFullPath($"{WorkspacePath}/.bin/libplanet-client/libplanet-client{Extension}");
+    {
+        get
+        {
+            if (Environment.ProcessPath is { } processPath)
+            {
+                var directoryName = Path.GetDirectoryName(processPath) ??
+                    throw new InvalidOperationException(
+                        $"Directory of the process path '{processPath}' is not found.");
+                var extension = Path.GetExtension(processPath) ??
+                    throw new InvalidOperationException(
+                        $"Extension of the process path '{processPath}' is not found.");
+                return Path.Combine(directoryName, $"libplanet-client{extension}");
+            }
+
+            throw new InvalidOperationException("Environment.ProcessPath is not found.");
+        }
+    }
+
+    public static string GetAssemblyLocation(Assembly assembly)
+    {
+        if (assembly.Location is { } assemblyLocation)
+        {
+            return assemblyLocation;
+        }
+
+        return Path.Combine(AppContext.BaseDirectory, assembly.GetName().Name!);
+    }
 
     public static string GetNodePath()
     {
@@ -154,7 +219,7 @@ internal static class ProcessUtility
         {
             var message =
                 $"Use 'src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{Extension}' by setting the directory path " +
+                $"{Framework}/libplanet-node{PublishExtension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
                 $"'{NodePathVariableName}'.";
@@ -172,7 +237,7 @@ internal static class ProcessUtility
         {
             var message =
                 $"Use 'src/client/LibplanetConsole.Clients.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client{Extension}' by setting the directory path " +
+                $"{Framework}/libplanet-client{PublishExtension}' by setting the directory path " +
                 $"in environment variable '{WorkspacePathVariableName}', or " +
                 $"set the path to the node executable DLL file directly in environment variable " +
                 $"'{ClientPathVariableName}'.";
@@ -182,13 +247,16 @@ internal static class ProcessUtility
 
     public static bool IsWindows()
     {
-        return System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-            System.Runtime.InteropServices.OSPlatform.Windows);
+        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     }
 
     public static bool IsArm64()
     {
-        return System.Runtime.InteropServices.RuntimeInformation.OSArchitecture ==
-               System.Runtime.InteropServices.Architecture.Arm64;
+        return RuntimeInformation.OSArchitecture == Architecture.Arm64;
+    }
+
+    public static bool IsDotnetRuntime()
+    {
+        return Environment.ProcessPath == DotnetPath;
     }
 }
