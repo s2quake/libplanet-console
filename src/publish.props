@@ -1,0 +1,11 @@
+<Project>
+
+  <PropertyGroup>
+    <PublishSingleFile>true</PublishSingleFile>
+    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+</Project>

@@ -14,7 +14,7 @@ internal sealed class NodeProcess : IDisposable
 
     public NodeProcess(NodeProcessOptions options)
     {
-        var isArm64Windows = IsWindows() && IsArm64();
+        var isDotnetRuntime = IsDotnetRuntime();
         var startInfo = new ProcessStartInfo
         {
             ArgumentList =
@@ -30,11 +30,15 @@ internal sealed class NodeProcess : IDisposable
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            FileName = isArm64Windows ? NodePath : "dotnet",
         };
-        if (isArm64Windows != true)
+        if (isDotnetRuntime == true)
         {
+            startInfo.FileName = DotnetPath;
             startInfo.ArgumentList.Insert(0, NodePath);
+        }
+        else
+        {
+            startInfo.FileName = NodePath;
         }
 
         if (options.StoreDirectory != string.Empty)

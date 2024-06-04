@@ -30,6 +30,7 @@
     <CommunicationDirectory>$(MSBuildThisFileDirectory)..\.communication\</CommunicationDirectory>
     <ConfigurationDirectory>$(MSBuildThisFileDirectory)..\.configurations\</ConfigurationDirectory>
     <LibplanetDirectory>$(MSBuildThisFileDirectory)..\.libplanet\</LibplanetDirectory>
+    <DebugType Condition="'$(_IsPublishing)'=='true'">none</DebugType>
   </PropertyGroup>
 
   <Target Name="DisplaySourceUsage" BeforeTargets="Build">

@@ -1,7 +1,12 @@
-$filename = Join-Path $PSScriptRoot ".bin/libplanet-console/libplanet-console.dll"
-
-if (!(Test-Path -Path $filename)) {
-  throw "'$filename' not found.`nPlease run 'dotnet build' first."
+if ($IsWindows ) {
+  $filename = Join-Path $PSScriptRoot ".bin/libplanet-console.exe"
+}
+else {
+  $filename = Join-Path $PSScriptRoot ".bin/libplanet-console"
 }
 
-dotnet "$filename" $args
+if (!(Test-Path -Path $filename)) {
+  throw "'$filename' not found.`nPlease run 'dotnet publish' first."
+}
+
+Invoke-Expression "& '$filename' $args" 

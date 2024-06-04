@@ -14,7 +14,7 @@ internal sealed class ClientProcess : IDisposable
 
     public ClientProcess(ClientProcessOptions options)
     {
-        var isArm64Windows = IsWindows() && IsArm64();
+        var isDotnetRuntime = IsDotnetRuntime();
         var startInfo = new ProcessStartInfo
         {
             ArgumentList =
@@ -30,11 +30,15 @@ internal sealed class ClientProcess : IDisposable
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            FileName = isArm64Windows ? ClientPath : "dotnet",
         };
-        if (isArm64Windows != true)
+        if (isDotnetRuntime == true)
         {
+            startInfo.FileName = DotnetPath;
             startInfo.ArgumentList.Insert(0, ClientPath);
+        }
+        else
+        {
+            startInfo.FileName = ClientPath;
         }
 
         if (options.LogDirectory != string.Empty)
