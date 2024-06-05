@@ -1,4 +1,4 @@
-using System.ComponentModel.Composition;
+using System.Net;
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
@@ -12,15 +12,23 @@ using LibplanetConsole.Nodes.Services;
 
 namespace LibplanetConsole.Clients;
 
-[method: ImportingConstructor]
-internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
-    : IClient, INodeCallback
+internal sealed class Client : IClient, INodeCallback
 {
-    private readonly ApplicationBase _application = application;
-    private readonly SecureString _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
+    private readonly ApplicationBase _application;
+    private readonly SecureString _privateKey;
+    private EndPoint? _nodeEndPoint;
     private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
-    private ClientInfo _info = new() { Address = privateKey.PublicKey.Address };
+    private ClientInfo _info;
+
+    public Client(ApplicationBase application, ApplicationOptions options)
+    {
+        _application = application;
+        _nodeEndPoint = options.NodeEndPoint;
+        _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
+        _info = new() { Address = options.PrivateKey.PublicKey.Address };
+        PublicKey = options.PrivateKey.PublicKey;
+    }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -28,7 +36,7 @@ internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
 
     public event EventHandler<StopEventArgs>? Stopped;
 
-    public PublicKey PublicKey { get; } = privateKey.PublicKey;
+    public PublicKey PublicKey { get; }
 
     public Address Address => PublicKey.Address;
 
@@ -38,9 +46,22 @@ internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
 
     public NodeInfo NodeInfo { get; private set; } = new();
 
-    public bool IsRunning { get; private set; }
+    public EndPoint NodeEndPoint
+    {
+        get => _nodeEndPoint ??
+            throw new InvalidOperationException("NodeEndPoint is not initialized.");
+        set
+        {
+            if (IsRunning == true)
+            {
+                throw new InvalidOperationException("The client is running.");
+            }
 
-    public ClientOptions ClientOptions { get; private set; } = new();
+            _nodeEndPoint = value;
+        }
+    }
+
+    public bool IsRunning { get; private set; }
 
     private INodeService RemoteNodeService => _application.GetService<RemoteNodeService>().Service;
 
@@ -49,7 +70,7 @@ internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
     public bool Verify(object obj, byte[] signature)
         => PublicKeyUtility.Verify(PublicKey, obj, signature);
 
-    public async Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         if (_remoteNodeContext != null)
         {
@@ -57,12 +78,11 @@ internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
         }
 
         _remoteNodeContext = _application.GetService<RemoteNodeContext>();
-        _remoteNodeContext.EndPoint = clientOptions.NodeEndPoint;
+        _remoteNodeContext.EndPoint = NodeEndPoint;
         _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
         _remoteNodeContext.Closed += RemoteNodeContext_Closed;
         NodeInfo = await RemoteNodeService.GetInfoAsync(cancellationToken);
         _info = _info with { NodeAddress = NodeInfo.Address };
-        ClientOptions = clientOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -79,7 +99,6 @@ internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
         _info = _info with { NodeAddress = default };
         _remoteNodeContext = null;
         _closeToken = Guid.Empty;
-        ClientOptions = new();
         IsRunning = false;
         Stopped?.Invoke(this, new(StopReason.None));
     }
@@ -151,7 +170,6 @@ internal sealed class Client(ApplicationBase application, PrivateKey privateKey)
         }
 
         _closeToken = Guid.Empty;
-        ClientOptions = new();
         IsRunning = false;
         Stopped?.Invoke(this, new(StopReason.None));
     }

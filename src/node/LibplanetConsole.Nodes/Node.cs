@@ -17,7 +17,6 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Seeds;
@@ -34,6 +33,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
+    private readonly EndPoint? _seedEndPoint;
+    private readonly ManualResetEvent _initializedResetEvent = new(false);
 
     private DnsEndPoint? _blocksyncEndPoint;
     private DnsEndPoint? _consensusEndPoint;
@@ -46,6 +47,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public Node(ApplicationOptions options)
     {
+        _seedEndPoint = options.NodeEndPoint;
         _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
@@ -151,6 +153,10 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(_startTask is not null, "Swarm has been started.");
+        if (_initializedResetEvent.WaitOne(10000) != true)
+        {
+            throw new InvalidOperationException("NodeOptions is not initialized.");
+        }
 
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var nodeOptions = NodeOptions;
@@ -330,12 +336,11 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        var application = serviceProvider.GetService<ApplicationBase>();
-        var seedEndPoint = application.Info.NodeEndPoint;
-        var nodeOptions = seedEndPoint != string.Empty
-            ? await NodeOptions.CreateAsync(seedEndPoint, cancellationToken)
+        var nodeOptions = _seedEndPoint != null
+            ? await NodeOptions.CreateAsync(_seedEndPoint, cancellationToken)
             : NodeOptions;
         _nodeOptions = nodeOptions;
+        _initializedResetEvent.Set();
     }
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)

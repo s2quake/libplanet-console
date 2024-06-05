@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
@@ -105,44 +104,16 @@ internal sealed class ClientCollection(
     public async Task<Client> AddNewAsync(
         PrivateKey privateKey, CancellationToken cancellationToken)
     {
-        var nodes = _application.GetService<NodeCollection>();
-        var node = nodes.RandomNode();
-        var endPoint = DnsEndPointUtility.Next();
-        var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
-        {
-            LogDirectory = _application.Info.LogDirectory,
-            NoREPL = _application.Info.IsNewTerminal != true,
-        };
-        var client = CreateNew(privateKey, endPoint);
+        var client = CreateNew(privateKey);
         if (_application.Info.ManualStart != true)
         {
-            var clientProcess = new ClientProcess(clientProcessOptions)
-            {
-                StartOnTerminal = _application.Info.IsNewTerminal,
-            };
-            var clientOptions = new ClientOptions()
-            {
-                NodeEndPoint = node.EndPoint,
-            };
-            clientProcess.Start();
-            await client.StartAsync(clientOptions, cancellationToken);
+            var nodes = _application.GetService<NodeCollection>();
+            var node = nodes.RandomNode();
+            client.StartProcess();
+            await client.AttachAsync(cancellationToken);
+            await client.StartAsync(node, cancellationToken);
         }
 
-        InsertClient(client);
-        return client;
-    }
-
-    public async Task<Client> AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
-    {
-        var nodes = _application.GetService<NodeCollection>();
-        var node = nodes.RandomNode();
-        var clientOptions = new ClientOptions()
-        {
-            NodeEndPoint = node.EndPoint,
-        };
-        var client = CreateNew(privateKey, endPoint);
-        await client.StartAsync(clientOptions, cancellationToken);
         InsertClient(client);
         return client;
     }
@@ -178,10 +149,6 @@ internal sealed class ClientCollection(
         PrivateKey privateKey, CancellationToken cancellationToken)
         => await AddNewAsync(privateKey, cancellationToken);
 
-    async Task<IClient> IClientCollection.AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
-        => await AttachAsync(endPoint, privateKey, cancellationToken);
-
     bool IClientCollection.Contains(IClient item) => item switch
     {
         Client client => Contains(client),
@@ -203,11 +170,14 @@ internal sealed class ClientCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
 
-    private Client CreateNew(PrivateKey privateKey, EndPoint endPoint)
+    private Client CreateNew(PrivateKey privateKey)
     {
         lock (LockObject)
         {
-            return new Client(_application, privateKey, endPoint);
+            return new Client(_application, privateKey)
+            {
+                EndPoint = DnsEndPointUtility.Next(),
+            };
         }
     }
 

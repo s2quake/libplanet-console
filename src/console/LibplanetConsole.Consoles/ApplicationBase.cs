@@ -68,28 +68,6 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     internal GenesisOptions GenesisOptions { get; }
 
-    public IClient GetClient(string address)
-    {
-        if (address == string.Empty)
-        {
-            return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
-        }
-
-        return _clients.Where<Client>(item => IsEquals(item, address))
-                       .Single();
-    }
-
-    public INode GetNode(string address)
-    {
-        if (address == string.Empty)
-        {
-            return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        }
-
-        return _nodes.Where<Node>(item => IsEquals(item, address))
-                     .Single();
-    }
-
     public bool TryGetClient(string address, [MaybeNullWhen(false)] out IClient client)
     {
         if (address == string.Empty)
@@ -154,19 +132,45 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     public ApplicationContainer CreateChildContainer(object owner)
         => new(owner, _container, new ApplicationExportProvider(_container));
 
+    IClient IApplication.GetClient(string address) => GetClient(address);
+
+    INode IApplication.GetNode(string address) => GetNode(address);
+
+    internal Client GetClient(string address)
+    {
+        if (address == string.Empty)
+        {
+            return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
+        }
+
+        return _clients.Where<Client>(item => IsEquals(item, address))
+                       .Single();
+    }
+
+    internal Node GetNode(string address)
+    {
+        if (address == string.Empty)
+        {
+            return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
+        }
+
+        return _nodes.Where<Node>(item => IsEquals(item, address))
+                     .Single();
+    }
+
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         _logger.Information("Starting the application...");
-        await base.OnStartAsync(cancellationToken);
         _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
+        await base.OnStartAsync(cancellationToken);
         _logger.Information("Started the application.");
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         _logger.Information("Disposing the application...");
-        await base.OnDisposeAsync();
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
+        await base.OnDisposeAsync();
         await _container.DisposeAsync();
         _logger.Information("Disposed the application.");
     }

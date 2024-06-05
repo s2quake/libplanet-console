@@ -1,3 +1,4 @@
+using System.Net;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using Libplanet.Types.Tx;
@@ -25,7 +26,9 @@ public interface IClient : IVerifier
 
     Address Address { get; }
 
-    Task StartAsync(ClientOptions nodeOptions, CancellationToken cancellationToken);
+    EndPoint NodeEndPoint { get; set; }
+
+    Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

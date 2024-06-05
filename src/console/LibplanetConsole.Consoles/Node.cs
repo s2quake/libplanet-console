@@ -68,9 +68,9 @@ internal sealed class Node
 
     public Address Address => PublicKey.Address;
 
-    public bool IsRunning { get; private set; }
-
     public bool IsAttached => _closeToken != Guid.Empty;
+
+    public bool IsRunning { get; private set; }
 
     public NodeOptions NodeOptions { get; }
 
@@ -184,7 +184,6 @@ internal sealed class Node
 
         using var scope = new ProgressScope(this);
         await _remoteService.Service.StopAsync(cancellationToken);
-        await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         _closeToken = Guid.Empty;
         _nodeInfo = new();
         IsRunning = false;
@@ -246,6 +245,7 @@ internal sealed class Node
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
         var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
         {
+            NodeEndPoint = EndPointUtility.Parse(application.Info.EndPoint),
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
             ManualStart = application.Info.ManualStart,

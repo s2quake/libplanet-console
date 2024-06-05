@@ -34,8 +34,7 @@ internal sealed class ClientEventTracer(IClient client)
         var hash = (ShortBlockHash)blockInfo.Hash;
         var miner = (ShortAddress)blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 
     private void Client_Started(object? sender, EventArgs e)

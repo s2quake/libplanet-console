@@ -28,7 +28,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger = CreateLogger(options.LogPath);
         _logger.Information(Environment.CommandLine);
         _logger.Information("Initializing the application...");
-        _client = new(this, options.PrivateKey);
+        _client = new(this, options);
         _isSeed = options.IsSeed;
         _container = new(this);
         _container.ComposeExportedValue<IApplication>(this);
@@ -142,22 +142,19 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         if (_info.NodeEndPoint != string.Empty)
         {
-            var clientOptions = new ClientOptions
-            {
-                NodeEndPoint = await GetNodeEndPointAsync(cancellationToken),
-            };
-            await _client.StartAsync(clientOptions, cancellationToken: cancellationToken);
-        }
-
-        async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
-        {
             var nodeEndPoint = EndPointUtility.Parse(_info.NodeEndPoint);
-            if (_isSeed == true)
-            {
-                return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);
-            }
+            _client.NodeEndPoint = await GetNodeEndPointAsync(cancellationToken);
+            await _client.StartAsync(cancellationToken);
 
-            return nodeEndPoint;
+            async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
+            {
+                if (_isSeed == true)
+                {
+                    return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);
+                }
+
+                return nodeEndPoint;
+            }
         }
     }
 }

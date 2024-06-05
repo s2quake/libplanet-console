@@ -61,6 +61,12 @@ internal sealed class NodeProcess(NodeProcessOptions options) : ProcessBase
                     $"{(ShortAddress)privateKey.Address}.log"));
         }
 
+        if (options.NodeEndPoint is { } nodeEndPoint)
+        {
+            startInfo.ArgumentList.Add("--node-end-point");
+            startInfo.ArgumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+        }
+
         return startInfo;
     }
 }

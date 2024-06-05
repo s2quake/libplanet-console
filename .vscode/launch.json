@@ -14,7 +14,7 @@
                 "--node-count",
                 "1",
                 "--client-count",
-                "0",
+                "1",
                 "--end-point",
                 "127.0.0.1:4343",
                 "--log-path",

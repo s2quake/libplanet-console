@@ -59,16 +59,16 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
     [CommandSummary("Starts a client of the specified address.\n" +
                     "If the address is not specified, current client is used.")]
     [CommandMethodProperty(nameof(Address))]
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(
+        string nodeAddress = "", CancellationToken cancellationToken = default)
     {
+        var nodes = application.GetService<NodeCollection>();
         var address = Address;
+        var node = nodeAddress == string.Empty
+            ? nodes.RandomNode()
+            : application.GetNode(nodeAddress);
         var client = application.GetClient(address);
-        var node = GetRandomNode(application);
-        var clientOptions = new ClientOptions()
-        {
-            NodeEndPoint = node.EndPoint,
-        };
-        await client.StartAsync(clientOptions, cancellationToken);
+        await client.StartAsync(node, cancellationToken);
     }
 
     [CommandMethod]

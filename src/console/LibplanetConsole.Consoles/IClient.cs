@@ -8,11 +8,17 @@ namespace LibplanetConsole.Consoles;
 
 public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {
+    event EventHandler? Attached;
+
+    event EventHandler? Detached;
+
     event EventHandler? Started;
 
     event EventHandler? Stopped;
 
     event EventHandler? Disposed;
+
+    bool IsAttached { get; }
 
     bool IsRunning { get; }
 
@@ -20,13 +26,13 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     ClientInfo Info { get; }
 
-    ClientOptions ClientOptions { get; }
-
     PublicKey PublicKey { get; }
 
-    Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
+    Task AttachAsync(CancellationToken cancellationToken);
 
-    Task StartAsync(ClientOptions clientOptions, CancellationToken cancellationToken);
+    Task DetachAsync(CancellationToken cancellationToken);
+
+    Task StartAsync(INode node, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

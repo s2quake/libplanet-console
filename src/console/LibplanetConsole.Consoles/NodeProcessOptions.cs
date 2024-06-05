@@ -17,6 +17,8 @@ internal sealed record class NodeProcessOptions
 
     public SecureString PrivateKey { get; }
 
+    public EndPoint? NodeEndPoint { get; init; }
+
     public string StoreDirectory { get; init; } = string.Empty;
 
     public string LogDirectory { get; init; } = string.Empty;

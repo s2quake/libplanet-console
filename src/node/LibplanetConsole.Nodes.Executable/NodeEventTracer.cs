@@ -33,16 +33,14 @@ internal sealed class NodeEventTracer(IApplication application, INode node) : IA
         var hash = (ShortBlockHash)blockInfo.Hash;
         var miner = (ShortAddress)blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 
     private void Node_Started(object? sender, EventArgs e)
     {
         var endPoint = application.Info.EndPoint;
         var message = $"BlockChain has been started.: {endPoint}";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
         Console.Out.WriteLineAsJson(node.Info);
     }
 
@@ -50,7 +48,6 @@ internal sealed class NodeEventTracer(IApplication application, INode node) : IA
     {
         var endPoint = application.Info.EndPoint;
         var message = $"BlockChain has been stopped.: {endPoint}";
-        Console.WriteLine(
-            TerminalStringBuilder.GetString(message, TerminalColorType.BrightGreen));
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 }

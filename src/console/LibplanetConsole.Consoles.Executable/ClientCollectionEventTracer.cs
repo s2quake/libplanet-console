@@ -14,8 +14,6 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
     private readonly IClientCollection _clients = clients;
     private IClient? _current;
 
-    public static TextWriter Writer => Console.Out;
-
     public Task InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
@@ -58,12 +56,16 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
 
     private void AttachEvent(IClient client)
     {
+        client.Attached += Client_Attached;
+        client.Detached += Client_Detached;
         client.Started += Client_Started;
         client.Stopped += Client_Stopped;
     }
 
     private void DetachEvent(IClient client)
     {
+        client.Attached -= Client_Attached;
+        client.Detached -= Client_Detached;
         client.Started -= Client_Started;
         client.Stopped -= Client_Stopped;
     }
@@ -79,7 +81,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             foreach (IClient client in e.NewItems!)
             {
-                var message = $"Client attached: {(ShortAddress)client.Address}";
+                var message = $"Client created: {(ShortAddress)client.Address}";
                 var colorType = TerminalColorType.BrightBlue;
                 Console.Out.WriteColoredLine(message, colorType);
                 AttachEvent(client);
@@ -89,11 +91,31 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             foreach (IClient client in e.OldItems!)
             {
-                var message = $"Client detached: {(ShortAddress)client.Address}";
+                var message = $"Client deleted: {(ShortAddress)client.Address}";
                 var colorType = TerminalColorType.BrightBlue;
                 Console.Out.WriteColoredLine(message, colorType);
                 DetachEvent(client);
             }
+        }
+    }
+
+    private void Client_Attached(object? sender, EventArgs e)
+    {
+        if (sender is IClient client)
+        {
+            var message = $"Client attached: {(ShortAddress)client.Address}";
+            var colorType = TerminalColorType.BrightBlue;
+            Console.Out.WriteColoredLine(message, colorType);
+        }
+    }
+
+    private void Client_Detached(object? sender, EventArgs e)
+    {
+        if (sender is IClient client)
+        {
+            var message = $"Client detached: {(ShortAddress)client.Address}";
+            var colorType = TerminalColorType.BrightBlue;
+            Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
