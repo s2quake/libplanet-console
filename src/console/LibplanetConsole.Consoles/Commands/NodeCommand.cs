@@ -66,6 +66,22 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
+    public async Task AttachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        await node.AttachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task DetachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        await node.DetachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
     [CommandSummary("Starts a node of the specified address.\n" +
                     "If the address is not specified, the current node is used.")]
     public async Task StartAsync(CancellationToken cancellationToken = default)
@@ -83,6 +99,15 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
         var address = Address;
         var node = application.GetNode(address);
         await node.StopAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public void CommandLine()
+    {
+        var address = Address;
+        var node = (Node)application.GetNode(address);
+        var nodeProcess = node.CreateNodeProcess();
+        Out.WriteLine(nodeProcess.GetCommandLine());
     }
 
     [CommandMethod]

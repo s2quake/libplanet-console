@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
@@ -108,19 +107,8 @@ internal sealed class NodeCollection(
         var node = CreateNew(privateKey);
         if (_application.Info.ManualStart != true)
         {
-            var endPoint = node.EndPoint;
-            var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
-            {
-                StoreDirectory = _application.Info.StoreDirectory,
-                LogDirectory = _application.Info.LogDirectory,
-                ManualStart = _application.Info.ManualStart,
-                NoREPL = _application.Info.IsNewTerminal != true,
-            };
-            var nodeProcess = new NodeProcess(nodeProcessOptions)
-            {
-                StartOnTerminal = _application.Info.IsNewTerminal,
-            };
-            nodeProcess.Start();
+            node.StartProcess();
+            await node.AttachAsync(cancellationToken);
             await node.StartAsync(cancellationToken);
         }
 

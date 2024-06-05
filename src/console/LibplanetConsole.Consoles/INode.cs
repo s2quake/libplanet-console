@@ -11,11 +11,17 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
+    event EventHandler? Attached;
+
+    event EventHandler? Detached;
+
     event EventHandler? Started;
 
     event EventHandler? Stopped;
 
     event EventHandler? Disposed;
+
+    bool IsAttached { get; }
 
     bool IsRunning { get; }
 
@@ -26,6 +32,10 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
     NodeOptions NodeOptions { get; }
 
     PublicKey PublicKey { get; }
+
+    Task AttachAsync(CancellationToken cancellationToken);
+
+    Task DetachAsync(CancellationToken cancellationToken);
 
     Task StartAsync(CancellationToken cancellationToken);
 

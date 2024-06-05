@@ -37,35 +37,6 @@ internal abstract class ProcessBase : IDisposable
         return true;
     }
 
-    private Process GetProcess()
-    {
-        var startInfo = GetStartInfo();
-        if (StartOnTerminal == true)
-        {
-            var filename = startInfo.FileName;
-            var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
-            var script = $"tell application \"Terminal\"\n" +
-                         $"  do script \"{filename} {arguments}; exit\"\n" +
-                         $"  activate\n" +
-                         $"end tell\n";
-            var tempFile = TempFile.WriteAllText(script);
-
-            return new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "/usr/bin/osascript",
-                    ArgumentList =
-                {
-                    tempFile.FileName,
-                },
-                },
-            };
-        }
-
-        return new Process() { StartInfo = startInfo };
-    }
-
     public void Close()
     {
         if (_process is null)
@@ -87,7 +58,44 @@ internal abstract class ProcessBase : IDisposable
         _process = null;
     }
 
+    public string GetCommandLine()
+    {
+        var startInfo = GetStartInfo();
+        var filename = startInfo.FileName;
+        var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
+        return $"{filename} {arguments}";
+    }
+
     protected abstract ProcessStartInfo GetStartInfo();
+
+    private Process GetProcess()
+    {
+        var startInfo = GetStartInfo();
+        if (StartOnTerminal == true)
+        {
+            var filename = startInfo.FileName;
+            var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
+            var script = $"tell application \"Terminal\"\n" +
+                         $"  do script \"{filename} {arguments}; exit\"\n" +
+                         $"  activate\n" +
+                         $"end tell\n";
+            var tempFile = TempFile.WriteAllText(script);
+
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/usr/bin/osascript",
+                    ArgumentList =
+                    {
+                        tempFile.FileName,
+                    },
+                },
+            };
+        }
+
+        return new Process() { StartInfo = startInfo };
+    }
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
     {

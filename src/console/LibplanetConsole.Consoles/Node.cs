@@ -8,6 +8,7 @@ using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
@@ -47,6 +48,10 @@ internal sealed class Node
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
+    public event EventHandler? Attached;
+
+    public event EventHandler? Detached;
+
     public event EventHandler? Started;
 
     public event EventHandler? Stopped;
@@ -64,6 +69,8 @@ internal sealed class Node
     public Address Address => PublicKey.Address;
 
     public bool IsRunning { get; private set; }
+
+    public bool IsAttached => _closeToken != Guid.Empty;
 
     public NodeOptions NodeOptions { get; }
 
@@ -124,13 +131,42 @@ internal sealed class Node
         return _nodeInfo;
     }
 
+    public async Task AttachAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(
+            condition: _closeToken != Guid.Empty,
+            message: "Node is already attached.");
+
+        using var scope = new ProgressScope(this);
+        _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
+        _nodeInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
+        IsRunning = _nodeInfo.IsRunning;
+        Attached?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task DetachAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(
+            condition: _closeToken == Guid.Empty,
+            message: "Node is not attached.");
+
+        using var scope = new ProgressScope(this);
+        await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
+        _closeToken = Guid.Empty;
+        Detached?.Invoke(this, EventArgs.Empty);
+    }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
+        InvalidOperationExceptionUtility.ThrowIf(
+            condition: _closeToken == Guid.Empty,
+            message: "Node is not attached.");
 
         using var scope = new ProgressScope(this);
-        _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
         _nodeInfo = await _remoteService.Service.StartAsync(cancellationToken);
         _blocksyncEndPoint = DnsEndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = DnsEndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
@@ -142,10 +178,14 @@ internal sealed class Node
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
+        InvalidOperationExceptionUtility.ThrowIf(
+            condition: _closeToken == Guid.Empty,
+            message: "Node is not attached.");
 
         using var scope = new ProgressScope(this);
         await _remoteService.Service.StopAsync(cancellationToken);
         await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
+        _closeToken = Guid.Empty;
         _nodeInfo = new();
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -186,13 +226,38 @@ internal sealed class Node
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-        await _remoteServiceContext.CloseAsync(_closeToken);
+        if (_closeToken != Guid.Empty)
+        {
+            await _remoteServiceContext.CloseAsync(_closeToken);
+            _closeToken = Guid.Empty;
+        }
+
         IsRunning = false;
         await _container.DisposeAsync();
         _isDisposed = true;
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
     }
+
+    public NodeProcess CreateNodeProcess()
+    {
+        var endPoint = EndPoint;
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
+        var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
+        {
+            StoreDirectory = application.Info.StoreDirectory,
+            LogDirectory = application.Info.LogDirectory,
+            ManualStart = application.Info.ManualStart,
+            NoREPL = application.Info.IsNewTerminal != true,
+        };
+        return new NodeProcess(nodeProcessOptions)
+        {
+            StartOnTerminal = application.Info.IsNewTerminal,
+        };
+    }
+
+    public bool StartProcess() => CreateNodeProcess().Start();
 
     void INodeCallback.OnStarted(NodeInfo nodeInfo)
     {
@@ -243,8 +308,11 @@ internal sealed class Node
 
     private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {
-        IsRunning = false;
-        Stopped?.Invoke(this, EventArgs.Empty);
+        if (_isInProgress != true && IsRunning == true)
+        {
+            _closeToken = Guid.Empty;
+            Detached?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private sealed class ProgressScope : IDisposable
