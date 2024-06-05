@@ -107,18 +107,27 @@ internal sealed class ClientCollection(
     {
         var nodes = _application.GetService<NodeCollection>();
         var node = nodes.RandomNode();
-        var clientOptions = new ClientOptions()
-        {
-            NodeEndPoint = node.EndPoint,
-        };
         var endPoint = DnsEndPointUtility.Next();
         var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
         {
             LogDirectory = _application.Info.LogDirectory,
+            NoREPL = _application.Info.IsNewTerminal != true,
         };
-        _ = new ClientProcess(clientProcessOptions);
         var client = CreateNew(privateKey, endPoint);
-        await client.StartAsync(clientOptions, cancellationToken);
+        if (_application.Info.ManualStart != true)
+        {
+            var clientProcess = new ClientProcess(clientProcessOptions)
+            {
+                StartOnTerminal = _application.Info.IsNewTerminal,
+            };
+            var clientOptions = new ClientOptions()
+            {
+                NodeEndPoint = node.EndPoint,
+            };
+            clientProcess.Start();
+            await client.StartAsync(clientOptions, cancellationToken);
+        }
+
         InsertClient(client);
         return client;
     }

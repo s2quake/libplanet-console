@@ -24,11 +24,11 @@ internal sealed class SeedService(IApplication application, INode node)
             var nodeInfo = node.Info;
             var blocksyncSeedPeer = node.BlocksyncSeedPeer;
             var consensusSeedPeer = node.ConsensusSeedPeer;
-            var genesisOptions = (GenesisOptionsInfo)node.NodeOptions.GenesisOptions;
+            var genesisOptions = (GenesisInfo)node.NodeOptions.GenesisOptions;
 
             return await application.InvokeAsync(() => new SeedInfo
             {
-                GenesisOptions = genesisOptions.Encrypt(publicKey),
+                GenesisInfo = genesisOptions.Encrypt(publicKey),
                 BlocksyncSeedPeer = BoundPeerUtility.ToString(blocksyncSeedPeer),
                 ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
             });

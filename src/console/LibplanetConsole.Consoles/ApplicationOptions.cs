@@ -19,4 +19,8 @@ public sealed record class ApplicationOptions
     public string StoreDirectory { get; init; } = string.Empty;
 
     public string LogDirectory { get; init; } = string.Empty;
+
+    public bool ManualStart { get; init; }
+
+    public bool IsNewTerminal { get; init; }
 }

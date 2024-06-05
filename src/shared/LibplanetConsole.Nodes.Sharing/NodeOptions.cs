@@ -29,7 +29,7 @@ public sealed record class NodeOptions
     {
         return new NodeOptions
         {
-            GenesisOptions = info.GenesisOptions,
+            GenesisOptions = info.GenesisInfo,
             BlocksyncSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.ConsensusSeedPeer),
         };
@@ -39,7 +39,7 @@ public sealed record class NodeOptions
     {
         return new NodeOptionsInfo
         {
-            GenesisOptions = nodeOptions.GenesisOptions,
+            GenesisInfo = nodeOptions.GenesisOptions,
             BlocksyncSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.ConsensusSeedPeer),
         };

@@ -27,7 +27,7 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 
     PublicKey PublicKey { get; }
 
-    Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
+    Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

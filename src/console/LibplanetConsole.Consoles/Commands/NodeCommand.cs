@@ -4,7 +4,6 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Consoles.Services;
 
 namespace LibplanetConsole.Consoles.Commands;
 
@@ -73,15 +72,7 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     {
         var address = Address;
         var node = application.GetNode(address);
-        var seedService = application.GetService<SeedService>();
-        var nodeOptions = new NodeOptions
-        {
-            GenesisOptions = application.GenesisOptions,
-            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
-        };
-        await node.StartAsync(nodeOptions, cancellationToken);
-        await Task.CompletedTask;
+        await node.StartAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -92,16 +83,6 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
         var address = Address;
         var node = application.GetNode(address);
         await node.StopAsync(cancellationToken);
-    }
-
-    [CommandMethod]
-    public async Task AttachAsync(
-        string endPoint, string privateKey, CancellationToken cancellationToken)
-    {
-        await nodes.AttachAsync(
-            endPoint: EndPointUtility.Parse(endPoint),
-            privateKey: PrivateKeyUtility.Parse(privateKey),
-            cancellationToken: cancellationToken);
     }
 
     [CommandMethod]

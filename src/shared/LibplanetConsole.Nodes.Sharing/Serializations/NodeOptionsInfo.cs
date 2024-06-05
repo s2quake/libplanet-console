@@ -4,7 +4,7 @@ namespace LibplanetConsole.Nodes.Serializations;
 
 public record struct NodeOptionsInfo
 {
-    public GenesisOptionsInfo GenesisOptions { get; set; }
+    public GenesisInfo GenesisInfo { get; set; }
 
     public string BlocksyncSeedPeer { get; set; }
 
@@ -14,7 +14,7 @@ public record struct NodeOptionsInfo
     {
         return new NodeOptionsInfo
         {
-            GenesisOptions = seedInfo.GenesisOptions,
+            GenesisInfo = seedInfo.GenesisInfo,
             BlocksyncSeedPeer = seedInfo.BlocksyncSeedPeer,
             ConsensusSeedPeer = seedInfo.ConsensusSeedPeer,
         };

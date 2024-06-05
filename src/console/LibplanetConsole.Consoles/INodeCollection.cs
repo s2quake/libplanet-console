@@ -28,7 +28,4 @@ public interface INodeCollection : IEnumerable<INode>, INotifyCollectionChanged
         => AddNewAsync(new(), cancellationToken);
 
     Task<INode> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken);
-
-    Task<INode> AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken);
 }

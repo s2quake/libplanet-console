@@ -8,7 +8,7 @@ try
     var @out = Console.Out;
     await using var application = new Application(settings);
     @out.WriteLine();
-    await application.StartAsync();
+    await application.RunAsync();
     @out.WriteLine("\u001b0");
 }
 catch (CommandParsingException e)

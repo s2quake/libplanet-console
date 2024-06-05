@@ -32,7 +32,7 @@ public interface INode : IVerifier
 
     BoundPeer ConsensusSeedPeer { get; }
 
-    Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken);
+    Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

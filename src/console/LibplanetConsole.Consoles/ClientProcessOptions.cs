@@ -16,4 +16,8 @@ internal sealed record class ClientProcessOptions
     public PrivateKey PrivateKey { get; }
 
     public string LogDirectory { get; init; } = string.Empty;
+
+    public bool ManualStart { get; init; }
+
+    public bool NoREPL { get; init; }
 }

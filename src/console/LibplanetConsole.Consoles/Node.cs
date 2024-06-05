@@ -29,8 +29,9 @@ internal sealed class Node
     private Guid _closeToken;
     private NodeInfo _nodeInfo = new();
     private bool _isDisposed;
+    private bool _isInProgress;
 
-    public Node(ApplicationBase application, PrivateKey privateKey, EndPoint endPoint)
+    public Node(ApplicationBase application, PrivateKey privateKey, NodeOptions nodeOptions)
     {
         _container = application.CreateChildContainer(this);
         _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
@@ -38,11 +39,9 @@ internal sealed class Node
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_container)])
-        {
-            EndPoint = endPoint,
-        };
+            [_remoteService, .. GetRemoteServices(_container)]);
         PublicKey = privateKey.PublicKey;
+        NodeOptions = nodeOptions;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
     }
 
@@ -66,9 +65,13 @@ internal sealed class Node
 
     public bool IsRunning { get; private set; }
 
-    public NodeOptions NodeOptions { get; private set; } = NodeOptions.Default;
+    public NodeOptions NodeOptions { get; }
 
-    public EndPoint EndPoint => _remoteServiceContext.EndPoint;
+    public EndPoint EndPoint
+    {
+        get => _remoteServiceContext.EndPoint;
+        set => _remoteServiceContext.EndPoint = value;
+    }
 
     public NodeInfo Info => _nodeInfo;
 
@@ -121,16 +124,16 @@ internal sealed class Node
         return _nodeInfo;
     }
 
-    public async Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
 
+        using var scope = new ProgressScope(this);
         _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
-        _nodeInfo = await _remoteService.Service.StartAsync(nodeOptions, cancellationToken);
+        _nodeInfo = await _remoteService.Service.StartAsync(cancellationToken);
         _blocksyncEndPoint = DnsEndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = DnsEndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
-        NodeOptions = nodeOptions;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -140,9 +143,10 @@ internal sealed class Node
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
 
+        using var scope = new ProgressScope(this);
         await _remoteService.Service.StopAsync(cancellationToken);
         await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
-        NodeOptions = NodeOptions.Default;
+        _nodeInfo = new();
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
     }
@@ -183,7 +187,6 @@ internal sealed class Node
 
         _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
         await _remoteServiceContext.CloseAsync(_closeToken);
-        NodeOptions = NodeOptions.Default;
         IsRunning = false;
         await _container.DisposeAsync();
         _isDisposed = true;
@@ -193,12 +196,22 @@ internal sealed class Node
 
     void INodeCallback.OnStarted(NodeInfo nodeInfo)
     {
-        _nodeInfo = nodeInfo;
+        if (_isInProgress != true)
+        {
+            _nodeInfo = nodeInfo;
+            IsRunning = true;
+            Started?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     void INodeCallback.OnStopped()
     {
-        _nodeInfo = new();
+        if (_isInProgress != true)
+        {
+            _nodeInfo = new();
+            IsRunning = false;
+            Stopped?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
@@ -230,9 +243,23 @@ internal sealed class Node
 
     private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {
-        NodeOptions = NodeOptions.Default;
         IsRunning = false;
-        _isDisposed = true;
-        Disposed?.Invoke(this, EventArgs.Empty);
+        Stopped?.Invoke(this, EventArgs.Empty);
+    }
+
+    private sealed class ProgressScope : IDisposable
+    {
+        private readonly Node _node;
+
+        public ProgressScope(Node node)
+        {
+            _node = node;
+            _node._isInProgress = true;
+        }
+
+        public void Dispose()
+        {
+            _node._isInProgress = false;
+        }
     }
 }

@@ -105,40 +105,26 @@ internal sealed class NodeCollection(
 
     public async Task<Node> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
     {
-        var seedService = _application.GetService<SeedService>();
-        var nodeOptions = new NodeOptions
+        var node = CreateNew(privateKey);
+        if (_application.Info.ManualStart != true)
         {
-            GenesisOptions = _application.GenesisOptions,
-            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
-        };
-        var endPoint = DnsEndPointUtility.Next();
-        var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
-        {
-            StoreDirectory = _application.Info.StoreDirectory,
-            LogDirectory = _application.Info.LogDirectory,
-        };
-        _ = new NodeProcess(nodeProcessOptions);
-        var node = CreateNew(privateKey, endPoint);
-        await node.StartAsync(nodeOptions, cancellationToken);
-        InsertNode(node);
-        return node;
-    }
+            var endPoint = node.EndPoint;
+            var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
+            {
+                StoreDirectory = _application.Info.StoreDirectory,
+                LogDirectory = _application.Info.LogDirectory,
+                ManualStart = _application.Info.ManualStart,
+                NoREPL = _application.Info.IsNewTerminal != true,
+            };
+            var nodeProcess = new NodeProcess(nodeProcessOptions)
+            {
+                StartOnTerminal = _application.Info.IsNewTerminal,
+            };
+            nodeProcess.Start();
+            await node.StartAsync(cancellationToken);
+        }
 
-    public async Task<Node> AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
-    {
-        var seedService = _application.GetService<SeedService>();
-        var nodeOptions = new NodeOptions
-        {
-            GenesisOptions = _application.GenesisOptions,
-            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
-        };
-        var node = CreateNew(privateKey, endPoint);
-        await node.StartAsync(nodeOptions, cancellationToken);
         InsertNode(node);
-
         return node;
     }
 
@@ -173,10 +159,6 @@ internal sealed class NodeCollection(
         PrivateKey privateKey, CancellationToken cancellationToken)
         => await AddNewAsync(privateKey, cancellationToken);
 
-    async Task<INode> INodeCollection.AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
-        => await AttachAsync(endPoint, privateKey, cancellationToken);
-
     bool INodeCollection.Contains(INode item) => item switch
     {
         Node node => Contains(node),
@@ -209,11 +191,21 @@ internal sealed class NodeCollection(
         return _nodeList[nodeIndex];
     }
 
-    private Node CreateNew(PrivateKey privateKey, EndPoint endPoint)
+    private Node CreateNew(PrivateKey privateKey)
     {
         lock (LockObject)
         {
-            return new Node(_application, privateKey, endPoint);
+            var seedService = _application.GetService<SeedService>();
+            var nodeOptions = new NodeOptions
+            {
+                GenesisOptions = _application.GenesisOptions,
+                BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
+                ConsensusSeedPeer = seedService.ConsensusSeedPeer,
+            };
+            return new Node(_application, privateKey, nodeOptions)
+            {
+                EndPoint = DnsEndPointUtility.Next(),
+            };
         }
     }
 

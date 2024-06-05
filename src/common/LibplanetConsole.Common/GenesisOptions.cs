@@ -15,7 +15,7 @@ public sealed record class GenesisOptions
 
     public override string ToString()
     {
-        var s = JsonUtility.SerializeObject((GenesisOptionsInfo)this);
+        var s = JsonUtility.SerializeObject((GenesisInfo)this);
         var bytes = Encoding.UTF8.GetBytes(s);
         return ByteUtil.Hex(bytes);
     }
@@ -24,7 +24,7 @@ public sealed record class GenesisOptions
     {
         var bytes = ByteUtil.ParseHex(text);
         var s = Encoding.UTF8.GetString(bytes);
-        return JsonUtility.DeserializeObject<GenesisOptionsInfo>(s);
+        return JsonUtility.DeserializeObject<GenesisInfo>(s);
     }
 
     // public string Encrypt(PublicKey publicKey)

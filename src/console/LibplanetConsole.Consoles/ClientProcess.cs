@@ -1,19 +1,16 @@
 using System.Diagnostics;
-using JSSoft.Commands;
-using JSSoft.Terminals;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class ClientProcess : IDisposable
+internal sealed class ClientProcess(ClientProcessOptions options) : ProcessBase
 {
-    private readonly Process _process;
+    private readonly ClientProcessOptions _options = options;
 
-    public ClientProcess(ClientProcessOptions options)
+    protected override ProcessStartInfo GetStartInfo()
     {
+        var options = _options;
         var isDotnetRuntime = IsDotnetRuntime();
         var startInfo = new ProcessStartInfo
         {
@@ -41,6 +38,11 @@ internal sealed class ClientProcess : IDisposable
             startInfo.FileName = ClientPath;
         }
 
+        if (options.NoREPL == true)
+        {
+            startInfo.ArgumentList.Add("--no-repl");
+        }
+
         if (options.LogDirectory != string.Empty)
         {
             startInfo.ArgumentList.Add("--log-path");
@@ -50,42 +52,6 @@ internal sealed class ClientProcess : IDisposable
                     $"{(ShortAddress)options.PrivateKey.Address}.log"));
         }
 
-        var filename = startInfo.FileName;
-        var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
-        ApplicationLogger.Information(
-            $"Starting a client process: {filename} {arguments}");
-        _process = new Process
-        {
-            StartInfo = startInfo,
-        };
-        _process.ErrorDataReceived += Process_ErrorDataReceived;
-        _process.Start();
-    }
-
-    public event EventHandler? Exited
-    {
-        add => _process.Exited += value;
-        remove => _process.Exited -= value;
-    }
-
-    public int Id => _process.Id;
-
-    public void Dispose()
-    {
-        if (_process.HasExited != true)
-        {
-            _process.Close();
-            ApplicationLogger.Information(
-                $"Closed the client process (PID: {_process.Id}).");
-        }
-    }
-
-    private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-    {
-        if (e.Data is string text)
-        {
-            ApplicationLogger.Error(text);
-            Console.Error.WriteColoredLine(text, TerminalColorType.Red);
-        }
+        return startInfo;
     }
 }

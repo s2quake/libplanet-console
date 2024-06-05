@@ -53,6 +53,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcess = parentProcess;
+            WaitForExit(parentProcess, Cancel);
         }
 
         _logger.Information("Initialized the application.");
@@ -112,6 +113,12 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
         await _container.DisposeAsync();
         _logger.Information("Disposed the application.");
+    }
+
+    private static async void WaitForExit(Process process, Action cancelAction)
+    {
+        await process.WaitForExitAsync();
+        cancelAction.Invoke();
     }
 
     private static Logger CreateLogger(string logFilename)

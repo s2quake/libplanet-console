@@ -28,7 +28,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger = CreateLogger(options.LogPath);
         _logger.Information(Environment.CommandLine);
         _logger.Information("Initializing the application...");
-        _isAutoStart = options.AutoStart;
+        _isAutoStart = options.ManualStart != true;
         _node = new Node(options);
         _container = new(this);
         _container.ComposeExportedValue<IApplication>(this);
@@ -36,6 +36,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_node);
         _container.ComposeExportedValue<INode>(_node);
+        _container.ComposeExportedValue<IApplicationService>(_node);
         _container.ComposeExportedValue<ILogger>(_logger);
         _nodeContext = _container.GetValue<NodeContext>();
         _nodeContext.EndPoint = options.EndPoint;
@@ -47,17 +48,12 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             StorePath = options.StorePath,
             LogPath = options.LogPath,
         };
-        DefaultGenesisOptions = new GenesisOptions
-        {
-            GenesisKey = new(),
-            GenesisValidators = options.GenesisValidators,
-            Timestamp = DateTimeOffset.UtcNow,
-        };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcess = parentProcess;
+            WaitForExit(parentProcess, Cancel);
         }
 
         _logger.Information("Initialized the application.");
@@ -70,8 +66,6 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     public ApplicationInfo Info => _info;
 
     public override ILogger Logger => _logger;
-
-    internal GenesisOptions DefaultGenesisOptions { get; }
 
     protected override bool CanClose => _parentProcess?.HasExited == true;
 
@@ -121,6 +115,12 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Information("Disposed the application.");
     }
 
+    private static async void WaitForExit(Process process, Action cancelAction)
+    {
+        await process.WaitForExitAsync();
+        cancelAction.Invoke();
+    }
+
     private static Logger CreateLogger(string logFilename)
     {
         var loggerConfiguration = new LoggerConfiguration();
@@ -142,14 +142,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         if (_isAutoStart == true)
         {
-            var seedEndPoint = _info.NodeEndPoint;
-            var nodeOptions = seedEndPoint != string.Empty
-                ? await NodeOptions.CreateAsync(seedEndPoint, cancellationToken)
-                : new NodeOptions
-                {
-                    GenesisOptions = DefaultGenesisOptions,
-                };
-            await _node.StartAsync(nodeOptions, cancellationToken: default);
+            await _node.StartAsync(cancellationToken);
         }
     }
 }
