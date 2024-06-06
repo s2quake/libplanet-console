@@ -20,8 +20,6 @@ internal sealed class NodeProcess : ProcessBase
 
     public bool ManualStart { get; set; }
 
-    public bool NoREPL { get; set; }
-
     protected override string FileName => IsDotnetRuntime() ? DotnetPath : NodePath;
 
     protected override Collection<string> ArgumentList
@@ -44,7 +42,7 @@ internal sealed class NodeProcess : ProcessBase
                 argumentList.Insert(0, NodePath);
             }
 
-            if (NoREPL == true)
+            if (NewTerminal != true)
             {
                 argumentList.Add("--no-repl");
             }

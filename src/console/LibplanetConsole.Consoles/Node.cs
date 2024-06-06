@@ -251,7 +251,6 @@ internal sealed class Node
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
             ManualStart = application.Info.ManualStart,
-            NoREPL = application.Info.NewTerminal != true,
         };
     }
 

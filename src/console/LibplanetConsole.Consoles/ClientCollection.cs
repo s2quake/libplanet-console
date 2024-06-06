@@ -105,7 +105,7 @@ internal sealed class ClientCollection(
         var clientProcess = client.CreateClientProcess();
         clientProcess.NewTerminal = options.NewTerminal;
         clientProcess.ManualStart = true;
-        clientProcess.Start();
+        _ = clientProcess.StartAsync(cancellationToken: default);
 
         if (options.Detached != true)
         {

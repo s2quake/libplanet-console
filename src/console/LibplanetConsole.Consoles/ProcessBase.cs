@@ -7,7 +7,7 @@ using LibplanetConsole.Common.Threading;
 
 namespace LibplanetConsole.Consoles;
 
-internal abstract class ProcessBase : IDisposable
+internal abstract class ProcessBase : IAsyncDisposable
 {
     private readonly StringBuilder _outBuilder = new();
     private readonly StringBuilder _errorBuilder = new();
@@ -25,7 +25,7 @@ internal abstract class ProcessBase : IDisposable
 
     protected abstract Collection<string> ArgumentList { get; }
 
-    public void Start()
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         if (_process is not null)
         {
@@ -35,40 +35,42 @@ internal abstract class ProcessBase : IDisposable
         _process = GetProcess();
         _process.OutputDataReceived += Process_OutputDataReceived;
         _process.ErrorDataReceived += Process_ErrorDataReceived;
+        _process.Start();
 
-        // _process.BeginOutputReadLine();
-        // _process.BeginErrorReadLine();
-        // await Task.Delay(1000, cancellationToken);
-        if (_process.Start() != true)
+        _process.BeginOutputReadLine();
+        _process.BeginErrorReadLine();
+        await Task.Delay(1000, cancellationToken);
+        if (_process.ExitCode != 0)
         {
             throw new InvalidOperationException(_errorBuilder.ToString());
         }
 
         _cancellationTokenSource = new CancellationTokenSource();
-        // _exitTask = WaitForExitAsync(_cancellationTokenSource.Token);
+        _exitTask = WaitForExitAsync(_cancellationTokenSource.Token);
     }
 
-    // public async Task StopAsync(CancellationToken cancellationToken)
-    // {
-    //     if (_process is null)
-    //     {
-    //         throw new InvalidOperationException("The process is already disposed.");
-    //     }
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        if (_process is null)
+        {
+            throw new InvalidOperationException("The process is already disposed.");
+        }
 
-    //     _cancellationTokenSource?.Cancel();
-    //     _cancellationTokenSource = null;
-    //     _process.Close();
-    //     await _process.WaitForExitAsync(cancellationToken);
-    //     _process = null;
-    //     await _exitTask;
-    // }
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource = null;
+        _process.Close();
+        await _process.WaitForExitAsync(cancellationToken);
+        _process = null;
+        await _exitTask;
+    }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
         _process?.Dispose();
         _process = null;
+        await _exitTask;
     }
 
     public string GetCommandLine()

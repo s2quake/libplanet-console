@@ -105,7 +105,7 @@ internal sealed class NodeCollection(
         var nodeProcess = node.CreateNodeProcess();
         nodeProcess.NewTerminal = options.NewTerminal;
         nodeProcess.ManualStart = true;
-        nodeProcess.Start();
+        _ = nodeProcess.StartAsync(cancellationToken: default);
 
         if (options.Detached != true)
         {

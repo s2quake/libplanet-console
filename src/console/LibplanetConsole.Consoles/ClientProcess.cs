@@ -16,8 +16,6 @@ internal sealed class ClientProcess : ProcessBase
 
     public string LogDirectory { get; set; } = string.Empty;
 
-    public bool NoREPL { get; set; }
-
     public bool ManualStart { get; set; }
 
     protected override string FileName
@@ -43,7 +41,7 @@ internal sealed class ClientProcess : ProcessBase
                 argumentList.Insert(0, ClientPath);
             }
 
-            if (NoREPL == true)
+            if (NewTerminal != true)
             {
                 argumentList.Add("--no-repl");
             }
