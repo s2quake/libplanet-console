@@ -12,14 +12,13 @@
             "console": "integratedTerminal",
             "args": [
                 "--node-count",
-                "1",
+                "5",
                 "--client-count",
                 "1",
                 "--end-point",
                 "127.0.0.1:4343",
                 "--log-path",
-                ".log",
-                "--new-terminal"
+                ".log"
             ]
         },
         {

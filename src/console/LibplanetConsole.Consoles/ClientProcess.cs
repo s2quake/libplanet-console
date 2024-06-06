@@ -1,63 +1,69 @@
-using System.Diagnostics;
+using System.Collections.ObjectModel;
+using System.Net;
+using System.Security;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class ClientProcess(ClientProcessOptions options) : ProcessBase
+internal sealed class ClientProcess : ProcessBase
 {
-    private readonly ClientProcessOptions _options = options;
+    public required EndPoint EndPoint { get; init; }
 
-    protected override ProcessStartInfo GetStartInfo()
+    public required SecureString PrivateKey { get; init; }
+
+    public EndPoint? NodeEndPoint { get; set; }
+
+    public string LogDirectory { get; set; } = string.Empty;
+
+    public bool NoREPL { get; set; }
+
+    public bool ManualStart { get; set; }
+
+    protected override string FileName
+        => IsDotnetRuntime() ? DotnetPath : ClientPath;
+
+    protected override Collection<string> ArgumentList
     {
-        var options = _options;
-        var isDotnetRuntime = IsDotnetRuntime();
-        var startInfo = new ProcessStartInfo
+        get
         {
-            ArgumentList =
+            var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
+            var argumentList = new Collection<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(options.EndPoint),
+                EndPointUtility.ToString(EndPoint),
                 "--private-key",
-                PrivateKeyUtility.ToString(options.PrivateKey),
+                PrivateKeyUtility.ToString(privateKey),
                 "--parent",
                 Environment.ProcessId.ToString(),
-            },
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        if (isDotnetRuntime == true)
-        {
-            startInfo.FileName = DotnetPath;
-            startInfo.ArgumentList.Insert(0, ClientPath);
-        }
-        else
-        {
-            startInfo.FileName = ClientPath;
-        }
+            };
 
-        if (options.NoREPL == true)
-        {
-            startInfo.ArgumentList.Add("--no-repl");
-        }
+            if (IsDotnetRuntime() == true)
+            {
+                argumentList.Insert(0, ClientPath);
+            }
 
-        if (options.LogDirectory != string.Empty)
-        {
-            startInfo.ArgumentList.Add("--log-path");
-            startInfo.ArgumentList.Add(
-                Path.Combine(
-                    options.LogDirectory,
-                    $"{(ShortAddress)options.PrivateKey.Address}.log"));
-        }
+            if (NoREPL == true)
+            {
+                argumentList.Add("--no-repl");
+            }
 
-        if (options.NodeEndPoint is { } nodeEndPoint)
-        {
-            startInfo.ArgumentList.Add("--node-end-point");
-            startInfo.ArgumentList.Add(EndPointUtility.ToString(nodeEndPoint));
-        }
+            if (LogDirectory != string.Empty)
+            {
+                argumentList.Add("--log-path");
+                argumentList.Add(
+                    Path.Combine(
+                        LogDirectory,
+                        $"{(ShortAddress)privateKey.Address}.log"));
+            }
 
-        return startInfo;
+            if (NodeEndPoint is { } nodeEndPoint)
+            {
+                argumentList.Add("--node-end-point");
+                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+            }
+
+            return argumentList;
+        }
     }
 }

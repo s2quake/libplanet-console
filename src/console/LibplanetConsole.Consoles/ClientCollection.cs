@@ -98,19 +98,24 @@ internal sealed class ClientCollection(
         return -1;
     }
 
-    public Task<Client> AddNewAsync(CancellationToken cancellationToken)
-        => AddNewAsync(new(), cancellationToken);
-
     public async Task<Client> AddNewAsync(
-        PrivateKey privateKey, CancellationToken cancellationToken)
+        AddNewOptions options, CancellationToken cancellationToken)
     {
-        var client = CreateNew(privateKey);
-        if (_application.Info.ManualStart != true)
+        var client = CreateNew(options.PrivateKey);
+        var clientProcess = client.CreateClientProcess();
+        clientProcess.NewTerminal = options.NewTerminal;
+        clientProcess.ManualStart = true;
+        clientProcess.Start();
+
+        if (options.Detached != true)
+        {
+            await client.AttachAsync(cancellationToken);
+        }
+
+        if (options.ManualStart != true)
         {
             var nodes = _application.GetService<NodeCollection>();
             var node = nodes.RandomNode();
-            client.StartProcess();
-            await client.AttachAsync(cancellationToken);
             await client.StartAsync(node, cancellationToken);
         }
 
@@ -121,13 +126,19 @@ internal sealed class ClientCollection(
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
+        var info = _application.Info;
         await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
         Current = _clientList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = privateKeys[index];
-            await AddNewAsync(privateKey, cancellationToken);
+            var options = new AddNewOptions
+            {
+                PrivateKey = privateKeys[index],
+                ManualStart = info.ManualStart,
+                NewTerminal = info.NewTerminal,
+            };
+            await AddNewAsync(options, cancellationToken);
         }
     }
 
@@ -146,8 +157,8 @@ internal sealed class ClientCollection(
     }
 
     async Task<IClient> IClientCollection.AddNewAsync(
-        PrivateKey privateKey, CancellationToken cancellationToken)
-        => await AddNewAsync(privateKey, cancellationToken);
+        AddNewOptions options, CancellationToken cancellationToken)
+        => await AddNewAsync(options, cancellationToken);
 
     bool IClientCollection.Contains(IClient item) => item switch
     {

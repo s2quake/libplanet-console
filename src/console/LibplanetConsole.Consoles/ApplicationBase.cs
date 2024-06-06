@@ -48,7 +48,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             StoreDirectory = options.StoreDirectory,
             LogDirectory = options.LogDirectory,
             ManualStart = options.ManualStart,
-            IsNewTerminal = options.IsNewTerminal,
+            NewTerminal = options.IsNewTerminal,
         };
         GenesisOptions = new()
         {

@@ -52,12 +52,10 @@ internal sealed record class ApplicationSettings
     [CommandPropertySwitch("manual-start", 'm')]
     [CommandSummary("If set, the node and the client do not start automatically. " +
                     "Instead, it waits for the user to start it manually.")]
-    [CommandPropertyCondition(nameof(IsNewTerminal), false)]
     public bool ManualStart { get; set; }
 
     [CommandPropertySwitch("new-terminal")]
     [CommandSummary("If set, the node and the client start in a new terminal.")]
-    [CommandPropertyCondition(nameof(ManualStart), false)]
     public bool IsNewTerminal { get; set; }
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)

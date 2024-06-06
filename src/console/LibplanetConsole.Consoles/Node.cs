@@ -241,23 +241,19 @@ internal sealed class Node
     public NodeProcess CreateNodeProcess()
     {
         var endPoint = EndPoint;
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
-        var nodeProcessOptions = new NodeProcessOptions(endPoint, privateKey)
+        return new NodeProcess
         {
+            EndPoint = endPoint,
+            PrivateKey = _privateKey,
+            NewTerminal = application.Info.NewTerminal,
             NodeEndPoint = EndPointUtility.Parse(application.Info.EndPoint),
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
             ManualStart = application.Info.ManualStart,
-            NoREPL = application.Info.IsNewTerminal != true,
-        };
-        return new NodeProcess(nodeProcessOptions)
-        {
-            StartOnTerminal = application.Info.IsNewTerminal,
+            NoREPL = application.Info.NewTerminal != true,
         };
     }
-
-    public bool StartProcess() => CreateNodeProcess().Start();
 
     void INodeCallback.OnStarted(NodeInfo nodeInfo)
     {

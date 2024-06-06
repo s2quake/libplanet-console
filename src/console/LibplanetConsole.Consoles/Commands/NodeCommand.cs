@@ -58,9 +58,18 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
 
     [CommandMethod]
     [CommandSummary("Creates a new node.")]
-    public async Task NewAsync(CancellationToken cancellationToken)
+    [CommandMethodStaticProperty(typeof(StartProperties))]
+    public async Task NewAsync(
+        string privateKey = "", CancellationToken cancellationToken = default)
     {
-        var node = await nodes.AddNewAsync(cancellationToken);
+        var options = new AddNewOptions
+        {
+            PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
+            ManualStart = StartProperties.ManualStart,
+            NewTerminal = StartProperties.NewTerminal,
+            Detached = StartProperties.Detached,
+        };
+        var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
         await Out.WriteLineAsJsonAsync(nodeInfo);
     }
@@ -177,5 +186,17 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     {
         var infos = nodes.Select(node => node.Info).ToArray();
         Out.WriteLineAsJson(infos);
+    }
+
+    private static class StartProperties
+    {
+        [CommandPropertySwitch("new-terminal", 'n')]
+        public static bool NewTerminal { get; set; }
+
+        [CommandPropertySwitch("manual-start", 'm')]
+        public static bool ManualStart { get; set; }
+
+        [CommandPropertySwitch("detach", 'd')]
+        public static bool Detached { get; set; }
     }
 }

@@ -1,25 +1,31 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text;
 using JSSoft.Commands;
-using JSSoft.Terminals;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
-using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles;
 
 internal abstract class ProcessBase : IDisposable
 {
+    private readonly StringBuilder _outBuilder = new();
+    private readonly StringBuilder _errorBuilder = new();
     private Process? _process;
     private CancellationTokenSource? _cancellationTokenSource;
-
-    public event EventHandler? Exited;
+    private Task _exitTask = Task.CompletedTask;
 
     public int Id => _process?.Id ?? -1;
 
-    public bool StartOnTerminal { get; set; }
+    public bool IsRunning => _process?.HasExited != true;
 
-    public bool Start()
+    public bool NewTerminal { get; set; }
+
+    protected abstract string FileName { get; }
+
+    protected abstract Collection<string> ArgumentList { get; }
+
+    public void Start()
     {
         if (_process is not null)
         {
@@ -27,28 +33,35 @@ internal abstract class ProcessBase : IDisposable
         }
 
         _process = GetProcess();
+        _process.OutputDataReceived += Process_OutputDataReceived;
+        _process.ErrorDataReceived += Process_ErrorDataReceived;
+
+        // _process.BeginOutputReadLine();
+        // _process.BeginErrorReadLine();
+        // await Task.Delay(1000, cancellationToken);
         if (_process.Start() != true)
         {
-            return false;
+            throw new InvalidOperationException(_errorBuilder.ToString());
         }
 
-        _cancellationTokenSource = new();
-        ObserveExit(_cancellationTokenSource.Token);
-        return true;
+        _cancellationTokenSource = new CancellationTokenSource();
+        // _exitTask = WaitForExitAsync(_cancellationTokenSource.Token);
     }
 
-    public void Close()
-    {
-        if (_process is null)
-        {
-            throw new InvalidOperationException("The process is already disposed.");
-        }
+    // public async Task StopAsync(CancellationToken cancellationToken)
+    // {
+    //     if (_process is null)
+    //     {
+    //         throw new InvalidOperationException("The process is already disposed.");
+    //     }
 
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
-        _process.Close();
-        _process = null;
-    }
+    //     _cancellationTokenSource?.Cancel();
+    //     _cancellationTokenSource = null;
+    //     _process.Close();
+    //     await _process.WaitForExitAsync(cancellationToken);
+    //     _process = null;
+    //     await _exitTask;
+    // }
 
     public void Dispose()
     {
@@ -60,53 +73,63 @@ internal abstract class ProcessBase : IDisposable
 
     public string GetCommandLine()
     {
-        var startInfo = GetStartInfo();
-        var filename = startInfo.FileName;
-        var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
+        var filename = FileName;
+        var arguments = CommandUtility.Join([.. ArgumentList]);
         return $"{filename} {arguments}";
     }
 
-    protected abstract ProcessStartInfo GetStartInfo();
-
     private Process GetProcess()
     {
-        var startInfo = GetStartInfo();
-        if (StartOnTerminal == true)
+        var startInfo = GetProcessStartInfo();
+        startInfo.CreateNoWindow = true;
+        startInfo.UseShellExecute = false;
+        startInfo.RedirectStandardOutput = true;
+        startInfo.RedirectStandardError = true;
+        return new Process { StartInfo = startInfo, };
+    }
+
+    private ProcessStartInfo GetProcessStartInfo()
+    {
+        if (NewTerminal == true)
         {
-            var filename = startInfo.FileName;
-            var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
+            var filename = FileName;
+            var arguments = CommandUtility.Join([.. ArgumentList]);
             var script = $"tell application \"Terminal\"\n" +
                          $"  do script \"{filename} {arguments}; exit\"\n" +
                          $"  activate\n" +
                          $"end tell\n";
             var tempFile = TempFile.WriteAllText(script);
 
-            return new Process
+            return new ProcessStartInfo
             {
-                StartInfo = new ProcessStartInfo
+                FileName = "/usr/bin/osascript",
+                ArgumentList =
                 {
-                    FileName = "/usr/bin/osascript",
-                    ArgumentList =
-                    {
-                        tempFile.FileName,
-                    },
+                    tempFile.FileName,
                 },
             };
         }
 
-        return new Process() { StartInfo = startInfo };
+        return new ProcessStartInfo(FileName, ArgumentList);
+    }
+
+    private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (e.Data is string text)
+        {
+            // _outBuilder.AppendLine(text);
+        }
     }
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
     {
         if (e.Data is string text)
         {
-            ApplicationLogger.Error(text);
-            Console.Error.WriteColoredLine(text, TerminalColorType.Red);
+            // _errorBuilder.AppendLine(text);
         }
     }
 
-    private async void ObserveExit(CancellationToken cancellationToken)
+    private async Task WaitForExitAsync(CancellationToken cancellationToken)
     {
         while (cancellationToken.IsCancellationRequested != true)
         {
@@ -117,14 +140,10 @@ internal abstract class ProcessBase : IDisposable
 
             if (_process?.HasExited == true)
             {
-                Exited?.Invoke(this, EventArgs.Empty);
                 break;
             }
 
-            if (await TaskUtility.Delay(100, cancellationToken) != true)
-            {
-                break;
-            }
+            await TaskUtility.Delay(100, cancellationToken);
         }
     }
 }

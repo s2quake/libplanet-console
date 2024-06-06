@@ -10,5 +10,5 @@ public sealed record class ApplicationInfo
 
     public bool ManualStart { get; init; }
 
-    public bool IsNewTerminal { get; init; }
+    public bool NewTerminal { get; init; }
 }

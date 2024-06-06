@@ -1,72 +1,82 @@
-using System.Diagnostics;
+using System.Collections.ObjectModel;
+using System.Net;
+using System.Security;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class NodeProcess(NodeProcessOptions options) : ProcessBase
+internal sealed class NodeProcess : ProcessBase
 {
-    private readonly NodeProcessOptions _options = options;
+    public required EndPoint EndPoint { get; init; }
 
-    protected override ProcessStartInfo GetStartInfo()
+    public required SecureString PrivateKey { get; init; }
+
+    public EndPoint? NodeEndPoint { get; set; }
+
+    public string StoreDirectory { get; set; } = string.Empty;
+
+    public string LogDirectory { get; set; } = string.Empty;
+
+    public bool ManualStart { get; set; }
+
+    public bool NoREPL { get; set; }
+
+    protected override string FileName => IsDotnetRuntime() ? DotnetPath : NodePath;
+
+    protected override Collection<string> ArgumentList
     {
-        var options = _options;
-        var isDotnetRuntime = IsDotnetRuntime();
-        var privateKey = PrivateKeyUtility.FromSecureString(options.PrivateKey);
-        var startInfo = new ProcessStartInfo
+        get
         {
-            ArgumentList =
+            var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
+            var argumentList = new Collection<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(options.EndPoint),
+                EndPointUtility.ToString(EndPoint),
                 "--private-key",
                 PrivateKeyUtility.ToString(privateKey),
                 "--parent",
                 Environment.ProcessId.ToString(),
-                "--manual-start",
-            },
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        if (isDotnetRuntime == true)
-        {
-            startInfo.FileName = DotnetPath;
-            startInfo.ArgumentList.Insert(0, NodePath);
-        }
-        else
-        {
-            startInfo.FileName = NodePath;
-        }
+            };
 
-        if (options.NoREPL == true)
-        {
-            startInfo.ArgumentList.Add("--no-repl");
-        }
+            if (IsDotnetRuntime() == true)
+            {
+                argumentList.Insert(0, NodePath);
+            }
 
-        if (options.StoreDirectory != string.Empty)
-        {
-            startInfo.ArgumentList.Add("--store-path");
-            startInfo.ArgumentList.Add(
-                Path.Combine(options.StoreDirectory, (ShortAddress)privateKey.Address));
-        }
+            if (NoREPL == true)
+            {
+                argumentList.Add("--no-repl");
+            }
 
-        if (options.LogDirectory != string.Empty)
-        {
-            startInfo.ArgumentList.Add("--log-path");
-            startInfo.ArgumentList.Add(
-                Path.Combine(
-                    options.LogDirectory,
-                    $"{(ShortAddress)privateKey.Address}.log"));
-        }
+            if (StoreDirectory != string.Empty)
+            {
+                argumentList.Add("--store-path");
+                argumentList.Add(
+                    Path.Combine(StoreDirectory, (ShortAddress)privateKey.Address));
+            }
 
-        if (options.NodeEndPoint is { } nodeEndPoint)
-        {
-            startInfo.ArgumentList.Add("--node-end-point");
-            startInfo.ArgumentList.Add(EndPointUtility.ToString(nodeEndPoint));
-        }
+            if (LogDirectory != string.Empty)
+            {
+                argumentList.Add("--log-path");
+                argumentList.Add(
+                    Path.Combine(
+                        LogDirectory,
+                        $"{(ShortAddress)privateKey.Address}.log"));
+            }
 
-        return startInfo;
+            if (NodeEndPoint is { } nodeEndPoint)
+            {
+                argumentList.Add("--node-end-point");
+                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+            }
+
+            if (ManualStart == true)
+            {
+                argumentList.Add("--manual-start");
+            }
+
+            return argumentList;
+        }
     }
 }

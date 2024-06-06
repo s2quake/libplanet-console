@@ -37,9 +37,18 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
     [CommandMethod]
     [CommandSummary("Creates a new client.")]
-    public async Task NewAsync(CancellationToken cancellationToken)
+    [CommandMethodStaticProperty(typeof(StartProperties))]
+    public async Task NewAsync(
+        string privateKey = "", CancellationToken cancellationToken = default)
     {
-        var client = await clients.AddNewAsync(cancellationToken);
+        var options = new AddNewOptions
+        {
+            PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
+            ManualStart = StartProperties.ManualStart,
+            NewTerminal = StartProperties.NewTerminal,
+            Detached = StartProperties.Detached,
+        };
+        var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
         await Out.WriteLineAsJsonAsync(clientInfo);
     }
@@ -143,5 +152,17 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
         var nodeIndex = Random.Shared.Next(nodes.Count);
         return nodes[nodeIndex];
+    }
+
+    private static class StartProperties
+    {
+        [CommandPropertySwitch("new-terminal", 'n')]
+        public static bool NewTerminal { get; set; }
+
+        [CommandPropertySwitch("manual-start", 'm')]
+        public static bool ManualStart { get; set; }
+
+        [CommandPropertySwitch("detach", 'd')]
+        public static bool Detached { get; set; }
     }
 }

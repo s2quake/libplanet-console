@@ -99,16 +99,21 @@ internal sealed class NodeCollection(
         return -1;
     }
 
-    public Task<Node> AddNewAsync(CancellationToken cancellationToken)
-        => AddNewAsync(new(), cancellationToken);
-
-    public async Task<Node> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken)
+    public async Task<Node> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken)
     {
-        var node = CreateNew(privateKey);
-        if (_application.Info.ManualStart != true)
+        var node = CreateNew(options.PrivateKey);
+        var nodeProcess = node.CreateNodeProcess();
+        nodeProcess.NewTerminal = options.NewTerminal;
+        nodeProcess.ManualStart = true;
+        nodeProcess.Start();
+
+        if (options.Detached != true)
         {
-            node.StartProcess();
             await node.AttachAsync(cancellationToken);
+        }
+
+        if (options.ManualStart != true)
+        {
             await node.StartAsync(cancellationToken);
         }
 
@@ -119,13 +124,19 @@ internal sealed class NodeCollection(
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
+        var info = _application.Info;
         await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
         Current = _nodeList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = privateKeys[index];
-            await AddNewAsync(privateKey, cancellationToken);
+            var options = new AddNewOptions
+            {
+                PrivateKey = privateKeys[index],
+                ManualStart = info.ManualStart,
+                NewTerminal = info.NewTerminal,
+            };
+            await AddNewAsync(options, cancellationToken);
         }
     }
 
@@ -144,8 +155,8 @@ internal sealed class NodeCollection(
     }
 
     async Task<INode> INodeCollection.AddNewAsync(
-        PrivateKey privateKey, CancellationToken cancellationToken)
-        => await AddNewAsync(privateKey, cancellationToken);
+        AddNewOptions options, CancellationToken cancellationToken)
+        => await AddNewAsync(options, cancellationToken);
 
     bool INodeCollection.Contains(INode item) => item switch
     {

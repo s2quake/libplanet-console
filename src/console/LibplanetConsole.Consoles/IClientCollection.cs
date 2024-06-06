@@ -23,8 +23,5 @@ public interface IClientCollection : IEnumerable<IClient>, INotifyCollectionChan
 
     int IndexOf(Address address);
 
-    Task<IClient> AddNewAsync(CancellationToken cancellationToken)
-        => AddNewAsync(new(), cancellationToken);
-
-    Task<IClient> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken);
+    Task<IClient> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken);
 }

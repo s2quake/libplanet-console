@@ -214,21 +214,14 @@ internal sealed class Client :
     public ClientProcess CreateClientProcess()
     {
         var endPoint = EndPoint;
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
-        var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
+        return new ClientProcess
         {
-            LogDirectory = application.Info.LogDirectory,
-            NoREPL = application.Info.IsNewTerminal != true,
-        };
-
-        return new ClientProcess(clientProcessOptions)
-        {
-            StartOnTerminal = application.Info.IsNewTerminal,
+            EndPoint = endPoint,
+            PrivateKey = _privateKey,
+            NewTerminal = application.Info.NewTerminal,
         };
     }
-
-    public bool StartProcess() => CreateClientProcess().Start();
 
     void IClientCallback.OnStarted(ClientInfo clientInfo)
     {
