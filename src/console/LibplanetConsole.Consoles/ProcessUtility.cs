@@ -135,6 +135,11 @@ internal static class ProcessUtility
                                     $"bin/{Congiguration}/{Framework}";
             var d1 = Path.GetFullPath(expectedDirectory);
             var d2 = Path.GetFullPath(directory);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+            {
+                return StringComparer.OrdinalIgnoreCase.Equals(d1, d2);
+            }
+
             return d1 == d2;
         }
     }
@@ -145,7 +150,7 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{PublishExtension}"
+                $"{Framework}/libplanet-node.dll"
             );
         }
     }
@@ -175,7 +180,7 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
-                $"{Congiguration}/{Framework}/libplanet-client{PublishExtension}"
+                $"{Congiguration}/{Framework}/libplanet-client.dll"
             );
         }
     }

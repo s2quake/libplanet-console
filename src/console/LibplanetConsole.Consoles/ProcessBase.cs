@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
+using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
@@ -33,14 +35,22 @@ internal abstract class ProcessBase : IAsyncDisposable
         }
 
         _process = GetProcess();
-        _process.OutputDataReceived += Process_OutputDataReceived;
-        _process.ErrorDataReceived += Process_ErrorDataReceived;
+        if (NewTerminal != true)
+        {
+            _process.OutputDataReceived += Process_OutputDataReceived;
+            _process.ErrorDataReceived += Process_ErrorDataReceived;
+        }
+
         _process.Start();
 
-        _process.BeginOutputReadLine();
-        _process.BeginErrorReadLine();
+        if (NewTerminal != true)
+        {
+            _process.BeginOutputReadLine();
+            _process.BeginErrorReadLine();
+        }
+
         await Task.Delay(1000, cancellationToken);
-        if (_process.ExitCode != 0)
+        if (_process.HasExited == true)
         {
             throw new InvalidOperationException(_errorBuilder.ToString());
         }
@@ -83,10 +93,10 @@ internal abstract class ProcessBase : IAsyncDisposable
     private Process GetProcess()
     {
         var startInfo = GetProcessStartInfo();
-        startInfo.CreateNoWindow = true;
-        startInfo.UseShellExecute = false;
-        startInfo.RedirectStandardOutput = true;
-        startInfo.RedirectStandardError = true;
+        startInfo.CreateNoWindow = NewTerminal != true;
+        startInfo.UseShellExecute = IsWindows() == true && NewTerminal == true;
+        startInfo.RedirectStandardOutput = NewTerminal != true;
+        startInfo.RedirectStandardError = NewTerminal != true;
         return new Process { StartInfo = startInfo, };
     }
 
@@ -94,25 +104,64 @@ internal abstract class ProcessBase : IAsyncDisposable
     {
         if (NewTerminal == true)
         {
-            var filename = FileName;
-            var arguments = CommandUtility.Join([.. ArgumentList]);
-            var script = $"tell application \"Terminal\"\n" +
-                         $"  do script \"{filename} {arguments}; exit\"\n" +
-                         $"  activate\n" +
-                         $"end tell\n";
-            var tempFile = TempFile.WriteAllText(script);
-
-            return new ProcessStartInfo
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                FileName = "/usr/bin/osascript",
-                ArgumentList =
-                {
-                    tempFile.FileName,
-                },
-            };
+                return GetProcessStartInfoOnMacOS();
+            }
+
+            if (IsWindows() == true)
+            {
+                return GetProcessStartInfoOnWindows();
+            }
+
+            throw new NotSupportedException("The new terminal is not supported on this platform.");
         }
 
         return new ProcessStartInfo(FileName, ArgumentList);
+    }
+
+    private ProcessStartInfo GetProcessStartInfoOnMacOS()
+    {
+        var filename = FileName;
+        var arguments = CommandUtility.Join([.. ArgumentList]);
+        var script = $"tell application \"Terminal\"\n" +
+                     $"  do script \"{filename} {arguments}; exit\"\n" +
+                     $"  activate\n" +
+                     $"end tell\n";
+        var tempFile = TempFile.WriteAllText(script);
+
+        return new ProcessStartInfo
+        {
+            FileName = "/usr/bin/osascript",
+            ArgumentList =
+                {
+                    tempFile.FileName,
+                },
+        };
+    }
+
+    private ProcessStartInfo GetProcessStartInfoOnWindows()
+    {
+        var filename = $"\"{FileName}\"";
+        var arguments = CommandUtility.Join([.. ArgumentList]);
+        var tempFile = TempFile.WriteAllText($"& {filename} {arguments}");
+        var scriptList = new List<string>
+        {
+            $"Invoke-Expression $(Get-Content {tempFile})",
+            "Write-Host -NoNewLine 'Press any key to exit.'",
+            "$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')",
+        };
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "powershell.exe",
+            ArgumentList =
+            {
+                "-Command",
+                $"& {{ {string.Join(';', scriptList)} }}",
+            },
+        };
+
+        return startInfo;
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
