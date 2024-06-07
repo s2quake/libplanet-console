@@ -102,22 +102,42 @@ internal static class ProcessUtility
     {
         get
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+            var dotnetPath = GetDotnetPath();
+            if (File.Exists(dotnetPath) == true)
             {
-                return @"C:\Program Files\dotnet\dotnet.exe";
+                return dotnetPath;
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
+            if (Environment.GetEnvironmentVariable("DOTNET_ROOT") is string v &&
+                File.Exists(v) == true)
             {
-                return "/usr/local/share/dotnet/dotnet";
+                return v;
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
-            {
-                return "/usr/lib/dotnet/dotnet";
-            }
+            var message = $"dotnet executable is not found.\n" +
+                          $"if you have installed dotnet, please set DOTNET_ROOT environment " +
+                          $"variable to the directory containing dotnet executable.";
+            throw new InvalidOperationException(message);
 
-            throw new NotSupportedException("Unsupported OS platform.");
+            static string GetDotnetPath()
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+                {
+                    return @"C:\Program Files\dotnet\dotnet.exe";
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
+                {
+                    return "/usr/local/share/dotnet/dotnet";
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
+                {
+                    return "/usr/lib/dotnet/dotnet";
+                }
+
+                throw new NotSupportedException("Unsupported OS platform.");
+            }
         }
     }
 
