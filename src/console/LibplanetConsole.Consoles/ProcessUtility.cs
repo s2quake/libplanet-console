@@ -114,7 +114,7 @@ internal static class ProcessUtility
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
             {
-                return "/usr/bin/dotnet";
+                return "/usr/lib/dotnet/dotnet";
             }
 
             throw new NotSupportedException("Unsupported OS platform.");
@@ -250,9 +250,19 @@ internal static class ProcessUtility
         }
     }
 
+    public static bool IsOSX()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    }
+
     public static bool IsWindows()
     {
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    }
+
+    public static bool IsLinux()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     }
 
     public static bool IsArm64()

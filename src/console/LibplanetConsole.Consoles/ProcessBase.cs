@@ -104,7 +104,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     {
         if (NewTerminal == true)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (IsOSX() == true)
             {
                 return GetProcessStartInfoOnMacOS();
             }
@@ -112,6 +112,11 @@ internal abstract class ProcessBase : IAsyncDisposable
             if (IsWindows() == true)
             {
                 return GetProcessStartInfoOnWindows();
+            }
+
+            if (IsLinux() == true)
+            {
+                return GetProcessStartInfoOnLinux();
             }
 
             throw new NotSupportedException("The new terminal is not supported on this platform.");
@@ -134,9 +139,9 @@ internal abstract class ProcessBase : IAsyncDisposable
         {
             FileName = "/usr/bin/osascript",
             ArgumentList =
-                {
-                    tempFile.FileName,
-                },
+            {
+                tempFile.FileName,
+            },
         };
     }
 
@@ -162,6 +167,24 @@ internal abstract class ProcessBase : IAsyncDisposable
         };
 
         return startInfo;
+    }
+
+    private ProcessStartInfo GetProcessStartInfoOnLinux()
+    {
+        var filename = FileName;
+        var arguments = CommandUtility.Join([.. ArgumentList]);
+
+        return new ProcessStartInfo
+        {
+            FileName = "/usr/bin/gnome-terminal",
+            ArgumentList =
+            {
+                "--",
+                "/bin/bash",
+                "-c",
+                $"{filename} {arguments}; read -n1 -r -p 'Press any key to exit...'",
+            },
+        };
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
