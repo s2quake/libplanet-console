@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using System.Text;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
@@ -52,7 +51,6 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
         await Out.WriteLineAsJsonAsync(clientInfo);
-
     }
 
     [CommandMethod]
@@ -150,7 +148,7 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
         [CommandPropertySwitch("manual-start", 'm')]
         [CommandSummary("The service does not start automatically " +
-                        "when the client process is executed." + 
+                        "when the client process is executed." +
                         "This option cannot be used with --detach option.")]
         [CommandPropertyCondition(nameof(Detached), false)]
         public static bool ManualStart { get; set; }

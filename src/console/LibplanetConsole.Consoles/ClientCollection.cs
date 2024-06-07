@@ -6,6 +6,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
+using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
@@ -18,6 +19,7 @@ internal sealed class ClientCollection(
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
     private readonly List<Client> _clientList = new(privateKeys.Length);
+    private readonly ILogger _logger = application.GetService<ILogger>();
     private Client? _current;
     private bool _isDisposed;
 
@@ -103,13 +105,16 @@ internal sealed class ClientCollection(
     {
         var client = CreateNew(options.PrivateKey);
 
+        _logger.Debug($"Created a new node: {client.Address}");
         if (options.Detached != true)
         {
             var clientProcess = client.CreateClientProcess();
             clientProcess.NewWindow = options.NewWindow;
             clientProcess.ManualStart = true;
             _ = clientProcess.StartAsync(cancellationToken: default);
+            _logger.Debug("Started the client process.");
             await client.AttachAsync(cancellationToken);
+            _logger.Debug("Attached the client.");
         }
 
         if (options.ManualStart != true && options.Detached != true)
@@ -117,6 +122,7 @@ internal sealed class ClientCollection(
             var nodes = _application.GetService<NodeCollection>();
             var node = nodes.RandomNode();
             await client.StartAsync(node, cancellationToken);
+            _logger.Debug("Started the client.");
         }
 
         InsertClient(client);
@@ -137,6 +143,7 @@ internal sealed class ClientCollection(
                 PrivateKey = privateKeys[index],
                 ManualStart = info.ManualStart,
                 NewWindow = info.NewWindow,
+                Detached = info.Detached,
             };
             await AddNewAsync(options, cancellationToken);
         }
@@ -150,6 +157,7 @@ internal sealed class ClientCollection(
         {
             var item = _clientList[i]!;
             await item.DisposeAsync();
+            _logger.Debug("Disposed a client: {Address}", item.Address);
         }
 
         _isDisposed = true;
@@ -208,6 +216,7 @@ internal sealed class ClientCollection(
             var index = _clientList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             _clientList.Add(client);
+            _logger.Debug("Inserted a new client: {Address}", client.Address);
             client.Disposed += Client_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -222,6 +231,7 @@ internal sealed class ClientCollection(
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             client.Disposed -= Client_Disposed;
             _clientList.RemoveAt(index);
+            _logger.Debug("Removed a client: {Address}", client.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == client)
             {

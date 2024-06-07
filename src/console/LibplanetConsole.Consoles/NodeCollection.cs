@@ -7,6 +7,7 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
+using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
@@ -19,6 +20,7 @@ internal sealed class NodeCollection(
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
     private readonly List<Node> _nodeList = new(privateKeys.Length);
+    private readonly ILogger _logger = application.GetService<ILogger>();
     private Node? _current;
     private bool _isDisposed;
 
@@ -103,18 +105,22 @@ internal sealed class NodeCollection(
     {
         var node = CreateNew(options.PrivateKey);
 
+        _logger.Information($"Created a new node: {node.Address}");
         if (options.Detached != true)
         {
             var nodeProcess = node.CreateNodeProcess();
             nodeProcess.NewWindow = options.NewWindow;
             nodeProcess.ManualStart = true;
             _ = nodeProcess.StartAsync(cancellationToken: default);
+            _logger.Information("Started the node process.");
             await node.AttachAsync(cancellationToken);
+            _logger.Information("Attached the node.");
         }
 
         if (options.ManualStart != true && options.Detached != true)
         {
             await node.StartAsync(cancellationToken);
+            _logger.Information("Started the node.");
         }
 
         InsertNode(node);
@@ -149,6 +155,7 @@ internal sealed class NodeCollection(
         {
             var item = _nodeList[i]!;
             await item.DisposeAsync();
+            _logger.Information("Disposed a node: {Address}", item.Address);
         }
 
         _isDisposed = true;
@@ -225,6 +232,7 @@ internal sealed class NodeCollection(
             var index = _nodeList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
             _nodeList.Add(node);
+            _logger.Information("Inserted a new node: {Address}", node.Address);
             node.Disposed += Node_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -239,6 +247,7 @@ internal sealed class NodeCollection(
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
             node.Disposed -= Node_Disposed;
             _nodeList.RemoveAt(index);
+            _logger.Information("Removed a node: {Address}", node.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == node)
             {

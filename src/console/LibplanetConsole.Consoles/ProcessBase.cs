@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
+using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
@@ -40,7 +43,20 @@ internal abstract class ProcessBase : IAsyncDisposable
             _process.ErrorDataReceived += Process_ErrorDataReceived;
         }
 
+        ApplicationLogger.Debug("Process staring: " + JsonUtility.SerializeObject(new
+        {
+            HashCode = _process.GetHashCode(),
+            _process.StartInfo.FileName,
+            Arguments = GetArguments(_process.StartInfo),
+            _process.StartInfo.WorkingDirectory,
+        }));
+
         _process.Start();
+        ApplicationLogger.Debug("Process started: " + JsonUtility.SerializeObject(new
+        {
+            HashCode = _process.GetHashCode(),
+            _process.Id,
+        }));
 
         if (NewWindow != true)
         {
@@ -89,6 +105,19 @@ internal abstract class ProcessBase : IAsyncDisposable
         return $"{filename} {arguments}";
     }
 
+    private static string GetArguments(ProcessStartInfo processStartInfo)
+    {
+        var bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var methodInfo = typeof(ProcessStartInfo).GetMethod("BuildArguments", bindingFlags)
+            ?? throw new MissingMethodException("ProcessStartInfo", "BuildArguments");
+        if (methodInfo.Invoke(processStartInfo, null) is string arguments)
+        {
+            return arguments;
+        }
+
+        throw new InvalidOperationException("Failed to get arguments.");
+    }
+
     private Process GetProcess()
     {
         var startInfo = GetProcessStartInfo();
@@ -96,6 +125,7 @@ internal abstract class ProcessBase : IAsyncDisposable
         startInfo.UseShellExecute = IsWindows() == true && NewWindow == true;
         startInfo.RedirectStandardOutput = NewWindow != true;
         startInfo.RedirectStandardError = NewWindow != true;
+        startInfo.WorkingDirectory = Directory.GetCurrentDirectory();
         return new Process { StartInfo = startInfo, };
     }
 
