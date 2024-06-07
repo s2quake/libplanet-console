@@ -42,7 +42,7 @@ internal sealed class NodeProcess : ProcessBase
                 argumentList.Insert(0, NodePath);
             }
 
-            if (NewTerminal != true)
+            if (NewWindow != true)
             {
                 argumentList.Add("--no-repl");
             }

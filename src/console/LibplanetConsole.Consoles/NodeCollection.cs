@@ -103,7 +103,7 @@ internal sealed class NodeCollection(
     {
         var node = CreateNew(options.PrivateKey);
         var nodeProcess = node.CreateNodeProcess();
-        nodeProcess.NewTerminal = options.NewTerminal;
+        nodeProcess.NewWindow = options.NewWindow;
         nodeProcess.ManualStart = true;
         _ = nodeProcess.StartAsync(cancellationToken: default);
 
@@ -134,7 +134,7 @@ internal sealed class NodeCollection(
             {
                 PrivateKey = privateKeys[index],
                 ManualStart = info.ManualStart,
-                NewTerminal = info.NewTerminal,
+                NewWindow = info.NewWindow,
             };
             await AddNewAsync(options, cancellationToken);
         }

@@ -54,9 +54,9 @@ internal sealed record class ApplicationSettings
                     "Instead, it waits for the user to start it manually.")]
     public bool ManualStart { get; set; }
 
-    [CommandPropertySwitch("new-terminal")]
-    [CommandSummary("If set, the node and the client start in a new terminal.")]
-    public bool IsNewTerminal { get; set; }
+    [CommandPropertySwitch("new-window")]
+    [CommandSummary("If set, the node and the client start in a new window(terminal or console).")]
+    public bool NewWindow { get; set; }
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
@@ -68,7 +68,7 @@ internal sealed record class ApplicationSettings
             StoreDirectory = GetFullPath(settings.StorePath),
             LogDirectory = GetFullPath(settings.LogPath),
             ManualStart = settings.ManualStart,
-            IsNewTerminal = settings.IsNewTerminal,
+            NewWindow = settings.NewWindow,
         };
 
         static string GetFullPath(string path)

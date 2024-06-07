@@ -45,7 +45,7 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         {
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
             ManualStart = StartProperties.ManualStart,
-            NewTerminal = StartProperties.NewTerminal,
+            NewWindow = StartProperties.NewWindow,
             Detached = StartProperties.Detached,
         };
         var client = await clients.AddNewAsync(options, cancellationToken);
@@ -156,8 +156,8 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
     private static class StartProperties
     {
-        [CommandPropertySwitch("new-terminal", 'n')]
-        public static bool NewTerminal { get; set; }
+        [CommandPropertySwitch("new-window", 'n')]
+        public static bool NewWindow { get; set; }
 
         [CommandPropertySwitch("manual-start", 'm')]
         public static bool ManualStart { get; set; }

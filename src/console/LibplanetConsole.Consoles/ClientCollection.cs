@@ -103,7 +103,7 @@ internal sealed class ClientCollection(
     {
         var client = CreateNew(options.PrivateKey);
         var clientProcess = client.CreateClientProcess();
-        clientProcess.NewTerminal = options.NewTerminal;
+        clientProcess.NewWindow = options.NewWindow;
         clientProcess.ManualStart = true;
         _ = clientProcess.StartAsync(cancellationToken: default);
 
@@ -136,7 +136,7 @@ internal sealed class ClientCollection(
             {
                 PrivateKey = privateKeys[index],
                 ManualStart = info.ManualStart,
-                NewTerminal = info.NewTerminal,
+                NewWindow = info.NewWindow,
             };
             await AddNewAsync(options, cancellationToken);
         }

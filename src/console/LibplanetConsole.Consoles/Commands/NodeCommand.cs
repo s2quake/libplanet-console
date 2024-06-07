@@ -66,7 +66,7 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
         {
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
             ManualStart = StartProperties.ManualStart,
-            NewTerminal = StartProperties.NewTerminal,
+            NewWindow = StartProperties.NewWindow,
             Detached = StartProperties.Detached,
         };
         var node = await nodes.AddNewAsync(options, cancellationToken);
@@ -190,8 +190,8 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
 
     private static class StartProperties
     {
-        [CommandPropertySwitch("new-terminal", 'n')]
-        public static bool NewTerminal { get; set; }
+        [CommandPropertySwitch("new-window", 'n')]
+        public static bool NewWindow { get; set; }
 
         [CommandPropertySwitch("manual-start", 'm')]
         public static bool ManualStart { get; set; }

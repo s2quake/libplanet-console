@@ -219,7 +219,7 @@ internal sealed class Client :
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NewTerminal = application.Info.NewTerminal,
+            NewWindow = application.Info.NewWindow,
             ManualStart = application.Info.ManualStart,
         };
     }

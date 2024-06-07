@@ -22,5 +22,5 @@ public sealed record class ApplicationOptions
 
     public bool ManualStart { get; init; }
 
-    public bool IsNewTerminal { get; init; }
+    public bool NewWindow { get; init; }
 }

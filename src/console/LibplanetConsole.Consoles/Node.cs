@@ -246,7 +246,7 @@ internal sealed class Node
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NewTerminal = application.Info.NewTerminal,
+            NewWindow = application.Info.NewWindow,
             NodeEndPoint = EndPointUtility.Parse(application.Info.EndPoint),
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,

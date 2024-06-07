@@ -41,7 +41,7 @@ internal sealed class ClientProcess : ProcessBase
                 argumentList.Insert(0, ClientPath);
             }
 
-            if (NewTerminal != true)
+            if (NewWindow != true)
             {
                 argumentList.Add("--no-repl");
             }

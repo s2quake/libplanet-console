@@ -21,7 +21,7 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     public bool IsRunning => _process?.HasExited != true;
 
-    public bool NewTerminal { get; set; }
+    public bool NewWindow { get; set; }
 
     protected abstract string FileName { get; }
 
@@ -35,7 +35,7 @@ internal abstract class ProcessBase : IAsyncDisposable
         }
 
         _process = GetProcess();
-        if (NewTerminal != true)
+        if (NewWindow != true)
         {
             _process.OutputDataReceived += Process_OutputDataReceived;
             _process.ErrorDataReceived += Process_ErrorDataReceived;
@@ -43,7 +43,7 @@ internal abstract class ProcessBase : IAsyncDisposable
 
         _process.Start();
 
-        if (NewTerminal != true)
+        if (NewWindow != true)
         {
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
@@ -93,16 +93,16 @@ internal abstract class ProcessBase : IAsyncDisposable
     private Process GetProcess()
     {
         var startInfo = GetProcessStartInfo();
-        startInfo.CreateNoWindow = NewTerminal != true;
-        startInfo.UseShellExecute = IsWindows() == true && NewTerminal == true;
-        startInfo.RedirectStandardOutput = NewTerminal != true;
-        startInfo.RedirectStandardError = NewTerminal != true;
+        startInfo.CreateNoWindow = NewWindow != true;
+        startInfo.UseShellExecute = IsWindows() == true && NewWindow == true;
+        startInfo.RedirectStandardOutput = NewWindow != true;
+        startInfo.RedirectStandardError = NewWindow != true;
         return new Process { StartInfo = startInfo, };
     }
 
     private ProcessStartInfo GetProcessStartInfo()
     {
-        if (NewTerminal == true)
+        if (NewWindow == true)
         {
             if (IsOSX() == true)
             {
