@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Text;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
@@ -37,20 +38,21 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
     [CommandMethod]
     [CommandSummary("Creates a new client.")]
-    [CommandMethodStaticProperty(typeof(StartProperties))]
+    [CommandMethodStaticProperty(typeof(NewProperties))]
     public async Task NewAsync(
         string privateKey = "", CancellationToken cancellationToken = default)
     {
         var options = new AddNewOptions
         {
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
-            ManualStart = StartProperties.ManualStart,
-            NewWindow = StartProperties.NewWindow,
-            Detached = StartProperties.Detached,
+            ManualStart = NewProperties.ManualStart,
+            NewWindow = NewProperties.NewWindow,
+            Detached = NewProperties.Detached,
         };
         var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
         await Out.WriteLineAsJsonAsync(clientInfo);
+
     }
 
     [CommandMethod]
@@ -138,31 +140,23 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         return TerminalColorType.BrightBlack;
     }
 
-    private static INode GetRandomNode(IApplication application)
-    {
-        if (application.GetService(typeof(INodeCollection)) is not INodeCollection nodes)
-        {
-            throw new InvalidOperationException("The node collection is not found.");
-        }
-
-        if (nodes.Count == 0)
-        {
-            throw new InvalidOperationException("There is no node.");
-        }
-
-        var nodeIndex = Random.Shared.Next(nodes.Count);
-        return nodes[nodeIndex];
-    }
-
-    private static class StartProperties
+    private static class NewProperties
     {
         [CommandPropertySwitch("new-window", 'n')]
+        [CommandSummary("The client is started in a new window." +
+                        "This option cannot be used with --detach option.")]
+        [CommandPropertyCondition(nameof(Detached), false)]
         public static bool NewWindow { get; set; }
 
         [CommandPropertySwitch("manual-start", 'm')]
+        [CommandSummary("The service does not start automatically " +
+                        "when the client process is executed." + 
+                        "This option cannot be used with --detach option.")]
+        [CommandPropertyCondition(nameof(Detached), false)]
         public static bool ManualStart { get; set; }
 
         [CommandPropertySwitch("detach", 'd')]
+        [CommandSummary("The client process will not run after the client is created.")]
         public static bool Detached { get; set; }
     }
 }

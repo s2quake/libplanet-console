@@ -58,16 +58,16 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
 
     [CommandMethod]
     [CommandSummary("Creates a new node.")]
-    [CommandMethodStaticProperty(typeof(StartProperties))]
+    [CommandMethodStaticProperty(typeof(NewProperties))]
     public async Task NewAsync(
         string privateKey = "", CancellationToken cancellationToken = default)
     {
         var options = new AddNewOptions
         {
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
-            ManualStart = StartProperties.ManualStart,
-            NewWindow = StartProperties.NewWindow,
-            Detached = StartProperties.Detached,
+            ManualStart = NewProperties.ManualStart,
+            NewWindow = NewProperties.NewWindow,
+            Detached = NewProperties.Detached,
         };
         var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
@@ -188,15 +188,23 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
         Out.WriteLineAsJson(infos);
     }
 
-    private static class StartProperties
+    private static class NewProperties
     {
         [CommandPropertySwitch("new-window", 'n')]
+        [CommandSummary("The node is started in a new window." +
+                        "This option cannot be used with --detach option.")]
+        [CommandPropertyCondition(nameof(Detached), false)]
         public static bool NewWindow { get; set; }
 
         [CommandPropertySwitch("manual-start", 'm')]
+        [CommandSummary("The service does not start automatically " +
+                        "when the node process is executed." +
+                        "This option cannot be used with --detach option.")]
+        [CommandPropertyCondition(nameof(Detached), false)]
         public static bool ManualStart { get; set; }
 
         [CommandPropertySwitch("detach", 'd')]
+        [CommandSummary("The node process will not run after the node is created.")]
         public static bool Detached { get; set; }
     }
 }

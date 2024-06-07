@@ -102,17 +102,17 @@ internal sealed class ClientCollection(
         AddNewOptions options, CancellationToken cancellationToken)
     {
         var client = CreateNew(options.PrivateKey);
-        var clientProcess = client.CreateClientProcess();
-        clientProcess.NewWindow = options.NewWindow;
-        clientProcess.ManualStart = true;
-        _ = clientProcess.StartAsync(cancellationToken: default);
 
         if (options.Detached != true)
         {
+            var clientProcess = client.CreateClientProcess();
+            clientProcess.NewWindow = options.NewWindow;
+            clientProcess.ManualStart = true;
+            _ = clientProcess.StartAsync(cancellationToken: default);
             await client.AttachAsync(cancellationToken);
         }
 
-        if (options.ManualStart != true)
+        if (options.ManualStart != true && options.Detached != true)
         {
             var nodes = _application.GetService<NodeCollection>();
             var node = nodes.RandomNode();

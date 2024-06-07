@@ -50,13 +50,21 @@ internal sealed record class ApplicationSettings
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("manual-start", 'm')]
-    [CommandSummary("If set, the node and the client do not start automatically. " +
-                    "Instead, it waits for the user to start it manually.")]
+    [CommandSummary("If set, The service does not start automatically " +
+                    "when the node and client processes are executed.\n" +
+                    $"This option cannot be used with --detach option.")]
+    [CommandPropertyCondition(nameof(Detached), false)]
     public bool ManualStart { get; set; }
 
     [CommandPropertySwitch("new-window")]
-    [CommandSummary("If set, the node and the client start in a new window(terminal or console).")]
+    [CommandSummary($"If set, the node and the client processes start in a new window.\n" +
+                    $"This option cannot be used with --detach option.")]
+    [CommandPropertyCondition(nameof(Detached), false)]
     public bool NewWindow { get; set; }
+
+    [CommandPropertySwitch("detach", 'd')]
+    [CommandSummary("If set, the node and the client processes will not run.")]
+    public bool Detached { get; set; }
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
@@ -69,6 +77,7 @@ internal sealed record class ApplicationSettings
             LogDirectory = GetFullPath(settings.LogPath),
             ManualStart = settings.ManualStart,
             NewWindow = settings.NewWindow,
+            Detached = settings.Detached,
         };
 
         static string GetFullPath(string path)
