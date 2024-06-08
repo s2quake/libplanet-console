@@ -25,7 +25,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         _logger = CreateLogger(options.LogDirectory);
         _logger.Debug(Environment.CommandLine);
-        _logger.Debug("Initializing the application...");
+        _logger.Debug("Application is initializing...");
         _container = new(this);
         _container.ComposeExportedValue<ILogger>(_logger);
         _nodes = new NodeCollection(this, options.Nodes);
@@ -47,8 +47,10 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             EndPoint = EndPointUtility.ToString(_consoleContext.EndPoint),
             StoreDirectory = options.StoreDirectory,
             LogDirectory = options.LogDirectory,
-            ManualStart = options.ManualStart,
+            NoProcess = options.NoProcess,
+            Detach = options.Detach,
             NewWindow = options.NewWindow,
+            ManualStart = options.ManualStart,
         };
         GenesisOptions = new()
         {
@@ -57,7 +59,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             Timestamp = DateTimeOffset.UtcNow,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _logger.Debug("Initialized the application.");
+        _logger.Debug($"GenesisOptions: {GenesisOptions.ToJson()}");
+        _logger.Debug("Application is initialized.");
     }
 
     public override ApplicationServiceCollection ApplicationServices { get; }

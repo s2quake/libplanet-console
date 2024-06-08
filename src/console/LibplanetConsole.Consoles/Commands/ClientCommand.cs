@@ -44,8 +44,10 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         var options = new AddNewOptions
         {
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
-            ManualStart = NewProperties.ManualStart,
+            NoProcess = NewProperties.NoProcess,
+            Detach = NewProperties.Detach,
             NewWindow = NewProperties.NewWindow,
+            ManualStart = NewProperties.ManualStart,
         };
         var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
@@ -139,13 +141,28 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
     private static class NewProperties
     {
-        [CommandPropertySwitch("new-window", 'n')]
-        [CommandSummary("The client is started in a new window.")]
+        [CommandPropertySwitch]
+        [CommandSummary("The client is created but process is not executed.")]
+        public static bool NoProcess { get; set; }
+
+        [CommandPropertySwitch]
+        [CommandSummary("The client is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        public static bool Detach { get; set; }
+
+        [CommandPropertySwitch]
+        [CommandSummary("The client is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
         public static bool NewWindow { get; set; }
 
-        [CommandPropertySwitch("manual-start", 'm')]
+        [CommandPropertySwitch('m', useName: true)]
         [CommandSummary("The service does not start automatically " +
-                        "when the client process is executed.")]
+                        "when the client process is executed.\n" +
+                        "This option cannot be used with --no-process or --detach option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyCondition(nameof(Detach), false)]
         public static bool ManualStart { get; set; }
     }
 }

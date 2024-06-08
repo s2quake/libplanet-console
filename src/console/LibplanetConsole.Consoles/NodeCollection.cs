@@ -104,13 +104,22 @@ internal sealed class NodeCollection(
     public async Task<Node> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken)
     {
         var node = CreateNew(options.PrivateKey);
-        if (options.ManualStart != true)
+        if (options.NoProcess != true)
         {
             var nodeProcess = node.CreateNodeProcess();
-            nodeProcess.ManualStart = true;
+            nodeProcess.Detach = options.Detach;
+            nodeProcess.ManualStart = options.Detach != true;
             nodeProcess.NewWindow = options.NewWindow;
             await nodeProcess.StartAsync(cancellationToken);
+        }
+
+        if (options.NoProcess != true && options.Detach != true)
+        {
             await node.AttachAsync(cancellationToken);
+        }
+
+        if (node.IsAttached == true && options.ManualStart != true)
+        {
             await node.StartAsync(cancellationToken);
         }
 
@@ -130,8 +139,10 @@ internal sealed class NodeCollection(
             var options = new AddNewOptions
             {
                 PrivateKey = privateKeys[index],
-                ManualStart = info.ManualStart,
+                NoProcess = info.NoProcess,
+                Detach = info.Detach,
                 NewWindow = info.NewWindow,
+                ManualStart = info.ManualStart,
             };
             await AddNewAsync(options, cancellationToken);
         }

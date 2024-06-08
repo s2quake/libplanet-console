@@ -32,8 +32,6 @@ internal sealed class ClientProcess : ProcessBase
                 EndPointUtility.ToString(EndPoint),
                 "--private-key",
                 PrivateKeyUtility.ToString(privateKey),
-                "--parent",
-                Environment.ProcessId.ToString(),
             };
 
             if (IsDotnetRuntime() == true)
@@ -59,6 +57,12 @@ internal sealed class ClientProcess : ProcessBase
             {
                 argumentList.Add("--node-end-point");
                 argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+            }
+
+            if (Detach != true)
+            {
+                argumentList.Add("--parent");
+                argumentList.Add(Environment.ProcessId.ToString());
             }
 
             return argumentList;

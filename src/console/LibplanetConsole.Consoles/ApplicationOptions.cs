@@ -20,9 +20,11 @@ public sealed record class ApplicationOptions
 
     public string LogDirectory { get; init; } = string.Empty;
 
-    public bool ManualStart { get; init; }
+    public bool NoProcess { get; init; }
+
+    public bool Detach { get; init; }
 
     public bool NewWindow { get; init; }
 
-    public bool Detached { get; init; }
+    public bool ManualStart { get; init; }
 }

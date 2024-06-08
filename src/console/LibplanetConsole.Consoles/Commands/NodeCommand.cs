@@ -65,8 +65,10 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
         var options = new AddNewOptions
         {
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
-            ManualStart = NewProperties.ManualStart,
+            NoProcess = NewProperties.NoProcess,
+            Detach = NewProperties.Detach,
             NewWindow = NewProperties.NewWindow,
+            ManualStart = NewProperties.ManualStart,
         };
         var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
@@ -189,13 +191,28 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
 
     private static class NewProperties
     {
-        [CommandPropertySwitch("new-window", 'n')]
-        [CommandSummary("The node is started in a new window.")]
+        [CommandPropertySwitch]
+        [CommandSummary("The node is created but process is not executed.")]
+        public static bool NoProcess { get; set; }
+
+        [CommandPropertySwitch]
+        [CommandSummary("The node is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        public static bool Detach { get; set; }
+
+        [CommandPropertySwitch]
+        [CommandSummary("The node is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
         public static bool NewWindow { get; set; }
 
-        [CommandPropertySwitch("manual-start", 'm')]
+        [CommandPropertySwitch('m', useName: true)]
         [CommandSummary("The service does not start automatically " +
-                        "when the node process is executed.")]
+                        "when the node process is executed.\n" +
+                        "This option cannot be used with --no-process or --detach option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyCondition(nameof(Detach), false)]
         public static bool ManualStart { get; set; }
     }
 }

@@ -23,6 +23,8 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     public bool IsRunning => _process?.HasExited != true;
 
+    public bool Detach { get; set; }
+
     public bool NewWindow { get; set; }
 
     protected abstract string FileName { get; }

@@ -33,8 +33,6 @@ internal sealed class NodeProcess : ProcessBase
                 EndPointUtility.ToString(EndPoint),
                 "--private-key",
                 PrivateKeyUtility.ToString(privateKey),
-                "--parent",
-                Environment.ProcessId.ToString(),
             };
 
             if (IsDotnetRuntime() == true)
@@ -72,6 +70,12 @@ internal sealed class NodeProcess : ProcessBase
             if (ManualStart == true)
             {
                 argumentList.Add("--manual-start");
+            }
+
+            if (Detach != true)
+            {
+                argumentList.Add("--parent");
+                argumentList.Add(Environment.ProcessId.ToString());
             }
 
             return argumentList;
