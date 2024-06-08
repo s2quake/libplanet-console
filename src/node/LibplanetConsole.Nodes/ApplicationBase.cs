@@ -29,7 +29,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Initializing the application...");
         _isAutoStart = options.ManualStart != true;
-        _node = new Node(options);
+        _node = new Node(options, _logger);
         _container = new(this);
         _container.ComposeExportedValue<ILogger>(_logger);
         _container.ComposeExportedValue<IApplication>(this);

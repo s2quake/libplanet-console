@@ -49,7 +49,6 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             LogDirectory = options.LogDirectory,
             ManualStart = options.ManualStart,
             NewWindow = options.NewWindow,
-            Detached = options.Detached,
         };
         GenesisOptions = new()
         {

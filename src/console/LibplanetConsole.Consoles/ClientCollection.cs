@@ -104,25 +104,16 @@ internal sealed class ClientCollection(
         AddNewOptions options, CancellationToken cancellationToken)
     {
         var client = CreateNew(options.PrivateKey);
-
-        _logger.Debug($"Created a new node: {client.Address}");
-        if (options.Detached != true)
+        if (options.ManualStart != true)
         {
             var clientProcess = client.CreateClientProcess();
-            clientProcess.NewWindow = options.NewWindow;
             clientProcess.ManualStart = true;
-            _ = clientProcess.StartAsync(cancellationToken: default);
-            _logger.Debug("Started the client process.");
+            clientProcess.NewWindow = options.NewWindow;
+            await clientProcess.StartAsync(cancellationToken: default);
             await client.AttachAsync(cancellationToken);
-            _logger.Debug("Attached the client.");
-        }
-
-        if (options.ManualStart != true && options.Detached != true)
-        {
             var nodes = _application.GetService<NodeCollection>();
             var node = nodes.RandomNode();
             await client.StartAsync(node, cancellationToken);
-            _logger.Debug("Started the client.");
         }
 
         InsertClient(client);
@@ -143,7 +134,6 @@ internal sealed class ClientCollection(
                 PrivateKey = privateKeys[index],
                 ManualStart = info.ManualStart,
                 NewWindow = info.NewWindow,
-                Detached = info.Detached,
             };
             await AddNewAsync(options, cancellationToken);
         }
@@ -216,7 +206,7 @@ internal sealed class ClientCollection(
             var index = _clientList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             _clientList.Add(client);
-            _logger.Debug("Inserted a new client: {Address}", client.Address);
+            _logger.Debug("Client is inserted into the collection: {Address}", client.Address);
             client.Disposed += Client_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -231,7 +221,7 @@ internal sealed class ClientCollection(
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             client.Disposed -= Client_Disposed;
             _clientList.RemoveAt(index);
-            _logger.Debug("Removed a client: {Address}", client.Address);
+            _logger.Debug("Client is removed from the collection: {Address}", client.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == client)
             {

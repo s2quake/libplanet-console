@@ -46,7 +46,6 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
             ManualStart = NewProperties.ManualStart,
             NewWindow = NewProperties.NewWindow,
-            Detached = NewProperties.Detached,
         };
         var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
@@ -141,20 +140,12 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
     private static class NewProperties
     {
         [CommandPropertySwitch("new-window", 'n')]
-        [CommandSummary("The client is started in a new window." +
-                        "This option cannot be used with --detach option.")]
-        [CommandPropertyCondition(nameof(Detached), false)]
+        [CommandSummary("The client is started in a new window.")]
         public static bool NewWindow { get; set; }
 
         [CommandPropertySwitch("manual-start", 'm')]
         [CommandSummary("The service does not start automatically " +
-                        "when the client process is executed." +
-                        "This option cannot be used with --detach option.")]
-        [CommandPropertyCondition(nameof(Detached), false)]
+                        "when the client process is executed.")]
         public static bool ManualStart { get; set; }
-
-        [CommandPropertySwitch("detach", 'd')]
-        [CommandSummary("The client process will not run after the client is created.")]
-        public static bool Detached { get; set; }
     }
 }

@@ -67,7 +67,6 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
             PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
             ManualStart = NewProperties.ManualStart,
             NewWindow = NewProperties.NewWindow,
-            Detached = NewProperties.Detached,
         };
         var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
@@ -191,20 +190,12 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     private static class NewProperties
     {
         [CommandPropertySwitch("new-window", 'n')]
-        [CommandSummary("The node is started in a new window." +
-                        "This option cannot be used with --detach option.")]
-        [CommandPropertyCondition(nameof(Detached), false)]
+        [CommandSummary("The node is started in a new window.")]
         public static bool NewWindow { get; set; }
 
         [CommandPropertySwitch("manual-start", 'm')]
         [CommandSummary("The service does not start automatically " +
-                        "when the node process is executed." +
-                        "This option cannot be used with --detach option.")]
-        [CommandPropertyCondition(nameof(Detached), false)]
+                        "when the node process is executed.")]
         public static bool ManualStart { get; set; }
-
-        [CommandPropertySwitch("detach", 'd')]
-        [CommandSummary("The node process will not run after the node is created.")]
-        public static bool Detached { get; set; }
     }
 }

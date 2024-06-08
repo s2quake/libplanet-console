@@ -104,23 +104,14 @@ internal sealed class NodeCollection(
     public async Task<Node> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken)
     {
         var node = CreateNew(options.PrivateKey);
-
-        _logger.Information($"Created a new node: {node.Address}");
-        if (options.Detached != true)
+        if (options.ManualStart != true)
         {
             var nodeProcess = node.CreateNodeProcess();
-            nodeProcess.NewWindow = options.NewWindow;
             nodeProcess.ManualStart = true;
-            _ = nodeProcess.StartAsync(cancellationToken: default);
-            _logger.Information("Started the node process.");
+            nodeProcess.NewWindow = options.NewWindow;
+            await nodeProcess.StartAsync(cancellationToken);
             await node.AttachAsync(cancellationToken);
-            _logger.Information("Attached the node.");
-        }
-
-        if (options.ManualStart != true && options.Detached != true)
-        {
             await node.StartAsync(cancellationToken);
-            _logger.Information("Started the node.");
         }
 
         InsertNode(node);
@@ -141,7 +132,6 @@ internal sealed class NodeCollection(
                 PrivateKey = privateKeys[index],
                 ManualStart = info.ManualStart,
                 NewWindow = info.NewWindow,
-                Detached = info.Detached,
             };
             await AddNewAsync(options, cancellationToken);
         }
@@ -155,7 +145,6 @@ internal sealed class NodeCollection(
         {
             var item = _nodeList[i]!;
             await item.DisposeAsync();
-            _logger.Information("Disposed a node: {Address}", item.Address);
         }
 
         _isDisposed = true;
@@ -232,7 +221,7 @@ internal sealed class NodeCollection(
             var index = _nodeList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
             _nodeList.Add(node);
-            _logger.Information("Inserted a new node: {Address}", node.Address);
+            _logger.Debug("Node is inserted into the collection: {Address}", node.Address);
             node.Disposed += Node_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -247,7 +236,7 @@ internal sealed class NodeCollection(
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
             node.Disposed -= Node_Disposed;
             _nodeList.RemoveAt(index);
-            _logger.Information("Removed a node: {Address}", node.Address);
+            _logger.Debug("Node is removed from the collection: {Address}", node.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == node)
             {

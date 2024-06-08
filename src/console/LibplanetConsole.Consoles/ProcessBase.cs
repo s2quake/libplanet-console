@@ -51,7 +51,11 @@ internal abstract class ProcessBase : IAsyncDisposable
             _process.StartInfo.WorkingDirectory,
         }));
 
-        _process.Start();
+        if (_process.Start() != true)
+        {
+            throw new InvalidOperationException("Failed to start the process.");
+        }
+
         ApplicationLogger.Debug("Process started: " + JsonUtility.SerializeObject(new
         {
             HashCode = _process.GetHashCode(),
@@ -64,7 +68,7 @@ internal abstract class ProcessBase : IAsyncDisposable
             _process.BeginErrorReadLine();
         }
 
-        await Task.Delay(1000, cancellationToken);
+        await Task.Delay(1, cancellationToken);
         if (_process.HasExited == true)
         {
             throw new InvalidOperationException(_errorBuilder.ToString());

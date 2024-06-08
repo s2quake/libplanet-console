@@ -14,6 +14,7 @@ using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
+using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
@@ -25,6 +26,7 @@ internal sealed class Node
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private readonly INodeContent[] _contents;
+    private readonly ILogger _logger;
     private DnsEndPoint? _blocksyncEndPoint;
     private DnsEndPoint? _consensusEndPoint;
     private Guid _closeToken;
@@ -38,12 +40,14 @@ internal sealed class Node
         _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
         _container.ComposeExportedValue<INode>(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
+        _logger = application.GetService<ILogger>();
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
             [_remoteService, .. GetRemoteServices(_container)]);
         PublicKey = privateKey.PublicKey;
         NodeOptions = nodeOptions;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
+        _logger.Debug("Node is created: {Address}", Address);
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -142,6 +146,7 @@ internal sealed class Node
         _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
         _nodeInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         IsRunning = _nodeInfo.IsRunning;
+        _logger.Debug("Node is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
     }
 
@@ -155,6 +160,7 @@ internal sealed class Node
         using var scope = new ProgressScope(this);
         await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         _closeToken = Guid.Empty;
+        _logger.Debug("Node is detached: {Address}", Address);
         Detached?.Invoke(this, EventArgs.Empty);
     }
 
@@ -171,6 +177,7 @@ internal sealed class Node
         _blocksyncEndPoint = DnsEndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = DnsEndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
+        _logger.Debug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -187,6 +194,7 @@ internal sealed class Node
         _closeToken = Guid.Empty;
         _nodeInfo = new();
         IsRunning = false;
+        _logger.Debug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -234,6 +242,7 @@ internal sealed class Node
         IsRunning = false;
         await _container.DisposeAsync();
         _isDisposed = true;
+        _logger.Debug("Node is disposed: {Address}", Address);
         Disposed?.Invoke(this, EventArgs.Empty);
         GC.SuppressFinalize(this);
     }
@@ -246,11 +255,9 @@ internal sealed class Node
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NewWindow = application.Info.NewWindow,
             NodeEndPoint = EndPointUtility.Parse(application.Info.EndPoint),
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
-            ManualStart = application.Info.ManualStart,
         };
     }
 
