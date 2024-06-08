@@ -66,6 +66,22 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     }
 
     [CommandMethod]
+    public async Task AttachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var client = application.GetClient(address);
+        await client.AttachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task DetachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var client = application.GetClient(address);
+        await client.DetachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
     [CommandSummary("Starts a client of the specified address.\n" +
                     "If the address is not specified, current client is used.")]
     [CommandMethodProperty(nameof(Address))]
