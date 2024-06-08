@@ -10,4 +10,6 @@ public sealed record class ClientInfo
     public Address NodeAddress { get; init; }
 
     public BlockHash GenesisHash { get; init; }
+
+    public bool IsRunning { get; init; }
 }

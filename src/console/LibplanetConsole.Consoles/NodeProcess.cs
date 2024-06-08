@@ -1,98 +1,84 @@
-using System.Diagnostics;
-using JSSoft.Commands;
-using JSSoft.Terminals;
+using System.Collections.ObjectModel;
+using System.Net;
+using System.Security;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class NodeProcess : IDisposable
+internal sealed class NodeProcess : ProcessBase
 {
-    private readonly Process _process;
+    public required EndPoint EndPoint { get; init; }
 
-    public NodeProcess(NodeProcessOptions options)
+    public required SecureString PrivateKey { get; init; }
+
+    public EndPoint? NodeEndPoint { get; set; }
+
+    public string StoreDirectory { get; set; } = string.Empty;
+
+    public string LogDirectory { get; set; } = string.Empty;
+
+    public bool ManualStart { get; set; }
+
+    protected override string FileName => IsDotnetRuntime() ? DotnetPath : NodePath;
+
+    protected override Collection<string> ArgumentList
     {
-        var isDotnetRuntime = IsDotnetRuntime();
-        var startInfo = new ProcessStartInfo
+        get
         {
-            ArgumentList =
+            var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
+            var argumentList = new Collection<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(options.EndPoint),
+                EndPointUtility.ToString(EndPoint),
                 "--private-key",
-                PrivateKeyUtility.ToString(options.PrivateKey),
-                "--parent",
-                Environment.ProcessId.ToString(),
-            },
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        if (isDotnetRuntime == true)
-        {
-            startInfo.FileName = DotnetPath;
-            startInfo.ArgumentList.Insert(0, NodePath);
-        }
-        else
-        {
-            startInfo.FileName = NodePath;
-        }
+                PrivateKeyUtility.ToString(privateKey),
+            };
 
-        if (options.StoreDirectory != string.Empty)
-        {
-            startInfo.ArgumentList.Add("--store-path");
-            startInfo.ArgumentList.Add(
-                Path.Combine(options.StoreDirectory, (ShortAddress)options.PrivateKey.Address));
-        }
+            if (IsDotnetRuntime() == true)
+            {
+                argumentList.Insert(0, NodePath);
+            }
 
-        if (options.LogDirectory != string.Empty)
-        {
-            startInfo.ArgumentList.Add("--log-path");
-            startInfo.ArgumentList.Add(
-                Path.Combine(
-                    options.LogDirectory,
-                    $"{(ShortAddress)options.PrivateKey.Address}.log"));
-        }
+            if (NewWindow != true)
+            {
+                argumentList.Add("--no-repl");
+            }
 
-        var filename = startInfo.FileName;
-        var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
-        ApplicationLogger.Information(
-            $"Starting a node process: {filename} {arguments}");
-        _process = new Process
-        {
-            StartInfo = startInfo,
-        };
-        _process.ErrorDataReceived += Process_ErrorDataReceived;
-        _process.Start();
-    }
+            if (StoreDirectory != string.Empty)
+            {
+                argumentList.Add("--store-path");
+                argumentList.Add(
+                    Path.Combine(StoreDirectory, (ShortAddress)privateKey.Address));
+            }
 
-    public event EventHandler? Exited
-    {
-        add => _process.Exited += value;
-        remove => _process.Exited -= value;
-    }
+            if (LogDirectory != string.Empty)
+            {
+                argumentList.Add("--log-path");
+                argumentList.Add(
+                    Path.Combine(
+                        LogDirectory,
+                        $"{(ShortAddress)privateKey.Address}.log"));
+            }
 
-    public int Id => _process.Id;
+            if (NodeEndPoint is { } nodeEndPoint)
+            {
+                argumentList.Add("--node-end-point");
+                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+            }
 
-    public void Dispose()
-    {
-        if (_process.HasExited != true)
-        {
-            _process.Close();
-            ApplicationLogger.Information(
-                $"Closed the node process (PID: {_process.Id}).");
-        }
-    }
+            if (ManualStart == true)
+            {
+                argumentList.Add("--manual-start");
+            }
 
-    private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-    {
-        if (e.Data is string text)
-        {
-            ApplicationLogger.Error(text);
-            Console.Error.WriteColoredLine(text, TerminalColorType.Red);
+            if (Detach != true)
+            {
+                argumentList.Add("--parent");
+                argumentList.Add(Environment.ProcessId.ToString());
+            }
+
+            return argumentList;
         }
     }
 }

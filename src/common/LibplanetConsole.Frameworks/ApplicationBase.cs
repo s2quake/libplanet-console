@@ -39,14 +39,13 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     public void Cancel()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed == true, this);
-
+        Logger.Information("Application canceled.");
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
         _closeEvent.Set();
     }
 
-    public async Task StartAsync()
+    public async Task RunAsync()
     {
         ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
@@ -54,6 +53,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
         await OnStartAsync(_cancellationTokenSource.Token);
         await Task.Run(() =>
         {
+            Logger.Information($"{CanClose}");
             while (CanClose != true && _closeEvent.WaitOne(1) != true)
             {
             }

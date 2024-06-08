@@ -4,7 +4,6 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Consoles.Services;
 
 namespace LibplanetConsole.Consoles.Commands;
 
@@ -59,11 +58,37 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
 
     [CommandMethod]
     [CommandSummary("Creates a new node.")]
-    public async Task NewAsync(CancellationToken cancellationToken)
+    [CommandMethodStaticProperty(typeof(NewProperties))]
+    public async Task NewAsync(
+        string privateKey = "", CancellationToken cancellationToken = default)
     {
-        var node = await nodes.AddNewAsync(cancellationToken);
+        var options = new AddNewOptions
+        {
+            PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
+            NoProcess = NewProperties.NoProcess,
+            Detach = NewProperties.Detach,
+            NewWindow = NewProperties.NewWindow,
+            ManualStart = NewProperties.ManualStart,
+        };
+        var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
         await Out.WriteLineAsJsonAsync(nodeInfo);
+    }
+
+    [CommandMethod]
+    public async Task AttachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        await node.AttachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task DetachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var node = application.GetNode(address);
+        await node.DetachAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -73,15 +98,7 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     {
         var address = Address;
         var node = application.GetNode(address);
-        var seedService = application.GetService<SeedService>();
-        var nodeOptions = new NodeOptions
-        {
-            GenesisOptions = application.GenesisOptions,
-            BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
-            ConsensusSeedPeer = seedService.ConsensusSeedPeer,
-        };
-        await node.StartAsync(nodeOptions, cancellationToken);
-        await Task.CompletedTask;
+        await node.StartAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -95,13 +112,14 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
-    public async Task AttachAsync(
-        string endPoint, string privateKey, CancellationToken cancellationToken)
+    public void CommandLine()
     {
-        await nodes.AttachAsync(
-            endPoint: EndPointUtility.Parse(endPoint),
-            privateKey: PrivateKeyUtility.Parse(privateKey),
-            cancellationToken: cancellationToken);
+        var address = Address;
+        var node = application.GetNode(address);
+        var nodeProcess = node.CreateProcess();
+        nodeProcess.Detach = true;
+        nodeProcess.NewWindow = true;
+        Out.WriteLine(nodeProcess.GetCommandLine());
     }
 
     [CommandMethod]
@@ -171,5 +189,32 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     {
         var infos = nodes.Select(node => node.Info).ToArray();
         Out.WriteLineAsJson(infos);
+    }
+
+    private static class NewProperties
+    {
+        [CommandPropertySwitch]
+        [CommandSummary("The node is created but process is not executed.")]
+        public static bool NoProcess { get; set; }
+
+        [CommandPropertySwitch]
+        [CommandSummary("The node is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        public static bool Detach { get; set; }
+
+        [CommandPropertySwitch]
+        [CommandSummary("The node is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        public static bool NewWindow { get; set; }
+
+        [CommandPropertySwitch('m', useName: true)]
+        [CommandSummary("The service does not start automatically " +
+                        "when the node process is executed.\n" +
+                        "This option cannot be used with --no-process or --detach option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyCondition(nameof(Detach), false)]
+        public static bool ManualStart { get; set; }
     }
 }

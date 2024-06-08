@@ -12,8 +12,6 @@ public class RemoteServiceContext
         _clientContext = new([.. remoteServices.Select(service => service.Service)]);
         _clientContext.Opened += (s, e) => Opened?.Invoke(this, EventArgs.Empty);
         _clientContext.Closed += (s, e) => Closed?.Invoke(this, EventArgs.Empty);
-        _clientContext.Disconnected += (s, e) => Closed?.Invoke(this, EventArgs.Empty);
-        _clientContext.Faulted += (s, e) => Closed?.Invoke(this, EventArgs.Empty);
     }
 
     public event EventHandler? Opened;

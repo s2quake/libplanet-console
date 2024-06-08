@@ -26,17 +26,17 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     protected ApplicationBase(ApplicationOptions options)
     {
         _logger = CreateLogger(options.LogPath);
-        _logger.Information(Environment.CommandLine);
-        _logger.Information("Initializing the application...");
-        _client = new(this, options.PrivateKey);
+        _logger.Debug(Environment.CommandLine);
+        _logger.Debug("Initializing the application...");
+        _client = new(this, options);
         _isSeed = options.IsSeed;
         _container = new(this);
+        _container.ComposeExportedValue<ILogger>(_logger);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_client);
         _container.ComposeExportedValue<IClient>(_client);
-        _container.ComposeExportedValue<ILogger>(_logger);
         _clientServiceContext = _container.GetValue<ClientServiceContext>();
         _clientServiceContext.EndPoint = options.EndPoint;
         _container.GetValue<IApplicationConfigurations>();
@@ -53,9 +53,10 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcess = parentProcess;
+            WaitForExit(parentProcess, Cancel);
         }
 
-        _logger.Information("Initialized the application.");
+        _logger.Debug("Initialized the application.");
     }
 
     public override ApplicationServiceCollection ApplicationServices { get; }
@@ -98,20 +99,26 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        _logger.Information("Starting the application...");
+        _logger.Debug("Starting the application...");
         _closeToken = await _clientServiceContext.StartAsync(cancellationToken: default);
         await base.OnStartAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
-        _logger.Information("Started the application.");
+        _logger.Debug("Started the application.");
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _logger.Information("Disposing the application...");
+        _logger.Debug("Disposing the application...");
         await base.OnDisposeAsync();
         await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
         await _container.DisposeAsync();
-        _logger.Information("Disposed the application.");
+        _logger.Debug("Disposed the application.");
+    }
+
+    private static async void WaitForExit(Process process, Action cancelAction)
+    {
+        await process.WaitForExitAsync();
+        cancelAction.Invoke();
     }
 
     private static Logger CreateLogger(string logFilename)
@@ -119,7 +126,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         var loggerConfiguration = new LoggerConfiguration();
         if (logFilename != string.Empty)
         {
-            loggerConfiguration = loggerConfiguration.WriteTo.File(logFilename);
+            loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
+                                                     .WriteTo.File(logFilename);
         }
 
         var logger = loggerConfiguration.CreateLogger();
@@ -135,22 +143,19 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         if (_info.NodeEndPoint != string.Empty)
         {
-            var clientOptions = new ClientOptions
-            {
-                NodeEndPoint = await GetNodeEndPointAsync(cancellationToken),
-            };
-            await _client.StartAsync(clientOptions, cancellationToken: cancellationToken);
-        }
-
-        async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
-        {
             var nodeEndPoint = EndPointUtility.Parse(_info.NodeEndPoint);
-            if (_isSeed == true)
-            {
-                return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);
-            }
+            _client.NodeEndPoint = await GetNodeEndPointAsync(cancellationToken);
+            await _client.StartAsync(cancellationToken);
 
-            return nodeEndPoint;
+            async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
+            {
+                if (_isSeed == true)
+                {
+                    return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);
+                }
+
+                return nodeEndPoint;
+            }
         }
     }
 }

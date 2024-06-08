@@ -19,6 +19,9 @@ public static class PrivateKeyUtility
 
     public static PrivateKey Parse(string text) => new(text);
 
+    public static PrivateKey ParseWithFallback(string text)
+        => text == string.Empty ? new PrivateKey() : Parse(text);
+
     public static bool TryParse(string text, [MaybeNullWhen(false)] out PrivateKey privateKey)
     {
         try

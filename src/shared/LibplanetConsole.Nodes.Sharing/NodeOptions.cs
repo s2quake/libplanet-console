@@ -1,3 +1,4 @@
+using System.Net;
 using Libplanet.Crypto;
 using Libplanet.Net;
 using LibplanetConsole.Common;
@@ -29,7 +30,7 @@ public sealed record class NodeOptions
     {
         return new NodeOptions
         {
-            GenesisOptions = info.GenesisOptions,
+            GenesisOptions = info.GenesisInfo,
             BlocksyncSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.ConsensusSeedPeer),
         };
@@ -39,7 +40,7 @@ public sealed record class NodeOptions
     {
         return new NodeOptionsInfo
         {
-            GenesisOptions = nodeOptions.GenesisOptions,
+            GenesisInfo = nodeOptions.GenesisOptions,
             BlocksyncSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.ConsensusSeedPeer),
         };
@@ -59,12 +60,12 @@ public sealed record class NodeOptions
     }
 
     public static async Task<NodeOptions> CreateAsync(
-        string seedEndPoint, CancellationToken cancellationToken)
+        EndPoint seedEndPoint, CancellationToken cancellationToken)
     {
         var remoteService = new RemoteService<ISeedService>();
         var remoteServiceContext = new RemoteServiceContext([remoteService])
         {
-            EndPoint = DnsEndPointUtility.Parse(seedEndPoint),
+            EndPoint = seedEndPoint,
         };
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
         var service = remoteService.Service;

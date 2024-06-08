@@ -17,12 +17,14 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Seeds;
+using Serilog;
 
 namespace LibplanetConsole.Nodes;
 
-internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
+internal sealed class Node : IActionRenderer, INode, IApplicationService
 {
     private readonly SecureString _privateKey;
     private readonly string _storePath;
@@ -32,20 +34,35 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
+    private readonly EndPoint? _seedEndPoint;
+    private readonly ManualResetEvent _initializedResetEvent = new(false);
+    private readonly ILogger _logger;
 
     private DnsEndPoint? _blocksyncEndPoint;
     private DnsEndPoint? _consensusEndPoint;
     private Swarm? _swarm;
-    private Task? _startTask;
+    private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
+    private NodeOptions _nodeOptions;
 
-    public Node(ApplicationOptions options)
+    public Node(ApplicationOptions options, ILogger logger)
     {
+        _seedEndPoint = options.NodeEndPoint;
         _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
+        _logger = logger;
+        _nodeOptions = new NodeOptions
+        {
+            GenesisOptions = new GenesisOptions
+            {
+                GenesisKey = new(),
+                GenesisValidators = options.GenesisValidators,
+                Timestamp = DateTimeOffset.UtcNow,
+            },
+        };
         UpdateNodeInfo();
     }
 
@@ -102,7 +119,7 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
         => _consensusSeedNode?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
             throw new InvalidOperationException();
 
-    public NodeOptions NodeOptions { get; private set; } = new();
+    public NodeOptions NodeOptions => _nodeOptions;
 
     public override string ToString() => AddressUtility.ToString(Address);
 
@@ -118,8 +135,8 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask is null || _swarm is null,
-            message: "Swarm has been stopped.");
+            condition: IsRunning != true,
+            message: "Node is not running.");
 
         var blockChain = BlockChain;
         var genesisBlock = blockChain.Genesis;
@@ -135,12 +152,17 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
         return transaction.Id;
     }
 
-    public async Task StartAsync(NodeOptions nodeOptions, CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(_startTask is not null, "Swarm has been started.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
+        if (_initializedResetEvent.WaitOne(10000) != true)
+        {
+            throw new InvalidOperationException("NodeOptions is not initialized.");
+        }
 
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var nodeOptions = NodeOptions;
         var storePath = _storePath;
         var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
         var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
@@ -167,7 +189,7 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
             SeedPeers = [consensusSeedPeer],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
-            TargetBlockInterval = TimeSpan.FromSeconds(8),
+            TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
         };
         var blockChain = BlockChainUtility.CreateBlockChain(
@@ -184,6 +206,7 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
                 AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
             });
             await _blocksyncSeedNode.StartAsync(cancellationToken);
+            _logger.Debug("Node.BlocksyncSeed is started: {Address}", Address);
         }
 
         if (nodeOptions.ConsensusSeedPeer is null)
@@ -195,8 +218,11 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
                 AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
             });
             await _consensusSeedNode.StartAsync(cancellationToken);
+            _logger.Debug("Node.ConsensusSeed is started: {Address}", Address);
         }
 
+        _blocksyncEndPoint = blocksyncEndPoint;
+        _consensusEndPoint = consensusEndPoint;
         _swarm = new Swarm(
             blockChain: blockChain,
             privateKey: privateKey,
@@ -205,12 +231,12 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
             consensusTransport: consensusTransport,
             consensusOption: consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
+        _logger.Debug("Node.Swarm is starting: {Address}", Address);
         await _swarm.BootstrapAsync(cancellationToken: default);
-        _blocksyncEndPoint = blocksyncEndPoint;
-        _consensusEndPoint = consensusEndPoint;
-        NodeOptions = nodeOptions;
+        _logger.Debug("Node.Swarm is bootstrapped: {Address}", Address);
         IsRunning = true;
         UpdateNodeInfo();
+        _logger.Debug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -218,19 +244,39 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask is null || _swarm is null,
-            message: "Swarm has been stopped.");
+            condition: IsRunning != true,
+            message: "Node is not running.");
 
-        NodeOptions = new();
+        if (_consensusSeedNode is not null)
+        {
+            await _consensusSeedNode.StopAsync(cancellationToken: default);
+            _consensusSeedNode = null;
+            _logger.Debug("Node.ConsensusSeed is stopped: {Address}", Address);
+        }
+
+        if (_blocksyncSeedNode is not null)
+        {
+            await _blocksyncSeedNode!.StopAsync(cancellationToken: default);
+            _blocksyncSeedNode = null;
+            _logger.Debug("Node.BlocksyncSeed is stopped: {Address}", Address);
+        }
+
+        if (_swarm is not null)
+        {
+            await _swarm.StopAsync(cancellationToken: cancellationToken);
+            await _startTask;
+            _logger.Debug("Node.Swarm is stopping: {Address}", Address);
+            _swarm.Dispose();
+            _logger.Debug("Node.Swarm is stopped: {Address}", Address);
+        }
+
         _blocksyncEndPoint = null;
         _consensusEndPoint = null;
-        await _swarm!.StopAsync(cancellationToken: cancellationToken);
-        await _startTask!;
-        _swarm.Dispose();
         _swarm = null;
-        _startTask = null;
+        _startTask = Task.CompletedTask;
         IsRunning = false;
         UpdateNodeInfo();
+        _logger.Debug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -239,8 +285,8 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask is null || _swarm is null,
-            message: "Swarm has been stopped.");
+            condition: IsRunning != true,
+            message: "Node is not running.");
 
         var blockChain = BlockChain;
         var height = blockChain.Tip.Index + 1;
@@ -273,8 +319,8 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
-            condition: _startTask is null || _swarm is null,
-            message: "Swarm has been stopped.");
+            condition: IsRunning != true,
+            message: "Node is not running.");
 
         var blockChain = BlockChain;
         var nonce = blockChain.GetNextTxNonce(address);
@@ -294,10 +340,32 @@ internal sealed class Node : IAsyncDisposable, IActionRenderer, INode
             _swarm.Dispose();
         }
 
+        if (_consensusSeedNode is not null)
+        {
+            await _consensusSeedNode.StopAsync(cancellationToken: default);
+            _consensusSeedNode = null;
+        }
+
+        if (_blocksyncSeedNode is not null)
+        {
+            await _blocksyncSeedNode.StopAsync(cancellationToken: default);
+            _blocksyncSeedNode = null;
+        }
+
         await (_startTask ?? Task.CompletedTask);
-        _startTask = null;
+        _startTask = Task.CompletedTask;
         _isDisposed = true;
         GC.SuppressFinalize(this);
+    }
+
+    async Task IApplicationService.InitializeAsync(
+        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        var nodeOptions = _seedEndPoint != null
+            ? await NodeOptions.CreateAsync(_seedEndPoint, cancellationToken)
+            : NodeOptions;
+        _nodeOptions = nodeOptions;
+        _initializedResetEvent.Set();
     }
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)

@@ -1,91 +1,71 @@
-using System.Diagnostics;
-using JSSoft.Commands;
-using JSSoft.Terminals;
+using System.Collections.ObjectModel;
+using System.Net;
+using System.Security;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class ClientProcess : IDisposable
+internal sealed class ClientProcess : ProcessBase
 {
-    private readonly Process _process;
+    public required EndPoint EndPoint { get; init; }
 
-    public ClientProcess(ClientProcessOptions options)
+    public required SecureString PrivateKey { get; init; }
+
+    public EndPoint? NodeEndPoint { get; set; }
+
+    public string LogDirectory { get; set; } = string.Empty;
+
+    public bool ManualStart { get; set; }
+
+    protected override string FileName
+        => IsDotnetRuntime() ? DotnetPath : ClientPath;
+
+    protected override Collection<string> ArgumentList
     {
-        var isDotnetRuntime = IsDotnetRuntime();
-        var startInfo = new ProcessStartInfo
+        get
         {
-            ArgumentList =
+            var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
+            var argumentList = new Collection<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(options.EndPoint),
+                EndPointUtility.ToString(EndPoint),
                 "--private-key",
-                PrivateKeyUtility.ToString(options.PrivateKey),
-                "--parent",
-                Environment.ProcessId.ToString(),
-            },
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        if (isDotnetRuntime == true)
-        {
-            startInfo.FileName = DotnetPath;
-            startInfo.ArgumentList.Insert(0, ClientPath);
-        }
-        else
-        {
-            startInfo.FileName = ClientPath;
-        }
+                PrivateKeyUtility.ToString(privateKey),
+            };
 
-        if (options.LogDirectory != string.Empty)
-        {
-            startInfo.ArgumentList.Add("--log-path");
-            startInfo.ArgumentList.Add(
-                Path.Combine(
-                    options.LogDirectory,
-                    $"{(ShortAddress)options.PrivateKey.Address}.log"));
-        }
+            if (IsDotnetRuntime() == true)
+            {
+                argumentList.Insert(0, ClientPath);
+            }
 
-        var filename = startInfo.FileName;
-        var arguments = CommandUtility.Join([.. startInfo.ArgumentList]);
-        ApplicationLogger.Information(
-            $"Starting a client process: {filename} {arguments}");
-        _process = new Process
-        {
-            StartInfo = startInfo,
-        };
-        _process.ErrorDataReceived += Process_ErrorDataReceived;
-        _process.Start();
-    }
+            if (NewWindow != true)
+            {
+                argumentList.Add("--no-repl");
+            }
 
-    public event EventHandler? Exited
-    {
-        add => _process.Exited += value;
-        remove => _process.Exited -= value;
-    }
+            if (LogDirectory != string.Empty)
+            {
+                argumentList.Add("--log-path");
+                argumentList.Add(
+                    Path.Combine(
+                        LogDirectory,
+                        $"{(ShortAddress)privateKey.Address}.log"));
+            }
 
-    public int Id => _process.Id;
+            if (NodeEndPoint is { } nodeEndPoint)
+            {
+                argumentList.Add("--node-end-point");
+                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+            }
 
-    public void Dispose()
-    {
-        if (_process.HasExited != true)
-        {
-            _process.Close();
-            ApplicationLogger.Information(
-                $"Closed the client process (PID: {_process.Id}).");
-        }
-    }
+            if (Detach != true)
+            {
+                argumentList.Add("--parent");
+                argumentList.Add(Environment.ProcessId.ToString());
+            }
 
-    private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-    {
-        if (e.Data is string text)
-        {
-            ApplicationLogger.Error(text);
-            Console.Error.WriteColoredLine(text, TerminalColorType.Red);
+            return argumentList;
         }
     }
 }

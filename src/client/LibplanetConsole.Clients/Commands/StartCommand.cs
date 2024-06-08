@@ -12,7 +12,7 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
 {
     public override bool IsEnabled => client.IsRunning is false;
 
-    [CommandPropertyRequired]
+    [CommandPropertyRequired(DefaultValue = "")]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
     public string NodeEndPoint { get; set; } = string.Empty;
 
@@ -24,21 +24,24 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
     protected override async Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
-        var clientOptions = new ClientOptions
-        {
-            NodeEndPoint = await GetNodeEndPointAsync(cancellationToken),
-        };
-        await client.StartAsync(clientOptions, cancellationToken);
+        client.NodeEndPoint = await GetNodeEndPointAsync(cancellationToken);
+        await client.StartAsync(cancellationToken);
     }
 
     private async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
     {
-        var nodeEndPoint = EndPointUtility.Parse(NodeEndPoint);
-        if (IsSeed == true)
+        if (NodeEndPoint != string.Empty)
         {
-            return await SeedUtility.GetNodeEndPointAsync(nodeEndPoint, cancellationToken);
+            var nodeEndPoint = EndPointUtility.Parse(NodeEndPoint);
+            if (IsSeed == true)
+            {
+                return await SeedUtility.GetNodeEndPointAsync(
+                    nodeEndPoint, cancellationToken);
+            }
+
+            return nodeEndPoint;
         }
 
-        return nodeEndPoint;
+        return client.NodeEndPoint;
     }
 }

@@ -14,8 +14,6 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     private readonly INodeCollection _nodes = nodes;
     private INode? _current;
 
-    public static TextWriter Writer => Console.Out;
-
     public Task InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
@@ -60,12 +58,16 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
 
     private void AttachEvent(INode node)
     {
+        node.Attached += Node_Attached;
+        node.Detached += Node_Detached;
         node.Started += Node_Started;
         node.Stopped += Node_Stopped;
     }
 
     private void DetachEvent(INode node)
     {
+        node.Attached -= Node_Attached;
+        node.Detached -= Node_Detached;
         node.Started -= Node_Started;
         node.Stopped -= Node_Stopped;
     }
@@ -81,22 +83,20 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             foreach (INode node in e.NewItems!)
             {
-                var message = $"Node attached: {(ShortAddress)node.Address}";
+                var message = $"Node created: {(ShortAddress)node.Address}";
                 var colorType = TerminalColorType.BrightBlue;
-                Writer.WriteColoredLine(message, colorType);
-                node.Started += Node_Started;
-                node.Stopped += Node_Stopped;
+                Console.Out.WriteColoredLine(message, colorType);
+                AttachEvent(node);
             }
         }
         else if (e.Action == NotifyCollectionChangedAction.Remove)
         {
             foreach (INode node in e.OldItems!)
             {
-                var message = $"Node detached: {(ShortAddress)node.Address}";
+                var message = $"Node deleted: {(ShortAddress)node.Address}";
                 var colorType = TerminalColorType.BrightBlue;
-                Writer.WriteColoredLine(message, colorType);
-                node.Started -= Node_Started;
-                node.Stopped -= Node_Stopped;
+                Console.Out.WriteColoredLine(message, colorType);
+                DetachEvent(node);
             }
         }
     }
@@ -107,7 +107,27 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         var hash = (ShortBlockHash)blockInfo.Hash;
         var miner = (ShortAddress)blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
-        Writer.WriteColoredLine(message, TerminalColorType.BrightBlue);
+        Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
+    }
+
+    private void Node_Attached(object? sender, EventArgs e)
+    {
+        if (sender is INode node)
+        {
+            var message = $"Node attached: {(ShortAddress)node.Address}";
+            var colorType = TerminalColorType.BrightBlue;
+            Console.Out.WriteColoredLine(message, colorType);
+        }
+    }
+
+    private void Node_Detached(object? sender, EventArgs e)
+    {
+        if (sender is INode node)
+        {
+            var message = $"Node detached: {(ShortAddress)node.Address}";
+            var colorType = TerminalColorType.BrightBlue;
+            Console.Out.WriteColoredLine(message, colorType);
+        }
     }
 
     private void Node_Started(object? sender, EventArgs e)
@@ -116,7 +136,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             var message = $"Node started: {(ShortAddress)node.Address}";
             var colorType = TerminalColorType.BrightBlue;
-            Writer.WriteColoredLine(message, colorType);
+            Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -126,7 +146,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             var message = $"Node stopped: {(ShortAddress)node.Address}";
             var colorType = TerminalColorType.BrightBlue;
-            Writer.WriteColoredLine(message, colorType);
+            Console.Out.WriteColoredLine(message, colorType);
         }
     }
 }

@@ -5,8 +5,7 @@ namespace LibplanetConsole.Clients.Services;
 
 public interface IClientService
 {
-    Task<ClientInfo> StartAsync(
-        ClientOptionsInfo clientOptionsInfo, CancellationToken cancellationToken);
+    Task<ClientInfo> StartAsync(string nodeEndPoint, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

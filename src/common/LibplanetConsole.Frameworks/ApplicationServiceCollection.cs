@@ -13,7 +13,10 @@ public sealed class ApplicationServiceCollection(
     {
         for (var i = 0; i < _applicationServices.Length; i++)
         {
+            var serviceName = _applicationServices[i].GetType().Name;
+            ApplicationLogger.Debug("Application service initializing: {0}", serviceName);
             await _applicationServices[i].InitializeAsync(serviceProvider, cancellationToken);
+            ApplicationLogger.Debug("Application service initialized: {0}", serviceName);
         }
     }
 

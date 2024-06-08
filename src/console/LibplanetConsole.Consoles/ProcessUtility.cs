@@ -102,22 +102,42 @@ internal static class ProcessUtility
     {
         get
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+            var dotnetPath = GetDotnetPath();
+            if (File.Exists(dotnetPath) == true)
             {
-                return @"C:\Program Files\dotnet\dotnet.exe";
+                return dotnetPath;
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
+            if (Environment.GetEnvironmentVariable("DOTNET_ROOT") is string v &&
+                File.Exists(v) == true)
             {
-                return "/usr/local/share/dotnet/dotnet";
+                return v;
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
-            {
-                return "/usr/bin/dotnet";
-            }
+            var message = $"dotnet executable is not found.\n" +
+                          $"if you have installed dotnet, please set DOTNET_ROOT environment " +
+                          $"variable to the directory containing dotnet executable.";
+            throw new InvalidOperationException(message);
 
-            throw new NotSupportedException("Unsupported OS platform.");
+            static string GetDotnetPath()
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+                {
+                    return @"C:\Program Files\dotnet\dotnet.exe";
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
+                {
+                    return "/usr/local/share/dotnet/dotnet";
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
+                {
+                    return "/usr/lib/dotnet/dotnet";
+                }
+
+                throw new NotSupportedException("Unsupported OS platform.");
+            }
         }
     }
 
@@ -135,6 +155,11 @@ internal static class ProcessUtility
                                     $"bin/{Congiguration}/{Framework}";
             var d1 = Path.GetFullPath(expectedDirectory);
             var d2 = Path.GetFullPath(directory);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+            {
+                return StringComparer.OrdinalIgnoreCase.Equals(d1, d2);
+            }
+
             return d1 == d2;
         }
     }
@@ -145,7 +170,7 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{PublishExtension}"
+                $"{Framework}/libplanet-node.dll"
             );
         }
     }
@@ -175,7 +200,7 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
-                $"{Congiguration}/{Framework}/libplanet-client{PublishExtension}"
+                $"{Congiguration}/{Framework}/libplanet-client.dll"
             );
         }
     }
@@ -245,9 +270,19 @@ internal static class ProcessUtility
         }
     }
 
+    public static bool IsOSX()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    }
+
     public static bool IsWindows()
     {
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    }
+
+    public static bool IsLinux()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     }
 
     public static bool IsArm64()

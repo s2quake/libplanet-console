@@ -63,6 +63,6 @@ Specify a path to save the logs.
 Run one node and one client independently.
 
 ```sh
-.bin/libplanet-node -a --end-point "127.0.0.1:4343"
+.bin/libplanet-node --end-point "127.0.0.1:4343"
 .bin/libplanet-client --node-end-point "127.0.0.1:4343"
 ```

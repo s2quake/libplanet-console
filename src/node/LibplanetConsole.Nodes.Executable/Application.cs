@@ -12,10 +12,11 @@ internal sealed class Application(ApplicationOptions options)
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        if (_options.ParentProcessId == 0)
+        if (_options.NoREPL != true)
         {
             var sw = new StringWriter();
             var commandContext = this.GetService<CommandContext>();
+            var startupCondition = _options.ManualStart == true && _options.ParentProcessId == 0;
             commandContext.Out = sw;
             _terminal = this.GetService<SystemTerminal>();
             await base.OnStartAsync(cancellationToken);
@@ -25,10 +26,15 @@ internal sealed class Application(ApplicationOptions options)
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
             sw.WriteSeparator(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
-            sw.WriteLineIf(_options.AutoStart != true, GetStartupMessage());
+            sw.WriteLineIf(startupCondition, GetStartupMessage());
             Console.Write(sw.ToString());
 
             await _terminal.StartAsync(cancellationToken);
+        }
+        else if (_options.ParentProcessId == 0)
+        {
+            await base.OnStartAsync(cancellationToken);
+            WaitInput();
         }
         else
         {
@@ -40,5 +46,12 @@ internal sealed class Application(ApplicationOptions options)
     {
         var startText = TerminalStringBuilder.GetString("start", TerminalColorType.Green);
         return $"\nType '{startText}' to start the node.";
+    }
+
+    private async void WaitInput()
+    {
+        Console.WriteLine("Press any key to exit.");
+        await Task.Run(() => Console.ReadKey(intercept: true));
+        Cancel();
     }
 }

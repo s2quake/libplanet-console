@@ -49,6 +49,31 @@ internal sealed record class ApplicationSettings
     [CommandSummary("The directory path to store log.")]
     public string LogPath { get; set; } = string.Empty;
 
+    [CommandPropertySwitch]
+    [CommandSummary("If set, the node and the client processes will not run.")]
+    public bool NoProcess { get; set; }
+
+    [CommandPropertySwitch]
+    [CommandSummary($"If set, the node and the client processes start in a new window.\n" +
+                    $"This option cannot be used with --no-process option.")]
+    [CommandPropertyCondition(nameof(NoProcess), false)]
+    public bool NewWindow { get; set; }
+
+    [CommandPropertySwitch]
+    [CommandSummary("If set, the node and the client processes are detached from the console.\n" +
+                    "This option cannot be used with --no-process option.\n" +
+                    "And this option is only available if the --new-window option is set.")]
+    [CommandPropertyCondition(nameof(NewWindow), true)]
+    public bool Detach { get; set; }
+
+    [CommandPropertySwitch('m', useName: true)]
+    [CommandSummary("If set, The service does not start automatically " +
+                    "when the node and client processes are executed.\n" +
+                    $"This option cannot be used with --no-process or --detach option.")]
+    [CommandPropertyCondition(nameof(NoProcess), false)]
+    [CommandPropertyCondition(nameof(Detach), false)]
+    public bool ManualStart { get; set; }
+
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
         var endPoint = settings.GetEndPoint();
@@ -58,6 +83,10 @@ internal sealed record class ApplicationSettings
             Clients = settings.GetClients(),
             StoreDirectory = GetFullPath(settings.StorePath),
             LogDirectory = GetFullPath(settings.LogPath),
+            NoProcess = settings.NoProcess,
+            NewWindow = settings.NewWindow,
+            Detach = settings.Detach,
+            ManualStart = settings.ManualStart,
         };
 
         static string GetFullPath(string path)

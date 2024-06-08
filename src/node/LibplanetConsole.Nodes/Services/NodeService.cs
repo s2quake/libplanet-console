@@ -27,10 +27,9 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
         return _node.Info;
     }
 
-    public async Task<NodeInfo> StartAsync(
-        NodeOptionsInfo nodeOptionsInfo, CancellationToken cancellationToken)
+    public async Task<NodeInfo> StartAsync(CancellationToken cancellationToken)
     {
-        await _node.StartAsync(nodeOptionsInfo, cancellationToken);
+        await _node.StartAsync(cancellationToken);
         return _node.Info;
     }
 

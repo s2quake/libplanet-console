@@ -9,7 +9,7 @@ namespace LibplanetConsole.Consoles.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Provides client-related commands.")]
 [method: ImportingConstructor]
-internal sealed partial class ClientCommand(IApplication application, IClientCollection clients)
+internal sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
@@ -37,9 +37,19 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
 
     [CommandMethod]
     [CommandSummary("Creates a new client.")]
-    public async Task NewAsync(CancellationToken cancellationToken)
+    [CommandMethodStaticProperty(typeof(NewProperties))]
+    public async Task NewAsync(
+        string privateKey = "", CancellationToken cancellationToken = default)
     {
-        var client = await clients.AddNewAsync(cancellationToken);
+        var options = new AddNewOptions
+        {
+            PrivateKey = PrivateKeyUtility.ParseWithFallback(privateKey),
+            NoProcess = NewProperties.NoProcess,
+            Detach = NewProperties.Detach,
+            NewWindow = NewProperties.NewWindow,
+            ManualStart = NewProperties.ManualStart,
+        };
+        var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
         await Out.WriteLineAsJsonAsync(clientInfo);
     }
@@ -56,19 +66,35 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
     }
 
     [CommandMethod]
-    [CommandSummary("Starts a client of the specified address.\n" +
-                    "If the address is not specified, current client is used.")]
-    [CommandMethodProperty(nameof(Address))]
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
         var client = application.GetClient(address);
-        var node = GetRandomNode(application);
-        var clientOptions = new ClientOptions()
-        {
-            NodeEndPoint = node.EndPoint,
-        };
-        await client.StartAsync(clientOptions, cancellationToken);
+        await client.AttachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task DetachAsync(CancellationToken cancellationToken = default)
+    {
+        var address = Address;
+        var client = application.GetClient(address);
+        await client.DetachAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandSummary("Starts a client of the specified address.\n" +
+                    "If the address is not specified, current client is used.")]
+    [CommandMethodProperty(nameof(Address))]
+    public async Task StartAsync(
+        string nodeAddress = "", CancellationToken cancellationToken = default)
+    {
+        var nodes = application.GetService<NodeCollection>();
+        var address = Address;
+        var node = nodeAddress == string.Empty
+            ? nodes.RandomNode()
+            : application.GetNode(nodeAddress);
+        var client = application.GetClient(address);
+        await client.StartAsync(node, cancellationToken);
     }
 
     [CommandMethod]
@@ -80,6 +106,20 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         var address = Address;
         var client = application.GetClient(address);
         await client.StopAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public void CommandLine()
+    {
+        var address = Address;
+        var client = application.GetClient(address);
+        var clientProcess = client.CreateProcess();
+        var nodes = application.GetService<NodeCollection>();
+        var node = nodes.RandomNode();
+        clientProcess.Detach = true;
+        clientProcess.NewWindow = true;
+        clientProcess.NodeEndPoint = node.EndPoint;
+        Out.WriteLine(clientProcess.GetCommandLine());
     }
 
     [CommandMethod]
@@ -129,19 +169,30 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         return TerminalColorType.BrightBlack;
     }
 
-    private static INode GetRandomNode(IApplication application)
+    private static class NewProperties
     {
-        if (application.GetService(typeof(INodeCollection)) is not INodeCollection nodes)
-        {
-            throw new InvalidOperationException("The node collection is not found.");
-        }
+        [CommandPropertySwitch]
+        [CommandSummary("The client is created but process is not executed.")]
+        public static bool NoProcess { get; set; }
 
-        if (nodes.Count == 0)
-        {
-            throw new InvalidOperationException("There is no node.");
-        }
+        [CommandPropertySwitch]
+        [CommandSummary("The client is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        public static bool Detach { get; set; }
 
-        var nodeIndex = Random.Shared.Next(nodes.Count);
-        return nodes[nodeIndex];
+        [CommandPropertySwitch]
+        [CommandSummary("The client is started in a new window.\n" +
+                        "This option cannot be used with --no-process option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        public static bool NewWindow { get; set; }
+
+        [CommandPropertySwitch('m', useName: true)]
+        [CommandSummary("The service does not start automatically " +
+                        "when the client process is executed.\n" +
+                        "This option cannot be used with --no-process or --detach option.")]
+        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyCondition(nameof(Detach), false)]
+        public static bool ManualStart { get; set; }
     }
 }

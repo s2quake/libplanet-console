@@ -2,7 +2,7 @@ using Libplanet.Crypto;
 
 namespace LibplanetConsole.Common.Serializations;
 
-public readonly record struct GenesisOptionsInfo
+public readonly record struct GenesisInfo
 {
     public string GenesisKey { get; init; }
 
@@ -10,7 +10,7 @@ public readonly record struct GenesisOptionsInfo
 
     public string Timestamp { get; init; }
 
-    public static implicit operator GenesisOptions(GenesisOptionsInfo info)
+    public static implicit operator GenesisOptions(GenesisInfo info)
     {
         return new GenesisOptions
         {
@@ -21,9 +21,9 @@ public readonly record struct GenesisOptionsInfo
         };
     }
 
-    public static implicit operator GenesisOptionsInfo(GenesisOptions genesisOptions)
+    public static implicit operator GenesisInfo(GenesisOptions genesisOptions)
     {
-        return new GenesisOptionsInfo
+        return new GenesisInfo
         {
             GenesisKey = PrivateKeyUtility.ToString(genesisOptions.GenesisKey),
             GenesisValidators =
@@ -32,7 +32,7 @@ public readonly record struct GenesisOptionsInfo
         };
     }
 
-    public GenesisOptionsInfo Encrypt(PublicKey publicKey)
+    public GenesisInfo Encrypt(PublicKey publicKey)
     {
         return this with
         {
@@ -42,7 +42,7 @@ public readonly record struct GenesisOptionsInfo
         };
     }
 
-    public GenesisOptionsInfo Decrypt(PrivateKey privateKey)
+    public GenesisInfo Decrypt(PrivateKey privateKey)
     {
         return this with
         {

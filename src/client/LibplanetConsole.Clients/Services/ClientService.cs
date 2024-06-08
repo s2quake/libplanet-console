@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Services;
 
@@ -27,9 +28,10 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     }
 
     public async Task<ClientInfo> StartAsync(
-        ClientOptionsInfo clientOptionsInfo, CancellationToken cancellationToken)
+        string nodeEndPoint, CancellationToken cancellationToken)
     {
-        await _client.StartAsync(clientOptionsInfo, cancellationToken);
+        _client.NodeEndPoint = EndPointUtility.Parse(nodeEndPoint);
+        await _client.StartAsync(cancellationToken);
         return _client.Info;
     }
 

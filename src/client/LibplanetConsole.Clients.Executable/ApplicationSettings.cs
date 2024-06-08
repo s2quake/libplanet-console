@@ -37,6 +37,10 @@ internal sealed record class ApplicationSettings
     [CommandSummary("The file path to store log.")]
     public string LogPath { get; set; } = string.Empty;
 
+    [CommandPropertySwitch("no-repl")]
+    [CommandSummary("If set, the REPL is not started.")]
+    public bool NoREPL { get; init; }
+
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
         var endPoint = settings.GetEndPoint();
@@ -47,6 +51,7 @@ internal sealed record class ApplicationSettings
             IsSeed = settings.IsSeed,
             NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(settings.NodeEndPoint),
             LogPath = GetFullPath(settings.LogPath),
+            NoREPL = settings.NoREPL,
         };
 
         static string GetFullPath(string path)

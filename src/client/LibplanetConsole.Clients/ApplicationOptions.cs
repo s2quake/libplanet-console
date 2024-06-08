@@ -22,4 +22,6 @@ public sealed record class ApplicationOptions
     public EndPoint? NodeEndPoint { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
+
+    public bool NoREPL { get; init; }
 }

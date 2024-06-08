@@ -1,5 +1,4 @@
 using System.Collections.Specialized;
-using System.Net;
 using Libplanet.Crypto;
 
 namespace LibplanetConsole.Consoles;
@@ -24,11 +23,5 @@ public interface INodeCollection : IEnumerable<INode>, INotifyCollectionChanged
 
     int IndexOf(Address address);
 
-    Task<INode> AddNewAsync(CancellationToken cancellationToken)
-        => AddNewAsync(new(), cancellationToken);
-
-    Task<INode> AddNewAsync(PrivateKey privateKey, CancellationToken cancellationToken);
-
-    Task<INode> AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken);
+    Task<INode> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken);
 }

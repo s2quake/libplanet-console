@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Common.IO;
 
-internal sealed class TempFile : IDisposable
+public sealed class TempFile : IDisposable
 {
     public TempFile()
     {
@@ -8,6 +8,11 @@ internal sealed class TempFile : IDisposable
     }
 
     public string FileName { get; }
+
+    public static implicit operator string(TempFile tempFile)
+    {
+        return tempFile.FileName;
+    }
 
     public static TempFile WriteAllText(string content)
     {
@@ -22,5 +27,10 @@ internal sealed class TempFile : IDisposable
         {
             File.Delete(FileName);
         }
+    }
+
+    public override string ToString()
+    {
+        return FileName;
     }
 }

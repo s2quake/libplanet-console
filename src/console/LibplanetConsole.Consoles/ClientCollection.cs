@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
+using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
@@ -19,6 +19,7 @@ internal sealed class ClientCollection(
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
     private readonly List<Client> _clientList = new(privateKeys.Length);
+    private readonly ILogger _logger = application.GetService<ILogger>();
     private Client? _current;
     private bool _isDisposed;
 
@@ -99,41 +100,31 @@ internal sealed class ClientCollection(
         return -1;
     }
 
-    public Task<Client> AddNewAsync(CancellationToken cancellationToken)
-        => AddNewAsync(new(), cancellationToken);
-
     public async Task<Client> AddNewAsync(
-        PrivateKey privateKey, CancellationToken cancellationToken)
+        AddNewOptions options, CancellationToken cancellationToken)
     {
-        var nodes = _application.GetService<NodeCollection>();
-        var node = nodes.RandomNode();
-        var clientOptions = new ClientOptions()
+        var client = CreateNew(options.PrivateKey);
+        if (options.NoProcess != true)
         {
-            NodeEndPoint = node.EndPoint,
-        };
-        var endPoint = DnsEndPointUtility.Next();
-        var clientProcessOptions = new ClientProcessOptions(endPoint, privateKey)
-        {
-            LogDirectory = _application.Info.LogDirectory,
-        };
-        _ = new ClientProcess(clientProcessOptions);
-        var client = CreateNew(privateKey, endPoint);
-        await client.StartAsync(clientOptions, cancellationToken);
-        InsertClient(client);
-        return client;
-    }
+            var clientProcess = client.CreateProcess();
+            clientProcess.Detach = options.Detach;
+            clientProcess.ManualStart = options.Detach != true;
+            clientProcess.NewWindow = options.NewWindow;
+            await clientProcess.StartAsync(cancellationToken: default);
+        }
 
-    public async Task<Client> AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
-    {
-        var nodes = _application.GetService<NodeCollection>();
-        var node = nodes.RandomNode();
-        var clientOptions = new ClientOptions()
+        if (options.NoProcess != true && options.Detach != true)
         {
-            NodeEndPoint = node.EndPoint,
-        };
-        var client = CreateNew(privateKey, endPoint);
-        await client.StartAsync(clientOptions, cancellationToken);
+            await client.AttachAsync(cancellationToken);
+        }
+
+        if (client.IsAttached == true && options.ManualStart != true)
+        {
+            var nodes = _application.GetService<NodeCollection>();
+            var node = nodes.RandomNode();
+            await client.StartAsync(node, cancellationToken);
+        }
+
         InsertClient(client);
         return client;
     }
@@ -141,13 +132,21 @@ internal sealed class ClientCollection(
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
+        var info = _application.Info;
         await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
         Current = _clientList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var privateKey = privateKeys[index];
-            await AddNewAsync(privateKey, cancellationToken);
+            var options = new AddNewOptions
+            {
+                PrivateKey = privateKeys[index],
+                NoProcess = info.NoProcess,
+                Detach = info.Detach,
+                NewWindow = info.NewWindow,
+                ManualStart = info.ManualStart,
+            };
+            await AddNewAsync(options, cancellationToken);
         }
     }
 
@@ -159,6 +158,7 @@ internal sealed class ClientCollection(
         {
             var item = _clientList[i]!;
             await item.DisposeAsync();
+            _logger.Debug("Disposed a client: {Address}", item.Address);
         }
 
         _isDisposed = true;
@@ -166,12 +166,8 @@ internal sealed class ClientCollection(
     }
 
     async Task<IClient> IClientCollection.AddNewAsync(
-        PrivateKey privateKey, CancellationToken cancellationToken)
-        => await AddNewAsync(privateKey, cancellationToken);
-
-    async Task<IClient> IClientCollection.AttachAsync(
-        EndPoint endPoint, PrivateKey privateKey, CancellationToken cancellationToken)
-        => await AttachAsync(endPoint, privateKey, cancellationToken);
+        AddNewOptions options, CancellationToken cancellationToken)
+        => await AddNewAsync(options, cancellationToken);
 
     bool IClientCollection.Contains(IClient item) => item switch
     {
@@ -194,11 +190,14 @@ internal sealed class ClientCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
 
-    private Client CreateNew(PrivateKey privateKey, EndPoint endPoint)
+    private Client CreateNew(PrivateKey privateKey)
     {
         lock (LockObject)
         {
-            return new Client(_application, privateKey, endPoint);
+            return new Client(_application, privateKey)
+            {
+                EndPoint = DnsEndPointUtility.Next(),
+            };
         }
     }
 
@@ -218,6 +217,7 @@ internal sealed class ClientCollection(
             var index = _clientList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             _clientList.Add(client);
+            _logger.Debug("Client is inserted into the collection: {Address}", client.Address);
             client.Disposed += Client_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -232,6 +232,7 @@ internal sealed class ClientCollection(
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             client.Disposed -= Client_Disposed;
             _clientList.RemoveAt(index);
+            _logger.Debug("Client is removed from the collection: {Address}", client.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == client)
             {
