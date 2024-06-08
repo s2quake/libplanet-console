@@ -247,7 +247,7 @@ internal sealed class Node
         GC.SuppressFinalize(this);
     }
 
-    public NodeProcess CreateNodeProcess()
+    public NodeProcess CreateProcess()
     {
         var endPoint = EndPoint;
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);

@@ -115,8 +115,10 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     public void CommandLine()
     {
         var address = Address;
-        var node = (Node)application.GetNode(address);
-        var nodeProcess = node.CreateNodeProcess();
+        var node = application.GetNode(address);
+        var nodeProcess = node.CreateProcess();
+        nodeProcess.Detach = true;
+        nodeProcess.NewWindow = true;
         Out.WriteLine(nodeProcess.GetCommandLine());
     }
 

@@ -106,7 +106,7 @@ internal sealed class NodeCollection(
         var node = CreateNew(options.PrivateKey);
         if (options.NoProcess != true)
         {
-            var nodeProcess = node.CreateNodeProcess();
+            var nodeProcess = node.CreateProcess();
             nodeProcess.Detach = options.Detach;
             nodeProcess.ManualStart = options.Detach != true;
             nodeProcess.NewWindow = options.NewWindow;

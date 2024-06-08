@@ -218,16 +218,13 @@ internal sealed class Client :
         GC.SuppressFinalize(this);
     }
 
-    public ClientProcess CreateClientProcess()
+    public ClientProcess CreateProcess()
     {
         var endPoint = EndPoint;
-        var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
         return new ClientProcess
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NewWindow = application.Info.NewWindow,
-            ManualStart = application.Info.ManualStart,
         };
     }
 

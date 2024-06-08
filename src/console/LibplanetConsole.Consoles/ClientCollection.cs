@@ -106,7 +106,7 @@ internal sealed class ClientCollection(
         var client = CreateNew(options.PrivateKey);
         if (options.NoProcess != true)
         {
-            var clientProcess = client.CreateClientProcess();
+            var clientProcess = client.CreateProcess();
             clientProcess.Detach = options.Detach;
             clientProcess.ManualStart = options.Detach != true;
             clientProcess.NewWindow = options.NewWindow;
@@ -141,8 +141,10 @@ internal sealed class ClientCollection(
             var options = new AddNewOptions
             {
                 PrivateKey = privateKeys[index],
-                ManualStart = info.ManualStart,
+                NoProcess = info.NoProcess,
+                Detach = info.Detach,
                 NewWindow = info.NewWindow,
+                ManualStart = info.ManualStart,
             };
             await AddNewAsync(options, cancellationToken);
         }

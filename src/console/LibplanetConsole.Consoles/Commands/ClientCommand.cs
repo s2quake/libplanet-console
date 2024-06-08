@@ -9,7 +9,7 @@ namespace LibplanetConsole.Consoles.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Provides client-related commands.")]
 [method: ImportingConstructor]
-internal sealed partial class ClientCommand(IApplication application, IClientCollection clients)
+internal sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
@@ -90,6 +90,20 @@ internal sealed partial class ClientCommand(IApplication application, IClientCol
         var address = Address;
         var client = application.GetClient(address);
         await client.StopAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public void CommandLine()
+    {
+        var address = Address;
+        var client = application.GetClient(address);
+        var clientProcess = client.CreateProcess();
+        var nodes = application.GetService<NodeCollection>();
+        var node = nodes.RandomNode();
+        clientProcess.Detach = true;
+        clientProcess.NewWindow = true;
+        clientProcess.NodeEndPoint = node.EndPoint;
+        Out.WriteLine(clientProcess.GetCommandLine());
     }
 
     [CommandMethod]
