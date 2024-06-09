@@ -64,6 +64,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             },
         };
         UpdateNodeInfo();
+        _logger.Debug("Node is created: {Address}", Address);
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -288,6 +289,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             condition: IsRunning != true,
             message: "Node is not running.");
 
+        _logger.Debug("Node adds a transaction: {TxId}", transaction.Id);
         var blockChain = BlockChain;
         var height = blockChain.Tip.Index + 1;
         var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
@@ -313,6 +315,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         {
             throw new InvalidOperationException(sb.ToString());
         }
+
+        _logger.Debug("Node added a transaction: {TxId}", transaction.Id);
     }
 
     public long GetNextNonce(Address address)

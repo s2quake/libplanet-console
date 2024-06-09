@@ -50,7 +50,7 @@ internal sealed class ClientProcess : ProcessBase
                 argumentList.Add(
                     Path.Combine(
                         LogDirectory,
-                        $"{(ShortAddress)privateKey.Address}.log"));
+                        $"client-{(ShortAddress)privateKey.Address}.log"));
             }
 
             if (NodeEndPoint is { } nodeEndPoint)

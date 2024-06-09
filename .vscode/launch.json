@@ -18,8 +18,7 @@
                 "--end-point",
                 "127.0.0.1:4343",
                 "--log-path",
-                ".log",
-                "--no-process"
+                ".log"
             ]
         },
         {

@@ -27,7 +27,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         _logger = CreateLogger(options.LogPath);
         _logger.Debug(Environment.CommandLine);
-        _logger.Debug("Initializing the application...");
+        _logger.Debug("Application initializing...");
         _isAutoStart = options.ManualStart != true;
         _node = new Node(options, _logger);
         _container = new(this);
@@ -56,7 +56,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             WaitForExit(parentProcess, Cancel);
         }
 
-        _logger.Debug("Initialized the application.");
+        _logger.Debug("Application initialized.");
     }
 
     public override ApplicationServiceCollection ApplicationServices { get; }
@@ -97,22 +97,18 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         }
     }
 
-    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
-        _logger.Debug("Starting the application...");
         _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
-        await base.OnStartAsync(cancellationToken);
+        await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
-        _logger.Debug("Started the application.");
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _logger.Debug("Disposing the application...");
         await base.OnDisposeAsync();
         await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
         await _container.DisposeAsync();
-        _logger.Debug("Disposed the application.");
     }
 
     private static async void WaitForExit(Process process, Action cancelAction)

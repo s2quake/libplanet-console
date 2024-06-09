@@ -9,12 +9,12 @@ internal sealed partial class Application(ApplicationOptions options)
 {
     private SystemTerminal? _terminal;
 
-    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
         var message = "Welcome to console for Libplanet.";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
         _terminal = this.GetService<SystemTerminal>();
-        await base.OnStartAsync(cancellationToken);
+        await base.OnRunAsync(cancellationToken);
         await PrepareCommandContext();
         await _terminal.StartAsync(cancellationToken);
 

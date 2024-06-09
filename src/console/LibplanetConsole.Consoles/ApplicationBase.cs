@@ -25,7 +25,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     {
         _logger = CreateLogger(options.LogDirectory);
         _logger.Debug(Environment.CommandLine);
-        _logger.Debug("Application is initializing...");
+        _logger.Debug("Application initializing...");
         _container = new(this);
         _container.ComposeExportedValue<ILogger>(_logger);
         _nodes = new NodeCollection(this, options.Nodes);
@@ -60,7 +60,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         _logger.Debug($"GenesisOptions: {GenesisOptions.ToJson()}");
-        _logger.Debug("Application is initialized.");
+        _logger.Debug("Application initialized.");
     }
 
     public override ApplicationServiceCollection ApplicationServices { get; }
@@ -161,21 +161,17 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
                      .Single();
     }
 
-    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
-        _logger.Debug("Starting the application...");
         _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
-        await base.OnStartAsync(cancellationToken);
-        _logger.Debug("Started the application.");
+        await base.OnRunAsync(cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _logger.Debug("Disposing the application...");
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
         await base.OnDisposeAsync();
         await _container.DisposeAsync();
-        _logger.Debug("Disposed the application.");
     }
 
     private static Logger CreateLogger(string logDicrectory)
