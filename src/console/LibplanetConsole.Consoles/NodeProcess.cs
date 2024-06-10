@@ -58,7 +58,7 @@ internal sealed class NodeProcess : ProcessBase
                 argumentList.Add(
                     Path.Combine(
                         LogDirectory,
-                        $"{(ShortAddress)privateKey.Address}.log"));
+                        $"node-{(ShortAddress)privateKey.Address}.log"));
             }
 
             if (NodeEndPoint is { } nodeEndPoint)

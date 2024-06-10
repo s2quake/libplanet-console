@@ -9,6 +9,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
+using Serilog;
 
 namespace LibplanetConsole.Clients;
 
@@ -16,6 +17,7 @@ internal sealed class Client : IClient, INodeCallback
 {
     private readonly ApplicationBase _application;
     private readonly SecureString _privateKey;
+    private readonly ILogger _logger;
     private EndPoint? _nodeEndPoint;
     private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
@@ -26,8 +28,10 @@ internal sealed class Client : IClient, INodeCallback
         _application = application;
         _nodeEndPoint = options.NodeEndPoint;
         _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
+        _logger = application.Logger;
         _info = new() { Address = options.PrivateKey.PublicKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
+        _logger.Debug("Client is created: {Address}", Address);
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -84,6 +88,7 @@ internal sealed class Client : IClient, INodeCallback
         NodeInfo = await RemoteNodeService.GetInfoAsync(cancellationToken);
         _info = _info with { NodeAddress = NodeInfo.Address };
         IsRunning = true;
+        _logger.Debug("Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -100,6 +105,7 @@ internal sealed class Client : IClient, INodeCallback
         _remoteNodeContext = null;
         _closeToken = Guid.Empty;
         IsRunning = false;
+        _logger.Debug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, new(StopReason.None));
     }
 
@@ -116,6 +122,7 @@ internal sealed class Client : IClient, INodeCallback
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]
         );
+        _logger.Debug("Client sends a transaction: {TxId}", tx.Id);
         return await RemoteNodeService.SendTransactionAsync(tx.Serialize(), cancellationToken);
     }
 

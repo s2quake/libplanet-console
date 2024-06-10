@@ -39,7 +39,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     public void Cancel()
     {
-        Logger.Information("Application canceled.");
+        Logger.Debug("Application canceled.");
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = null;
         _closeEvent.Set();
@@ -49,29 +49,33 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
     {
         ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
+        Logger.Debug("Application running...");
         _cancellationTokenSource = new();
-        await OnStartAsync(_cancellationTokenSource.Token);
+        await OnRunAsync(_cancellationTokenSource.Token);
+        Logger.Debug("Application waiting for close...");
         await Task.Run(() =>
         {
-            Logger.Information($"{CanClose}");
             while (CanClose != true && _closeEvent.WaitOne(1) != true)
             {
             }
         });
+        Logger.Debug("Application run completed.");
     }
 
     public async ValueTask DisposeAsync()
     {
         ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
+        Logger.Debug("Application disposing...");
         await OnDisposeAsync();
         _isDisposed = true;
         GC.SuppressFinalize(this);
+        Logger.Debug("Application disposed.");
     }
 
     public abstract object? GetService(Type serviceType);
 
-    protected virtual async Task OnStartAsync(CancellationToken cancellationToken)
+    protected virtual async Task OnRunAsync(CancellationToken cancellationToken)
     {
         await ApplicationServices.InitializeAsync(this, cancellationToken: default);
     }

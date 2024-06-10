@@ -10,7 +10,7 @@ internal sealed class Application(ApplicationOptions options)
     private readonly ApplicationOptions _options = options;
     private SystemTerminal? _terminal;
 
-    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
         if (_options.NoREPL != true)
         {
@@ -19,7 +19,7 @@ internal sealed class Application(ApplicationOptions options)
             var startupCondition = _options.ManualStart == true && _options.ParentProcessId == 0;
             commandContext.Out = sw;
             _terminal = this.GetService<SystemTerminal>();
-            await base.OnStartAsync(cancellationToken);
+            await base.OnRunAsync(cancellationToken);
             sw.WriteSeparator(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
             sw.WriteLine();
@@ -33,12 +33,12 @@ internal sealed class Application(ApplicationOptions options)
         }
         else if (_options.ParentProcessId == 0)
         {
-            await base.OnStartAsync(cancellationToken);
+            await base.OnRunAsync(cancellationToken);
             WaitInput();
         }
         else
         {
-            await base.OnStartAsync(cancellationToken);
+            await base.OnRunAsync(cancellationToken);
         }
     }
 

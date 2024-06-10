@@ -221,10 +221,12 @@ internal sealed class Client :
     public ClientProcess CreateProcess()
     {
         var endPoint = EndPoint;
+        var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
         return new ClientProcess
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
+            LogDirectory = application.Info.LogDirectory,
         };
     }
 
