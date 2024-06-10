@@ -384,8 +384,14 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         _initializedResetEvent.Set();
     }
 
-    void IRenderer.RenderBlock(Block oldTip, Block newTip)
+    async void IRenderer.RenderBlock(Block oldTip, Block newTip)
     {
+        var blockChain = _swarm!.BlockChain;
+        while (blockChain.Tip.Index < newTip.Index)
+        {
+            await Task.Delay(100);
+        }
+
         _synchronizationContext.Post(Action, state: null);
 
         void Action(object? state)
@@ -398,7 +404,6 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
                 }
             }
 
-            var blockChain = _swarm!.BlockChain;
             var blockInfo = new BlockInfo(blockChain.Tip);
             UpdateNodeInfo();
             BlockAppended?.Invoke(this, new(blockInfo));

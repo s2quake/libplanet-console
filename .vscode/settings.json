@@ -21,9 +21,5 @@
         ".configurations": true,
         ".libplanet": false,
     },
-    "cSpell.words": [
-      "devcontainer",
-      "dorny",
-      "dotnettools"
-    ]
+    "cSpell.enabled": false
 }

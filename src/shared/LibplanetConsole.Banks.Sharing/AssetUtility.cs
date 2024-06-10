@@ -1,0 +1,48 @@
+using System.Globalization;
+using System.Numerics;
+using Libplanet.Types.Assets;
+
+#if LIBPLANET_CONSOLE
+namespace LibplanetConsole.Consoles.Banks;
+#elif LIBPLANET_NODE
+namespace LibplanetConsole.Nodes.Banks;
+#elif LIBPLANET_CLIENT
+namespace LibplanetConsole.Clients.Banks;
+#else
+#error "Either LIBPLANET_CONSOLE or LIBPLANET_NODE must be defined."
+#endif
+
+public static class AssetUtility
+{
+#pragma warning disable CS0618 // Type or member is obsolete
+    public static Currency NCG { get; } = Currency.Legacy("NCG", 2, null);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+    public static (BigInteger MajorUnit, BigInteger MinorUnit) GetValue(double amount)
+    {
+        var text = amount.ToString(CultureInfo.InvariantCulture);
+        var items = text.Split('.');
+        if (items.Length != 1 && items.Length != 2)
+        {
+            throw new InvalidOperationException($"Invalid amount.: '{text}'");
+        }
+
+        if (items.Length == 2 && items[1].Length > 2)
+        {
+            throw new ArgumentException(
+                message: $"Only 2 decimal places are allowed.: '{text}'",
+                paramName: nameof(amount));
+        }
+
+        var major = BigInteger.Parse(items[0]);
+        var minorText = items.Length == 2 ? items[1].PadRight(2, '0') : "0";
+        var minor = BigInteger.Parse(minorText);
+        return (major, minor);
+    }
+
+    public static FungibleAssetValue GetNCG(double amount)
+    {
+        var (majorUnit, minorUnit) = GetValue(amount);
+        return new FungibleAssetValue(NCG, majorUnit, minorUnit);
+    }
+}
