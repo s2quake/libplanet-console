@@ -8,16 +8,27 @@
     <PackageReference Include="Serilog" Version="2.10.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Terminals -->
-    <ProjectReference Condition="Exists('$(TerminalsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
-    <PackageReference Condition="!Exists('$(TerminalsProjectPath)')" Include="JSSoft.Terminals" Version="6.0.1" />
-    <!-- Commands -->
-    <ProjectReference Condition="Exists('$(CommandsProjectPath)')" Include="..\..\..\.commands\src\JSSoft.Commands\JSSoft.Commands.csproj" />
-    <PackageReference Condition="!Exists('$(CommandsProjectPath)')" Include="JSSoft.Commands" Version="6.0.1" />
-    <!-- Configurations -->
-    <ProjectReference Condition="Exists('$(ConfigurationsProjectPath)')" Include="..\..\..\.configurations\src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
-    <PackageReference Condition="!Exists('$(ConfigurationsProjectPath)')" Include="JSSoft.Configurations" Version="1.0.0" />
+
+  <!-- $(CommandsDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(CommandsDirectory)')">
+    <ProjectReference Include="$(CommandsDirectory)src\JSSoft.Commands\JSSoft.Commands.csproj" />
+    <ProjectReference Include="$(CommandsDirectory)src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
+  </ItemGroup>
+
+  <!-- $(CommandsDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(CommandsDirectory)')">
+    <PackageReference Include="JSSoft.Commands" Version="6.0.1" />
+    <PackageReference Include="JSSoft.Terminals" Version="6.0.1" />
+  </ItemGroup>
+
+  <!-- $(ConfigurationsDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(ConfigurationsDirectory)')">
+    <ProjectReference Include="$(ConfigurationsDirectory)src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
+  </ItemGroup>
+
+  <!-- $(ConfigurationsDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
+    <PackageReference Include="JSSoft.Configurations" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

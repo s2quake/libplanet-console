@@ -18,14 +18,14 @@
     <PackageReference Include="Libplanet.RocksDBStore" Version="4.4.1" />
   </ItemGroup>
 
-  <!-- $(TerminalsDirectory) exists. -->
-  <ItemGroup Condition="Exists('$(TerminalsDirectory)')">
-    <ProjectReference Include="$(TerminalsDirectory)src\JSSoft.Commands\JSSoft.Commands.csproj" />
-    <ProjectReference Include="$(TerminalsDirectory)src\JSSoft.Commands\JSSoft.Terminals.csproj" />
+  <!-- $(CommandsDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(CommandsDirectory)')">
+    <ProjectReference Include="$(CommandsDirectory)src\JSSoft.Commands\JSSoft.Commands.csproj" />
+    <ProjectReference Include="$(CommandsDirectory)src\JSSoft.Terminals\JSSoft.Terminals.csproj" />
   </ItemGroup>
 
-  <!-- $(TerminalsDirectory) does not exist. -->
-  <ItemGroup Condition="!Exists('$(TerminalsDirectory)')">
+  <!-- $(CommandsDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(CommandsDirectory)')">
     <PackageReference Include="JSSoft.Commands" Version="6.0.1" />
     <PackageReference Include="JSSoft.Terminals" Version="6.0.1" />
   </ItemGroup>
