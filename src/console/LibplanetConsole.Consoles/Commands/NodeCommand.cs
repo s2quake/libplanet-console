@@ -76,6 +76,8 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
+    [CommandSummary("Attach to the node which is already running.\n" +
+                    "If the address is not specified, the current node is used.")]
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -84,6 +86,8 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
+    [CommandSummary("Detach from the node\n" +
+                    "If the address is not specified, the current node is used.")]
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -112,6 +116,7 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     }
 
     [CommandMethod]
+    [CommandSummary("Display command line to execute the node process.")]
     public void CommandLine()
     {
         var address = Address;

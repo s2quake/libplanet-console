@@ -66,6 +66,9 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     }
 
     [CommandMethod]
+    [CommandSummary("Attach to the client which is already running.\n" +
+                    "If the address is not specified, current client is used.")]
+    [CommandMethodProperty(nameof(Address))]
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -74,6 +77,9 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     }
 
     [CommandMethod]
+    [CommandSummary("Detach from the client.\n" +
+                    "If the address is not specified, current client is used.")]
+    [CommandMethodProperty(nameof(Address))]
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -109,6 +115,7 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     }
 
     [CommandMethod]
+    [CommandSummary("Display command line to execute the client process.")]
     public void CommandLine()
     {
         var address = Address;
