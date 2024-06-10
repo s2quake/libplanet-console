@@ -1,4 +1,3 @@
-using System.Net;
 using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -76,7 +75,7 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = settings.GetEndPoint();
+        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
         return new ApplicationOptions(endPoint)
         {
             Nodes = settings.GetNodes(),
@@ -128,15 +127,5 @@ internal sealed record class ApplicationSettings
         }
 
         return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
-    }
-
-    private EndPoint GetEndPoint()
-    {
-        if (EndPoint != string.Empty)
-        {
-            return EndPointUtility.Parse(EndPoint);
-        }
-
-        return DnsEndPointUtility.Next();
     }
 }
