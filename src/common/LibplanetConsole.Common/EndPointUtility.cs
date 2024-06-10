@@ -24,6 +24,9 @@ public static class EndPointUtility
     public static EndPoint Parse(string text)
         => JSSoft.Communication.EndPointUtility.Parse(text);
 
+    public static EndPoint ParseWithFallback(string text)
+        => text == string.Empty ? DnsEndPointUtility.Next() : Parse(text);
+
     public static bool TryParse(string text, [MaybeNullWhen(false)] out EndPoint endPoint)
         => JSSoft.Communication.EndPointUtility.TryParse(text, out endPoint);
 }

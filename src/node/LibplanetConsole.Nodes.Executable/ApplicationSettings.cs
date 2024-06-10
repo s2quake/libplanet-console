@@ -1,4 +1,3 @@
-using System.Net;
 using JSSoft.Commands;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
@@ -54,8 +53,8 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = settings.GetEndPoint();
-        var privateKey = settings.GetPrivateKey();
+        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
+        var privateKey = PrivateKeyUtility.ParseWithFallback(settings.PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = settings.ParentProcessId,
@@ -81,26 +80,6 @@ internal sealed record class ApplicationSettings
         var parser = new CommandParser(settings, commandSettings);
         parser.Parse(args);
         return settings;
-    }
-
-    private PrivateKey GetPrivateKey()
-    {
-        if (PrivateKey != string.Empty)
-        {
-            return PrivateKeyUtility.Parse(PrivateKey);
-        }
-
-        return new();
-    }
-
-    private EndPoint GetEndPoint()
-    {
-        if (EndPoint != string.Empty)
-        {
-            return EndPointUtility.Parse(EndPoint);
-        }
-
-        return DnsEndPointUtility.Next();
     }
 
     private PublicKey[] GetGenesisValidators(PublicKey publicKey)
