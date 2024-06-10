@@ -17,10 +17,10 @@ public readonly record struct AppPublicKey : IFormattable
 
     public AppAddress Address => new(_publicKey.Address);
 
-    public static explicit operator AppPublicKey(PublicKey publicKey)
+    public static implicit operator AppPublicKey(PublicKey publicKey)
         => new(publicKey);
 
-    public static explicit operator PublicKey(AppPublicKey publicKey)
+    public static implicit operator PublicKey(AppPublicKey publicKey)
         => publicKey._publicKey;
 
     public static string ToString(AppPublicKey? publicKey)
@@ -28,8 +28,8 @@ public readonly record struct AppPublicKey : IFormattable
 
     public static AppPublicKey Parse(string text) => new(PublicKey.FromHex(text));
 
-    public static AppPublicKey? ParseOrDefault(string text)
-        => text == string.Empty ? null : Parse(text);
+    public static AppPublicKey ParseOrDefault(string text)
+        => text == string.Empty ? default : Parse(text);
 
     public static bool TryParse(string text, [MaybeNullWhen(false)] out AppPublicKey publicKey)
     {

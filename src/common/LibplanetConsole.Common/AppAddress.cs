@@ -19,10 +19,10 @@ public readonly record struct AppAddress : IFormattable
     {
     }
 
-    public static explicit operator AppAddress(Address address)
+    public static implicit operator AppAddress(Address address)
         => new(address);
 
-    public static explicit operator Address(AppAddress address)
+    public static implicit operator Address(AppAddress address)
         => address._address;
 
     public static string ToString(AppAddress? address)
@@ -32,6 +32,9 @@ public readonly record struct AppAddress : IFormattable
 
     public static AppAddress? ParseOrDefault(string text)
         => text == string.Empty ? null : Parse(text);
+
+    public static AppAddress ParseOrFallback(string text, AppAddress fallback)
+        => text == string.Empty ? fallback : Parse(text);
 
     public static bool TryParse(string text, [MaybeNullWhen(false)] out AppAddress address)
     {

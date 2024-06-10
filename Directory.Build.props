@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <LibplanetSolutionPath>$(SolutionDir).libplanet\</LibplanetSolutionPath>
+    <LibplanetDirectory>$(SolutionDir).libplanet\</LibplanetDirectory>
     <RootPath Condition="'$(SolutionDir)' != ''">$(SolutionDir)</RootPath>
     <RootPath Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)\</RootPath>
     <UseRidGraph>true</UseRidGraph>

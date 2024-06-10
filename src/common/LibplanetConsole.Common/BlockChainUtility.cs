@@ -11,10 +11,12 @@ using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
+using Libplanet.Types.Assets;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common.Actions;
+using Nekoyume.Model.State;
 
 namespace LibplanetConsole.Common;
 
@@ -35,9 +37,26 @@ public static class BlockChainUtility
         var actionLoader = new AggregateTypedActionLoader
         {
             new AssemblyActionLoader(typeof(AssemblyActionLoader).Assembly),
+            new AssemblyActionLoader(typeof(Nekoyume.Action.DPoS.SlashAction).Assembly),
         };
+        var beginActions = new IAction[]
+        {
+            new Nekoyume.Action.DPoS.SlashAction(),
+            new Nekoyume.Action.DPoS.Sys.AllocateReward(),
+        };
+        var endActions = new IAction[]
+        {
+            new Nekoyume.Action.DPoS.Sys.UpdateValidators(),
+            new Nekoyume.Action.DPoS.Sys.RecordProposer(),
+        };
+        var policyActionsRegistry = new PolicyActionsRegistry(
+            beginBlockActionsGetter: _ => [.. beginActions],
+            endBlockActionsGetter_ => [.. endActions],
+            beginTxActionsGetter: _ => [],
+            endTxActionsGetter: _ => []);
+
         var actionEvaluator = new ActionEvaluator(
-            policyBlockActionGetter: _ => null,
+            policyActionsRegistry,
             stateStore,
             actionLoader);
         var validators = genesisOptions.GenesisValidators
@@ -45,8 +64,19 @@ public static class BlockChainUtility
                             .ToArray();
         var validatorSet = new ValidatorSet(validators: [.. validators]);
         var nonce = 0L;
+        var ncg = Currency.Capped("NCG", 2, maximumSupply: (1_000_000, 0), minters: default) * 10;
         IAction[] actions =
         [
+            .. validators.Select(item => new Nekoyume.Action.DPoS.MintAssetAction
+            {
+                Address = item.PublicKey.Address,
+                Amount = ncg,
+            }),
+            .. validators.Select(item => new Nekoyume.Action.DPoS.InitializeValidator
+            {
+                Validator = item.PublicKey,
+                Amount = ncg,
+            }),
             new Initialize(
                 validatorSet: validatorSet,
                 states: ImmutableDictionary.Create<Address, IValue>()),
@@ -60,7 +90,6 @@ public static class BlockChainUtility
             timestamp: DateTimeOffset.MinValue);
         var transactions = ImmutableList.Create(transaction);
         var genesisBlock = BlockChain.ProposeGenesisBlock(
-            actionEvaluator: actionEvaluator,
             privateKey: genesisKey,
             transactions: transactions,
             timestamp: DateTimeOffset.MinValue);
@@ -133,7 +162,7 @@ public static class BlockChainUtility
             lastCommit: lastCommit);
         var blockContent = new BlockContent(blockMetadata, [transaction]);
         var preEvaluationBlock = blockContent.Propose();
-        var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
+        var stateRootHash = blockChain.DetermineNextBlockStateRootHash(blockChain.Tip, out _);
         var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
@@ -145,6 +174,7 @@ public static class BlockChainUtility
             blockHash: block.Hash,
             timestamp: DateTimeOffset.UtcNow,
             validatorPublicKey: item.PublicKey,
+            validatorPower: BigInteger.One,
             flag: VoteFlag.PreCommit);
             return voteMetadata.Sign(item);
         }).ToImmutableArray();
