@@ -3,7 +3,7 @@ using Libplanet.Types.Blocks;
 
 namespace LibplanetConsole.Clients.Serializations;
 
-public sealed record class ClientInfo
+public readonly record struct ClientInfo
 {
     public Address Address { get; init; }
 
@@ -12,4 +12,8 @@ public sealed record class ClientInfo
     public BlockHash GenesisHash { get; init; }
 
     public bool IsRunning { get; init; }
+
+    public static ClientInfo Empty { get; } = new ClientInfo
+    {
+    };
 }

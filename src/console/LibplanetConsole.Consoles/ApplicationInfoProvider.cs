@@ -1,12 +1,12 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Consoles;
 
 [Export(typeof(IInfoProvider))]
 internal sealed class ApplicationInfoProvider : IInfoProvider
 {
-    public bool CanSupport(Type type) => typeof(ApplicationBase).IsAssignableFrom(type);
+    public bool CanSupport(Type type) => typeof(ApplicationBase).IsAssignableFrom(type) == true;
 
     public IEnumerable<(string Name, object? Value)> GetInfos(object obj)
     {

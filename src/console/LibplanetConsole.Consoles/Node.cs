@@ -30,7 +30,7 @@ internal sealed class Node
     private DnsEndPoint? _blocksyncEndPoint;
     private DnsEndPoint? _consensusEndPoint;
     private Guid _closeToken;
-    private NodeInfo _nodeInfo = new();
+    private NodeInfo _nodeInfo;
     private bool _isDisposed;
     private bool _isInProgress;
 
@@ -192,7 +192,7 @@ internal sealed class Node
         using var scope = new ProgressScope(this);
         await _remoteService.Service.StopAsync(cancellationToken);
         _closeToken = Guid.Empty;
-        _nodeInfo = new();
+        _nodeInfo = NodeInfo.Empty;
         IsRunning = false;
         _logger.Debug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -275,7 +275,7 @@ internal sealed class Node
     {
         if (_isInProgress != true)
         {
-            _nodeInfo = new();
+            _nodeInfo = NodeInfo.Empty;
             IsRunning = false;
             Stopped?.Invoke(this, EventArgs.Empty);
         }

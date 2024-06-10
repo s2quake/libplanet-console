@@ -2,7 +2,7 @@ using Libplanet.Blockchain;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public record class BlockChainInfo
+public readonly record struct BlockChainInfo
 {
     public BlockChainInfo(BlockChain blockChain)
     {

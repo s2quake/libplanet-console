@@ -2,7 +2,7 @@ using Libplanet.Types.Tx;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public record class TransactionInfo
+public readonly record struct TransactionInfo
 {
     public TransactionInfo(ITransaction transaction)
     {

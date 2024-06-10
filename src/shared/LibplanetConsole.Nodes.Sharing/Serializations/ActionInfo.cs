@@ -2,7 +2,7 @@ using Bencodex.Types;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public record class ActionInfo
+public readonly record struct ActionInfo
 {
     public ActionInfo(IValue value)
     {

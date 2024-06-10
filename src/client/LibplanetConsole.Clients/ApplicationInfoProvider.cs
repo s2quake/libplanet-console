@@ -4,15 +4,17 @@ using LibplanetConsole.Common;
 namespace LibplanetConsole.Clients;
 
 [Export(typeof(IInfoProvider))]
-[method: ImportingConstructor]
-internal sealed class ApplicationInfoProvider(ApplicationBase application) : IInfoProvider
+internal sealed class ApplicationInfoProvider : IInfoProvider
 {
-    public Type DeclaringType => typeof(IApplication);
+    public bool CanSupport(Type type) => typeof(ApplicationBase).IsAssignableFrom(type) == true;
 
-    public IEnumerable<(string Name, object? Value)> GetInfos()
+    public IEnumerable<(string Name, object? Value)> GetInfos(object obj)
     {
-        var info = application.Info;
-        yield return (nameof(info.EndPoint), info.EndPoint);
-        yield return (nameof(info.NodeEndPoint), info.NodeEndPoint);
+        if (obj is ApplicationBase application)
+        {
+            return InfoUtility.EnumerateValues(application.Info);
+        }
+
+        throw new NotSupportedException("The object is not supported.");
     }
 }
