@@ -4,17 +4,8 @@ using LibplanetConsole.Common;
 namespace LibplanetConsole.Nodes;
 
 [Export(typeof(IInfoProvider))]
-internal sealed class ApplicationInfoProvider : IInfoProvider
+internal sealed class ApplicationInfoProvider : InfoProviderBase<ApplicationBase>
 {
-    public bool CanSupport(Type type) => typeof(ApplicationBase).IsAssignableFrom(type);
-
-    public IEnumerable<(string Name, object? Value)> GetInfos(object obj)
-    {
-        if (obj is ApplicationBase application)
-        {
-            return InfoUtility.EnumerateValues(application.Info);
-        }
-
-        throw new NotSupportedException("The object is not supported.");
-    }
+    protected override IEnumerable<(string Name, object? Value)> GetInfos(ApplicationBase obj)
+        => InfoUtility.EnumerateValues(obj.Info);
 }

@@ -52,7 +52,7 @@ internal sealed partial class NodeCommand(ApplicationBase application, INodeColl
     {
         var address = Address;
         var node = application.GetNode(address);
-        var nodeInfo = node.Info;
+        var nodeInfo = InfoUtility.GetInfo(serviceProvider: application, obj: node);
         Out.WriteLineAsJson(nodeInfo);
     }
 

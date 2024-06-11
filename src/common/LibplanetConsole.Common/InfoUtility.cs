@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Reflection;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Common;
@@ -27,7 +28,8 @@ public static class InfoUtility
     public static IEnumerable<(string Name, object? Value)> EnumerateValues<T>(T info)
         where T : struct
     {
-        var propertyInfos = info.GetType().GetProperties();
+        var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+        var propertyInfos = info.GetType().GetProperties(bindingFlags);
         foreach (var item in propertyInfos)
         {
             yield return (item.Name, item.GetValue(info));

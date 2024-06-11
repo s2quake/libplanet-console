@@ -36,6 +36,17 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     }
 
     [CommandMethod]
+    [CommandSummary("Displays the client information of the specified address.\n" +
+                    "If the address is not specified, the current client is used.")]
+    public void Info()
+    {
+        var address = Address;
+        var client = application.GetClient(address);
+        var clientInfo = InfoUtility.GetInfo(serviceProvider: application, obj: client);
+        Out.WriteLineAsJson(clientInfo);
+    }
+
+    [CommandMethod]
     [CommandSummary("Creates a new client.")]
     [CommandMethodStaticProperty(typeof(NewProperties))]
     public async Task NewAsync(
