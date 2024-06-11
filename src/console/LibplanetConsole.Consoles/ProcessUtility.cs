@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -9,6 +10,7 @@ internal static class ProcessUtility
     private const string WorkspacePathVariableName = "LIBPLANET_CONSOLE_WORKSPACE_PATH";
     private const string NodePathVariableName = "LIBPLANET_CONSOLE_NODE_PATH";
     private const string ClientPathVariableName = "LIBPLANET_CONSOLE_CLIENT_PATH";
+    private const string DotnetRootVariableName = "DOTNET_ROOT";
     private const string Framework = "net8.0";
 
 #if DEBUG
@@ -102,42 +104,52 @@ internal static class ProcessUtility
     {
         get
         {
+            var dotnetRoot = Environment.GetEnvironmentVariable(DotnetRootVariableName);
+            if (dotnetRoot is not null)
+            {
+                var dotnetRootPath = GetDotnetPathFromDirectory(dotnetRoot);
+                if (File.Exists(dotnetRootPath) == true)
+                {
+                    return dotnetRootPath;
+                }
+
+                throw new InvalidOperationException(
+                    $"dotnet executable is not found in {DotnetRootVariableName}.");
+            }
+
             var dotnetPath = GetDotnetPath();
             if (File.Exists(dotnetPath) == true)
             {
                 return dotnetPath;
             }
 
-            if (Environment.GetEnvironmentVariable("DOTNET_ROOT") is string v &&
-                File.Exists(v) == true)
+            var dotnetRootInHomeDirectory = Path.Combine(HomeDirectory, ".dotnet");
+            var dotnetPathInHomeDirectory = GetDotnetPathFromDirectory(dotnetRootInHomeDirectory);
+            if (File.Exists(dotnetPathInHomeDirectory) == true)
             {
-                return v;
+                return dotnetPathInHomeDirectory;
             }
 
             var message = $"dotnet executable is not found.\n" +
-                          $"if you have installed dotnet, please set DOTNET_ROOT environment " +
-                          $"variable to the directory containing dotnet executable.";
+                          $"if you have installed dotnet, please set {DotnetRootVariableName} " +
+                          $"environment variable to the directory containing dotnet executable.";
             throw new InvalidOperationException(message);
+        }
+    }
 
-            static string GetDotnetPath()
+    public static string HomeDirectory
+    {
+        get
+        {
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            var variable = isWindows ? "USERPROFILE" : "HOME";
+            var homeDirectory = Environment.GetEnvironmentVariable(variable);
+            if (homeDirectory is not null)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
-                {
-                    return @"C:\Program Files\dotnet\dotnet.exe";
-                }
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
-                {
-                    return "/usr/local/share/dotnet/dotnet";
-                }
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
-                {
-                    return "/usr/lib/dotnet/dotnet";
-                }
-
-                throw new NotSupportedException("Unsupported OS platform.");
+                return homeDirectory;
             }
+
+            throw new InvalidOperationException($"Environment variable '{variable}' is not found.");
         }
     }
 
@@ -293,5 +305,56 @@ internal static class ProcessUtility
     public static bool IsDotnetRuntime()
     {
         return Environment.ProcessPath == DotnetPath;
+    }
+
+    private static string GetDotnetPath()
+    {
+        var processStartInfo = new ProcessStartInfo();
+        var process = new Process { StartInfo = processStartInfo };
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+        {
+            processStartInfo.FileName = "powershell";
+            processStartInfo.Arguments
+                = "-Command 'Get-Command dotnet | Select-Object -ExpandProperty Source'";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
+        {
+            processStartInfo.FileName = "which";
+            processStartInfo.Arguments = "dotnet";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
+        {
+            processStartInfo.FileName = "which";
+            processStartInfo.Arguments = "dotnet";
+        }
+        else
+        {
+            throw new NotSupportedException("Unsupported OS platform.");
+        }
+
+        processStartInfo.RedirectStandardOutput = true;
+        processStartInfo.RedirectStandardError = true;
+        process.Start();
+        var error = process.StandardError.ReadToEnd();
+        var @out = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException("Failed to get dotnet path.\n" + error);
+        }
+
+        return @out.Trim();
+    }
+
+    private static string GetDotnetPathFromDirectory(string directory)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+        {
+            return Path.Combine(directory, "dotnet.exe");
+        }
+
+        return Path.Combine(directory, "dotnet");
     }
 }
