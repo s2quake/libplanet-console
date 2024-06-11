@@ -1,19 +1,23 @@
 using System.ComponentModel.Composition;
 using Libplanet.Crypto;
-using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 using LibplanetConsole.Examples.Services;
+using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Clients.Examples;
 
-[Export(typeof(IExampleClientContent))]
+[Export(typeof(IExampleClient))]
+[Export]
 [method: ImportingConstructor]
-internal sealed class ExampleClientContent(
-    IClient client, ExampleRemoteNodeService remoteNodeService) : IExampleClientContent
+internal sealed class ExampleClient(
+    IClient client, ExampleRemoteNodeService remoteNodeService) : IExampleClient
 {
     private readonly ExampleRemoteNodeService _remoteNodeService = remoteNodeService;
 
     public Address Address => client.Address;
+
+    public bool IsExample { get; }
+        = ApplicationSettingsParser.Peek<ExampleClientSettings>().IsExample;
 
     private IExampleNodeService Server => _remoteNodeService.Service;
 

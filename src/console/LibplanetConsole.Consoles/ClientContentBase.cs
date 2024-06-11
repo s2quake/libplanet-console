@@ -3,11 +3,11 @@ namespace LibplanetConsole.Consoles;
 public abstract class ClientContentBase(IClient client, string name) : IClientContent
 {
     public ClientContentBase(IClient client)
-        : this(client, client.GetType().Name)
+        : this(client, string.Empty)
     {
     }
 
     public IClient Client { get; } = client;
 
-    public string Name { get; } = name;
+    public string Name => name != string.Empty ? name : GetType().Name;
 }

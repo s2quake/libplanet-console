@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Clients.Examples;
 
-public interface IExampleClientContent
+public interface IExampleClient
 {
     void Subscribe();
 
