@@ -97,7 +97,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
 
-    public NodeInfo Info { get; private set; } = new();
+    public NodeInfo Info { get; private set; } = NodeInfo.Empty;
 
     public BoundPeer[] Peers
     {
@@ -424,6 +424,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     {
         var nodeInfo = new NodeInfo
         {
+            ProcessId = Environment.ProcessId,
             Address = Address,
             AppProtocolVersion = $"{BlockChainUtility.AppProtocolVersion}",
         };

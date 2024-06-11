@@ -3,13 +3,15 @@ using Libplanet.Types.Blocks;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public sealed record class NodeInfo
+public readonly record struct NodeInfo
 {
-    public string AppProtocolVersion { get; init; } = string.Empty;
+    public required int ProcessId { get; init; }
 
-    public string SwarmEndPoint { get; init; } = string.Empty;
+    public string AppProtocolVersion { get; init; }
 
-    public string ConsensusEndPoint { get; init; } = string.Empty;
+    public string SwarmEndPoint { get; init; }
+
+    public string ConsensusEndPoint { get; init; }
 
     public Address Address { get; init; }
 
@@ -19,7 +21,14 @@ public sealed record class NodeInfo
 
     public bool IsRunning { get; init; }
 
-    public int ProcessId { get; init; } = Environment.ProcessId;
+    public BoundPeerInfo[] Peers { get; init; }
 
-    public BoundPeerInfo[] Peers { get; init; } = [];
+    public static NodeInfo Empty { get; } = new NodeInfo
+    {
+        ProcessId = -1,
+        AppProtocolVersion = string.Empty,
+        SwarmEndPoint = string.Empty,
+        ConsensusEndPoint = string.Empty,
+        Peers = [],
+    };
 }

@@ -6,7 +6,7 @@ namespace LibplanetConsole.Clients.Examples;
 
 [Export(typeof(ILocalService))]
 [method: ImportingConstructor]
-internal sealed class ExampleClientService(IExampleClientContent sampleClient)
+internal sealed class ExampleClientService(IExampleClient sampleClient)
     : LocalService<IExampleClientService>, IExampleClientService
 {
     public void Subscribe()

@@ -2,7 +2,7 @@ namespace LibplanetConsole.Common;
 
 public interface IInfoProvider
 {
-    Type DeclaringType { get; }
+    bool CanSupport(Type type);
 
-    IEnumerable<(string Name, object? Value)> GetInfos();
+    IEnumerable<(string Name, object? Value)> GetInfos(object obj);
 }

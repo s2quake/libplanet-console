@@ -48,7 +48,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public ClientInfo Info => _info;
 
-    public NodeInfo NodeInfo { get; private set; } = new();
+    public NodeInfo NodeInfo { get; private set; }
 
     public EndPoint NodeEndPoint
     {
@@ -134,7 +134,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public void InvokeNodeStoppedEvent()
     {
-        NodeInfo = new();
+        NodeInfo = NodeInfo.Empty;
         _info = _info with { NodeAddress = default };
     }
 
@@ -160,7 +160,7 @@ internal sealed class Client : IClient, INodeCallback
 
     void INodeCallback.OnStopped()
     {
-        NodeInfo = new();
+        NodeInfo = NodeInfo.Empty;
     }
 
     void INodeCallback.OnBlockAppended(BlockInfo blockInfo)

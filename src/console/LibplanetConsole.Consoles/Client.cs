@@ -27,7 +27,7 @@ internal sealed class Client :
     private readonly IClientContent[] _contents;
     private readonly ILogger _logger;
     private Guid _closeToken;
-    private ClientInfo _clientInfo = new();
+    private ClientInfo _clientInfo = ClientInfo.Empty;
     private INode? _node;
     private bool _isDisposed;
     private bool _isInProgress;
@@ -183,7 +183,7 @@ internal sealed class Client :
         await _remoteService.Service.StopAsync(cancellationToken);
         _node = null;
         _closeToken = Guid.Empty;
-        _clientInfo = new();
+        _clientInfo = ClientInfo.Empty;
         IsRunning = false;
         _logger.Debug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -244,7 +244,7 @@ internal sealed class Client :
     {
         if (_isInProgress != true)
         {
-            _clientInfo = new();
+            _clientInfo = ClientInfo.Empty;
             IsRunning = false;
             Stopped?.Invoke(this, EventArgs.Empty);
         }

@@ -2,7 +2,7 @@ using Libplanet.Net;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public record class BoundPeerInfo
+public readonly record struct BoundPeerInfo
 {
     public BoundPeerInfo(BoundPeer peer)
     {

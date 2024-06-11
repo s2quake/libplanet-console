@@ -1,10 +1,10 @@
 namespace LibplanetConsole.Clients.Serializations;
 
-public sealed record class ApplicationInfo
+public readonly record struct ApplicationInfo
 {
-    public string EndPoint { get; init; } = string.Empty;
+    public required string EndPoint { get; init; }
 
-    public string NodeEndPoint { get; init; } = string.Empty;
+    public required string NodeEndPoint { get; init; }
 
-    public string LogPath { get; init; } = string.Empty;
+    public required string LogPath { get; init; }
 }

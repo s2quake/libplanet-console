@@ -6,19 +6,13 @@ using LibplanetConsole.Common.Extensions;
 namespace LibplanetConsole.Nodes.Commands;
 
 [Export(typeof(ICommand))]
-[CommandSummary("Print node information.")]
+[CommandSummary("Print node application information.")]
 [method: ImportingConstructor]
 internal sealed class InfoCommand(IApplication application) : CommandBase
 {
     protected override void OnExecute()
     {
-        var infoProviders = application.GetService<IEnumerable<IInfoProvider>>();
-        var infos = infoProviders.Where(IsAssignableFrom)
-                                 .SelectMany(item => item.GetInfos())
-                                 .ToDictionary(item => item.Name, item => item.Value);
-        Out.WriteLineAsJson(infos);
+        var info = InfoUtility.GetInfo(serviceProvider: application, obj: application);
+        Out.WriteLineAsJson(info);
     }
-
-    private static bool IsAssignableFrom(IInfoProvider infoProvider)
-        => typeof(IApplication).IsAssignableFrom(infoProvider.DeclaringType);
 }

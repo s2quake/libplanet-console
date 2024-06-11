@@ -41,7 +41,6 @@ internal sealed class NodeEventTracer(IApplication application, INode node) : IA
         var endPoint = application.Info.EndPoint;
         var message = $"BlockChain has been started.: {endPoint}";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
-        Console.Out.WriteLineAsJson(node.Info);
     }
 
     private void Node_Stopped(object? sender, EventArgs e)

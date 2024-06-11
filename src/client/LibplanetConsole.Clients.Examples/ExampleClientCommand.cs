@@ -6,7 +6,7 @@ namespace LibplanetConsole.Clients.Examples;
 [Export(typeof(ICommand))]
 [CommandSummary("Example client commands for a quick start.")]
 [method: ImportingConstructor]
-internal sealed class ExampleClientCommand(IExampleClientContent sampleClient)
+internal sealed class ExampleClientCommand(IExampleClient sampleClient)
     : CommandMethodBase
 {
     [CommandMethod]

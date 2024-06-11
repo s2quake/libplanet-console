@@ -4,8 +4,11 @@ using LibplanetConsole.Common;
 namespace LibplanetConsole.Clients;
 
 [Export(typeof(IInfoProvider))]
-internal sealed class ApplicationInfoProvider : InfoProviderBase<ApplicationBase>
+[method: ImportingConstructor]
+internal sealed class ClientInfoProvider(Client client) : InfoProviderBase<ApplicationBase>
 {
     protected override IEnumerable<(string Name, object? Value)> GetInfos(ApplicationBase obj)
-        => InfoUtility.EnumerateValues(obj.Info);
+    {
+        yield return (nameof(Client), client.Info);
+    }
 }

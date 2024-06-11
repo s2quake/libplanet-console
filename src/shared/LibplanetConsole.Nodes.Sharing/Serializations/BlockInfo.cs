@@ -3,7 +3,7 @@ using Libplanet.Types.Blocks;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
-public sealed record class BlockInfo
+public readonly record struct BlockInfo
 {
     public BlockInfo(Block block)
     {

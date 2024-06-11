@@ -1,12 +1,12 @@
 namespace LibplanetConsole.Consoles.Serializations;
 
-public sealed record class ApplicationInfo
+public readonly record struct ApplicationInfo
 {
-    public string EndPoint { get; init; } = string.Empty;
+    public required string EndPoint { get; init; }
 
-    public string StoreDirectory { get; init; } = string.Empty;
+    public required string StoreDirectory { get; init; }
 
-    public string LogDirectory { get; init; } = string.Empty;
+    public required string LogDirectory { get; init; }
 
     public bool NoProcess { get; init; }
 
