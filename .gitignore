@@ -8,3 +8,10 @@ obj/
 .lib9c/
 .bin/
 .commands/
+.commands
+.communication/
+.communication
+.configurations/
+.configurations
+.libplanet/
+.libplanet
