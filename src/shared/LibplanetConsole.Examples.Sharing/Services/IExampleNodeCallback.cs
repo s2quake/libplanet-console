@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Examples.Services;
 
-public interface IExampleNodeCallbak
+public interface IExampleNodeCallback
 {
     void OnSubscribed(string address);
 

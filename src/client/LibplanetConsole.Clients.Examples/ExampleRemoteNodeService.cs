@@ -6,8 +6,8 @@ namespace LibplanetConsole.Clients.Examples;
 
 [Export]
 internal sealed class ExampleRemoteNodeService
-    : RemoteService<IExampleNodeService, IExampleNodeCallbak>,
-    IExampleNodeCallbak
+    : RemoteService<IExampleNodeService, IExampleNodeCallback>,
+    IExampleNodeCallback
 {
     public void OnSubscribed(string address)
     {

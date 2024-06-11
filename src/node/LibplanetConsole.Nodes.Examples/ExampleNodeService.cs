@@ -7,45 +7,45 @@ using LibplanetConsole.Examples.Services;
 namespace LibplanetConsole.Nodes.Examples;
 
 [Export(typeof(ILocalService))]
-internal sealed class ExampleNodeService : LocalService<IExampleNodeService, IExampleNodeCallbak>,
+internal sealed class ExampleNodeService : LocalService<IExampleNodeService, IExampleNodeCallback>,
     IExampleNodeService, IDisposable
 {
-    private readonly ExampleNode _sampleNode;
+    private readonly ExampleNode _exampleNode;
 
     [ImportingConstructor]
-    public ExampleNodeService(ExampleNode sampleNode)
+    public ExampleNodeService(ExampleNode exampleNode)
     {
-        _sampleNode = sampleNode;
-        _sampleNode.Subscribed += ExampleNode_Subscribed;
-        _sampleNode.Unsubscribed += ExampleNode_Unsubscribed;
+        _exampleNode = exampleNode;
+        _exampleNode.Subscribed += ExampleNode_Subscribed;
+        _exampleNode.Unsubscribed += ExampleNode_Unsubscribed;
     }
 
     public void Dispose()
     {
-        _sampleNode.Subscribed -= ExampleNode_Subscribed;
-        _sampleNode.Unsubscribed -= ExampleNode_Unsubscribed;
+        _exampleNode.Subscribed -= ExampleNode_Subscribed;
+        _exampleNode.Unsubscribed -= ExampleNode_Unsubscribed;
     }
 
     public async Task<int> GetAddressCountAsync(CancellationToken cancellationToken)
     {
-        var addresses = await _sampleNode.GetAddressesAsync(cancellationToken);
+        var addresses = await _exampleNode.GetAddressesAsync(cancellationToken);
         return addresses.Length;
     }
 
     public async Task<string[]> GetAddressesAsync(CancellationToken cancellationToken)
     {
-        var addresses = await _sampleNode.GetAddressesAsync(cancellationToken);
+        var addresses = await _exampleNode.GetAddressesAsync(cancellationToken);
         return [.. addresses.Select(AddressUtility.ToString)];
     }
 
     public void Subscribe(string address)
     {
-        _sampleNode.Subscribe(AddressUtility.Parse(address));
+        _exampleNode.Subscribe(AddressUtility.Parse(address));
     }
 
     public void Unsubscribe(string address)
     {
-        _sampleNode.Unsubscribe(AddressUtility.Parse(address));
+        _exampleNode.Unsubscribe(AddressUtility.Parse(address));
     }
 
     private void ExampleNode_Subscribed(object? sender, ItemEventArgs<Address> e)

@@ -1,0 +1,78 @@
+﻿using System.ComponentModel.Composition;
+using Libplanet.Explorer;
+using LibplanetConsole.Common;
+using LibplanetConsole.Explorer.Serializations;
+using LibplanetConsole.Frameworks;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+
+namespace LibplanetConsole.Nodes.Explorer;
+
+[Export(typeof(IExplorerNode))]
+[Export(typeof(IApplicationService))]
+[Export]
+[method: ImportingConstructor]
+internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, IApplicationService
+{
+    private IWebHost? _webHost;
+
+    public event EventHandler? Started;
+
+    public event EventHandler? Stopped;
+
+    public ExplorerInfo Info { get; private set; }
+
+    public bool IsRunning => _webHost is not null;
+
+    public async Task StartAsync(
+        ExplorerOptions options, CancellationToken cancellationToken)
+    {
+        if (_webHost is not null)
+        {
+            throw new InvalidOperationException("The explorer is already running.");
+        }
+
+        var (host, port) = EndPointUtility.GetElements(options.EndPoint);
+        _webHost = WebHost.CreateDefaultBuilder()
+                    .ConfigureServices(services => services.AddSingleton(node))
+                    .UseStartup<ExplorerStartup<BlockChainContext>>()
+                    .UseSerilog()
+                    .UseUrls($"http://{host}:{port}/")
+                    .Build();
+
+        await _webHost.StartAsync(cancellationToken);
+        Info = new() { EndPoint = EndPointUtility.ToString(options.EndPoint), IsRunning = true, };
+        logger.Debug("Explorer is started: {EndPoint}", Info.EndPoint);
+        Started?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        if (_webHost is null)
+        {
+            throw new InvalidOperationException("The explorer is not running.");
+        }
+
+        await _webHost.StopAsync(cancellationToken);
+        _webHost = null;
+        Info = new() { EndPoint = string.Empty };
+        logger.Debug("Explorer is stopped.");
+        Stopped?.Invoke(this, EventArgs.Empty);
+    }
+
+    async Task IApplicationService.InitializeAsync(
+        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        var endPoint = ApplicationSettingsParser.Peek<ExplorerNodeSettings>().ExplorerEndPoint;
+        if (endPoint is not null)
+        {
+            var options = new ExplorerOptions
+            {
+                EndPoint = EndPointUtility.ParseWithFallback(endPoint),
+            };
+            await StartAsync(options, cancellationToken);
+        }
+    }
+}

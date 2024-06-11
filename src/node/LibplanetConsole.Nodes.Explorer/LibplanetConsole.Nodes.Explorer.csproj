@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- $(LibplanetDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
+    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Explorer\Libplanet.Explorer.csproj" />
+  </ItemGroup>
+
+  <!-- $(LibplanetDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
+    <PackageReference Include="Libplanet.Explorer" Version="4.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
+  </ItemGroup>
+
+  <Import Project="..\..\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems" Label="Shared" />
+
+</Project>
