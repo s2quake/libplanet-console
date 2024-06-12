@@ -30,7 +30,7 @@ internal sealed class ExampleNodeContent
     public int Count { get; private set; }
 
     public bool IsExample { get; }
-        = ApplicationSettingsParser.Peek<ExampleClientSettings>().IsClientExample;
+        = ApplicationSettingsParser.Peek<ExampleNodeSettings>().IsNodeExample;
 
     private IExampleNodeService Service => _service.Service;
 

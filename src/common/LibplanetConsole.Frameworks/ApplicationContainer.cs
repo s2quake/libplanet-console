@@ -20,8 +20,8 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
     }
 
     public ApplicationContainer(
-        object owner, ApplicationContainer container, params ExportProvider[] providers)
-        : base(container.Catalog, providers)
+        object owner, ApplicationContainer container)
+        : base(container.Catalog, container)
     {
         _parentContainer = container;
         _owner = owner;

@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Net;
 using System.Security;
 using LibplanetConsole.Common;
@@ -6,7 +5,7 @@ using static LibplanetConsole.Consoles.ProcessUtility;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class NodeProcess : ProcessBase
+internal sealed class NodeProcess(Node node) : ProcessBase
 {
     public required EndPoint EndPoint { get; init; }
 
@@ -22,12 +21,12 @@ internal sealed class NodeProcess : ProcessBase
 
     protected override string FileName => IsDotnetRuntime() ? DotnetPath : NodePath;
 
-    protected override Collection<string> ArgumentList
+    protected override string[] Arguments
     {
         get
         {
             var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
-            var argumentList = new Collection<string>
+            var argumentList = new List<string>
             {
                 "--end-point",
                 EndPointUtility.ToString(EndPoint),
@@ -78,7 +77,10 @@ internal sealed class NodeProcess : ProcessBase
                 argumentList.Add(Environment.ProcessId.ToString());
             }
 
-            return argumentList;
+            var extendedArguments = GetArguments(serviceProvider: node, obj: node);
+            argumentList.AddRange(extendedArguments);
+
+            return [.. argumentList];
         }
     }
 }

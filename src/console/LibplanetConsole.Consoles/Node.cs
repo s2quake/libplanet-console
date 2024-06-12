@@ -93,6 +93,11 @@ internal sealed class Node
             return this;
         }
 
+        if (serviceType == typeof(IEnumerable<INodeContent>))
+        {
+            return _contents;
+        }
+
         if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
             serviceType.GenericTypeArguments.Length == 1)
         {
@@ -251,7 +256,7 @@ internal sealed class Node
     {
         var endPoint = EndPoint;
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
-        return new NodeProcess
+        return new NodeProcess(this)
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
