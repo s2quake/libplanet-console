@@ -1,7 +1,9 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Consoles;
 
@@ -305,6 +307,24 @@ internal static class ProcessUtility
     public static bool IsDotnetRuntime()
     {
         return Environment.ProcessPath == DotnetPath;
+    }
+
+    public static ImmutableArray<string> GetArguments(
+            IEnumerable<IProcessArgumentProvider> argumentProviders, object obj)
+    {
+        var query = from argumentProvider in argumentProviders
+                    where argumentProvider.CanSupport(obj.GetType())
+                    from arguments in argumentProvider.GetArguments(obj)
+                    select arguments;
+
+        return [.. query];
+    }
+
+    public static ImmutableArray<string> GetArguments(
+        IServiceProvider serviceProvider, object obj)
+    {
+        var argumentProviders = serviceProvider.GetService<IEnumerable<IProcessArgumentProvider>>();
+        return GetArguments(argumentProviders, obj);
     }
 
     private static string GetDotnetPath()

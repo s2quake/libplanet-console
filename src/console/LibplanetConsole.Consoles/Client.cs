@@ -85,6 +85,11 @@ internal sealed class Client :
             return _node;
         }
 
+        if (serviceType == typeof(IEnumerable<IClientContent>))
+        {
+            return _contents;
+        }
+
         if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
             serviceType.GenericTypeArguments.Length == 1)
         {
@@ -222,7 +227,7 @@ internal sealed class Client :
     {
         var endPoint = EndPoint;
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
-        return new ClientProcess
+        return new ClientProcess(this)
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,

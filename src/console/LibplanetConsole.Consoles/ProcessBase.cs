@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -29,7 +28,7 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     protected abstract string FileName { get; }
 
-    protected abstract Collection<string> ArgumentList { get; }
+    protected abstract string[] Arguments { get; }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -107,7 +106,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     public string GetCommandLine()
     {
         var filename = FileName;
-        var arguments = CommandUtility.Join([.. ArgumentList]);
+        var arguments = CommandUtility.Join(Arguments);
         return $"{filename} {arguments}";
     }
 
@@ -157,13 +156,13 @@ internal abstract class ProcessBase : IAsyncDisposable
             throw new NotSupportedException("The new terminal is not supported on this platform.");
         }
 
-        return new ProcessStartInfo(FileName, ArgumentList);
+        return new ProcessStartInfo(FileName, Arguments);
     }
 
     private ProcessStartInfo GetProcessStartInfoOnMacOS()
     {
         var filename = FileName;
-        var arguments = CommandUtility.Join([.. ArgumentList]);
+        var arguments = CommandUtility.Join(Arguments);
         var script = $"tell application \"Terminal\"\n" +
                      $"  do script \"{filename} {arguments}; exit\"\n" +
                      $"  activate\n" +
@@ -183,7 +182,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     private ProcessStartInfo GetProcessStartInfoOnWindows()
     {
         var filename = $"\"{FileName}\"";
-        var arguments = CommandUtility.Join([.. ArgumentList]);
+        var arguments = CommandUtility.Join(Arguments);
         var tempFile = TempFile.WriteAllText($"& {filename} {arguments}");
         var scriptList = new List<string>
         {
@@ -207,7 +206,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     private ProcessStartInfo GetProcessStartInfoOnLinux()
     {
         var filename = FileName;
-        var arguments = CommandUtility.Join([.. ArgumentList]);
+        var arguments = CommandUtility.Join(Arguments);
 
         return new ProcessStartInfo
         {

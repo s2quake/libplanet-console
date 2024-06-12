@@ -133,7 +133,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     }
 
     public ApplicationContainer CreateChildContainer(object owner)
-        => new(owner, _container, new ApplicationExportProvider(_container));
+        => new(owner, _container);
 
     IClient IApplication.GetClient(string address) => GetClient(address);
 

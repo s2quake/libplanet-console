@@ -14,11 +14,13 @@
                 "--nodes",
                 "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32",
                 "--client-count",
-                "1",
+                "2",
                 "--end-point",
                 "127.0.0.1:4343",
                 "--log-path",
-                ".log"
+                ".log",
+                "--node-example",
+                "--client-example"
             ]
         },
         {
