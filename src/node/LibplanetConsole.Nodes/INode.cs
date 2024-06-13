@@ -24,6 +24,8 @@ public interface INode : IVerifier
 
     BlockChain BlockChain { get; }
 
+    Swarm Swarm { get; }
+
     PublicKey PublicKey { get; }
 
     Address Address => PublicKey.Address;

@@ -13,14 +13,13 @@
             "args": [
                 "--nodes",
                 "b05c8b2bc981219c2afc32725f1dd7bdfce356ac7382699cb74647ab20895e32",
-                "--client-count",
-                "2",
+                "--clients",
+                "698e1dc854bfba5c359710ded3770010aa58625c2fe6ee1765ed9d0cf99c6b0d",
                 "--end-point",
                 "127.0.0.1:4343",
                 "--log-path",
                 ".log",
-                "--node-example",
-                "--client-example"
+                "--explorer"
             ]
         },
         {
@@ -32,8 +31,7 @@
             "args": [
                 "--end-point",
                 "127.0.0.1:5353",
-                "--log-path",
-                ".log/node.log"
+                "--explorer-end-point"
             ]
         },
         {

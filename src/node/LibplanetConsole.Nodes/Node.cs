@@ -99,6 +99,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public NodeInfo Info { get; private set; } = NodeInfo.Empty;
 
+    public Swarm Swarm => _swarm ?? throw new InvalidOperationException();
+
     public BoundPeer[] Peers
     {
         get
