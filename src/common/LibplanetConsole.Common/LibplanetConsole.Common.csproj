@@ -11,11 +11,11 @@
 
   <!-- $(LibplanetDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
-    <PackageReference Include="Libplanet" Version="4.4.1" />
-    <PackageReference Include="Libplanet.Net" Version="4.4.1" />
-    <PackageReference Include="Libplanet.Crypto" Version="4.4.1" />
-    <PackageReference Include="Libplanet.Store" Version="4.4.1" />
-    <PackageReference Include="Libplanet.RocksDBStore" Version="4.4.1" />
+    <PackageReference Include="Libplanet" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.Net" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.Crypto" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.Store" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.RocksDBStore" Version="$(LibplanetVersion)" />
   </ItemGroup>
 
   <!-- $(CommandsDirectory) exists. -->

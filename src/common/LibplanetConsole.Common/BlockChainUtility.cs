@@ -60,7 +60,6 @@ public static class BlockChainUtility
             timestamp: DateTimeOffset.MinValue);
         var transactions = ImmutableList.Create(transaction);
         var genesisBlock = BlockChain.ProposeGenesisBlock(
-            actionEvaluator: actionEvaluator,
             privateKey: genesisKey,
             transactions: transactions,
             timestamp: DateTimeOffset.MinValue);
@@ -133,7 +132,7 @@ public static class BlockChainUtility
             lastCommit: lastCommit);
         var blockContent = new BlockContent(blockMetadata, [transaction]);
         var preEvaluationBlock = blockContent.Propose();
-        var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);
+        var stateRootHash = blockChain.DetermineNextBlockStateRootHash(blockChain.Tip, out _);
         var height = blockChain.Count;
         var round = 0;
         var block = preEvaluationBlock.Sign(privateKey, stateRootHash);
