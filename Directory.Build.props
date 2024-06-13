@@ -23,9 +23,9 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <LibplanetSolutionPath>$(SolutionDir).libplanet\</LibplanetSolutionPath>
     <RootPath Condition="'$(SolutionDir)' != ''">$(SolutionDir)</RootPath>
     <RootPath Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)\</RootPath>
+    <LibplanetVersion>5.0.0</LibplanetVersion>
     <UseRidGraph>true</UseRidGraph>
   </PropertyGroup>
 
