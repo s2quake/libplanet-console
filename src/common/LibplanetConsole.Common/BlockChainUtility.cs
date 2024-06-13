@@ -30,7 +30,7 @@ public static class BlockChainUtility
         GenesisOptions genesisOptions, string storePath, IRenderer renderer)
     {
         var genesisKey = genesisOptions.GenesisKey;
-        var isNew = storePath == string.Empty || Directory.Exists(storePath) == false;
+        var isNew = storePath == string.Empty || Directory.Exists(storePath) != true;
         var (store, stateStore) = GetStore(storePath);
         var actionLoader = new AggregateTypedActionLoader
         {
@@ -39,8 +39,7 @@ public static class BlockChainUtility
         var actionEvaluator = new ActionEvaluator(
             policyBlockActionGetter: _ => null,
             stateStore,
-            actionLoader
-        );
+            actionLoader);
         var validators = genesisOptions.GenesisValidators
                             .Select(item => new Validator(item, new BigInteger(1000)))
                             .ToArray();
@@ -50,8 +49,7 @@ public static class BlockChainUtility
         [
             new Initialize(
                 validatorSet: validatorSet,
-                states: ImmutableDictionary.Create<Address, IValue>()
-            ),
+                states: ImmutableDictionary.Create<Address, IValue>()),
         ];
 
         var transaction = Transaction.Create(
@@ -98,7 +96,7 @@ public static class BlockChainUtility
     }
 
     [Obsolete("""
-    Do not use this method. 
+    Do not use this method.
     It exists to help understand how blocks can be appended to the blockchain.
     """)]
     public static Block AppendNew(
@@ -110,7 +108,7 @@ public static class BlockChainUtility
     }
 
     [Obsolete("""
-    Do not use this method. 
+    Do not use this method.
     It exists to help understand how blocks can be appended to the blockchain.
     """)]
     public static Block AppendNew(
@@ -122,8 +120,7 @@ public static class BlockChainUtility
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisBlock.Hash,
-            actions: new TxActionList(values)
-        );
+            actions: new TxActionList(values));
 
         var previousBlock = blockChain[blockChain.Count - 1];
         var lastCommit = blockChain.GetBlockCommit(previousBlock.Hash);
@@ -133,8 +130,7 @@ public static class BlockChainUtility
             publicKey: privateKey.PublicKey,
             previousHash: previousBlock.Hash,
             txHash: BlockContent.DeriveTxHash([transaction]),
-            lastCommit: lastCommit
-        );
+            lastCommit: lastCommit);
         var blockContent = new BlockContent(blockMetadata, [transaction]);
         var preEvaluationBlock = blockContent.Propose();
         var stateRootHash = blockChain.DetermineBlockStateRootHash(preEvaluationBlock, out _);

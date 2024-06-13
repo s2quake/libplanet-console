@@ -21,6 +21,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     private readonly bool _isSeed;
     private readonly ApplicationInfo _info;
     private readonly Logger _logger;
+    private readonly Task _waitForExitTask = Task.CompletedTask;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
@@ -53,7 +54,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcess = parentProcess;
-            WaitForExit(parentProcess, Cancel);
+            _waitForExitTask = WaitForExit(parentProcess, Cancel);
         }
 
         _logger.Debug("Application initialized.");
@@ -76,7 +77,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
         if (isMultiple == true)
         {
-            var itemType = serviceType.GenericTypeArguments.First();
+            var itemType = serviceType.GenericTypeArguments[0];
             var contractName = AttributedModelServices.GetContractName(itemType);
             var items = _container.GetExportedValues<object?>(contractName);
             var listGenericType = typeof(List<>);
@@ -109,9 +110,10 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         await base.OnDisposeAsync();
         await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
         await _container.DisposeAsync();
+        await _waitForExitTask;
     }
 
-    private static async void WaitForExit(Process process, Action cancelAction)
+    private static async Task WaitForExit(Process process, Action cancelAction)
     {
         await process.WaitForExitAsync();
         cancelAction.Invoke();

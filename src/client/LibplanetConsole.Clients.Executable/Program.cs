@@ -7,9 +7,9 @@ try
     var settings = ApplicationSettingsParser.Parse<ApplicationSettings>(args);
     var @out = Console.Out;
     await using var application = new Application(settings);
-    @out.WriteLine();
+    await @out.WriteLineAsync();
     await application.RunAsync();
-    @out.WriteLine("\u001b0");
+    await @out.WriteLineAsync("\u001b0");
 }
 catch (CommandParsingException e)
 {

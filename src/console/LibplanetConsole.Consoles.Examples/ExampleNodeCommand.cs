@@ -73,7 +73,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
                 sb.AppendLine(address.ToString());
             }
 
-            Out.Write(sb.ToString());
+            await Out.WriteAsync(sb.ToString());
         }
         else
         {

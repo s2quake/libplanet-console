@@ -1,3 +1,4 @@
+using System.Globalization;
 using Libplanet.Crypto;
 
 namespace LibplanetConsole.Common.Serializations;
@@ -16,8 +17,9 @@ public readonly record struct GenesisInfo
         {
             GenesisKey = PrivateKeyUtility.Parse(info.GenesisKey),
             GenesisValidators = [.. info.GenesisValidators.Select(PublicKeyUtility.Parse)],
-            Timestamp = info.Timestamp == string.Empty ?
-                DateTimeOffset.MinValue : DateTimeOffset.Parse(info.Timestamp),
+            Timestamp = info.Timestamp == string.Empty
+                ? DateTimeOffset.MinValue
+                : DateTimeOffset.ParseExact(info.Timestamp, "O", CultureInfo.CurrentCulture),
         };
     }
 

@@ -35,6 +35,7 @@ public sealed class AggregateTypedActionLoader
             }
             catch
             {
+                // ignored
             }
         }
 

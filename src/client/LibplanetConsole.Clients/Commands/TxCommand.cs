@@ -22,6 +22,6 @@ internal sealed class TxCommand(IClient client) : CommandAsyncBase
         };
 
         await client.SendTransactionAsync([action], cancellationToken);
-        Out.WriteLine($"{(ShortAddress)client.Address}: {Text}");
+        await Out.WriteLineAsync($"{(ShortAddress)client.Address}: {Text}");
     }
 }

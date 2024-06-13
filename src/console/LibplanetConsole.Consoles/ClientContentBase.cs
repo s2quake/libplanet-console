@@ -5,7 +5,7 @@ public abstract class ClientContentBase : IClientContent, IDisposable
     private readonly string _name;
     private bool _isDisposed;
 
-    public ClientContentBase(IClient client, string name)
+    protected ClientContentBase(IClient client, string name)
     {
         _name = name;
         Client = client;
@@ -15,7 +15,7 @@ public abstract class ClientContentBase : IClientContent, IDisposable
         Client.Stopped += Client_Stopped;
     }
 
-    public ClientContentBase(IClient client)
+    protected ClientContentBase(IClient client)
         : this(client, string.Empty)
     {
     }

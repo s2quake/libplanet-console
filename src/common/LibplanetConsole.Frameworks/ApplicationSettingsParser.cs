@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition.Hosting;
 using System.Reflection;
 using JSSoft.Commands;
 
@@ -8,7 +7,7 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
 {
     private static ApplicationSettingsParser? _instance;
     private readonly List<object> _optionList;
-    private readonly Dictionary<CommandMemberDescriptor, object> _descriptorByInstance = [];
+    private readonly Dictionary<CommandMemberDescriptor, object> _descriptorByInstance;
 
     private readonly CommandMemberDescriptorCollection _descriptors;
 
@@ -54,7 +53,7 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
             throw new InvalidOperationException("Settings parser is not initialized.");
         }
 
-        return _instance._optionList.FirstOrDefault(type.IsInstanceOfType) ??
+        return _instance._optionList.Find(type.IsInstanceOfType) ??
             throw new InvalidOperationException($"Settings of type {type} is not found.");
     }
 
@@ -67,7 +66,7 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
             throw new InvalidOperationException("Settings parser is not initialized.");
         }
 
-        if (_instance._optionList.FirstOrDefault(type.IsInstanceOfType) is { } option)
+        if (_instance._optionList.Find(type.IsInstanceOfType) is { } option)
         {
             _instance._optionList.Remove(option);
             foreach (var item in _instance._descriptorByInstance.ToArray())
@@ -91,20 +90,6 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
     object ICustomCommandDescriptor.GetMemberOwner(CommandMemberDescriptor memberDescriptor)
         => _descriptorByInstance[memberDescriptor];
 
-    private static Assembly[] GetAssemblies()
-    {
-        var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var directoryCatalog = new DirectoryCatalog(directory);
-        var entryAssembly = Assembly.GetEntryAssembly() ??
-            throw new InvalidOperationException("Entry assembly is not found.");
-        string[] paths =
-        [
-            entryAssembly.Location,
-            .. directoryCatalog.LoadedFiles,
-        ];
-        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
-    }
-
     private static bool IsApplicationSettings(Type type)
     {
         return Attribute.GetCustomAttribute(type, typeof(ApplicationSettingsAttribute)) is not null;
@@ -118,7 +103,7 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
         {
             var option = optionList[i];
             var descriptors = CommandDescriptor.GetMemberDescriptors(option)
-                                .Select(item => KeyValuePair.Create(item, (object)option));
+                                .Select(item => KeyValuePair.Create(item, option));
             itemList.AddRange(descriptors);
         }
 

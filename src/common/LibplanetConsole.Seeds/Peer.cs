@@ -36,8 +36,6 @@ internal sealed class Peer(ITransport transport, BoundPeer boundPeer)
         {
             var pingMsg = new PingMsg();
             var stopwatch = Stopwatch.StartNew();
-            var boundPeer = BoundPeer;
-
             var replyMessage = await _transport.SendMessageAsync(
                 BoundPeer,
                 pingMsg,
@@ -53,6 +51,7 @@ internal sealed class Peer(ITransport transport, BoundPeer boundPeer)
         }
         catch
         {
+            // Ignore
         }
 
         Latency = TimeSpan.MinValue;

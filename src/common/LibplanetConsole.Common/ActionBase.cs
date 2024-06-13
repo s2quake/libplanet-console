@@ -13,7 +13,7 @@ public abstract class ActionBase : IAction
     {
         TypeId = GetType().GetCustomAttribute<ActionTypeAttribute>() is { } attribute
             ? attribute.TypeIdentifier
-            : throw new NullReferenceException(
+            : throw new InvalidOperationException(
                 $"Given type {this.GetType()} is missing {nameof(ActionTypeAttribute)}.");
     }
 

@@ -27,7 +27,7 @@ public static class DependencyUtility
         {
             yield return items.Single(item =>
             {
-                return attribute.DependencyType.IsAssignableFrom(item.GetType());
+                return attribute.DependencyType.IsInstanceOfType(item);
             });
         }
     }

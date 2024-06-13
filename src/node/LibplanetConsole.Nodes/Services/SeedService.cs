@@ -21,7 +21,6 @@ internal sealed class SeedService(IApplication application, INode node)
     {
         if (node.IsRunning == true)
         {
-            var nodeInfo = node.Info;
             var blocksyncSeedPeer = node.BlocksyncSeedPeer;
             var consensusSeedPeer = node.ConsensusSeedPeer;
             var genesisOptions = (GenesisInfo)node.NodeOptions.GenesisOptions;

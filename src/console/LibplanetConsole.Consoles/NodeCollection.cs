@@ -73,7 +73,7 @@ internal sealed class NodeCollection(
 
     public bool Contains(Node item) => _nodeList.Contains(item);
 
-    public bool Contains(Address address) => _nodeList.Any(item => item.Address == address);
+    public bool Contains(Address address) => _nodeList.Exists(item => item.Address == address);
 
     public int IndexOf(Node item)
     {

@@ -86,8 +86,13 @@ internal abstract class ProcessBase : IAsyncDisposable
             throw new InvalidOperationException("The process is already disposed.");
         }
 
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
+
         _process.Close();
         await _process.WaitForExitAsync(cancellationToken);
         _process = null;
@@ -96,8 +101,12 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource = null;
+        }
+
         _process?.Dispose();
         _process = null;
         await _exitTask;
@@ -110,6 +119,8 @@ internal abstract class ProcessBase : IAsyncDisposable
         return $"{filename} {arguments}";
     }
 
+// Reflection should not be used to increase accessibility of classes, methods, or fields
+#pragma warning disable S3011
     private static string GetArguments(ProcessStartInfo processStartInfo)
     {
         var bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -122,6 +133,7 @@ internal abstract class ProcessBase : IAsyncDisposable
 
         throw new InvalidOperationException("Failed to get arguments.");
     }
+#pragma warning restore S3011
 
     private Process GetProcess()
     {
@@ -225,7 +237,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     {
         if (e.Data is string text)
         {
-            // _outBuilder.AppendLine(text);
+            _outBuilder.AppendLine(text);
         }
     }
 
@@ -233,7 +245,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     {
         if (e.Data is string text)
         {
-            // _errorBuilder.AppendLine(text);
+            _errorBuilder.AppendLine(text);
         }
     }
 
@@ -246,7 +258,7 @@ internal abstract class ProcessBase : IAsyncDisposable
                 break;
             }
 
-            if (_process?.HasExited == true)
+            if (_process.HasExited == true)
             {
                 break;
             }

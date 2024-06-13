@@ -18,8 +18,7 @@ using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class Node
-    : INodeCallback, IAsyncDisposable, IAddressable, INode
+internal sealed class Node : INode, INodeCallback
 {
     private readonly ApplicationContainer _container;
     private readonly SecureString _privateKey;
@@ -101,7 +100,7 @@ internal sealed class Node
         if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
             serviceType.GenericTypeArguments.Length == 1)
         {
-            var itemType = serviceType.GenericTypeArguments.First();
+            var itemType = serviceType.GenericTypeArguments[0];
             var items = GetInstances(itemType);
             var listGenericType = typeof(List<>);
             var list = listGenericType.MakeGenericType(itemType);
@@ -217,8 +216,7 @@ internal sealed class Node
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisHash,
-            actions: [.. actions.Select(item => item.PlainValue)]
-        );
+            actions: [.. actions.Select(item => item.PlainValue)]);
         var txId = await _remoteService.Service.SendTransactionAsync(
             transaction: tx.Serialize(),
             cancellationToken: cancellationToken);

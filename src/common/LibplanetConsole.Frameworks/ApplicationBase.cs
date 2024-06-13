@@ -6,7 +6,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 {
     private readonly ManualResetEvent _closeEvent = new(false);
     private readonly SynchronizationContext _synchronizationContext;
-    private CancellationTokenSource? _cancellationTokenSource;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
     private bool _isDisposed;
 
     protected ApplicationBase()
@@ -40,8 +40,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
     public void Cancel()
     {
         Logger.Debug("Application canceled.");
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
+        _cancellationTokenSource.Cancel();
         _closeEvent.Set();
     }
 
@@ -50,13 +49,13 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
         ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
         Logger.Debug("Application running...");
-        _cancellationTokenSource = new();
         await OnRunAsync(_cancellationTokenSource.Token);
         Logger.Debug("Application waiting for close...");
         await Task.Run(() =>
         {
             while (CanClose != true && _closeEvent.WaitOne(1) != true)
             {
+                // Wait for close.
             }
         });
         Logger.Debug("Application run completed.");
@@ -68,6 +67,7 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
         Logger.Debug("Application disposing...");
         await OnDisposeAsync();
+        _cancellationTokenSource.Dispose();
         _isDisposed = true;
         GC.SuppressFinalize(this);
         Logger.Debug("Application disposed.");
