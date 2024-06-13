@@ -79,8 +79,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             return client != null;
         }
 
-        client = _clients.Where<Client>(item => IsEquals(item, address))
-                         .SingleOrDefault();
+        client = _clients.SingleOrDefault<Client>(item => IsEquals(item, address));
         return client != null;
     }
 
@@ -92,16 +91,14 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             return node != null;
         }
 
-        node = _nodes.Where<Node>(item => IsEquals(item, address))
-                     .SingleOrDefault();
+        node = _nodes.SingleOrDefault<Node>(item => IsEquals(item, address));
         return node != null;
     }
 
     public IAddressable GetAddressable(string address)
     {
         return _nodes.Concat<IAddressable>(_clients)
-                     .Where(item => IsEquals(item, address))
-                     .Single();
+                     .Single(item => IsEquals(item, address));
     }
 
     public override object? GetService(Type serviceType)
@@ -111,7 +108,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
         if (isMultiple == true)
         {
-            var itemType = serviceType.GenericTypeArguments.First();
+            var itemType = serviceType.GenericTypeArguments[0];
             var contractName = AttributedModelServices.GetContractName(itemType);
             var items = _container.GetExportedValues<object?>(contractName);
             var listGenericType = typeof(List<>);
@@ -146,8 +143,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             return _clients.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _clients.Where<Client>(item => IsEquals(item, address))
-                       .Single();
+        return _clients.Single<Client>(item => IsEquals(item, address));
     }
 
     internal Node GetNode(string address)
@@ -157,8 +153,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             return _nodes.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return _nodes.Where<Node>(item => IsEquals(item, address))
-                     .Single();
+        return _nodes.Single<Node>(item => IsEquals(item, address));
     }
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)

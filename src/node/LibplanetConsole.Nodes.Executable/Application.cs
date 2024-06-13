@@ -8,7 +8,7 @@ internal sealed class Application(ApplicationOptions options)
     : ApplicationBase(options), IApplication
 {
     private readonly ApplicationOptions _options = options;
-    private SystemTerminal? _terminal;
+    private Task _waitInputTask = Task.CompletedTask;
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
@@ -18,28 +18,34 @@ internal sealed class Application(ApplicationOptions options)
             var commandContext = this.GetService<CommandContext>();
             var startupCondition = _options.ManualStart == true && _options.ParentProcessId == 0;
             commandContext.Out = sw;
-            _terminal = this.GetService<SystemTerminal>();
+            var terminal = this.GetService<SystemTerminal>();
             await base.OnRunAsync(cancellationToken);
-            sw.WriteSeparator(TerminalColorType.BrightGreen);
+            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
-            sw.WriteLine();
+            await sw.WriteLineAsync();
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
-            sw.WriteSeparator(TerminalColorType.BrightGreen);
+            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
-            sw.WriteLineIf(startupCondition, GetStartupMessage());
-            Console.Write(sw.ToString());
+            await sw.WriteLineIfAsync(startupCondition, GetStartupMessage());
+            await Console.Out.WriteAsync(sw.ToString());
 
-            await _terminal.StartAsync(cancellationToken);
+            await terminal.StartAsync(cancellationToken);
         }
         else if (_options.ParentProcessId == 0)
         {
             await base.OnRunAsync(cancellationToken);
-            WaitInput();
+            _waitInputTask = WaitInputAsync();
         }
         else
         {
             await base.OnRunAsync(cancellationToken);
         }
+    }
+
+    protected override async ValueTask OnDisposeAsync()
+    {
+        await base.OnDisposeAsync();
+        await _waitInputTask;
     }
 
     private static string GetStartupMessage()
@@ -48,9 +54,9 @@ internal sealed class Application(ApplicationOptions options)
         return $"\nType '{startText}' to start the node.";
     }
 
-    private async void WaitInput()
+    private async Task WaitInputAsync()
     {
-        Console.WriteLine("Press any key to exit.");
+        await Console.Out.WriteLineAsync("Press any key to exit.");
         await Task.Run(() => Console.ReadKey(intercept: true));
         Cancel();
     }

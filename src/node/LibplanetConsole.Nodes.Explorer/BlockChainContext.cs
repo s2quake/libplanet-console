@@ -17,6 +17,7 @@ internal sealed record class BlockChainContext : IBlockChainContext
 
     public BlockChain BlockChain => _node!.BlockChain;
 
+#pragma warning disable S3011 // Reflection should not be used to increase accessibility ...
     public IStore Store
     {
         get
@@ -32,6 +33,7 @@ internal sealed record class BlockChainContext : IBlockChainContext
             throw new InvalidOperationException("Store property is not IStore.");
         }
     }
+#pragma warning restore S3011
 
     public Swarm Swarm => _node!.Swarm;
 

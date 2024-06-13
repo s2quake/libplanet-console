@@ -120,8 +120,7 @@ internal sealed class Client : IClient, INodeCallback
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisHash,
-            actions: [.. actions.Select(item => item.PlainValue)]
-        );
+            actions: [.. actions.Select(item => item.PlainValue)]);
         _logger.Debug("Client sends a transaction: {TxId}", tx.Id);
         return await RemoteNodeService.SendTransactionAsync(tx.Serialize(), cancellationToken);
     }

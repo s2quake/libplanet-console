@@ -54,11 +54,13 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
         }
     }
 
+#pragma warning disable S2953 // Methods named "Dispose" should implement "IDisposable.Dispose"
     [Obsolete("Use DisposeAsync instead.")]
     public new void Dispose()
     {
         throw new NotSupportedException();
     }
+#pragma warning restore S2953 // Methods named "Dispose" should implement "IDisposable.Dispose"
 
     protected override IEnumerable<Export>? GetExportsCore(
         ImportDefinition definition, AtomicComposition? atomicComposition)
@@ -75,7 +77,7 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
     private static AggregateCatalog GetCatalog(IEnumerable<Assembly> assemblies)
     {
         var assemblyCatalogs = assemblies.Select(item => new AssemblyCatalog(item));
-        return new AggregateCatalog([.. assemblyCatalogs]);
+        return new AggregateCatalog(assemblyCatalogs);
     }
 
     private void OnExport(IAsyncDisposable asyncDisposable)

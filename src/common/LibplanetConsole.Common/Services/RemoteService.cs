@@ -17,7 +17,8 @@ public class RemoteService<TService, TCallback> : IRemoteService
 
     public RemoteService()
     {
-        if (this is TCallback callback)
+        var obj = this;
+        if (obj is TCallback callback)
         {
             _clientService = new ClientService<TService, TCallback>(callback);
         }

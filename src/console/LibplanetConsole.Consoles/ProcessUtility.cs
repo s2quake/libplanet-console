@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using LibplanetConsole.Common.Extensions;
+using static System.Runtime.InteropServices.RuntimeInformation;
 
 namespace LibplanetConsole.Consoles;
 
@@ -143,7 +144,7 @@ internal static class ProcessUtility
     {
         get
         {
-            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            var isWindows = IsOSPlatform(OSPlatform.Windows);
             var variable = isWindows ? "USERPROFILE" : "HOME";
             var homeDirectory = Environment.GetEnvironmentVariable(variable);
             if (homeDirectory is not null)
@@ -169,7 +170,7 @@ internal static class ProcessUtility
                                     $"bin/{Congiguration}/{Framework}";
             var d1 = Path.GetFullPath(expectedDirectory);
             var d2 = Path.GetFullPath(directory);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+            if (IsOSPlatform(OSPlatform.Windows) == true)
             {
                 return StringComparer.OrdinalIgnoreCase.Equals(d1, d2);
             }
@@ -184,8 +185,7 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node.dll"
-            );
+                $"{Framework}/libplanet-node.dll");
         }
     }
 
@@ -214,8 +214,7 @@ internal static class ProcessUtility
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
-                $"{Congiguration}/{Framework}/libplanet-client.dll"
-            );
+                $"{Congiguration}/{Framework}/libplanet-client.dll");
         }
     }
 
@@ -286,22 +285,22 @@ internal static class ProcessUtility
 
     public static bool IsOSX()
     {
-        return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        return IsOSPlatform(OSPlatform.OSX);
     }
 
     public static bool IsWindows()
     {
-        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        return IsOSPlatform(OSPlatform.Windows);
     }
 
     public static bool IsLinux()
     {
-        return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        return IsOSPlatform(OSPlatform.Linux);
     }
 
     public static bool IsArm64()
     {
-        return RuntimeInformation.OSArchitecture == Architecture.Arm64;
+        return OSArchitecture == Architecture.Arm64;
     }
 
     public static bool IsDotnetRuntime()
@@ -332,18 +331,13 @@ internal static class ProcessUtility
         var processStartInfo = new ProcessStartInfo();
         var process = new Process { StartInfo = processStartInfo };
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+        if (IsOSPlatform(OSPlatform.Windows) == true)
         {
             processStartInfo.FileName = "powershell";
             processStartInfo.Arguments
                 = "-Command 'Get-Command dotnet | Select-Object -ExpandProperty Source'";
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) == true)
-        {
-            processStartInfo.FileName = "which";
-            processStartInfo.Arguments = "dotnet";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == true)
+        else if (IsOSPlatform(OSPlatform.OSX) == true || IsOSPlatform(OSPlatform.Linux) == true)
         {
             processStartInfo.FileName = "which";
             processStartInfo.Arguments = "dotnet";
@@ -370,7 +364,7 @@ internal static class ProcessUtility
 
     private static string GetDotnetPathFromDirectory(string directory)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == true)
+        if (IsOSPlatform(OSPlatform.Windows) == true)
         {
             return Path.Combine(directory, "dotnet.exe");
         }

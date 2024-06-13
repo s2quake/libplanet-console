@@ -72,7 +72,7 @@ internal sealed class ClientCollection(
 
     public bool Contains(Client item) => _clientList.Contains(item);
 
-    public bool Contains(Address address) => _clientList.Any(item => item.Address == address);
+    public bool Contains(Address address) => _clientList.Exists(item => item.Address == address);
 
     public int IndexOf(Client item)
     {

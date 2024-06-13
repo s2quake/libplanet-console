@@ -54,28 +54,12 @@ public abstract class KeyCommandBase : CommandMethodBase
         [CommandSummary("The private key or public key.")]
         string key)
     {
-        var address = GetAddress();
+        var address = GetAddress(key);
         var info = new
         {
             Address = AddressUtility.ToString(address),
         };
         Out.WriteLineAsJson(info);
-
-        Address GetAddress()
-        {
-            if (PrivateKeyUtility.TryParse(key, out var privateKey) == true)
-            {
-                return privateKey.Address;
-            }
-            else if (PublicKeyUtility.TryParse(key, out var publicKey) == true)
-            {
-                return publicKey.Address;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid key.", nameof(key));
-            }
-        }
     }
 
     [CommandMethod]
@@ -92,5 +76,21 @@ public abstract class KeyCommandBase : CommandMethodBase
             Address = AddressUtility.ToString(AddressUtility.Derive(addressObject, keyword)),
         };
         Out.WriteLineAsJson(info);
+    }
+
+    private static Address GetAddress(string key)
+    {
+        if (PrivateKeyUtility.TryParse(key, out var privateKey) == true)
+        {
+            return privateKey.Address;
+        }
+        else if (PublicKeyUtility.TryParse(key, out var publicKey) == true)
+        {
+            return publicKey.Address;
+        }
+        else
+        {
+            throw new ArgumentException("Invalid key.", nameof(key));
+        }
     }
 }

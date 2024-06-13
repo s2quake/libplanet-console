@@ -5,7 +5,7 @@ public abstract class NodeContentBase : INodeContent, IDisposable
     private readonly string _name;
     private bool _isDisposed;
 
-    public NodeContentBase(INode node, string name)
+    protected NodeContentBase(INode node, string name)
     {
         _name = name;
         Node = node;
@@ -15,7 +15,7 @@ public abstract class NodeContentBase : INodeContent, IDisposable
         Node.Stopped += Node_Stopped;
     }
 
-    public NodeContentBase(INode node)
+    protected NodeContentBase(INode node)
         : this(node, string.Empty)
     {
     }

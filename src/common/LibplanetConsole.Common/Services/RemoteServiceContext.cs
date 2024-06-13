@@ -44,6 +44,7 @@ public class RemoteServiceContext
             }
             catch
             {
+                // Ignore.
             }
         }
 

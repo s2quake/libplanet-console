@@ -129,9 +129,9 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     public bool Verify(object obj, byte[] signature)
         => PublicKeyUtility.Verify(PublicKey, obj, signature);
 
-    public Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken)
+    public Task<TxId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
         => AddTransactionAsync(
-            PrivateKeyUtility.FromSecureString(_privateKey), actions, cancellationToken);
+            PrivateKeyUtility.FromSecureString(_privateKey), values, cancellationToken);
 
     public async Task<TxId> AddTransactionAsync(
         PrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
@@ -149,10 +149,46 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisBlock.Hash,
-            actions: new TxActionList(values)
-        );
+            actions: new TxActionList(values));
         await AddTransactionAsync(transaction, cancellationToken);
         return transaction.Id;
+    }
+
+    public async Task AddTransactionAsync(
+        Transaction transaction, CancellationToken cancellationToken)
+    {
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
+        InvalidOperationExceptionUtility.ThrowIf(
+            condition: IsRunning != true,
+            message: "Node is not running.");
+
+        _logger.Debug("Node adds a transaction: {TxId}", transaction.Id);
+        var blockChain = BlockChain;
+        var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
+        {
+            return new ManualResetEvent(initialState: false);
+        });
+        blockChain.StageTransaction(transaction);
+        await Task.Run(manualResetEvent.WaitOne, cancellationToken);
+
+        _eventByTxId.TryRemove(transaction.Id, out _);
+
+        var sb = new StringBuilder();
+        foreach (var item in transaction.Actions)
+        {
+            if (_exceptionByAction.TryRemove(item, out var exception) == true &&
+                exception is UnexpectedlyTerminatedActionException)
+            {
+                sb.AppendLine($"{exception.InnerException}");
+            }
+        }
+
+        if (sb.Length > 0)
+        {
+            throw new InvalidOperationException(sb.ToString());
+        }
+
+        _logger.Debug("Node added a transaction: {TxId}", transaction.Id);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -174,7 +210,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
             new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
         var swarmTransport
-            = await CreateTransport(privateKey, blocksyncEndPoint, cancellationToken);
+            = await CreateTransport(privateKey, blocksyncEndPoint);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = [blocksyncSeedPeer],
@@ -185,8 +221,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
-            endPoint: consensusEndPoint,
-            cancellationToken: cancellationToken);
+            endPoint: consensusEndPoint);
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = [consensusSeedPeer],
@@ -283,44 +318,6 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task AddTransactionAsync(
-        Transaction transaction, CancellationToken cancellationToken)
-    {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
-
-        _logger.Debug("Node adds a transaction: {TxId}", transaction.Id);
-        var blockChain = BlockChain;
-        var height = blockChain.Tip.Index + 1;
-        var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
-        {
-            return new ManualResetEvent(initialState: false);
-        });
-        blockChain.StageTransaction(transaction);
-        await Task.Run(manualResetEvent.WaitOne, cancellationToken);
-
-        _eventByTxId.TryRemove(transaction.Id, out _);
-
-        var sb = new StringBuilder();
-        foreach (var item in transaction.Actions)
-        {
-            if (_exceptionByAction.TryRemove(item, out var exception) == true &&
-                exception is UnexpectedlyTerminatedActionException)
-            {
-                sb.AppendLine($"{exception.InnerException}");
-            }
-        }
-
-        if (sb.Length > 0)
-        {
-            throw new InvalidOperationException(sb.ToString());
-        }
-
-        _logger.Debug("Node added a transaction: {TxId}", transaction.Id);
-    }
-
     public long GetNextNonce(Address address)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
@@ -380,7 +377,6 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
         void Action(object? state)
         {
-            var height = newTip.Index;
             foreach (var transaction in newTip.Transactions)
             {
                 if (_eventByTxId.TryGetValue(transaction.Id, out var manualResetEvent) == true)
@@ -412,7 +408,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, DnsEndPoint endPoint, CancellationToken cancellationToken)
+        PrivateKey privateKey, DnsEndPoint endPoint)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {

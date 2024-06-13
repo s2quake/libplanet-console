@@ -39,6 +39,6 @@ internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
             sb.AppendLine(AddressUtility.ToString(address));
         }
 
-        Out.WriteLine(sb.ToString());
+        await Out.WriteLineAsync(sb.ToString());
     }
 }

@@ -44,8 +44,13 @@ internal class Seed(SeedOptions seedOptions)
             throw new InvalidOperationException("Seed node is not running.");
         }
 
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource = null;
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
+
         await _transport.StopAsync(TimeSpan.FromSeconds(0), cancellationToken);
         await _refreshTask;
         await _task;
@@ -101,7 +106,7 @@ internal class Seed(SeedOptions seedOptions)
 
         switch (message.Content)
         {
-            case FindNeighborsMsg findNeighbors:
+            case FindNeighborsMsg:
                 var alivePeers = peers.Where(item => item.IsAlive)
                                       .Select(item => item.BoundPeer)
                                       .ToArray();

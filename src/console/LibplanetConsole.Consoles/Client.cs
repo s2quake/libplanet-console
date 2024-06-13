@@ -17,8 +17,7 @@ using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class Client :
-    IClientCallback, IAsyncDisposable, IAddressable, IClient
+internal sealed class Client : IClient, IClientCallback
 {
     private readonly ApplicationContainer _container;
     private readonly SecureString _privateKey;
@@ -93,7 +92,7 @@ internal sealed class Client :
         if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
             serviceType.GenericTypeArguments.Length == 1)
         {
-            var itemType = serviceType.GenericTypeArguments.First();
+            var itemType = serviceType.GenericTypeArguments[0];
             var items = GetInstances(itemType);
             var listGenericType = typeof(List<>);
             var list = listGenericType.MakeGenericType(itemType);

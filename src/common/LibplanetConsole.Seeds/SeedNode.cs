@@ -38,13 +38,14 @@ public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
             throw new InvalidOperationException("Seed node is not running.");
         }
 
-        _cancellationTokenSource?.Cancel();
+        await _cancellationTokenSource.CancelAsync();
         if (_seed is not null)
         {
             await _seed.StopAsync(cancellationToken);
             _seed = null;
         }
 
+        _cancellationTokenSource.Dispose();
         _cancellationTokenSource = null;
     }
 }

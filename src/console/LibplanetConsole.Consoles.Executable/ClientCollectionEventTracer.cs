@@ -12,46 +12,28 @@ namespace LibplanetConsole.Consoles.Executable;
 internal sealed class ClientCollectionEventTracer(IClientCollection clients) : IApplicationService
 {
     private readonly IClientCollection _clients = clients;
-    private IClient? _current;
 
     public Task InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        UpdateCurrent(_clients.Current);
         foreach (var client in _clients)
         {
             AttachEvent(client);
         }
 
-        _clients.CurrentChanged += Clients_CurrentChanged;
         _clients.CollectionChanged += Clients_CollectionChanged;
         return Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync()
     {
-        UpdateCurrent(null);
         foreach (var client in _clients)
         {
             DetachEvent(client);
         }
 
-        _clients.CurrentChanged -= Clients_CurrentChanged;
         _clients.CollectionChanged -= Clients_CollectionChanged;
         return ValueTask.CompletedTask;
-    }
-
-    private void UpdateCurrent(IClient? client)
-    {
-        if (_current is not null)
-        {
-        }
-
-        _current = client;
-
-        if (_current is not null)
-        {
-        }
     }
 
     private void AttachEvent(IClient client)
@@ -68,11 +50,6 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         client.Detached -= Client_Detached;
         client.Started -= Client_Started;
         client.Stopped -= Client_Stopped;
-    }
-
-    private void Clients_CurrentChanged(object? sender, EventArgs e)
-    {
-        UpdateCurrent(_clients.Current);
     }
 
     private void Clients_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

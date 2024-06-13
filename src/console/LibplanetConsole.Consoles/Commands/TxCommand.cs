@@ -25,12 +25,12 @@ internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
         {
             var action = new StringAction { Value = text };
             await node.SendTransactionAsync([action], cancellationToken);
-            Out.WriteLine($"{(ShortAddress)node.Address}: {text}");
+            await Out.WriteLineAsync($"{(ShortAddress)node.Address}: {text}");
         }
         else if (addressable is IClient client)
         {
             await client.SendTransactionAsync(text, cancellationToken);
-            Out.WriteLine($"{(ShortAddress)client.Address}: {text}");
+            await Out.WriteLineAsync($"{(ShortAddress)client.Address}: {text}");
         }
         else
         {

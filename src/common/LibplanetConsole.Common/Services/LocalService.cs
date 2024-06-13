@@ -17,7 +17,8 @@ public class LocalService<TService, TCallback> : ILocalService
 
     public LocalService()
     {
-        if (this is TService service)
+        var obj = this;
+        if (obj is TService service)
         {
             _serverService = new ServerService<TService, TCallback>(service);
         }
@@ -45,7 +46,8 @@ public class LocalService<TService> : ILocalService
 
     public LocalService()
     {
-        if (this is TService service)
+        var obj = this;
+        if (obj is TService service)
         {
             _serverService = new ServerService<TService>(service);
         }

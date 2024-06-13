@@ -174,7 +174,7 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
         var address = Address;
         var client = application.GetClient(address);
         await client.SendTransactionAsync(text, cancellationToken);
-        Out.WriteLine($"{(ShortAddress)client.Address}: {text}");
+        await Out.WriteLineAsync($"{(ShortAddress)client.Address}: {text}");
     }
 
     private static TerminalColorType? GetForeground(IClient client, bool isCurrent)
