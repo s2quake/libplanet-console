@@ -1,0 +1,41 @@
+name: Build and Test
+
+on:
+  pull_request: 
+
+env:
+  TEST_RESULTS_PATH: ${{ github.workspace }}/test-results.trx
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.0.0
+        with:
+          dotnet-version: 8.0.100
+      - name: Dotnet Build
+        run: dotnet build --configuration Release
+      - name: Dotnet Test
+        run: |
+          dotnet test --configuration Release --no-restore --no-build --logger "trx;LogFileName=${{ env.TEST_RESULTS_PATH }}"
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: test-results
+          path: ${{ env.TEST_RESULTS_PATH }}
+      - name: Upload test results
+        uses: dorny/test-reporter@v1.9.1
+        if: success() || failure()
+        with:
+          name: XUnit Tests
+          path: ${{ env.TEST_RESULTS_PATH }}
+          reporter: dotnet-trx
