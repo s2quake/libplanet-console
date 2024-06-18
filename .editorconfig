@@ -44,6 +44,12 @@ dotnet_diagnostic.SA1309.severity = none
 # SA1600: Elements should be documented
 dotnet_diagnostic.SA1600.severity = none
 
+# SA1601: Partial elements should be documented
+dotnet_diagnostic.SA1601.severity = none
+
+# SA1602: Enumeration items should be documented
+dotnet_diagnostic.SA1602.severity = none
+
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = none
 
@@ -64,6 +70,15 @@ dotnet_diagnostic.S3971.severity = none
 
 # S4143: Collection elements should not be replaced unconditionally
 dotnet_diagnostic.S4143.severity = none
+
+# S6605: Collection-specific "Exists" method should be used instead of the "Any" extension
+dotnet_diagnostic.S6605.severity = none
+
+# S6608: Prefer indexing instead of "Enumerable" methods on types implementing "IList"
+dotnet_diagnostic.S6608.severity = none
+
+# MEN007: Use a single return
+dotnet_diagnostic.MEN007.severity = none
 
 # MEN016: Avoid top-level statements
 dotnet_diagnostic.MEN016.severity = none
