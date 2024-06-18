@@ -25,10 +25,11 @@ internal sealed class Client : IClient, INodeCallback
 
     public Client(ApplicationBase application, ApplicationOptions options)
     {
+        _logger = application.Logger;
+        _logger.Debug("Client is creating...: {Address}", options.PrivateKey.Address);
         _application = application;
         _nodeEndPoint = options.NodeEndPoint;
         _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
-        _logger = application.Logger;
         _info = new() { Address = options.PrivateKey.PublicKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
         _logger.Debug("Client is created: {Address}", Address);
@@ -53,7 +54,7 @@ internal sealed class Client : IClient, INodeCallback
     public EndPoint NodeEndPoint
     {
         get => _nodeEndPoint ??
-            throw new InvalidOperationException("NodeEndPoint is not initialized.");
+            throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");
         set
         {
             if (IsRunning == true)
@@ -76,7 +77,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_remoteNodeContext != null)
+        if (_remoteNodeContext is not null)
         {
             throw new InvalidOperationException("The client is already running.");
         }
@@ -94,7 +95,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_remoteNodeContext == null)
+        if (_remoteNodeContext is null)
         {
             throw new InvalidOperationException("The client is not running.");
         }
@@ -144,7 +145,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public async ValueTask DisposeAsync()
     {
-        if (_remoteNodeContext != null)
+        if (_remoteNodeContext is not null)
         {
             _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
             await _remoteNodeContext.CloseAsync(_closeToken);
@@ -169,7 +170,7 @@ internal sealed class Client : IClient, INodeCallback
 
     private void RemoteNodeContext_Closed(object? sender, EventArgs e)
     {
-        if (_remoteNodeContext != null)
+        if (_remoteNodeContext is not null)
         {
             _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
             _remoteNodeContext = null;

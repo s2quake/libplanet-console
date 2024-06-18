@@ -75,13 +75,8 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     public abstract object? GetService(Type serviceType);
 
-    protected virtual async Task OnRunAsync(CancellationToken cancellationToken)
-    {
-        await ApplicationServices.InitializeAsync(this, cancellationToken: default);
-    }
+    protected virtual Task OnRunAsync(CancellationToken cancellationToken)
+        => ApplicationServices.InitializeAsync(this, cancellationToken: default);
 
-    protected virtual async ValueTask OnDisposeAsync()
-    {
-        await ValueTask.CompletedTask;
-    }
+    protected virtual ValueTask OnDisposeAsync() => ValueTask.CompletedTask;
 }

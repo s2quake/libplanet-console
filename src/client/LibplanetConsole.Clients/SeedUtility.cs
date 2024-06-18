@@ -14,10 +14,20 @@ internal static class SeedUtility
         {
             EndPoint = seedEndPoint,
         };
-
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
         var nodeEndPoint = await remoteService.Service.GetNodeEndPointAsync(cancellationToken);
         await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
         return EndPointUtility.Parse(nodeEndPoint);
+    }
+
+    public static async Task<EndPoint> GetNodeEndPointAsync(
+        EndPoint nodEndPoint, bool isSeed, CancellationToken cancellationToken)
+    {
+        if (isSeed == true)
+        {
+            return await GetNodeEndPointAsync(nodEndPoint, cancellationToken);
+        }
+
+        return nodEndPoint;
     }
 }

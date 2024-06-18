@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.RuntimeInformation;
 
 namespace LibplanetConsole.Consoles;
 
-internal static class ProcessUtility
+internal static class ProcessEnvironment
 {
     private const string WorkspacePathVariableName = "LIBPLANET_CONSOLE_WORKSPACE_PATH";
     private const string NodePathVariableName = "LIBPLANET_CONSOLE_NODE_PATH";
@@ -101,7 +101,7 @@ internal static class ProcessUtility
         }
     }
 
-    public static string PublishExtension => IsWindows() ? ".exe" : ".dll";
+    public static string PublishExtension => IsWindows ? ".exe" : ".dll";
 
     public static string DotnetPath
     {
@@ -155,6 +155,16 @@ internal static class ProcessUtility
             throw new InvalidOperationException($"Environment variable '{variable}' is not found.");
         }
     }
+
+    public static bool IsOSX => IsOSPlatform(OSPlatform.OSX);
+
+    public static bool IsWindows => IsOSPlatform(OSPlatform.Windows);
+
+    public static bool IsLinux => IsOSPlatform(OSPlatform.Linux);
+
+    public static bool IsArm64 => OSArchitecture == Architecture.Arm64;
+
+    public static bool IsDotnetRuntime => Environment.ProcessPath == DotnetPath;
 
     private static bool IsInProject
     {
@@ -237,77 +247,6 @@ internal static class ProcessUtility
         }
     }
 
-    public static string GetAssemblyLocation(Assembly assembly)
-    {
-        if (assembly.Location is { } assemblyLocation)
-        {
-            return assemblyLocation;
-        }
-
-        return Path.Combine(AppContext.BaseDirectory, assembly.GetName().Name!);
-    }
-
-    public static string GetNodePath()
-    {
-        try
-        {
-            return NodePath;
-        }
-        catch (Exception e)
-        {
-            var message =
-                $"Use 'src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node{PublishExtension}' by setting the directory path " +
-                $"in environment variable '{WorkspacePathVariableName}', or " +
-                $"set the path to the node executable DLL file directly in environment variable " +
-                $"'{NodePathVariableName}'.";
-            throw new InvalidOperationException(message, innerException: e);
-        }
-    }
-
-    public static string GetClientPath()
-    {
-        try
-        {
-            return ClientPath;
-        }
-        catch (Exception e)
-        {
-            var message =
-                $"Use 'src/client/LibplanetConsole.Clients.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-client{PublishExtension}' by setting the directory path " +
-                $"in environment variable '{WorkspacePathVariableName}', or " +
-                $"set the path to the node executable DLL file directly in environment variable " +
-                $"'{ClientPathVariableName}'.";
-            throw new InvalidOperationException(message, innerException: e);
-        }
-    }
-
-    public static bool IsOSX()
-    {
-        return IsOSPlatform(OSPlatform.OSX);
-    }
-
-    public static bool IsWindows()
-    {
-        return IsOSPlatform(OSPlatform.Windows);
-    }
-
-    public static bool IsLinux()
-    {
-        return IsOSPlatform(OSPlatform.Linux);
-    }
-
-    public static bool IsArm64()
-    {
-        return OSArchitecture == Architecture.Arm64;
-    }
-
-    public static bool IsDotnetRuntime()
-    {
-        return Environment.ProcessPath == DotnetPath;
-    }
-
     public static ImmutableArray<string> GetArguments(
             IEnumerable<IProcessArgumentProvider> argumentProviders, object obj)
     {
@@ -331,13 +270,13 @@ internal static class ProcessUtility
         var processStartInfo = new ProcessStartInfo();
         var process = new Process { StartInfo = processStartInfo };
 
-        if (IsOSPlatform(OSPlatform.Windows) == true)
+        if (IsWindows == true)
         {
             processStartInfo.FileName = "powershell";
             processStartInfo.Arguments
                 = "-Command 'Get-Command dotnet | Select-Object -ExpandProperty Source'";
         }
-        else if (IsOSPlatform(OSPlatform.OSX) == true || IsOSPlatform(OSPlatform.Linux) == true)
+        else if (IsOSX == true || IsLinux == true)
         {
             processStartInfo.FileName = "which";
             processStartInfo.Arguments = "dotnet";

@@ -112,9 +112,7 @@ internal sealed class Client : IClient, IClientCallback
     }
 
     public override string ToString()
-    {
-        return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
-    }
+        => $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
 
     public byte[] Sign(object obj)
     {

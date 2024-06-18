@@ -46,10 +46,7 @@ public static class DnsEndPointUtility
         return false;
     }
 
-    public static DnsEndPoint Next()
-    {
-        return new DnsEndPoint($"{IPAddress.Loopback}", PortUtility.GetPort());
-    }
+    public static DnsEndPoint Next() => new($"{IPAddress.Loopback}", PortUtility.GetPort());
 
     public static void Release(ref DnsEndPoint? endPoint)
     {

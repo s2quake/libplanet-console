@@ -364,7 +364,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        var nodeOptions = _seedEndPoint != null
+        var nodeOptions = _seedEndPoint is not null
             ? await NodeOptions.CreateAsync(_seedEndPoint, cancellationToken)
             : NodeOptions;
         _nodeOptions = nodeOptions;

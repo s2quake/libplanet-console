@@ -1,7 +1,7 @@
 using System.Net;
 using System.Security;
 using LibplanetConsole.Common;
-using static LibplanetConsole.Consoles.ProcessUtility;
+using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
@@ -17,8 +17,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
 
     public bool ManualStart { get; set; }
 
-    protected override string FileName
-        => IsDotnetRuntime() ? DotnetPath : ClientPath;
+    protected override string FileName => IsDotnetRuntime ? DotnetPath : ClientPath;
 
     protected override string[] Arguments
     {
@@ -33,7 +32,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
                 PrivateKeyUtility.ToString(privateKey),
             };
 
-            if (IsDotnetRuntime() == true)
+            if (IsDotnetRuntime == true)
             {
                 argumentList.Insert(0, ClientPath);
             }
@@ -45,11 +44,10 @@ internal sealed class ClientProcess(Client client) : ProcessBase
 
             if (LogDirectory != string.Empty)
             {
+                var logFilename = $"client-{(ShortAddress)privateKey.Address}.log";
+                var logPath = Path.Combine(LogDirectory, logFilename);
                 argumentList.Add("--log-path");
-                argumentList.Add(
-                    Path.Combine(
-                        LogDirectory,
-                        $"client-{(ShortAddress)privateKey.Address}.log"));
+                argumentList.Add(logPath);
             }
 
             if (NodeEndPoint is { } nodeEndPoint)

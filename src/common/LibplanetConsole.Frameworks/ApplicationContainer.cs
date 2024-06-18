@@ -54,13 +54,14 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
         }
     }
 
-#pragma warning disable S2953 // Methods named "Dispose" should implement "IDisposable.Dispose"
+    // Methods named "Dispose" should implement "IDisposable.Dispose"
+#pragma warning disable S2953
     [Obsolete("Use DisposeAsync instead.")]
     public new void Dispose()
     {
         throw new NotSupportedException();
     }
-#pragma warning restore S2953 // Methods named "Dispose" should implement "IDisposable.Dispose"
+#pragma warning restore S2953
 
     protected override IEnumerable<Export>? GetExportsCore(
         ImportDefinition definition, AtomicComposition? atomicComposition)
@@ -94,12 +95,5 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
     }
 
     private bool ContainsExport(IAsyncDisposable asyncDisposable)
-    {
-        if (_owner == asyncDisposable)
-        {
-            return true;
-        }
-
-        return _instanceHash.Contains(asyncDisposable);
-    }
+        => _owner == asyncDisposable || _instanceHash.Contains(asyncDisposable);
 }

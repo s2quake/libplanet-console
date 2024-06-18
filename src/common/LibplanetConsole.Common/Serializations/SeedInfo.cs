@@ -12,19 +12,13 @@ public readonly record struct SeedInfo
 
     public string ConsensusSeedPeer { get; init; }
 
-    public SeedInfo Encrypt(PublicKey publicKey)
+    public SeedInfo Encrypt(PublicKey publicKey) => this with
     {
-        return this with
-        {
-            GenesisInfo = GenesisInfo.Encrypt(publicKey),
-        };
-    }
+        GenesisInfo = GenesisInfo.Encrypt(publicKey),
+    };
 
-    public SeedInfo Decrypt(PrivateKey privateKey)
+    public SeedInfo Decrypt(PrivateKey privateKey) => this with
     {
-        return this with
-        {
-            GenesisInfo = GenesisInfo.Decrypt(privateKey),
-        };
-    }
+        GenesisInfo = GenesisInfo.Decrypt(privateKey),
+    };
 }

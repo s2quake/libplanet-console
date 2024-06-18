@@ -15,10 +15,10 @@ internal sealed class Application(ApplicationOptions options)
         if (_options.NoREPL != true)
         {
             var sw = new StringWriter();
-            var commandContext = this.GetService<CommandContext>();
             var startupCondition = _options.ManualStart == true && _options.ParentProcessId == 0;
-            commandContext.Out = sw;
+            var commandContext = this.GetService<CommandContext>();
             var terminal = this.GetService<SystemTerminal>();
+            commandContext.Out = sw;
             await base.OnRunAsync(cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);

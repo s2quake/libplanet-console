@@ -21,13 +21,7 @@ internal sealed class ExampleClient(
 
     private IExampleNodeService Server => _remoteNodeService.Service;
 
-    public void Subscribe()
-    {
-        Server.Subscribe(AddressUtility.ToString(Address));
-    }
+    public void Subscribe() => Server.Subscribe(AddressUtility.ToString(Address));
 
-    public void Unsubscribe()
-    {
-        Server.Unsubscribe(AddressUtility.ToString(Address));
-    }
+    public void Unsubscribe() => Server.Unsubscribe(AddressUtility.ToString(Address));
 }

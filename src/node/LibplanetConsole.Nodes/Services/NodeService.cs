@@ -45,9 +45,7 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     }
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
-    {
-        return Task.Run(() => _node.GetNextNonce(address), cancellationToken);
-    }
+        => Task.Run(() => _node.GetNextNonce(address), cancellationToken);
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {

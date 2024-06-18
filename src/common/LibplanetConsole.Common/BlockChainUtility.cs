@@ -20,8 +20,8 @@ namespace LibplanetConsole.Common;
 
 public static class BlockChainUtility
 {
-    public static readonly PrivateKey AppProtocolKey = PrivateKey.FromString(
-        "2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
+    public static readonly PrivateKey AppProtocolKey
+        = PrivateKey.FromString("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
     public static readonly AppProtocolVersion AppProtocolVersion
         = AppProtocolVersion.Sign(AppProtocolKey, 1);

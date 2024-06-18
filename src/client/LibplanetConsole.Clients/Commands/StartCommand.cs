@@ -24,24 +24,12 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
     protected override async Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
-        client.NodeEndPoint = await GetNodeEndPointAsync(cancellationToken);
+        var isSeed = IsSeed;
+        var nodeEndPoint = NodeEndPoint != string.Empty
+            ? EndPointUtility.Parse(NodeEndPoint)
+            : client.NodeEndPoint;
+        client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(
+            nodeEndPoint, isSeed, cancellationToken);
         await client.StartAsync(cancellationToken);
-    }
-
-    private async Task<EndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
-    {
-        if (NodeEndPoint != string.Empty)
-        {
-            var nodeEndPoint = EndPointUtility.Parse(NodeEndPoint);
-            if (IsSeed == true)
-            {
-                return await SeedUtility.GetNodeEndPointAsync(
-                    nodeEndPoint, cancellationToken);
-            }
-
-            return nodeEndPoint;
-        }
-
-        return client.NodeEndPoint;
     }
 }

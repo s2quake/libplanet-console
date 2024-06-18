@@ -15,16 +15,16 @@ public static class AddressUtility
     public static Address Derive(Address address, byte[] key)
     {
         var bytes = address.ToByteArray();
-        byte[] hashed;
-
-        using (var hmac = new HMACSHA1(key))
-        {
-            hashed = hmac.ComputeHash(bytes);
-        }
-
+        var hashed = GetHahsed(key, bytes);
         return new Address(hashed);
+
+        static byte[] GetHahsed(byte[] key, byte[] bytes)
+        {
+            using var hmac = new HMACSHA1(key);
+            return hmac.ComputeHash(bytes);
+        }
     }
 
-    public static Address Derive(Address address, string key) =>
-        Derive(address, Encoding.UTF8.GetBytes(key));
+    public static Address Derive(Address address, string key)
+        => Derive(address, Encoding.UTF8.GetBytes(key));
 }

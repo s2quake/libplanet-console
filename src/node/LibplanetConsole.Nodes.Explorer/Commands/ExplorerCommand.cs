@@ -20,7 +20,7 @@ internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : Comman
             EndPoint = EndPointUtility.ParseWithFallback(endPoint),
         };
         await explorerNode.StartAsync(explorerOptions, cancellationToken);
-        Console.WriteLine($"http://{explorerOptions.EndPoint}/ui/playground");
+        await Console.Out.WriteLineAsync($"http://{explorerOptions.EndPoint}/ui/playground");
     }
 
     [CommandMethod]

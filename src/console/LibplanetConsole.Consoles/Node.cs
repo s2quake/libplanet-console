@@ -236,12 +236,8 @@ internal sealed class Node : INode, INodeCallback
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-        if (_closeToken != Guid.Empty)
-        {
-            await _remoteServiceContext.CloseAsync(_closeToken);
-            _closeToken = Guid.Empty;
-        }
-
+        await _remoteServiceContext.CloseAsync(_closeToken);
+        _closeToken = Guid.Empty;
         IsRunning = false;
         await _container.DisposeAsync();
         _isDisposed = true;
