@@ -2,7 +2,8 @@ namespace LibplanetConsole.Common.Threading;
 
 public static class TaskUtility
 {
-    public static async Task<bool> Delay(int millisecondsDelay, CancellationToken cancellationToken)
+    public static async Task<bool> TryDelay(
+        int millisecondsDelay, CancellationToken cancellationToken)
     {
         try
         {

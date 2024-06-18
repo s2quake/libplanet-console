@@ -84,13 +84,12 @@ public abstract class KeyCommandBase : CommandMethodBase
         {
             return privateKey.Address;
         }
-        else if (PublicKeyUtility.TryParse(key, out var publicKey) == true)
+
+        if (PublicKeyUtility.TryParse(key, out var publicKey) == true)
         {
             return publicKey.Address;
         }
-        else
-        {
-            throw new ArgumentException("Invalid key.", nameof(key));
-        }
+
+        throw new ArgumentException("Invalid key.", nameof(key));
     }
 }

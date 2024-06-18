@@ -41,7 +41,5 @@ public static class BoundPeerUtility
     }
 
     public static BoundPeer Create(PublicKey publicKey, string endPoint)
-    {
-        return new BoundPeer(publicKey, DnsEndPointUtility.Parse(endPoint));
-    }
+        => new(publicKey, DnsEndPointUtility.Parse(endPoint));
 }

@@ -5,10 +5,7 @@ namespace LibplanetConsole.Consoles;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(EndPoint endPoint)
-    {
-        EndPoint = endPoint;
-    }
+    public ApplicationOptions(EndPoint endPoint) => EndPoint = endPoint;
 
     public EndPoint EndPoint { get; }
 

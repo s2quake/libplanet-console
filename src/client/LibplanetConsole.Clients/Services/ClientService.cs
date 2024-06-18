@@ -47,7 +47,6 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
             {
                 Value = transactionOptions.Text,
             };
-
             return await _client.SendTransactionAsync([action], cancellationToken);
         }
 

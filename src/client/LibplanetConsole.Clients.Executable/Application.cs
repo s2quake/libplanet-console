@@ -14,10 +14,10 @@ internal sealed class Application(ApplicationOptions options) : ApplicationBase(
         if (_options.NoREPL != true)
         {
             var sw = new StringWriter();
-            var commandContext = this.GetService<CommandContext>();
             var startupCondition = _options.NodeEndPoint is null && _options.ParentProcessId == 0;
-            commandContext.Out = sw;
+            var commandContext = this.GetService<CommandContext>();
             var terminal = this.GetService<SystemTerminal>();
+            commandContext.Out = sw;
             await base.OnRunAsync(cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
@@ -55,7 +55,7 @@ internal sealed class Application(ApplicationOptions options) : ApplicationBase(
 
     private async Task WaitInputAsync()
     {
-        Console.WriteLine("Press any key to exit.");
+        await Console.Out.WriteLineAsync("Press any key to exit.");
         await Task.Run(() => Console.ReadKey(intercept: true));
         Cancel();
     }

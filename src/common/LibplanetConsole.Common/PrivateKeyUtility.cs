@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Libplanet.Common;
 using Libplanet.Crypto;
+using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Common;
 
@@ -13,7 +13,8 @@ public static class PrivateKeyUtility
 {
     public static PrivateKey Create(string name)
     {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(name));
+        var source = Encoding.UTF8.GetBytes(name);
+        var bytes = SHA256.HashData(source);
         return new(bytes);
     }
 
@@ -41,29 +42,17 @@ public static class PrivateKeyUtility
 
     public static PrivateKey FromSecureString(SecureString secureString)
     {
-        var ptr = IntPtr.Zero;
-        try
-        {
-            ptr = Marshal.SecureStringToGlobalAllocUnicode(secureString);
-            var text = Marshal.PtrToStringUni(ptr)!;
-            var bytes = ByteUtil.ParseHex(text);
-            return new(bytes);
-        }
-        finally
-        {
-            Marshal.ZeroFreeGlobalAllocUnicode(ptr);
-        }
+        using var ptr = new StringPointer(secureString);
+        var text = ptr.GetString();
+        var bytes = ByteUtil.ParseHex(text);
+        return new(bytes);
     }
 
     public static SecureString ToSecureString(PrivateKey privateKey)
     {
         var secureString = new SecureString();
         var text = ByteUtil.Hex(privateKey.ByteArray);
-        foreach (var item in text)
-        {
-            secureString.AppendChar(item);
-        }
-
+        secureString.AppendString(text);
         return secureString;
     }
 
@@ -76,15 +65,11 @@ public static class PrivateKeyUtility
     }
 
     public static T Decrypt<T>(PrivateKey privateKey, string text)
-        where T : notnull
-    {
-        if (Decrypt(privateKey, text, typeof(T)) is T result)
+        where T : notnull => Decrypt(privateKey, text, typeof(T)) switch
         {
-            return result;
-        }
-
-        throw new InvalidOperationException($"Failed to decrypt {text} as {typeof(T)}.");
-    }
+            T result => result,
+            _ => throw new InvalidOperationException($"Failed to decrypt {text} as {typeof(T)}."),
+        };
 
     public static byte[] Sign(PrivateKey privateKey, object obj)
     {

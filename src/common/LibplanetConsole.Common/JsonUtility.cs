@@ -40,7 +40,12 @@ public static class JsonUtility
 
     public static T DeserializeObject<T>(string value)
     {
-        return JsonSerializer.Deserialize<T>(value)!;
+        if (JsonSerializer.Deserialize<T>(value) is T t)
+        {
+            return t;
+        }
+
+        throw new ArgumentException("Cannot deserialize the object.", nameof(value));
     }
 
     private static bool SupportsJQ()

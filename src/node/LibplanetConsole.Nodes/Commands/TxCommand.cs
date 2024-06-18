@@ -20,7 +20,6 @@ internal sealed class TxCommand(INode node) : CommandAsyncBase
         {
             Value = Text,
         };
-
         await node.AddTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{(ShortAddress)node.Address}: {Text}");
     }

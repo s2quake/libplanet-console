@@ -11,10 +11,10 @@ internal sealed class NodeProcessArgumentProvider : ProcessArgumentProviderBase<
         var contents = obj.GetService<IEnumerable<INodeContent>>();
         foreach (var content in contents)
         {
-            var contentArguments = ProcessUtility.GetArguments(serviceProvider: obj, obj: content);
-            foreach (var item in contentArguments)
+            var args = ProcessEnvironment.GetArguments(serviceProvider: obj, obj: content);
+            foreach (var arg in args)
             {
-                yield return item;
+                yield return arg;
             }
         }
     }

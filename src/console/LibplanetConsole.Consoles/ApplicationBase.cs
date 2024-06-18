@@ -76,11 +76,11 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         if (address == string.Empty)
         {
             client = _clients.Current;
-            return client != null;
+            return client is not null;
         }
 
         client = _clients.SingleOrDefault<Client>(item => IsEquals(item, address));
-        return client != null;
+        return client is not null;
     }
 
     public bool TryGetNode(string address, [MaybeNullWhen(false)] out INode node)
@@ -88,17 +88,16 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         if (address == string.Empty)
         {
             node = _nodes.Current;
-            return node != null;
+            return node is not null;
         }
 
         node = _nodes.SingleOrDefault<Node>(item => IsEquals(item, address));
-        return node != null;
+        return node is not null;
     }
 
     public IAddressable GetAddressable(string address)
     {
-        return _nodes.Concat<IAddressable>(_clients)
-                     .Single(item => IsEquals(item, address));
+        return _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
     }
 
     public override object? GetService(Type serviceType)

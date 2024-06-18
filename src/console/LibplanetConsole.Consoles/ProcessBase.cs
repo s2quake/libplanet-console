@@ -6,7 +6,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Frameworks;
-using static LibplanetConsole.Consoles.ProcessUtility;
+using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
@@ -139,7 +139,7 @@ internal abstract class ProcessBase : IAsyncDisposable
     {
         var startInfo = GetProcessStartInfo();
         startInfo.CreateNoWindow = NewWindow != true;
-        startInfo.UseShellExecute = IsWindows() == true && NewWindow == true;
+        startInfo.UseShellExecute = IsWindows == true && NewWindow == true;
         startInfo.RedirectStandardOutput = NewWindow != true;
         startInfo.RedirectStandardError = NewWindow != true;
         startInfo.WorkingDirectory = Directory.GetCurrentDirectory();
@@ -150,17 +150,17 @@ internal abstract class ProcessBase : IAsyncDisposable
     {
         if (NewWindow == true)
         {
-            if (IsOSX() == true)
+            if (IsOSX == true)
             {
                 return GetProcessStartInfoOnMacOS();
             }
 
-            if (IsWindows() == true)
+            if (IsWindows == true)
             {
                 return GetProcessStartInfoOnWindows();
             }
 
-            if (IsLinux() == true)
+            if (IsLinux == true)
             {
                 return GetProcessStartInfoOnLinux();
             }
@@ -263,7 +263,7 @@ internal abstract class ProcessBase : IAsyncDisposable
                 break;
             }
 
-            await TaskUtility.Delay(100, cancellationToken);
+            await TaskUtility.TryDelay(100, cancellationToken);
         }
     }
 }

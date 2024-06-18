@@ -1,7 +1,7 @@
 using System.Net;
 using System.Security;
 using LibplanetConsole.Common;
-using static LibplanetConsole.Consoles.ProcessUtility;
+using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
@@ -19,7 +19,7 @@ internal sealed class NodeProcess(Node node) : ProcessBase
 
     public bool ManualStart { get; set; }
 
-    protected override string FileName => IsDotnetRuntime() ? DotnetPath : NodePath;
+    protected override string FileName => IsDotnetRuntime ? DotnetPath : NodePath;
 
     protected override string[] Arguments
     {
@@ -34,7 +34,7 @@ internal sealed class NodeProcess(Node node) : ProcessBase
                 PrivateKeyUtility.ToString(privateKey),
             };
 
-            if (IsDotnetRuntime() == true)
+            if (IsDotnetRuntime == true)
             {
                 argumentList.Insert(0, NodePath);
             }
@@ -46,18 +46,17 @@ internal sealed class NodeProcess(Node node) : ProcessBase
 
             if (StoreDirectory != string.Empty)
             {
+                var storePath = Path.Combine(StoreDirectory, (ShortAddress)privateKey.Address);
                 argumentList.Add("--store-path");
-                argumentList.Add(
-                    Path.Combine(StoreDirectory, (ShortAddress)privateKey.Address));
+                argumentList.Add(storePath);
             }
 
             if (LogDirectory != string.Empty)
             {
+                var logFilename = $"node-{(ShortAddress)privateKey.Address}.log";
+                var logPath = Path.Combine(LogDirectory, logFilename);
                 argumentList.Add("--log-path");
-                argumentList.Add(
-                    Path.Combine(
-                        LogDirectory,
-                        $"node-{(ShortAddress)privateKey.Address}.log"));
+                argumentList.Add(logPath);
             }
 
             if (NodeEndPoint is { } nodeEndPoint)

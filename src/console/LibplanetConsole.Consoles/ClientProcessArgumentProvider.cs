@@ -11,10 +11,10 @@ internal sealed class ClientProcessArgumentProvider : ProcessArgumentProviderBas
         var contents = obj.GetService<IEnumerable<IClientContent>>();
         foreach (var content in contents)
         {
-            var contentArguments = ProcessUtility.GetArguments(serviceProvider: obj, obj: content);
-            foreach (var item in contentArguments)
+            var args = ProcessEnvironment.GetArguments(serviceProvider: obj, obj: content);
+            foreach (var arg in args)
             {
-                yield return item;
+                yield return arg;
             }
         }
     }
