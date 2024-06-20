@@ -22,19 +22,23 @@ public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
 
     protected virtual bool CanClose => false;
 
-    public Task InvokeAsync(Action action)
+    public Task InvokeAsync(Action action, CancellationToken cancellationToken)
     {
-        return Task.Run(() => _synchronizationContext.Send((state) => action(), null));
+        return Task.Run(Action, cancellationToken);
+
+        void Action() => _synchronizationContext.Send((state) => action(), null);
     }
 
-    public Task<T> InvokeAsync<T>(Func<T> func)
+    public Task<T> InvokeAsync<T>(Func<T> func, CancellationToken cancellationToken)
     {
-        return Task.Run(() =>
+        return Task.Run(Func, cancellationToken);
+
+        T Func()
         {
             T result = default!;
             _synchronizationContext.Send((state) => result = func(), null);
             return result;
-        });
+        }
     }
 
     public void Cancel()

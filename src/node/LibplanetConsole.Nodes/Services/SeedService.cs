@@ -12,29 +12,29 @@ internal sealed class SeedService(IApplication application, INode node)
     : LocalService<ISeedService>, ISeedService
 {
     public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
-    {
-        return application.InvokeAsync(() => application.Info.EndPoint);
-    }
+        => application.InvokeAsync(() => application.Info.EndPoint, cancellationToken);
 
-    public async Task<SeedInfo> GetSeedAsync(
+    public Task<SeedInfo> GetSeedAsync(PublicKey publicKey, CancellationToken cancellationToken)
+        => node.IsRunning switch
+        {
+            true => GetActualSeedAsync(publicKey, cancellationToken),
+            _ => Task.Run(() => SeedInfo.Empty),
+        };
+
+    private Task<SeedInfo> GetActualSeedAsync(
         PublicKey publicKey, CancellationToken cancellationToken)
     {
-        if (node.IsRunning == true)
-        {
-            var blocksyncSeedPeer = node.BlocksyncSeedPeer;
-            var consensusSeedPeer = node.ConsensusSeedPeer;
-            var genesisOptions = (GenesisInfo)node.NodeOptions.GenesisOptions;
+        var blocksyncSeedPeer = node.BlocksyncSeedPeer;
+        var consensusSeedPeer = node.ConsensusSeedPeer;
+        var genesisOptions = (GenesisInfo)node.NodeOptions.GenesisOptions;
 
-            return await application.InvokeAsync(() => new SeedInfo
-            {
-                GenesisInfo = genesisOptions.Encrypt(publicKey),
-                BlocksyncSeedPeer = BoundPeerUtility.ToString(blocksyncSeedPeer),
-                ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
-            });
-        }
-        else
+        return application.InvokeAsync(Func, cancellationToken);
+
+        SeedInfo Func() => new()
         {
-            return SeedInfo.Empty;
-        }
+            GenesisInfo = genesisOptions.Encrypt(publicKey),
+            BlocksyncSeedPeer = BoundPeerUtility.ToString(blocksyncSeedPeer),
+            ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
+        };
     }
 }
