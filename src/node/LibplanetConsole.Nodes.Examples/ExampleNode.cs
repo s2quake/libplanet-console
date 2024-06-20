@@ -23,9 +23,7 @@ internal sealed class ExampleNode(IApplication application) : IExampleNode
         = ApplicationSettingsParser.Peek<ExampleNodeSettings>().IsExample;
 
     public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
-    {
-        return _application.InvokeAsync(() => _addresses.ToArray());
-    }
+        => _application.InvokeAsync(() => _addresses.ToArray(), cancellationToken);
 
     public void Subscribe(Address address)
     {

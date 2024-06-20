@@ -55,7 +55,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
             ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
         };
 
-        return await _application.InvokeAsync(() => seedInfo);
+        return await _application.InvokeAsync(() => seedInfo, cancellationToken);
     }
 
     public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
@@ -63,7 +63,9 @@ internal sealed class SeedService : LocalService<ISeedService>,
         if (_application.GetService(typeof(NodeCollection)) is NodeCollection nodes)
         {
             var node = nodes.RandomNode();
-            return _application.InvokeAsync(() => EndPointUtility.ToString(node.EndPoint));
+            return _application.InvokeAsync(Func, cancellationToken);
+
+            string Func() => EndPointUtility.ToString(node.EndPoint);
         }
 
         throw new InvalidOperationException("NodeCollection is not found.");

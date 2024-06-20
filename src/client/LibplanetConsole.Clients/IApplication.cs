@@ -6,9 +6,9 @@ public interface IApplication : IAsyncDisposable, IServiceProvider
 {
     ApplicationInfo Info { get; }
 
-    Task InvokeAsync(Action action);
+    Task InvokeAsync(Action action, CancellationToken cancellationToken);
 
-    Task<T> InvokeAsync<T>(Func<T> func);
+    Task<T> InvokeAsync<T>(Func<T> func, CancellationToken cancellationToken);
 
     void Cancel();
 }
