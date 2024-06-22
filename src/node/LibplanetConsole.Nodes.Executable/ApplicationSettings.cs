@@ -53,13 +53,13 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
+        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
         var privateKey = PrivateKeyUtility.ParseWithFallback(settings.PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = settings.ParentProcessId,
             ManualStart = settings.ManualStart,
-            NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(settings.NodeEndPoint),
+            NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
             GenesisValidators = settings.GetGenesisValidators(privateKey.PublicKey),
             StorePath = GetFullPath(settings.StorePath),
             LogPath = GetFullPath(settings.LogPath),

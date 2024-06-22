@@ -43,8 +43,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
-            EndPoint = EndPointUtility.ToString(_clientServiceContext.EndPoint),
-            NodeEndPoint = EndPointUtility.ToSafeString(options.NodeEndPoint),
+            EndPoint = _clientServiceContext.EndPoint.ToString(),
+            NodeEndPoint = AppEndPoint.ToString(options.NodeEndPoint),
             LogPath = options.LogPath,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
@@ -60,7 +60,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public EndPoint EndPoint => _clientServiceContext.EndPoint;
+    public AppEndPoint EndPoint => _clientServiceContext.EndPoint;
 
     public ApplicationInfo Info => _info;
 
@@ -137,7 +137,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     private async Task AutoStartAsync(CancellationToken cancellationToken)
     {
-        if (EndPointUtility.TryParse(_info.NodeEndPoint, out var nodeEndPoint) == true)
+        if (AppEndPoint.TryParse(_info.NodeEndPoint, out var nodeEndPoint) == true)
         {
             var isSeed = _isSeed;
             _client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(

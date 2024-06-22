@@ -14,13 +14,13 @@ namespace LibplanetConsole.Clients.Explorer;
 
 public sealed record class ExplorerOptions
 {
-    public required EndPoint EndPoint { get; init; }
+    public required AppEndPoint EndPoint { get; init; }
 
     public static implicit operator ExplorerOptions(ExplorerOptionsInfo info)
     {
         return new ExplorerOptions
         {
-            EndPoint = EndPointUtility.Parse(info.EndPoint),
+            EndPoint = AppEndPoint.Parse(info.EndPoint),
         };
     }
 
@@ -28,7 +28,7 @@ public sealed record class ExplorerOptions
     {
         return new ExplorerOptionsInfo
         {
-            EndPoint = EndPointUtility.ToString(explorerOptions.EndPoint),
+            EndPoint = explorerOptions.EndPoint.ToString(),
         };
     }
 }

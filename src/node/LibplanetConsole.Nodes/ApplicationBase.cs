@@ -44,8 +44,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
-            EndPoint = EndPointUtility.ToString(_nodeContext.EndPoint),
-            NodeEndPoint = EndPointUtility.ToSafeString(options.NodeEndPoint),
+            EndPoint = _nodeContext.EndPoint.ToString(),
+            NodeEndPoint = AppEndPoint.ToString(options.NodeEndPoint),
             StorePath = options.StorePath,
             LogPath = options.LogPath,
         };
@@ -62,7 +62,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public EndPoint EndPoint => _nodeContext.EndPoint;
+    public AppEndPoint EndPoint => _nodeContext.EndPoint;
 
     public ApplicationInfo Info => _info;
 

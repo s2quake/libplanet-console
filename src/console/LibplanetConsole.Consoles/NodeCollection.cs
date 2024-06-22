@@ -211,7 +211,7 @@ internal sealed class NodeCollection(
             };
             return new Node(_application, privateKey, nodeOptions)
             {
-                EndPoint = DnsEndPointUtility.Next(),
+                EndPoint = AppEndPoint.Next(),
             };
         }
     }

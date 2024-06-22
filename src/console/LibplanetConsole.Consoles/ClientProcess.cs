@@ -7,11 +7,11 @@ namespace LibplanetConsole.Consoles;
 
 internal sealed class ClientProcess(Client client) : ProcessBase
 {
-    public required EndPoint EndPoint { get; init; }
+    public required AppEndPoint EndPoint { get; init; }
 
     public required SecureString PrivateKey { get; init; }
 
-    public EndPoint? NodeEndPoint { get; set; }
+    public AppEndPoint? NodeEndPoint { get; set; }
 
     public string LogDirectory { get; set; } = string.Empty;
 
@@ -27,7 +27,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
             var argumentList = new List<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(EndPoint),
+                EndPoint.ToString(),
                 "--private-key",
                 PrivateKeyUtility.ToString(privateKey),
             };
@@ -53,7 +53,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
             if (NodeEndPoint is { } nodeEndPoint)
             {
                 argumentList.Add("--node-end-point");
-                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+                argumentList.Add(nodeEndPoint.ToString());
             }
 
             if (Detach != true)

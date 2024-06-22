@@ -18,7 +18,7 @@ internal sealed class Client : IClient, INodeCallback
     private readonly ApplicationBase _application;
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
-    private EndPoint? _nodeEndPoint;
+    private AppEndPoint? _nodeEndPoint;
     private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
     private ClientInfo _info;
@@ -51,7 +51,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public NodeInfo NodeInfo { get; private set; }
 
-    public EndPoint NodeEndPoint
+    public AppEndPoint NodeEndPoint
     {
         get => _nodeEndPoint ??
             throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");

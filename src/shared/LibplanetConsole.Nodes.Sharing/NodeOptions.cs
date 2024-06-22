@@ -60,7 +60,7 @@ public sealed record class NodeOptions
     }
 
     public static async Task<NodeOptions> CreateAsync(
-        EndPoint seedEndPoint, CancellationToken cancellationToken)
+        AppEndPoint seedEndPoint, CancellationToken cancellationToken)
     {
         var remoteService = new RemoteService<ISeedService>();
         var remoteServiceContext = new RemoteServiceContext([remoteService])

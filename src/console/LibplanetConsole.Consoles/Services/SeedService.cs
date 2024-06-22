@@ -65,7 +65,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
             var node = nodes.RandomNode();
             return _application.InvokeAsync(Func, cancellationToken);
 
-            string Func() => EndPointUtility.ToString(node.EndPoint);
+            string Func() => node.EndPoint.ToString();
         }
 
         throw new InvalidOperationException("NodeCollection is not found.");

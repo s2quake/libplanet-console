@@ -44,7 +44,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
-            EndPoint = EndPointUtility.ToString(_consoleContext.EndPoint),
+            EndPoint = _consoleContext.EndPoint.ToString(),
             StoreDirectory = options.StoreDirectory,
             LogDirectory = options.LogDirectory,
             NoProcess = options.NoProcess,

@@ -25,7 +25,7 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 
     bool IsRunning { get; }
 
-    EndPoint EndPoint { get; }
+    AppEndPoint EndPoint { get; }
 
     NodeInfo Info { get; }
 

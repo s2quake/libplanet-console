@@ -25,7 +25,7 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
     {
         var isSeed = IsSeed;
         var nodeEndPoint = NodeEndPoint != string.Empty
-            ? EndPointUtility.Parse(NodeEndPoint)
+            ? AppEndPoint.Parse(NodeEndPoint)
             : client.NodeEndPoint;
         client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(
             nodeEndPoint, isSeed, cancellationToken);

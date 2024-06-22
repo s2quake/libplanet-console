@@ -19,7 +19,7 @@ internal sealed class ExplorerNodeContent
     private readonly RemoteService<IExplorerService, IExplorerCallback> _remoteService;
     private readonly ILogger _logger;
     private readonly ExecutionScope _executionScope = new();
-    private EndPoint _endPoint = DnsEndPointUtility.Next();
+    private AppEndPoint _endPoint = AppEndPoint.Next();
 
     [ImportingConstructor]
     public ExplorerNodeContent(INode node, ILogger logger)
@@ -33,7 +33,7 @@ internal sealed class ExplorerNodeContent
 
     public event EventHandler? Stopped;
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
         get => _endPoint;
         set
@@ -65,10 +65,10 @@ internal sealed class ExplorerNodeContent
 
         using var scope = _executionScope.Enter();
         var nodeAddress = Node.Address;
-        var endPoint = EndPointUtility.ToString(EndPoint);
+        var endPoint = EndPoint.ToString();
         var options = new ExplorerOptionsInfo
         {
-            EndPoint = EndPointUtility.ToString(EndPoint),
+            EndPoint = EndPoint.ToString(),
         };
         Info = await Service.StartAsync(options, cancellationToken);
         IsRunning = true;
@@ -96,7 +96,7 @@ internal sealed class ExplorerNodeContent
         {
             var message = "Explorer is started by the remote service: {NodeAddress} {EndPoint}";
             var nodeAddress = Node.Address;
-            var endPoint = EndPointUtility.ToString(EndPoint);
+            var endPoint = EndPoint.ToString();
             Info = explorerInfo;
             IsRunning = true;
             _logger.Debug(message, nodeAddress, endPoint);

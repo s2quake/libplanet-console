@@ -34,7 +34,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
-    private readonly EndPoint? _seedEndPoint;
+    private readonly AppEndPoint? _seedEndPoint;
     private readonly ManualResetEvent _initializedResetEvent = new(false);
     private readonly ILogger _logger;
 

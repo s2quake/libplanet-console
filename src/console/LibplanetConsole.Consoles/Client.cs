@@ -64,7 +64,7 @@ internal sealed class Client : IClient, IClientCallback
 
     public bool IsRunning { get; private set; }
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
         get => _remoteServiceContext.EndPoint;
         set => _remoteServiceContext.EndPoint = value;
@@ -112,7 +112,7 @@ internal sealed class Client : IClient, IClientCallback
     }
 
     public override string ToString()
-        => $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
+        => $"{(ShortAddress)Address}: {EndPoint}";
 
     public byte[] Sign(object obj)
     {
@@ -167,7 +167,7 @@ internal sealed class Client : IClient, IClientCallback
             message: "Client is not attached.");
 
         _clientInfo = await _remoteService.Service.StartAsync(
-            EndPointUtility.ToString(node.EndPoint), cancellationToken);
+            node.EndPoint.ToString(), cancellationToken);
         _node = node;
         IsRunning = true;
         _logger.Debug("Client is started: {Address}", Address);

@@ -1,13 +1,13 @@
-using System.Net;
 using Libplanet.Crypto;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(EndPoint endPoint) => EndPoint = endPoint;
+    public ApplicationOptions(AppEndPoint endPoint) => EndPoint = endPoint;
 
-    public EndPoint EndPoint { get; }
+    public AppEndPoint EndPoint { get; }
 
     public PrivateKey[] Nodes { get; init; } = [];
 

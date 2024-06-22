@@ -30,7 +30,7 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     public async Task<ClientInfo> StartAsync(
         string nodeEndPoint, CancellationToken cancellationToken)
     {
-        _client.NodeEndPoint = EndPointUtility.Parse(nodeEndPoint);
+        _client.NodeEndPoint = AppEndPoint.Parse(nodeEndPoint);
         await _client.StartAsync(cancellationToken);
         return _client.Info;
     }

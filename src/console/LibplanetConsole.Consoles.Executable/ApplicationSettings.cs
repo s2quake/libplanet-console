@@ -75,7 +75,7 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
+        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
         return new ApplicationOptions(endPoint)
         {
             Nodes = settings.GetNodes(),

@@ -196,7 +196,7 @@ internal sealed class ClientCollection(
         {
             return new Client(_application, privateKey)
             {
-                EndPoint = DnsEndPointUtility.Next(),
+                EndPoint = AppEndPoint.Next(),
             };
         }
     }

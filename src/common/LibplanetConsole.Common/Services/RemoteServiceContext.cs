@@ -6,6 +6,7 @@ namespace LibplanetConsole.Common.Services;
 public class RemoteServiceContext
 {
     private readonly InternalClientContext _clientContext;
+    private AppEndPoint? _endPoint;
 
     public RemoteServiceContext(IEnumerable<IRemoteService> remoteServices)
     {
@@ -18,10 +19,14 @@ public class RemoteServiceContext
 
     public event EventHandler? Closed;
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
-        get => _clientContext.EndPoint;
-        set => _clientContext.EndPoint = value;
+        get => _endPoint ?? throw new InvalidOperationException("EndPoint is not set.");
+        set
+        {
+            _endPoint = value;
+            _clientContext.EndPoint = (EndPoint)value;
+        }
     }
 
     public bool IsRunning => _clientContext.ServiceState == ServiceState.Open;

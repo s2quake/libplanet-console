@@ -77,7 +77,7 @@ internal sealed class Node : INode, INodeCallback
 
     public NodeOptions NodeOptions { get; }
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
         get => _remoteServiceContext.EndPoint;
         set => _remoteServiceContext.EndPoint = value;
@@ -121,7 +121,7 @@ internal sealed class Node : INode, INodeCallback
 
     public override string ToString()
     {
-        return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
+        return $"{(ShortAddress)Address}: {EndPoint}";
     }
 
     public byte[] Sign(object obj)
@@ -254,7 +254,7 @@ internal sealed class Node : INode, INodeCallback
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NodeEndPoint = EndPointUtility.Parse(application.Info.EndPoint),
+            NodeEndPoint = AppEndPoint.Parse(application.Info.EndPoint),
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
         };
