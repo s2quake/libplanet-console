@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using Libplanet.Crypto;
-using Libplanet.Net;
 using Libplanet.Net.Transports;
+using LibplanetConsole.Common;
 using Serilog;
 
 namespace LibplanetConsole.Seeds;
@@ -15,7 +15,7 @@ internal sealed class PeerCollection(SeedOptions seedOptions) : IEnumerable<Peer
 
     public int Count => _infoByAddress.Count;
 
-    public void AddOrUpdate(BoundPeer boundPeer, ITransport transport)
+    public void AddOrUpdate(AppPeer boundPeer, ITransport transport)
     {
         _infoByAddress.AddOrUpdate(
             key: boundPeer.Address,

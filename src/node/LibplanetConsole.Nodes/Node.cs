@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Net;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -38,8 +37,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     private readonly ManualResetEvent _initializedResetEvent = new(false);
     private readonly ILogger _logger;
 
-    private DnsEndPoint? _blocksyncEndPoint;
-    private DnsEndPoint? _consensusEndPoint;
+    private AppEndPoint? _blocksyncEndPoint;
+    private AppEndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
@@ -73,13 +72,13 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public event EventHandler? Stopped;
 
-    public DnsEndPoint SwarmEndPoint
+    public AppEndPoint SwarmEndPoint
     {
         get => _blocksyncEndPoint ?? throw new InvalidOperationException();
         set => _blocksyncEndPoint = value;
     }
 
-    public DnsEndPoint ConsensusEndPoint
+    public AppEndPoint ConsensusEndPoint
     {
         get => _consensusEndPoint ?? throw new InvalidOperationException();
         set => _consensusEndPoint = value;
@@ -101,24 +100,24 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public Swarm Swarm => _swarm ?? throw new InvalidOperationException();
 
-    public BoundPeer[] Peers
+    public AppPeer[] Peers
     {
         get
         {
             if (_swarm is not null)
             {
-                return [.. _swarm.Peers];
+                return [.. _swarm.Peers.Select(item => (AppPeer)item)];
             }
 
             throw new InvalidOperationException();
         }
     }
 
-    public BoundPeer BlocksyncSeedPeer
+    public AppPeer BlocksyncSeedPeer
         => _blocksyncSeedNode?.BoundPeer ?? NodeOptions.BlocksyncSeedPeer ??
             throw new InvalidOperationException();
 
-    public BoundPeer ConsensusSeedPeer
+    public AppPeer ConsensusSeedPeer
         => _consensusSeedNode?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
             throw new InvalidOperationException();
 
@@ -203,20 +202,20 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var nodeOptions = NodeOptions;
         var storePath = _storePath;
-        var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
-        var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
+        var blocksyncEndPoint = _blocksyncEndPoint ?? AppEndPoint.Next();
+        var consensusEndPoint = _consensusEndPoint ?? AppEndPoint.Next();
         var blocksyncSeedPeer = nodeOptions.BlocksyncSeedPeer ??
-            new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
+            new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
         var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
-            new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
+            new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
         var swarmTransport
             = await CreateTransport(privateKey, blocksyncEndPoint);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = [blocksyncSeedPeer],
+            StaticPeers = [(BoundPeer)blocksyncSeedPeer],
             BootstrapOptions = new()
             {
-                SeedPeers = [blocksyncSeedPeer],
+                SeedPeers = [(BoundPeer)blocksyncSeedPeer],
             },
         };
         var consensusTransport = await CreateTransport(
@@ -224,7 +223,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             endPoint: consensusEndPoint);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [consensusSeedPeer],
+            SeedPeers = [(BoundPeer)consensusSeedPeer],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
@@ -334,8 +333,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
-        DnsEndPointUtility.Release(ref _blocksyncEndPoint);
-        DnsEndPointUtility.Release(ref _consensusEndPoint);
+        _blocksyncEndPoint = null;
+        _consensusEndPoint = null;
 
         if (_swarm is not null)
         {
@@ -408,7 +407,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, DnsEndPoint endPoint)
+        PrivateKey privateKey, AppEndPoint endPoint)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
@@ -431,12 +430,12 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         {
             nodeInfo = nodeInfo with
             {
-                SwarmEndPoint = DnsEndPointUtility.ToString(SwarmEndPoint),
-                ConsensusEndPoint = DnsEndPointUtility.ToString(ConsensusEndPoint),
+                SwarmEndPoint = AppEndPoint.ToString(SwarmEndPoint),
+                ConsensusEndPoint = AppEndPoint.ToString(ConsensusEndPoint),
                 GenesisHash = BlockChain.Genesis.Hash,
                 TipHash = BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
-                Peers = [.. Peers.Select(peer => new BoundPeerInfo(peer))],
+                Peers = [.. Peers],
             };
         }
 

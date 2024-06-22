@@ -1,7 +1,6 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Net;
 using System.Security;
 using Libplanet.Crypto;
 using Libplanet.Types.Tx;

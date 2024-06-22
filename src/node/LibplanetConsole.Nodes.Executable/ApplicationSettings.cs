@@ -11,7 +11,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint on which the Node Service will run. " +
                     "If omitted, host is 127.0.0.1 and port is set to random.")]
-    public string EndPoint { get; init; } = string.Empty;
+    public AppEndPoint EndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the node. " +

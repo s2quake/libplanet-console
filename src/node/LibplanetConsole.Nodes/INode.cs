@@ -30,9 +30,9 @@ public interface INode : IVerifier
 
     Address Address => PublicKey.Address;
 
-    BoundPeer BlocksyncSeedPeer { get; }
+    AppPeer BlocksyncSeedPeer { get; }
 
-    BoundPeer ConsensusSeedPeer { get; }
+    AppPeer ConsensusSeedPeer { get; }
 
     Task StartAsync(CancellationToken cancellationToken);
 

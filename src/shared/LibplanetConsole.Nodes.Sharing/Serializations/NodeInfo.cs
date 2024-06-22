@@ -1,5 +1,6 @@
 using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
@@ -21,7 +22,7 @@ public readonly record struct NodeInfo
 
     public bool IsRunning { get; init; }
 
-    public BoundPeerInfo[] Peers { get; init; }
+    public AppPeer[] Peers { get; init; }
 
     public static NodeInfo Empty { get; } = new NodeInfo
     {

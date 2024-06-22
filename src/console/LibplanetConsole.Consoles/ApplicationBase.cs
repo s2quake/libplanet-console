@@ -59,7 +59,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             Timestamp = DateTimeOffset.UtcNow,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _logger.Debug($"GenesisOptions: {GenesisOptions.ToJson()}");
+        _logger.Debug($"GenesisOptions: {JsonUtility.SerializeObject(GenesisOptions)}");
         _logger.Debug("Application initialized.");
     }
 

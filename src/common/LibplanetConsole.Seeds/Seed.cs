@@ -3,6 +3,7 @@ using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
+using LibplanetConsole.Common;
 using Serilog;
 
 namespace LibplanetConsole.Seeds;
@@ -108,7 +109,7 @@ internal class Seed(SeedOptions seedOptions)
         {
             case FindNeighborsMsg:
                 var alivePeers = peers.Where(item => item.IsAlive)
-                                      .Select(item => item.BoundPeer)
+                                      .Select(item => (BoundPeer)item.AppPeer)
                                       .ToArray();
                 var neighborsMsg = new NeighborsMsg(alivePeers);
                 await transport.ReplyMessageAsync(
@@ -128,7 +129,7 @@ internal class Seed(SeedOptions seedOptions)
 
         if (message.Remote is BoundPeer boundPeer)
         {
-            peers.AddOrUpdate(boundPeer, transport);
+            peers.AddOrUpdate((AppPeer)boundPeer, transport);
         }
     }
 }

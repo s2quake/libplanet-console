@@ -1,7 +1,6 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Net;
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
@@ -26,8 +25,8 @@ internal sealed class Node : INode, INodeCallback
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
-    private DnsEndPoint? _blocksyncEndPoint;
-    private DnsEndPoint? _consensusEndPoint;
+    private AppEndPoint? _blocksyncEndPoint;
+    private AppEndPoint? _consensusEndPoint;
     private Guid _closeToken;
     private NodeInfo _nodeInfo;
     private bool _isDisposed;
@@ -61,10 +60,10 @@ internal sealed class Node : INode, INodeCallback
 
     public event EventHandler? Disposed;
 
-    public DnsEndPoint SwarmEndPoint
+    public AppEndPoint SwarmEndPoint
         => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
 
-    public DnsEndPoint ConsensusEndPoint
+    public AppEndPoint ConsensusEndPoint
         => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
     public PublicKey PublicKey { get; }
@@ -178,8 +177,8 @@ internal sealed class Node : INode, INodeCallback
 
         using var scope = new ProgressScope(this);
         _nodeInfo = await _remoteService.Service.StartAsync(cancellationToken);
-        _blocksyncEndPoint = DnsEndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = DnsEndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
+        _blocksyncEndPoint = AppEndPoint.Parse(_nodeInfo.SwarmEndPoint);
+        _consensusEndPoint = AppEndPoint.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
         _logger.Debug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);

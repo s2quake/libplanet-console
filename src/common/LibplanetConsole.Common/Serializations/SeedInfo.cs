@@ -8,9 +8,9 @@ public readonly record struct SeedInfo
 
     public GenesisInfo GenesisInfo { get; init; }
 
-    public string BlocksyncSeedPeer { get; init; }
+    public AppPeer BlocksyncSeedPeer { get; init; }
 
-    public string ConsensusSeedPeer { get; init; }
+    public AppPeer ConsensusSeedPeer { get; init; }
 
     public SeedInfo Encrypt(PublicKey publicKey) => this with
     {

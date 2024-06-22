@@ -1,6 +1,4 @@
-using System.Net;
 using Libplanet.Crypto;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Common.Services;
@@ -22,27 +20,17 @@ public sealed record class NodeOptions
 
     public GenesisOptions GenesisOptions { get; init; } = new();
 
-    public BoundPeer? BlocksyncSeedPeer { get; init; }
+    public AppPeer? BlocksyncSeedPeer { get; init; }
 
-    public BoundPeer? ConsensusSeedPeer { get; init; }
+    public AppPeer? ConsensusSeedPeer { get; init; }
 
-    public static implicit operator NodeOptions(NodeOptionsInfo info)
+    public static implicit operator NodeOptions(SeedInfo seedInfo)
     {
         return new NodeOptions
         {
-            GenesisOptions = info.GenesisInfo,
-            BlocksyncSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.BlocksyncSeedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.ConsensusSeedPeer),
-        };
-    }
-
-    public static implicit operator NodeOptionsInfo(NodeOptions nodeOptions)
-    {
-        return new NodeOptionsInfo
-        {
-            GenesisInfo = nodeOptions.GenesisOptions,
-            BlocksyncSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.BlocksyncSeedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.ConsensusSeedPeer),
+            GenesisOptions = seedInfo.GenesisInfo,
+            BlocksyncSeedPeer = seedInfo.BlocksyncSeedPeer,
+            ConsensusSeedPeer = seedInfo.ConsensusSeedPeer,
         };
     }
 
@@ -79,7 +67,7 @@ public sealed record class NodeOptions
                 var seedInfo = decrypted.Decrypt(privateKey);
                 if (Equals(seedInfo, SeedInfo.Empty) != true)
                 {
-                    return (NodeOptionsInfo)seedInfo;
+                    return (NodeOptions)seedInfo;
                 }
 
                 await Task.Delay(500, cancellationToken);

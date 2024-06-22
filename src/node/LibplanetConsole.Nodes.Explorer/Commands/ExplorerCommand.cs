@@ -2,6 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Explorer;
 
 namespace LibplanetConsole.Nodes.Explorer.Commands;
 

@@ -1,4 +1,3 @@
-using System.Net;
 using System.Security;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessEnvironment;

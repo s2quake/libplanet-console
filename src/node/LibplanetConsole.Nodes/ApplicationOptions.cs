@@ -1,4 +1,3 @@
-using System.Net;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
 

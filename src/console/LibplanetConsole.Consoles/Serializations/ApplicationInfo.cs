@@ -2,7 +2,7 @@ namespace LibplanetConsole.Consoles.Serializations;
 
 public readonly record struct ApplicationInfo
 {
-    public required string EndPoint { get; init; }
+    public required AppEndPoint EndPoint { get; init; }
 
     public required string StoreDirectory { get; init; }
 

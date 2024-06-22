@@ -5,37 +5,45 @@ using CommunicationUtility = JSSoft.Communication.EndPointUtility;
 
 namespace LibplanetConsole.Common;
 
-public sealed class AppEndPoint : IDisposable
+public sealed record class AppEndPoint
 {
     private static readonly object LockObject = new();
     private static readonly List<int> PortList = [];
 
-    private readonly EndPoint _endPoint;
-    private bool _isDisposed;
-
     public AppEndPoint(string host, int port)
     {
-        _endPoint = new DnsEndPoint(host, port);
         Host = host;
         Port = port;
-    }
-
-    private AppEndPoint(EndPoint endPoint)
-    {
-        _endPoint = endPoint;
-        (Host, Port) = CommunicationUtility.GetElements(endPoint);
     }
 
     public string Host { get; }
 
     public int Port { get; }
 
-    public static explicit operator EndPoint(AppEndPoint endPointObject)
-        => endPointObject._endPoint;
+    public static explicit operator EndPoint(AppEndPoint endPoint)
+        => new DnsEndPoint(endPoint.Host, endPoint.Port);
+
+    public static explicit operator DnsEndPoint(AppEndPoint endPoint)
+        => new(endPoint.Host, endPoint.Port);
+
+    public static explicit operator AppEndPoint(EndPoint endPoint)
+    {
+        if (endPoint is DnsEndPoint dnsEndPoint)
+        {
+            return new(dnsEndPoint.Host, dnsEndPoint.Port);
+        }
+
+        if (endPoint is IPEndPoint ipEndPoint)
+        {
+            return new($"{ipEndPoint.Address}", ipEndPoint.Port);
+        }
+
+        throw new InvalidCastException();
+    }
 
     public static AppEndPoint Next() => new("localhost", GetPort());
 
-    public static AppEndPoint Parse(string text) => new(CommunicationUtility.Parse(text));
+    public static AppEndPoint Parse(string text) => (AppEndPoint)CommunicationUtility.Parse(text);
 
     public static AppEndPoint ParseOrNext(string text)
         => text == string.Empty ? Next() : Parse(text);
@@ -50,7 +58,7 @@ public sealed class AppEndPoint : IDisposable
     {
         if (CommunicationUtility.TryParse(text, out var value))
         {
-            endPoint = new(value);
+            endPoint = (AppEndPoint)value;
             return true;
         }
 
@@ -62,18 +70,6 @@ public sealed class AppEndPoint : IDisposable
         => endPoint is not null ? endPoint.ToString() : string.Empty;
 
     public override string ToString() => $"{Host}:{Port}";
-
-    public void Dispose()
-    {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        lock (LockObject)
-        {
-            PortList.Remove(Port);
-        }
-
-        _isDisposed = true;
-    }
 
     private static int GetPort()
     {

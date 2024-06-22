@@ -1,4 +1,3 @@
-using System.Net;
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;

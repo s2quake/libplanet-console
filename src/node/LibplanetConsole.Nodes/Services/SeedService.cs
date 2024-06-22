@@ -33,8 +33,8 @@ internal sealed class SeedService(IApplication application, INode node)
         SeedInfo Func() => new()
         {
             GenesisInfo = genesisOptions.Encrypt(publicKey),
-            BlocksyncSeedPeer = BoundPeerUtility.ToString(blocksyncSeedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
+            BlocksyncSeedPeer = blocksyncSeedPeer,
+            ConsensusSeedPeer = consensusSeedPeer,
         };
     }
 }

@@ -1,8 +1,8 @@
 using System.ComponentModel.Composition;
-using System.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Serializations;
 using LibplanetConsole.Explorer.Services;
 using LibplanetConsole.Frameworks;
@@ -66,9 +66,9 @@ internal sealed class ExplorerNodeContent
         using var scope = _executionScope.Enter();
         var nodeAddress = Node.Address;
         var endPoint = EndPoint.ToString();
-        var options = new ExplorerOptionsInfo
+        var options = new ExplorerOptions
         {
-            EndPoint = EndPoint.ToString(),
+            EndPoint = EndPoint,
         };
         Info = await Service.StartAsync(options, cancellationToken);
         IsRunning = true;
