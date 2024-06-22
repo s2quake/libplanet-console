@@ -42,8 +42,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
-            EndPoint = _clientServiceContext.EndPoint.ToString(),
-            NodeEndPoint = AppEndPoint.ToString(options.NodeEndPoint),
+            EndPoint = _clientServiceContext.EndPoint,
+            NodeEndPoint = options.NodeEndPoint,
             LogPath = options.LogPath,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
@@ -136,7 +136,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     private async Task AutoStartAsync(CancellationToken cancellationToken)
     {
-        if (AppEndPoint.TryParse(_info.NodeEndPoint, out var nodeEndPoint) == true)
+        if (_info.NodeEndPoint is { } nodeEndPoint)
         {
             var isSeed = _isSeed;
             _client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(

@@ -7,5 +7,5 @@ public interface ISeedService
 {
     Task<SeedInfo> GetSeedAsync(PublicKey publicKey, CancellationToken cancellationToken);
 
-    Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken);
+    Task<AppEndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken);
 }

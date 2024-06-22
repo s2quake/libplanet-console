@@ -11,7 +11,7 @@ namespace LibplanetConsole.Nodes.Services;
 internal sealed class SeedService(IApplication application, INode node)
     : LocalService<ISeedService>, ISeedService
 {
-    public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
+    public Task<AppEndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
         => application.InvokeAsync(() => application.Info.EndPoint, cancellationToken);
 
     public Task<SeedInfo> GetSeedAsync(PublicKey publicKey, CancellationToken cancellationToken)

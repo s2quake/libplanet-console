@@ -1,10 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 using CommunicationUtility = JSSoft.Communication.EndPointUtility;
 
 namespace LibplanetConsole.Common;
 
+[JsonConverter(typeof(AppEndPointJsonConverter))]
 public sealed record class AppEndPoint
 {
     private static readonly object LockObject = new();

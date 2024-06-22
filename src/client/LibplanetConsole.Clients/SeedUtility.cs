@@ -16,7 +16,7 @@ internal static class SeedUtility
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
         var nodeEndPoint = await remoteService.Service.GetNodeEndPointAsync(cancellationToken);
         await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
-        return AppEndPoint.Parse(nodeEndPoint);
+        return nodeEndPoint;
     }
 
     public static async Task<AppEndPoint> GetNodeEndPointAsync(

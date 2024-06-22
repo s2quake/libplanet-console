@@ -253,7 +253,7 @@ internal sealed class Node : INode, INodeCallback
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NodeEndPoint = AppEndPoint.Parse(application.Info.EndPoint),
+            NodeEndPoint = application.Info.EndPoint,
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
         };

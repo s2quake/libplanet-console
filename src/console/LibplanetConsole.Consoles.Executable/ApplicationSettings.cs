@@ -11,7 +11,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("The endpoint of the console to run." +
                     "If omitted, one of the random ports will be used.")]
-    public AppEndPoint EndPoint { get; init; } = string.Empty;
+    public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty(InitValue = 4)]
     [CommandSummary("The number of nodes to run.\n" +

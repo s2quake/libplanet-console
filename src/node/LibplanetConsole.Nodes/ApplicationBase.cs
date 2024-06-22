@@ -43,8 +43,8 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
-            EndPoint = _nodeContext.EndPoint.ToString(),
-            NodeEndPoint = AppEndPoint.ToString(options.NodeEndPoint),
+            EndPoint = _nodeContext.EndPoint,
+            NodeEndPoint = options.NodeEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,
         };

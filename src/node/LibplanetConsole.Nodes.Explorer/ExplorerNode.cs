@@ -44,7 +44,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
                     .Build();
 
         await _webHost.StartAsync(cancellationToken);
-        Info = new() { EndPoint = options.EndPoint.ToString(), IsRunning = true, };
+        Info = new() { EndPoint = options.EndPoint, IsRunning = true, };
         logger.Debug("Explorer is started: {EndPoint}", Info.EndPoint);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -58,7 +58,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
 
         await _webHost.StopAsync(cancellationToken);
         _webHost = null;
-        Info = new() { EndPoint = string.Empty };
+        Info = new() { };
         logger.Debug("Explorer is stopped.");
         Stopped?.Invoke(this, EventArgs.Empty);
     }
