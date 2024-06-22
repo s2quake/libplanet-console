@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Text.Json;
 using Libplanet.Common;
 using Libplanet.Crypto;
+using Newtonsoft.Json;
 
 namespace LibplanetConsole.Common;
 
@@ -32,7 +32,7 @@ public static class PublicKeyUtility
 
     public static string Encrypt(PublicKey publicKey, object obj)
     {
-        var json = JsonSerializer.Serialize(obj);
+        var json = JsonConvert.SerializeObject(obj);
         var encodings = Encoding.UTF8.GetBytes(json);
         var encrypted = publicKey.Encrypt(encodings);
         return ByteUtil.Hex(encrypted);
@@ -40,7 +40,7 @@ public static class PublicKeyUtility
 
     public static bool Verify(PublicKey publicKey, object obj, byte[] signature)
     {
-        var json = JsonSerializer.Serialize(obj);
+        var json = JsonConvert.SerializeObject(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
         return publicKey.Verify(bytes, signature);
     }

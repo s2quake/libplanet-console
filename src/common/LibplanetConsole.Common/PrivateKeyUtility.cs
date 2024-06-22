@@ -2,10 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using Libplanet.Common;
 using Libplanet.Crypto;
 using LibplanetConsole.Common.Extensions;
+using Newtonsoft.Json;
 
 namespace LibplanetConsole.Common;
 
@@ -61,7 +61,7 @@ public static class PrivateKeyUtility
         var bytes = ByteUtil.ParseHex(text);
         var decrypted = privateKey.Decrypt(bytes);
         var json = Encoding.UTF8.GetString(decrypted);
-        return JsonSerializer.Deserialize(json, type);
+        return JsonConvert.DeserializeObject(json, type);
     }
 
     public static T Decrypt<T>(PrivateKey privateKey, string text)
@@ -73,7 +73,7 @@ public static class PrivateKeyUtility
 
     public static byte[] Sign(PrivateKey privateKey, object obj)
     {
-        var json = JsonSerializer.Serialize(obj);
+        var json = JsonConvert.SerializeObject(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
         return privateKey.Sign(bytes);
     }

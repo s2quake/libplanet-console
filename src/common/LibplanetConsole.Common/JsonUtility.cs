@@ -1,20 +1,20 @@
 using System.Diagnostics;
-using System.Text.Json;
 using LibplanetConsole.Common.IO;
+using Newtonsoft.Json;
 
 namespace LibplanetConsole.Common;
 
 public static class JsonUtility
 {
     private static readonly bool IsJQSupported = SupportsJQ();
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    private static readonly JsonSerializerSettings Settings = new()
     {
-        WriteIndented = true,
+        Formatting = Formatting.Indented,
     };
 
     public static string SerializeObject(object value)
     {
-        return JsonSerializer.Serialize(value, SerializerOptions);
+        return JsonConvert.SerializeObject(value, Settings);
     }
 
     public static string SerializeObject(object value, bool isColorized)
@@ -40,7 +40,7 @@ public static class JsonUtility
 
     public static T DeserializeObject<T>(string value)
     {
-        if (JsonSerializer.Deserialize<T>(value) is T t)
+        if (JsonConvert.DeserializeObject<T>(value, Settings) is T t)
         {
             return t;
         }
