@@ -11,7 +11,12 @@ public sealed class AppEndPointJsonConverter : JsonConverter<AppEndPoint>
         bool hasExistingValue,
         JsonSerializer serializer)
     {
-        throw new NotImplementedException();
+        if (reader.ReadAsString() is string text)
+        {
+            return AppEndPoint.Parse(text);
+        }
+
+        throw new JsonException("Cannot read AppEndPoint from JSON.");
     }
 
     public override void WriteJson(JsonWriter writer, AppEndPoint? value, JsonSerializer serializer)

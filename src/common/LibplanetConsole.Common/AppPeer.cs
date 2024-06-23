@@ -1,9 +1,11 @@
 using System.Net;
+using System.Text.Json.Serialization;
 using Libplanet.Crypto;
 using Libplanet.Net;
 
 namespace LibplanetConsole.Common;
 
+[JsonConverter(typeof(AppPeerJsonConverter))]
 public readonly struct AppPeer(PublicKey publicKey, AppEndPoint endPoint)
 {
     public PublicKey PublicKey { get; } = publicKey;
