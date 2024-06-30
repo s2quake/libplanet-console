@@ -1,8 +1,8 @@
-using Libplanet.Crypto;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;
 
 public interface IAddressable
 {
-    Address Address { get; }
+    AppAddress Address { get; }
 }

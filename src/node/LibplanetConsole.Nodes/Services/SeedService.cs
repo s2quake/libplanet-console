@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Common.Services;
@@ -11,10 +10,10 @@ namespace LibplanetConsole.Nodes.Services;
 internal sealed class SeedService(IApplication application, INode node)
     : LocalService<ISeedService>, ISeedService
 {
-    public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
+    public Task<AppEndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
         => application.InvokeAsync(() => application.Info.EndPoint, cancellationToken);
 
-    public Task<SeedInfo> GetSeedAsync(PublicKey publicKey, CancellationToken cancellationToken)
+    public Task<SeedInfo> GetSeedAsync(AppPublicKey publicKey, CancellationToken cancellationToken)
         => node.IsRunning switch
         {
             true => GetActualSeedAsync(publicKey, cancellationToken),
@@ -22,7 +21,7 @@ internal sealed class SeedService(IApplication application, INode node)
         };
 
     private Task<SeedInfo> GetActualSeedAsync(
-        PublicKey publicKey, CancellationToken cancellationToken)
+        AppPublicKey publicKey, CancellationToken cancellationToken)
     {
         var blocksyncSeedPeer = node.BlocksyncSeedPeer;
         var consensusSeedPeer = node.ConsensusSeedPeer;
@@ -33,8 +32,8 @@ internal sealed class SeedService(IApplication application, INode node)
         SeedInfo Func() => new()
         {
             GenesisInfo = genesisOptions.Encrypt(publicKey),
-            BlocksyncSeedPeer = BoundPeerUtility.ToString(blocksyncSeedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
+            BlocksyncSeedPeer = blocksyncSeedPeer,
+            ConsensusSeedPeer = consensusSeedPeer,
         };
     }
 }

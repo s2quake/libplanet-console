@@ -1,10 +1,10 @@
-using Libplanet.Crypto;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;
 
 public sealed record class AddNewOptions
 {
-    public required PrivateKey PrivateKey { get; init; }
+    public required AppPrivateKey PrivateKey { get; init; }
 
     public bool NoProcess { get; init; }
 

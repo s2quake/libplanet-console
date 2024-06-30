@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -14,7 +13,7 @@ namespace LibplanetConsole.Consoles;
 [Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
-    ApplicationBase application, PrivateKey[] privateKeys)
+    ApplicationBase application, AppPrivateKey[] privateKeys)
     : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
@@ -65,15 +64,15 @@ internal sealed class NodeCollection(
 
     public Node this[int index] => _nodeList[index];
 
-    public Node this[Address address] => _nodeList.Single(item => item.Address == address);
+    public Node this[AppAddress address] => _nodeList.Single(item => item.Address == address);
 
     INode INodeCollection.this[int index] => this[index];
 
-    INode INodeCollection.this[Address address] => this[address];
+    INode INodeCollection.this[AppAddress address] => this[address];
 
     public bool Contains(Node item) => _nodeList.Contains(item);
 
-    public bool Contains(Address address) => _nodeList.Exists(item => item.Address == address);
+    public bool Contains(AppAddress address) => _nodeList.Exists(item => item.Address == address);
 
     public int IndexOf(Node item)
     {
@@ -88,7 +87,7 @@ internal sealed class NodeCollection(
         return -1;
     }
 
-    public int IndexOf(Address address)
+    public int IndexOf(AppAddress address)
     {
         for (var i = 0; i < _nodeList.Count; i++)
         {
@@ -198,7 +197,7 @@ internal sealed class NodeCollection(
         return _nodeList[nodeIndex];
     }
 
-    private Node CreateNew(PrivateKey privateKey)
+    private Node CreateNew(AppPrivateKey privateKey)
     {
         lock (LockObject)
         {
@@ -211,7 +210,7 @@ internal sealed class NodeCollection(
             };
             return new Node(_application, privateKey, nodeOptions)
             {
-                EndPoint = DnsEndPointUtility.Next(),
+                EndPoint = AppEndPoint.Next(),
             };
         }
     }

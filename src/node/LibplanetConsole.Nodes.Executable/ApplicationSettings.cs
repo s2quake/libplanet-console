@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 
@@ -53,13 +52,13 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
-        var privateKey = PrivateKeyUtility.ParseWithFallback(settings.PrivateKey);
+        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
+        var privateKey = AppPrivateKey.ParseOrRandom(settings.PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = settings.ParentProcessId,
             ManualStart = settings.ManualStart,
-            NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(settings.NodeEndPoint),
+            NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
             GenesisValidators = settings.GetGenesisValidators(privateKey.PublicKey),
             StorePath = GetFullPath(settings.StorePath),
             LogPath = GetFullPath(settings.LogPath),
@@ -82,11 +81,11 @@ internal sealed record class ApplicationSettings
         return settings;
     }
 
-    private PublicKey[] GetGenesisValidators(PublicKey publicKey)
+    private AppPublicKey[] GetGenesisValidators(AppPublicKey publicKey)
     {
         if (GenesisValidators.Length > 0)
         {
-            return [.. GenesisValidators.Select(PublicKeyUtility.Parse)];
+            return [.. GenesisValidators.Select(AppPublicKey.Parse)];
         }
 
         return [publicKey];

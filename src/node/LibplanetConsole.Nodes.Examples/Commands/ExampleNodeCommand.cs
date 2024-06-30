@@ -14,13 +14,13 @@ internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
     [CommandMethod]
     public void Subscribe(string address)
     {
-        sampleNode.Subscribe(AddressUtility.Parse(address));
+        sampleNode.Subscribe(AppAddress.Parse(address));
     }
 
     [CommandMethod]
     public void Unsubscribe(string address)
     {
-        sampleNode.Unsubscribe(AddressUtility.Parse(address));
+        sampleNode.Unsubscribe(AppAddress.Parse(address));
     }
 
     [CommandMethod]
@@ -36,7 +36,7 @@ internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
         var sb = new StringBuilder();
         foreach (var address in addresses)
         {
-            sb.AppendLine(AddressUtility.ToString(address));
+            sb.AppendLine(address.ToString());
         }
 
         await Out.WriteLineAsync(sb.ToString());

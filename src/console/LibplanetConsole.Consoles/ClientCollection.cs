@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -13,7 +12,7 @@ namespace LibplanetConsole.Consoles;
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
 internal sealed class ClientCollection(
-    ApplicationBase application, PrivateKey[] privateKeys)
+    ApplicationBase application, AppPrivateKey[] privateKeys)
     : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
@@ -64,15 +63,15 @@ internal sealed class ClientCollection(
 
     public Client this[int index] => _clientList[index];
 
-    public Client this[Address address] => _clientList.Single(item => item.Address == address);
+    public Client this[AppAddress address] => _clientList.Single(item => item.Address == address);
 
     IClient IClientCollection.this[int index] => this[index];
 
-    IClient IClientCollection.this[Address address] => this[address];
+    IClient IClientCollection.this[AppAddress address] => this[address];
 
     public bool Contains(Client item) => _clientList.Contains(item);
 
-    public bool Contains(Address address) => _clientList.Exists(item => item.Address == address);
+    public bool Contains(AppAddress address) => _clientList.Exists(item => item.Address == address);
 
     public int IndexOf(Client item)
     {
@@ -87,7 +86,7 @@ internal sealed class ClientCollection(
         return -1;
     }
 
-    public int IndexOf(Address address)
+    public int IndexOf(AppAddress address)
     {
         for (var i = 0; i < _clientList.Count; i++)
         {
@@ -190,13 +189,13 @@ internal sealed class ClientCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
 
-    private Client CreateNew(PrivateKey privateKey)
+    private Client CreateNew(AppPrivateKey privateKey)
     {
         lock (LockObject)
         {
             return new Client(_application, privateKey)
             {
-                EndPoint = DnsEndPointUtility.Next(),
+                EndPoint = AppEndPoint.Next(),
             };
         }
     }

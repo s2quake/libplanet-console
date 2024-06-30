@@ -1,5 +1,3 @@
-using Libplanet.Crypto;
-
 namespace LibplanetConsole.Common.Serializations;
 
 public readonly record struct SeedInfo
@@ -8,16 +6,16 @@ public readonly record struct SeedInfo
 
     public GenesisInfo GenesisInfo { get; init; }
 
-    public string BlocksyncSeedPeer { get; init; }
+    public AppPeer BlocksyncSeedPeer { get; init; }
 
-    public string ConsensusSeedPeer { get; init; }
+    public AppPeer ConsensusSeedPeer { get; init; }
 
-    public SeedInfo Encrypt(PublicKey publicKey) => this with
+    public SeedInfo Encrypt(AppPublicKey publicKey) => this with
     {
         GenesisInfo = GenesisInfo.Encrypt(publicKey),
     };
 
-    public SeedInfo Decrypt(PrivateKey privateKey) => this with
+    public SeedInfo Decrypt(AppPrivateKey privateKey) => this with
     {
         GenesisInfo = GenesisInfo.Decrypt(privateKey),
     };

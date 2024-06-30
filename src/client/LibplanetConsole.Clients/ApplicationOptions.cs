@@ -1,25 +1,24 @@
-using System.Net;
-using Libplanet.Crypto;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Clients;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(EndPoint endPoint, PrivateKey privateKey)
+    public ApplicationOptions(AppEndPoint endPoint, AppPrivateKey privateKey)
     {
         EndPoint = endPoint;
         PrivateKey = privateKey;
     }
 
-    public EndPoint EndPoint { get; }
+    public AppEndPoint EndPoint { get; }
 
-    public PrivateKey PrivateKey { get; }
+    public AppPrivateKey PrivateKey { get; }
 
     public int ParentProcessId { get; init; }
 
     public bool IsSeed { get; init; }
 
-    public EndPoint? NodeEndPoint { get; init; }
+    public AppEndPoint? NodeEndPoint { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
 

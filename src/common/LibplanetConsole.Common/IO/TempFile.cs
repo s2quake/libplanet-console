@@ -4,7 +4,7 @@ public sealed class TempFile : IDisposable
 {
     public TempFile()
     {
-        FileName = Path.GetRandomFileName();
+        FileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
     }
 
     public string FileName { get; }

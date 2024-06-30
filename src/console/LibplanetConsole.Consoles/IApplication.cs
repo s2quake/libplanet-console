@@ -1,4 +1,3 @@
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Consoles.Serializations;
 
@@ -20,6 +19,6 @@ public interface IApplication : IAsyncDisposable, IServiceProvider
 
     IAddressable GetAddressable(string address);
 
-    IAddressable GetAddressable(Address address)
-        => GetAddressable(AddressUtility.ToString(address));
+    IAddressable GetAddressable(AppAddress address)
+        => GetAddressable(address.ToString());
 }

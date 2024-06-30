@@ -1,4 +1,3 @@
-using System.Net;
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
@@ -18,7 +17,7 @@ internal sealed class Client : IClient, INodeCallback
     private readonly ApplicationBase _application;
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
-    private EndPoint? _nodeEndPoint;
+    private AppEndPoint? _nodeEndPoint;
     private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
     private ClientInfo _info;
@@ -29,8 +28,8 @@ internal sealed class Client : IClient, INodeCallback
         _logger.Debug("Client is creating...: {Address}", options.PrivateKey.Address);
         _application = application;
         _nodeEndPoint = options.NodeEndPoint;
-        _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
-        _info = new() { Address = options.PrivateKey.PublicKey.Address };
+        _privateKey = options.PrivateKey.ToSecureString();
+        _info = new() { Address = options.PrivateKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
         _logger.Debug("Client is created: {Address}", Address);
     }
@@ -41,9 +40,9 @@ internal sealed class Client : IClient, INodeCallback
 
     public event EventHandler<StopEventArgs>? Stopped;
 
-    public PublicKey PublicKey { get; }
+    public AppPublicKey PublicKey { get; }
 
-    public Address Address => PublicKey.Address;
+    public AppAddress Address => PublicKey.Address;
 
     public TextWriter Out { get; set; } = Console.Out;
 
@@ -51,7 +50,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public NodeInfo NodeInfo { get; private set; }
 
-    public EndPoint NodeEndPoint
+    public AppEndPoint NodeEndPoint
     {
         get => _nodeEndPoint ??
             throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");
@@ -72,8 +71,7 @@ internal sealed class Client : IClient, INodeCallback
 
     public override string ToString() => $"[{Address}]";
 
-    public bool Verify(object obj, byte[] signature)
-        => PublicKeyUtility.Verify(PublicKey, obj, signature);
+    public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -113,13 +111,13 @@ internal sealed class Client : IClient, INodeCallback
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
         var address = privateKey.Address;
         var nonce = await RemoteNodeService.GetNextNonceAsync(address, cancellationToken);
         var genesisHash = NodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: privateKey,
+            privateKey: (PrivateKey)privateKey,
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         _logger.Debug("Client sends a transaction: {TxId}", tx.Id);

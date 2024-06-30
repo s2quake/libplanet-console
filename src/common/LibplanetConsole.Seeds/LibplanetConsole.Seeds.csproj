@@ -12,4 +12,8 @@
     <PackageReference Include="Libplanet.Crypto" Version="4.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,78 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Libplanet.Common;
+using Libplanet.Crypto;
+using LibplanetConsole.Common.Converters;
+
+namespace LibplanetConsole.Common;
+
+[JsonConverter(typeof(AppPublicKeyJsonConverter))]
+public readonly record struct AppPublicKey : IFormattable
+{
+    private readonly PublicKey _publicKey;
+
+    public AppPublicKey(PublicKey publicKey) => _publicKey = publicKey;
+
+    public AppAddress Address => new(_publicKey.Address);
+
+    public static explicit operator AppPublicKey(PublicKey publicKey)
+        => new(publicKey);
+
+    public static explicit operator PublicKey(AppPublicKey publicKey)
+        => publicKey._publicKey;
+
+    public static string ToString(AppPublicKey? publicKey)
+        => publicKey?.ToString() ?? string.Empty;
+
+    public static AppPublicKey Parse(string text) => new(PublicKey.FromHex(text));
+
+    public static AppPublicKey? ParseOrDefault(string text)
+        => text == string.Empty ? null : Parse(text);
+
+    public static bool TryParse(string text, [MaybeNullWhen(false)] out AppPublicKey publicKey)
+    {
+        try
+        {
+            publicKey = Parse(text);
+            return true;
+        }
+        catch
+        {
+            publicKey = default;
+            return false;
+        }
+    }
+
+    public override string ToString() => _publicKey.ToHex(compress: false);
+
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        if (format is "S" or "C")
+        {
+            return _publicKey.ToHex(compress: true);
+        }
+
+        return ToString();
+    }
+
+    public string ToShortString() => ToString(format: "S", formatProvider: null);
+
+    public byte[] ToByteArray() => [.. _publicKey.ToImmutableArray(compress: false)];
+
+    public string Encrypt(object obj)
+    {
+        var json = JsonSerializer.Serialize(obj);
+        var encodings = Encoding.UTF8.GetBytes(json);
+        var encrypted = _publicKey.Encrypt(encodings);
+        return ByteUtil.Hex(encrypted);
+    }
+
+    public bool Verify(object obj, byte[] signature)
+    {
+        var json = JsonSerializer.Serialize(obj);
+        var bytes = Encoding.UTF8.GetBytes(json);
+        return _publicKey.Verify(bytes, signature);
+    }
+}

@@ -9,9 +9,8 @@ internal sealed class ExplorerNodeInfoProvider
 {
     protected override IEnumerable<(string Name, object? Value)> GetInfos(ExplorerNodeContent obj)
     {
-        var endPoint = EndPointUtility.ToString(obj.EndPoint);
-        yield return (nameof(obj.EndPoint), endPoint);
+        yield return (nameof(obj.EndPoint), obj.EndPoint);
         yield return (nameof(obj.IsRunning), obj.IsRunning);
-        yield return ("Url", $"http://{endPoint}/ui/playground");
+        yield return ("Url", $"http://{obj.EndPoint}/ui/playground");
     }
 }

@@ -1,13 +1,13 @@
-using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Clients.Serializations;
 
 public readonly record struct ClientInfo
 {
-    public Address Address { get; init; }
+    public AppAddress Address { get; init; }
 
-    public Address NodeAddress { get; init; }
+    public AppAddress NodeAddress { get; init; }
 
     public BlockHash GenesisHash { get; init; }
 

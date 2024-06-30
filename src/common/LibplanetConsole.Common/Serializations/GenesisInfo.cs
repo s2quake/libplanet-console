@@ -1,5 +1,4 @@
 using System.Globalization;
-using Libplanet.Crypto;
 
 namespace LibplanetConsole.Common.Serializations;
 
@@ -13,8 +12,8 @@ public readonly record struct GenesisInfo
 
     public static implicit operator GenesisOptions(GenesisInfo info) => new()
     {
-        GenesisKey = PrivateKeyUtility.Parse(info.GenesisKey),
-        GenesisValidators = [.. info.GenesisValidators.Select(PublicKeyUtility.Parse)],
+        GenesisKey = AppPrivateKey.Parse(info.GenesisKey),
+        GenesisValidators = [.. info.GenesisValidators.Select(AppPublicKey.Parse)],
         Timestamp = info.Timestamp == string.Empty
             ? DateTimeOffset.MinValue
             : DateTimeOffset.ParseExact(info.Timestamp, "O", CultureInfo.CurrentCulture),
@@ -22,26 +21,24 @@ public readonly record struct GenesisInfo
 
     public static implicit operator GenesisInfo(GenesisOptions genesisOptions) => new()
     {
-        GenesisKey = PrivateKeyUtility.ToString(genesisOptions.GenesisKey),
+        GenesisKey = AppPrivateKey.ToString(genesisOptions.GenesisKey),
         GenesisValidators
-            = [.. genesisOptions.GenesisValidators.Select(PublicKeyUtility.ToString)],
+            = [.. genesisOptions.GenesisValidators.Select(item => item.ToString())],
         Timestamp = genesisOptions.Timestamp.ToString("O"),
     };
 
-    public GenesisInfo Encrypt(PublicKey publicKey) => this with
+    public GenesisInfo Encrypt(AppPublicKey publicKey) => this with
     {
-        GenesisKey = PublicKeyUtility.Encrypt(publicKey, GenesisKey),
-        GenesisValidators
-            = [.. GenesisValidators.Select(item => PublicKeyUtility.Encrypt(publicKey, item))],
+        GenesisKey = publicKey.Encrypt(GenesisKey),
+        GenesisValidators = [.. GenesisValidators.Select(publicKey.Encrypt)],
     };
 
-    public GenesisInfo Decrypt(PrivateKey privateKey) => this with
+    public GenesisInfo Decrypt(AppPrivateKey privateKey) => this with
     {
         GenesisKey = Decrypt(privateKey, GenesisKey),
-        GenesisValidators
-            = [.. GenesisValidators.Select(item => Decrypt(privateKey, item))],
+        GenesisValidators = [.. GenesisValidators.Select(item => Decrypt(privateKey, item))],
     };
 
-    private static string Decrypt(PrivateKey privateKey, string text)
-        => PrivateKeyUtility.Decrypt<string>(privateKey, text);
+    private static string Decrypt(AppPrivateKey privateKey, string text)
+        => privateKey.Decrypt<string>(text);
 }

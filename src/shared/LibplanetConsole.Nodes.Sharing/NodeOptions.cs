@@ -1,10 +1,6 @@
-using System.Net;
-using Libplanet.Crypto;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Nodes.Serializations;
 
 #if LIBPLANET_CONSOLE
 namespace LibplanetConsole.Consoles;
@@ -22,37 +18,27 @@ public sealed record class NodeOptions
 
     public GenesisOptions GenesisOptions { get; init; } = new();
 
-    public BoundPeer? BlocksyncSeedPeer { get; init; }
+    public AppPeer? BlocksyncSeedPeer { get; init; }
 
-    public BoundPeer? ConsensusSeedPeer { get; init; }
+    public AppPeer? ConsensusSeedPeer { get; init; }
 
-    public static implicit operator NodeOptions(NodeOptionsInfo info)
+    public static implicit operator NodeOptions(SeedInfo seedInfo)
     {
         return new NodeOptions
         {
-            GenesisOptions = info.GenesisInfo,
-            BlocksyncSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.BlocksyncSeedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.GetSafeBoundPeer(info.ConsensusSeedPeer),
+            GenesisOptions = seedInfo.GenesisInfo,
+            BlocksyncSeedPeer = seedInfo.BlocksyncSeedPeer,
+            ConsensusSeedPeer = seedInfo.ConsensusSeedPeer,
         };
     }
 
-    public static implicit operator NodeOptionsInfo(NodeOptions nodeOptions)
-    {
-        return new NodeOptionsInfo
-        {
-            GenesisInfo = nodeOptions.GenesisOptions,
-            BlocksyncSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.BlocksyncSeedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.ToSafeString(nodeOptions.ConsensusSeedPeer),
-        };
-    }
-
-    public static NodeOptions Create(PublicKey publicKey)
+    public static NodeOptions Create(AppPublicKey publicKey)
     {
         return new NodeOptions
         {
             GenesisOptions = new GenesisOptions()
             {
-                GenesisKey = new PrivateKey(),
+                GenesisKey = new AppPrivateKey(),
                 GenesisValidators = [publicKey],
                 Timestamp = DateTimeOffset.UtcNow,
             },
@@ -60,7 +46,7 @@ public sealed record class NodeOptions
     }
 
     public static async Task<NodeOptions> CreateAsync(
-        EndPoint seedEndPoint, CancellationToken cancellationToken)
+        AppEndPoint seedEndPoint, CancellationToken cancellationToken)
     {
         var remoteService = new RemoteService<ISeedService>();
         var remoteServiceContext = new RemoteServiceContext([remoteService])
@@ -69,7 +55,7 @@ public sealed record class NodeOptions
         };
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
         var service = remoteService.Service;
-        var privateKey = new PrivateKey();
+        var privateKey = new AppPrivateKey();
         var publicKey = privateKey.PublicKey;
         try
         {
@@ -79,7 +65,7 @@ public sealed record class NodeOptions
                 var seedInfo = decrypted.Decrypt(privateKey);
                 if (Equals(seedInfo, SeedInfo.Empty) != true)
                 {
-                    return (NodeOptionsInfo)seedInfo;
+                    return (NodeOptions)seedInfo;
                 }
 
                 await Task.Delay(500, cancellationToken);

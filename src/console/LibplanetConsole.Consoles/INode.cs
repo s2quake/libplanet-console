@@ -1,6 +1,4 @@
-using System.Net;
 using Libplanet.Action;
-using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
@@ -25,13 +23,13 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 
     bool IsRunning { get; }
 
-    EndPoint EndPoint { get; }
+    AppEndPoint EndPoint { get; }
 
     NodeInfo Info { get; }
 
     NodeOptions NodeOptions { get; }
 
-    PublicKey PublicKey { get; }
+    AppPublicKey PublicKey { get; }
 
     Task AttachAsync(CancellationToken cancellationToken);
 
@@ -43,5 +41,5 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 
     Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
-    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
+    Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
 }

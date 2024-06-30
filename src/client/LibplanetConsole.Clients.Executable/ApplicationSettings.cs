@@ -41,13 +41,13 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
-        var privateKey = PrivateKeyUtility.ParseWithFallback(settings.PrivateKey);
+        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
+        var privateKey = AppPrivateKey.ParseOrRandom(settings.PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = settings.ParentProcessId,
             IsSeed = settings.IsSeed,
-            NodeEndPoint = DnsEndPointUtility.GetSafeEndPoint(settings.NodeEndPoint),
+            NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
             LogPath = GetFullPath(settings.LogPath),
             NoREPL = settings.NoREPL,
         };

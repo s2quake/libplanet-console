@@ -1,6 +1,4 @@
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Common.Services;
@@ -16,7 +14,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
     ISeedService, IApplicationService, IAsyncDisposable
 {
     private readonly ApplicationBase _application;
-    private readonly PrivateKey _seedNodePrivateKey = new();
+    private readonly AppPrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 
@@ -27,23 +25,23 @@ internal sealed class SeedService : LocalService<ISeedService>,
         _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = DnsEndPointUtility.Next(),
+            EndPoint = AppEndPoint.Next(),
             AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
         });
         _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = DnsEndPointUtility.Next(),
+            EndPoint = AppEndPoint.Next(),
             AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
         });
     }
 
-    public BoundPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
+    public AppPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
 
-    public BoundPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
+    public AppPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
     public async Task<SeedInfo> GetSeedAsync(
-        PublicKey publicKey, CancellationToken cancellationToken)
+        AppPublicKey publicKey, CancellationToken cancellationToken)
     {
         var seedPeer = _blocksyncSeedNode.BoundPeer;
         var consensusSeedPeer = _consensusSeedNode.BoundPeer;
@@ -51,21 +49,21 @@ internal sealed class SeedService : LocalService<ISeedService>,
         var seedInfo = new SeedInfo
         {
             GenesisInfo = genesisOptions.Encrypt(publicKey),
-            BlocksyncSeedPeer = BoundPeerUtility.ToString(seedPeer),
-            ConsensusSeedPeer = BoundPeerUtility.ToString(consensusSeedPeer),
+            BlocksyncSeedPeer = seedPeer,
+            ConsensusSeedPeer = consensusSeedPeer,
         };
 
         return await _application.InvokeAsync(() => seedInfo, cancellationToken);
     }
 
-    public Task<string> GetNodeEndPointAsync(CancellationToken cancellationToken)
+    public Task<AppEndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
     {
         if (_application.GetService(typeof(NodeCollection)) is NodeCollection nodes)
         {
             var node = nodes.RandomNode();
             return _application.InvokeAsync(Func, cancellationToken);
 
-            string Func() => EndPointUtility.ToString(node.EndPoint);
+            AppEndPoint Func() => node.EndPoint;
         }
 
         throw new InvalidOperationException("NodeCollection is not found.");

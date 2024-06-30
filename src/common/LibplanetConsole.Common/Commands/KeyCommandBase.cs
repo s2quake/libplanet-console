@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using Libplanet.Crypto;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Common.Commands;
@@ -21,13 +20,13 @@ public abstract class KeyCommandBase : CommandMethodBase
 
         var info = Enumerable.Range(0, count).Select(_ =>
         {
-            var privateKey = new PrivateKey();
+            var privateKey = new AppPrivateKey();
             return new
             {
-                PrivateKey = PrivateKeyUtility.ToString(privateKey),
-                PublicKey = PublicKeyUtility.ToString(privateKey.PublicKey),
-                PublicKeyShort = PublicKeyUtility.ToShortString(privateKey.PublicKey),
-                Address = AddressUtility.ToString(privateKey.Address),
+                PrivateKey = AppPrivateKey.ToString(privateKey),
+                privateKey.PublicKey,
+                PublicKeyShort = privateKey.PublicKey.ToShortString(),
+                privateKey.Address,
             };
         }).ToArray();
         Out.WriteLineAsJson(info);
@@ -39,11 +38,11 @@ public abstract class KeyCommandBase : CommandMethodBase
         [CommandSummary("The private key.")]
         string privateKey)
     {
-        var key = PrivateKeyUtility.Parse(privateKey);
+        var key = AppPrivateKey.Parse(privateKey);
         var info = new
         {
-            PublicKey = PublicKeyUtility.ToString(key.PublicKey),
-            PublicKeyShort = PublicKeyUtility.ToShortString(key.PublicKey),
+            key.PublicKey,
+            PublicKeyShort = key.PublicKey.ToShortString(),
         };
         Out.WriteLineAsJson(info);
     }
@@ -54,10 +53,9 @@ public abstract class KeyCommandBase : CommandMethodBase
         [CommandSummary("The private key or public key.")]
         string key)
     {
-        var address = GetAddress(key);
         var info = new
         {
-            Address = AddressUtility.ToString(address),
+            Address = GetAddress(key),
         };
         Out.WriteLineAsJson(info);
     }
@@ -70,22 +68,21 @@ public abstract class KeyCommandBase : CommandMethodBase
         [CommandSummary("The keyword.")]
         string keyword)
     {
-        var addressObject = AddressUtility.Parse(address);
         var info = new
         {
-            Address = AddressUtility.ToString(AddressUtility.Derive(addressObject, keyword)),
+            Address = AppAddress.Parse(address).Derive(keyword),
         };
         Out.WriteLineAsJson(info);
     }
 
-    private static Address GetAddress(string key)
+    private static AppAddress GetAddress(string key)
     {
-        if (PrivateKeyUtility.TryParse(key, out var privateKey) == true)
+        if (AppPrivateKey.TryParse(key, out var privateKey) == true)
         {
             return privateKey.Address;
         }
 
-        if (PublicKeyUtility.TryParse(key, out var publicKey) == true)
+        if (AppPublicKey.TryParse(key, out var publicKey) == true)
         {
             return publicKey.Address;
         }

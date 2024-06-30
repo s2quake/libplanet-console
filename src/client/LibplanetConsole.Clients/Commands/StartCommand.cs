@@ -24,9 +24,7 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         var isSeed = IsSeed;
-        var nodeEndPoint = NodeEndPoint != string.Empty
-            ? EndPointUtility.Parse(NodeEndPoint)
-            : client.NodeEndPoint;
+        var nodeEndPoint = AppEndPoint.ParseOrFallback(NodeEndPoint, client.NodeEndPoint);
         client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(
             nodeEndPoint, isSeed, cancellationToken);
         await client.StartAsync(cancellationToken);

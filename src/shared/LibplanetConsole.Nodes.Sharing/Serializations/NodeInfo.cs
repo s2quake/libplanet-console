@@ -1,5 +1,5 @@
-using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
@@ -13,7 +13,7 @@ public readonly record struct NodeInfo
 
     public string ConsensusEndPoint { get; init; }
 
-    public Address Address { get; init; }
+    public AppAddress Address { get; init; }
 
     public BlockHash GenesisHash { get; init; }
 
@@ -21,7 +21,7 @@ public readonly record struct NodeInfo
 
     public bool IsRunning { get; init; }
 
-    public BoundPeerInfo[] Peers { get; init; }
+    public AppPeer[] Peers { get; init; }
 
     public static NodeInfo Empty { get; } = new NodeInfo
     {

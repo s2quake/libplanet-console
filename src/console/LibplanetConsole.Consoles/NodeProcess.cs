@@ -1,4 +1,3 @@
-using System.Net;
 using System.Security;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
@@ -7,11 +6,11 @@ namespace LibplanetConsole.Consoles;
 
 internal sealed class NodeProcess(Node node) : ProcessBase
 {
-    public required EndPoint EndPoint { get; init; }
+    public required AppEndPoint EndPoint { get; init; }
 
     public required SecureString PrivateKey { get; init; }
 
-    public EndPoint? NodeEndPoint { get; set; }
+    public AppEndPoint? NodeEndPoint { get; set; }
 
     public string StoreDirectory { get; set; } = string.Empty;
 
@@ -25,13 +24,13 @@ internal sealed class NodeProcess(Node node) : ProcessBase
     {
         get
         {
-            var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
+            var privateKey = AppPrivateKey.FromSecureString(PrivateKey);
             var argumentList = new List<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(EndPoint),
+                EndPoint.ToString(),
                 "--private-key",
-                PrivateKeyUtility.ToString(privateKey),
+                AppPrivateKey.ToString(privateKey),
             };
 
             if (IsDotnetRuntime == true)
@@ -46,14 +45,14 @@ internal sealed class NodeProcess(Node node) : ProcessBase
 
             if (StoreDirectory != string.Empty)
             {
-                var storePath = Path.Combine(StoreDirectory, (ShortAddress)privateKey.Address);
+                var storePath = Path.Combine(StoreDirectory, $"{privateKey.Address}:S");
                 argumentList.Add("--store-path");
                 argumentList.Add(storePath);
             }
 
             if (LogDirectory != string.Empty)
             {
-                var logFilename = $"node-{(ShortAddress)privateKey.Address}.log";
+                var logFilename = $"node-{privateKey.Address:S}.log";
                 var logPath = Path.Combine(LogDirectory, logFilename);
                 argumentList.Add("--log-path");
                 argumentList.Add(logPath);
@@ -62,7 +61,7 @@ internal sealed class NodeProcess(Node node) : ProcessBase
             if (NodeEndPoint is { } nodeEndPoint)
             {
                 argumentList.Add("--node-end-point");
-                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+                argumentList.Add(nodeEndPoint.ToString());
             }
 
             if (ManualStart == true)

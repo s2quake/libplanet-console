@@ -1,4 +1,4 @@
-using System.Net;
+using LibplanetConsole.Common;
 using LibplanetConsole.Explorer.Serializations;
 
 namespace LibplanetConsole.Consoles.Explorer;
@@ -9,7 +9,7 @@ public interface IExplorerNodeContent
 
     event EventHandler? Stopped;
 
-    EndPoint EndPoint { get; set; }
+    AppEndPoint EndPoint { get; set; }
 
     ExplorerInfo Info { get; }
 

@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 
@@ -75,7 +74,7 @@ internal sealed record class ApplicationSettings
 
     public static implicit operator ApplicationOptions(ApplicationSettings settings)
     {
-        var endPoint = EndPointUtility.ParseWithFallback(settings.EndPoint);
+        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
         return new ApplicationOptions(endPoint)
         {
             Nodes = settings.GetNodes(),
@@ -109,23 +108,23 @@ internal sealed record class ApplicationSettings
         return options;
     }
 
-    private PrivateKey[] GetNodes()
+    private AppPrivateKey[] GetNodes()
     {
         if (Nodes.Length > 0)
         {
-            return [.. Nodes.Select(item => new PrivateKey(item))];
+            return [.. Nodes.Select(item => AppPrivateKey.Parse(item))];
         }
 
-        return [.. Enumerable.Range(0, NodeCount).Select(item => new PrivateKey())];
+        return [.. Enumerable.Range(0, NodeCount).Select(item => new AppPrivateKey())];
     }
 
-    private PrivateKey[] GetClients()
+    private AppPrivateKey[] GetClients()
     {
         if (Clients.Length > 0)
         {
-            return [.. Clients.Select(item => new PrivateKey(item))];
+            return [.. Clients.Select(item => AppPrivateKey.Parse(item))];
         }
 
-        return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
+        return [.. Enumerable.Range(0, ClientCount).Select(item => new AppPrivateKey())];
     }
 }
