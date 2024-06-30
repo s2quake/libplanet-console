@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Net;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -31,15 +30,15 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     private readonly SynchronizationContext _synchronizationContext
         = SynchronizationContext.Current!;
 
-    private readonly PrivateKey _seedNodePrivateKey = new();
+    private readonly AppPrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
-    private readonly EndPoint? _seedEndPoint;
+    private readonly AppEndPoint? _seedEndPoint;
     private readonly ManualResetEvent _initializedResetEvent = new(false);
     private readonly ILogger _logger;
 
-    private DnsEndPoint? _blocksyncEndPoint;
-    private DnsEndPoint? _consensusEndPoint;
+    private AppEndPoint? _blocksyncEndPoint;
+    private AppEndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
@@ -50,7 +49,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     public Node(ApplicationOptions options, ILogger logger)
     {
         _seedEndPoint = options.NodeEndPoint;
-        _privateKey = PrivateKeyUtility.ToSecureString(options.PrivateKey);
+        _privateKey = options.PrivateKey.ToSecureString();
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
         _logger = logger;
@@ -73,13 +72,13 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public event EventHandler? Stopped;
 
-    public DnsEndPoint SwarmEndPoint
+    public AppEndPoint SwarmEndPoint
     {
         get => _blocksyncEndPoint ?? throw new InvalidOperationException();
         set => _blocksyncEndPoint = value;
     }
 
-    public DnsEndPoint ConsensusEndPoint
+    public AppEndPoint ConsensusEndPoint
     {
         get => _consensusEndPoint ?? throw new InvalidOperationException();
         set => _consensusEndPoint = value;
@@ -91,9 +90,9 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public bool IsDisposed => _isDisposed;
 
-    public PublicKey PublicKey { get; }
+    public AppPublicKey PublicKey { get; }
 
-    public Address Address => PublicKey.Address;
+    public AppAddress Address => PublicKey.Address;
 
     public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
 
@@ -101,40 +100,39 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public Swarm Swarm => _swarm ?? throw new InvalidOperationException();
 
-    public BoundPeer[] Peers
+    public AppPeer[] Peers
     {
         get
         {
             if (_swarm is not null)
             {
-                return [.. _swarm.Peers];
+                return [.. _swarm.Peers.Select(item => (AppPeer)item)];
             }
 
             throw new InvalidOperationException();
         }
     }
 
-    public BoundPeer BlocksyncSeedPeer
+    public AppPeer BlocksyncSeedPeer
         => _blocksyncSeedNode?.BoundPeer ?? NodeOptions.BlocksyncSeedPeer ??
             throw new InvalidOperationException();
 
-    public BoundPeer ConsensusSeedPeer
+    public AppPeer ConsensusSeedPeer
         => _consensusSeedNode?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
             throw new InvalidOperationException();
 
     public NodeOptions NodeOptions => _nodeOptions;
 
-    public override string ToString() => AddressUtility.ToString(Address);
+    public override string ToString() => $"{Address:S}";
 
-    public bool Verify(object obj, byte[] signature)
-        => PublicKeyUtility.Verify(PublicKey, obj, signature);
+    public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
     public Task<TxId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
         => AddTransactionAsync(
-            PrivateKeyUtility.FromSecureString(_privateKey), values, cancellationToken);
+            AppPrivateKey.FromSecureString(_privateKey), values, cancellationToken);
 
     public async Task<TxId> AddTransactionAsync(
-        PrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
+        AppPrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
@@ -143,11 +141,11 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
         var blockChain = BlockChain;
         var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce(privateKey.Address);
+        var nonce = blockChain.GetNextTxNonce((Address)privateKey.Address);
         var values = actions.Select(item => item.PlainValue).ToArray();
         var transaction = Transaction.Create(
             nonce: nonce,
-            privateKey: privateKey,
+            privateKey: (PrivateKey)privateKey,
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values));
         await AddTransactionAsync(transaction, cancellationToken);
@@ -200,23 +198,23 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             throw new InvalidOperationException("NodeOptions is not initialized.");
         }
 
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var privateKey = (PrivateKey)AppPrivateKey.FromSecureString(_privateKey);
         var nodeOptions = NodeOptions;
         var storePath = _storePath;
-        var blocksyncEndPoint = _blocksyncEndPoint ?? DnsEndPointUtility.Next();
-        var consensusEndPoint = _consensusEndPoint ?? DnsEndPointUtility.Next();
+        var blocksyncEndPoint = _blocksyncEndPoint ?? AppEndPoint.Next();
+        var consensusEndPoint = _consensusEndPoint ?? AppEndPoint.Next();
         var blocksyncSeedPeer = nodeOptions.BlocksyncSeedPeer ??
-            new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
+            new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
         var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
-            new BoundPeer(_seedNodePrivateKey.PublicKey, DnsEndPointUtility.Next());
+            new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
         var swarmTransport
             = await CreateTransport(privateKey, blocksyncEndPoint);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = [blocksyncSeedPeer],
+            StaticPeers = [(BoundPeer)blocksyncSeedPeer],
             BootstrapOptions = new()
             {
-                SeedPeers = [blocksyncSeedPeer],
+                SeedPeers = [(BoundPeer)blocksyncSeedPeer],
             },
         };
         var consensusTransport = await CreateTransport(
@@ -224,7 +222,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             endPoint: consensusEndPoint);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [consensusSeedPeer],
+            SeedPeers = [(BoundPeer)consensusSeedPeer],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
@@ -318,7 +316,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public long GetNextNonce(Address address)
+    public long GetNextNonce(AppAddress address)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
@@ -326,7 +324,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             message: "Node is not running.");
 
         var blockChain = BlockChain;
-        var nonce = blockChain.GetNextTxNonce(address);
+        var nonce = blockChain.GetNextTxNonce((Address)address);
         return nonce;
     }
 
@@ -334,8 +332,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
-        DnsEndPointUtility.Release(ref _blocksyncEndPoint);
-        DnsEndPointUtility.Release(ref _consensusEndPoint);
+        _blocksyncEndPoint = null;
+        _consensusEndPoint = null;
 
         if (_swarm is not null)
         {
@@ -408,7 +406,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, DnsEndPoint endPoint)
+        PrivateKey privateKey, AppEndPoint endPoint)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
@@ -431,12 +429,12 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         {
             nodeInfo = nodeInfo with
             {
-                SwarmEndPoint = DnsEndPointUtility.ToString(SwarmEndPoint),
-                ConsensusEndPoint = DnsEndPointUtility.ToString(ConsensusEndPoint),
+                SwarmEndPoint = AppEndPoint.ToString(SwarmEndPoint),
+                ConsensusEndPoint = AppEndPoint.ToString(ConsensusEndPoint),
                 GenesisHash = BlockChain.Genesis.Hash,
                 TipHash = BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
-                Peers = [.. Peers.Select(peer => new BoundPeerInfo(peer))],
+                Peers = [.. Peers],
             };
         }
 

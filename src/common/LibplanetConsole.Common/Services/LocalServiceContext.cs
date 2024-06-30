@@ -6,6 +6,7 @@ namespace LibplanetConsole.Common.Services;
 public class LocalServiceContext
 {
     private readonly InternalServerContext _serverContext;
+    private AppEndPoint? _endPoint;
 
     public LocalServiceContext(IEnumerable<ILocalService> localServices)
     {
@@ -23,10 +24,14 @@ public class LocalServiceContext
 
     public event EventHandler<StopEventArgs>? Stopped;
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
-        get => _serverContext.EndPoint;
-        set => _serverContext.EndPoint = value;
+        get => _endPoint ?? throw new InvalidOperationException("EndPoint is not set.");
+        set
+        {
+            _endPoint = value;
+            _serverContext.EndPoint = (EndPoint)value;
+        }
     }
 
     public bool IsRunning => _serverContext.ServiceState == ServiceState.Open;

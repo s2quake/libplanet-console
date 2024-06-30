@@ -1,4 +1,3 @@
-using System.Net;
 using System.Security;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
@@ -7,11 +6,11 @@ namespace LibplanetConsole.Consoles;
 
 internal sealed class ClientProcess(Client client) : ProcessBase
 {
-    public required EndPoint EndPoint { get; init; }
+    public required AppEndPoint EndPoint { get; init; }
 
     public required SecureString PrivateKey { get; init; }
 
-    public EndPoint? NodeEndPoint { get; set; }
+    public AppEndPoint? NodeEndPoint { get; set; }
 
     public string LogDirectory { get; set; } = string.Empty;
 
@@ -23,13 +22,13 @@ internal sealed class ClientProcess(Client client) : ProcessBase
     {
         get
         {
-            var privateKey = PrivateKeyUtility.FromSecureString(PrivateKey);
+            var privateKey = AppPrivateKey.FromSecureString(PrivateKey);
             var argumentList = new List<string>
             {
                 "--end-point",
-                EndPointUtility.ToString(EndPoint),
+                EndPoint.ToString(),
                 "--private-key",
-                PrivateKeyUtility.ToString(privateKey),
+                AppPrivateKey.ToString(privateKey),
             };
 
             if (IsDotnetRuntime == true)
@@ -44,7 +43,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
 
             if (LogDirectory != string.Empty)
             {
-                var logFilename = $"client-{(ShortAddress)privateKey.Address}.log";
+                var logFilename = $"client-{privateKey.Address:S}.log";
                 var logPath = Path.Combine(LogDirectory, logFilename);
                 argumentList.Add("--log-path");
                 argumentList.Add(logPath);
@@ -53,7 +52,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
             if (NodeEndPoint is { } nodeEndPoint)
             {
                 argumentList.Add("--node-end-point");
-                argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+                argumentList.Add(nodeEndPoint.ToString());
             }
 
             if (Detach != true)

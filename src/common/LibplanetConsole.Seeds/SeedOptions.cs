@@ -1,22 +1,21 @@
-﻿using System.Net;
-using Libplanet.Crypto;
-using Libplanet.Net;
+﻿using Libplanet.Net;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Seeds;
 
 internal record class SeedOptions
 {
     public SeedOptions(
-        PrivateKey privateKey, DnsEndPoint endPoint, AppProtocolVersion appProtocolVersion)
+        AppPrivateKey privateKey, AppEndPoint endPoint, AppProtocolVersion appProtocolVersion)
     {
         PrivateKey = privateKey;
         EndPoint = endPoint;
         AppProtocolVersion = appProtocolVersion;
     }
 
-    public PrivateKey PrivateKey { get; }
+    public AppPrivateKey PrivateKey { get; }
 
-    public DnsEndPoint EndPoint { get; }
+    public AppEndPoint EndPoint { get; }
 
     public AppProtocolVersion AppProtocolVersion { get; }
 

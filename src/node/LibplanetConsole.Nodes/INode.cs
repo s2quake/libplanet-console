@@ -1,6 +1,5 @@
 using Libplanet.Action;
 using Libplanet.Blockchain;
-using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
@@ -26,13 +25,13 @@ public interface INode : IVerifier
 
     Swarm Swarm { get; }
 
-    PublicKey PublicKey { get; }
+    AppPublicKey PublicKey { get; }
 
-    Address Address => PublicKey.Address;
+    AppAddress Address => PublicKey.Address;
 
-    BoundPeer BlocksyncSeedPeer { get; }
+    AppPeer BlocksyncSeedPeer { get; }
 
-    BoundPeer ConsensusSeedPeer { get; }
+    AppPeer ConsensusSeedPeer { get; }
 
     Task StartAsync(CancellationToken cancellationToken);
 
@@ -42,5 +41,5 @@ public interface INode : IVerifier
 
     Task AddTransactionAsync(Transaction transaction, CancellationToken cancellationToken);
 
-    long GetNextNonce(Address address);
+    long GetNextNonce(AppAddress address);
 }

@@ -1,8 +1,10 @@
+using LibplanetConsole.Common;
+
 namespace LibplanetConsole.Examples.Services;
 
 public interface IExampleNodeCallback
 {
-    void OnSubscribed(string address);
+    void OnSubscribed(AppAddress address);
 
-    void OnUnsubscribed(string address);
+    void OnUnsubscribed(AppAddress address);
 }

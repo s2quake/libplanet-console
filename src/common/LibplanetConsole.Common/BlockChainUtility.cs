@@ -29,7 +29,7 @@ public static class BlockChainUtility
     public static BlockChain CreateBlockChain(
         GenesisOptions genesisOptions, string storePath, IRenderer renderer)
     {
-        var genesisKey = genesisOptions.GenesisKey;
+        var genesisKey = (PrivateKey)genesisOptions.GenesisKey;
         var isNew = storePath == string.Empty || Directory.Exists(storePath) != true;
         var (store, stateStore) = GetStore(storePath);
         var actionLoader = new AggregateTypedActionLoader
@@ -41,7 +41,7 @@ public static class BlockChainUtility
             stateStore,
             actionLoader);
         var validators = genesisOptions.GenesisValidators
-                            .Select(item => new Validator(item, new BigInteger(1000)))
+                            .Select(item => new Validator((PublicKey)item, new BigInteger(1000)))
                             .ToArray();
         var validatorSet = new ValidatorSet(validators: [.. validators]);
         var nonce = 0L;

@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Examples.Services;
 
@@ -9,11 +10,11 @@ internal sealed class ExampleRemoteNodeService
     : RemoteService<IExampleNodeService, IExampleNodeCallback>,
     IExampleNodeCallback
 {
-    public void OnSubscribed(string address)
+    public void OnSubscribed(AppAddress address)
     {
     }
 
-    public void OnUnsubscribed(string address)
+    public void OnUnsubscribed(AppAddress address)
     {
     }
 }

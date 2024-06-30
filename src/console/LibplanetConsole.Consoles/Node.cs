@@ -1,7 +1,6 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Net;
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
@@ -26,17 +25,17 @@ internal sealed class Node : INode, INodeCallback
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
-    private DnsEndPoint? _blocksyncEndPoint;
-    private DnsEndPoint? _consensusEndPoint;
+    private AppEndPoint? _blocksyncEndPoint;
+    private AppEndPoint? _consensusEndPoint;
     private Guid _closeToken;
     private NodeInfo _nodeInfo;
     private bool _isDisposed;
     private bool _isInProgress;
 
-    public Node(ApplicationBase application, PrivateKey privateKey, NodeOptions nodeOptions)
+    public Node(ApplicationBase application, AppPrivateKey privateKey, NodeOptions nodeOptions)
     {
         _container = application.CreateChildContainer(this);
-        _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
+        _privateKey = privateKey.ToSecureString();
         _container.ComposeExportedValue<INode>(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _logger = application.GetService<ILogger>();
@@ -61,15 +60,15 @@ internal sealed class Node : INode, INodeCallback
 
     public event EventHandler? Disposed;
 
-    public DnsEndPoint SwarmEndPoint
+    public AppEndPoint SwarmEndPoint
         => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
 
-    public DnsEndPoint ConsensusEndPoint
+    public AppEndPoint ConsensusEndPoint
         => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
-    public PublicKey PublicKey { get; }
+    public AppPublicKey PublicKey { get; }
 
-    public Address Address => PublicKey.Address;
+    public AppAddress Address => PublicKey.Address;
 
     public bool IsAttached => _closeToken != Guid.Empty;
 
@@ -77,7 +76,7 @@ internal sealed class Node : INode, INodeCallback
 
     public NodeOptions NodeOptions { get; }
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
         get => _remoteServiceContext.EndPoint;
         set => _remoteServiceContext.EndPoint = value;
@@ -119,16 +118,9 @@ internal sealed class Node : INode, INodeCallback
         }
     }
 
-    public override string ToString()
-    {
-        return $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
-    }
+    public override string ToString() => $"{Address:S}: {EndPoint}";
 
-    public byte[] Sign(object obj)
-    {
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
-        return PrivateKeyUtility.Sign(privateKey, obj);
-    }
+    public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
 
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -178,8 +170,8 @@ internal sealed class Node : INode, INodeCallback
 
         using var scope = new ProgressScope(this);
         _nodeInfo = await _remoteService.Service.StartAsync(cancellationToken);
-        _blocksyncEndPoint = DnsEndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = DnsEndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
+        _blocksyncEndPoint = AppEndPoint.Parse(_nodeInfo.SwarmEndPoint);
+        _consensusEndPoint = AppEndPoint.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
         _logger.Debug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
@@ -202,19 +194,19 @@ internal sealed class Node : INode, INodeCallback
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
         => _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
 
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
         var address = privateKey.Address;
         var nonce = await _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
         var genesisHash = _nodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: privateKey,
+            privateKey: (PrivateKey)privateKey,
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txId = await _remoteService.Service.SendTransactionAsync(
@@ -254,7 +246,7 @@ internal sealed class Node : INode, INodeCallback
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            NodeEndPoint = EndPointUtility.Parse(application.Info.EndPoint),
+            NodeEndPoint = application.Info.EndPoint,
             StoreDirectory = application.Info.StoreDirectory,
             LogDirectory = application.Info.LogDirectory,
         };

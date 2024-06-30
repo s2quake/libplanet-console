@@ -1,27 +1,27 @@
-using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes.Serializations;
 
 public readonly record struct BlockInfo
 {
-    public BlockInfo(Block block)
+    public BlockInfo()
+    {
+    }
+
+    internal BlockInfo(Block block)
     {
         Index = block.Index;
         Hash = block.Hash;
-        Miner = block.Miner;
+        Miner = (AppAddress)block.Miner;
         Transactions = block.Transactions.Select(item => new TransactionInfo(item)).ToArray();
-    }
-
-    public BlockInfo()
-    {
     }
 
     public long Index { get; init; }
 
     public BlockHash Hash { get; init; }
 
-    public Address Miner { get; init; }
+    public AppAddress Miner { get; init; }
 
     public TransactionInfo[] Transactions { get; init; } = [];
 }

@@ -1,21 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
-using Libplanet.Crypto;
-using Libplanet.Net;
 using Libplanet.Net.Transports;
+using LibplanetConsole.Common;
 using Serilog;
 
 namespace LibplanetConsole.Seeds;
 
 internal sealed class PeerCollection(SeedOptions seedOptions) : IEnumerable<Peer>
 {
-    private readonly ConcurrentDictionary<Address, Peer> _infoByAddress = [];
+    private readonly ConcurrentDictionary<AppAddress, Peer> _infoByAddress = [];
     private readonly SeedOptions _seedOptions = seedOptions;
     private readonly ILogger _logger = Log.ForContext<Seed>();
 
     public int Count => _infoByAddress.Count;
 
-    public void AddOrUpdate(BoundPeer boundPeer, ITransport transport)
+    public void AddOrUpdate(AppPeer boundPeer, ITransport transport)
     {
         _infoByAddress.AddOrUpdate(
             key: boundPeer.Address,

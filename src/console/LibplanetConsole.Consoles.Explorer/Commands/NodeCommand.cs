@@ -26,7 +26,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
         var explorerNode = node.GetService<IExplorerNodeContent>();
         if (endPoint != string.Empty)
         {
-            explorerNode.EndPoint = EndPointUtility.Parse(endPoint);
+            explorerNode.EndPoint = AppEndPoint.Parse(endPoint);
         }
 
         await explorerNode.StartAsync(cancellationToken);

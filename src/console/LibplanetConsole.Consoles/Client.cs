@@ -1,9 +1,7 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Net;
 using System.Security;
-using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
@@ -31,10 +29,10 @@ internal sealed class Client : IClient, IClientCallback
     private bool _isDisposed;
     private bool _isInProgress;
 
-    public Client(ApplicationBase application, PrivateKey privateKey)
+    public Client(ApplicationBase application, AppPrivateKey privateKey)
     {
         _container = application.CreateChildContainer(this);
-        _privateKey = PrivateKeyUtility.ToSecureString(privateKey);
+        _privateKey = privateKey.ToSecureString();
         _container.ComposeExportedValue<IClient>(this);
         _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
@@ -56,15 +54,15 @@ internal sealed class Client : IClient, IClientCallback
 
     public event EventHandler? Disposed;
 
-    public PublicKey PublicKey { get; }
+    public AppPublicKey PublicKey { get; }
 
-    public Address Address => PublicKey.Address;
+    public AppAddress Address => PublicKey.Address;
 
     public bool IsAttached => _closeToken != Guid.Empty;
 
     public bool IsRunning { get; private set; }
 
-    public EndPoint EndPoint
+    public AppEndPoint EndPoint
     {
         get => _remoteServiceContext.EndPoint;
         set => _remoteServiceContext.EndPoint = value;
@@ -111,14 +109,9 @@ internal sealed class Client : IClient, IClientCallback
         }
     }
 
-    public override string ToString()
-        => $"{(ShortAddress)Address}: {EndPointUtility.ToString(EndPoint)}";
+    public override string ToString() => $"{Address:S}: {EndPoint}";
 
-    public byte[] Sign(object obj)
-    {
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
-        return PrivateKeyUtility.Sign(privateKey, obj);
-    }
+    public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -167,7 +160,7 @@ internal sealed class Client : IClient, IClientCallback
             message: "Client is not attached.");
 
         _clientInfo = await _remoteService.Service.StartAsync(
-            EndPointUtility.ToString(node.EndPoint), cancellationToken);
+            node.EndPoint.ToString(), cancellationToken);
         _node = node;
         IsRunning = true;
         _logger.Debug("Client is started: {Address}", Address);

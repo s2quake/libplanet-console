@@ -1,6 +1,4 @@
-using System.Net;
 using Libplanet.Action;
-using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
@@ -22,11 +20,11 @@ public interface IClient : IVerifier
 
     bool IsRunning { get; }
 
-    PublicKey PublicKey { get; }
+    AppPublicKey PublicKey { get; }
 
-    Address Address { get; }
+    AppAddress Address { get; }
 
-    EndPoint NodeEndPoint { get; set; }
+    AppEndPoint NodeEndPoint { get; set; }
 
     Task StartAsync(CancellationToken cancellationToken);
 

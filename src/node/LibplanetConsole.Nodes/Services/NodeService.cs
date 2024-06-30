@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Nodes.Serializations;
 
@@ -44,7 +44,7 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
         return tx.Id;
     }
 
-    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
         => Task.Run(() => _node.GetNextNonce(address), cancellationToken);
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)

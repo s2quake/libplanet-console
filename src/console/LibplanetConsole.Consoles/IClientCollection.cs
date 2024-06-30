@@ -1,5 +1,5 @@
 using System.Collections.Specialized;
-using Libplanet.Crypto;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;
 
@@ -13,15 +13,15 @@ public interface IClientCollection : IEnumerable<IClient>, INotifyCollectionChan
 
     IClient this[int index] { get; }
 
-    IClient this[Address address] { get; }
+    IClient this[AppAddress address] { get; }
 
     bool Contains(IClient item);
 
-    bool Contains(Address address);
+    bool Contains(AppAddress address);
 
     int IndexOf(IClient item);
 
-    int IndexOf(Address address);
+    int IndexOf(AppAddress address);
 
     Task<IClient> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken);
 }

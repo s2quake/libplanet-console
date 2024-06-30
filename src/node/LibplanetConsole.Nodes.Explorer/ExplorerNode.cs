@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using Libplanet.Explorer;
 using LibplanetConsole.Common;
+using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Serializations;
 using LibplanetConsole.Frameworks;
 using Microsoft.AspNetCore;
@@ -34,16 +35,16 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
             throw new InvalidOperationException("The explorer is already running.");
         }
 
-        var (host, port) = EndPointUtility.GetElements(options.EndPoint);
+        var endPoint = options.EndPoint;
         _webHost = WebHost.CreateDefaultBuilder()
                     .ConfigureServices(services => services.AddSingleton(node))
                     .UseStartup<ExplorerStartup<BlockChainContext>>()
                     .UseSerilog()
-                    .UseUrls($"http://{host}:{port}/")
+                    .UseUrls($"http://{endPoint.Host}:{endPoint.Port}/")
                     .Build();
 
         await _webHost.StartAsync(cancellationToken);
-        Info = new() { EndPoint = EndPointUtility.ToString(options.EndPoint), IsRunning = true, };
+        Info = new() { EndPoint = options.EndPoint, IsRunning = true, };
         logger.Debug("Explorer is started: {EndPoint}", Info.EndPoint);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -57,7 +58,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
 
         await _webHost.StopAsync(cancellationToken);
         _webHost = null;
-        Info = new() { EndPoint = string.Empty };
+        Info = new() { };
         logger.Debug("Explorer is stopped.");
         Stopped?.Invoke(this, EventArgs.Empty);
     }
@@ -70,7 +71,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
         {
             var options = new ExplorerOptions
             {
-                EndPoint = EndPointUtility.ParseWithFallback(endPoint),
+                EndPoint = AppEndPoint.ParseOrNext(endPoint),
             };
             await StartAsync(options, cancellationToken);
         }

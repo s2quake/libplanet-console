@@ -1,8 +1,10 @@
 ﻿using Dasync.Collections;
+using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
+using LibplanetConsole.Common;
 using Serilog;
 
 namespace LibplanetConsole.Seeds;
@@ -61,7 +63,7 @@ internal class Seed(SeedOptions seedOptions)
 
     private static async Task<NetMQTransport> CreateTransport(SeedOptions seedOptions)
     {
-        var privateKey = seedOptions.PrivateKey;
+        var privateKey = (PrivateKey)seedOptions.PrivateKey;
         var appProtocolVersion = seedOptions.AppProtocolVersion;
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
@@ -108,7 +110,7 @@ internal class Seed(SeedOptions seedOptions)
         {
             case FindNeighborsMsg:
                 var alivePeers = peers.Where(item => item.IsAlive)
-                                      .Select(item => item.BoundPeer)
+                                      .Select(item => (BoundPeer)item.AppPeer)
                                       .ToArray();
                 var neighborsMsg = new NeighborsMsg(alivePeers);
                 await transport.ReplyMessageAsync(
@@ -128,7 +130,7 @@ internal class Seed(SeedOptions seedOptions)
 
         if (message.Remote is BoundPeer boundPeer)
         {
-            peers.AddOrUpdate(boundPeer, transport);
+            peers.AddOrUpdate((AppPeer)boundPeer, transport);
         }
     }
 }

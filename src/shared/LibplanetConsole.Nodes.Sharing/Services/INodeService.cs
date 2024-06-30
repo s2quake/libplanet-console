@@ -1,5 +1,5 @@
-using Libplanet.Crypto;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes.Services;
@@ -14,5 +14,5 @@ public interface INodeService
 
     Task<TxId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
 
-    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
+    Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
 }

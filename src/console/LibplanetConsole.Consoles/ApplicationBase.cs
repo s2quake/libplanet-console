@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Consoles.Serializations;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
@@ -44,7 +45,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
-            EndPoint = EndPointUtility.ToString(_consoleContext.EndPoint),
+            EndPoint = _consoleContext.EndPoint,
             StoreDirectory = options.StoreDirectory,
             LogDirectory = options.LogDirectory,
             NoProcess = options.NoProcess,
@@ -59,7 +60,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             Timestamp = DateTimeOffset.UtcNow,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _logger.Debug($"GenesisOptions: {GenesisOptions.ToJson()}");
+        _logger.Debug($"GenesisOptions: {JsonUtility.Serialize((GenesisInfo)GenesisOptions)}");
         _logger.Debug("Application initialized.");
     }
 

@@ -1,4 +1,4 @@
-using Libplanet.Net;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Seeds;
 
@@ -10,7 +10,7 @@ public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
 
     public bool IsRunning => _cancellationTokenSource is not null;
 
-    public BoundPeer BoundPeer => new(
+    public AppPeer BoundPeer => new(
         _seedNodeOptions.PrivateKey.PublicKey, _seedNodeOptions.EndPoint);
 
     public async Task StartAsync(CancellationToken cancellationToken)

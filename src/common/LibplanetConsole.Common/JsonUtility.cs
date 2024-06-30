@@ -12,14 +12,14 @@ public static class JsonUtility
         WriteIndented = true,
     };
 
-    public static string SerializeObject(object value)
+    public static string Serialize(object value)
     {
         return JsonSerializer.Serialize(value, SerializerOptions);
     }
 
-    public static string SerializeObject(object value, bool isColorized)
+    public static string Serialize(object value, bool isColorized)
     {
-        var json = SerializeObject(value);
+        var json = Serialize(value);
         if (isColorized == true && IsJQSupported == true)
         {
             using var tempFile = TempFile.WriteAllText(json);
@@ -38,7 +38,7 @@ public static class JsonUtility
         return json;
     }
 
-    public static T DeserializeObject<T>(string value)
+    public static T Deserialize<T>(string value)
     {
         if (JsonSerializer.Deserialize<T>(value) is T t)
         {

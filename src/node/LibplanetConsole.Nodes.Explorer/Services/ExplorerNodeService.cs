@@ -1,9 +1,10 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
+using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Serializations;
 using LibplanetConsole.Explorer.Services;
 
-namespace LibplanetConsole.Nodes.Explorer;
+namespace LibplanetConsole.Nodes.Explorer.Services;
 
 [Export(typeof(ILocalService))]
 internal sealed class ExplorerNodeService : LocalService<IExplorerService, IExplorerCallback>,
@@ -32,7 +33,7 @@ internal sealed class ExplorerNodeService : LocalService<IExplorerService, IExpl
     }
 
     public async Task<ExplorerInfo> StartAsync(
-        ExplorerOptionsInfo options, CancellationToken cancellationToken)
+        ExplorerOptions options, CancellationToken cancellationToken)
     {
         await _explorerNode.StartAsync(options, cancellationToken);
         return _explorerNode.Info;

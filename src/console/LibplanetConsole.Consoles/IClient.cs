@@ -1,5 +1,3 @@
-using System.Net;
-using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
@@ -22,11 +20,11 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     bool IsRunning { get; }
 
-    EndPoint EndPoint { get; }
+    AppEndPoint EndPoint { get; }
 
     ClientInfo Info { get; }
 
-    PublicKey PublicKey { get; }
+    AppPublicKey PublicKey { get; }
 
     Task AttachAsync(CancellationToken cancellationToken);
 

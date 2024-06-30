@@ -1,14 +1,13 @@
-using System.Net;
-using Libplanet.Crypto;
 using Libplanet.Net;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Seeds;
 
 public readonly record struct SeedNodeOptions
 {
-    public DnsEndPoint EndPoint { get; init; }
+    public AppEndPoint EndPoint { get; init; }
 
-    public PrivateKey PrivateKey { get; init; }
+    public AppPrivateKey PrivateKey { get; init; }
 
     public AppProtocolVersion AppProtocolVersion { get; init; }
 }

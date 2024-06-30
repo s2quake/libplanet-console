@@ -44,7 +44,7 @@ internal abstract class ProcessBase : IAsyncDisposable
             _process.ErrorDataReceived += Process_ErrorDataReceived;
         }
 
-        ApplicationLogger.Debug("Process staring: " + JsonUtility.SerializeObject(new
+        ApplicationLogger.Debug("Process staring: " + JsonUtility.Serialize(new
         {
             HashCode = _process.GetHashCode(),
             _process.StartInfo.FileName,
@@ -57,7 +57,7 @@ internal abstract class ProcessBase : IAsyncDisposable
             throw new InvalidOperationException("Failed to start the process.");
         }
 
-        ApplicationLogger.Debug("Process started: " + JsonUtility.SerializeObject(new
+        ApplicationLogger.Debug("Process started: " + JsonUtility.Serialize(new
         {
             HashCode = _process.GetHashCode(),
             _process.Id,

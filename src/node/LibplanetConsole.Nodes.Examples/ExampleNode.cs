@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 
@@ -11,21 +10,21 @@ namespace LibplanetConsole.Nodes.Examples;
 internal sealed class ExampleNode(IApplication application) : IExampleNode
 {
     private readonly IApplication _application = application;
-    private readonly HashSet<Address> _addresses = [];
+    private readonly HashSet<AppAddress> _addresses = [];
 
-    public event EventHandler<ItemEventArgs<Address>>? Subscribed;
+    public event EventHandler<ItemEventArgs<AppAddress>>? Subscribed;
 
-    public event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
+    public event EventHandler<ItemEventArgs<AppAddress>>? Unsubscribed;
 
     public int Count => _addresses.Count;
 
     public bool IsExample { get; }
         = ApplicationSettingsParser.Peek<ExampleNodeSettings>().IsExample;
 
-    public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
+    public Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken)
         => _application.InvokeAsync(() => _addresses.ToArray(), cancellationToken);
 
-    public void Subscribe(Address address)
+    public void Subscribe(AppAddress address)
     {
         if (_addresses.Contains(address) == true)
         {
@@ -33,11 +32,11 @@ internal sealed class ExampleNode(IApplication application) : IExampleNode
         }
 
         _addresses.Add(address);
-        Subscribed?.Invoke(this, new ItemEventArgs<Address>(address));
+        Subscribed?.Invoke(this, new ItemEventArgs<AppAddress>(address));
         Console.Out.WriteLine($"Subscribed: '{address}'");
     }
 
-    public void Unsubscribe(Address address)
+    public void Unsubscribe(AppAddress address)
     {
         if (_addresses.Contains(address) != true)
         {
@@ -45,7 +44,7 @@ internal sealed class ExampleNode(IApplication application) : IExampleNode
         }
 
         _addresses.Remove(address);
-        Unsubscribed?.Invoke(this, new ItemEventArgs<Address>(address));
+        Unsubscribed?.Invoke(this, new ItemEventArgs<AppAddress>(address));
         Console.Out.WriteLine($"Unsubscribed: '{address}'");
     }
 }

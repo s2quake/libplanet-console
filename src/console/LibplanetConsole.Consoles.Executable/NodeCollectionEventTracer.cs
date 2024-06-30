@@ -83,7 +83,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             foreach (INode node in e.NewItems!)
             {
-                var message = $"Node created: {(ShortAddress)node.Address}";
+                var message = $"Node created: {node.Address:S}";
                 var colorType = TerminalColorType.BrightBlue;
                 Console.Out.WriteColoredLine(message, colorType);
                 AttachEvent(node);
@@ -93,7 +93,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             foreach (INode node in e.OldItems!)
             {
-                var message = $"Node deleted: {(ShortAddress)node.Address}";
+                var message = $"Node deleted: {node.Address:S}";
                 var colorType = TerminalColorType.BrightBlue;
                 Console.Out.WriteColoredLine(message, colorType);
                 DetachEvent(node);
@@ -105,8 +105,8 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     {
         var blockInfo = e.BlockInfo;
         var hash = (ShortBlockHash)blockInfo.Hash;
-        var miner = (ShortAddress)blockInfo.Miner;
-        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner}'";
+        var miner = (AppAddress)blockInfo.Miner;
+        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner:S}'";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
     }
 
@@ -114,7 +114,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     {
         if (sender is INode node)
         {
-            var message = $"Node attached: {(ShortAddress)node.Address}";
+            var message = $"Node attached: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
             Console.Out.WriteColoredLine(message, colorType);
         }
@@ -124,7 +124,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     {
         if (sender is INode node)
         {
-            var message = $"Node detached: {(ShortAddress)node.Address}";
+            var message = $"Node detached: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
             Console.Out.WriteColoredLine(message, colorType);
         }
@@ -134,7 +134,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     {
         if (sender is INode node)
         {
-            var message = $"Node started: {(ShortAddress)node.Address}";
+            var message = $"Node started: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
             Console.Out.WriteColoredLine(message, colorType);
         }
@@ -144,7 +144,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     {
         if (sender is INode node)
         {
-            var message = $"Node stopped: {(ShortAddress)node.Address}";
+            var message = $"Node stopped: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
             Console.Out.WriteColoredLine(message, colorType);
         }

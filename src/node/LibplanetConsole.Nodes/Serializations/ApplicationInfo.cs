@@ -1,10 +1,12 @@
+using LibplanetConsole.Common;
+
 namespace LibplanetConsole.Nodes.Serializations;
 
 public readonly record struct ApplicationInfo
 {
-    public required string EndPoint { get; init; }
+    public required AppEndPoint EndPoint { get; init; }
 
-    public required string NodeEndPoint { get; init; }
+    public required AppEndPoint? NodeEndPoint { get; init; }
 
     public required string StorePath { get; init; }
 
