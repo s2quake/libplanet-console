@@ -20,5 +20,10 @@
         ".communication": true,
         ".configurations": true,
         ".libplanet": false,
-    }
+    },
+    "cSpell.words": [
+      "devcontainer",
+      "dorny",
+      "dotnettools"
+    ]
 }

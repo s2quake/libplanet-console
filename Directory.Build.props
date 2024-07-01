@@ -27,11 +27,11 @@
 
   <PropertyGroup>
     <LibplanetSolutionPath>$(SolutionDir).libplanet\</LibplanetSolutionPath>
-    <WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
     <RootPath Condition="'$(SolutionDir)' != ''">$(SolutionDir)</RootPath>
     <RootPath Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)\</RootPath>
+    <UseRidGraph>true</UseRidGraph>
   </PropertyGroup>
-  
+
   <!-- <Target Name="DisplayInformation" BeforeTargets="Build">
     <Message Text="TargetFramework: $(TargetFramework)" Importance="High" />
     <Message Text="NETCoreSdkPortableRuntimeIdentifier: $(NETCoreSdkPortableRuntimeIdentifier)" Importance="High" />
