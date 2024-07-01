@@ -1,6 +1,7 @@
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
+using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
@@ -108,7 +109,7 @@ internal sealed class Client : IClient, INodeCallback
         Stopped?.Invoke(this, new(StopReason.None));
     }
 
-    public async Task<TxId> SendTransactionAsync(
+    public async Task<AppId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = AppPrivateKey.FromSecureString(_privateKey);
@@ -118,9 +119,9 @@ internal sealed class Client : IClient, INodeCallback
         var tx = Transaction.Create(
             nonce: nonce,
             privateKey: (PrivateKey)privateKey,
-            genesisHash: genesisHash,
+            genesisHash: (BlockHash)genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
-        _logger.Debug("Client sends a transaction: {TxId}", tx.Id);
+        _logger.Debug("Client sends a transaction: {AppId}", tx.Id);
         return await RemoteNodeService.SendTransactionAsync(tx.Serialize(), cancellationToken);
     }
 

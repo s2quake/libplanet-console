@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
@@ -38,7 +37,7 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     public Task StopAsync(CancellationToken cancellationToken)
         => _client.StopAsync(cancellationToken);
 
-    public async Task<TxId> SendTransactionAsync(
+    public async Task<AppId> SendTransactionAsync(
         TransactionOptions transactionOptions, CancellationToken cancellationToken)
     {
         if (transactionOptions.TryVerify(_client) == true)

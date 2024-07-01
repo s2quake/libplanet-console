@@ -1,4 +1,3 @@
-using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes.Serializations;
@@ -15,9 +14,9 @@ public readonly record struct NodeInfo
 
     public AppAddress Address { get; init; }
 
-    public BlockHash GenesisHash { get; init; }
+    public AppHash GenesisHash { get; init; }
 
-    public BlockHash TipHash { get; init; }
+    public AppHash TipHash { get; init; }
 
     public bool IsRunning { get; init; }
 

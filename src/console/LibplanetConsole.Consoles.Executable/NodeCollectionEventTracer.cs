@@ -1,7 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 
@@ -104,9 +103,9 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
-        var hash = (ShortBlockHash)blockInfo.Hash;
+        var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Index} '{hash}' Appended by '{miner:S}'";
+        var message = $"Block #{blockInfo.Index} '{hash:S}' Appended by '{miner:S}'";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
     }
 

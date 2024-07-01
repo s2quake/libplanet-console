@@ -2,7 +2,6 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Security;
-using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
@@ -184,7 +183,7 @@ internal sealed class Client : IClient, IClientCallback
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken)
+    public async Task<AppId> SendTransactionAsync(string text, CancellationToken cancellationToken)
     {
         var transactionOptions = new TransactionOptions
         {
