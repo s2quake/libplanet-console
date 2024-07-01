@@ -1,13 +1,11 @@
 using Libplanet.Action;
-using Libplanet.Blockchain;
-using Libplanet.Net;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes;
 
-public interface INode : IVerifier
+public interface INode : IVerifier, IServiceProvider
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -20,10 +18,6 @@ public interface INode : IVerifier
     NodeOptions NodeOptions { get; }
 
     bool IsRunning { get; }
-
-    BlockChain BlockChain { get; }
-
-    Swarm Swarm { get; }
 
     AppPublicKey PublicKey { get; }
 

@@ -125,6 +125,21 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public override string ToString() => $"{Address:S}";
 
+    public object? GetService(Type serviceType)
+    {
+        if (serviceType == typeof(Swarm))
+        {
+            return _swarm;
+        }
+
+        if (serviceType == typeof(BlockChain))
+        {
+            return BlockChain;
+        }
+
+        return null;
+    }
+
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
     public Task<AppId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
