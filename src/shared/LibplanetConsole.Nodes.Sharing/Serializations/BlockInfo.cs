@@ -12,14 +12,14 @@ public readonly record struct BlockInfo
     internal BlockInfo(Block block)
     {
         Index = block.Index;
-        Hash = block.Hash;
+        Hash = (AppBlockHash)block.Hash;
         Miner = (AppAddress)block.Miner;
         Transactions = block.Transactions.Select(item => new TransactionInfo(item)).ToArray();
     }
 
     public long Index { get; init; }
 
-    public BlockHash Hash { get; init; }
+    public AppBlockHash Hash { get; init; }
 
     public AppAddress Miner { get; init; }
 

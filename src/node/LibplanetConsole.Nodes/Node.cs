@@ -431,8 +431,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             {
                 SwarmEndPoint = AppEndPoint.ToString(SwarmEndPoint),
                 ConsensusEndPoint = AppEndPoint.ToString(ConsensusEndPoint),
-                GenesisHash = BlockChain.Genesis.Hash,
-                TipHash = BlockChain.Tip.Hash,
+                GenesisHash = (AppBlockHash)BlockChain.Genesis.Hash,
+                TipHash = (AppBlockHash)BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
                 Peers = [.. Peers],
             };

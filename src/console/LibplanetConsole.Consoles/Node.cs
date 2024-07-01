@@ -4,6 +4,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Security;
 using Libplanet.Action;
 using Libplanet.Crypto;
+using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
@@ -207,7 +208,7 @@ internal sealed class Node : INode, INodeCallback
         var tx = Transaction.Create(
             nonce: nonce,
             privateKey: (PrivateKey)privateKey,
-            genesisHash: genesisHash,
+            genesisHash: (BlockHash)genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txId = await _remoteService.Service.SendTransactionAsync(
             transaction: tx.Serialize(),
