@@ -127,11 +127,11 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
-    public Task<TxId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
+    public Task<AppId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
         => AddTransactionAsync(
             AppPrivateKey.FromSecureString(_privateKey), values, cancellationToken);
 
-    public async Task<TxId> AddTransactionAsync(
+    public async Task<AppId> AddTransactionAsync(
         AppPrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
@@ -149,7 +149,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values));
         await AddTransactionAsync(transaction, cancellationToken);
-        return transaction.Id;
+        return (AppId)transaction.Id;
     }
 
     public async Task AddTransactionAsync(
@@ -160,7 +160,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        _logger.Debug("Node adds a transaction: {TxId}", transaction.Id);
+        _logger.Debug("Node adds a transaction: {AppId}", transaction.Id);
         var blockChain = BlockChain;
         var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
         {
@@ -186,7 +186,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             throw new InvalidOperationException(sb.ToString());
         }
 
-        _logger.Debug("Node added a transaction: {TxId}", transaction.Id);
+        _logger.Debug("Node added a transaction: {AppId}", transaction.Id);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -431,8 +431,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             {
                 SwarmEndPoint = AppEndPoint.ToString(SwarmEndPoint),
                 ConsensusEndPoint = AppEndPoint.ToString(ConsensusEndPoint),
-                GenesisHash = (AppBlockHash)BlockChain.Genesis.Hash,
-                TipHash = (AppBlockHash)BlockChain.Tip.Hash,
+                GenesisHash = (AppHash)BlockChain.Genesis.Hash,
+                TipHash = (AppHash)BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
                 Peers = [.. Peers],
             };

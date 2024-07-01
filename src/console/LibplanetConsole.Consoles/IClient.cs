@@ -1,4 +1,3 @@
-using Libplanet.Types.Tx;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
 
@@ -34,5 +33,5 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken);
+    Task<AppId> SendTransactionAsync(string text, CancellationToken cancellationToken);
 }

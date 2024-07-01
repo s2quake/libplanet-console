@@ -198,7 +198,7 @@ internal sealed class Node : INode, INodeCallback
     public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
         => _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
 
-    public async Task<TxId> SendTransactionAsync(
+    public async Task<AppId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = AppPrivateKey.FromSecureString(_privateKey);
@@ -217,7 +217,7 @@ internal sealed class Node : INode, INodeCallback
         return txId;
     }
 
-    public Task<TxId> SendTransactionAsync(
+    public Task<AppId> SendTransactionAsync(
         Transaction transaction, CancellationToken cancellationToken)
     {
         return _remoteService.Service.SendTransactionAsync(

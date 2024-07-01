@@ -3,23 +3,23 @@ using System.Text.Json.Serialization;
 
 namespace LibplanetConsole.Common.Converters;
 
-public sealed class AppBlockHashJsonConverter : JsonConverter<AppBlockHash>
+public sealed class AppIdJsonConverter : JsonConverter<AppId>
 {
-    public override AppBlockHash Read(
+    public override AppId Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
     {
         if (reader.GetString() is string text)
         {
-            return AppBlockHash.Parse(text);
+            return AppId.Parse(text);
         }
 
-        throw new JsonException("Cannot read AppBlockHash from JSON.");
+        throw new JsonException("Cannot read AppId from JSON.");
     }
 
     public override void Write(
-        Utf8JsonWriter writer, AppBlockHash value, JsonSerializerOptions options)
+        Utf8JsonWriter writer, AppId value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
     }

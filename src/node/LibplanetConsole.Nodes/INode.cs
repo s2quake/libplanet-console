@@ -37,7 +37,7 @@ public interface INode : IVerifier
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<TxId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken);
+    Task<AppId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken);
 
     Task AddTransactionAsync(Transaction transaction, CancellationToken cancellationToken);
 

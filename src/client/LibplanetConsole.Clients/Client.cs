@@ -109,7 +109,7 @@ internal sealed class Client : IClient, INodeCallback
         Stopped?.Invoke(this, new(StopReason.None));
     }
 
-    public async Task<TxId> SendTransactionAsync(
+    public async Task<AppId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = AppPrivateKey.FromSecureString(_privateKey);
@@ -121,7 +121,7 @@ internal sealed class Client : IClient, INodeCallback
             privateKey: (PrivateKey)privateKey,
             genesisHash: (BlockHash)genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
-        _logger.Debug("Client sends a transaction: {TxId}", tx.Id);
+        _logger.Debug("Client sends a transaction: {AppId}", tx.Id);
         return await RemoteNodeService.SendTransactionAsync(tx.Serialize(), cancellationToken);
     }
 

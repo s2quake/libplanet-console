@@ -1,4 +1,3 @@
-using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
 
@@ -12,7 +11,7 @@ public interface INodeService
 
     Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken);
 
-    Task<TxId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
+    Task<AppId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
 }

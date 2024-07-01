@@ -1,5 +1,4 @@
 using Libplanet.Action;
-using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes.Serializations;
 
@@ -39,7 +38,7 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
 }

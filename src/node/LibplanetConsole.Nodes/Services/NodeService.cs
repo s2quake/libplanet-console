@@ -36,12 +36,12 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     public Task StopAsync(CancellationToken cancellationToken)
         => _node.StopAsync(cancellationToken);
 
-    public async Task<TxId> SendTransactionAsync(
+    public async Task<AppId> SendTransactionAsync(
         byte[] transaction, CancellationToken cancellationToken)
     {
         var tx = Transaction.Deserialize(transaction);
         await _node.AddTransactionAsync(tx, cancellationToken);
-        return tx.Id;
+        return (AppId)tx.Id;
     }
 
     public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
