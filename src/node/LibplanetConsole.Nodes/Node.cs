@@ -58,7 +58,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             GenesisOptions = new GenesisOptions
             {
                 GenesisKey = new(),
-                GenesisValidators = options.GenesisValidators,
+                GenesisValidators = options.Validators,
                 Timestamp = DateTimeOffset.UtcNow,
             },
         };

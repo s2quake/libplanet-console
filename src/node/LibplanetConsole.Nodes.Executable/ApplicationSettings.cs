@@ -40,7 +40,7 @@ internal sealed record class ApplicationSettings
                     "If omitted, genesis validators is derived from " +
                     "the private key of the node.\n" +
                     "If genesis block does not need to create, this option is ignored.")]
-    public string[] GenesisValidators { get; init; } = [];
+    public string[] Validators { get; init; } = [];
 
     [CommandProperty]
     [CommandSummary("The file path to store log.")]
@@ -59,7 +59,7 @@ internal sealed record class ApplicationSettings
             ParentProcessId = settings.ParentProcessId,
             ManualStart = settings.ManualStart,
             NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
-            GenesisValidators = settings.GetGenesisValidators(privateKey.PublicKey),
+            Validators = settings.GetGenesisValidators(privateKey.PublicKey),
             StorePath = GetFullPath(settings.StorePath),
             LogPath = GetFullPath(settings.LogPath),
             NoREPL = settings.NoREPL,
@@ -81,13 +81,9 @@ internal sealed record class ApplicationSettings
         return settings;
     }
 
-    private AppPublicKey[] GetGenesisValidators(AppPublicKey publicKey)
+    private AppPublicKey[] GetGenesisValidators(AppPublicKey publicKey) => Validators.Length switch
     {
-        if (GenesisValidators.Length > 0)
-        {
-            return [.. GenesisValidators.Select(AppPublicKey.Parse)];
-        }
-
-        return [publicKey];
-    }
+        > 0 => [.. Validators.Select(AppPublicKey.Parse)],
+        _ => [publicKey],
+    };
 }

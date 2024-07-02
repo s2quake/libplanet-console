@@ -14,9 +14,7 @@ namespace LibplanetConsole.Clients;
 
 public sealed record class NodeOptions
 {
-    public static NodeOptions Default { get; } = new NodeOptions();
-
-    public GenesisOptions GenesisOptions { get; init; } = new();
+    public required GenesisOptions GenesisOptions { get; init; }
 
     public AppPeer? BlocksyncSeedPeer { get; init; }
 

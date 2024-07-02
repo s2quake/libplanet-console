@@ -10,11 +10,13 @@ internal sealed class ExplorerNodeInfoProvider(ExplorerNode explorerNode)
 {
     protected override IEnumerable<(string Name, object? Value)> GetInfos(IApplication obj)
     {
-        yield return (nameof(ExplorerNode), new
+        var name = nameof(ExplorerNode);
+        var value = new
         {
             explorerNode.Info.EndPoint,
             Url = $"http://{explorerNode.Info.EndPoint}/ui/playground",
             explorerNode.IsRunning,
-        });
+        };
+        yield return (name, value);
     }
 }

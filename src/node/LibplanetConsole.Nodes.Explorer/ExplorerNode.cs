@@ -27,7 +27,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
 
     public bool IsRunning => _webHost is not null;
 
-    public async Task StartAsync(
+    public async Task<ExplorerInfo> StartAsync(
         ExplorerOptions options, CancellationToken cancellationToken)
     {
         if (_webHost is not null)
@@ -47,6 +47,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
         Info = new() { EndPoint = options.EndPoint, IsRunning = true, };
         logger.Debug("Explorer is started: {EndPoint}", Info.EndPoint);
         Started?.Invoke(this, EventArgs.Empty);
+        return Info;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

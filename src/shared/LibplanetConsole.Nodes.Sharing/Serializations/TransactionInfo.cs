@@ -1,14 +1,7 @@
-using Libplanet.Types.Tx;
-
 namespace LibplanetConsole.Nodes.Serializations;
 
-public readonly record struct TransactionInfo
+public readonly partial record struct TransactionInfo
 {
-    public TransactionInfo(ITransaction transaction)
-    {
-        Actions = transaction.Actions.Select(item => new ActionInfo(item)).ToArray();
-    }
-
     public TransactionInfo()
     {
     }

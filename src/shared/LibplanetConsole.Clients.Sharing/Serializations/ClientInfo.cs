@@ -12,8 +12,4 @@ public readonly record struct ClientInfo
     public BlockHash GenesisHash { get; init; }
 
     public bool IsRunning { get; init; }
-
-    public static ClientInfo Empty { get; } = new ClientInfo
-    {
-    };
 }
