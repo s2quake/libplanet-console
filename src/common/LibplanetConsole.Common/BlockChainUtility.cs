@@ -131,6 +131,7 @@ public static class BlockChainUtility
             previousHash: previousBlock.Hash,
             txHash: BlockContent.DeriveTxHash([transaction]),
             lastCommit: lastCommit,
+            proof: null,
             evidenceHash: null);
         var blockContent = new BlockContent(blockMetadata, [transaction], []);
         var preEvaluationBlock = blockContent.Propose();
