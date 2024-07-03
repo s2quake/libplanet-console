@@ -20,4 +20,13 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />
 
+  <Target Name="RestoreDependenciesProject" BeforeTargets="Restore">
+    <MSBuild Projects="..\..\node\LibplanetConsole.Nodes.Executable\LibplanetConsole.Nodes.Executable.csproj" Targets="Restore" />
+    <MSBuild Projects="..\..\client\LibplanetConsole.Clients.Executable\LibplanetConsole.Clients.Executable.csproj" Targets="Restore" />
+  </Target>
+  <Target Name="BuildDependenciesProject" BeforeTargets="Build">
+    <MSBuild Projects="..\..\node\LibplanetConsole.Nodes.Executable\LibplanetConsole.Nodes.Executable.csproj" Targets="Build" />
+    <MSBuild Projects="..\..\client\LibplanetConsole.Clients.Executable\LibplanetConsole.Clients.Executable.csproj" Targets="Build" />
+  </Target>
+
 </Project>

@@ -17,9 +17,9 @@ internal static class ProcessEnvironment
     private const string Framework = "net8.0";
 
 #if DEBUG
-    private const string Congiguration = "Debug";
+    private const string Configuration = "Debug";
 #elif RELEASE
-    private const string Congiguration = "Release";
+    private const string Configuration = "Release";
 #endif
 
     public static string WorkspacePath
@@ -101,7 +101,18 @@ internal static class ProcessEnvironment
         }
     }
 
-    public static string PublishExtension => IsWindows ? ".exe" : ".dll";
+    public static string Extension
+    {
+        get
+        {
+            if (IsDotnetRuntime == true)
+            {
+                return IsWindows ? ".exe" : ".dll";
+            }
+
+            return IsWindows ? ".exe" : string.Empty;
+        }
+    }
 
     public static string DotnetPath
     {
@@ -164,7 +175,7 @@ internal static class ProcessEnvironment
 
     public static bool IsArm64 => OSArchitecture == Architecture.Arm64;
 
-    public static bool IsDotnetRuntime => Environment.ProcessPath == DotnetPath;
+    public static bool IsDotnetRuntime => ProcessPath == DotnetPath;
 
     private static bool IsInProject
     {
@@ -177,7 +188,7 @@ internal static class ProcessEnvironment
                     $"Directory of the executing assembly location '{location}' is not found.");
             var expectedDirectory = $"{WorkspacePath}/src/console/" +
                                     $"LibplanetConsole.Consoles.Executable/" +
-                                    $"bin/{Congiguration}/{Framework}";
+                                    $"bin/{Configuration}/{Framework}";
             var d1 = Path.GetFullPath(expectedDirectory);
             var d2 = Path.GetFullPath(directory);
             if (IsOSPlatform(OSPlatform.Windows) == true)
@@ -189,13 +200,26 @@ internal static class ProcessEnvironment
         }
     }
 
+    private static string ProcessPath
+    {
+        get
+        {
+            if (Environment.ProcessPath is { } processPath)
+            {
+                return processPath;
+            }
+
+            throw new InvalidOperationException("Environment.ProcessPath is not found.");
+        }
+    }
+
     private static string NodePathInProject
     {
         get
         {
             return Path.GetFullPath(
-                $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Congiguration}/" +
-                $"{Framework}/libplanet-node.dll");
+                $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Configuration}/" +
+                $"{Framework}/libplanet-node{Extension}");
         }
     }
 
@@ -203,18 +227,14 @@ internal static class ProcessEnvironment
     {
         get
         {
-            if (Environment.ProcessPath is { } processPath)
-            {
-                var directoryName = Path.GetDirectoryName(processPath) ??
-                    throw new InvalidOperationException(
-                        $"Directory of the process path '{processPath}' is not found.");
-                var extension = Path.GetExtension(processPath) ??
-                    throw new InvalidOperationException(
-                        $"Extension of the process path '{processPath}' is not found.");
-                return Path.Combine(directoryName, $"libplanet-node{extension}");
-            }
-
-            throw new InvalidOperationException("Environment.ProcessPath is not found.");
+            var processPath = ProcessPath;
+            var directoryName = Path.GetDirectoryName(processPath) ??
+                throw new InvalidOperationException(
+                    $"Directory of the process path '{processPath}' is not found.");
+            var extension = Path.GetExtension(processPath) ??
+                throw new InvalidOperationException(
+                    $"Extension of the process path '{processPath}' is not found.");
+            return Path.Combine(directoryName, $"libplanet-node{extension}");
         }
     }
 
@@ -224,7 +244,7 @@ internal static class ProcessEnvironment
         {
             return Path.GetFullPath(
                 $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
-                $"{Congiguration}/{Framework}/libplanet-client.dll");
+                $"{Configuration}/{Framework}/libplanet-client{Extension}");
         }
     }
 
@@ -232,18 +252,14 @@ internal static class ProcessEnvironment
     {
         get
         {
-            if (Environment.ProcessPath is { } processPath)
-            {
-                var directoryName = Path.GetDirectoryName(processPath) ??
-                    throw new InvalidOperationException(
-                        $"Directory of the process path '{processPath}' is not found.");
-                var extension = Path.GetExtension(processPath) ??
-                    throw new InvalidOperationException(
-                        $"Extension of the process path '{processPath}' is not found.");
-                return Path.Combine(directoryName, $"libplanet-client{extension}");
-            }
-
-            throw new InvalidOperationException("Environment.ProcessPath is not found.");
+            var processPath = ProcessPath;
+            var directoryName = Path.GetDirectoryName(processPath) ??
+                throw new InvalidOperationException(
+                    $"Directory of the process path '{processPath}' is not found.");
+            var extension = Path.GetExtension(processPath) ??
+                throw new InvalidOperationException(
+                    $"Extension of the process path '{processPath}' is not found.");
+            return Path.Combine(directoryName, $"libplanet-client{extension}");
         }
     }
 
