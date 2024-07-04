@@ -6,6 +6,7 @@
     <ProjectReference Include="..\LibplanetConsole.Consoles\LibplanetConsole.Consoles.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Consoles.Examples\LibplanetConsole.Consoles.Examples.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Consoles.Explorer\LibplanetConsole.Consoles.Explorer.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Consoles.Evidence\LibplanetConsole.Consoles.Evidence.csproj" />
   </ItemGroup>
 
   <ItemGroup>

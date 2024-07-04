@@ -5,7 +5,7 @@ using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes;
 
-public interface INode : IVerifier, IServiceProvider
+public interface INode : IVerifier, ISigner, IServiceProvider
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 

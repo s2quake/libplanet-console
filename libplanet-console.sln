@@ -47,6 +47,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles.E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Common.Tests", "test\LibplanetConsole.Common.Tests\LibplanetConsole.Common.Tests.csproj", "{65341396-A058-4577-9B70-C1DD3D146501}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Nodes.Evidence", "src\node\LibplanetConsole.Nodes.Evidence\LibplanetConsole.Nodes.Evidence.csproj", "{4C151EAE-2105-4DA1-B645-C09513EA8532}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Consoles.Evidence", "src\console\LibplanetConsole.Consoles.Evidence\LibplanetConsole.Consoles.Evidence.csproj", "{965DF40E-F3BA-45F2-A177-A3DE550C824E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +121,14 @@ Global
 		{65341396-A058-4577-9B70-C1DD3D146501}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65341396-A058-4577-9B70-C1DD3D146501}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65341396-A058-4577-9B70-C1DD3D146501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C151EAE-2105-4DA1-B645-C09513EA8532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C151EAE-2105-4DA1-B645-C09513EA8532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C151EAE-2105-4DA1-B645-C09513EA8532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C151EAE-2105-4DA1-B645-C09513EA8532}.Release|Any CPU.Build.0 = Release|Any CPU
+		{965DF40E-F3BA-45F2-A177-A3DE550C824E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{965DF40E-F3BA-45F2-A177-A3DE550C824E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{965DF40E-F3BA-45F2-A177-A3DE550C824E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{965DF40E-F3BA-45F2-A177-A3DE550C824E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +154,8 @@ Global
 		{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{AF1A0011-2795-42FD-B67B-7F1956268577} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
 		{65341396-A058-4577-9B70-C1DD3D146501} = {56942891-CFBD-41E4-8881-47F455D7BEFD}
+		{4C151EAE-2105-4DA1-B645-C09513EA8532} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
+		{965DF40E-F3BA-45F2-A177-A3DE550C824E} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		{1778FDCB-AC26-43E4-97FE-FC4F0C427672} = {23C68389-8F13-48E7-9878-440917F70DAF}
