@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bencodex;
+using Bencodex.Types;
 using Libplanet.Common;
 using Libplanet.Crypto;
 using LibplanetConsole.Common.Converters;
@@ -11,6 +13,7 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPublicKeyJsonConverter))]
 public readonly record struct AppPublicKey : IFormattable
 {
+    private static readonly Codec _codec = new();
     private readonly PublicKey _publicKey;
 
     public AppPublicKey(PublicKey publicKey) => _publicKey = publicKey;
@@ -71,6 +74,16 @@ public readonly record struct AppPublicKey : IFormattable
 
     public bool Verify(object obj, byte[] signature)
     {
+        if (obj is IValue value)
+        {
+            return _publicKey.Verify(_codec.Encode(value), signature);
+        }
+
+        if (obj is IBencodable bencodable)
+        {
+            return _publicKey.Verify(_codec.Encode(bencodable.Bencoded), signature);
+        }
+
         var json = JsonSerializer.Serialize(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
         return _publicKey.Verify(bytes, signature);
