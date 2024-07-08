@@ -114,6 +114,11 @@ public sealed record class AppPrivateKey
             return _privateKey.Sign(_codec.Encode(value));
         }
 
+        if (obj is IBencodable bencodable)
+        {
+            return _privateKey.Sign(_codec.Encode(bencodable.Bencoded));
+        }
+
         var json = JsonSerializer.Serialize(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
         return _privateKey.Sign(bytes);
