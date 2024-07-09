@@ -31,7 +31,9 @@
             "args": [
                 "--end-point",
                 "127.0.0.1:5353",
-                "--explorer-end-point"
+                "--explorer-end-point",
+                "--database-path",
+                ".data"
             ]
         },
         {

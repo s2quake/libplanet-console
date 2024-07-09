@@ -57,6 +57,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Explorer.S
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Nodes.Sharing", "src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.shproj", "{F656916C-C43A-4427-BD74-8742401B2D29}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes.Databases", "src\node\LibplanetConsole.Nodes.Databases\LibplanetConsole.Nodes.Databases.csproj", "{D7A49F29-9C6B-448E-A8EE-CE6ADF443D2E}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Databases.Sharing", "src\shared\LibplanetConsole.Databases.Sharing\LibplanetConsole.Databases.Sharing.shproj", "{9BE26458-C411-4CE3-B044-2EA2E55BFECF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +131,10 @@ Global
 		{65341396-A058-4577-9B70-C1DD3D146501}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65341396-A058-4577-9B70-C1DD3D146501}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65341396-A058-4577-9B70-C1DD3D146501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7A49F29-9C6B-448E-A8EE-CE6ADF443D2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7A49F29-9C6B-448E-A8EE-CE6ADF443D2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7A49F29-9C6B-448E-A8EE-CE6ADF443D2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7A49F29-9C6B-448E-A8EE-CE6ADF443D2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,11 +165,13 @@ Global
 		{1ACB9269-98AD-4E25-9DEA-F27150A38084} = {480BDA5A-FA96-4097-9E20-3841831413BB}
 		{3ABEC64A-5794-495A-91DB-81095DADC2E7} = {480BDA5A-FA96-4097-9E20-3841831413BB}
 		{F656916C-C43A-4427-BD74-8742401B2D29} = {480BDA5A-FA96-4097-9E20-3841831413BB}
+		{D7A49F29-9C6B-448E-A8EE-CE6ADF443D2E} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
+		{9BE26458-C411-4CE3-B044-2EA2E55BFECF} = {480BDA5A-FA96-4097-9E20-3841831413BB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		{1778FDCB-AC26-43E4-97FE-FC4F0C427672} = {23C68389-8F13-48E7-9878-440917F70DAF}
-		{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		SolutionGuid = {3227501A-47F1-4FA6-A69C-B5801260FEC9}
+		{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
+		{1778FDCB-AC26-43E4-97FE-FC4F0C427672} = {23C68389-8F13-48E7-9878-440917F70DAF}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{217938cf-b2b8-41bb-a193-475430421265}*SharedItemsImports = 5
@@ -174,6 +184,7 @@ Global
 		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
 		src\shared\LibplanetConsole.Examples.Sharing\LibplanetConsole.Examples.Sharing.projitems*{ace75cd7-e4fd-4b9e-943e-ef3bb11decdf}*SharedItemsImports = 5
 		src\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems*{af1a0011-2795-42fd-b67b-7f1956268577}*SharedItemsImports = 5
+		src\shared\LibplanetConsole.Databases.Sharing\LibplanetConsole.Databases.Sharing.projitems*{d7a49f29-9c6b-448e-a8ee-ce6adf443d2e}*SharedItemsImports = 5
 		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{f656916c-c43a-4427-bd74-8742401b2d29}*SharedItemsImports = 13
 		src\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems*{fef8e9d4-cbb7-4efc-a5c2-2c9e91498d79}*SharedItemsImports = 5
 	EndGlobalSection
