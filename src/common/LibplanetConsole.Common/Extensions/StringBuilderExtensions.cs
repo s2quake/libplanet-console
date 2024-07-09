@@ -12,4 +12,13 @@ public static class StringBuilderExtensions
             @this.AppendLine(formatter(item));
         }
     }
+
+    public static void AppendLines(
+        this StringBuilder @this, IEnumerable<string> items)
+    {
+        foreach (var item in items)
+        {
+            @this.AppendLine(item);
+        }
+    }
 }

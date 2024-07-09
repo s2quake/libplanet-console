@@ -13,17 +13,9 @@ public interface IDatabaseNode
 
     bool IsRunning { get; }
 
+    ITableCollection Tables { get; }
+
     Task StartAsync(DatabaseOptions options, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
-
-    Task PutAsync(string key, string value, CancellationToken cancellationToken);
-
-    Task PutRangeAsync(KeyValue[] keyValues, CancellationToken cancellationToken);
-
-    Task<string> SeekAsync(string key, CancellationToken cancellationToken);
-
-    Task<KeyValue[]> SeekManyAsync(string find, string prefix, CancellationToken cancellationToken);
-
-    Task DeleteAsync(string key, CancellationToken cancellationToken);
 }
