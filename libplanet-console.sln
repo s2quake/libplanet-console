@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -56,6 +55,28 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Explorer.Sharing", "src\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.shproj", "{3ABEC64A-5794-495A-91DB-81095DADC2E7}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Nodes.Sharing", "src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.shproj", "{F656916C-C43A-4427-BD74-8742401B2D29}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".submodules", ".submodules", "{1296E2F4-EC9C-45EC-93FF-C6724D1CA7C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libplanet", "libplanet", "{E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Action", ".submodules\libplanet\src\Libplanet.Action\Libplanet.Action.csproj", "{9F20D261-4493-48CD-9AC0-A9F71AFA4BC7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Common", ".submodules\libplanet\src\Libplanet.Common\Libplanet.Common.csproj", "{8314556D-1EA8-4419-825E-43B9352CA717}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Crypto", ".submodules\libplanet\src\Libplanet.Crypto\Libplanet.Crypto.csproj", "{919029BE-DC09-41D8-B31A-592BB29679EA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Net", ".submodules\libplanet\src\Libplanet.Net\Libplanet.Net.csproj", "{DDEA6E85-6538-40FC-B0D3-8EF421E75758}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.RocksDBStore", ".submodules\libplanet\src\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj", "{1BFD2118-4CB9-4661-BD52-06F26EAE6AF5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Store", ".submodules\libplanet\src\Libplanet.Store\Libplanet.Store.csproj", "{B293D7B0-8A8F-4565-8428-2E0A811DCE1E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Stun", ".submodules\libplanet\src\Libplanet.Stun\Libplanet.Stun.csproj", "{750518D9-C402-46C5-AD13-5899FAFD8C1A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Types", ".submodules\libplanet\src\Libplanet.Types\Libplanet.Types.csproj", "{C15A04B7-9CAC-4BF5-BF66-0CF5AD22D61A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libplanet.Explorer", ".submodules\libplanet\tools\Libplanet.Explorer\Libplanet.Explorer.csproj", "{3836638D-9610-4CCA-82E1-FB41D041DFC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,6 +148,42 @@ Global
 		{65341396-A058-4577-9B70-C1DD3D146501}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65341396-A058-4577-9B70-C1DD3D146501}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65341396-A058-4577-9B70-C1DD3D146501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F20D261-4493-48CD-9AC0-A9F71AFA4BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F20D261-4493-48CD-9AC0-A9F71AFA4BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F20D261-4493-48CD-9AC0-A9F71AFA4BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F20D261-4493-48CD-9AC0-A9F71AFA4BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8314556D-1EA8-4419-825E-43B9352CA717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8314556D-1EA8-4419-825E-43B9352CA717}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8314556D-1EA8-4419-825E-43B9352CA717}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8314556D-1EA8-4419-825E-43B9352CA717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{919029BE-DC09-41D8-B31A-592BB29679EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{919029BE-DC09-41D8-B31A-592BB29679EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{919029BE-DC09-41D8-B31A-592BB29679EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{919029BE-DC09-41D8-B31A-592BB29679EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDEA6E85-6538-40FC-B0D3-8EF421E75758}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDEA6E85-6538-40FC-B0D3-8EF421E75758}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDEA6E85-6538-40FC-B0D3-8EF421E75758}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDEA6E85-6538-40FC-B0D3-8EF421E75758}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BFD2118-4CB9-4661-BD52-06F26EAE6AF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BFD2118-4CB9-4661-BD52-06F26EAE6AF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BFD2118-4CB9-4661-BD52-06F26EAE6AF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BFD2118-4CB9-4661-BD52-06F26EAE6AF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B293D7B0-8A8F-4565-8428-2E0A811DCE1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B293D7B0-8A8F-4565-8428-2E0A811DCE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B293D7B0-8A8F-4565-8428-2E0A811DCE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B293D7B0-8A8F-4565-8428-2E0A811DCE1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{750518D9-C402-46C5-AD13-5899FAFD8C1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{750518D9-C402-46C5-AD13-5899FAFD8C1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{750518D9-C402-46C5-AD13-5899FAFD8C1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{750518D9-C402-46C5-AD13-5899FAFD8C1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C15A04B7-9CAC-4BF5-BF66-0CF5AD22D61A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C15A04B7-9CAC-4BF5-BF66-0CF5AD22D61A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C15A04B7-9CAC-4BF5-BF66-0CF5AD22D61A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C15A04B7-9CAC-4BF5-BF66-0CF5AD22D61A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3836638D-9610-4CCA-82E1-FB41D041DFC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3836638D-9610-4CCA-82E1-FB41D041DFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3836638D-9610-4CCA-82E1-FB41D041DFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3836638D-9610-4CCA-82E1-FB41D041DFC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,6 +214,16 @@ Global
 		{1ACB9269-98AD-4E25-9DEA-F27150A38084} = {480BDA5A-FA96-4097-9E20-3841831413BB}
 		{3ABEC64A-5794-495A-91DB-81095DADC2E7} = {480BDA5A-FA96-4097-9E20-3841831413BB}
 		{F656916C-C43A-4427-BD74-8742401B2D29} = {480BDA5A-FA96-4097-9E20-3841831413BB}
+		{E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6} = {1296E2F4-EC9C-45EC-93FF-C6724D1CA7C6}
+		{9F20D261-4493-48CD-9AC0-A9F71AFA4BC7} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{8314556D-1EA8-4419-825E-43B9352CA717} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{919029BE-DC09-41D8-B31A-592BB29679EA} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{DDEA6E85-6538-40FC-B0D3-8EF421E75758} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{1BFD2118-4CB9-4661-BD52-06F26EAE6AF5} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{B293D7B0-8A8F-4565-8428-2E0A811DCE1E} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{750518D9-C402-46C5-AD13-5899FAFD8C1A} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{C15A04B7-9CAC-4BF5-BF66-0CF5AD22D61A} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
+		{3836638D-9610-4CCA-82E1-FB41D041DFC2} = {E84C5FCE-0973-4BFD-8AA3-08B69E1F51C6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		{1778FDCB-AC26-43E4-97FE-FC4F0C427672} = {23C68389-8F13-48E7-9878-440917F70DAF}
