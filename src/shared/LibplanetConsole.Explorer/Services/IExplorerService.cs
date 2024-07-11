@@ -1,5 +1,3 @@
-using LibplanetConsole.Explorer.Serializations;
-
 namespace LibplanetConsole.Explorer.Services;
 
 public interface IExplorerService

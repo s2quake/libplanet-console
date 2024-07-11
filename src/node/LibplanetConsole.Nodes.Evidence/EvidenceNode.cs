@@ -5,7 +5,6 @@ using Libplanet.Types.Evidence;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Evidence;
-using LibplanetConsole.Evidence.Serializations;
 
 namespace LibplanetConsole.Nodes.Evidence;
 

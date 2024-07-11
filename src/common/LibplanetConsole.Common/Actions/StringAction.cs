@@ -13,15 +13,9 @@ public sealed class StringAction : ActionBase
 
     public string Value { get; set; } = string.Empty;
 
-    protected override void OnLoadPlainValue(Dictionary values)
-    {
-        Value = (Text)values["value"];
-    }
+    protected override void OnLoadPlainValue(Dictionary values) => Value = (Text)values["value"];
 
-    protected override Dictionary OnInitialize(Dictionary values)
-    {
-        return values.SetItem("value", Value);
-    }
+    protected override Dictionary OnInitialize(Dictionary values) => values.SetItem("value", Value);
 
     protected override IWorld OnExecute(IActionContext context)
     {

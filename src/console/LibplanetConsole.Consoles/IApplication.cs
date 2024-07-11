@@ -1,5 +1,4 @@
 using LibplanetConsole.Common;
-using LibplanetConsole.Consoles.Serializations;
 
 namespace LibplanetConsole.Consoles;
 

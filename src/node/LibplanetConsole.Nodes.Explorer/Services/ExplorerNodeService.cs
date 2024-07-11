@@ -1,7 +1,6 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Explorer;
-using LibplanetConsole.Explorer.Serializations;
 using LibplanetConsole.Explorer.Services;
 
 namespace LibplanetConsole.Nodes.Explorer.Services;
@@ -26,31 +25,19 @@ internal sealed class ExplorerNodeService : LocalService<IExplorerService, IExpl
         _explorerNode.Stopped -= ExplorerNode_Stopped;
     }
 
-    public async Task<ExplorerInfo> GetInfoAsync(CancellationToken cancellationToken)
-    {
-        await Task.CompletedTask;
-        return _explorerNode.Info;
-    }
+    public Task<ExplorerInfo> GetInfoAsync(CancellationToken cancellationToken)
+        => Task.Run(() => _explorerNode.Info, cancellationToken);
 
-    public async Task<ExplorerInfo> StartAsync(
+    public Task<ExplorerInfo> StartAsync(
         ExplorerOptions options, CancellationToken cancellationToken)
-    {
-        await _explorerNode.StartAsync(options, cancellationToken);
-        return _explorerNode.Info;
-    }
+        => _explorerNode.StartAsync(options, cancellationToken);
 
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _explorerNode.StopAsync(cancellationToken);
-    }
+    public Task StopAsync(CancellationToken cancellationToken)
+        => _explorerNode.StopAsync(cancellationToken);
 
     private void ExplorerNode_Started(object? sender, EventArgs e)
-    {
-        Callback.OnStarted(_explorerNode.Info);
-    }
+        => Callback.OnStarted(_explorerNode.Info);
 
     private void ExplorerNode_Stopped(object? sender, EventArgs e)
-    {
-        Callback.OnStopped();
-    }
+        => Callback.OnStopped();
 }

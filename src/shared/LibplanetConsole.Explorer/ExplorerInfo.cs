@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Explorer.Serializations;
+namespace LibplanetConsole.Explorer;
 
 public readonly record struct ExplorerInfo
 {

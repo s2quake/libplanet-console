@@ -1,5 +1,4 @@
 using Libplanet.Action;
-using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes;
 

@@ -1,5 +1,3 @@
-using LibplanetConsole.Evidence.Serializations;
-
 namespace LibplanetConsole.Evidence.Services;
 
 public interface IEvidenceService

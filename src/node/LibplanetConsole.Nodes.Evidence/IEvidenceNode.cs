@@ -1,4 +1,4 @@
-using LibplanetConsole.Evidence.Serializations;
+using LibplanetConsole.Evidence;
 
 namespace LibplanetConsole.Nodes.Evidence;
 

@@ -10,9 +10,7 @@ internal sealed class StopCommand(IClient client) : CommandAsyncBase
 {
     public override bool IsEnabled => client.IsRunning is true;
 
-    protected override async Task OnExecuteAsync(
+    protected override Task OnExecuteAsync(
         CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
-    {
-        await client.StopAsync(cancellationToken);
-    }
+        => client.StopAsync(cancellationToken);
 }

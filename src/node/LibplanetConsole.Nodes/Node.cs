@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security;
 using System.Security.Cryptography;
-using System.Text;
 using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Action.Loader;
@@ -63,7 +62,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             GenesisOptions = new GenesisOptions
             {
                 GenesisKey = (AppPrivateKey)BlockChainUtility.AppProtocolKey,
-                GenesisValidators = options.GenesisValidators,
+                GenesisValidators = options.Validators,
                 Timestamp = DateTimeOffset.UtcNow,
             },
         };

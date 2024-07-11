@@ -24,7 +24,7 @@ public sealed record class ApplicationOptions
 
     public string LogPath { get; set; } = string.Empty;
 
-    public AppPublicKey[] GenesisValidators { get; init; } = [];
+    public AppPublicKey[] Validators { get; init; } = [];
 
     public bool NoREPL { get; init; }
 }

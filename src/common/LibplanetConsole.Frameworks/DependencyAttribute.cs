@@ -5,10 +5,7 @@ public class DependencyAttribute : Attribute
 {
     private Type? _type;
 
-    public DependencyAttribute(string typeName)
-    {
-        DependencyTypeName = typeName;
-    }
+    public DependencyAttribute(string typeName) => DependencyTypeName = typeName;
 
     public DependencyAttribute(Type type)
     {

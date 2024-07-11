@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Frameworks;
 
@@ -19,10 +20,13 @@ internal sealed class ConfigCommand(IApplicationConfigurations configurations) :
     {
         if (Key == string.Empty && Value == string.Empty)
         {
+            var sb = new StringBuilder();
             foreach (var key in configurations)
             {
-                Out.Write($"{key}={configurations[key]}");
+                sb.AppendLine($"{key}={configurations[key]}");
             }
+
+            Out.Write(sb.ToString());
         }
         else if (Value == string.Empty)
         {

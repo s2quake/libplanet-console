@@ -1,5 +1,3 @@
-using LibplanetConsole.Clients.Serializations;
-
 namespace LibplanetConsole.Clients;
 
 public interface IApplication : IAsyncDisposable, IServiceProvider

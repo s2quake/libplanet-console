@@ -1,5 +1,3 @@
-using LibplanetConsole.Clients.Serializations;
-
 namespace LibplanetConsole.Clients.Services;
 
 public interface IClientCallback
