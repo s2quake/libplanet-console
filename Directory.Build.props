@@ -7,8 +7,8 @@
     <CommandsDirectory>$(MSBuildThisFileDirectory).submodules\commands\</CommandsDirectory>
     <CommunicationDirectory>$(MSBuildThisFileDirectory).submodules\communication\</CommunicationDirectory>
     <ConfigurationDirectory>$(MSBuildThisFileDirectory).submodules\configurations\</ConfigurationDirectory>
-    <LibplanetDirectory>$(MSBuildThisFileDirectory).submodules\libplanet\</LibplanetDirectory>
-    <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
+    <LibplanetDirectory>$(MSBuildThisFileDirectory).submodules\lib9c\.Libplanet\</LibplanetDirectory>
+    <NoWarn>$(NoWarn);NU1902;NU1903;NU1504</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

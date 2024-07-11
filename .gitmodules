@@ -1,0 +1,3 @@
+[submodule ".submodules/lib9c"]
+	path = .submodules/lib9c
+	url = https://github.com/moreal/lib9c.git
