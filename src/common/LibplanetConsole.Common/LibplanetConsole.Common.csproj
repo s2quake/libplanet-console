@@ -2,11 +2,11 @@
 
   <!-- $(LibplanetDirectory) exists. -->
   <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
-    <ProjectReference Include="$(LibplanetDirectory)Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Net\Libplanet.Net.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Crypto\Libplanet.Crypto.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Store\Libplanet.Store.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Crypto\Libplanet.Crypto.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Store\Libplanet.Store.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
   </ItemGroup>
 
   <!-- $(LibplanetDirectory) does not exist. -->

@@ -3,21 +3,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <CommandsDirectory>$(MSBuildThisFileDirectory)..\.commands\</CommandsDirectory>
-    <CommunicationDirectory>$(MSBuildThisFileDirectory)..\.communication\</CommunicationDirectory>
-    <ConfigurationDirectory>$(MSBuildThisFileDirectory)..\.configurations\</ConfigurationDirectory>
-    <LibplanetDirectory>$(MSBuildThisFileDirectory)..\.libplanet\</LibplanetDirectory>
     <DebugType Condition="'$(_IsPublishing)'=='true'">none</DebugType>
   </PropertyGroup>
-
-  <Target Name="DisplaySourceUsage" BeforeTargets="Build">
-    <Warning Condition="Exists('$(CommandsDirectory)')" Text="Commands is being referenced from this source.: $(CommandsDirectory)" />
-    <Warning Condition="Exists('$(CommunicationDirectory)')" Text="Communication is being referenced from this source.: $(CommunicationDirectory)" />
-    <Warning Condition="Exists('$(ConfigurationDirectory)')" Text="Configurations is being referenced from this source.: $(ConfigurationDirectory)" />
-    <Warning Condition="Exists('$(LibplanetDirectory)')" Text="Libplanet is being referenced from this source.: $(LibplanetDirectory)" />
-  </Target>
 
 </Project>

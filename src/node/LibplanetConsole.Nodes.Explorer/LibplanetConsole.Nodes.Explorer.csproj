@@ -2,7 +2,7 @@
 
   <!-- $(LibplanetDirectory) exists. -->
   <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
-    <ProjectReference Include="$(LibplanetDirectory)Libplanet.Explorer\Libplanet.Explorer.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)tools\Libplanet.Explorer\Libplanet.Explorer.csproj" />
   </ItemGroup>
 
   <!-- $(LibplanetDirectory) does not exist. -->
