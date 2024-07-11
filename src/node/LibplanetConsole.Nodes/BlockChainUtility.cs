@@ -32,7 +32,7 @@ public static class BlockChainUtility
         var (store, stateStore) = GetStore(storePath);
         var actionLoader = new AggregateTypedActionLoader(actionLoaders);
         var actionEvaluator = new ActionEvaluator(
-            policyActionsRegistry: new(),
+            policyBlockActionGetter: _ => null,
             stateStore,
             actionLoader);
         var validators = genesisOptions.Validators
