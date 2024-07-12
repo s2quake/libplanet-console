@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Action.Loader;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Common;
@@ -15,7 +16,9 @@ using Libplanet.Net.Transports;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Seeds;
@@ -30,6 +33,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     private readonly SynchronizationContext _synchronizationContext
         = SynchronizationContext.Current!;
 
+    private readonly IServiceProvider _serviceProvider;
     private readonly AppPrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
@@ -46,8 +50,9 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     private SeedNode? _consensusSeedNode;
     private NodeOptions _nodeOptions;
 
-    public Node(ApplicationOptions options, ILogger logger)
+    public Node(IServiceProvider serviceProvider, ApplicationOptions options, ILogger logger)
     {
+        _serviceProvider = serviceProvider;
         _seedEndPoint = options.NodeEndPoint;
         _privateKey = options.PrivateKey.ToSecureString();
         _storePath = options.StorePath;
@@ -137,7 +142,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             return BlockChain;
         }
 
-        return null;
+        return _serviceProvider.GetService(serviceType);
     }
 
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
@@ -243,10 +248,12 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
         };
+        var actionLoaders = CollectActionLoaders(_serviceProvider);
         var blockChain = BlockChainUtility.CreateBlockChain(
             genesisOptions: nodeOptions.GenesisOptions,
             storePath: storePath,
-            renderer: this);
+            renderer: this,
+            actionLoaders: actionLoaders);
 
         if (nodeOptions.BlocksyncSeedPeer is null)
         {
@@ -418,6 +425,14 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     void IActionRenderer.RenderBlockEnd(Block oldTip, Block newTip)
     {
+    }
+
+    private static IActionLoader[] CollectActionLoaders(IServiceProvider serviceProvider)
+    {
+        var actionLoaderProviders = serviceProvider.GetService<IEnumerable<IActionLoaderProvider>>();
+        var actionLoaderList = actionLoaderProviders.Select(item => item.GetActionLoader()).ToList();
+        actionLoaderList.Add(new AssemblyActionLoader(typeof(AssemblyActionLoader).Assembly));
+        return [.. actionLoaderList];
     }
 
     private static async Task<NetMQTransport> CreateTransport(
