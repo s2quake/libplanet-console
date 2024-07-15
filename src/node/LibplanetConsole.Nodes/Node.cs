@@ -62,7 +62,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         {
             GenesisOptions = new GenesisOptions
             {
-                GenesisKey = (AppPrivateKey)BlockChainUtility.AppProtocolKey,
+                GenesisKey = new(),
                 GenesisValidators = options.GenesisValidators,
                 Timestamp = DateTimeOffset.UtcNow,
             },
@@ -429,8 +429,10 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     private static IActionLoader[] CollectActionLoaders(IServiceProvider serviceProvider)
     {
-        var actionLoaderProviders = serviceProvider.GetService<IEnumerable<IActionLoaderProvider>>();
-        var actionLoaderList = actionLoaderProviders.Select(item => item.GetActionLoader()).ToList();
+        var actionLoaderProviders
+            = serviceProvider.GetService<IEnumerable<IActionLoaderProvider>>();
+        var actionLoaderList
+            = actionLoaderProviders.Select(item => item.GetActionLoader()).ToList();
         actionLoaderList.Add(new AssemblyActionLoader(typeof(AssemblyActionLoader).Assembly));
         return [.. actionLoaderList];
     }
