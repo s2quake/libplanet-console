@@ -62,7 +62,7 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         {
             GenesisOptions = new GenesisOptions
             {
-                GenesisKey = new(),
+                GenesisKey = (AppPrivateKey)BlockChainUtility.AppProtocolKey,
                 GenesisValidators = options.GenesisValidators,
                 Timestamp = DateTimeOffset.UtcNow,
             },
