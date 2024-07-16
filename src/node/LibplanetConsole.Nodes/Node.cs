@@ -393,6 +393,21 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)
     {
+    }
+
+    void IActionRenderer.RenderAction(
+        IValue action, ICommittedActionContext context, HashDigest<SHA256> nextState)
+    {
+    }
+
+    void IActionRenderer.RenderActionError(
+        IValue action, ICommittedActionContext context, Exception exception)
+    {
+        _exceptionByAction.AddOrUpdate(action, exception, (_, _) => exception);
+    }
+
+    void IActionRenderer.RenderBlockEnd(Block oldTip, Block newTip)
+    {
         _synchronizationContext.Post(Action, state: null);
 
         void Action(object? state)
@@ -410,21 +425,6 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
             UpdateNodeInfo();
             BlockAppended?.Invoke(this, new(blockInfo));
         }
-    }
-
-    void IActionRenderer.RenderAction(
-        IValue action, ICommittedActionContext context, HashDigest<SHA256> nextState)
-    {
-    }
-
-    void IActionRenderer.RenderActionError(
-        IValue action, ICommittedActionContext context, Exception exception)
-    {
-        _exceptionByAction.AddOrUpdate(action, exception, (_, _) => exception);
-    }
-
-    void IActionRenderer.RenderBlockEnd(Block oldTip, Block newTip)
-    {
     }
 
     private static IActionLoader[] CollectActionLoaders(IServiceProvider serviceProvider)
