@@ -20,13 +20,12 @@ using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Seeds;
 using Serilog;
 
 namespace LibplanetConsole.Nodes;
 
-internal sealed class Node : IActionRenderer, INode, IApplicationService
+internal sealed partial class Node : IActionRenderer, INode, IApplicationService
 {
     private readonly SecureString _privateKey;
     private readonly string _storePath;
@@ -148,68 +147,6 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
     public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
-
-    public Task<AppId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
-        => AddTransactionAsync(
-            AppPrivateKey.FromSecureString(_privateKey), values, cancellationToken);
-
-    public async Task<AppId> AddTransactionAsync(
-        AppPrivateKey privateKey, IAction[] actions, CancellationToken cancellationToken)
-    {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
-
-        var blockChain = BlockChain;
-        var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce((Address)privateKey.Address);
-        var values = actions.Select(item => item.PlainValue).ToArray();
-        var transaction = Transaction.Create(
-            nonce: nonce,
-            privateKey: (PrivateKey)privateKey,
-            genesisHash: genesisBlock.Hash,
-            actions: new TxActionList(values));
-        await AddTransactionAsync(transaction, cancellationToken);
-        return (AppId)transaction.Id;
-    }
-
-    public async Task AddTransactionAsync(
-        Transaction transaction, CancellationToken cancellationToken)
-    {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
-
-        _logger.Debug("Node adds a transaction: {AppId}", transaction.Id);
-        var blockChain = BlockChain;
-        var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
-        {
-            return new ManualResetEvent(initialState: false);
-        });
-        blockChain.StageTransaction(transaction);
-        await Task.Run(manualResetEvent.WaitOne, cancellationToken);
-
-        _eventByTxId.TryRemove(transaction.Id, out _);
-
-        var sb = new StringBuilder();
-        foreach (var item in transaction.Actions)
-        {
-            if (_exceptionByAction.TryRemove(item, out var exception) == true &&
-                exception is UnexpectedlyTerminatedActionException)
-            {
-                sb.AppendLine($"{exception.InnerException}");
-            }
-        }
-
-        if (sb.Length > 0)
-        {
-            throw new InvalidOperationException(sb.ToString());
-        }
-
-        _logger.Debug("Node added a transaction: {AppId}", transaction.Id);
-    }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -338,18 +275,6 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
         UpdateNodeInfo();
         _logger.Debug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
-    }
-
-    public long GetNextNonce(AppAddress address)
-    {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
-
-        var blockChain = BlockChain;
-        var nonce = blockChain.GetNextTxNonce((Address)address);
-        return nonce;
     }
 
     public async ValueTask DisposeAsync()

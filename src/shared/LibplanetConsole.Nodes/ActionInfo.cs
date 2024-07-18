@@ -1,6 +1,6 @@
 using Bencodex.Types;
 
-namespace LibplanetConsole.Nodes.Serializations;
+namespace LibplanetConsole.Nodes;
 
 public readonly record struct ActionInfo
 {
@@ -8,9 +8,11 @@ public readonly record struct ActionInfo
 
     public ActionInfo(IValue value)
     {
-        if (value is Dictionary values && values.TryGetValue(TypeIdKey, out var typeId))
+        if (value is Dictionary values
+            && values.TryGetValue(TypeIdKey, out var typeId)
+            && typeId is Text text)
         {
-            TypeId = $"{typeId}";
+            TypeId = text.Value;
         }
     }
 

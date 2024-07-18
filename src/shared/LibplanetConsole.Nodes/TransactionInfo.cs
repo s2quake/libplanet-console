@@ -1,6 +1,6 @@
 using Libplanet.Types.Tx;
 
-namespace LibplanetConsole.Nodes.Serializations;
+namespace LibplanetConsole.Nodes;
 
 public readonly record struct TransactionInfo
 {
