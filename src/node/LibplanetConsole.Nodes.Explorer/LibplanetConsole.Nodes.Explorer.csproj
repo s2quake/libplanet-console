@@ -18,6 +18,8 @@
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
   </ItemGroup>
 
-  <Import Project="..\..\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems" Label="Shared" />
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Explorer\**\*.cs" />
+  </ItemGroup>
 
 </Project>
