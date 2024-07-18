@@ -130,8 +130,9 @@ public static class BlockChainUtility
             publicKey: privateKey.PublicKey,
             previousHash: previousBlock.Hash,
             txHash: BlockContent.DeriveTxHash([transaction]),
-            lastCommit: lastCommit);
-        var blockContent = new BlockContent(blockMetadata, [transaction]);
+            lastCommit: lastCommit,
+            evidenceHash: null);
+        var blockContent = new BlockContent(blockMetadata, [transaction], []);
         var preEvaluationBlock = blockContent.Propose();
         var stateRootHash = blockChain.DetermineNextBlockStateRootHash(blockChain.Tip, out _);
         var height = blockChain.Count;
@@ -145,6 +146,7 @@ public static class BlockChainUtility
             blockHash: block.Hash,
             timestamp: DateTimeOffset.UtcNow,
             validatorPublicKey: item.PublicKey,
+            validatorPower: BigInteger.One,
             flag: VoteFlag.PreCommit);
             return voteMetadata.Sign(item);
         }).ToImmutableArray();
