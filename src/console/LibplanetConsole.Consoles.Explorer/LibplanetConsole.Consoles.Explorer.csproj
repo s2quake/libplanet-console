@@ -4,6 +4,8 @@
     <ProjectReference Include="..\LibplanetConsole.Consoles\LibplanetConsole.Consoles.csproj" />
   </ItemGroup>
 
-  <Import Project="..\..\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems" Label="Shared" />
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Explorer\**\*.cs" />
+  </ItemGroup>
 
 </Project>

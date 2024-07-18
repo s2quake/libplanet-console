@@ -41,21 +41,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Clients.Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles.Examples", "src\console\LibplanetConsole.Consoles.Examples\LibplanetConsole.Consoles.Examples.csproj", "{ACE75CD7-E4FD-4B9E-943E-EF3BB11DECDF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{480BDA5A-FA96-4097-9E20-3841831413BB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes.Explorer", "src\node\LibplanetConsole.Nodes.Explorer\LibplanetConsole.Nodes.Explorer.csproj", "{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles.Explorer", "src\console\LibplanetConsole.Consoles.Explorer\LibplanetConsole.Consoles.Explorer.csproj", "{AF1A0011-2795-42FD-B67B-7F1956268577}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Common.Tests", "test\LibplanetConsole.Common.Tests\LibplanetConsole.Common.Tests.csproj", "{65341396-A058-4577-9B70-C1DD3D146501}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Clients.Sharing", "src\shared\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.shproj", "{2FFED165-D285-415D-B421-64D41B5199D0}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Examples.Sharing", "src\shared\LibplanetConsole.Examples.Sharing\LibplanetConsole.Examples.Sharing.shproj", "{1ACB9269-98AD-4E25-9DEA-F27150A38084}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Explorer.Sharing", "src\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.shproj", "{3ABEC64A-5794-495A-91DB-81095DADC2E7}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LibplanetConsole.Nodes.Sharing", "src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.shproj", "{F656916C-C43A-4427-BD74-8742401B2D29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -149,14 +139,9 @@ Global
 		{6ECDC75B-1B38-4480-AD15-CE0F330CD70B} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{2CA203CA-1980-4B11-82E1-0E5812D86C63} = {1DEAA4CE-E29B-4379-BAF6-20B79A5946CB}
 		{ACE75CD7-E4FD-4B9E-943E-EF3BB11DECDF} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
-		{480BDA5A-FA96-4097-9E20-3841831413BB} = {4194F59A-6D6B-4651-B133-3FE6081BF1F9}
 		{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{AF1A0011-2795-42FD-B67B-7F1956268577} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
 		{65341396-A058-4577-9B70-C1DD3D146501} = {56942891-CFBD-41E4-8881-47F455D7BEFD}
-		{2FFED165-D285-415D-B421-64D41B5199D0} = {480BDA5A-FA96-4097-9E20-3841831413BB}
-		{1ACB9269-98AD-4E25-9DEA-F27150A38084} = {480BDA5A-FA96-4097-9E20-3841831413BB}
-		{3ABEC64A-5794-495A-91DB-81095DADC2E7} = {480BDA5A-FA96-4097-9E20-3841831413BB}
-		{F656916C-C43A-4427-BD74-8742401B2D29} = {480BDA5A-FA96-4097-9E20-3841831413BB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		{1778FDCB-AC26-43E4-97FE-FC4F0C427672} = {23C68389-8F13-48E7-9878-440917F70DAF}
@@ -164,17 +149,5 @@ Global
 		SolutionGuid = {3227501A-47F1-4FA6-A69C-B5801260FEC9}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{217938cf-b2b8-41bb-a193-475430421265}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Examples.Sharing\LibplanetConsole.Examples.Sharing.projitems*{2ca203ca-1980-4b11-82e1-0e5812d86c63}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{2ffed165-d285-415d-b421-64d41b5199d0}*SharedItemsImports = 13
-		src\shared\LibplanetConsole.Examples.Sharing\LibplanetConsole.Examples.Sharing.projitems*{6ecdc75b-1b38-4480-ad15-ce0f330cd70b}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{7b2d3bf1-a244-4868-a6b7-b717db7bcaa2}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{7b2d3bf1-a244-4868-a6b7-b717db7bcaa2}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{8749087f-5de0-46ab-82d6-5009b3d9e2af}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Examples.Sharing\LibplanetConsole.Examples.Sharing.projitems*{ace75cd7-e4fd-4b9e-943e-ef3bb11decdf}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems*{af1a0011-2795-42fd-b67b-7f1956268577}*SharedItemsImports = 5
-		src\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems*{f656916c-c43a-4427-bd74-8742401b2d29}*SharedItemsImports = 13
-		src\shared\LibplanetConsole.Explorer.Sharing\LibplanetConsole.Explorer.Sharing.projitems*{fef8e9d4-cbb7-4efc-a5c2-2c9e91498d79}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

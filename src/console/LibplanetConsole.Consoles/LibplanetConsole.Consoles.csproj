@@ -10,7 +10,9 @@
     <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
   </ItemGroup>
 
-  <Import Project="..\..\shared\LibplanetConsole.Nodes.Sharing\LibplanetConsole.Nodes.Sharing.projitems" Label="Shared" />
-  <Import Project="..\..\shared\LibplanetConsole.Clients.Sharing\LibplanetConsole.Clients.Sharing.projitems" Label="Shared" />
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Nodes\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Clients\**\*.cs" />
+  </ItemGroup>
 
 </Project>
