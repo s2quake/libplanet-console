@@ -33,7 +33,6 @@ internal sealed class NodeEventTracer(IApplication application, INode node) : IA
         var miner = blockInfo.Miner;
         var message = $"Block #{blockInfo.Index} '{hash:S}' Appended by '{miner:S}'";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
-        Console.Out.WriteLineAsJson(blockInfo);
     }
 
     private void Node_Started(object? sender, EventArgs e)

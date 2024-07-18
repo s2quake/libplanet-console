@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj" />
+    <ProjectReference Include="..\..\..\.submodules\lib9c\Lib9c\Lib9c.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Guild\**\*.cs" />
+  </ItemGroup>
+
+</Project>

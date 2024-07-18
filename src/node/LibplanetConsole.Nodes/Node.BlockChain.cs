@@ -121,7 +121,11 @@ internal sealed partial class Node : IBlockChain
         byte[] GetStateByBlockHash()
         {
             var blockChain = BlockChain;
-            var worldState = blockChain.GetWorldState((BlockHash)blockHash);
+            var block = blockChain[(BlockHash)blockHash];
+            var isTip = block.Hash.Equals(blockChain.Tip.Hash);
+            var worldState = isTip
+                ? blockChain.GetNextWorldState() ?? blockChain.GetWorldState(block.Hash)
+                : blockChain.GetWorldState(block.Hash);
             var account = worldState.GetAccountState((Address)accountAddress);
             var value = account.GetState((Address)address);
             if (value is not null)
