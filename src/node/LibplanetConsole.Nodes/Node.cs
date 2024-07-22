@@ -147,6 +147,8 @@ internal sealed class Node : IActionRenderer, INode, IApplicationService
 
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
+    public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
+
     public Task<AppId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken)
         => AddTransactionAsync(
             AppPrivateKey.FromSecureString(_privateKey), values, cancellationToken);

@@ -3,6 +3,8 @@ using System.Security;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bencodex;
+using Bencodex.Types;
 using Libplanet.Common;
 using Libplanet.Crypto;
 using LibplanetConsole.Common.Converters;
@@ -13,6 +15,7 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPrivateKeyJsonConverter))]
 public sealed record class AppPrivateKey
 {
+    private static readonly Codec _codec = new();
     private readonly PrivateKey _privateKey;
 
     public AppPrivateKey(PrivateKey privateKey) => _privateKey = privateKey;
@@ -106,6 +109,11 @@ public sealed record class AppPrivateKey
 
     public byte[] Sign(object obj)
     {
+        if (obj is IValue value)
+        {
+            return _privateKey.Sign(_codec.Encode(value));
+        }
+
         var json = JsonSerializer.Serialize(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
         return _privateKey.Sign(bytes);

@@ -65,7 +65,7 @@ public static class BlockChainUtility
             transactions: transactions,
             timestamp: DateTimeOffset.MinValue);
         var policy = new BlockPolicy(
-            blockInterval: TimeSpan.FromMilliseconds(8),
+            blockInterval: TimeSpan.FromSeconds(10),
             getMaxTransactionsPerBlock: _ => int.MaxValue,
             getMaxTransactionsBytes: _ => long.MaxValue);
         var stagePolicy = new VolatileStagePolicy();
