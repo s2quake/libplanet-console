@@ -1,8 +1,16 @@
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Text;
+using Bencodex.Types;
 using JSSoft.Commands;
+using Libplanet.Blockchain;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Guild;
+using Nekoyume;
+using Nekoyume.Model.Guild;
+using Nekoyume.TypedAddress;
 using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LibplanetConsole.Nodes.Guild.Commands;
@@ -120,14 +128,27 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
 
     [CommandMethod]
     [CommandSummary("List the member.")]
-    public async Task ListMembersAsync(string memberAddress, CancellationToken cancellationToken)
+    public async Task ListMembersAsync(string guildAddress, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetService<IBlockChain>();
-        var options = new UnbanMemberOptions
+        var blockChain = node.GetService<BlockChain>();
+        // var options = new UnbanMemberOptions
+        // {
+        //     MemberAddress = AppAddress.Parse(memberAddress),
+        // };
+        var trie = blockChain.GetWorldState().GetAccountState(Addresses.GuildParticipant).Trie;
+        IEnumerable<(Address, GuildParticipant)> guildParticipants = trie.IterateValues()
+            .Where(pair => pair.Value is List)
+            .Select(pair => (
+                new Address(Convert.FromHexString(pair.Path.Hex)),
+                new GuildParticipant((List)pair.Value)));
+        var filtered = guildParticipants
+            .Where(pair => pair.Item2.GuildAddress == new GuildAddress(guildAddress));
+
+        await Out.WriteLineAsync($"Members:");
+        foreach (var (address, guildParticipant) in filtered)
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
-        };
-        await guildNode.UnbanMemberAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Unbanned the member.: {memberAddress}");
+            await Out.WriteLineAsync(
+                $"  - {address} at {guildParticipant.GuildAddress.ToString()}");
+        }
     }
 }

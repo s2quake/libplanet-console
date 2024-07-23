@@ -29,4 +29,6 @@ public interface IBlockChain
         CancellationToken cancellationToken);
 
     Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
+
+    Task<byte[]> GetActionAsync(AppId txId, int actionIndex, CancellationToken cancellationToken);
 }

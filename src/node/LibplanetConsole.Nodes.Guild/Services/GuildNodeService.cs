@@ -22,16 +22,34 @@ internal sealed class GuildNodeService(INode node, GuildNode guildNode)
         return guildNode.DeleteAsync(options, cancellationToken);
     }
 
-    public Task JoinAsync(JoinGuildOptions options, CancellationToken cancellationToken)
-    {
-        options.Verify(node);
-        return guildNode.JoinAsync(options, cancellationToken);
-    }
-
     public Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)
     {
         options.Verify(node);
         return guildNode.QuitAsync(options, cancellationToken);
+    }
+
+    public Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
+    {
+        options.Verify(node);
+        return guildNode.RequestJoinAsync(options, cancellationToken);
+    }
+
+    public Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
+    {
+        options.Verify(node);
+        return guildNode.CancelJoinAsync(options, cancellationToken);
+    }
+
+    public Task AcceptJoinAsync(AcceptJoinOptions options, CancellationToken cancellationToken)
+    {
+        options.Verify(node);
+        return guildNode.AcceptJoinAsync(options, cancellationToken);
+    }
+
+    public Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
+    {
+        options.Verify(node);
+        return guildNode.RejectJoinAsync(options, cancellationToken);
     }
 
     public Task BanMemberAsync(BanMemberOptions options, CancellationToken cancellationToken)

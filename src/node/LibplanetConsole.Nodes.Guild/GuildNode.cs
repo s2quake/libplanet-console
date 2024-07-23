@@ -79,7 +79,8 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
         Info = await GetGuildInfoAsync(cancellationToken) with { IsRunning = true };
     }
 
-    public async Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
+    public async Task RequestJoinAsync(
+        RequestJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -89,7 +90,8 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
         await _blockChain.AddTransactionAsync([action], cancellationToken);
     }
 
-    public async Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
+    public async Task CancelJoinAsync(
+        CancelJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -99,7 +101,8 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
         await _blockChain.AddTransactionAsync([action], cancellationToken);
     }
 
-    public async Task AcceptJoinAsync(AcceptJoinOptions options, CancellationToken cancellationToken)
+    public async Task AcceptJoinAsync(
+        AcceptJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -109,7 +112,8 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
         await _blockChain.AddTransactionAsync([action], cancellationToken);
     }
 
-    public async Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
+    public async Task RejectJoinAsync(
+        RejectJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -117,17 +121,6 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
         {
         };
         await _blockChain.AddTransactionAsync([action], cancellationToken);
-    }
-
-    public async Task JoinAsync(JoinGuildOptions options, CancellationToken cancellationToken)
-    {
-        ThrowIfNotRunning();
-
-        // var guildAddress = (Address)options.GuildAddress;
-        // var joinGuild = new JoinGuild(new GuildAddress(guildAddress))
-        // {
-        // };
-        // await _blockChain.AddTransactionAsync([joinGuild], cancellationToken);
     }
 
     public async Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)

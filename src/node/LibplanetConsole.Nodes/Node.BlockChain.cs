@@ -183,4 +183,18 @@ internal sealed partial class Node : IBlockChain
 
         return Task.Run(GetBlockHash, cancellationToken);
     }
+
+    public Task<byte[]> GetActionAsync(
+        AppId txId, int actionIndex, CancellationToken cancellationToken)
+    {
+        byte[] GetAction()
+        {
+            var blockChain = BlockChain;
+            var transaction = blockChain.GetTransaction((TxId)txId);
+            var action = transaction.Actions[actionIndex];
+            return _codec.Encode(action);
+        }
+
+        return Task.Run(GetAction, cancellationToken);
+    }
 }

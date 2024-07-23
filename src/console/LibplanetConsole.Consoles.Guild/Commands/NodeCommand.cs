@@ -45,20 +45,67 @@ internal sealed class NodeCommand(IApplication application) : CommandMethodBase
         await guildNode.DeleteAsync(options.Sign(node), cancellationToken);
     }
 
-    [CommandMethod("join-guild")]
-    [CommandSummary("Join the guild.")]
+    [CommandMethod]
+    [CommandSummary("Request to join the guild.")]
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
-    public async Task JoinAsync(
+    public async Task RequestJoinAsync(
         string guildAddress, CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
         var guildNode = node.GetService<IGuildNodeContent>();
-        var options = new JoinGuildOptions
+        var options = new RequestJoinOptions
         {
             GuildAddress = AppAddress.Parse(guildAddress),
         };
-        await guildNode.JoinAsync(options.Sign(node), cancellationToken);
+        await guildNode.RequestJoinAsync(options, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandSummary("Cancel the request to join the guild.")]
+    [CommandMethodProperty(nameof(Address))]
+    [Category("Guild")]
+    public async Task CancelJoinAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var node = application.GetNode(Address);
+        var guildNode = node.GetService<IGuildNodeContent>();
+        var options = new CancelJoinOptions
+        {
+        };
+        await guildNode.CancelJoinAsync(options, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandSummary("Request to join the guild.")]
+    [CommandMethodProperty(nameof(Address))]
+    [Category("Guild")]
+    public async Task AcceptJoinAsync(
+        string memberAddress, CancellationToken cancellationToken = default)
+    {
+        var node = application.GetNode(Address);
+        var guildNode = node.GetService<IGuildNodeContent>();
+        var options = new AcceptJoinOptions
+        {
+            MemberAddress = AppAddress.Parse(memberAddress),
+        };
+        await guildNode.AcceptJoinAsync(options, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandSummary("Request to join the guild.")]
+    [CommandMethodProperty(nameof(Address))]
+    [Category("Guild")]
+    public async Task RejectJoinAsync(
+        string memberAddress, CancellationToken cancellationToken = default)
+    {
+        var node = application.GetNode(Address);
+        var guildNode = node.GetService<IGuildNodeContent>();
+        var options = new RejectJoinOptions
+        {
+            MemberAddress = AppAddress.Parse(memberAddress),
+        };
+        await guildNode.RejectJoinAsync(options, cancellationToken);
     }
 
     [CommandMethod("leave-guild")]

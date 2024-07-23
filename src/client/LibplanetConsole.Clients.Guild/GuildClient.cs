@@ -74,7 +74,8 @@ internal sealed class GuildClient : IGuildClient, IApplicationService, IDisposab
         await _blockChain.SendTransactionAsync([removeGuild], cancellationToken);
     }
 
-    public async Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
+    public async Task RequestJoinAsync(
+        RequestJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -84,7 +85,8 @@ internal sealed class GuildClient : IGuildClient, IApplicationService, IDisposab
         await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
-    public async Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
+    public async Task CancelJoinAsync(
+        CancelJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -94,7 +96,8 @@ internal sealed class GuildClient : IGuildClient, IApplicationService, IDisposab
         await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
-    public async Task AcceptJoinAsync(AcceptJoinOptions options, CancellationToken cancellationToken)
+    public async Task AcceptJoinAsync(
+        AcceptJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -104,7 +107,8 @@ internal sealed class GuildClient : IGuildClient, IApplicationService, IDisposab
         await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
-    public async Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
+    public async Task RejectJoinAsync(
+        RejectJoinOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 

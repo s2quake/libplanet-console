@@ -28,8 +28,17 @@ internal sealed class GuildNodeContent(INode node)
     public Task DeleteAsync(DeleteGuildOptions options, CancellationToken cancellationToken)
         => Service.DeleteAsync(options, cancellationToken);
 
-    public Task JoinAsync(JoinGuildOptions options, CancellationToken cancellationToken)
-        => Service.JoinAsync(options, cancellationToken);
+    public Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
+        => Service.RequestJoinAsync(options, cancellationToken);
+
+    public Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
+        => Service.CancelJoinAsync(options, cancellationToken);
+
+    public Task AcceptJoinAsync(AcceptJoinOptions options, CancellationToken cancellationToken)
+        => Service.AcceptJoinAsync(options, cancellationToken);
+
+    public Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
+        => Service.RejectJoinAsync(options, cancellationToken);
 
     public Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)
         => Service.QuitAsync(options, cancellationToken);
