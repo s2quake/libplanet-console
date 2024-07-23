@@ -35,12 +35,12 @@ internal sealed partial class Client : IBlockChain
     public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
         => RemoteBlockChainService.GetTipHashAsync(cancellationToken);
 
-    public Task<byte[]> GetStateByBlockHashAsync(
+    public Task<byte[]> GetStateAsync(
         AppHash blockHash,
         AppAddress accountAddress,
         AppAddress address,
         CancellationToken cancellationToken)
-        => RemoteBlockChainService.GetStateByBlockHashAsync(
+        => RemoteBlockChainService.GetStateAsync(
             blockHash, accountAddress, address, cancellationToken);
 
     public Task<byte[]> GetStateByStateRootHashAsync(
@@ -50,4 +50,8 @@ internal sealed partial class Client : IBlockChain
         CancellationToken cancellationToken)
         => RemoteBlockChainService.GetStateByStateRootHashAsync(
             stateRootHash, accountAddress, address, cancellationToken);
+
+    public Task<byte[]> GetActionAsync(
+        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        => RemoteBlockChainService.GetActionAsync(txId, actionIndex, cancellationToken);
 }

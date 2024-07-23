@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Guild;
 
 namespace LibplanetConsole.Clients.Guild.Commands;
@@ -8,8 +9,7 @@ namespace LibplanetConsole.Clients.Guild.Commands;
 [Export(typeof(ICommand))]
 [CommandSummary("Provides commands for the guild service.")]
 [method: ImportingConstructor]
-internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
-    : CommandMethodBase
+internal sealed class GuildCommand(IClient client, IGuildClient guildClient) : CommandMethodBase
 {
     [CommandMethod]
     [CommandSummary("Create new guild.")]
@@ -19,8 +19,10 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
         {
             Name = "Guild",
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.CreatedMessage(guildAddress);
         await guildClient.CreateAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Guild created.: {client.Address}");
+        await Out.WriteLineAsJsonAsync(message);
     }
 
     [CommandMethod(Aliases = ["rm"])]
@@ -30,8 +32,10 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
         var options = new DeleteGuildOptions
         {
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.DeletedMessage(guildAddress);
         await guildClient.DeleteAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Guild deleted.: {client.Address}");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -39,11 +43,15 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
     public async Task RequestJoinAsync(
         string guildAddress, CancellationToken cancellationToken = default)
     {
+        var guildAddress1 = AppAddress.Parse(guildAddress);
         var options = new RequestJoinOptions
         {
-            GuildAddress = AppAddress.Parse(guildAddress),
+            GuildAddress = guildAddress1,
         };
+        var memberAddress = client.Address;
+        var message = GuildEventMessage.RequestedJoinMessage(guildAddress1, memberAddress);
         await guildClient.RequestJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -54,7 +62,10 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
         var options = new CancelJoinOptions
         {
         };
+        var memberAddress = client.Address;
+        var message = GuildEventMessage.CancelledJoinMessage(memberAddress);
         await guildClient.CancelJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -62,11 +73,15 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
     public async Task AcceptJoinAsync(
         string memberAddress, CancellationToken cancellationToken = default)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new AcceptJoinOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.AcceptedJoinMessage(guildAddress, memberAddress1);
         await guildClient.AcceptJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -74,11 +89,15 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
     public async Task RejectJoinAsync(
         string memberAddress, CancellationToken cancellationToken = default)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new RejectJoinOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.RejectedJoinMessage(guildAddress, memberAddress1);
         await guildClient.RejectJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -88,8 +107,10 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
         var options = new LeaveGuildOptions
         {
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.LeftMessage(guildAddress, guildAddress);
         await guildClient.QuitAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Left the guild.");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -97,23 +118,30 @@ internal sealed class GuildCommand(IClient client, IGuildClient guildClient)
     public async Task BanMemberAsync(
         string memberAddress, CancellationToken cancellationToken)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new BanMemberOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.BannedMessage(guildAddress, memberAddress1);
         await guildClient.BanMemberAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Banned the member.: {memberAddress}");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
     [CommandSummary("Unban the member.")]
-    public async Task UnbanMemberAsync(string memberAddress, CancellationToken cancellationToken)
+    public async Task UnbanMemberAsync(
+        string memberAddress, CancellationToken cancellationToken)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new UnbanMemberOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = client.Address;
+        var message = GuildEventMessage.UnbannedMessage(guildAddress, memberAddress1);
         await guildClient.UnbanMemberAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Unbanned the member.: {memberAddress}");
+        await Out.WriteLineAsync(message);
     }
 }

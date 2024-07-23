@@ -83,6 +83,9 @@ dotnet_diagnostic.MEN007.severity = none
 # MEN016: Avoid top-level statements
 dotnet_diagnostic.MEN016.severity = none
 
+# S1172: Unused method parameters should be removed
+dotnet_diagnostic.S1172.severity = none
+
 [*.csproj]
 quote_type = double
 

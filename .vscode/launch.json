@@ -20,8 +20,6 @@
                 "--log-path",
                 ".log",
                 "--explorer",
-                "--store-path",
-                ".store",
                 "--new-window"
             ]
         },

@@ -176,7 +176,7 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
         {
             var tipHash = await _blockChain.GetTipHashAsync(cancellationToken);
             var guildAddress = _node.Address;
-            var guildData = await _blockChain.GetStateByBlockHashAsync(
+            var guildData = await _blockChain.GetStateAsync(
                 tipHash, (AppAddress)Nekoyume.Addresses.Guild, guildAddress, cancellationToken);
             if (guildData.Length > 0)
             {
@@ -215,5 +215,4 @@ internal sealed class GuildNode : IGuildNode, IApplicationService, IDisposable
             throw new InvalidOperationException("The guild is not running.");
         }
     }
-
 }

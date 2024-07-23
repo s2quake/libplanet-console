@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Text;
 using Bencodex.Types;
@@ -11,7 +10,6 @@ using LibplanetConsole.Guild;
 using Nekoyume;
 using Nekoyume.Model.Guild;
 using Nekoyume.TypedAddress;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace LibplanetConsole.Nodes.Guild.Commands;
 
@@ -28,8 +26,10 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
         {
             Name = "Guild",
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.CreatedMessage(guildAddress);
         await guildNode.CreateAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Guild created.: {node.Address}");
+        await Out.WriteLineAsJsonAsync(message);
     }
 
     [CommandMethod(Aliases = ["rm"])]
@@ -39,8 +39,10 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
         var options = new DeleteGuildOptions
         {
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.DeletedMessage(guildAddress);
         await guildNode.DeleteAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Guild deleted.: {node.Address}");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -48,11 +50,15 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
     public async Task RequestJoinAsync(
         string guildAddress, CancellationToken cancellationToken = default)
     {
+        var guildAddress1 = AppAddress.Parse(guildAddress);
         var options = new RequestJoinOptions
         {
-            GuildAddress = AppAddress.Parse(guildAddress),
+            GuildAddress = guildAddress1,
         };
+        var memberAddress = node.Address;
+        var message = GuildEventMessage.RequestedJoinMessage(guildAddress1, memberAddress);
         await guildNode.RequestJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -63,7 +69,10 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
         var options = new CancelJoinOptions
         {
         };
+        var memberAddress = node.Address;
+        var message = GuildEventMessage.CancelledJoinMessage(memberAddress);
         await guildNode.CancelJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -71,11 +80,15 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
     public async Task AcceptJoinAsync(
         string memberAddress, CancellationToken cancellationToken = default)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new AcceptJoinOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.AcceptedJoinMessage(guildAddress, memberAddress1);
         await guildNode.AcceptJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -83,11 +96,15 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
     public async Task RejectJoinAsync(
         string memberAddress, CancellationToken cancellationToken = default)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new RejectJoinOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.RejectedJoinMessage(guildAddress, memberAddress1);
         await guildNode.RejectJoinAsync(options, cancellationToken);
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -97,8 +114,10 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
         var options = new LeaveGuildOptions
         {
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.LeftMessage(guildAddress, guildAddress);
         await guildNode.QuitAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Left the guild.");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -106,24 +125,31 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
     public async Task BanMemberAsync(
         string memberAddress, CancellationToken cancellationToken)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new BanMemberOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.BannedMessage(guildAddress, memberAddress1);
         await guildNode.BanMemberAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Banned the member.: {memberAddress}");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
     [CommandSummary("Unban the member.")]
-    public async Task UnbanMemberAsync(string memberAddress, CancellationToken cancellationToken)
+    public async Task UnbanMemberAsync(
+        string memberAddress, CancellationToken cancellationToken)
     {
+        var memberAddress1 = AppAddress.Parse(memberAddress);
         var options = new UnbanMemberOptions
         {
-            MemberAddress = AppAddress.Parse(memberAddress),
+            MemberAddress = memberAddress1,
         };
+        var guildAddress = node.Address;
+        var message = GuildEventMessage.UnbannedMessage(guildAddress, memberAddress1);
         await guildNode.UnbanMemberAsync(options, cancellationToken);
-        await Out.WriteLineAsync($"Unbanned the member.: {memberAddress}");
+        await Out.WriteLineAsync(message);
     }
 
     [CommandMethod]
@@ -131,15 +157,11 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
     public async Task ListMembersAsync(string guildAddress, CancellationToken cancellationToken)
     {
         var blockChain = node.GetService<BlockChain>();
-        // var options = new UnbanMemberOptions
-        // {
-        //     MemberAddress = AppAddress.Parse(memberAddress),
-        // };
         var trie = blockChain.GetWorldState().GetAccountState(Addresses.GuildParticipant).Trie;
         IEnumerable<(Address, GuildParticipant)> guildParticipants = trie.IterateValues()
             .Where(pair => pair.Value is List)
             .Select(pair => (
-                new Address(Convert.FromHexString(pair.Path.Hex)),
+                new Address(Encoding.UTF8.GetString(Convert.FromHexString(pair.Path.Hex))),
                 new GuildParticipant((List)pair.Value)));
         var filtered = guildParticipants
             .Where(pair => pair.Item2.GuildAddress == new GuildAddress(guildAddress));

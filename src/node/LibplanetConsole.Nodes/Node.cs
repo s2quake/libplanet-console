@@ -348,7 +348,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             }
 
             var blockChain = _swarm!.BlockChain;
-            var blockInfo = new BlockInfo(blockChain.Tip);
+            var blockInfo = new BlockInfo(blockChain, blockChain.Tip);
             UpdateNodeInfo();
             BlockAppended?.Invoke(this, new(blockInfo));
         }

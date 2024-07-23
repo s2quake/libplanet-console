@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,6 +9,7 @@ using LibplanetConsole.Common.Converters;
 namespace LibplanetConsole.Common;
 
 [JsonConverter(typeof(AppAddressJsonConverter))]
+[TypeConverter(typeof(AppAddressConverter))]
 public readonly record struct AppAddress : IFormattable
 {
     private readonly Address _address;

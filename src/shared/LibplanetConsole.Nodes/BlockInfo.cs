@@ -1,4 +1,6 @@
+using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
+using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes;
@@ -9,12 +11,18 @@ public readonly record struct BlockInfo
     {
     }
 
-    internal BlockInfo(Block block)
+    internal BlockInfo(BlockChain blockChain, Block block)
     {
         Index = block.Index;
         Hash = (AppHash)block.Hash;
         Miner = (AppAddress)block.Miner;
-        Transactions = block.Transactions.Select(item => new TransactionInfo(item)).ToArray();
+        Transactions = [.. block.Transactions.Select(GetTransaction)];
+
+        TransactionInfo GetTransaction(Transaction transaction)
+        {
+            var execution = blockChain.GetTxExecution(block.Hash, transaction.Id);
+            return new TransactionInfo(execution, transaction);
+        }
     }
 
     public long Index { get; init; }

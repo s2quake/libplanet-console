@@ -107,7 +107,7 @@ internal sealed partial class Node : IBlockChain
         return Task.Run(GetTipHash, cancellationToken);
     }
 
-    public Task<byte[]> GetStateByBlockHashAsync(
+    public Task<byte[]> GetStateAsync(
         AppHash blockHash,
         AppAddress accountAddress,
         AppAddress address,
@@ -121,7 +121,7 @@ internal sealed partial class Node : IBlockChain
         byte[] GetStateByBlockHash()
         {
             var blockChain = BlockChain;
-            var block = blockChain[(BlockHash)blockHash];
+            var block = blockHash == default ? blockChain.Tip : blockChain[(BlockHash)blockHash];
             var isTip = block.Hash.Equals(blockChain.Tip.Hash);
             var worldState = isTip
                 ? blockChain.GetNextWorldState() ?? blockChain.GetWorldState(block.Hash)

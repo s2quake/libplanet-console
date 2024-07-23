@@ -1,10 +1,12 @@
 using System.ComponentModel.Composition;
 using Bencodex;
-using LibplanetConsole.Common.Extensions;
+using Libplanet.Crypto;
+using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
+using LibplanetConsole.Guild;
 using Nekoyume.Action.Guild;
 
-namespace LibplanetConsole.Nodes.Executable;
+namespace LibplanetConsole.Nodes.Guild;
 
 [Export(typeof(IApplicationService))]
 internal sealed class GuildEventTracer : IApplicationService
@@ -13,11 +15,13 @@ internal sealed class GuildEventTracer : IApplicationService
 
     private readonly Dictionary<string, Func<TransactionInfo, int, Task>> _actionHandlers;
     private readonly INode _node;
+    private readonly IBlockChain _blockChain;
 
     [ImportingConstructor]
-    public GuildEventTracer(INode node)
+    public GuildEventTracer(INode node, IBlockChain blockChain)
     {
         _node = node;
+        _blockChain = blockChain;
         _actionHandlers = new()
         {
             { MakeGuild.TypeIdentifier, OnGuildCreatedAsync },
@@ -53,6 +57,11 @@ internal sealed class GuildEventTracer : IApplicationService
         for (var i = 0; i < blockInfo.Transactions.Length; i++)
         {
             var transaction = blockInfo.Transactions[i];
+            if (transaction.IsFailed == true)
+            {
+                continue;
+            }
+
             for (var j = 0; j < transaction.Actions.Length; j++)
             {
                 var action = transaction.Actions[j];
@@ -87,7 +96,9 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            await Console.Out.WriteLineAsync($"Guild created: {transactionInfo.Signer}");
+            var guildAddress = transactionInfo.Signer;
+            var message = GuildEventMessage.CreatedMessage(guildAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -95,7 +106,9 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            await Console.Out.WriteLineAsync($"Guild deleted: {transactionInfo.Signer}");
+            var guildMessage = transactionInfo.Signer;
+            var message = GuildEventMessage.DeletedMessage(guildMessage);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -103,13 +116,16 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            var blockChain = _node.GetService<IBlockChain>();
+            var blockChain = _blockChain;
             var bytes = await blockChain.GetActionAsync(transactionInfo.Id, actionIndex, default);
             var value = _codec.Decode(bytes);
             var action = new ApplyGuild();
             action.LoadPlainValue(value);
-            await Console.Out.WriteLineAsync(
-                $"Guild join requested: [{action.GuildAddress}] {transactionInfo.Signer}");
+
+            var guildAddress = (AppAddress)(Address)action.GuildAddress;
+            var memberAddress = transactionInfo.Signer;
+            var message = GuildEventMessage.RequestedJoinMessage(guildAddress, memberAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -117,7 +133,9 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            await Console.Out.WriteLineAsync($"Guild join cancelled: {transactionInfo.Signer}");
+            var memberAddress = transactionInfo.Signer;
+            var message = GuildEventMessage.CancelledJoinMessage(memberAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -125,13 +143,16 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            var blockChain = _node.GetService<IBlockChain>();
+            var blockChain = _blockChain;
             var bytes = await blockChain.GetActionAsync(transactionInfo.Id, actionIndex, default);
             var value = _codec.Decode(bytes);
             var action = new AcceptGuildApplication();
             action.LoadPlainValue(value);
-            await Console.Out.WriteLineAsync(
-                $"Guild join accepted: [{transactionInfo.Signer}] {action.Target}");
+
+            var guildAddress = transactionInfo.Signer;
+            var memberAddress = (AppAddress)(Address)action.Target;
+            var message = GuildEventMessage.AcceptedJoinMessage(guildAddress, memberAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -139,13 +160,16 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            var blockChain = _node.GetService<IBlockChain>();
+            var blockChain = _blockChain;
             var bytes = await blockChain.GetActionAsync(transactionInfo.Id, actionIndex, default);
             var value = _codec.Decode(bytes);
             var action = new RejectGuildApplication();
             action.LoadPlainValue(value);
-            await Console.Out.WriteLineAsync(
-                $"Guild join rejected: [{transactionInfo.Signer}] {action.Target}");
+
+            var guildAddress = transactionInfo.Signer;
+            var memberAddress = (AppAddress)(Address)action.Target;
+            var message = GuildEventMessage.RejectedJoinMessage(guildAddress, memberAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -153,13 +177,16 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            var blockChain = _node.GetService<IBlockChain>();
+            var blockChain = _blockChain;
             var bytes = await blockChain.GetActionAsync(transactionInfo.Id, actionIndex, default);
             var value = _codec.Decode(bytes);
             var action = new BanGuildMember();
             action.LoadPlainValue(value);
-            await Console.Out.WriteLineAsync(
-                $"Guild member banned: [{transactionInfo.Signer}] {action.Target}");
+
+            var guildAddress = transactionInfo.Signer;
+            var memberAddress = (AppAddress)(Address)action.Target;
+            var message = GuildEventMessage.BannedMessage(guildAddress, memberAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 
@@ -167,13 +194,16 @@ internal sealed class GuildEventTracer : IApplicationService
     {
         if (transactionInfo.Signer != _node.Address)
         {
-            var blockChain = _node.GetService<IBlockChain>();
+            var blockChain = _blockChain;
             var bytes = await blockChain.GetActionAsync(transactionInfo.Id, actionIndex, default);
             var value = _codec.Decode(bytes);
             var action = new UnbanGuildMember();
             action.LoadPlainValue(value);
-            await Console.Out.WriteLineAsync(
-                $"Guild member unbanned: [{transactionInfo.Signer}] {action.Target}");
+
+            var guildAddress = transactionInfo.Signer;
+            var memberAddress = (AppAddress)action.Target;
+            var message = GuildEventMessage.UnbannedMessage(guildAddress, memberAddress);
+            await Console.Out.WriteLineAsync(message);
         }
     }
 }

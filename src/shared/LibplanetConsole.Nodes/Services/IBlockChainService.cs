@@ -10,7 +10,7 @@ public interface IBlockChainService
 
     Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken);
 
-    Task<byte[]> GetStateByBlockHashAsync(
+    Task<byte[]> GetStateAsync(
         AppHash blockHash,
         AppAddress accountAddress,
         AppAddress address,
@@ -23,4 +23,6 @@ public interface IBlockChainService
         CancellationToken cancellationToken);
 
     Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
+
+    Task<byte[]> GetActionAsync(AppId txId, int actionIndex, CancellationToken cancellationToken);
 }

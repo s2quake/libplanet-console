@@ -26,12 +26,12 @@ internal sealed class BlockChainService(Node node)
     public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
         => _node.GetTipHashAsync(cancellationToken);
 
-    public Task<byte[]> GetStateByBlockHashAsync(
+    public Task<byte[]> GetStateAsync(
         AppHash blockHash,
         AppAddress accountAddress,
         AppAddress address,
         CancellationToken cancellationToken)
-        => _node.GetStateByBlockHashAsync(blockHash, accountAddress, address, cancellationToken);
+        => _node.GetStateAsync(blockHash, accountAddress, address, cancellationToken);
 
     public Task<byte[]> GetStateByStateRootHashAsync(
         AppHash stateRootHash,
@@ -43,4 +43,8 @@ internal sealed class BlockChainService(Node node)
 
     public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => _node.GetBlockHashAsync(height, cancellationToken);
+
+    public Task<byte[]> GetActionAsync(
+        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        => _node.GetActionAsync(txId, actionIndex, cancellationToken);
 }
