@@ -173,4 +173,24 @@ internal sealed class GuildCommand(INode node, IGuildNode guildNode) : CommandMe
                 $"  - {address} at {guildParticipant.GuildAddress.ToString()}");
         }
     }
+
+    [CommandMethod("list", Aliases = ["ls"])]
+    [CommandSummary("List the guild.")]
+    public async Task ListAsync(CancellationToken cancellationToken)
+    {
+        var blockChain = node.GetService<BlockChain>();
+        var trie = blockChain.GetWorldState().GetAccountState(Addresses.Guild).Trie;
+        IEnumerable<(Address, Nekoyume.Model.Guild.Guild)> guilds = trie.IterateValues()
+            .Where(pair => pair.Value is List)
+            .Select(pair => (
+                new Address(Encoding.UTF8.GetString(Convert.FromHexString(pair.Path.Hex))),
+                new Nekoyume.Model.Guild.Guild((List)pair.Value)));
+
+        await Out.WriteLineAsync("Guilds:");
+        foreach (var (address, guild) in guilds)
+        {
+            await Out.WriteLineAsync(
+                $"  - {address} owned by {guild.GuildMasterAddress}");
+        }
+    }
 }

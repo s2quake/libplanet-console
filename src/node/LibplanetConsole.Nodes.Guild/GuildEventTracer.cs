@@ -98,7 +98,7 @@ internal sealed class GuildEventTracer : IApplicationService
         {
             var guildAddress = transactionInfo.Signer;
             var message = GuildEventMessage.CreatedMessage(guildAddress);
-            await Console.Out.WriteLineAsync(message);
+            await Console.Out.WriteLineAsync(message.ToString());
         }
     }
 

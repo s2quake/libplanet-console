@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Bencodex.Types;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Guild;
@@ -14,7 +15,7 @@ public readonly record struct GuildInfo
         }
 
         var guild = new Nekoyume.Model.Guild.Guild(list);
-        Address = (AppAddress)guild.GuildMaster;
+        Address = (AppAddress)(Address)guild.GuildMasterAddress;
     }
 
     public bool IsRunning { get; init; }
