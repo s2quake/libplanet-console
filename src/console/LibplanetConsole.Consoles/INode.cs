@@ -1,6 +1,6 @@
 using Libplanet.Action;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Consoles;
 

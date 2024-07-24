@@ -1,7 +1,4 @@
-using Libplanet.Action;
-using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes;
 
@@ -30,10 +27,4 @@ public interface INode : IVerifier, ISigner, IServiceProvider
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
-
-    Task<AppId> AddTransactionAsync(IAction[] values, CancellationToken cancellationToken);
-
-    Task AddTransactionAsync(Transaction transaction, CancellationToken cancellationToken);
-
-    long GetNextNonce(AppAddress address);
 }

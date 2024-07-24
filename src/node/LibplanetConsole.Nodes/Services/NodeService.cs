@@ -2,12 +2,10 @@ using System.ComponentModel.Composition;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Nodes.Serializations;
 
 namespace LibplanetConsole.Nodes.Services;
 
 [Export(typeof(ILocalService))]
-[Export(typeof(INodeService))]
 internal sealed class NodeService : LocalService<INodeService, INodeCallback>, INodeService
 {
     private readonly Node _node;
@@ -35,17 +33,6 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
 
     public Task StopAsync(CancellationToken cancellationToken)
         => _node.StopAsync(cancellationToken);
-
-    public async Task<AppId> SendTransactionAsync(
-        byte[] transaction, CancellationToken cancellationToken)
-    {
-        var tx = Transaction.Deserialize(transaction);
-        await _node.AddTransactionAsync(tx, cancellationToken);
-        return (AppId)tx.Id;
-    }
-
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
-        => Task.Run(() => _node.GetNextNonce(address), cancellationToken);
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {

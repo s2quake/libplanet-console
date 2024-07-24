@@ -1,4 +1,4 @@
-using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes;
 
 #if LIBPLANET_CONSOLE
 namespace LibplanetConsole.Consoles;

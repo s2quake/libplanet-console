@@ -12,7 +12,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Services;
 using Serilog;
 
@@ -24,6 +24,7 @@ internal sealed class Node : INode, INodeCallback
     private readonly SecureString _privateKey;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
+    private readonly RemoteService<IBlockChainService> _blockChainService;
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
     private AppEndPoint? _blocksyncEndPoint;
@@ -41,8 +42,9 @@ internal sealed class Node : INode, INodeCallback
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _logger = application.GetService<ILogger>();
         _remoteService = new(this);
+        _blockChainService = new();
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_container)]);
+            [_remoteService, _blockChainService, .. GetRemoteServices(_container)]);
         PublicKey = privateKey.PublicKey;
         NodeOptions = nodeOptions;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
@@ -196,21 +198,21 @@ internal sealed class Node : INode, INodeCallback
     }
 
     public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
-        => _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
+        => _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
 
     public async Task<AppId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = AppPrivateKey.FromSecureString(_privateKey);
         var address = privateKey.Address;
-        var nonce = await _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
+        var nonce = await _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
         var genesisHash = _nodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
             privateKey: (PrivateKey)privateKey,
             genesisHash: (BlockHash)genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
-        var txId = await _remoteService.Service.SendTransactionAsync(
+        var txId = await _blockChainService.Service.SendTransactionAsync(
             transaction: tx.Serialize(),
             cancellationToken: cancellationToken);
 
@@ -220,7 +222,7 @@ internal sealed class Node : INode, INodeCallback
     public Task<AppId> SendTransactionAsync(
         Transaction transaction, CancellationToken cancellationToken)
     {
-        return _remoteService.Service.SendTransactionAsync(
+        return _blockChainService.Service.SendTransactionAsync(
             transaction.Serialize(), cancellationToken);
     }
 
