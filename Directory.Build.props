@@ -36,7 +36,7 @@
   <PropertyGroup>
     <RootPath Condition="'$(SolutionDir)' != ''">$(SolutionDir)</RootPath>
     <RootPath Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)\</RootPath>
-    <LibplanetVersion>5.1.2</LibplanetVersion>
+    <LibplanetVersion>5.2.0</LibplanetVersion>
     <UseRidGraph>true</UseRidGraph>
   </PropertyGroup>
 
