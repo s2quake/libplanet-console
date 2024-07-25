@@ -4,8 +4,6 @@ namespace LibplanetConsole.Nodes;
 
 public interface INode : IVerifier, ISigner, IServiceProvider
 {
-    event EventHandler<BlockEventArgs>? BlockAppended;
-
     event EventHandler? Started;
 
     event EventHandler? Stopped;

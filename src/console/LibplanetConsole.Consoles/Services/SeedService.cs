@@ -26,13 +26,11 @@ internal sealed class SeedService : LocalService<ISeedService>,
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = AppEndPoint.Next(),
-            AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
         });
         _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = AppEndPoint.Next(),
-            AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
         });
     }
 

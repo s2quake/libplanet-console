@@ -6,8 +6,6 @@ namespace LibplanetConsole.Clients;
 
 public interface IClient : IVerifier
 {
-    event EventHandler<BlockEventArgs>? BlockAppended;
-
     event EventHandler? Started;
 
     event EventHandler<StopEventArgs>? Stopped;

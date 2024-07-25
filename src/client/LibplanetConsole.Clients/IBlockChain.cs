@@ -6,6 +6,8 @@ namespace LibplanetConsole.Clients;
 
 public interface IBlockChain
 {
+    event EventHandler<BlockEventArgs>? BlockAppended;
+
     Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);

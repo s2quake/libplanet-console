@@ -4,7 +4,7 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 
-namespace LibplanetConsole.Consoles.Executable;
+namespace LibplanetConsole.Consoles.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]

@@ -15,17 +15,17 @@ using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using Libplanet.Types.Tx;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 
-namespace LibplanetConsole.Common;
+namespace LibplanetConsole.Nodes;
 
 public static class BlockChainUtility
 {
-    public static readonly PrivateKey AppProtocolKey
-        = PrivateKey.FromString("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
+    public static readonly PrivateKey AppProtocolKey = (PrivateKey)GenesisOptions.AppProtocolKey;
 
     public static readonly AppProtocolVersion AppProtocolVersion
-        = AppProtocolVersion.Sign(AppProtocolKey, 1);
+        = AppProtocolVersion.Sign(AppProtocolKey, GenesisOptions.AppProtocolVersion);
 
     public static BlockChain CreateBlockChain(
         GenesisOptions genesisOptions,

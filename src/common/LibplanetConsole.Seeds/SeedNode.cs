@@ -20,10 +20,11 @@ public sealed class SeedNode(SeedNodeOptions seedNodeOptions)
             throw new InvalidOperationException("Seed node is already running.");
         }
 
-        var seedOptions = new SeedOptions(
-            privateKey: _seedNodeOptions.PrivateKey,
-            endPoint: _seedNodeOptions.EndPoint,
-            appProtocolVersion: _seedNodeOptions.AppProtocolVersion);
+        var seedOptions = new SeedOptions
+        {
+            PrivateKey = _seedNodeOptions.PrivateKey,
+            EndPoint = _seedNodeOptions.EndPoint,
+        };
 
         _seed = new Seed(seedOptions);
         _cancellationTokenSource = new();

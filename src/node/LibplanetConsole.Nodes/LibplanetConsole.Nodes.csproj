@@ -1,5 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- $(LibplanetDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Store\Libplanet.Store.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+  </ItemGroup>
+
+  <!-- $(LibplanetDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
+    <PackageReference Include="Libplanet.Store" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.RocksDBStore" Version="$(LibplanetVersion)" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Seeds\LibplanetConsole.Seeds.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />

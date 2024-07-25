@@ -2,20 +2,16 @@
 
   <!-- $(LibplanetDirectory) exists. -->
   <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
-    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Net\Libplanet.Net.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Action\Libplanet.Action.csproj" />
     <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Crypto\Libplanet.Crypto.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Store\Libplanet.Store.csproj" />
-    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Types\Libplanet.Types.csproj" />
   </ItemGroup>
 
   <!-- $(LibplanetDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
-    <PackageReference Include="Libplanet" Version="$(LibplanetVersion)" />
-    <PackageReference Include="Libplanet.Net" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.Action" Version="$(LibplanetVersion)" />
     <PackageReference Include="Libplanet.Crypto" Version="$(LibplanetVersion)" />
-    <PackageReference Include="Libplanet.Store" Version="$(LibplanetVersion)" />
-    <PackageReference Include="Libplanet.RocksDBStore" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.Types" Version="$(LibplanetVersion)" />
   </ItemGroup>
 
   <!-- $(CommandsDirectory) exists. -->

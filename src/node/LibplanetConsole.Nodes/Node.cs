@@ -22,6 +22,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Seeds;
 using Serilog;
+using static LibplanetConsole.Nodes.PeerUtility;
 
 namespace LibplanetConsole.Nodes;
 
@@ -110,7 +111,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         {
             if (_swarm is not null)
             {
-                return [.. _swarm.Peers.Select(item => (AppPeer)item)];
+                return [.. _swarm.Peers.Select(item => ToAppPeer(item))];
             }
 
             throw new InvalidOperationException();
@@ -170,10 +171,10 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             = await CreateTransport(privateKey, blocksyncEndPoint);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = [(BoundPeer)blocksyncSeedPeer],
+            StaticPeers = [ToBoundPeer(blocksyncSeedPeer)],
             BootstrapOptions = new()
             {
-                SeedPeers = [(BoundPeer)blocksyncSeedPeer],
+                SeedPeers = [ToBoundPeer(blocksyncSeedPeer)],
             },
         };
         var consensusTransport = await CreateTransport(
@@ -181,7 +182,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             endPoint: consensusEndPoint);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [(BoundPeer)consensusSeedPeer],
+            SeedPeers = [ToBoundPeer(consensusSeedPeer)],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
@@ -200,7 +201,6 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = blocksyncSeedPeer.EndPoint,
-                AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
             });
             await _blocksyncSeedNode.StartAsync(cancellationToken);
             _logger.Debug("Node.BlocksyncSeed is started: {Address}", Address);
@@ -212,7 +212,6 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = consensusSeedPeer.EndPoint,
-                AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
             });
             await _consensusSeedNode.StartAsync(cancellationToken);
             _logger.Debug("Node.ConsensusSeed is started: {Address}", Address);

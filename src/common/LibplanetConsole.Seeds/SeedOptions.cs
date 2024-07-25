@@ -1,23 +1,12 @@
-﻿using Libplanet.Net;
-using LibplanetConsole.Common;
+﻿using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Seeds;
 
 internal record class SeedOptions
 {
-    public SeedOptions(
-        AppPrivateKey privateKey, AppEndPoint endPoint, AppProtocolVersion appProtocolVersion)
-    {
-        PrivateKey = privateKey;
-        EndPoint = endPoint;
-        AppProtocolVersion = appProtocolVersion;
-    }
+    public required AppPrivateKey PrivateKey { get; init; }
 
-    public AppPrivateKey PrivateKey { get; }
-
-    public AppEndPoint EndPoint { get; }
-
-    public AppProtocolVersion AppProtocolVersion { get; }
+    public required AppEndPoint EndPoint { get; init; }
 
     public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromSeconds(5);
 

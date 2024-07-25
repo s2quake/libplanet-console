@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
+using static LibplanetConsole.Seeds.PeerUtility;
 
 namespace LibplanetConsole.Seeds;
 
@@ -37,7 +37,7 @@ internal sealed class Peer(ITransport transport, AppPeer appPeer)
             var pingMsg = new PingMsg();
             var stopwatch = Stopwatch.StartNew();
             var replyMessage = await _transport.SendMessageAsync(
-                (BoundPeer)AppPeer,
+                ToBoundPeer(AppPeer),
                 pingMsg,
                 timeout,
                 cancellationToken);

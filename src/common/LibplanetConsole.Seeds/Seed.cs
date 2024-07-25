@@ -6,11 +6,17 @@ using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
 using Serilog;
+using static LibplanetConsole.Seeds.PeerUtility;
 
 namespace LibplanetConsole.Seeds;
 
 internal class Seed(SeedOptions seedOptions)
 {
+    public static readonly PrivateKey AppProtocolKey = (PrivateKey)GenesisOptions.AppProtocolKey;
+
+    public static readonly AppProtocolVersion AppProtocolVersion
+        = AppProtocolVersion.Sign(AppProtocolKey, GenesisOptions.AppProtocolVersion);
+
     private readonly SeedOptions _seedOptions = seedOptions;
     private readonly ILogger _logger = Log.ForContext<Seed>();
 
@@ -64,7 +70,7 @@ internal class Seed(SeedOptions seedOptions)
     private static async Task<NetMQTransport> CreateTransport(SeedOptions seedOptions)
     {
         var privateKey = (PrivateKey)seedOptions.PrivateKey;
-        var appProtocolVersion = seedOptions.AppProtocolVersion;
+        var appProtocolVersion = AppProtocolVersion;
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,
@@ -110,7 +116,7 @@ internal class Seed(SeedOptions seedOptions)
         {
             case FindNeighborsMsg:
                 var alivePeers = peers.Where(item => item.IsAlive)
-                                      .Select(item => (BoundPeer)item.AppPeer)
+                                      .Select(item => ToBoundPeer(item.AppPeer))
                                       .ToArray();
                 var neighborsMsg = new NeighborsMsg(alivePeers);
                 await transport.ReplyMessageAsync(
@@ -130,7 +136,7 @@ internal class Seed(SeedOptions seedOptions)
 
         if (message.Remote is BoundPeer boundPeer)
         {
-            peers.AddOrUpdate((AppPeer)boundPeer, transport);
+            peers.AddOrUpdate(ToAppPeer(boundPeer), transport);
         }
     }
 }

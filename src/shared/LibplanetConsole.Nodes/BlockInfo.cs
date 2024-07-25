@@ -1,4 +1,6 @@
+#if LIBPLANET_NODE
 using Libplanet.Blockchain;
+#endif // LIBPLANET_NODE
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
@@ -11,6 +13,7 @@ public readonly record struct BlockInfo
     {
     }
 
+#if LIBPLANET_NODE
     internal BlockInfo(BlockChain blockChain, Block block)
     {
         Height = block.Index;
@@ -24,6 +27,7 @@ public readonly record struct BlockInfo
             return new TransactionInfo(execution, transaction) { Height = block.Index };
         }
     }
+#endif // LIBPLANET_NODE
 
     public long Height { get; init; }
 
