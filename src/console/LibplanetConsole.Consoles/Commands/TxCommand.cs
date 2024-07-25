@@ -17,8 +17,7 @@ internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
     [CommandPropertyRequired]
     public string Text { get; set; } = string.Empty;
 
-    protected override async Task OnExecuteAsync(
-        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         var addressable = application.GetAddressable(Address);
         var text = Text;
