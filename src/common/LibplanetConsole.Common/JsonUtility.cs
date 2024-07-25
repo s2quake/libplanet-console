@@ -10,6 +10,8 @@ public static class JsonUtility
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
     };
 
     public static string Serialize(object value)
