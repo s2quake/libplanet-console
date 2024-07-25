@@ -42,16 +42,16 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
 
     private void UpdateCurrent(INode? node)
     {
-        if (_current is not null)
+        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain1)
         {
-            _current.BlockAppended -= Node_BlockAppended;
+            blockChain1.BlockAppended -= BlockChain_BlockAppended;
         }
 
         _current = node;
 
-        if (_current is not null)
+        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain2)
         {
-            _current.BlockAppended += Node_BlockAppended;
+            blockChain2.BlockAppended += BlockChain_BlockAppended;
         }
     }
 
@@ -100,7 +100,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         }
     }
 
-    private void Node_BlockAppended(object? sender, BlockEventArgs e)
+    private void BlockChain_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;

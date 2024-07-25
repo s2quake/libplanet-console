@@ -7,12 +7,18 @@ using LibplanetConsole.Common.Services;
 namespace LibplanetConsole.Nodes.Services;
 
 [Export(typeof(ILocalService))]
-[method: ImportingConstructor]
-internal sealed class BlockChainService(Node node)
-    : LocalService<IBlockChainService>, IBlockChainService
+internal sealed class BlockChainService
+    : LocalService<IBlockChainService, IBlockChainCallback>, IBlockChainService
 {
     private static readonly Codec _codec = new();
-    private readonly Node _node = node;
+    private readonly Node _node;
+
+    [ImportingConstructor]
+    public BlockChainService(Node node)
+    {
+        _node = node;
+        _node.BlockAppended += Node_BlockAppended;
+    }
 
     public async Task<AppId> SendTransactionAsync(
         byte[] transaction, CancellationToken cancellationToken)
@@ -56,4 +62,10 @@ internal sealed class BlockChainService(Node node)
     public Task<byte[]> GetActionAsync(
         AppId txId, int actionIndex, CancellationToken cancellationToken)
         => _node.GetActionAsync(txId, actionIndex, cancellationToken);
+
+    private void Node_BlockAppended(object? sender, BlockEventArgs e)
+    {
+        var blockInfo = e.BlockInfo;
+        Callback.OnBlockAppended(blockInfo);
+    }
 }

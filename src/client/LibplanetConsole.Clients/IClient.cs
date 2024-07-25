@@ -1,3 +1,4 @@
+using Libplanet.Action;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes;
@@ -25,4 +26,6 @@ public interface IClient : IVerifier
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

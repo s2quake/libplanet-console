@@ -9,7 +9,7 @@ using Serilog;
 
 namespace LibplanetConsole.Clients;
 
-internal sealed partial class Client : IClient, INodeCallback
+internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallback
 {
     private readonly ApplicationBase _application;
     private readonly SecureString _privateKey;
@@ -145,7 +145,7 @@ internal sealed partial class Client : IClient, INodeCallback
         NodeInfo = NodeInfo.Empty;
     }
 
-    void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
+    void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
     {
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }

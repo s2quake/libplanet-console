@@ -1,3 +1,4 @@
+using Libplanet.Action;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Nodes;
@@ -25,4 +26,6 @@ public interface INode : IVerifier, ISigner, IServiceProvider
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    Task<AppId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

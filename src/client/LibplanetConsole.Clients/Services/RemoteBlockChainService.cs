@@ -6,7 +6,8 @@ namespace LibplanetConsole.Clients.Services;
 
 [Export]
 [Export(typeof(IRemoteService))]
-internal sealed class RemoteBlockChainService
-    : RemoteService<IBlockChainService>
+[method: ImportingConstructor]
+internal sealed class RemoteBlockChainService(Client client)
+    : RemoteService<IBlockChainService, IBlockChainCallback>(client)
 {
 }

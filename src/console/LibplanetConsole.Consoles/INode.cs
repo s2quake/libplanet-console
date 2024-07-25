@@ -6,8 +6,6 @@ namespace LibplanetConsole.Consoles;
 
 public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {
-    event EventHandler<BlockEventArgs>? BlockAppended;
-
     event EventHandler? Attached;
 
     event EventHandler? Detached;
@@ -39,6 +37,4 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
     Task StopAsync(CancellationToken cancellationToken);
 
     Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
-
-    Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
 }
