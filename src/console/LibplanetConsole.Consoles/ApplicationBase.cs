@@ -56,7 +56,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         };
         GenesisOptions = new()
         {
-            GenesisKey = (AppPrivateKey)BlockChainUtility.AppProtocolKey,
+            GenesisKey = GenesisOptions.AppProtocolKey,
             GenesisValidators = [.. options.Nodes.Select(item => item.PublicKey)],
             Timestamp = DateTimeOffset.UtcNow,
         };

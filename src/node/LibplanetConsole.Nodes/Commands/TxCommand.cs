@@ -7,7 +7,7 @@ namespace LibplanetConsole.Nodes.Commands;
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
 [CommandSummary("Adds a transaction to store simple string.")]
-internal sealed class TxCommand(INode node) : CommandAsyncBase
+internal sealed class TxCommand(INode node, IBlockChain blockChain) : CommandAsyncBase
 {
     [CommandPropertyRequired]
     public string Text { get; set; } = string.Empty;
@@ -19,7 +19,7 @@ internal sealed class TxCommand(INode node) : CommandAsyncBase
         {
             Value = Text,
         };
-        await node.AddTransactionAsync([action], cancellationToken);
+        await blockChain.AddTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{node.Address:S}: {Text}");
     }
 }

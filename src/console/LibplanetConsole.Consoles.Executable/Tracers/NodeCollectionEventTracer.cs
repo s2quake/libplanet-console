@@ -4,7 +4,7 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 
-namespace LibplanetConsole.Consoles.Executable;
+namespace LibplanetConsole.Consoles.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
@@ -42,16 +42,16 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
 
     private void UpdateCurrent(INode? node)
     {
-        if (_current is not null)
+        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain1)
         {
-            _current.BlockAppended -= Node_BlockAppended;
+            blockChain1.BlockAppended -= BlockChain_BlockAppended;
         }
 
         _current = node;
 
-        if (_current is not null)
+        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain2)
         {
-            _current.BlockAppended += Node_BlockAppended;
+            blockChain2.BlockAppended += BlockChain_BlockAppended;
         }
     }
 
@@ -100,12 +100,12 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         }
     }
 
-    private void Node_BlockAppended(object? sender, BlockEventArgs e)
+    private void BlockChain_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Index} '{hash:S}' Appended by '{miner:S}'";
+        var message = $"Block #{blockInfo.Height} '{hash:S}' Appended by '{miner:S}'";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
     }
 

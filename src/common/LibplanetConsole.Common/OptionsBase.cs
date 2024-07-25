@@ -28,7 +28,7 @@ public abstract record class OptionsBase<T>
         return verifier.Verify(obj, signature);
     }
 
-    public void Verify(IVerifier verifier)
+    public T Verify(IVerifier verifier)
     {
         if (Signature.Length == 0)
         {
@@ -41,5 +41,7 @@ public abstract record class OptionsBase<T>
         {
             throw new InvalidOperationException("Invalid signature.");
         }
+
+        return (T)this;
     }
 }

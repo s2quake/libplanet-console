@@ -2,6 +2,8 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Security;
+using Bencodex;
+using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
@@ -12,18 +14,20 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Services;
 using Serilog;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class Node : INode, INodeCallback
+internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockChainCallback
 {
+    private static readonly Codec _codec = new();
     private readonly ApplicationContainer _container;
     private readonly SecureString _privateKey;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
+    private readonly RemoteService<IBlockChainService, IBlockChainCallback> _blockChainService;
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
     private AppEndPoint? _blocksyncEndPoint;
@@ -38,18 +42,18 @@ internal sealed class Node : INode, INodeCallback
         _container = application.CreateChildContainer(this);
         _privateKey = privateKey.ToSecureString();
         _container.ComposeExportedValue<INode>(this);
+        _container.ComposeExportedValue(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
         _logger = application.GetService<ILogger>();
         _remoteService = new(this);
+        _blockChainService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_container)]);
+            [_remoteService, _blockChainService, .. GetRemoteServices(_container)]);
         PublicKey = privateKey.PublicKey;
         NodeOptions = nodeOptions;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         _logger.Debug("Node is created: {Address}", Address);
     }
-
-    public event EventHandler<BlockEventArgs>? BlockAppended;
 
     public event EventHandler? Attached;
 
@@ -87,7 +91,7 @@ internal sealed class Node : INode, INodeCallback
 
     public object? GetService(Type serviceType)
     {
-        if (serviceType == typeof(IServiceProvider))
+        if (serviceType == typeof(IServiceProvider) || serviceType == typeof(IBlockChain))
         {
             return this;
         }
@@ -195,35 +199,6 @@ internal sealed class Node : INode, INodeCallback
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
-        => _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
-
-    public async Task<AppId> SendTransactionAsync(
-        IAction[] actions, CancellationToken cancellationToken)
-    {
-        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
-        var address = privateKey.Address;
-        var nonce = await _remoteService.Service.GetNextNonceAsync(address, cancellationToken);
-        var genesisHash = _nodeInfo.GenesisHash;
-        var tx = Transaction.Create(
-            nonce: nonce,
-            privateKey: (PrivateKey)privateKey,
-            genesisHash: (BlockHash)genesisHash,
-            actions: [.. actions.Select(item => item.PlainValue)]);
-        var txId = await _remoteService.Service.SendTransactionAsync(
-            transaction: tx.Serialize(),
-            cancellationToken: cancellationToken);
-
-        return txId;
-    }
-
-    public Task<AppId> SendTransactionAsync(
-        Transaction transaction, CancellationToken cancellationToken)
-    {
-        return _remoteService.Service.SendTransactionAsync(
-            transaction.Serialize(), cancellationToken);
-    }
-
     public async ValueTask DisposeAsync()
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
@@ -271,12 +246,6 @@ internal sealed class Node : INode, INodeCallback
             IsRunning = false;
             Stopped?.Invoke(this, EventArgs.Empty);
         }
-    }
-
-    void INodeCallback.OnBlockAppended(BlockInfo blockInfo)
-    {
-        _nodeInfo = _nodeInfo with { TipHash = blockInfo.Hash };
-        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
     private static IEnumerable<IRemoteService> GetRemoteServices(

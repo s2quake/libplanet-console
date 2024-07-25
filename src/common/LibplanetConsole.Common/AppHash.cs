@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using Libplanet.Common;
 using Libplanet.Types.Blocks;
@@ -26,7 +27,12 @@ public readonly record struct AppHash : IFormattable
 
     public static explicit operator AppHash(BlockHash blockHash) => new(blockHash);
 
-    public static explicit operator BlockHash(AppHash id) => new(id._bytes);
+    public static explicit operator AppHash(HashDigest<SHA256> hashDigest)
+        => new(hashDigest.ByteArray);
+
+    public static explicit operator BlockHash(AppHash hash) => new(hash._bytes);
+
+    public static explicit operator HashDigest<SHA256>(AppHash hash) => new(hash._bytes);
 
     public static string ToString(AppHash? blockHash)
         => blockHash?.ToString() ?? string.Empty;

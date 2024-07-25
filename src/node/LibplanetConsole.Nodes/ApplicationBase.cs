@@ -4,7 +4,6 @@ using System.Diagnostics;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
-using LibplanetConsole.Nodes.Serializations;
 using LibplanetConsole.Nodes.Services;
 using Serilog;
 using Serilog.Core;
@@ -37,6 +36,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_node);
         _container.ComposeExportedValue<INode>(_node);
+        _container.ComposeExportedValue<IBlockChain>(_node);
         _container.ComposeExportedValue<IApplicationService>(_node);
         _nodeContext = _container.GetValue<NodeContext>();
         _nodeContext.EndPoint = options.EndPoint;

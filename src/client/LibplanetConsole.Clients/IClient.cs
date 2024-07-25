@@ -1,14 +1,12 @@
 using Libplanet.Action;
 using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes.Serializations;
+using LibplanetConsole.Nodes;
 
 namespace LibplanetConsole.Clients;
 
 public interface IClient : IVerifier
 {
-    event EventHandler<BlockEventArgs>? BlockAppended;
-
     event EventHandler? Started;
 
     event EventHandler<StopEventArgs>? Stopped;

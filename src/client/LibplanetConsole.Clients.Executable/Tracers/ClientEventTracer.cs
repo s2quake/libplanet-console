@@ -4,37 +4,25 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
 
-namespace LibplanetConsole.Clients.Executable;
+namespace LibplanetConsole.Clients.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
 internal sealed class ClientEventTracer(IClient client)
-    : IApplicationService
+    : IApplicationService, IDisposable
 {
     public Task InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        client.BlockAppended += Client_BlockAppended;
         client.Started += Client_Started;
         client.Stopped += Client_Stopped;
         return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
+    void IDisposable.Dispose()
     {
-        client.BlockAppended -= Client_BlockAppended;
         client.Started -= Client_Started;
         client.Stopped -= Client_Stopped;
-        return ValueTask.CompletedTask;
-    }
-
-    private void Client_BlockAppended(object? sender, BlockEventArgs e)
-    {
-        var blockInfo = e.BlockInfo;
-        var hash = blockInfo.Hash;
-        var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Index} '{hash:S}' Appended by '{miner:S}'";
-        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 
     private void Client_Started(object? sender, EventArgs e)
