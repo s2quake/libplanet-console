@@ -14,8 +14,8 @@
 
   <!-- $(CommandsDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(CommandsDirectory)')">
-    <PackageReference Include="JSSoft.Commands" Version="6.0.1" />
-    <PackageReference Include="JSSoft.Terminals" Version="6.0.1" />
+    <PackageReference Include="JSSoft.Commands" Version="$(JSSoftCommandsVersion)" />
+    <PackageReference Include="JSSoft.Terminals" Version="$(JSSoftCommandsVersion)" />
   </ItemGroup>
 
   <!-- $(ConfigurationsDirectory) exists. -->
@@ -25,7 +25,7 @@
 
   <!-- $(ConfigurationsDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
-    <PackageReference Include="JSSoft.Configurations" Version="1.0.0" />
+    <PackageReference Include="JSSoft.Configurations" Version="$(JSSoftConfigurationsVersion)" />
   </ItemGroup>
 
 </Project>
