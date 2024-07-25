@@ -20,8 +20,7 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
                     "Get the EndPoint of the Node to connect to from Seed.")]
     public bool IsSeed { get; init; }
 
-    protected override async Task OnExecuteAsync(
-        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         var isSeed = IsSeed;
         var nodeEndPoint = AppEndPoint.ParseOrFallback(NodeEndPoint, client.NodeEndPoint);
