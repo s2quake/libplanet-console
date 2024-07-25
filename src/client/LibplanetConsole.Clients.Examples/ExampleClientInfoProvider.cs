@@ -10,9 +10,11 @@ internal sealed class ExampleClientInfoProvider(ExampleClient exampleClient)
 {
     protected override IEnumerable<(string Name, object? Value)> GetInfos(IApplication obj)
     {
-        yield return (nameof(ExampleClient), new
-        {
-            exampleClient.IsExample,
-        });
+        yield return (
+            Name: nameof(ExampleClient),
+            Value: new
+            {
+                exampleClient.IsExample,
+            });
     }
 }

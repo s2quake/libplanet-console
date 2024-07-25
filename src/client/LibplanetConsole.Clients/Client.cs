@@ -1,5 +1,4 @@
 using System.Security;
-using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
@@ -121,9 +120,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     }
 
     public void InvokeBlockAppendedEvent(BlockInfo blockInfo)
-    {
-        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
-    }
+        => BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
 
     public async ValueTask DisposeAsync()
     {
@@ -135,15 +132,9 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
         }
     }
 
-    void INodeCallback.OnStarted(NodeInfo nodeInfo)
-    {
-        NodeInfo = nodeInfo;
-    }
+    void INodeCallback.OnStarted(NodeInfo nodeInfo) => NodeInfo = nodeInfo;
 
-    void INodeCallback.OnStopped()
-    {
-        NodeInfo = NodeInfo.Empty;
-    }
+    void INodeCallback.OnStopped() => NodeInfo = NodeInfo.Empty;
 
     void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
     {

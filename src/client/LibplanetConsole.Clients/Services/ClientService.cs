@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Clients.Serializations;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Services;

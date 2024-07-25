@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace LibplanetConsole.Common.Serializations;
+namespace LibplanetConsole.Common;
 
 public readonly record struct GenesisInfo
 {

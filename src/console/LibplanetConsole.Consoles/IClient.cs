@@ -1,4 +1,4 @@
-using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Clients;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Consoles;

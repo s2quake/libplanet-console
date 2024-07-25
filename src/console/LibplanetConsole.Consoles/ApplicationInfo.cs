@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles.Serializations;
+namespace LibplanetConsole.Consoles;
 
 public readonly record struct ApplicationInfo
 {

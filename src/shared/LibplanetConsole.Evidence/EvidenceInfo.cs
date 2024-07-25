@@ -1,7 +1,7 @@
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Evidence.Serializations;
+namespace LibplanetConsole.Evidence;
 
 public readonly record struct EvidenceInfo
 {

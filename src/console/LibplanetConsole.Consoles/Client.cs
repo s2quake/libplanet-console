@@ -2,7 +2,7 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Security;
-using LibplanetConsole.Clients.Serializations;
+using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
@@ -23,7 +23,7 @@ internal sealed class Client : IClient, IClientCallback
     private readonly IClientContent[] _contents;
     private readonly ILogger _logger;
     private Guid _closeToken;
-    private ClientInfo _clientInfo = ClientInfo.Empty;
+    private ClientInfo _clientInfo;
     private INode? _node;
     private bool _isDisposed;
     private bool _isInProgress;
@@ -177,7 +177,7 @@ internal sealed class Client : IClient, IClientCallback
         await _remoteService.Service.StopAsync(cancellationToken);
         _node = null;
         _closeToken = Guid.Empty;
-        _clientInfo = ClientInfo.Empty;
+        _clientInfo = default;
         IsRunning = false;
         _logger.Debug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -238,7 +238,7 @@ internal sealed class Client : IClient, IClientCallback
     {
         if (_isInProgress != true)
         {
-            _clientInfo = ClientInfo.Empty;
+            _clientInfo = default;
             IsRunning = false;
             Stopped?.Invoke(this, EventArgs.Empty);
         }

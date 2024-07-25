@@ -9,13 +9,7 @@ namespace LibplanetConsole.Clients.Examples;
 internal sealed class ExampleClientService(IExampleClient sampleClient)
     : LocalService<IExampleClientService>, IExampleClientService
 {
-    public void Subscribe()
-    {
-        sampleClient.Subscribe();
-    }
+    public void Subscribe() => sampleClient.Subscribe();
 
-    public void Unsubscribe()
-    {
-        sampleClient.Unsubscribe();
-    }
+    public void Unsubscribe() => sampleClient.Unsubscribe();
 }

@@ -3,10 +3,7 @@
     "LibplanetConsole.Consoles.Executable": {
       "commandName": "Project",
       "commandLineArgs": "--node-count 4 --client-count 1 --end-point 127.0.0.1:4343",
-      "workingDirectory": "$(SolutionDir)",
-      "environmentVariables": {
-        "LIBPLANET_CONSOLE_WORKSPACE_PATH": "$(SolutionDir)"
-      }
+      "workingDirectory": "$(SolutionDir)"
     }
   }
 }

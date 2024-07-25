@@ -27,7 +27,7 @@ internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : Comman
     [CommandMethod]
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        var explorerContent = serviceProvider.GetService<IExplorerNode>();
-        await explorerContent.StopAsync(cancellationToken);
+        var explorerNode = serviceProvider.GetService<IExplorerNode>();
+        await explorerNode.StopAsync(cancellationToken);
     }
 }

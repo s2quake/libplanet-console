@@ -1,5 +1,5 @@
 using LibplanetConsole.Common;
-using LibplanetConsole.Explorer.Serializations;
+using LibplanetConsole.Explorer;
 
 namespace LibplanetConsole.Consoles.Explorer;
 

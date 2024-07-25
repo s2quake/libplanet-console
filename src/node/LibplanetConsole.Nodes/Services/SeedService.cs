@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Serializations;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Nodes.Services;

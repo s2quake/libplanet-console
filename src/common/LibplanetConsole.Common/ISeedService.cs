@@ -1,5 +1,3 @@
-using LibplanetConsole.Common.Serializations;
-
 namespace LibplanetConsole.Common;
 
 public interface ISeedService

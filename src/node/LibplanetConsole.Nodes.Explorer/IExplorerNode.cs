@@ -1,5 +1,4 @@
 ﻿using LibplanetConsole.Explorer;
-using LibplanetConsole.Explorer.Serializations;
 
 namespace LibplanetConsole.Nodes.Explorer;
 
@@ -13,7 +12,7 @@ public interface IExplorerNode
 
     bool IsRunning { get; }
 
-    Task StartAsync(ExplorerOptions options, CancellationToken cancellationToken);
+    Task<ExplorerInfo> StartAsync(ExplorerOptions options, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 }

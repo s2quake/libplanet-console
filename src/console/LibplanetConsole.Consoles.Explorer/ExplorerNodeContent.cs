@@ -3,7 +3,6 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Explorer;
-using LibplanetConsole.Explorer.Serializations;
 using LibplanetConsole.Explorer.Services;
 using LibplanetConsole.Frameworks;
 using Serilog;
