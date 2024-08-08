@@ -35,6 +35,4 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
-
-    Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

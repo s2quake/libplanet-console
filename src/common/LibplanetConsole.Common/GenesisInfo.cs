@@ -13,7 +13,7 @@ public readonly record struct GenesisInfo
     public static implicit operator GenesisOptions(GenesisInfo info) => new()
     {
         GenesisKey = AppPrivateKey.Parse(info.GenesisKey),
-        GenesisValidators = [.. info.GenesisValidators.Select(AppPublicKey.Parse)],
+        Validators = [.. info.GenesisValidators.Select(AppPublicKey.Parse)],
         Timestamp = info.Timestamp == string.Empty
             ? DateTimeOffset.MinValue
             : DateTimeOffset.ParseExact(info.Timestamp, "O", CultureInfo.CurrentCulture),
@@ -23,7 +23,7 @@ public readonly record struct GenesisInfo
     {
         GenesisKey = AppPrivateKey.ToString(genesisOptions.GenesisKey),
         GenesisValidators
-            = [.. genesisOptions.GenesisValidators.Select(item => item.ToString())],
+            = [.. genesisOptions.Validators.Select(item => item.ToString())],
         Timestamp = genesisOptions.Timestamp.ToString("O"),
     };
 

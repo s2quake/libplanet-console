@@ -8,7 +8,6 @@ using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Crypto;
-using Libplanet.Net;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
@@ -22,11 +21,6 @@ namespace LibplanetConsole.Nodes;
 
 public static class BlockChainUtility
 {
-    public static readonly PrivateKey AppProtocolKey = (PrivateKey)GenesisOptions.AppProtocolKey;
-
-    public static readonly AppProtocolVersion AppProtocolVersion
-        = AppProtocolVersion.Sign(AppProtocolKey, GenesisOptions.AppProtocolVersion);
-
     public static BlockChain CreateBlockChain(
         GenesisOptions genesisOptions,
         string storePath,
@@ -41,7 +35,7 @@ public static class BlockChainUtility
             policyActionsRegistry: new(),
             stateStore,
             actionLoader);
-        var validators = genesisOptions.GenesisValidators
+        var validators = genesisOptions.Validators
                             .Select(item => new Validator((PublicKey)item, new BigInteger(1000)))
                             .ToArray();
         var validatorSet = new ValidatorSet(validators: [.. validators]);

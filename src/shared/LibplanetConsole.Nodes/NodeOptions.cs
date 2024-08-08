@@ -36,7 +36,7 @@ public sealed record class NodeOptions
             GenesisOptions = new GenesisOptions()
             {
                 GenesisKey = new AppPrivateKey(),
-                GenesisValidators = [publicKey],
+                Validators = [publicKey],
                 Timestamp = DateTimeOffset.UtcNow,
             },
         };

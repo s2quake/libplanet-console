@@ -6,13 +6,19 @@ using static LibplanetConsole.Seeds.PeerUtility;
 
 namespace LibplanetConsole.Seeds;
 
-internal sealed class Peer(ITransport transport, AppPeer appPeer)
+public sealed class Peer
 {
-    private readonly ITransport _transport = transport;
+    private readonly ITransport _transport;
+
+    internal Peer(ITransport transport, AppPeer appPeer)
+    {
+        _transport = transport;
+        AppPeer = appPeer;
+    }
 
     public AppAddress Address => AppPeer.Address;
 
-    public AppPeer AppPeer { get; } = appPeer;
+    public AppPeer AppPeer { get; }
 
     public DateTimeOffset LastUpdated { get; private set; }
 
@@ -24,13 +30,13 @@ internal sealed class Peer(ITransport transport, AppPeer appPeer)
 
     public bool IsAlive => DateTimeOffset.UtcNow < LifeTime;
 
-    public void Update()
+    internal void Update()
     {
         LastUpdated = DateTimeOffset.UtcNow;
         LifeTime = LastUpdated + LifeTimeSpan;
     }
 
-    public async Task<bool> PingAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    internal async Task<bool> PingAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         try
         {

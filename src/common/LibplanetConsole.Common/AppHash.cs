@@ -13,15 +13,9 @@ public readonly record struct AppHash : IFormattable
 {
     private readonly ImmutableArray<byte> _bytes;
 
-    public AppHash(byte[] bytes)
-    {
-        _bytes = [.. bytes];
-    }
+    public AppHash(byte[] bytes) => _bytes = [.. bytes];
 
-    public AppHash(ImmutableArray<byte> bytes)
-    {
-        _bytes = bytes;
-    }
+    public AppHash(ImmutableArray<byte> bytes) => _bytes = bytes;
 
     public AppHash(BlockHash blockHash) => _bytes = blockHash.ByteArray;
 

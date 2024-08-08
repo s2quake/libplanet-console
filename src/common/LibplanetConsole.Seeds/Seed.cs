@@ -10,14 +10,13 @@ using static LibplanetConsole.Seeds.PeerUtility;
 
 namespace LibplanetConsole.Seeds;
 
-internal class Seed(SeedOptions seedOptions)
+public sealed class Seed(SeedOptions seedOptions)
 {
     public static readonly PrivateKey AppProtocolKey = (PrivateKey)GenesisOptions.AppProtocolKey;
 
     public static readonly AppProtocolVersion AppProtocolVersion
         = AppProtocolVersion.Sign(AppProtocolKey, GenesisOptions.AppProtocolVersion);
 
-    private readonly SeedOptions _seedOptions = seedOptions;
     private readonly ILogger _logger = Log.ForContext<Seed>();
 
     private ITransport? _transport;
@@ -27,27 +26,33 @@ internal class Seed(SeedOptions seedOptions)
 
     public ILogger Logger => _logger;
 
+    public bool IsRunning { get; private set; }
+
     public PeerCollection Peers { get; } = new(seedOptions);
+
+    public AppPeer BoundPeer => new(
+        seedOptions.PrivateKey.PublicKey, seedOptions.EndPoint);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_transport is not null)
+        if (IsRunning)
         {
             throw new InvalidOperationException("Seed node is already running.");
         }
 
         _cancellationTokenSource
             = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _transport = await CreateTransport(_seedOptions);
+        _transport = await CreateTransport(seedOptions);
         _transport.ProcessMessageHandler.Register(ReceiveMessageAsync);
         _task = _transport.StartAsync(_cancellationTokenSource.Token);
         await _transport.WaitForRunningAsync();
         _refreshTask = RefreshContinuouslyAsync(_cancellationTokenSource.Token);
+        IsRunning = true;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_transport is null)
+        if (!IsRunning)
         {
             throw new InvalidOperationException("Seed node is not running.");
         }
@@ -59,12 +64,39 @@ internal class Seed(SeedOptions seedOptions)
             _cancellationTokenSource = null;
         }
 
-        await _transport.StopAsync(TimeSpan.FromSeconds(0), cancellationToken);
+        if (_transport is not null)
+        {
+            await _transport.StopAsync(TimeSpan.FromSeconds(0), cancellationToken);
+            _transport.Dispose();
+            _transport = null;
+        }
+
         await _refreshTask;
         await _task;
         _refreshTask = Task.CompletedTask;
         _task = Task.CompletedTask;
-        _transport = null;
+        IsRunning = false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
+
+        if (_transport is not null)
+        {
+            _transport.Dispose();
+            _transport = null;
+        }
+
+        await _refreshTask;
+        await _task;
+        _refreshTask = Task.CompletedTask;
+        _task = Task.CompletedTask;
     }
 
     private static async Task<NetMQTransport> CreateTransport(SeedOptions seedOptions)
@@ -84,7 +116,7 @@ internal class Seed(SeedOptions seedOptions)
 
     private async Task RefreshContinuouslyAsync(CancellationToken cancellationToken)
     {
-        var interval = _seedOptions.RefreshInterval;
+        var interval = seedOptions.RefreshInterval;
         var peers = Peers;
         while (cancellationToken.IsCancellationRequested != true)
         {
