@@ -2,7 +2,7 @@
 
 namespace LibplanetConsole.Seeds;
 
-internal record class SeedOptions
+public sealed record class SeedOptions
 {
     public required AppPrivateKey PrivateKey { get; init; }
 

@@ -39,14 +39,16 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
     private readonly AppEndPoint? _seedEndPoint;
     private readonly ManualResetEvent _initializedResetEvent = new(false);
     private readonly ILogger _logger;
+    private readonly AppProtocolVersion _appProtocolVersion = AppProtocolVersion.Sign(
+        (PrivateKey)GenesisOptions.AppProtocolKey, GenesisOptions.AppProtocolVersion);
 
     private AppEndPoint? _blocksyncEndPoint;
     private AppEndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
-    private SeedNode? _blocksyncSeedNode;
-    private SeedNode? _consensusSeedNode;
+    private Seed? _blocksyncSeed;
+    private Seed? _consensusSeed;
     private NodeOptions _nodeOptions;
 
     public Node(IServiceProvider serviceProvider, ApplicationOptions options, ILogger logger)
@@ -61,8 +63,8 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         {
             GenesisOptions = new GenesisOptions
             {
-                GenesisKey = (AppPrivateKey)BlockChainUtility.AppProtocolKey,
-                GenesisValidators = options.Validators,
+                GenesisKey = GenesisOptions.AppProtocolKey,
+                Validators = options.Validators,
                 Timestamp = DateTimeOffset.UtcNow,
             },
         };
@@ -118,11 +120,11 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
     }
 
     public AppPeer BlocksyncSeedPeer
-        => _blocksyncSeedNode?.BoundPeer ?? NodeOptions.BlocksyncSeedPeer ??
+        => _blocksyncSeed?.BoundPeer ?? NodeOptions.BlocksyncSeedPeer ??
             throw new InvalidOperationException();
 
     public AppPeer ConsensusSeedPeer
-        => _consensusSeedNode?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
+        => _consensusSeed?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
             throw new InvalidOperationException();
 
     public NodeOptions NodeOptions => _nodeOptions;
@@ -158,6 +160,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         }
 
         var privateKey = (PrivateKey)AppPrivateKey.FromSecureString(_privateKey);
+        var appProtocolVersion = _appProtocolVersion;
         var nodeOptions = NodeOptions;
         var storePath = _storePath;
         var blocksyncEndPoint = _blocksyncEndPoint ?? AppEndPoint.Next();
@@ -167,7 +170,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
             new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
         var swarmTransport
-            = await CreateTransport(privateKey, blocksyncEndPoint);
+            = await CreateTransport(privateKey, blocksyncEndPoint, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = [ToBoundPeer(blocksyncSeedPeer)],
@@ -178,7 +181,8 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
-            endPoint: consensusEndPoint);
+            endPoint: consensusEndPoint,
+            appProtocolVersion: appProtocolVersion);
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = [ToBoundPeer(consensusSeedPeer)],
@@ -196,23 +200,23 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
 
         if (nodeOptions.BlocksyncSeedPeer is null)
         {
-            _blocksyncSeedNode = new SeedNode(new()
+            _blocksyncSeed = new Seed(new()
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = blocksyncSeedPeer.EndPoint,
             });
-            await _blocksyncSeedNode.StartAsync(cancellationToken);
+            await _blocksyncSeed.StartAsync(cancellationToken);
             _logger.Debug("Node.BlocksyncSeed is started: {Address}", Address);
         }
 
         if (nodeOptions.ConsensusSeedPeer is null)
         {
-            _consensusSeedNode = new SeedNode(new()
+            _consensusSeed = new Seed(new()
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = consensusSeedPeer.EndPoint,
             });
-            await _consensusSeedNode.StartAsync(cancellationToken);
+            await _consensusSeed.StartAsync(cancellationToken);
             _logger.Debug("Node.ConsensusSeed is started: {Address}", Address);
         }
 
@@ -242,17 +246,17 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        if (_consensusSeedNode is not null)
+        if (_consensusSeed is not null)
         {
-            await _consensusSeedNode.StopAsync(cancellationToken: default);
-            _consensusSeedNode = null;
+            await _consensusSeed.StopAsync(cancellationToken: default);
+            _consensusSeed = null;
             _logger.Debug("Node.ConsensusSeed is stopped: {Address}", Address);
         }
 
-        if (_blocksyncSeedNode is not null)
+        if (_blocksyncSeed is not null)
         {
-            await _blocksyncSeedNode!.StopAsync(cancellationToken: default);
-            _blocksyncSeedNode = null;
+            await _blocksyncSeed!.StopAsync(cancellationToken: default);
+            _blocksyncSeed = null;
             _logger.Debug("Node.BlocksyncSeed is stopped: {Address}", Address);
         }
 
@@ -288,16 +292,16 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             _swarm.Dispose();
         }
 
-        if (_consensusSeedNode is not null)
+        if (_consensusSeed is not null)
         {
-            await _consensusSeedNode.StopAsync(cancellationToken: default);
-            _consensusSeedNode = null;
+            await _consensusSeed.StopAsync(cancellationToken: default);
+            _consensusSeed = null;
         }
 
-        if (_blocksyncSeedNode is not null)
+        if (_blocksyncSeed is not null)
         {
-            await _blocksyncSeedNode.StopAsync(cancellationToken: default);
-            _blocksyncSeedNode = null;
+            await _blocksyncSeed.StopAsync(cancellationToken: default);
+            _blocksyncSeed = null;
         }
 
         await (_startTask ?? Task.CompletedTask);
@@ -363,11 +367,11 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, AppEndPoint endPoint)
+        PrivateKey privateKey, AppEndPoint endPoint, AppProtocolVersion appProtocolVersion)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
-            AppProtocolVersion = BlockChainUtility.AppProtocolVersion,
+            AppProtocolVersion = appProtocolVersion,
         };
         var hostOptions = new HostOptions(endPoint.Host, [], endPoint.Port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
@@ -375,11 +379,12 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
 
     private void UpdateNodeInfo()
     {
+        var appProtocolVersion = _appProtocolVersion;
         var nodeInfo = new NodeInfo
         {
             ProcessId = Environment.ProcessId,
             Address = Address,
-            AppProtocolVersion = $"{BlockChainUtility.AppProtocolVersion}",
+            AppProtocolVersion = $"{appProtocolVersion}",
         };
 
         if (IsRunning == true)

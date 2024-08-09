@@ -6,15 +6,26 @@ using Serilog;
 
 namespace LibplanetConsole.Seeds;
 
-internal sealed class PeerCollection(SeedOptions seedOptions) : IEnumerable<Peer>
+public sealed class PeerCollection : IEnumerable<Peer>
 {
     private readonly ConcurrentDictionary<AppAddress, Peer> _infoByAddress = [];
-    private readonly SeedOptions _seedOptions = seedOptions;
+    private readonly SeedOptions _seedOptions;
     private readonly ILogger _logger = Log.ForContext<Seed>();
+
+    internal PeerCollection(SeedOptions seedOptions)
+    {
+        _seedOptions = seedOptions;
+    }
 
     public int Count => _infoByAddress.Count;
 
-    public void AddOrUpdate(AppPeer boundPeer, ITransport transport)
+    public IEnumerator<Peer> GetEnumerator()
+        => _infoByAddress.Values.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator()
+        => _infoByAddress.Values.GetEnumerator();
+
+    internal void AddOrUpdate(AppPeer boundPeer, ITransport transport)
     {
         _infoByAddress.AddOrUpdate(
             key: boundPeer.Address,
@@ -34,7 +45,7 @@ internal sealed class PeerCollection(SeedOptions seedOptions) : IEnumerable<Peer
             });
     }
 
-    public async Task RefreshAsync(CancellationToken cancellationToken)
+    internal async Task RefreshAsync(CancellationToken cancellationToken)
     {
         var peers = _infoByAddress.Values.ToArray();
         var pingTimeout = _seedOptions.PingTimeout;
@@ -55,10 +66,4 @@ internal sealed class PeerCollection(SeedOptions seedOptions) : IEnumerable<Peer
             peers.Length,
             updatedCount);
     }
-
-    public IEnumerator<Peer> GetEnumerator()
-        => _infoByAddress.Values.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator()
-        => _infoByAddress.Values.GetEnumerator();
 }

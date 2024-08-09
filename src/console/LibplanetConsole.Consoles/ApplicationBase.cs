@@ -54,7 +54,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         GenesisOptions = new()
         {
             GenesisKey = GenesisOptions.AppProtocolKey,
-            GenesisValidators = [.. options.Nodes.Select(item => item.PublicKey)],
+            Validators = [.. options.Nodes.Select(item => item.PublicKey)],
             Timestamp = DateTimeOffset.UtcNow,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());

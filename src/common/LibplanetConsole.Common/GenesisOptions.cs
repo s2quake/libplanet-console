@@ -14,7 +14,7 @@ public sealed record class GenesisOptions
 
     public AppPrivateKey GenesisKey { get; init; } = new();
 
-    public AppPublicKey[] GenesisValidators { get; init; } = [];
+    public AppPublicKey[] Validators { get; init; } = [];
 
     public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.MinValue;
 
@@ -22,11 +22,11 @@ public sealed record class GenesisOptions
     {
         var genesisKey = GenesisKey.ToByteArray();
         var genesisValidators
-            = new List(GenesisValidators.Select(item => item.ToByteArray()));
+            = new List(Validators.Select(item => item.ToByteArray()));
         var timestamp = Timestamp.ToUnixTimeMilliseconds();
         var dictionary = Dictionary.Empty
                             .Add(nameof(GenesisKey), genesisKey)
-                            .Add(nameof(GenesisValidators), genesisValidators)
+                            .Add(nameof(Validators), genesisValidators)
                             .Add(nameof(Timestamp), timestamp);
         return _codec.Encode(dictionary);
     }

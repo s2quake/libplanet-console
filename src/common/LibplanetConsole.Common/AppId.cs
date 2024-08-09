@@ -12,15 +12,9 @@ public readonly record struct AppId : IFormattable
 {
     private readonly ImmutableArray<byte> _bytes;
 
-    public AppId(byte[] bytes)
-    {
-        _bytes = [.. bytes];
-    }
+    public AppId(byte[] bytes) => _bytes = [.. bytes];
 
-    public AppId(ImmutableArray<byte> bytes)
-    {
-        _bytes = bytes;
-    }
+    public AppId(ImmutableArray<byte> bytes) => _bytes = bytes;
 
     public AppId(TxId txId) => _bytes = txId.ByteArray;
 
