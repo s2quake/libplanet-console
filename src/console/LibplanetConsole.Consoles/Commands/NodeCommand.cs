@@ -8,9 +8,10 @@ using LibplanetConsole.Common.Extensions;
 namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
+[Export]
 [CommandSummary("Provides node-related commands.")]
 [method: ImportingConstructor]
-internal sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
+public sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]

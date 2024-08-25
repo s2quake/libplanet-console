@@ -9,7 +9,7 @@ namespace LibplanetConsole.Clients.Executable;
 [CommandSummary("Provides a prompt for input and execution of commands.")]
 [CommandDescription("REPL for libplanet client.")]
 [method: ImportingConstructor]
-internal sealed class CommandContext(
+internal class CommandContext(
     [ImportMany] IEnumerable<ICommand> commands,
     HelpCommand helpCommand,
     VersionCommand versionCommand)

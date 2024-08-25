@@ -27,6 +27,7 @@ internal sealed class NodeProcess(Node node) : ProcessBase
             var privateKey = AppPrivateKey.FromSecureString(PrivateKey);
             var argumentList = new List<string>
             {
+                "run",
                 "--end-point",
                 EndPoint.ToString(),
                 "--private-key",

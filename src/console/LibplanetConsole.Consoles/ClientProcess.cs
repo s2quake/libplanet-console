@@ -25,6 +25,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
             var privateKey = AppPrivateKey.FromSecureString(PrivateKey);
             var argumentList = new List<string>
             {
+                "run",
                 "--end-point",
                 EndPoint.ToString(),
                 "--private-key",

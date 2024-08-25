@@ -3,13 +3,15 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Consoles.Commands;
 
 namespace LibplanetConsole.Consoles.Explorer.Commands;
 
 [Export(typeof(ICommand))]
-[PartialCommand]
 [method: ImportingConstructor]
-internal sealed partial class NodeCommand(IApplication application) : CommandMethodBase
+internal sealed partial class ExplorerCommand(
+    NodeCommand nodeCommand, IApplication application)
+    : CommandMethodBase(nodeCommand)
 {
     [CommandPropertyRequired(DefaultValue = "")]
     [CommandSummary("The address of the node. If not specified, the current node is used.")]
@@ -19,7 +21,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
     [CommandMethodProperty(nameof(Address))]
     [CommandSummary("Start the explorer.")]
     [Category("Explorer")]
-    public async Task StartExplorerAsync(
+    public async Task StartAsync(
         string endPoint = "", CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
@@ -36,7 +38,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
     [CommandMethodProperty(nameof(Address))]
     [CommandSummary("Stop the explorer.")]
     [Category("Explorer")]
-    public async Task StopExplorerAsync(CancellationToken cancellationToken = default)
+    public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
         var explorerNode = node.GetService<IExplorerNodeContent>();

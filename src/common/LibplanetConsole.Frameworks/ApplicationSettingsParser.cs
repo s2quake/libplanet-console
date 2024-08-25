@@ -5,7 +5,7 @@ namespace LibplanetConsole.Frameworks;
 
 public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
 {
-    private static ApplicationSettingsParser? _instance;
+    private static ApplicationSettingsParser _instance = new();
     private readonly List<object> _optionList;
     private readonly Dictionary<CommandMemberDescriptor, object> _descriptorByInstance;
 
@@ -23,6 +23,10 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
         _descriptorByInstance = GetDescriptors(_optionList);
         _descriptors = new(GetType(), [.. _descriptorByInstance.Keys]);
     }
+
+    public static ApplicationSettingsParser Instance => _instance;
+
+    CommandMemberDescriptorCollection ICustomCommandDescriptor.Members => _descriptors;
 
     public static void Parse(string[] args)
     {
@@ -84,8 +88,6 @@ public sealed class ApplicationSettingsParser : ICustomCommandDescriptor
     }
 
     public static T Pop<T>() => (T)Pop(typeof(T));
-
-    CommandMemberDescriptorCollection ICustomCommandDescriptor.GetMembers() => _descriptors;
 
     object ICustomCommandDescriptor.GetMemberOwner(CommandMemberDescriptor memberDescriptor)
         => _descriptorByInstance[memberDescriptor];

@@ -7,9 +7,10 @@ using LibplanetConsole.Common.Extensions;
 namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
+[Export]
 [CommandSummary("Provides client-related commands.")]
 [method: ImportingConstructor]
-internal sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
+public sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
