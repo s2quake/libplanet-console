@@ -83,6 +83,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Consoles.G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Clients.Guild", "src\client\LibplanetConsole.Clients.Guild\LibplanetConsole.Clients.Guild.csproj", "{5A4B0E9A-C33E-4CC7-9EED-FDADE08E12F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Types", ".submodules\lib9c\.Libplanet\src\Libplanet.Types\Libplanet.Types.csproj", "{258E7818-5FFB-4BF1-8A2D-14B4CFAB940C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Action", ".submodules\lib9c\.Libplanet\src\Libplanet.Action\Libplanet.Action.csproj", "{0EC917BF-11AF-4559-AA82-8F144717D979}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Stun", ".submodules\lib9c\.Libplanet\src\Libplanet.Stun\Libplanet.Stun.csproj", "{D2CB21BC-A49C-4E1C-BC00-C0B6C428F5D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Analyzers", ".submodules\lib9c\.Libplanet\tools\Libplanet.Analyzers\Libplanet.Analyzers.csproj", "{634D7AAC-7FD1-4EC2-AF88-C9217AC660A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libplanet.Common", ".submodules\lib9c\.Libplanet\src\Libplanet.Common\Libplanet.Common.csproj", "{3B75370D-64FD-4B3F-ACD5-5ADFA4B20DC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,6 +223,26 @@ Global
 		{5A4B0E9A-C33E-4CC7-9EED-FDADE08E12F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A4B0E9A-C33E-4CC7-9EED-FDADE08E12F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A4B0E9A-C33E-4CC7-9EED-FDADE08E12F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{258E7818-5FFB-4BF1-8A2D-14B4CFAB940C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{258E7818-5FFB-4BF1-8A2D-14B4CFAB940C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{258E7818-5FFB-4BF1-8A2D-14B4CFAB940C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{258E7818-5FFB-4BF1-8A2D-14B4CFAB940C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EC917BF-11AF-4559-AA82-8F144717D979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EC917BF-11AF-4559-AA82-8F144717D979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EC917BF-11AF-4559-AA82-8F144717D979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EC917BF-11AF-4559-AA82-8F144717D979}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2CB21BC-A49C-4E1C-BC00-C0B6C428F5D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2CB21BC-A49C-4E1C-BC00-C0B6C428F5D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2CB21BC-A49C-4E1C-BC00-C0B6C428F5D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2CB21BC-A49C-4E1C-BC00-C0B6C428F5D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{634D7AAC-7FD1-4EC2-AF88-C9217AC660A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{634D7AAC-7FD1-4EC2-AF88-C9217AC660A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{634D7AAC-7FD1-4EC2-AF88-C9217AC660A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{634D7AAC-7FD1-4EC2-AF88-C9217AC660A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B75370D-64FD-4B3F-ACD5-5ADFA4B20DC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B75370D-64FD-4B3F-ACD5-5ADFA4B20DC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B75370D-64FD-4B3F-ACD5-5ADFA4B20DC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B75370D-64FD-4B3F-ACD5-5ADFA4B20DC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -255,6 +285,11 @@ Global
 		{469ABCB6-F994-4E94-8559-C133DB0975E7} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{27D61E3E-2941-463C-8168-814C19651F63} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
 		{5A4B0E9A-C33E-4CC7-9EED-FDADE08E12F4} = {1DEAA4CE-E29B-4379-BAF6-20B79A5946CB}
+		{258E7818-5FFB-4BF1-8A2D-14B4CFAB940C} = {0C6CED9E-AF13-4E74-A8A8-F192A24EABEF}
+		{0EC917BF-11AF-4559-AA82-8F144717D979} = {0C6CED9E-AF13-4E74-A8A8-F192A24EABEF}
+		{D2CB21BC-A49C-4E1C-BC00-C0B6C428F5D8} = {0C6CED9E-AF13-4E74-A8A8-F192A24EABEF}
+		{634D7AAC-7FD1-4EC2-AF88-C9217AC660A8} = {0C6CED9E-AF13-4E74-A8A8-F192A24EABEF}
+		{3B75370D-64FD-4B3F-ACD5-5ADFA4B20DC4} = {0C6CED9E-AF13-4E74-A8A8-F192A24EABEF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		{1778FDCB-AC26-43E4-97FE-FC4F0C427672} = {23C68389-8F13-48E7-9878-440917F70DAF}
