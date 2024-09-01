@@ -28,14 +28,10 @@
           "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
-              "run",
-              "--end-point",
-              "127.0.0.1:5353",
-              "--explorer-end-point",
-              "--private-key",
-              "b52e619962057e397f47efcb009ce45341f84cb86f425cd081cb64f1f1c1b220",
-              "--log-path",
-              ".log/node.log"
+              "genesis",
+              ".store/genesis",
+              "--validator-keys",
+              "034640270a199ee7b17b0c905916f2ca8188c70d8f0a004f669712383d5827209c"
           ]
       },
       {

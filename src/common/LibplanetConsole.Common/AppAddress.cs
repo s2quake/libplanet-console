@@ -12,6 +12,7 @@ namespace LibplanetConsole.Common;
 [TypeConverter(typeof(AppAddressConverter))]
 public readonly record struct AppAddress : IFormattable
 {
+    public const string RegularExpression = "0x[0-9a-fA-F]{40}";
     private readonly Address _address;
 
     public AppAddress(Address address) => _address = address;

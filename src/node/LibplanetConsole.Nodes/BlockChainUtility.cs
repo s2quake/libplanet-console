@@ -43,9 +43,9 @@ public static class BlockChainUtility
         IAction[] actions =
         [
             new Initialize(
-                validatorSet: validatorSet,
-                states: ImmutableDictionary.Create<Address, IValue>()),
-        ];
+                    validatorSet: validatorSet,
+                    states: ImmutableDictionary.Create<Address, IValue>()),
+            ];
 
         var transaction = Transaction.Create(
             nonce: nonce,

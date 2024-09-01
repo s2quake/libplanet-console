@@ -15,6 +15,7 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPrivateKeyJsonConverter))]
 public sealed record class AppPrivateKey
 {
+    public const string RegularExpression = "[0-9a-fA-F]{64}";
     private static readonly Codec _codec = new();
     private readonly PrivateKey _privateKey;
 

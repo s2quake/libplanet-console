@@ -13,6 +13,7 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPublicKeyJsonConverter))]
 public readonly record struct AppPublicKey : IFormattable
 {
+    public const string RegularExpression = "(?:[0-9a-fA-F]{130}|[0-9a-fA-F]{66})";
     private static readonly Codec _codec = new();
     private readonly PublicKey _publicKey;
 
