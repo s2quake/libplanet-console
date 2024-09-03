@@ -2,6 +2,7 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Security;
+using Libplanet.Common;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
@@ -216,11 +217,15 @@ internal sealed class Client : IClient, IClientCallback
     {
         var endPoint = EndPoint;
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
+        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
+        var hex = ByteUtil.Hex(privateKey.ToByteArray());
+        var logDirectory = Path.Combine(
+            application.Info.Path, hex, "log");
         return new ClientProcess(this)
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
-            LogDirectory = application.Info.LogDirectory,
+            LogPath = logDirectory,
         };
     }
 

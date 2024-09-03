@@ -1,5 +1,6 @@
 using System.Security;
 using LibplanetConsole.Common;
+using Serilog;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
@@ -12,7 +13,7 @@ internal sealed class ClientProcess(Client client) : ProcessBase
 
     public AppEndPoint? NodeEndPoint { get; set; }
 
-    public string LogDirectory { get; set; } = string.Empty;
+    public string LogPath { get; set; } = string.Empty;
 
     public bool ManualStart { get; set; }
 
@@ -42,12 +43,10 @@ internal sealed class ClientProcess(Client client) : ProcessBase
                 argumentList.Add("--no-repl");
             }
 
-            if (LogDirectory != string.Empty)
+            if (LogPath != string.Empty)
             {
-                var logFilename = $"client-{privateKey.Address:S}.log";
-                var logPath = Path.Combine(LogDirectory, logFilename);
                 argumentList.Add("--log-path");
-                argumentList.Add(logPath);
+                argumentList.Add(LogPath);
             }
 
             if (NodeEndPoint is { } nodeEndPoint)

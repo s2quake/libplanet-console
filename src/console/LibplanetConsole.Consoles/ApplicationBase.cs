@@ -11,7 +11,7 @@ using Serilog.Core;
 
 namespace LibplanetConsole.Consoles;
 
-public abstract class ApplicationBase : ApplicationFramework, IApplication
+public abstract partial class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly NodeCollection _nodes;
@@ -23,13 +23,13 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _logger = CreateLogger(options.LogDirectory);
+        _logger = CreateLogger(options.RepositoryPath);
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
         _container = new(this);
         _container.ComposeExportedValue<ILogger>(_logger);
-        _nodes = new NodeCollection(this, options.Nodes);
-        _clients = new ClientCollection(this, options.Clients);
+        _nodes = new NodeCollection(this, options.GetNodeKeys());
+        _clients = new ClientCollection(this, options.GetClientKeys());
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
@@ -45,19 +45,13 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _info = new()
         {
             EndPoint = _consoleContext.EndPoint,
-            StoreDirectory = options.StoreDirectory,
-            LogDirectory = options.LogDirectory,
+            Path = options.RepositoryPath,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
             NewWindow = options.NewWindow,
             ManualStart = options.ManualStart,
         };
-        GenesisBlock = BlockUtility.CreateGenesisBlock(new()
-        {
-            GenesisKey = GenesisOptions.AppProtocolKey,
-            Validators = [.. options.Nodes.Select(item => item.PublicKey)],
-            Timestamp = DateTimeOffset.UtcNow,
-        });
+        GenesisBlock = options.GetGenesisBlock();
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         _logger.Debug("Application initialized.");
     }
@@ -172,7 +166,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         var loggerConfiguration = new LoggerConfiguration();
         if (logDicrectory != string.Empty)
         {
-            var logFilename = Path.Combine(logDicrectory, "console.log");
+            var logFilename = Path.Combine(logDicrectory, "log");
             loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
                                                      .WriteTo.File(logFilename);
         }

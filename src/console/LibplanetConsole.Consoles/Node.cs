@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Security;
 using Bencodex;
+using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -213,13 +214,19 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     {
         var endPoint = EndPoint;
         var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
+        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
+        var hex = ByteUtil.Hex(privateKey.ToByteArray());
+        var logPath = Path.Combine(
+            application.Info.Path, hex, "log");
+        var storeDirectory = Path.Combine(
+            application.Info.Path, hex, "store");
         return new NodeProcess(this)
         {
             EndPoint = endPoint,
             PrivateKey = _privateKey,
             NodeEndPoint = application.Info.EndPoint,
-            StoreDirectory = application.Info.StoreDirectory,
-            LogDirectory = application.Info.LogDirectory,
+            StoreDirectory = storeDirectory,
+            LogPath = logPath,
         };
     }
 

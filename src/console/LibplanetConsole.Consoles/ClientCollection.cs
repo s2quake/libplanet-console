@@ -109,7 +109,7 @@ internal sealed class ClientCollection(
             clientProcess.Detach = options.Detach;
             clientProcess.ManualStart = options.Detach != true;
             clientProcess.NewWindow = options.NewWindow;
-            await clientProcess.StartAsync(cancellationToken: default);
+            await clientProcess.RunAsync(cancellationToken: default);
         }
 
         if (options.NoProcess != true && options.Detach != true)

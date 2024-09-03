@@ -8,48 +8,14 @@ namespace LibplanetConsole.Consoles.Executable;
 [ApplicationSettings]
 internal sealed record class ApplicationSettings
 {
+    [CommandPropertyRequired]
+    public string Path { get; set; } = string.Empty;
+
     [CommandProperty]
     [CommandSummary("The endpoint of the console to run." +
                     "If omitted, one of the random ports will be used.")]
     [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
-
-    [CommandProperty(InitValue = 4)]
-    [CommandSummary("The number of nodes to run.\n" +
-                    "If omitted, the default value is 4.\n" +
-                    "If --nodes option is set, this option is ignored.")]
-    [CommandPropertyCondition(nameof(Nodes), null, OnSet = true)]
-    public int NodeCount { get; init; }
-
-    [CommandProperty]
-    [CommandSummary("The private keys of the nodes to run.\n" +
-                    "Example: --nodes \"key1,key2,...\"")]
-    [CommandPropertyCondition(nameof(NodeCount), null, OnSet = true)]
-    [AppPrivateKeyArray]
-    public string[] Nodes { get; init; } = [];
-
-    [CommandProperty(InitValue = 2)]
-    [CommandSummary("The number of clients to run.\n" +
-                    "If omitted, the default value is 2.\n" +
-                    "If --clients option is set, this option is ignored.")]
-    [CommandPropertyCondition(nameof(Clients), null, OnSet = true)]
-    public int ClientCount { get; init; }
-
-    [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to run.\n" +
-                    "Example: --clients \"key1,key2,...\"")]
-    [CommandPropertyCondition(nameof(ClientCount), null, OnSet = true)]
-    [AppPrivateKeyArray]
-    public string[] Clients { get; init; } = [];
-
-    [CommandProperty]
-    [CommandSummary("The directory path to store data of each node. " +
-                    "If omitted, the data is stored in memory.")]
-    public string StorePath { get; init; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("The directory path to store log.")]
-    public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and the client processes will not run.")]
@@ -78,41 +44,15 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions(object[] components)
     {
+        var path = Path;
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
-        return new ApplicationOptions(endPoint)
+        return new ApplicationOptions(path, endPoint)
         {
-            Nodes = GetNodes(),
-            Clients = GetClients(),
-            StoreDirectory = GetFullPath(StorePath),
-            LogDirectory = GetFullPath(LogPath),
             NoProcess = NoProcess,
             NewWindow = NewWindow,
             Detach = Detach,
             ManualStart = ManualStart,
             Components = components,
         };
-
-        static string GetFullPath(string path)
-            => path != string.Empty ? Path.GetFullPath(path) : path;
-    }
-
-    private AppPrivateKey[] GetNodes()
-    {
-        if (Nodes.Length > 0)
-        {
-            return [.. Nodes.Select(item => AppPrivateKey.Parse(item))];
-        }
-
-        return [.. Enumerable.Range(0, NodeCount).Select(item => new AppPrivateKey())];
-    }
-
-    private AppPrivateKey[] GetClients()
-    {
-        if (Clients.Length > 0)
-        {
-            return [.. Clients.Select(item => AppPrivateKey.Parse(item))];
-        }
-
-        return [.. Enumerable.Range(0, ClientCount).Select(item => new AppPrivateKey())];
     }
 }

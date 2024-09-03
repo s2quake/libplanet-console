@@ -8,6 +8,7 @@ var commands = new ICommand[]
     new RunCommand(),
     new KeyCommand(),
     new GenesisCommand(),
+    new SchemaCommand(),
 };
 var commandContext = new EntryCommandContext(commands);
 await commandContext.ExecuteAsync(args);

@@ -2,21 +2,16 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.IO;
-using LibplanetConsole.Common.Threading;
-using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
-internal abstract class ProcessBase : IAsyncDisposable
+internal abstract class ProcessBase : IDisposable
 {
     private readonly StringBuilder _outBuilder = new();
     private readonly StringBuilder _errorBuilder = new();
     private Process? _process;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private Task _exitTask = Task.CompletedTask;
 
     public int Id => _process?.Id ?? -1;
 
@@ -30,7 +25,7 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     protected abstract string[] Arguments { get; }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public void Run(int millisecondsDelay)
     {
         if (_process is not null)
         {
@@ -44,24 +39,73 @@ internal abstract class ProcessBase : IAsyncDisposable
             _process.ErrorDataReceived += Process_ErrorDataReceived;
         }
 
-        ApplicationLogger.Debug("Process staring: " + JsonUtility.Serialize(new
+        if (_process.Start() != true)
         {
-            HashCode = _process.GetHashCode(),
-            _process.StartInfo.FileName,
-            Arguments = GetArguments(_process.StartInfo),
-            _process.StartInfo.WorkingDirectory,
-        }));
+            throw new InvalidOperationException("Failed to start the process.");
+        }
+
+        if (NewWindow != true)
+        {
+            _process.BeginOutputReadLine();
+            _process.BeginErrorReadLine();
+        }
+
+        if (_process.HasExited == true)
+        {
+            throw new InvalidOperationException(_errorBuilder.ToString());
+        }
+
+        if (_process.WaitForExit(millisecondsDelay) is true)
+        {
+            if (_process.ExitCode != 0)
+            {
+                var message = _errorBuilder.ToString();
+                throw new InvalidOperationException(message);
+            }
+
+            _process.Close();
+            _process = null;
+        }
+        else
+        {
+            _process.Dispose();
+            _process = null;
+            throw new InvalidOperationException("The process is not exited.");
+        }
+    }
+
+    public async Task RunAsync(CancellationToken cancellationToken)
+    {
+        if (_process is not null)
+        {
+            throw new InvalidOperationException("The process is already disposed.");
+        }
+
+        _process = GetProcess();
+        if (NewWindow != true)
+        {
+            _process.OutputDataReceived += Process_OutputDataReceived;
+            _process.ErrorDataReceived += Process_ErrorDataReceived;
+        }
+
+        // ApplicationLogger.Debug("Process staring: " + JsonUtility.Serialize(new
+        // {
+        //     HashCode = _process.GetHashCode(),
+        //     _process.StartInfo.FileName,
+        //     Arguments = GetArguments(_process.StartInfo),
+        //     _process.StartInfo.WorkingDirectory,
+        // }));
 
         if (_process.Start() != true)
         {
             throw new InvalidOperationException("Failed to start the process.");
         }
 
-        ApplicationLogger.Debug("Process started: " + JsonUtility.Serialize(new
-        {
-            HashCode = _process.GetHashCode(),
-            _process.Id,
-        }));
+        // ApplicationLogger.Debug("Process started: " + JsonUtility.Serialize(new
+        // {
+        //     HashCode = _process.GetHashCode(),
+        //     _process.Id,
+        // }));
 
         if (NewWindow != true)
         {
@@ -74,42 +118,31 @@ internal abstract class ProcessBase : IAsyncDisposable
         {
             throw new InvalidOperationException(_errorBuilder.ToString());
         }
-
-        _cancellationTokenSource = new CancellationTokenSource();
-        _exitTask = WaitForExitAsync(_cancellationTokenSource.Token);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public Task WaitForExitAsync(CancellationToken cancellationToken)
+        => WaitForExitAsync(Timeout.Infinite, cancellationToken);
+
+    public async Task WaitForExitAsync(int millisecondsDelay, CancellationToken cancellationToken)
     {
         if (_process is null)
         {
             throw new InvalidOperationException("The process is already disposed.");
         }
 
-        if (_cancellationTokenSource is not null)
-        {
-            await _cancellationTokenSource.CancelAsync();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
-        }
+        using var timeoutTokenSource = new CancellationTokenSource(millisecondsDelay);
+        using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            timeoutTokenSource.Token, cancellationToken);
 
+        await _process.WaitForExitAsync(linkedTokenSource.Token);
         _process.Close();
-        await _process.WaitForExitAsync(cancellationToken);
         _process = null;
-        await _exitTask;
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        if (_cancellationTokenSource is not null)
-        {
-            await _cancellationTokenSource.CancelAsync();
-            _cancellationTokenSource = null;
-        }
-
         _process?.Dispose();
         _process = null;
-        await _exitTask;
     }
 
     public string GetCommandLine()
@@ -119,7 +152,7 @@ internal abstract class ProcessBase : IAsyncDisposable
         return $"{filename} {arguments}";
     }
 
-// Reflection should not be used to increase accessibility of classes, methods, or fields
+    // Reflection should not be used to increase accessibility of classes, methods, or fields
 #pragma warning disable S3011
     private static string GetArguments(ProcessStartInfo processStartInfo)
     {
@@ -246,24 +279,6 @@ internal abstract class ProcessBase : IAsyncDisposable
         if (e.Data is string text)
         {
             _errorBuilder.AppendLine(text);
-        }
-    }
-
-    private async Task WaitForExitAsync(CancellationToken cancellationToken)
-    {
-        while (cancellationToken.IsCancellationRequested != true)
-        {
-            if (_process is null)
-            {
-                break;
-            }
-
-            if (_process.HasExited == true)
-            {
-                break;
-            }
-
-            await TaskUtility.TryDelay(100, cancellationToken);
         }
     }
 }

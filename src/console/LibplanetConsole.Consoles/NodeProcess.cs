@@ -14,7 +14,7 @@ internal sealed class NodeProcess(Node node) : ProcessBase
 
     public string StoreDirectory { get; set; } = string.Empty;
 
-    public string LogDirectory { get; set; } = string.Empty;
+    public string LogPath { get; set; } = string.Empty;
 
     public bool ManualStart { get; set; }
 
@@ -46,17 +46,14 @@ internal sealed class NodeProcess(Node node) : ProcessBase
 
             if (StoreDirectory != string.Empty)
             {
-                var storePath = Path.Combine(StoreDirectory, $"{privateKey.Address}:S");
                 argumentList.Add("--store-path");
-                argumentList.Add(storePath);
+                argumentList.Add(StoreDirectory);
             }
 
-            if (LogDirectory != string.Empty)
+            if (LogPath != string.Empty)
             {
-                var logFilename = $"node-{privateKey.Address:S}.log";
-                var logPath = Path.Combine(LogDirectory, logFilename);
                 argumentList.Add("--log-path");
-                argumentList.Add(logPath);
+                argumentList.Add(LogPath);
             }
 
             if (NodeEndPoint is { } nodeEndPoint)

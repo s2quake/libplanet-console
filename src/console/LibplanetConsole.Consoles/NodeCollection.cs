@@ -109,7 +109,7 @@ internal sealed class NodeCollection(
             nodeProcess.Detach = options.Detach;
             nodeProcess.ManualStart = options.Detach != true;
             nodeProcess.NewWindow = options.NewWindow;
-            await nodeProcess.StartAsync(cancellationToken);
+            await nodeProcess.RunAsync(cancellationToken);
         }
 
         if (options.NoProcess != true && options.Detach != true)
