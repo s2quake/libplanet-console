@@ -10,7 +10,7 @@ using Serilog.Core;
 
 namespace LibplanetConsole.Nodes;
 
-public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
+public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly Node _node;
@@ -38,6 +38,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.ComposeExportedValue<INode>(_node);
         _container.ComposeExportedValue<IBlockChain>(_node);
         _container.ComposeExportedValue<IApplicationService>(_node);
+        Array.ForEach(options.Components, _container.ComposeExportedValue);
         _nodeContext = _container.GetValue<NodeContext>();
         _nodeContext.EndPoint = options.EndPoint;
         _container.GetValue<IApplicationConfigurations>();

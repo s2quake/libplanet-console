@@ -61,12 +61,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         _logger = logger;
         _nodeOptions = new NodeOptions
         {
-            GenesisOptions = new GenesisOptions
-            {
-                GenesisKey = GenesisOptions.AppProtocolKey,
-                Validators = options.Validators,
-                Timestamp = DateTimeOffset.UtcNow,
-            },
+            Genesis = options.Genesis,
         };
         UpdateNodeInfo();
         _logger.Debug("Node is created: {Address}", Address);
@@ -193,7 +188,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         };
         var actionLoaders = CollectActionLoaders(_serviceProvider);
         var blockChain = BlockChainUtility.CreateBlockChain(
-            genesisOptions: nodeOptions.GenesisOptions,
+            genesisBlock: BlockUtility.DeserializeBlock(nodeOptions.Genesis),
             storePath: storePath,
             renderer: this,
             actionLoaders: actionLoaders);

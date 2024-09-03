@@ -42,10 +42,10 @@ internal sealed class SeedService : LocalService<ISeedService>,
     {
         var seedPeer = _blocksyncSeed.BoundPeer;
         var consensusSeedPeer = _consensusSeed.BoundPeer;
-        var genesisOptions = (GenesisInfo)_application.GenesisOptions;
+        var genesisBlock = _application.GenesisBlock;
         var seedInfo = new SeedInfo
         {
-            GenesisInfo = genesisOptions.Encrypt(publicKey),
+            Genesis = BlockUtility.SerializeBlock(genesisBlock),
             BlocksyncSeedPeer = seedPeer,
             ConsensusSeedPeer = consensusSeedPeer,
         };

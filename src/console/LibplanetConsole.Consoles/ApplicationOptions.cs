@@ -23,4 +23,6 @@ public sealed record class ApplicationOptions
     public bool NewWindow { get; init; }
 
     public bool ManualStart { get; init; }
+
+    public object[] Components { get; init; } = [];
 }

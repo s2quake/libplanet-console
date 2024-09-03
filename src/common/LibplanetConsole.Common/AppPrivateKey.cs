@@ -101,6 +101,8 @@ public sealed record class AppPrivateKey
         return JsonSerializer.Deserialize(json, type);
     }
 
+    public byte[] Decrypt(byte[] bytes) => _privateKey.Decrypt(bytes);
+
     public T Decrypt<T>(string text)
         where T : notnull => Decrypt(text, typeof(T)) switch
         {

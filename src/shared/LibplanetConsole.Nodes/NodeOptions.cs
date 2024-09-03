@@ -11,9 +11,9 @@ namespace LibplanetConsole.Clients;
 #error "Either LIBPLANET_CONSOLE or LIBPLANET_NODE must be defined."
 #endif
 
-public sealed record class NodeOptions
+public sealed partial record class NodeOptions
 {
-    public required GenesisOptions GenesisOptions { get; init; }
+    public required byte[] Genesis { get; init; }
 
     public AppPeer? BlocksyncSeedPeer { get; init; }
 
@@ -23,22 +23,9 @@ public sealed record class NodeOptions
     {
         return new NodeOptions
         {
-            GenesisOptions = seedInfo.GenesisInfo,
+            Genesis = seedInfo.Genesis,
             BlocksyncSeedPeer = seedInfo.BlocksyncSeedPeer,
             ConsensusSeedPeer = seedInfo.ConsensusSeedPeer,
-        };
-    }
-
-    public static NodeOptions Create(AppPublicKey publicKey)
-    {
-        return new NodeOptions
-        {
-            GenesisOptions = new GenesisOptions()
-            {
-                GenesisKey = new AppPrivateKey(),
-                Validators = [publicKey],
-                Timestamp = DateTimeOffset.UtcNow,
-            },
         };
     }
 

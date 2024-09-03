@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using JSSoft.Commands;
+using Libplanet.Common;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Nodes.Executable;
@@ -10,11 +13,13 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint on which the Node Service will run. " +
                     "If omitted, host is 127.0.0.1 and port is set to random.")]
+    [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the node. " +
                     "If omitted, a random private key is used.")]
+    [AppPrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
@@ -28,6 +33,7 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    [AppEndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -36,11 +42,12 @@ internal sealed record class ApplicationSettings
     public string StorePath { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates array of validators' public keys in the genesis block.\n" +
-                    "If omitted, genesis validators is derived from " +
-                    "the private key of the node.\n" +
-                    "If genesis block does not need to create, this option is ignored.")]
-    public string[] Validators { get; init; } = [];
+    [CommandPropertyCondition(nameof(Genesis), "")]
+    public string GenesisPath { get; init; } = string.Empty;
+
+    [CommandProperty]
+    [CommandPropertyCondition(nameof(GenesisPath), "")]
+    public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The file path to store log.")]
@@ -50,40 +57,54 @@ internal sealed record class ApplicationSettings
     [CommandSummary("If set, the REPL is not started.")]
     public bool NoREPL { get; init; }
 
-    public static implicit operator ApplicationOptions(ApplicationSettings settings)
+    public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(settings.PrivateKey);
-        return new ApplicationOptions(endPoint, privateKey)
+        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
+        var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
+        return new ApplicationOptions(endPoint, privateKey, genesis)
         {
-            ParentProcessId = settings.ParentProcessId,
-            ManualStart = settings.ManualStart,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
-            Validators = settings.GetGenesisValidators(privateKey.PublicKey),
-            StorePath = GetFullPath(settings.StorePath),
-            LogPath = GetFullPath(settings.LogPath),
-            NoREPL = settings.NoREPL,
+            ParentProcessId = ParentProcessId,
+            ManualStart = ManualStart,
+            NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
+            StorePath = GetFullPath(StorePath),
+            LogPath = GetFullPath(LogPath),
+            NoREPL = NoREPL,
+            Components = components,
         };
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
     }
 
-    public static ApplicationSettings Parse(string[] args)
+    private static byte[] CreateGenesis(AppPrivateKey privateKey)
     {
-        var settings = new ApplicationSettings();
-        var commandSettings = new CommandSettings
+        var validatorKey = new AppPublicKey[]
         {
-            AllowEmpty = true,
+            privateKey.PublicKey,
         };
-        var parser = new CommandParser(settings, commandSettings);
-        parser.Parse(args);
-        return settings;
+        var dateTimeOffset = DateTimeOffset.UtcNow;
+        var genesisBlock = BlockUtility.CreateGenesisBlock(
+            privateKey, validatorKey, dateTimeOffset);
+        return BlockUtility.SerializeBlock(genesisBlock);
     }
 
-    private AppPublicKey[] GetGenesisValidators(AppPublicKey publicKey) => Validators.Length switch
+    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
     {
-        > 0 => [.. Validators.Select(AppPublicKey.Parse)],
-        _ => [publicKey],
-    };
+        if (GenesisPath != string.Empty)
+        {
+            var hex = File.ReadAllText(GenesisPath);
+            genesis = ByteUtil.ParseHex(hex);
+            return true;
+        }
+
+        if (Genesis != string.Empty)
+        {
+            genesis = ByteUtil.ParseHex(Genesis);
+            return true;
+        }
+
+        genesis = null!;
+        return false;
+    }
 }

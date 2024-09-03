@@ -10,7 +10,7 @@ using Serilog.Core;
 
 namespace LibplanetConsole.Clients;
 
-public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
+public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly Client _client;

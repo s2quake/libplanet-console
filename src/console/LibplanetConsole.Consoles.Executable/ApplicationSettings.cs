@@ -1,5 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles.Executable;
@@ -10,6 +11,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("The endpoint of the console to run." +
                     "If omitted, one of the random ports will be used.")]
+    [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty(InitValue = 4)]
@@ -23,6 +25,7 @@ internal sealed record class ApplicationSettings
     [CommandSummary("The private keys of the nodes to run.\n" +
                     "Example: --nodes \"key1,key2,...\"")]
     [CommandPropertyCondition(nameof(NodeCount), null, OnSet = true)]
+    [AppPrivateKeyArray]
     public string[] Nodes { get; init; } = [];
 
     [CommandProperty(InitValue = 2)]
@@ -36,6 +39,7 @@ internal sealed record class ApplicationSettings
     [CommandSummary("The private keys of the clients to run.\n" +
                     "Example: --clients \"key1,key2,...\"")]
     [CommandPropertyCondition(nameof(ClientCount), null, OnSet = true)]
+    [AppPrivateKeyArray]
     public string[] Clients { get; init; } = [];
 
     [CommandProperty]
@@ -72,40 +76,24 @@ internal sealed record class ApplicationSettings
     [CommandPropertyCondition(nameof(Detach), false)]
     public bool ManualStart { get; set; }
 
-    public static implicit operator ApplicationOptions(ApplicationSettings settings)
+    public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
+        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
         return new ApplicationOptions(endPoint)
         {
-            Nodes = settings.GetNodes(),
-            Clients = settings.GetClients(),
-            StoreDirectory = GetFullPath(settings.StorePath),
-            LogDirectory = GetFullPath(settings.LogPath),
-            NoProcess = settings.NoProcess,
-            NewWindow = settings.NewWindow,
-            Detach = settings.Detach,
-            ManualStart = settings.ManualStart,
+            Nodes = GetNodes(),
+            Clients = GetClients(),
+            StoreDirectory = GetFullPath(StorePath),
+            LogDirectory = GetFullPath(LogPath),
+            NoProcess = NoProcess,
+            NewWindow = NewWindow,
+            Detach = Detach,
+            ManualStart = ManualStart,
+            Components = components,
         };
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
-    }
-
-    public static ApplicationSettings Parse(string[] args)
-    {
-        var options = new ApplicationSettings();
-        var parserSettings = new CommandSettings()
-        {
-            AllowEmpty = true,
-        };
-        var parser = new CommandParser(options, parserSettings);
-        parser.Parse(args);
-        if (options.NodeCount < 1)
-        {
-            throw new InvalidOperationException("Node count must be greater than or equal to 1.");
-        }
-
-        return options;
     }
 
     private AppPrivateKey[] GetNodes()

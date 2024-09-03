@@ -1,5 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Clients.Executable;
@@ -10,11 +11,13 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint on which the Client Service will run. " +
                     "If omitted, host is 127.0.0.1 and port is set to random.")]
+    [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the client. " +
                     "If omitted, a random private key is used.")]
+    [AppPrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
@@ -29,6 +32,7 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    [AppEndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -39,17 +43,18 @@ internal sealed record class ApplicationSettings
     [CommandSummary("If set, the REPL is not started.")]
     public bool NoREPL { get; init; }
 
-    public static implicit operator ApplicationOptions(ApplicationSettings settings)
+    public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(settings.PrivateKey);
+        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
-            ParentProcessId = settings.ParentProcessId,
-            IsSeed = settings.IsSeed,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
-            LogPath = GetFullPath(settings.LogPath),
-            NoREPL = settings.NoREPL,
+            ParentProcessId = ParentProcessId,
+            IsSeed = IsSeed,
+            NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
+            LogPath = GetFullPath(LogPath),
+            NoREPL = NoREPL,
+            Components = components,
         };
 
         static string GetFullPath(string path)

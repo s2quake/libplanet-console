@@ -2,14 +2,14 @@ using Serilog;
 
 namespace LibplanetConsole.Frameworks;
 
-public abstract class ApplicationBase : IAsyncDisposable, IServiceProvider
+public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 {
     private readonly ManualResetEvent _closeEvent = new(false);
     private readonly SynchronizationContext _synchronizationContext;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private bool _isDisposed;
 
-    protected ApplicationBase()
+    protected ApplicationFramework()
     {
         SynchronizationContext.SetSynchronizationContext(new());
         _synchronizationContext = SynchronizationContext.Current!;

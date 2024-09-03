@@ -204,7 +204,7 @@ internal sealed class NodeCollection(
             var seedService = _application.GetService<SeedService>();
             var nodeOptions = new NodeOptions
             {
-                GenesisOptions = _application.GenesisOptions,
+                Genesis = BlockUtility.SerializeBlock(_application.GenesisBlock),
                 BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
                 ConsensusSeedPeer = seedService.ConsensusSeedPeer,
             };

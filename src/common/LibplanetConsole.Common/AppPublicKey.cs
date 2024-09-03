@@ -73,6 +73,8 @@ public readonly record struct AppPublicKey : IFormattable
         return ByteUtil.Hex(encrypted);
     }
 
+    public byte[] Encrypt(byte[] bytes) => _publicKey.Encrypt(bytes);
+
     public bool Verify(object obj, byte[] signature)
     {
         if (obj is IValue value)

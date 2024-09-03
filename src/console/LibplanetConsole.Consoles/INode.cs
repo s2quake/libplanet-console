@@ -1,4 +1,3 @@
-using Libplanet.Action;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes;
 

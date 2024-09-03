@@ -4,7 +4,6 @@ using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
-using LibplanetConsole.Frameworks;
 using Serilog;
 
 namespace LibplanetConsole.Consoles.Explorer;
@@ -12,21 +11,14 @@ namespace LibplanetConsole.Consoles.Explorer;
 [Export(typeof(IExplorerNodeContent))]
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
-internal sealed class ExplorerNodeContent
-    : NodeContentBase, IExplorerNodeContent, IExplorerCallback, INodeContentService
+[method: ImportingConstructor]
+internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerNodeSettings settings)
+    : NodeContentBase(node), IExplorerNodeContent, IExplorerCallback, INodeContentService
 {
-    private readonly RemoteService<IExplorerService, IExplorerCallback> _remoteService;
-    private readonly ILogger _logger;
+    private readonly ILogger _logger = logger;
     private readonly ExecutionScope _executionScope = new();
     private AppEndPoint _endPoint = AppEndPoint.Next();
-
-    [ImportingConstructor]
-    public ExplorerNodeContent(INode node, ILogger logger)
-        : base(node)
-    {
-        _remoteService = new RemoteService<IExplorerService, IExplorerCallback>(this);
-        _logger = logger;
-    }
+    private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
 
     public event EventHandler? Started;
 
@@ -51,9 +43,12 @@ internal sealed class ExplorerNodeContent
 
     public bool IsRunning { get; private set; }
 
-    IRemoteService INodeContentService.RemoteService => _remoteService;
+    IRemoteService INodeContentService.RemoteService => RemoteService;
 
-    private IExplorerService Service => _remoteService.Service;
+    private IExplorerService Service => RemoteService.Service;
+
+    private RemoteService<IExplorerService, IExplorerCallback> RemoteService
+        => _remoteService ??= new RemoteService<IExplorerService, IExplorerCallback>(this);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -124,7 +119,6 @@ internal sealed class ExplorerNodeContent
     {
         base.OnNodeStarted();
 
-        var settings = ApplicationSettingsParser.Peek<ExplorerNodeSettings>();
         if (settings.UseExplorer == true)
         {
             await StartAsync(cancellationToken: default);

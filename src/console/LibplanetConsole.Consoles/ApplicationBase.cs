@@ -2,6 +2,7 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
@@ -10,7 +11,7 @@ using Serilog.Core;
 
 namespace LibplanetConsole.Consoles;
 
-public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
+public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly NodeCollection _nodes;
@@ -51,14 +52,13 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
             NewWindow = options.NewWindow,
             ManualStart = options.ManualStart,
         };
-        GenesisOptions = new()
+        GenesisBlock = BlockUtility.CreateGenesisBlock(new()
         {
             GenesisKey = GenesisOptions.AppProtocolKey,
             Validators = [.. options.Nodes.Select(item => item.PublicKey)],
             Timestamp = DateTimeOffset.UtcNow,
-        };
+        });
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _logger.Debug($"GenesisOptions: {JsonUtility.Serialize((GenesisInfo)GenesisOptions)}");
         _logger.Debug("Application initialized.");
     }
 
@@ -68,7 +68,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public override ILogger Logger => _logger;
 
-    internal GenesisOptions GenesisOptions { get; }
+    internal Block GenesisBlock { get; }
 
     public bool TryGetClient(string address, [MaybeNullWhen(false)] out IClient client)
     {

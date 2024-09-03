@@ -4,7 +4,7 @@ public readonly record struct SeedInfo
 {
     public static SeedInfo Empty { get; } = default;
 
-    public GenesisInfo GenesisInfo { get; init; }
+    public byte[] Genesis { get; init; }
 
     public AppPeer BlocksyncSeedPeer { get; init; }
 
@@ -12,11 +12,9 @@ public readonly record struct SeedInfo
 
     public SeedInfo Encrypt(AppPublicKey publicKey) => this with
     {
-        GenesisInfo = GenesisInfo.Encrypt(publicKey),
     };
 
     public SeedInfo Decrypt(AppPrivateKey privateKey) => this with
     {
-        GenesisInfo = GenesisInfo.Decrypt(privateKey),
     };
 }

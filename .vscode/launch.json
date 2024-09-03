@@ -11,6 +11,7 @@
           "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
           "console": "integratedTerminal",
           "args": [
+              "run",
               "--nodes",
               "b52e619962057e397f47efcb009ce45341f84cb86f425cd081cb64f1f1c1b220,cc1f459ea12f97cc8e996cf1d6ea74c4991f38cf4b555fa26a84d1db22c4481c,c7ffc6717833a51396ec992c0804946422a4ab85ab9fd64dfde99ba25a58ffe0,07cd0cf1242dd6ddef68a865658a57bdbe6b21c98d74c80365a274297e98667d",
               "--clients",
@@ -28,10 +29,14 @@
           "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
-              "genesis",
-              ".store/genesis",
-              "--validator-keys",
-              "034640270a199ee7b17b0c905916f2ca8188c70d8f0a004f669712383d5827209c"
+              "run",
+              "--end-point",
+              "127.0.0.1:5353",
+              "--explorer-end-point",
+              "--private-key",
+              "b52e619962057e397f47efcb009ce45341f84cb86f425cd081cb64f1f1c1b220",
+              "--log-path",
+              ".log/node.log"
           ]
       },
       {

@@ -6,7 +6,7 @@ namespace LibplanetConsole.Frameworks;
 
 public static class ApplicationLogger
 {
-    private static ApplicationBase? app;
+    private static ApplicationFramework? app;
 
     public static ILogger Logger => app?.Logger ??
         throw new InvalidOperationException("Application is not set.");
@@ -161,7 +161,7 @@ public static class ApplicationLogger
     public static void Fatal(Exception exception, string messageTemplate, params object[] propertyValues)
         => Logger.Fatal(exception, messageTemplate, propertyValues: propertyValues);
 
-    internal static void SetApplication(ApplicationBase application)
+    internal static void SetApplication(ApplicationFramework application)
     {
         if (app is not null)
         {

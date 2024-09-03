@@ -1,20 +1,18 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Examples.Services;
-using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles.Examples;
 
 [Export(typeof(IExampleClientContent))]
 [Export(typeof(IClientContent))]
 [method: ImportingConstructor]
-internal sealed class ExampleClientContent(IClient client)
+internal sealed class ExampleClientContent(IClient client, ExampleClientSettings settings)
     : ClientContentBase(client), IExampleClientContent
 {
     private readonly RemoteService<IExampleClientService> _remoteService = new();
 
-    public bool IsExample { get; }
-        = ApplicationSettingsParser.Peek<ExampleClientSettings>().IsClientExample;
+    public bool IsExample { get; } = settings.IsClientExample;
 
     private IExampleClientService Service => _remoteService.Service;
 
