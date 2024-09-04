@@ -1,5 +1,6 @@
 using Bencodex;
 using Libplanet.Common;
+using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
 
@@ -59,9 +60,17 @@ public abstract partial class ApplicationBase
             var nodePath = Path.Combine(nodesPath, ByteUtil.Hex(nodeKey.ToByteArray()));
             var settingsPath = Path.Combine(nodePath, "settings.json");
             Directory.CreateDirectory(nodePath);
-            var settings = new Dictionary<string, string>
+            var settings = new Dictionary<string, object>
             {
                 ["$schema"] = "../../node-schema.json",
+                ["Application"] = new
+                {
+                    EndPoint = AppEndPoint.Next().ToString(),
+                    PrivateKey = ByteUtil.Hex(nodeKey.ToByteArray()),
+                    GenesisPath = "../../genesis",
+                    StorePath = "./store",
+                    LogPath = "./log",
+                },
             };
             var json = JsonUtility.Serialize(settings);
             File.WriteAllText(settingsPath, json);

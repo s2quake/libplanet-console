@@ -22,7 +22,8 @@
           "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
-              "schema"
+              "start",
+              "/Users/jeesu/Projects/s2quake/libplanet-console/.data/nodes/1e7a0e79704c73f1ea6e0bf833ea500293aa6247a78150018028aca431f2b283/settings.json"
           ]
       },
       {

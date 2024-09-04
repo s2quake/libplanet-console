@@ -1,12 +1,13 @@
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.Json;
 using Namotion.Reflection;
 using NJsonSchema;
 using NJsonSchema.Generation;
 
 namespace LibplanetConsole.Common.DataAnnotations;
 
-public class DataSchemaBuilder
+public class SettingsSchemaBuilder
 {
     private readonly Dictionary<string, Type> _typeByName = [];
 
@@ -29,8 +30,12 @@ public class DataSchemaBuilder
             var settings = new SystemTextJsonSchemaGeneratorSettings
             {
                 FlattenInheritanceHierarchy = true,
+                SerializerOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                },
             };
-            var schemaGenerator = new DataSchemaGenerator(this, settings);
+            var schemaGenerator = new SetttingsSchemaGenerator(this, settings);
             var typeSchema = schemaGenerator.Generate(type);
             schema.Definitions[name] = typeSchema;
             optionsSchema.Properties.Add(name, new JsonSchemaProperty()

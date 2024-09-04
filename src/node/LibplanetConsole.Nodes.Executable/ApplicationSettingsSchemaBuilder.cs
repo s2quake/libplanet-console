@@ -6,7 +6,7 @@ using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Nodes.Executable;
 
-internal sealed class ApplicationSettingsSchemaBuilder : DataSchemaBuilder
+internal sealed class ApplicationSettingsSchemaBuilder : SettingsSchemaBuilder
 {
     public ApplicationSettingsSchemaBuilder()
     {

@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using Libplanet.Common;
 using LibplanetConsole.Common;
@@ -24,11 +26,13 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
+    [JsonIgnore]
     public int ParentProcessId { get; init; }
 
     [CommandPropertySwitch("manual-start", 'm')]
     [CommandSummary("If set, the node does not start automatically. " +
                     "Instead, it waits for the user to start it manually.")]
+    [JsonIgnore]
     public bool ManualStart { get; init; } = false;
 
     [CommandProperty]
@@ -39,22 +43,27 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("The directory path to store data." +
                     "If omitted, the data is stored in memory.")]
+    [Path(IsDirectory = true)]
     public string StorePath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyCondition(nameof(Genesis), "")]
+    [Path(MustExist = true)]
     public string GenesisPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyCondition(nameof(GenesisPath), "")]
+    [JsonIgnore]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The file path to store log.")]
+    [Path]
     public string LogPath { get; init; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the REPL is not started.")]
+    [JsonIgnore]
     public bool NoREPL { get; init; }
 
     public ApplicationOptions ToOptions(object[] components)

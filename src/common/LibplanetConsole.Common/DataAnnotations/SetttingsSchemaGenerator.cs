@@ -5,8 +5,8 @@ using NJsonSchema.Generation;
 
 namespace LibplanetConsole.Common.DataAnnotations;
 
-internal sealed class DataSchemaGenerator(
-    DataSchemaBuilder schemaBuilder, JsonSchemaGeneratorSettings settings)
+internal sealed class SetttingsSchemaGenerator(
+    SettingsSchemaBuilder schemaBuilder, JsonSchemaGeneratorSettings settings)
     : JsonSchemaGenerator(settings)
 {
     public override void ApplyDataAnnotations(
