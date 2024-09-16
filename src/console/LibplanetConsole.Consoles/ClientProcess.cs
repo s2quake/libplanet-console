@@ -1,41 +1,45 @@
-using System.Security;
 using LibplanetConsole.Common;
-using Serilog;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class ClientProcess(Client client) : ProcessBase
+internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
+    : ClientProcessBase
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public bool Detach { get; set; }
 
-    public required SecureString PrivateKey { get; init; }
-
-    public AppEndPoint? NodeEndPoint { get; set; }
-
-    public string LogPath { get; set; } = string.Empty;
-
-    public bool ManualStart { get; set; }
-
-    protected override string FileName => IsDotnetRuntime ? DotnetPath : ClientPath;
-
-    protected override string[] Arguments
+    public override string[] Arguments
     {
         get
         {
-            var privateKey = AppPrivateKey.FromSecureString(PrivateKey);
-            var argumentList = new List<string>
+            var argumentList = new List<string>();
+            if (clientOptions.Source != string.Empty)
             {
-                "run",
-                "--end-point",
-                EndPoint.ToString(),
-                "--private-key",
-                AppPrivateKey.ToString(privateKey),
-            };
+                argumentList.Add("start");
+                argumentList.Add(clientOptions.Source);
+            }
+            else
+            {
+                argumentList.Add("run");
+                argumentList.Add("--end-point");
+                argumentList.Add(clientOptions.EndPoint.ToString());
+                argumentList.Add("--private-key");
+                argumentList.Add(AppPrivateKey.ToString(clientOptions.PrivateKey));
 
-            if (IsDotnetRuntime == true)
-            {
-                argumentList.Insert(0, ClientPath);
+                if (clientOptions.LogPath != string.Empty)
+                {
+                    argumentList.Add("--log-path");
+                    argumentList.Add(clientOptions.LogPath);
+                }
+
+                if (clientOptions.NodeEndPoint is { } nodeEndPoint)
+                {
+                    argumentList.Add("--node-end-point");
+                    argumentList.Add(nodeEndPoint.ToString());
+                }
+
+                var extendedArguments = GetArguments(serviceProvider: client, obj: client);
+                argumentList.AddRange(extendedArguments);
             }
 
             if (NewWindow != true)
@@ -43,26 +47,11 @@ internal sealed class ClientProcess(Client client) : ProcessBase
                 argumentList.Add("--no-repl");
             }
 
-            if (LogPath != string.Empty)
-            {
-                argumentList.Add("--log-path");
-                argumentList.Add(LogPath);
-            }
-
-            if (NodeEndPoint is { } nodeEndPoint)
-            {
-                argumentList.Add("--node-end-point");
-                argumentList.Add(nodeEndPoint.ToString());
-            }
-
             if (Detach != true)
             {
                 argumentList.Add("--parent");
                 argumentList.Add(Environment.ProcessId.ToString());
             }
-
-            var extendedArguments = GetArguments(serviceProvider: client, obj: client);
-            argumentList.AddRange(extendedArguments);
 
             return [.. argumentList];
         }

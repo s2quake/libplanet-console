@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using static System.Runtime.InteropServices.RuntimeInformation;
 
 namespace LibplanetConsole.Consoles;
@@ -277,7 +277,8 @@ internal static class ProcessEnvironment
     public static ImmutableArray<string> GetArguments(
         IServiceProvider serviceProvider, object obj)
     {
-        var argumentProviders = serviceProvider.GetService<IEnumerable<IProcessArgumentProvider>>();
+        var argumentProviders
+            = serviceProvider.GetRequiredService<IEnumerable<IProcessArgumentProvider>>();
         return GetArguments(argumentProviders, obj);
     }
 

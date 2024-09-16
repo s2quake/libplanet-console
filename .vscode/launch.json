@@ -5,14 +5,35 @@
   "version": "0.2.0",
   "configurations": [
       {
-          "name": "C#: Libplanet Console",
+          "name": "C#: Libplanet Console - Initialize",
           "type": "coreclr",
           "request": "launch",
           "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
           "console": "integratedTerminal",
           "args": [
-              "init",
-              ".data"
+                "init",
+                ".data"
+          ]
+      },
+      {
+          "name": "C#: Libplanet Console - Start",
+          "type": "coreclr",
+          "request": "launch",
+          "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
+          "console": "integratedTerminal",
+          "args": [
+                "start",
+                ".data"
+          ]
+      },
+      {
+          "name": "C#: Libplanet Console - Run",
+          "type": "coreclr",
+          "request": "launch",
+          "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
+          "console": "integratedTerminal",
+          "args": [
+                "run"
           ]
       },
       {
@@ -22,8 +43,7 @@
           "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
-              "start",
-              "/Users/jeesu/Projects/s2quake/libplanet-console/.data/nodes/1e7a0e79704c73f1ea6e0bf833ea500293aa6247a78150018028aca431f2b283/settings.json"
+            "run"
           ]
       },
       {
@@ -33,8 +53,9 @@
           "program": "${workspaceFolder}/src/client/LibplanetConsole.Clients.Executable/bin/Debug/net8.0/libplanet-client.dll",
           "console": "integratedTerminal",
           "args": [
+              "run",
               "--node-end-point",
-              "127.0.0.1:5353"
+              "localhost:51087"
           ]
       },
       {

@@ -2,7 +2,7 @@ namespace LibplanetConsole.Nodes.Services;
 
 public interface INodeService
 {
-    Task<NodeInfo> StartAsync(CancellationToken cancellationToken);
+    Task<NodeInfo> StartAsync(string seedEndPoint, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

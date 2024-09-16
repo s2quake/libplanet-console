@@ -1,6 +1,7 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles.Executable;
 
@@ -11,8 +12,8 @@ internal sealed partial class Application(ApplicationOptions options)
     {
         var message = "Welcome to console for Libplanet.";
         var sw = new StringWriter();
-        var commandContext = this.GetService<CommandContext>();
-        var terminal = this.GetService<SystemTerminal>();
+        var commandContext = this.GetRequiredService<CommandContext>();
+        var terminal = this.GetRequiredService<SystemTerminal>();
         commandContext.Out = sw;
         await Console.Out.WriteColoredLineAsync(message, TerminalColorType.BrightGreen);
         await base.OnRunAsync(cancellationToken);

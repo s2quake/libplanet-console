@@ -1,15 +1,16 @@
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Nodes.Executable;
 
-[ApplicationSettings]
+[ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
@@ -27,44 +28,54 @@ internal sealed record class ApplicationSettings
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
     [JsonIgnore]
+    [Category("Hidden")]
     public int ParentProcessId { get; init; }
 
-    [CommandPropertySwitch("manual-start", 'm')]
-    [CommandSummary("If set, the node does not start automatically. " +
-                    "Instead, it waits for the user to start it manually.")]
-    [JsonIgnore]
-    public bool ManualStart { get; init; } = false;
-
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    [CommandSummary("Indicates the EndPoint of the seed node to connect to.")]
+    [CommandPropertyExclusion(nameof(IsSingleNode))]
     [AppEndPoint]
-    public string NodeEndPoint { get; init; } = string.Empty;
+    public string SeedEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The directory path to store data." +
                     "If omitted, the data is stored in memory.")]
-    [Path(IsDirectory = true)]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
+    [DefaultValue("")]
     public string StorePath { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandPropertyCondition(nameof(Genesis), "")]
-    [Path(MustExist = true)]
+    [CommandPropertyExclusion(nameof(Genesis))]
+    [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string GenesisPath { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandPropertyCondition(nameof(GenesisPath), "")]
+    [CommandPropertyExclusion(nameof(GenesisPath))]
     [JsonIgnore]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path to store log.")]
-    [Path]
+    [CommandSummary("Indicates the file path to save logs.")]
+    [Path(AllowEmpty = true)]
+    [DefaultValue("")]
     public string LogPath { get; init; } = string.Empty;
+
+    [CommandProperty]
+    [CommandSummary("Indicates the file path to save logs for the library." +
+                    "If omitted, the library logs will be saved in the LogPath.")]
+    [Path(AllowEmpty = true)]
+    [DefaultValue("")]
+    public string LibraryLogPath { get; init; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the REPL is not started.")]
     [JsonIgnore]
     public bool NoREPL { get; init; }
+
+    [CommandPropertySwitch("single-node")]
+    [CommandPropertyExclusion(nameof(SeedEndPoint))]
+    [JsonIgnore]
+    public bool IsSingleNode { get; set; }
 
     public ApplicationOptions ToOptions(object[] components)
     {
@@ -74,11 +85,12 @@ internal sealed record class ApplicationSettings
         return new ApplicationOptions(endPoint, privateKey, genesis)
         {
             ParentProcessId = ParentProcessId,
-            ManualStart = ManualStart,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
+            SeedEndPoint = AppEndPoint.ParseOrDefault(SeedEndPoint),
             StorePath = GetFullPath(StorePath),
             LogPath = GetFullPath(LogPath),
+            LibraryLogPath = GetFullPath(LibraryLogPath),
             NoREPL = NoREPL,
+            IsSingleNode = IsSingleNode,
             Components = components,
         };
 
@@ -102,8 +114,8 @@ internal sealed record class ApplicationSettings
     {
         if (GenesisPath != string.Empty)
         {
-            var hex = File.ReadAllText(GenesisPath);
-            genesis = ByteUtil.ParseHex(hex);
+            var lines = File.ReadAllLines(GenesisPath);
+            genesis = ByteUtil.ParseHex(lines[0]);
             return true;
         }
 

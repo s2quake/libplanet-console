@@ -19,15 +19,17 @@ public sealed record class ApplicationOptions
 
     public int ParentProcessId { get; init; }
 
-    public bool ManualStart { get; init; } = false;
-
-    public AppEndPoint? NodeEndPoint { get; init; }
+    public AppEndPoint? SeedEndPoint { get; init; }
 
     public string StorePath { get; init; } = string.Empty;
 
     public string LogPath { get; set; } = string.Empty;
 
+    public string LibraryLogPath { get; set; } = string.Empty;
+
     public bool NoREPL { get; init; }
+
+    public bool IsSingleNode { get; init; }
 
     public object[] Components { get; init; } = [];
 }

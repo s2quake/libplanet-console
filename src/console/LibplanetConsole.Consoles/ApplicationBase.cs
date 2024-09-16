@@ -7,29 +7,28 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
 using Serilog;
-using Serilog.Core;
 
 namespace LibplanetConsole.Consoles;
 
-public abstract partial class ApplicationBase : ApplicationFramework, IApplication
+public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
     private readonly ConsoleServiceContext _consoleContext;
     private readonly ApplicationInfo _info;
-    private readonly Logger _logger;
+    private readonly ILogger _logger;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _logger = CreateLogger(options.RepositoryPath);
+        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
         _container = new(this);
-        _container.ComposeExportedValue<ILogger>(_logger);
-        _nodes = new NodeCollection(this, options.GetNodeKeys());
-        _clients = new ClientCollection(this, options.GetClientKeys());
+        _container.ComposeExportedValue(_logger);
+        _nodes = new NodeCollection(this, options.Nodes);
+        _clients = new ClientCollection(this, options.Clients);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
@@ -45,13 +44,12 @@ public abstract partial class ApplicationBase : ApplicationFramework, IApplicati
         _info = new()
         {
             EndPoint = _consoleContext.EndPoint,
-            Path = options.RepositoryPath,
+            LogPath = options.LogPath,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
             NewWindow = options.NewWindow,
-            ManualStart = options.ManualStart,
         };
-        GenesisBlock = options.GetGenesisBlock();
+        GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         _logger.Debug("Application initialized.");
     }
@@ -89,9 +87,7 @@ public abstract partial class ApplicationBase : ApplicationFramework, IApplicati
     }
 
     public IAddressable GetAddressable(string address)
-    {
-        return _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
-    }
+        => _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
 
     public override object? GetService(Type serviceType)
     {
@@ -159,25 +155,6 @@ public abstract partial class ApplicationBase : ApplicationFramework, IApplicati
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
         await base.OnDisposeAsync();
         await _container.DisposeAsync();
-    }
-
-    private static Logger CreateLogger(string logDicrectory)
-    {
-        var loggerConfiguration = new LoggerConfiguration();
-        if (logDicrectory != string.Empty)
-        {
-            var logFilename = Path.Combine(logDicrectory, "log");
-            loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
-                                                     .WriteTo.File(logFilename);
-        }
-
-        var logger = loggerConfiguration.CreateLogger();
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
     }
 
     private static bool IsEquals(IAddressable addressable, string address)

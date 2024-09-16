@@ -23,5 +23,5 @@ public interface IClientCollection : IEnumerable<IClient>, INotifyCollectionChan
 
     int IndexOf(AppAddress address);
 
-    Task<IClient> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken);
+    Task<IClient> AddNewAsync(AddNewClientOptions options, CancellationToken cancellationToken);
 }

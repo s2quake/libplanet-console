@@ -62,6 +62,24 @@ public static class BlockUtility
             timestamp: dateTimeOffset);
     }
 
+    public static byte[] CreateGenesis(
+        AppPrivateKey genesisKey,
+        AppPublicKey[] validators,
+        DateTimeOffset dateTimeOffset)
+    {
+        var genesisBlock = CreateGenesisBlock(genesisKey, validators, dateTimeOffset);
+        return SerializeBlock(genesisBlock);
+    }
+
+    public static string CreateGenesisString(
+        AppPrivateKey genesisKey,
+        AppPublicKey[] validators,
+        DateTimeOffset dateTimeOffset)
+    {
+        var genesisBlock = CreateGenesisBlock(genesisKey, validators, dateTimeOffset);
+        return ByteUtil.Hex(SerializeBlock(genesisBlock));
+    }
+
     public static byte[] SerializeBlock(Block block)
     {
         var blockDictionary = BlockMarshaler.MarshalBlock(block);

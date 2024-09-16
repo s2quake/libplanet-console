@@ -1,16 +1,14 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Security;
-using Libplanet.Common;
 using LibplanetConsole.Clients;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Consoles;
@@ -18,28 +16,34 @@ namespace LibplanetConsole.Consoles;
 internal sealed class Client : IClient, IClientCallback
 {
     private readonly ApplicationContainer _container;
-    private readonly SecureString _privateKey;
+    private readonly ClientOptions _clientOptions;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<IClientService, IClientCallback> _remoteService;
     private readonly IClientContent[] _contents;
     private readonly ILogger _logger;
+    private readonly CancellationTokenSource _processCancellationTokenSource = new();
     private Guid _closeToken;
     private ClientInfo _clientInfo;
     private INode? _node;
     private bool _isDisposed;
     private bool _isInProgress;
+    private ClientProcess? _process;
+    private Task _processTask = Task.CompletedTask;
 
-    public Client(ApplicationBase application, AppPrivateKey privateKey)
+    public Client(ApplicationBase application, ClientOptions clientOptions)
     {
         _container = application.CreateChildContainer(this);
-        _privateKey = privateKey.ToSecureString();
+        _clientOptions = clientOptions;
         _container.ComposeExportedValue<IClient>(this);
         _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_container)]);
-        _logger = application.GetService<ILogger>();
-        PublicKey = privateKey.PublicKey;
+            [_remoteService, .. GetRemoteServices(_container)])
+        {
+            EndPoint = clientOptions.EndPoint,
+        };
+        _logger = application.GetRequiredService<ILogger>();
+        PublicKey = clientOptions.PrivateKey.PublicKey;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         _logger.Debug("Client is created: {Address}", Address);
     }
@@ -62,11 +66,7 @@ internal sealed class Client : IClient, IClientCallback
 
     public bool IsRunning { get; private set; }
 
-    public AppEndPoint EndPoint
-    {
-        get => _remoteServiceContext.EndPoint;
-        set => _remoteServiceContext.EndPoint = value;
-    }
+    public AppEndPoint EndPoint => _remoteServiceContext.EndPoint;
 
     public ClientInfo Info => _clientInfo;
 
@@ -111,12 +111,12 @@ internal sealed class Client : IClient, IClientCallback
 
     public override string ToString() => $"{Address:S}: {EndPoint}";
 
-    public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
+    public byte[] Sign(object obj) => _clientOptions.PrivateKey.Sign(obj);
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning is not true, "Client is not running.");
 
         _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         return _clientInfo;
@@ -154,7 +154,7 @@ internal sealed class Client : IClient, IClientCallback
     public async Task StartAsync(INode node, CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Client is already running.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning is true, "Client is already running.");
         InvalidOperationExceptionUtility.ThrowIf(
             condition: _closeToken == Guid.Empty,
             message: "Client is not attached.");
@@ -170,7 +170,7 @@ internal sealed class Client : IClient, IClientCallback
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Client is not running.");
+        InvalidOperationExceptionUtility.ThrowIf(IsRunning is not true, "Client is not running.");
         InvalidOperationExceptionUtility.ThrowIf(
             condition: _closeToken == Guid.Empty,
             message: "Client is not attached.");
@@ -198,6 +198,12 @@ internal sealed class Client : IClient, IClientCallback
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
+        await _processCancellationTokenSource.CancelAsync();
+        _processCancellationTokenSource.Dispose();
+        await _processTask;
+        _processTask = Task.CompletedTask;
+        _process = null;
+
         _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
         if (_closeToken != Guid.Empty)
         {
@@ -213,25 +219,40 @@ internal sealed class Client : IClient, IClientCallback
         GC.SuppressFinalize(this);
     }
 
-    public ClientProcess CreateProcess()
+    public ClientProcess CreateProcess() => new(this, _clientOptions);
+
+    public Task StartProcessAsync(AddNewClientOptions options, CancellationToken cancellationToken)
     {
-        var endPoint = EndPoint;
-        var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
-        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
-        var hex = ByteUtil.Hex(privateKey.ToByteArray());
-        var logDirectory = Path.Combine(
-            application.Info.Path, hex, "log");
-        return new ClientProcess(this)
+        if (_process is not null)
         {
-            EndPoint = endPoint,
-            PrivateKey = _privateKey,
-            LogPath = logDirectory,
+            throw new InvalidOperationException("Client process is already running.");
+        }
+
+        var clientOptions = _clientOptions;
+        var process = new ClientProcess(this, clientOptions)
+        {
+            Detach = options.Detach,
+            NewWindow = options.NewWindow,
         };
+        var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, _processCancellationTokenSource.Token);
+        _logger.Debug(process.ToString());
+        _processTask = process.RunAsync(cancellationTokenSource.Token)
+            .ContinueWith(
+                task =>
+                {
+                    _processTask = Task.CompletedTask;
+                    _process = null;
+                    cancellationTokenSource.Dispose();
+                },
+                cancellationToken);
+        _process = process;
+        return Task.CompletedTask;
     }
 
     void IClientCallback.OnStarted(ClientInfo clientInfo)
     {
-        if (_isInProgress != true)
+        if (_isInProgress is not true)
         {
             _clientInfo = clientInfo;
             IsRunning = true;
@@ -241,7 +262,7 @@ internal sealed class Client : IClient, IClientCallback
 
     void IClientCallback.OnStopped()
     {
-        if (_isInProgress != true)
+        if (_isInProgress is not true)
         {
             _clientInfo = default;
             IsRunning = false;
@@ -272,7 +293,7 @@ internal sealed class Client : IClient, IClientCallback
 
     private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {
-        if (_isInProgress != true && IsRunning == true)
+        if (_isInProgress is not true && IsRunning is true)
         {
             _closeToken = Guid.Empty;
             Detached?.Invoke(this, EventArgs.Empty);

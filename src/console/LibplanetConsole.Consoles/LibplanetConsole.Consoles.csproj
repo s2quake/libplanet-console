@@ -6,11 +6,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Nodes\**\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Clients\**\*.cs" />
   </ItemGroup>

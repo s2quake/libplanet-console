@@ -1,5 +1,5 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles;
 
@@ -8,7 +8,7 @@ internal sealed class NodeProcessArgumentProvider : ProcessArgumentProviderBase<
 {
     protected override IEnumerable<string> GetArguments(Node obj)
     {
-        var contents = obj.GetService<IEnumerable<INodeContent>>();
+        var contents = obj.GetRequiredService<IEnumerable<INodeContent>>();
         foreach (var content in contents)
         {
             var args = ProcessEnvironment.GetArguments(serviceProvider: obj, obj: content);

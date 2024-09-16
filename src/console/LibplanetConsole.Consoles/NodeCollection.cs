@@ -3,9 +3,9 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Consoles;
@@ -13,13 +13,14 @@ namespace LibplanetConsole.Consoles;
 [Dependency(typeof(SeedService))]
 [method: ImportingConstructor]
 internal sealed class NodeCollection(
-    ApplicationBase application, AppPrivateKey[] privateKeys)
+    ApplicationBase application, NodeOptions[] nodeOptions)
     : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
-    private readonly List<Node> _nodeList = new(privateKeys.Length);
-    private readonly ILogger _logger = application.GetService<ILogger>();
+    private readonly List<Node> _nodeList = new(nodeOptions.Length);
+    private readonly ILogger _logger = application.GetRequiredService<ILogger>();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
     private Node? _current;
     private bool _isDisposed;
 
@@ -100,26 +101,18 @@ internal sealed class NodeCollection(
         return -1;
     }
 
-    public async Task<Node> AddNewAsync(AddNewOptions options, CancellationToken cancellationToken)
+    public async Task<Node> AddNewAsync(
+        AddNewNodeOptions options, CancellationToken cancellationToken)
     {
-        var node = CreateNew(options.PrivateKey);
+        var node = CreateNew(options.NodeOptions);
         if (options.NoProcess != true)
         {
-            var nodeProcess = node.CreateProcess();
-            nodeProcess.Detach = options.Detach;
-            nodeProcess.ManualStart = options.Detach != true;
-            nodeProcess.NewWindow = options.NewWindow;
-            await nodeProcess.RunAsync(cancellationToken);
+            await node.StartProcessAsync(options, cancellationToken);
         }
 
         if (options.NoProcess != true && options.Detach != true)
         {
             await node.AttachAsync(cancellationToken);
-        }
-
-        if (node.IsAttached == true && options.ManualStart != true)
-        {
-            await node.StartAsync(cancellationToken);
         }
 
         InsertNode(node);
@@ -135,13 +128,12 @@ internal sealed class NodeCollection(
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var options = new AddNewOptions
+            var options = new AddNewNodeOptions
             {
-                PrivateKey = privateKeys[index],
+                NodeOptions = nodeOptions[index],
                 NoProcess = info.NoProcess,
                 Detach = info.Detach,
                 NewWindow = info.NewWindow,
-                ManualStart = info.ManualStart,
             };
             await AddNewAsync(options, cancellationToken);
         }
@@ -151,6 +143,8 @@ internal sealed class NodeCollection(
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
 
+        await _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource.Dispose();
         for (var i = _nodeList.Count - 1; i >= 0; i--)
         {
             var item = _nodeList[i]!;
@@ -162,7 +156,7 @@ internal sealed class NodeCollection(
     }
 
     async Task<INode> INodeCollection.AddNewAsync(
-        AddNewOptions options, CancellationToken cancellationToken)
+        AddNewNodeOptions options, CancellationToken cancellationToken)
         => await AddNewAsync(options, cancellationToken);
 
     bool INodeCollection.Contains(INode item) => item switch
@@ -197,21 +191,11 @@ internal sealed class NodeCollection(
         return _nodeList[nodeIndex];
     }
 
-    private Node CreateNew(AppPrivateKey privateKey)
+    private Node CreateNew(NodeOptions nodeOptions)
     {
         lock (LockObject)
         {
-            var seedService = _application.GetService<SeedService>();
-            var nodeOptions = new NodeOptions
-            {
-                Genesis = BlockUtility.SerializeBlock(_application.GenesisBlock),
-                BlocksyncSeedPeer = seedService.BlocksyncSeedPeer,
-                ConsensusSeedPeer = seedService.ConsensusSeedPeer,
-            };
-            return new Node(_application, privateKey, nodeOptions)
-            {
-                EndPoint = AppEndPoint.Next(),
-            };
+            return new Node(_application, nodeOptions);
         }
     }
 

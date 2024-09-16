@@ -11,7 +11,7 @@ namespace LibplanetConsole.Consoles.Examples;
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
 [method: ImportingConstructor]
-internal sealed class ExampleNodeContent(INode node, ExampleNodeSettings settings)
+internal sealed class ExampleNodeContent(INode node, ExampleSettings settings)
     : NodeContentBase(node), IExampleNodeCallback, IExampleNodeContent, INodeContentService
 {
     private readonly StringBuilder _log = new();

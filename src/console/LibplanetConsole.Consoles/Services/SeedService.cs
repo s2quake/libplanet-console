@@ -42,28 +42,13 @@ internal sealed class SeedService : LocalService<ISeedService>,
     {
         var seedPeer = _blocksyncSeed.BoundPeer;
         var consensusSeedPeer = _consensusSeed.BoundPeer;
-        var genesisBlock = _application.GenesisBlock;
         var seedInfo = new SeedInfo
         {
-            Genesis = BlockUtility.SerializeBlock(genesisBlock),
             BlocksyncSeedPeer = seedPeer,
             ConsensusSeedPeer = consensusSeedPeer,
         };
 
         return await _application.InvokeAsync(() => seedInfo, cancellationToken);
-    }
-
-    public Task<AppEndPoint> GetNodeEndPointAsync(CancellationToken cancellationToken)
-    {
-        if (_application.GetService(typeof(NodeCollection)) is NodeCollection nodes)
-        {
-            var node = nodes.RandomNode();
-            return _application.InvokeAsync(Func, cancellationToken);
-
-            AppEndPoint Func() => node.EndPoint;
-        }
-
-        throw new InvalidOperationException("NodeCollection is not found.");
     }
 
     async Task IApplicationService.InitializeAsync(

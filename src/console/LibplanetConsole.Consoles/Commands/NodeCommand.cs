@@ -63,13 +63,17 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public async Task NewAsync(
         string privateKey = "", CancellationToken cancellationToken = default)
     {
-        var options = new AddNewOptions
+        var nodeOptions = new NodeOptions
         {
+            EndPoint = AppEndPoint.Next(),
             PrivateKey = AppPrivateKey.ParseOrRandom(privateKey),
+        };
+        var options = new AddNewNodeOptions
+        {
+            NodeOptions = nodeOptions,
             NoProcess = NewProperties.NoProcess,
             Detach = NewProperties.Detach,
             NewWindow = NewProperties.NewWindow,
-            ManualStart = NewProperties.ManualStart,
         };
         var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
@@ -114,18 +118,6 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
         var address = Address;
         var node = application.GetNode(address);
         await node.StopAsync(cancellationToken);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Display command line to execute the node process.")]
-    public void CommandLine()
-    {
-        var address = Address;
-        var node = application.GetNode(address);
-        var nodeProcess = node.CreateProcess();
-        nodeProcess.Detach = true;
-        nodeProcess.NewWindow = true;
-        Out.WriteLine(nodeProcess.GetCommandLine());
     }
 
     [CommandMethod]
@@ -206,21 +198,13 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
         [CommandPropertySwitch]
         [CommandSummary("The node is started in a new window.\n" +
                         "This option cannot be used with --no-process option.")]
-        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyExclusion(nameof(NoProcess))]
         public static bool Detach { get; set; }
 
         [CommandPropertySwitch]
         [CommandSummary("The node is started in a new window.\n" +
                         "This option cannot be used with --no-process option.")]
-        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyExclusion(nameof(NoProcess))]
         public static bool NewWindow { get; set; }
-
-        [CommandPropertySwitch('m', useName: true)]
-        [CommandSummary("The service does not start automatically " +
-                        "when the node process is executed.\n" +
-                        "This option cannot be used with --no-process or --detach option.")]
-        [CommandPropertyCondition(nameof(NoProcess), false)]
-        [CommandPropertyCondition(nameof(Detach), false)]
-        public static bool ManualStart { get; set; }
     }
 }

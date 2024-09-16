@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using LibplanetConsole.Common.IO;
 
 namespace LibplanetConsole.Common;
@@ -12,17 +14,30 @@ public static class JsonUtility
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers = { ExcludeEmptyStrings },
+        },
     };
 
     public static string Serialize(object value)
-    {
-        return JsonSerializer.Serialize(value, SerializerOptions);
-    }
+        => JsonSerializer.Serialize(value, SerializerOptions);
 
     public static string Serialize(object value, bool isColorized)
     {
         var json = Serialize(value);
-        if (isColorized == true && IsJQSupported == true)
+        if (isColorized == true)
+        {
+            return ToColorizedString(json);
+        }
+
+        return json;
+    }
+
+    public static string ToColorizedString(string json)
+    {
+        if (IsJQSupported == true)
         {
             using var tempFile = TempFile.WriteAllText(json);
             var process = new Process();
@@ -54,7 +69,7 @@ public static class JsonUtility
     {
         try
         {
-            if (OperatingSystem.IsMacOS() == true)
+            if (OperatingSystem.IsMacOS() == true && Console.IsOutputRedirected is false)
             {
                 var process = new Process();
                 process.StartInfo.FileName = $"which";
@@ -78,5 +93,22 @@ public static class JsonUtility
         }
 
         return false;
+    }
+
+    private static void ExcludeEmptyStrings(JsonTypeInfo jsonTypeInfo)
+    {
+        if (jsonTypeInfo.Kind == JsonTypeInfoKind.Object)
+        {
+            foreach (var property in jsonTypeInfo.Properties)
+            {
+                if (property.PropertyType == typeof(string))
+                {
+                    property.ShouldSerialize = ShouldSerialize;
+                }
+            }
+        }
+
+        static bool ShouldSerialize(object obj, object? value)
+            => value is string @string && string.IsNullOrEmpty(@string) is false;
     }
 }

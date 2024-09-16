@@ -12,7 +12,7 @@ namespace LibplanetConsole.Consoles.Explorer;
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
 [method: ImportingConstructor]
-internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerNodeSettings settings)
+internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerSettings settings)
     : NodeContentBase(node), IExplorerNodeContent, IExplorerCallback, INodeContentService
 {
     private readonly ILogger _logger = logger;

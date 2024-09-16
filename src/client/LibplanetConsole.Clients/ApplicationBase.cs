@@ -6,7 +6,6 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
 using Serilog;
-using Serilog.Core;
 
 namespace LibplanetConsole.Clients;
 
@@ -16,21 +15,19 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly Client _client;
     private readonly ClientServiceContext _clientServiceContext;
     private readonly Process? _parentProcess;
-    private readonly bool _isSeed;
     private readonly ApplicationInfo _info;
-    private readonly Logger _logger;
+    private readonly ILogger _logger;
     private readonly Task _waitForExitTask = Task.CompletedTask;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _logger = CreateLogger(options.LogPath);
+        _logger = CreateLogger(GetType(), options.LogPath, string.Empty);
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
         _client = new(this, options);
-        _isSeed = options.IsSeed;
         _container = new(this);
-        _container.ComposeExportedValue<ILogger>(_logger);
+        _container.ComposeExportedValue(_logger);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
@@ -116,31 +113,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         cancelAction.Invoke();
     }
 
-    private static Logger CreateLogger(string logFilename)
-    {
-        var loggerConfiguration = new LoggerConfiguration();
-        if (logFilename != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
-                                                     .WriteTo.File(logFilename);
-        }
-
-        var logger = loggerConfiguration.CreateLogger();
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
-    }
-
     private async Task AutoStartAsync(CancellationToken cancellationToken)
     {
         if (_info.NodeEndPoint is { } nodeEndPoint)
         {
-            var isSeed = _isSeed;
-            _client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(
-                nodeEndPoint, isSeed, cancellationToken);
+            _client.NodeEndPoint = nodeEndPoint;
             await _client.StartAsync(cancellationToken);
         }
     }

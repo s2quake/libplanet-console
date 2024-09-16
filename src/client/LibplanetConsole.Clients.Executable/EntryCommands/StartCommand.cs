@@ -1,6 +1,7 @@
+using System.ComponentModel;
 using JSSoft.Commands;
-using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Frameworks;
+using LibplanetConsole.Settings;
 
 namespace LibplanetConsole.Clients.Executable.EntryCommands;
 
@@ -12,12 +13,25 @@ internal sealed class StartCommand : CommandAsyncBase
     [CommandPropertyRequired]
     public string SettingsPath { get; set; } = string.Empty;
 
+    [CommandProperty("parent")]
+    [CommandSummary("Reserved option used by libplanet-console.")]
+    [Category("Hidden")]
+    public int ParentProcessId { get; init; }
+
+    [CommandPropertySwitch("no-repl")]
+    [CommandSummary("If set, the REPL is not started.")]
+    public bool NoREPL { get; init; }
+
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         try
         {
             var components = _settingsCollection.ToArray();
-            var applicationSettings = Load(SettingsPath);
+            var applicationSettings = Load(SettingsPath) with
+            {
+                ParentProcessId = ParentProcessId,
+                NoREPL = NoREPL,
+            };
             var applicationOptions = applicationSettings.ToOptions(components);
             var @out = Console.Out;
             await using var application = new Application(applicationOptions);

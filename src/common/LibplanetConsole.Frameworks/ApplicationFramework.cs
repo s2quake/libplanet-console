@@ -1,4 +1,5 @@
 using Serilog;
+using Serilog.Events;
 
 namespace LibplanetConsole.Frameworks;
 
@@ -13,7 +14,6 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
     {
         SynchronizationContext.SetSynchronizationContext(new());
         _synchronizationContext = SynchronizationContext.Current!;
-        ApplicationLogger.SetApplication(this);
     }
 
     public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
@@ -79,8 +79,59 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 
     public abstract object? GetService(Type serviceType);
 
+    protected static ILogger CreateLogger(
+        Type applicationType, string logPath, string libraryLogPath)
+    {
+        var loggerConfiguration = new LoggerConfiguration();
+        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+        if (logPath != string.Empty)
+        {
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByIncludingOnly(e => IsApplicationLog(applicationType, e))
+                    .WriteTo.File(logPath));
+        }
+
+        if (libraryLogPath != string.Empty)
+        {
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByExcluding(e => IsApplicationLog(applicationType, e))
+                    .WriteTo.File(libraryLogPath));
+        }
+
+        Log.Logger = loggerConfiguration.CreateLogger();
+        var logger = Log.ForContext(applicationType);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
+        };
+
+        return logger;
+    }
+
     protected virtual Task OnRunAsync(CancellationToken cancellationToken)
         => ApplicationServices.InitializeAsync(this, cancellationToken: default);
 
     protected virtual ValueTask OnDisposeAsync() => ValueTask.CompletedTask;
+
+    private static bool IsApplicationLog(Type applicationType, LogEvent e)
+    {
+        if (e.Properties.TryGetValue("SourceContext", out var propertyValue) is false)
+        {
+            return false;
+        }
+
+        if (propertyValue is not ScalarValue scalarValue)
+        {
+            return false;
+        }
+
+        if (scalarValue.Value is not string value)
+        {
+            return false;
+        }
+
+        return value == applicationType.FullName;
+    }
 }

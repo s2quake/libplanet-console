@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Actions;
-using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles.Commands;
 
@@ -22,7 +22,7 @@ internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
         var text = Text;
         if (addressable is INode node)
         {
-            var blockChain = node.GetService<IBlockChain>();
+            var blockChain = node.GetRequiredService<IBlockChain>();
             var action = new StringAction { Value = text };
             await blockChain.SendTransactionAsync([action], cancellationToken);
             await Out.WriteLineAsync($"{node.Address:S}: {text}");

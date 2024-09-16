@@ -19,7 +19,7 @@ internal sealed partial class Node
     public async Task<AppId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
+        var privateKey = _nodeOptions.PrivateKey;
         var address = privateKey.Address;
         var nonce = await _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
         var genesisHash = _nodeInfo.GenesisHash;

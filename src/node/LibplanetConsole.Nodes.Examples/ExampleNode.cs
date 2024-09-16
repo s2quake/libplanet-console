@@ -7,7 +7,7 @@ namespace LibplanetConsole.Nodes.Examples;
 [Export]
 [method: ImportingConstructor]
 internal sealed class ExampleNode(
-    IApplication application, ExampleNodeSettings settings) : IExampleNode
+    IApplication application, ExampleSettings settings) : IExampleNode
 {
     private readonly IApplication _application = application;
     private readonly HashSet<AppAddress> _addresses = [];

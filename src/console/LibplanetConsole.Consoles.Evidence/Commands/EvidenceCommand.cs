@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles.Evidence.Commands;
 
@@ -17,7 +18,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetService<IEvidenceContent>();
+        var evidenceContent = node.GetRequiredService<IEvidenceContent>();
         var evidenceInfo = await evidenceContent.AddEvidenceAsync(cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfo);
     }
@@ -27,7 +28,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetService<IEvidenceContent>();
+        var evidenceContent = node.GetRequiredService<IEvidenceContent>();
         await evidenceContent.ViolateAsync(cancellationToken);
     }
 
@@ -35,7 +36,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
     public async Task ListAsync(long height = -1, CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetService<IEvidenceContent>();
+        var evidenceContent = node.GetRequiredService<IEvidenceContent>();
         var evidenceInfos = await evidenceContent.GetEvidenceAsync(height, cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfos);
     }

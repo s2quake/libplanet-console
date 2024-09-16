@@ -12,6 +12,8 @@ public sealed class ApplicationSettingsAttribute(string name) : Attribute
 
     public string Name { get; } = name;
 
+    public bool IsRequired { get; set; }
+
     public string GetSettingsName(Type type)
     {
         if (Name != string.Empty)

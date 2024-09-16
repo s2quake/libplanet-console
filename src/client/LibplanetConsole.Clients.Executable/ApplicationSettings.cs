@@ -1,11 +1,14 @@
+using System.ComponentModel;
+using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Clients.Executable;
 
-[ApplicationSettings]
+[ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
@@ -22,13 +25,9 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
+    [JsonIgnore]
+    [Category("Hidden")]
     public int ParentProcessId { get; init; }
-
-    [CommandProperty("seed")]
-    [CommandSummary("Use --node-end-point as the Seed EndPoint. " +
-                    "Get the EndPoint of the Node to connect to from Seed.")]
-    [CommandPropertyCondition(nameof(NodeEndPoint), "", IsNot = true)]
-    public bool IsSeed { get; init; }
 
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
@@ -37,10 +36,13 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("The file path to store log.")]
+    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
+    [DefaultValue("")]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the REPL is not started.")]
+    [JsonIgnore]
     public bool NoREPL { get; init; }
 
     public ApplicationOptions ToOptions(object[] components)
@@ -50,7 +52,6 @@ internal sealed record class ApplicationSettings
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = ParentProcessId,
-            IsSeed = IsSeed,
             NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
             LogPath = GetFullPath(LogPath),
             NoREPL = NoREPL,

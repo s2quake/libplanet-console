@@ -69,7 +69,7 @@ internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
         public static long Height { get; set; }
 
         [CommandPropertySwitch("pending", 'p')]
-        [CommandPropertyCondition(nameof(Height), -1, IsNot = true)]
+        [CommandPropertyExclusion(nameof(Height))]
         [CommandSummary("Indicates whether to get pending evidence. " +
                         "if true, the height is ignored.")]
         public static bool IsPending { get; set; }

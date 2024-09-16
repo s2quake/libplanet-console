@@ -17,15 +17,14 @@ using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
-using LibplanetConsole.Seeds;
+using LibplanetConsole.Common.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using static LibplanetConsole.Nodes.PeerUtility;
 
 namespace LibplanetConsole.Nodes;
 
-internal sealed partial class Node : IActionRenderer, INode, IApplicationService
+internal sealed partial class Node : IActionRenderer, INode
 {
     private readonly SecureString _privateKey;
     private readonly string _storePath;
@@ -33,36 +32,30 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         = SynchronizationContext.Current!;
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly AppPrivateKey _seedNodePrivateKey = new();
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
-    private readonly AppEndPoint? _seedEndPoint;
-    private readonly ManualResetEvent _initializedResetEvent = new(false);
     private readonly ILogger _logger;
+    private readonly byte[] _genesis;
     private readonly AppProtocolVersion _appProtocolVersion = AppProtocolVersion.Sign(
         (PrivateKey)GenesisOptions.AppProtocolKey, GenesisOptions.AppProtocolVersion);
 
+    private AppEndPoint? _seedEndPoint;
     private AppEndPoint? _blocksyncEndPoint;
     private AppEndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
-    private Seed? _blocksyncSeed;
-    private Seed? _consensusSeed;
-    private NodeOptions _nodeOptions;
 
     public Node(IServiceProvider serviceProvider, ApplicationOptions options, ILogger logger)
     {
         _serviceProvider = serviceProvider;
-        _seedEndPoint = options.NodeEndPoint;
+        _seedEndPoint = options.SeedEndPoint
+            ?? (options.IsSingleNode is true ? options.EndPoint : null);
         _privateKey = options.PrivateKey.ToSecureString();
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
         _logger = logger;
-        _nodeOptions = new NodeOptions
-        {
-            Genesis = options.Genesis,
-        };
+        _genesis = options.Genesis;
         UpdateNodeInfo();
         _logger.Debug("Node is created: {Address}", Address);
     }
@@ -114,15 +107,20 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         }
     }
 
-    public AppPeer BlocksyncSeedPeer
-        => _blocksyncSeed?.BoundPeer ?? NodeOptions.BlocksyncSeedPeer ??
-            throw new InvalidOperationException();
+    public AppEndPoint SeedEndPoint
+    {
+        get => _seedEndPoint ??
+            throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
+        set
+        {
+            if (IsRunning == true)
+            {
+                throw new InvalidOperationException("The client is running.");
+            }
 
-    public AppPeer ConsensusSeedPeer
-        => _consensusSeed?.BoundPeer ?? NodeOptions.ConsensusSeedPeer ??
-            throw new InvalidOperationException();
-
-    public NodeOptions NodeOptions => _nodeOptions;
+            _seedEndPoint = value;
+        }
+    }
 
     public override string ToString() => $"{Address:S}";
 
@@ -149,21 +147,20 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
-        if (_initializedResetEvent.WaitOne(10000) != true)
+
+        if (_seedEndPoint is null)
         {
-            throw new InvalidOperationException("NodeOptions is not initialized.");
+            throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
         }
 
+        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, cancellationToken);
         var privateKey = (PrivateKey)AppPrivateKey.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
-        var nodeOptions = NodeOptions;
         var storePath = _storePath;
         var blocksyncEndPoint = _blocksyncEndPoint ?? AppEndPoint.Next();
         var consensusEndPoint = _consensusEndPoint ?? AppEndPoint.Next();
-        var blocksyncSeedPeer = nodeOptions.BlocksyncSeedPeer ??
-            new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
-        var consensusSeedPeer = nodeOptions.ConsensusSeedPeer ??
-            new AppPeer(_seedNodePrivateKey.PublicKey, AppEndPoint.Next());
+        var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
+        var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
         var swarmTransport
             = await CreateTransport(privateKey, blocksyncEndPoint, appProtocolVersion);
         var swarmOptions = new SwarmOptions
@@ -188,32 +185,10 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         };
         var actionLoaders = CollectActionLoaders(_serviceProvider);
         var blockChain = BlockChainUtility.CreateBlockChain(
-            genesisBlock: BlockUtility.DeserializeBlock(nodeOptions.Genesis),
+            genesisBlock: BlockUtility.DeserializeBlock(_genesis),
             storePath: storePath,
             renderer: this,
             actionLoaders: actionLoaders);
-
-        if (nodeOptions.BlocksyncSeedPeer is null)
-        {
-            _blocksyncSeed = new Seed(new()
-            {
-                PrivateKey = _seedNodePrivateKey,
-                EndPoint = blocksyncSeedPeer.EndPoint,
-            });
-            await _blocksyncSeed.StartAsync(cancellationToken);
-            _logger.Debug("Node.BlocksyncSeed is started: {Address}", Address);
-        }
-
-        if (nodeOptions.ConsensusSeedPeer is null)
-        {
-            _consensusSeed = new Seed(new()
-            {
-                PrivateKey = _seedNodePrivateKey,
-                EndPoint = consensusSeedPeer.EndPoint,
-            });
-            await _consensusSeed.StartAsync(cancellationToken);
-            _logger.Debug("Node.ConsensusSeed is started: {Address}", Address);
-        }
 
         _blocksyncEndPoint = blocksyncEndPoint;
         _consensusEndPoint = consensusEndPoint;
@@ -240,20 +215,6 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         InvalidOperationExceptionUtility.ThrowIf(
             condition: IsRunning != true,
             message: "Node is not running.");
-
-        if (_consensusSeed is not null)
-        {
-            await _consensusSeed.StopAsync(cancellationToken: default);
-            _consensusSeed = null;
-            _logger.Debug("Node.ConsensusSeed is stopped: {Address}", Address);
-        }
-
-        if (_blocksyncSeed is not null)
-        {
-            await _blocksyncSeed!.StopAsync(cancellationToken: default);
-            _blocksyncSeed = null;
-            _logger.Debug("Node.BlocksyncSeed is stopped: {Address}", Address);
-        }
 
         if (_swarm is not null)
         {
@@ -287,32 +248,9 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
             _swarm.Dispose();
         }
 
-        if (_consensusSeed is not null)
-        {
-            await _consensusSeed.StopAsync(cancellationToken: default);
-            _consensusSeed = null;
-        }
-
-        if (_blocksyncSeed is not null)
-        {
-            await _blocksyncSeed.StopAsync(cancellationToken: default);
-            _blocksyncSeed = null;
-        }
-
         await (_startTask ?? Task.CompletedTask);
         _startTask = Task.CompletedTask;
         _isDisposed = true;
-        GC.SuppressFinalize(this);
-    }
-
-    async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
-    {
-        var nodeOptions = _seedEndPoint is not null
-            ? await NodeOptions.CreateAsync(_seedEndPoint, cancellationToken)
-            : NodeOptions;
-        _nodeOptions = nodeOptions;
-        _initializedResetEvent.Set();
     }
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)
@@ -354,7 +292,7 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
     private static IActionLoader[] CollectActionLoaders(IServiceProvider serviceProvider)
     {
         var actionLoaderProviders
-            = serviceProvider.GetService<IEnumerable<IActionLoaderProvider>>();
+            = serviceProvider.GetRequiredService<IEnumerable<IActionLoaderProvider>>();
         var actionLoaderList
             = actionLoaderProviders.Select(item => item.GetActionLoader()).ToList();
         actionLoaderList.Add(new AssemblyActionLoader(typeof(AssemblyActionLoader).Assembly));
@@ -370,6 +308,40 @@ internal sealed partial class Node : IActionRenderer, INode, IApplicationService
         };
         var hostOptions = new HostOptions(endPoint.Host, [], endPoint.Port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
+    }
+
+    private static async Task<SeedInfo> GetSeedInfoAsync(
+        AppEndPoint seedEndPoint, CancellationToken cancellationToken)
+    {
+        var remoteService = new RemoteService<ISeedService>();
+        var remoteServiceContext = new RemoteServiceContext([remoteService])
+        {
+            EndPoint = seedEndPoint,
+        };
+        var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
+        var service = remoteService.Service;
+        var privateKey = new AppPrivateKey();
+        var publicKey = privateKey.PublicKey;
+        try
+        {
+            for (var i = 0; i < 10; i++)
+            {
+                var decrypted = await service.GetSeedAsync(publicKey, cancellationToken);
+                var seedInfo = decrypted.Decrypt(privateKey);
+                if (Equals(seedInfo, SeedInfo.Empty) != true)
+                {
+                    return seedInfo;
+                }
+
+                await Task.Delay(500, cancellationToken);
+            }
+
+            throw new InvalidOperationException("No seed information is available.");
+        }
+        finally
+        {
+            await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
+        }
     }
 
     private void UpdateNodeInfo()

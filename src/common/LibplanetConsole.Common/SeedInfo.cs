@@ -4,8 +4,6 @@ public readonly record struct SeedInfo
 {
     public static SeedInfo Empty { get; } = default;
 
-    public byte[] Genesis { get; init; }
-
     public AppPeer BlocksyncSeedPeer { get; init; }
 
     public AppPeer ConsensusSeedPeer { get; init; }
