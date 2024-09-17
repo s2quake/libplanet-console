@@ -3,10 +3,11 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
+using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Consoles.Executable.EntryCommands;
 
-[CommandSummary("Run the Libplanet console.")]
+[CommandSummary("Create a new repository to run Libplanet nodes and clients from the console.")]
 internal sealed class InitializeCommand : CommandBase
 {
     public InitializeCommand()
@@ -15,46 +16,55 @@ internal sealed class InitializeCommand : CommandBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path to initialize.")]
+    [CommandSummary("The directory path used to initialize a repository.")]
+    [Path(
+        Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string OutputPath { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The endpoint of the libplanet-console. " +
+                    "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The private key of the genesis block. " +
+                    "if omitted, a random private key is used.")]
     [AppPrivateKey]
     public string GenesisKey { get; set; } = string.Empty;
 
+    [CommandProperty("date-time")]
+    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
+    public DateTimeOffset DateTimeOffset { get; set; }
+
     [CommandProperty(InitValue = 4)]
-    [CommandSummary("The number of nodes to run.\n" +
-                    "If omitted, the default value is 4.\n" +
-                    "If --nodes option is set, this option is ignored.")]
+    [CommandSummary("The number of nodes to create. If omitted, 4 nodes are created.\n" +
+                    "Mutually exclusive with '--nodes' option.")]
     [CommandPropertyExclusion(nameof(Nodes))]
     public int NodeCount { get; init; }
 
     [CommandProperty]
-    [CommandSummary("The private keys of the nodes to run.\n" +
-                    "Example: --nodes \"key1,key2,...\"")]
+    [CommandSummary("The private keys of the nodes to create. ex) --nodes \"key1,key2,...\"\n" +
+                    "Mutually exclusive with '--node-count' option.")]
     [CommandPropertyExclusion(nameof(NodeCount))]
     [AppPrivateKeyArray]
     public string[] Nodes { get; init; } = [];
 
     [CommandProperty(InitValue = 2)]
-    [CommandSummary("The number of clients to run.\n" +
-                    "If omitted, the default value is 2.\n" +
-                    "If --clients option is set, this option is ignored.")]
+    [CommandSummary("The number of clients to create. If omitted, 2 clients are created.\n" +
+                    "Mutually exclusive with '--clients' option.")]
     [CommandPropertyExclusion(nameof(Clients))]
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to run.\n" +
-                    "Example: --clients \"key1,key2,...\"")]
+    [CommandSummary("The private keys of the clients to create. ex) --clients \"key1,key2,...\"\n" +
+                    "Mutually exclusive with '--client-count' option.")]
     [CommandPropertyExclusion(nameof(ClientCount))]
     [AppPrivateKeyArray]
     public string[] Clients { get; init; } = [];
 
     [CommandPropertySwitch("quiet", 'q')]
+    [CommandSummary("If set, the command does not output any information.")]
     public bool Quiet { get; set; }
 
     protected override void OnExecute()
@@ -65,12 +75,13 @@ internal sealed class InitializeCommand : CommandBase
         var nodeOptions = GetNodeOptions(ref prevEndPoint);
         var clientOptions = GetClientOptions(ref prevEndPoint);
         var outputPath = Path.GetFullPath(OutputPath);
+        var dateTimeOffset = DateTimeOffset.UtcNow;
         var repository = new Repository(endPoint, nodeOptions, clientOptions)
         {
             Genesis = BlockUtility.SerializeBlock(BlockUtility.CreateGenesisBlock(
                 genesisKey: genesisKey,
                 validatorKeys: nodeOptions.Select(item => item.PrivateKey.PublicKey).ToArray(),
-                dateTimeOffset: DateTimeOffset.UtcNow)),
+                dateTimeOffset: dateTimeOffset)),
             LogPath = "app.log",
             LibraryLogPath = "library.log",
         };
@@ -80,6 +91,13 @@ internal sealed class InitializeCommand : CommandBase
             Condition = Quiet is false,
         };
         dynamic info = repository.Save(outputPath, resolver);
+        info.GenesisArguments = new
+        {
+            GenesisKey = AppPrivateKey.ToString(genesisKey),
+            Validators = nodeOptions.Select(
+                item => AppPublicKey.ToString(item.PrivateKey.PublicKey)),
+            Timestamp = dateTimeOffset,
+        };
 
         TextWriterExtensions.WriteLineAsJson(writer, info);
     }

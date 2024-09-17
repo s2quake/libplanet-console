@@ -4,32 +4,40 @@ using Libplanet.Common;
 using Libplanet.Types.Blocks;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Common.Commands;
 
 [CommandSummary("Creates a genesis.")]
+[CommandExample("genesis --validators \"key1,key2,...\" --date-time \"2021-01-01T00:00:00Z\"")]
 public abstract class GenesisCommandBase : CommandBase
 {
     [CommandProperty]
+    [CommandSummary("The private key of the genesis block. " +
+                    "if omitted, a random private key is used.")]
     [AppPrivateKey]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(ValidatorCount))]
+    [CommandSummary("The public keys of the validators. mutually exclusive with " +
+                    "'--validator-count'.")]
     [AppPublicKeyArray]
     public string[] Validators { get; set; } = [];
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Validators))]
+    [CommandSummary("The number of validators to create. mutually exclusive with '--validators'.")]
     [NonNegative]
     public int ValidatorCount { get; set; }
 
     [CommandProperty("date-time")]
+    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
     public DateTimeOffset DateTimeOffset { get; set; }
 
     [CommandPropertySwitch("raw")]
+    [CommandSummary("If set, this option suppresses the arguments used to create " +
+                    "the genesis block.")]
     public bool IsRaw { get; set; }
 
     protected override void OnExecute()
