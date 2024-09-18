@@ -113,6 +113,13 @@ internal sealed class ClientCollection(
             await client.AttachAsync(cancellationToken);
         }
 
+        if (client.IsAttached is true && options.ClientOptions.NodeEndPoint is null)
+        {
+            var nodes = _application.GetRequiredService<NodeCollection>();
+            var node = nodes.RandomNode();
+            await client.StartAsync(node, cancellationToken);
+        }
+
         InsertClient(client);
         return client;
     }

@@ -29,7 +29,12 @@ public sealed class PathAttribute : ValidationAttribute
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (value is string path && AllowEmpty is false)
+        if (value is "" && AllowEmpty is true)
+        {
+            return ValidationResult.Success;
+        }
+
+        if (value is string path)
         {
             var memberName = validationContext.MemberName;
             var objectType = validationContext.ObjectType;

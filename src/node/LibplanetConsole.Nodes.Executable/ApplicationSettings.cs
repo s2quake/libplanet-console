@@ -56,14 +56,14 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("Indicates the file path to save logs.")]
-    [Path(AllowEmpty = true)]
+    [Path(Type = PathType.File, AllowEmpty = true)]
     [DefaultValue("")]
     public string LogPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the file path to save logs for the library." +
                     "If omitted, the library logs will be saved in the LogPath.")]
-    [Path(AllowEmpty = true)]
+    [Path(Type = PathType.File, AllowEmpty = true)]
     [DefaultValue("")]
     public string LibraryLogPath { get; init; } = string.Empty;
 

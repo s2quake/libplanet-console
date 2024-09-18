@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles.Executable;
@@ -53,10 +54,12 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("The directory path to store log.")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The directory path to store log of the library.")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
     public string LibraryLogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]

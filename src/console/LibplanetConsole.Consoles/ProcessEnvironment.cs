@@ -107,7 +107,7 @@ internal static class ProcessEnvironment
         {
             if (IsDotnetRuntime == true)
             {
-                return IsWindows ? ".exe" : ".dll";
+                return ".dll";
             }
 
             return IsWindows ? ".exe" : string.Empty;

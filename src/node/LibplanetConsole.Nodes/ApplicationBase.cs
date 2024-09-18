@@ -130,13 +130,5 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             _node.SeedEndPoint = _info.EndPoint;
             await _node.StartAsync(cancellationToken);
         }
-        else
-        {
-            var message = "The node cannot be started automatically. " +
-                          "because the '--seed-end-point' is not set.\nIf you want to start " +
-                          "the node as a single node, use the '--signle-node' option.";
-            await Console.Error.WriteLineAsync(message);
-            Environment.Exit(1);
-        }
     }
 }

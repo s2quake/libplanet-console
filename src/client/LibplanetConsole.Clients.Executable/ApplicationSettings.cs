@@ -36,7 +36,7 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("The file path to store log.")]
-    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
+    [Path(Type = PathType.File, AllowEmpty = true)]
     [DefaultValue("")]
     public string LogPath { get; set; } = string.Empty;
 

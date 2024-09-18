@@ -57,7 +57,7 @@ public static class JsonUtility
 
     public static T Deserialize<T>(string value)
     {
-        if (JsonSerializer.Deserialize<T>(value) is T t)
+        if (JsonSerializer.Deserialize<T>(value, SerializerOptions) is T t)
         {
             return t;
         }

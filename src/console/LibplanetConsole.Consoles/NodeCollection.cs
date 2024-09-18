@@ -115,6 +115,11 @@ internal sealed class NodeCollection(
             await node.AttachAsync(cancellationToken);
         }
 
+        if (node.IsAttached is true && options.NodeOptions.SeedEndPoint is null)
+        {
+            await node.StartAsync(cancellationToken);
+        }
+
         InsertNode(node);
         return node;
     }
