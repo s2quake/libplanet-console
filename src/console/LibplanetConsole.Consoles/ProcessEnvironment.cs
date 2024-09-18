@@ -290,8 +290,9 @@ internal static class ProcessEnvironment
         if (IsWindows == true)
         {
             processStartInfo.FileName = "powershell";
-            processStartInfo.Arguments
-                = "-Command 'Get-Command dotnet | Select-Object -ExpandProperty Source'";
+            processStartInfo.ArgumentList.Add("-Command");
+            processStartInfo.ArgumentList.Add(
+                "Get-Command dotnet | Select-Object -ExpandProperty Source");
         }
         else if (IsOSX == true || IsLinux == true)
         {
