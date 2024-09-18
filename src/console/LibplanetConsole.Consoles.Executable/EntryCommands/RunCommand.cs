@@ -4,6 +4,7 @@ using LibplanetConsole.Frameworks;
 namespace LibplanetConsole.Consoles.Executable.EntryCommands;
 
 [CommandSummary("Run the Libplanet console.")]
+[CommandExample("run --end-point localhost:5000 --node-count 4 --client-count 2")]
 internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
 {
     private readonly ApplicationSettingsCollection _settingsCollection = new();

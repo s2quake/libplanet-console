@@ -33,9 +33,9 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the public key of the private key.")]
+    [CommandSummary("Displays the public key from the given private key.")]
     public void Public(
-        [CommandSummary("The private key.")]
+        [CommandSummary("Indicates the private key that corresponds to the public key.")]
         string privateKey)
     {
         var key = AppPrivateKey.Parse(privateKey);
@@ -48,9 +48,9 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the address of the private key or public key.")]
+    [CommandSummary("Displays the public key from the given private or public key")]
     public void Address(
-        [CommandSummary("The private key or public key.")]
+        [CommandSummary("Indicates the private or public key that corresponds to the address.")]
         string key)
     {
         var info = new

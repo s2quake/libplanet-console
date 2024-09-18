@@ -5,12 +5,12 @@ using LibplanetConsole.Nodes.Executable.EntryCommands;
 
 var commands = new ICommand[]
 {
+    new InitializeCommand(),
+    new StartCommand(),
     new RunCommand(),
     new KeyCommand(),
     new GenesisCommand(),
     new SchemaCommand(),
-    new StartCommand(),
-    new InitializeCommand(),
 };
 var commandContext = new EntryCommandContext(commands);
 await commandContext.ExecuteAsync(args);

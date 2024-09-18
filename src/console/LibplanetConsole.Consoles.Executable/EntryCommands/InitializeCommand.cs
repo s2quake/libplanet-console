@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -19,23 +20,13 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("The directory path used to initialize a repository.")]
     [Path(
         Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
-    public string OutputPath { get; set; } = string.Empty;
+    public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The endpoint of the libplanet-console. " +
                     "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; set; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("The private key of the genesis block. " +
-                    "if omitted, a random private key is used.")]
-    [AppPrivateKey]
-    public string GenesisKey { get; set; } = string.Empty;
-
-    [CommandProperty("date-time")]
-    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
-    public DateTimeOffset DateTimeOffset { get; set; }
 
     [CommandProperty(InitValue = 4)]
     [CommandSummary("The number of nodes to create. If omitted, 4 nodes are created.\n" +
@@ -67,6 +58,18 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("If set, the command does not output any information.")]
     public bool Quiet { get; set; }
 
+    [CommandProperty]
+    [CommandSummary("The private key of the genesis block. " +
+                    "if omitted, a random private key is used.")]
+    [AppPrivateKey]
+    [Category("Genesis")]
+    public string GenesisKey { get; set; } = string.Empty;
+
+    [CommandProperty("date-time")]
+    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
+    [Category("Genesis")]
+    public DateTimeOffset DateTimeOffset { get; set; }
+
     protected override void OnExecute()
     {
         var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
@@ -74,8 +77,9 @@ internal sealed class InitializeCommand : CommandBase
         var prevEndPoint = EndPoint != string.Empty ? endPoint : null;
         var nodeOptions = GetNodeOptions(ref prevEndPoint);
         var clientOptions = GetClientOptions(ref prevEndPoint);
-        var outputPath = Path.GetFullPath(OutputPath);
-        var dateTimeOffset = DateTimeOffset.UtcNow;
+        var outputPath = Path.GetFullPath(RepositoryPath);
+        var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
+            ? DateTimeOffset : DateTimeOffset.UtcNow;
         var repository = new Repository(endPoint, nodeOptions, clientOptions)
         {
             Genesis = BlockUtility.SerializeBlock(BlockUtility.CreateGenesisBlock(

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -7,7 +8,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Nodes.Executable.EntryCommands;
 
-[CommandSummary("Create a repository to run a libplanet-node")]
+[CommandSummary("Create a new repository to run the libplanet-node")]
 internal sealed class InitializeCommand : CommandBase
 {
     public InitializeCommand()
@@ -16,41 +17,75 @@ internal sealed class InitializeCommand : CommandBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path to create repository.")]
+    [CommandSummary("The directory path used to initialize a repository.")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
-    public string OutputPath { get; set; } = string.Empty;
+    public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the node. " +
+    [CommandSummary("Indicates the private key of the libplanet-node. " +
                     "If omitted, a random private key is used.")]
     [AppPrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The endpoint of the libplanet-node. " +
+                    "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The directory path to store the block. " +
+                    "If omitted, the 'store' directory is used.")]
+    [Path(
+        Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
     public string StorePath { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The file path to store the application logs." +
+                    "If omitted, the 'app.log' file is used.")]
+    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The file path to store logs other than application logs." +
+                    "If omitted, the 'library.log' file is used.")]
+    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
     public string LibraryLogPath { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The file path of the genesis." +
+                    "If omitted, the 'genesis' file is used.")]
+    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
     public string GenesisPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
+    [CommandSummary("If set, the genesis is not stored at the specified genesis path.")]
+    [Category("Genesis")]
     public bool NoGenesis { get; set; }
 
+    [CommandProperty]
+    [CommandSummary("The private key of the genesis block. " +
+                    "if omitted, a random private key is used.\n" +
+                    "Mutually exclusive with '--no-genesis' option.")]
+    [CommandPropertyExclusion(nameof(NoGenesis))]
+    [AppPrivateKey]
+    [Category("Genesis")]
+    public string GenesisKey { get; set; } = string.Empty;
+
+    [CommandProperty("date-time")]
+    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"\n" +
+                    "Mutually exclusive with '--no-genesis' option.")]
+    [Category("Genesis")]
+    [CommandPropertyExclusion(nameof(NoGenesis))]
+    public DateTimeOffset DateTimeOffset { get; set; }
+
     [CommandPropertySwitch("quiet", 'q')]
+    [CommandSummary("If set, the command does not output any information.")]
     public bool Quiet { get; set; }
 
     protected override void OnExecute()
     {
-        var outputPath = Path.GetFullPath(OutputPath);
+        var outputPath = Path.GetFullPath(RepositoryPath);
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
         var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
         var storePath = Path.Combine(outputPath, StorePath.Fallback("store"));
@@ -74,9 +109,10 @@ internal sealed class InitializeCommand : CommandBase
 
         if (NoGenesis is false)
         {
-            var genesisKey = privateKey;
+            var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
             var validatorKeys = new AppPublicKey[] { privateKey.PublicKey };
-            var dateTimeOffset = DateTimeOffset.UtcNow;
+            var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
+                ? DateTimeOffset : DateTimeOffset.UtcNow;
             var genesis = BlockUtility.CreateGenesisString(
                 genesisKey, validatorKeys, dateTimeOffset);
             File.WriteAllLines(genesisPath, [genesis]);

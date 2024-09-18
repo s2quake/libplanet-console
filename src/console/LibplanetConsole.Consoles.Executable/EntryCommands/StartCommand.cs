@@ -1,12 +1,14 @@
 using JSSoft.Commands;
+using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Consoles.Executable.EntryCommands;
 
-[CommandSummary("Run the Libplanet console with repository path.")]
+[CommandSummary("Run the libplanet-console using the given repository path.")]
 internal sealed class StartCommand : CommandAsyncBase
 {
     [CommandPropertyRequired]
     [CommandSummary("The path of the repository.")]
+    [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
     public string RepositoryPath { get; set; } = string.Empty;
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

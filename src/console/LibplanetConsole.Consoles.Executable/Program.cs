@@ -5,10 +5,10 @@ using LibplanetConsole.Consoles.Executable.EntryCommands;
 
 var commands = new ICommand[]
 {
-    new RunCommand(),
-    new KeyCommand(),
     new InitializeCommand(),
     new StartCommand(),
+    new RunCommand(),
+    new KeyCommand(),
     new GenesisCommand(),
 };
 var commandContext = new EntryCommandContext(commands);

@@ -10,8 +10,8 @@ namespace LibplanetConsole.Consoles.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("The endpoint of the console to run." +
-                    "If omitted, one of the random ports will be used.")]
+    [CommandSummary("The endpoint of the libplanet-console. " +
+                    "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
@@ -20,16 +20,15 @@ internal sealed record class ApplicationSettings
 #else
     [CommandProperty(InitValue = 4)]
 #endif
-    [CommandSummary("The number of nodes to run.\n" +
-                    "If omitted, the default value is 4.\n" +
-                    "If --nodes option is set, this option is ignored.")]
+    [CommandSummary("The number of nodes to run. If omitted, 4 nodes are run.\n" +
+                    "Mutually exclusive with '--nodes' option.")]
     [CommandPropertyExclusion(nameof(Nodes))]
     [JsonIgnore]
     public int NodeCount { get; init; }
 
     [CommandProperty]
-    [CommandSummary("The private keys of the nodes to run.\n" +
-                    "Example: --nodes \"key1,key2,...\"")]
+    [CommandSummary("The private keys of the nodes to run. ex) --nodes \"key1,key2,...\"\n" +
+                    "Mutually exclusive with '--node-count' option.")]
     [CommandPropertyExclusion(nameof(NodeCount))]
     [JsonIgnore]
     public string[] Nodes { get; init; } = [];
@@ -39,25 +38,18 @@ internal sealed record class ApplicationSettings
 #else
     [CommandProperty(InitValue = 2)]
 #endif
-    [CommandSummary("The number of clients to run.\n" +
-                    "If omitted, the default value is 2.\n" +
-                    "If --clients option is set, this option is ignored.")]
+    [CommandSummary("The number of clients to run. If omitted, 2 clients are run.\n" +
+                    "Mutually exclusive with '--clients' option.")]
     [CommandPropertyExclusion(nameof(Clients))]
     [JsonIgnore]
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to run.\n" +
-                    "Example: --clients \"key1,key2,...\"")]
+    [CommandSummary("The private keys of the clients to run. ex) --clients \"key1,key2,...\"\n" +
+                    "Mutually exclusive with '--client-count' option.")]
     [CommandPropertyExclusion(nameof(ClientCount))]
     [JsonIgnore]
     public string[] Clients { get; init; } = [];
-
-    [CommandProperty]
-    [CommandSummary("The directory path to store data of each node. " +
-                    "If omitted, the data is stored in memory.")]
-    [JsonIgnore]
-    public string RepositoryPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The directory path to store log.")]

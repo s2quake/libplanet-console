@@ -7,7 +7,7 @@ namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]
-[CommandSummary("Sends a transaction to store simple string.")]
+[CommandSummary("Sends a transaction using a simple string.")]
 internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
 {
     [CommandPropertyRequired]
