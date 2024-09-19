@@ -1,6 +1,7 @@
 # Libplanet Console
 
-This repository provides a `REPL` environment that enables easy testing of libplanet features.
+This repository provides a `REPL` environment that enables easy testing of 
+libplanet features.
 
 ## Requirements
 
@@ -24,45 +25,59 @@ dotnet publish
 
 > It's `publish`, not build.
 
-# Run Console
+# Creating Repository
 
-Run 4 Node processes and 2 Client processes to control each of them.
+Run the following command to create a repository for starting 4 nodes 
+and 2 clients at the specified path.
 
 ```sh
-.bin/libplanet-console
+.bin/libplanet-console init .data
+```
+
+# Staring Repository
+
+Run the following command to start nodes and clients at the specified path.
+
+```sh
+.bin/libplanet-console start .data
 ```
 
 > If platform is windows, run `.bin\libplanet-console.exe`.
 
+## Single Node
+
+Create and run a repository for a single node.
+
+```sh
+.bin/libplanet-node init .node --single-node
+.bin/libplanet-node start .node
+```
+
+## Settings data
+
+Once the repository is created, the specified path will contain 
+`node-settings.json` and `client-settings.json` files as shown below. 
+Users can configure various values to run nodes and clients 
+in different environments.
+
+```json
+{
+  "$schema": "node-settings-schema.json",
+  "application": {
+    "endPoint": "localhost:55314",
+    "privateKey": "5a3df2ce7fc8b8f7c984f867a34e7d343e974f7b661c83536c0a66685bdbf04a",
+    "storePath": "store",
+    "genesisPath": "genesis",
+    "logPath": "app.log",
+    "libraryLogPath": "library.log"
+  }
+}
+```
+
 ## Show Help
 
-Display the run options for libplanet-console.
+Run the following command to display help
 
 ```sh
 .bin/libplanet-console --help
-```
-
-## Save data
-
-Specify a path to save the data.
-
-```sh
-.bin/libplanet-console --store-path .store
-```
-
-## Save logs
-
-Specify a path to save the logs.
-
-```sh
-.bin/libplanet-console --log-path .log
-```
-
-## One node and One Client
-
-Run one node and one client independently.
-
-```sh
-.bin/libplanet-node --end-point "127.0.0.1:4343"
-.bin/libplanet-client --node-end-point "127.0.0.1:4343"
 ```
