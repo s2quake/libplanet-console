@@ -12,7 +12,5 @@ public readonly record struct ApplicationInfo
 
     public required string LogPath { get; init; }
 
-    public bool IsSingleNode { get; init; }
-
     public int ParentProcessId { get; init; }
 }

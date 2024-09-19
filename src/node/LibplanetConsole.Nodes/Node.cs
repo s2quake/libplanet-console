@@ -49,8 +49,7 @@ internal sealed partial class Node : IActionRenderer, INode
     public Node(IServiceProvider serviceProvider, ApplicationOptions options, ILogger logger)
     {
         _serviceProvider = serviceProvider;
-        _seedEndPoint = options.SeedEndPoint
-            ?? (options.IsSingleNode is true ? options.EndPoint : null);
+        _seedEndPoint = options.SeedEndPoint;
         _privateKey = options.PrivateKey.ToSecureString();
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;

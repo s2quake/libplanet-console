@@ -12,8 +12,8 @@ namespace LibplanetConsole.Clients.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint on which the Client Service will run. " +
-                    "If omitted, host is 127.0.0.1 and port is set to random.")]
+    [CommandSummary("Indicates the EndPoint on which the client will run. " +
+                    "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
@@ -26,7 +26,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
     [JsonIgnore]
-    [Category("Hidden")]
+    [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
@@ -35,13 +35,13 @@ internal sealed record class ApplicationSettings
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path to store log.")]
+    [CommandSummary("Indicates the file path to save logs.")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     [DefaultValue("")]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
-    [CommandSummary("If set, the REPL is not started.")]
+    [CommandSummary("If set, the client runs without REPL.")]
     [JsonIgnore]
     public bool NoREPL { get; init; }
 

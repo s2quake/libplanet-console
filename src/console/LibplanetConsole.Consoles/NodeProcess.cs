@@ -12,10 +12,10 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
         get
         {
             var argumentList = new List<string>();
-            if (nodeOptions.Source != string.Empty)
+            if (nodeOptions.RepositoryPath != string.Empty)
             {
                 argumentList.Add("start");
-                argumentList.Add(nodeOptions.Source);
+                argumentList.Add(nodeOptions.RepositoryPath);
             }
             else
             {

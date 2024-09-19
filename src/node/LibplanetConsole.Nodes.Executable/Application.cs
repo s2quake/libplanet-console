@@ -50,7 +50,7 @@ internal sealed class Application(ApplicationOptions options)
 
     private static bool GetStartupCondition(ApplicationOptions options)
     {
-        if (options.SeedEndPoint is not null || options.IsSingleNode is true)
+        if (options.SeedEndPoint is not null)
         {
             return false;
         }

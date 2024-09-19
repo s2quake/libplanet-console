@@ -38,6 +38,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _container.ComposeExportedValue(_clients);
         _container.ComposeExportedValue<IClientCollection>(_clients);
         _container.ComposeExportedValue<IApplicationService>(_clients);
+        _container.ComposeExportedValues(options.Components);
         _consoleContext = _container.GetValue<ConsoleServiceContext>();
         _consoleContext.EndPoint = options.EndPoint;
         _container.GetValue<IApplicationConfigurations>();

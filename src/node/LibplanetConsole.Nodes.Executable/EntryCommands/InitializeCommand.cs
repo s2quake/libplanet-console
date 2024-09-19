@@ -8,7 +8,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Nodes.Executable.EntryCommands;
 
-[CommandSummary("Create a new repository to run the libplanet-node")]
+[CommandSummary("Create a new repository to run the node")]
 internal sealed class InitializeCommand : CommandBase
 {
     public InitializeCommand()
@@ -22,13 +22,13 @@ internal sealed class InitializeCommand : CommandBase
     public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the libplanet-node. " +
+    [CommandSummary("Indicates the private key of the node. " +
                     "If omitted, a random private key is used.")]
     [AppPrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The endpoint of the libplanet-node. " +
+    [CommandSummary("The endpoint of the node. " +
                     "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; set; } = string.Empty;
@@ -55,28 +55,27 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The file path of the genesis." +
                     "If omitted, the 'genesis' file is used.")]
-    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
+    [Path(Type = PathType.File, AllowEmpty = true)]
     public string GenesisPath { get; set; } = string.Empty;
 
-    [CommandPropertySwitch]
-    [CommandSummary("If set, the genesis is not stored at the specified genesis path.")]
-    [Category("Genesis")]
-    public bool NoGenesis { get; set; }
+    [CommandPropertySwitch("single-node")]
+    [CommandSummary("If set, the repository is created in a format suitable for a single node.")]
+    public bool IsSingleNode { get; set; }
 
     [CommandProperty]
     [CommandSummary("The private key of the genesis block. " +
                     "if omitted, a random private key is used.\n" +
-                    "Mutually exclusive with '--no-genesis' option.")]
-    [CommandPropertyExclusion(nameof(NoGenesis))]
+                    "Requires the '--single-node' option to be set.")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
     [AppPrivateKey]
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty("date-time")]
     [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"\n" +
-                    "Mutually exclusive with '--no-genesis' option.")]
+                    "Requires the '--single-node' option to be set.")]
     [Category("Genesis")]
-    [CommandPropertyExclusion(nameof(NoGenesis))]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
     public DateTimeOffset DateTimeOffset { get; set; }
 
     [CommandPropertySwitch("quiet", 'q')]
@@ -100,6 +99,7 @@ internal sealed class InitializeCommand : CommandBase
             LogPath = logPath,
             LibraryLogPath = libraryLogPath,
             GenesisPath = genesisPath,
+            SeedEndPoint = IsSingleNode is true ? endPoint : null,
         };
         dynamic info = repository.Save(outputPath);
         using var writer = new ConditionalTextWriter(Out)
@@ -107,7 +107,7 @@ internal sealed class InitializeCommand : CommandBase
             Condition = Quiet is false,
         };
 
-        if (NoGenesis is false)
+        if (IsSingleNode is true)
         {
             var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
             var validatorKeys = new AppPublicKey[] { privateKey.PublicKey };

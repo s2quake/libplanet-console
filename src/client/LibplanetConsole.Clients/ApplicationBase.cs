@@ -34,6 +34,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _container.ComposeExportedValue(_client);
         _container.ComposeExportedValue<IClient>(_client);
         _container.ComposeExportedValue<IBlockChain>(_client);
+        _container.ComposeExportedValues(options.Components);
         _clientServiceContext = _container.GetValue<ClientServiceContext>();
         _clientServiceContext.EndPoint = options.EndPoint;
         _container.GetValue<IApplicationConfigurations>();

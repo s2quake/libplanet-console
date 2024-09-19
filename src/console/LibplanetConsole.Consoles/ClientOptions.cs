@@ -14,7 +14,7 @@ public sealed record class ClientOptions
 
     public string LogPath { get; init; } = string.Empty;
 
-    public string Source { get; private set; } = string.Empty;
+    internal string RepositoryPath { get; private set; } = string.Empty;
 
     public static ClientOptions Load(string settingsPath)
     {
@@ -24,7 +24,7 @@ public sealed record class ClientOptions
                 $"'{settingsPath}' must be an absolute path.", nameof(settingsPath));
         }
 
-        var directoryName = Path.GetDirectoryName(settingsPath)
+        var repositoryPath = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
         var json = File.ReadAllText(settingsPath);
         var settings = JsonUtility.Deserialize<Settings>(json);
@@ -34,9 +34,9 @@ public sealed record class ClientOptions
         {
             EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
             PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
-            LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
-            Source = settingsPath,
+            LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
             NodeEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.NodeEndPoint),
+            RepositoryPath = repositoryPath,
         };
     }
 

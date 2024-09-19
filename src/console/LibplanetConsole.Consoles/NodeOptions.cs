@@ -18,7 +18,7 @@ public sealed record class NodeOptions
 
     public string LibraryLogPath { get; init; } = string.Empty;
 
-    public string Source { get; private set; } = string.Empty;
+    internal string RepositoryPath { get; private set; } = string.Empty;
 
     public static NodeOptions Load(string settingsPath)
     {
@@ -28,7 +28,7 @@ public sealed record class NodeOptions
                 $"'{settingsPath}' must be an absolute path.", nameof(settingsPath));
         }
 
-        var directoryName = Path.GetDirectoryName(settingsPath)
+        var repositoryPath = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
         var json = File.ReadAllText(settingsPath);
         var settings = JsonUtility.Deserialize<Settings>(json);
@@ -38,11 +38,11 @@ public sealed record class NodeOptions
         {
             EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
             PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
-            StorePath = Path.GetFullPath(applicationSettings.StorePath, directoryName),
-            LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
-            LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, directoryName),
-            Source = settingsPath,
+            StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
+            LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
+            LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, repositoryPath),
             SeedEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.SeedEndPoint),
+            RepositoryPath = repositoryPath,
         };
     }
 

@@ -14,8 +14,8 @@ namespace LibplanetConsole.Nodes.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint on which the Node Service will run. " +
-                    "If omitted, host is 127.0.0.1 and port is set to random.")]
+    [CommandSummary("Indicates the EndPoint on which the node will run. " +
+                    "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
@@ -28,7 +28,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
     [JsonIgnore]
-    [Category("Hidden")]
+    [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
@@ -46,11 +46,15 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Genesis))]
+    [CommandSummary("Indicates the file path to load the genesis block.\n" +
+                    "Mutually exclusive with '--genesis' option.")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string GenesisPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(GenesisPath))]
+    [CommandSummary("Indicates a hexadecimal genesis string. If omitted, a random genesis block " +
+                    "is used.\nMutually exclusive with '--genesis-path' option.")]
     [JsonIgnore]
     public string Genesis { get; init; } = string.Empty;
 
@@ -61,19 +65,21 @@ internal sealed record class ApplicationSettings
     public string LogPath { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs for the library." +
+    [CommandSummary("Indicates the file path to save logs for the library. " +
                     "If omitted, the library logs will be saved in the LogPath.")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     [DefaultValue("")]
     public string LibraryLogPath { get; init; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
-    [CommandSummary("If set, the REPL is not started.")]
+    [CommandSummary("If set, the node runs without a REPL.")]
     [JsonIgnore]
     public bool NoREPL { get; init; }
 
     [CommandPropertySwitch("single-node")]
     [CommandPropertyExclusion(nameof(SeedEndPoint))]
+    [CommandSummary("If set, the node runs as a single node.\n" +
+                    "Mutually exclusive with '--seed-endpoint' option.")]
     [JsonIgnore]
     public bool IsSingleNode { get; set; }
 
@@ -85,17 +91,26 @@ internal sealed record class ApplicationSettings
         return new ApplicationOptions(endPoint, privateKey, genesis)
         {
             ParentProcessId = ParentProcessId,
-            SeedEndPoint = AppEndPoint.ParseOrDefault(SeedEndPoint),
+            SeedEndPoint = GetSeedEndPoint(),
             StorePath = GetFullPath(StorePath),
             LogPath = GetFullPath(LogPath),
             LibraryLogPath = GetFullPath(LibraryLogPath),
             NoREPL = NoREPL,
-            IsSingleNode = IsSingleNode,
             Components = components,
         };
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
+
+        AppEndPoint? GetSeedEndPoint()
+        {
+            if (SeedEndPoint != string.Empty)
+            {
+                return AppEndPoint.Parse(SeedEndPoint);
+            }
+
+            return IsSingleNode is true ? endPoint : null;
+        }
     }
 
     private static byte[] CreateGenesis(AppPrivateKey privateKey)

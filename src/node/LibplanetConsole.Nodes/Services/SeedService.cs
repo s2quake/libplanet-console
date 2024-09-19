@@ -53,7 +53,7 @@ internal sealed class SeedService(ApplicationBase application)
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        if (application.Info.IsSingleNode is true)
+        if (application.Info.SeedEndPoint == application.Info.EndPoint)
         {
             _blocksyncSeed = new Seed(new()
             {

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Settings;
 
@@ -11,11 +12,13 @@ internal sealed class StartCommand : CommandAsyncBase
     private static readonly ApplicationSettingsCollection _settingsCollection = new();
 
     [CommandPropertyRequired]
-    public string SettingsPath { get; set; } = string.Empty;
+    [CommandSummary("The path of the repository.")]
+    [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
+    public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
-    [Category("Hidden")]
+    [Category]
     public int ParentProcessId { get; init; }
 
     [CommandPropertySwitch("no-repl")]
@@ -26,8 +29,9 @@ internal sealed class StartCommand : CommandAsyncBase
     {
         try
         {
+            var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
             var components = _settingsCollection.ToArray();
-            var applicationSettings = Load(SettingsPath) with
+            var applicationSettings = Load(settingsPath) with
             {
                 ParentProcessId = ParentProcessId,
                 NoREPL = NoREPL,

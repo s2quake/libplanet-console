@@ -12,12 +12,13 @@ internal sealed class StartCommand : CommandAsyncBase
     private static readonly ApplicationSettingsCollection _settingsCollection = new();
 
     [CommandPropertyRequired]
-    [Path(Type = PathType.File, ExistsType = PathExistsType.Exist)]
-    public string SettingsPath { get; set; } = string.Empty;
+    [CommandSummary("The path of the repository.")]
+    [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
+    public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
-    [Category("Hidden")]
+    [Category]
     public int ParentProcessId { get; init; }
 
     [CommandPropertySwitch("no-repl")]
@@ -33,7 +34,7 @@ internal sealed class StartCommand : CommandAsyncBase
     {
         try
         {
-            var settingsPath = Path.GetFullPath(SettingsPath);
+            var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
             var components = _settingsCollection.ToArray();
             var applicationSettings = Load(settingsPath) with
             {

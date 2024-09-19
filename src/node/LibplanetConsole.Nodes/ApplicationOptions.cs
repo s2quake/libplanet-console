@@ -29,7 +29,5 @@ public sealed record class ApplicationOptions
 
     public bool NoREPL { get; init; }
 
-    public bool IsSingleNode { get; init; }
-
     public object[] Components { get; init; } = [];
 }

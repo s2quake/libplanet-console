@@ -13,10 +13,10 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
         get
         {
             var argumentList = new List<string>();
-            if (clientOptions.Source != string.Empty)
+            if (clientOptions.RepositoryPath != string.Empty)
             {
                 argumentList.Add("start");
-                argumentList.Add(clientOptions.Source);
+                argumentList.Add(clientOptions.RepositoryPath);
             }
             else
             {

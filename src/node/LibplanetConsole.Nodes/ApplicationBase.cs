@@ -34,7 +34,8 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _container.ComposeExportedValue(_node);
         _container.ComposeExportedValue<INode>(_node);
         _container.ComposeExportedValue<IBlockChain>(_node);
-        Array.ForEach(options.Components, _container.ComposeExportedValue);
+        _container.ComposeExportedValues(options.Components);
+        _container.ComposeParts(options.Components);
         _nodeContext = _container.GetValue<NodeContext>();
         _nodeContext.EndPoint = options.EndPoint;
         _logger.Debug(options.EndPoint.ToString());
@@ -45,7 +46,6 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             SeedEndPoint = options.SeedEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,
-            IsSingleNode = options.IsSingleNode,
             ParentProcessId = options.ParentProcessId,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
@@ -123,11 +123,6 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         if (_info.SeedEndPoint is { } seedEndPoint)
         {
             _node.SeedEndPoint = seedEndPoint;
-            await _node.StartAsync(cancellationToken);
-        }
-        else if (_info.IsSingleNode is true)
-        {
-            _node.SeedEndPoint = _info.EndPoint;
             await _node.StartAsync(cancellationToken);
         }
     }

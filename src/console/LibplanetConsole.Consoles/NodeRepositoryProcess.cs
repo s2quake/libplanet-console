@@ -22,6 +22,5 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
         AppEndPoint.ToString(EndPoint),
         "--genesis-path",
         GenesisPath,
-        "--no-genesis",
     ];
 }

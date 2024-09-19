@@ -27,13 +27,19 @@ internal sealed class InitializeCommand : CommandBase
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The endpoint of the client. " +
+                    "If omitted, a random endpoint is used.")]
     [AppEndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("The file path to store the application logs." +
+                    "If omitted, the 'app.log' file is used.")]
+    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("quiet", 'q')]
+    [CommandSummary("If set, the command does not output any information.")]
     public bool Quiet { get; set; }
 
     protected override void OnExecute()
