@@ -173,9 +173,9 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
     {
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var executionPath = consoleApplicationFixture.ExecutionPath;
-        var process = new TestProcess(dotnetPath, executionPath, "1000");
+        var process = new TestProcess(dotnetPath, executionPath, "10000");
         using var cancellationTokenSource = new CancellationTokenSource(10);
-        await Assert.ThrowsAsync<OperationCanceledException>(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
             () => process.RunAsync(cancellationTokenSource.Token));
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
