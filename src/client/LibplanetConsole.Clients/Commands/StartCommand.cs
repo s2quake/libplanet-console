@@ -15,18 +15,10 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
     public string NodeEndPoint { get; set; } = string.Empty;
 
-    [CommandProperty("seed")]
-    [CommandSummary("Use --node-end-point as the Seed EndPoint. " +
-                    "Get the EndPoint of the Node to connect to from Seed.")]
-    public bool IsSeed { get; init; }
-
-    protected override async Task OnExecuteAsync(
-        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var isSeed = IsSeed;
         var nodeEndPoint = AppEndPoint.ParseOrFallback(NodeEndPoint, client.NodeEndPoint);
-        client.NodeEndPoint = await SeedUtility.GetNodeEndPointAsync(
-            nodeEndPoint, isSeed, cancellationToken);
+        client.NodeEndPoint = nodeEndPoint;
         await client.StartAsync(cancellationToken);
     }
 }

@@ -11,17 +11,11 @@ public interface INode : IVerifier, ISigner, IServiceProvider
 
     NodeInfo Info { get; }
 
-    NodeOptions NodeOptions { get; }
-
     bool IsRunning { get; }
 
     AppPublicKey PublicKey { get; }
 
     AppAddress Address => PublicKey.Address;
-
-    AppPeer BlocksyncSeedPeer { get; }
-
-    AppPeer ConsensusSeedPeer { get; }
 
     Task StartAsync(CancellationToken cancellationToken);
 

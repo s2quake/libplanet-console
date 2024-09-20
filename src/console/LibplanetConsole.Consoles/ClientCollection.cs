@@ -3,8 +3,8 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Consoles;
@@ -12,13 +12,13 @@ namespace LibplanetConsole.Consoles;
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]
 internal sealed class ClientCollection(
-    ApplicationBase application, AppPrivateKey[] privateKeys)
+    ApplicationBase application, ClientOptions[] clientOptions)
     : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
     private readonly ApplicationBase _application = application;
-    private readonly List<Client> _clientList = new(privateKeys.Length);
-    private readonly ILogger _logger = application.GetService<ILogger>();
+    private readonly List<Client> _clientList = new(clientOptions.Length);
+    private readonly ILogger _logger = application.GetRequiredService<ILogger>();
     private Client? _current;
     private bool _isDisposed;
 
@@ -100,16 +100,12 @@ internal sealed class ClientCollection(
     }
 
     public async Task<Client> AddNewAsync(
-        AddNewOptions options, CancellationToken cancellationToken)
+        AddNewClientOptions options, CancellationToken cancellationToken)
     {
-        var client = CreateNew(options.PrivateKey);
+        var client = CreateNew(options.ClientOptions);
         if (options.NoProcess != true)
         {
-            var clientProcess = client.CreateProcess();
-            clientProcess.Detach = options.Detach;
-            clientProcess.ManualStart = options.Detach != true;
-            clientProcess.NewWindow = options.NewWindow;
-            await clientProcess.StartAsync(cancellationToken: default);
+            await client.StartProcessAsync(options, cancellationToken);
         }
 
         if (options.NoProcess != true && options.Detach != true)
@@ -117,9 +113,9 @@ internal sealed class ClientCollection(
             await client.AttachAsync(cancellationToken);
         }
 
-        if (client.IsAttached == true && options.ManualStart != true)
+        if (client.IsAttached is true && options.ClientOptions.NodeEndPoint is null)
         {
-            var nodes = _application.GetService<NodeCollection>();
+            var nodes = _application.GetRequiredService<NodeCollection>();
             var node = nodes.RandomNode();
             await client.StartAsync(node, cancellationToken);
         }
@@ -137,13 +133,12 @@ internal sealed class ClientCollection(
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var options = new AddNewOptions
+            var options = new AddNewClientOptions
             {
-                PrivateKey = privateKeys[index],
+                ClientOptions = clientOptions[index],
                 NoProcess = info.NoProcess,
                 Detach = info.Detach,
                 NewWindow = info.NewWindow,
-                ManualStart = info.ManualStart,
             };
             await AddNewAsync(options, cancellationToken);
         }
@@ -165,7 +160,7 @@ internal sealed class ClientCollection(
     }
 
     async Task<IClient> IClientCollection.AddNewAsync(
-        AddNewOptions options, CancellationToken cancellationToken)
+        AddNewClientOptions options, CancellationToken cancellationToken)
         => await AddNewAsync(options, cancellationToken);
 
     bool IClientCollection.Contains(IClient item) => item switch
@@ -189,14 +184,11 @@ internal sealed class ClientCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
 
-    private Client CreateNew(AppPrivateKey privateKey)
+    private Client CreateNew(ClientOptions clientOptions)
     {
         lock (LockObject)
         {
-            return new Client(_application, privateKey)
-            {
-                EndPoint = AppEndPoint.Next(),
-            };
+            return new Client(_application, clientOptions);
         }
     }
 

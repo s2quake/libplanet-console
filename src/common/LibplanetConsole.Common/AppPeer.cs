@@ -6,6 +6,13 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPeerJsonConverter))]
 public readonly struct AppPeer(AppPublicKey publicKey, AppEndPoint endPoint)
 {
+    public const string HostExpression
+        = @"(?:(?:[a-zA-Z0-9\-\.]+)|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))";
+
+    public const string PortExpression = @"\d{1,5}";
+    public static readonly string RegularExpression
+        = $"^{AppPublicKey.RegularExpression},{AppEndPoint.RegularExpression}$";
+
     public AppPublicKey PublicKey { get; } = publicKey;
 
     public AppEndPoint EndPoint { get; } = endPoint;

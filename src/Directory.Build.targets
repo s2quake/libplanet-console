@@ -1,8 +1,11 @@
 <Project>
 
   <Target Name="AfterBuild">
-    <PropertyGroup Condition="'$(OutputType)'=='Exe'">
+    <PropertyGroup Condition="'$(OutputType)'=='Exe' and '$(PublishDir)'=='$([System.IO.Path]::Combine(bin,$(Configuration),$(TargetFramework),$(RuntimeIdentifier),$(PublishDirName)))$([System.IO.Path]::DirectorySeparatorChar)'">
       <PublishDir>$([System.IO.Path]::Combine($(RootPath),.bin))</PublishDir>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(OutputType)'!='Exe'">
+      <PublishDir>$([System.IO.Path]::Combine(bin,$(Configuration),$(TargetFramework),$(RuntimeIdentifier),$(PublishDirName)))$([System.IO.Path]::DirectorySeparatorChar)</PublishDir>
     </PropertyGroup>
   </Target>
 

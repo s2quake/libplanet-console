@@ -13,6 +13,7 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPublicKeyJsonConverter))]
 public readonly record struct AppPublicKey : IFormattable
 {
+    public const string RegularExpression = "(?:[0-9a-fA-F]{130}|[0-9a-fA-F]{66})";
     private static readonly Codec _codec = new();
     private readonly PublicKey _publicKey;
 
@@ -71,6 +72,8 @@ public readonly record struct AppPublicKey : IFormattable
         var encrypted = _publicKey.Encrypt(encodings);
         return ByteUtil.Hex(encrypted);
     }
+
+    public byte[] Encrypt(byte[] bytes) => _publicKey.Encrypt(bytes);
 
     public bool Verify(object obj, byte[] signature)
     {

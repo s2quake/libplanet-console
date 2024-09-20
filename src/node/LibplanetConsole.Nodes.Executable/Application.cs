@@ -1,6 +1,7 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Nodes.Executable;
 
@@ -15,9 +16,8 @@ internal sealed class Application(ApplicationOptions options)
         if (_options.NoREPL != true)
         {
             var sw = new StringWriter();
-            var startupCondition = _options.ManualStart == true && _options.ParentProcessId == 0;
-            var commandContext = this.GetService<CommandContext>();
-            var terminal = this.GetService<SystemTerminal>();
+            var commandContext = this.GetRequiredService<CommandContext>();
+            var terminal = this.GetRequiredService<SystemTerminal>();
             commandContext.Out = sw;
             await base.OnRunAsync(cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
@@ -26,7 +26,7 @@ internal sealed class Application(ApplicationOptions options)
             await commandContext.ExecuteAsync(args: [], cancellationToken: default);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
-            await sw.WriteLineIfAsync(startupCondition, GetStartupMessage());
+            await sw.WriteLineIfAsync(GetStartupCondition(_options), GetStartupMessage());
             await Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
@@ -46,6 +46,16 @@ internal sealed class Application(ApplicationOptions options)
     {
         await base.OnDisposeAsync();
         await _waitInputTask;
+    }
+
+    private static bool GetStartupCondition(ApplicationOptions options)
+    {
+        if (options.SeedEndPoint is not null)
+        {
+            return false;
+        }
+
+        return options.ParentProcessId == 0;
     }
 
     private static string GetStartupMessage()

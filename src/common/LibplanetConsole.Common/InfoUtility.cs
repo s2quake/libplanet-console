@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Reflection;
-using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Common;
 
@@ -21,7 +21,7 @@ public static class InfoUtility
     public static ImmutableDictionary<string, object> GetInfo(
         IServiceProvider serviceProvider, object obj)
     {
-        var infoProviders = serviceProvider.GetService<IEnumerable<IInfoProvider>>();
+        var infoProviders = serviceProvider.GetRequiredService<IEnumerable<IInfoProvider>>();
         return GetInfo(infoProviders, obj);
     }
 

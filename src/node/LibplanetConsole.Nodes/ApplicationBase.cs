@@ -6,47 +6,47 @@ using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
 using LibplanetConsole.Nodes.Services;
 using Serilog;
-using Serilog.Core;
 
 namespace LibplanetConsole.Nodes;
 
-public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
+public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly Node _node;
     private readonly NodeContext _nodeContext;
     private readonly Process? _parentProcess;
-    private readonly bool _isAutoStart;
     private readonly ApplicationInfo _info;
-    private readonly Logger _logger;
+    private readonly ILogger _logger;
     private readonly Task _waitForExitTask = Task.CompletedTask;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _logger = CreateLogger(options.LogPath);
+        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
-        _isAutoStart = options.ManualStart != true;
         _node = new Node(this, options, _logger);
         _container = new(this);
-        _container.ComposeExportedValue<ILogger>(_logger);
+        _container.ComposeExportedValue(_logger);
         _container.ComposeExportedValue<IApplication>(this);
         _container.ComposeExportedValue(this);
         _container.ComposeExportedValue<IServiceProvider>(this);
         _container.ComposeExportedValue(_node);
         _container.ComposeExportedValue<INode>(_node);
         _container.ComposeExportedValue<IBlockChain>(_node);
-        _container.ComposeExportedValue<IApplicationService>(_node);
+        _container.ComposeExportedValues(options.Components);
+        _container.ComposeParts(options.Components);
         _nodeContext = _container.GetValue<NodeContext>();
         _nodeContext.EndPoint = options.EndPoint;
+        _logger.Debug(options.EndPoint.ToString());
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
             EndPoint = _nodeContext.EndPoint,
-            NodeEndPoint = options.NodeEndPoint,
+            SeedEndPoint = options.SeedEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,
+            ParentProcessId = options.ParentProcessId,
         };
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         if (options.ParentProcessId != 0 &&
@@ -118,28 +118,11 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         cancelAction.Invoke();
     }
 
-    private static Logger CreateLogger(string logFilename)
-    {
-        var loggerConfiguration = new LoggerConfiguration();
-        if (logFilename != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
-                                                     .WriteTo.File(logFilename);
-        }
-
-        var logger = loggerConfiguration.CreateLogger();
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
-    }
-
     private async Task AutoStartAsync(CancellationToken cancellationToken)
     {
-        if (_isAutoStart == true)
+        if (_info.SeedEndPoint is { } seedEndPoint)
         {
+            _node.SeedEndPoint = seedEndPoint;
             await _node.StartAsync(cancellationToken);
         }
     }

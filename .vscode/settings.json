@@ -4,6 +4,11 @@
             100
         ]
     },
+    "[markdown]": {
+        "editor.rulers": [
+            80
+        ]
+    },
     "files.exclude": {
         "**/bin": true,
         "**/obj": true,

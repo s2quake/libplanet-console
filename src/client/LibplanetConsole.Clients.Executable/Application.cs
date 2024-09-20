@@ -1,6 +1,7 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Clients.Executable;
 
@@ -15,8 +16,8 @@ internal sealed class Application(ApplicationOptions options) : ApplicationBase(
         {
             var sw = new StringWriter();
             var startupCondition = _options.NodeEndPoint is null && _options.ParentProcessId == 0;
-            var commandContext = this.GetService<CommandContext>();
-            var terminal = this.GetService<SystemTerminal>();
+            var commandContext = this.GetRequiredService<CommandContext>();
+            var terminal = this.GetRequiredService<SystemTerminal>();
             commandContext.Out = sw;
             await base.OnRunAsync(cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);

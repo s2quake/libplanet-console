@@ -1,4 +1,3 @@
-using Libplanet.Action;
 using LibplanetConsole.Common;
 using LibplanetConsole.Nodes;
 
@@ -23,8 +22,6 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
     AppEndPoint EndPoint { get; }
 
     NodeInfo Info { get; }
-
-    NodeOptions NodeOptions { get; }
 
     AppPublicKey PublicKey { get; }
 

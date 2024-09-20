@@ -2,31 +2,31 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Frameworks.Extensions;
 using Serilog;
-using Serilog.Core;
 
 namespace LibplanetConsole.Consoles;
 
-public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
+public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly ApplicationContainer _container;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
     private readonly ConsoleServiceContext _consoleContext;
     private readonly ApplicationInfo _info;
-    private readonly Logger _logger;
+    private readonly ILogger _logger;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
     {
-        _logger = CreateLogger(options.LogDirectory);
+        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
         _container = new(this);
-        _container.ComposeExportedValue<ILogger>(_logger);
+        _container.ComposeExportedValue(_logger);
         _nodes = new NodeCollection(this, options.Nodes);
         _clients = new ClientCollection(this, options.Clients);
         _container.ComposeExportedValue(this);
@@ -38,27 +38,20 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         _container.ComposeExportedValue(_clients);
         _container.ComposeExportedValue<IClientCollection>(_clients);
         _container.ComposeExportedValue<IApplicationService>(_clients);
+        _container.ComposeExportedValues(options.Components);
         _consoleContext = _container.GetValue<ConsoleServiceContext>();
         _consoleContext.EndPoint = options.EndPoint;
         _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
             EndPoint = _consoleContext.EndPoint,
-            StoreDirectory = options.StoreDirectory,
-            LogDirectory = options.LogDirectory,
+            LogPath = options.LogPath,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
             NewWindow = options.NewWindow,
-            ManualStart = options.ManualStart,
         };
-        GenesisOptions = new()
-        {
-            GenesisKey = GenesisOptions.AppProtocolKey,
-            Validators = [.. options.Nodes.Select(item => item.PublicKey)],
-            Timestamp = DateTimeOffset.UtcNow,
-        };
+        GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
         ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
-        _logger.Debug($"GenesisOptions: {JsonUtility.Serialize((GenesisInfo)GenesisOptions)}");
         _logger.Debug("Application initialized.");
     }
 
@@ -68,7 +61,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
 
     public override ILogger Logger => _logger;
 
-    internal GenesisOptions GenesisOptions { get; }
+    internal Block GenesisBlock { get; }
 
     public bool TryGetClient(string address, [MaybeNullWhen(false)] out IClient client)
     {
@@ -95,9 +88,7 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
     }
 
     public IAddressable GetAddressable(string address)
-    {
-        return _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
-    }
+        => _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
 
     public override object? GetService(Type serviceType)
     {
@@ -165,25 +156,6 @@ public abstract class ApplicationBase : Frameworks.ApplicationBase, IApplication
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
         await base.OnDisposeAsync();
         await _container.DisposeAsync();
-    }
-
-    private static Logger CreateLogger(string logDicrectory)
-    {
-        var loggerConfiguration = new LoggerConfiguration();
-        if (logDicrectory != string.Empty)
-        {
-            var logFilename = Path.Combine(logDicrectory, "console.log");
-            loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
-                                                     .WriteTo.File(logFilename);
-        }
-
-        var logger = loggerConfiguration.CreateLogger();
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
     }
 
     private static bool IsEquals(IAddressable addressable, string address)

@@ -1,13 +1,13 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Nodes.Examples;
 
 [Export(typeof(IExampleNode))]
 [Export]
 [method: ImportingConstructor]
-internal sealed class ExampleNode(IApplication application) : IExampleNode
+internal sealed class ExampleNode(
+    IApplication application, ExampleSettings settings) : IExampleNode
 {
     private readonly IApplication _application = application;
     private readonly HashSet<AppAddress> _addresses = [];
@@ -18,8 +18,7 @@ internal sealed class ExampleNode(IApplication application) : IExampleNode
 
     public int Count => _addresses.Count;
 
-    public bool IsExample { get; }
-        = ApplicationSettingsParser.Peek<ExampleNodeSettings>().IsExample;
+    public bool IsExample { get; } = settings.IsExample;
 
     public Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken)
         => _application.InvokeAsync(() => _addresses.ToArray(), cancellationToken);

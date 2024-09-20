@@ -6,7 +6,7 @@ public readonly record struct ApplicationInfo
 {
     public required AppEndPoint EndPoint { get; init; }
 
-    public required AppEndPoint? NodeEndPoint { get; init; }
+    public required AppEndPoint? SeedEndPoint { get; init; }
 
     public required string StorePath { get; init; }
 

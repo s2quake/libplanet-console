@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <PackageReference Include="NJsonSchema" Version="11.0.2" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.2" />
+  </ItemGroup>
+
   <!-- $(LibplanetDirectory) exists. -->
   <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
     <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Action\Libplanet.Action.csproj" />
@@ -44,6 +49,9 @@
   <!-- $(ConfigurationsDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
     <PackageReference Include="JSSoft.Configurations" Version="$(JSSoftConfigurationsVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.DataAnnotations\LibplanetConsole.DataAnnotations.csproj" />
   </ItemGroup>
 
 </Project>

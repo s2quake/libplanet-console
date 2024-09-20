@@ -77,4 +77,13 @@ public static class TextWriterExtensions
             await @this.WriteLineAsync(message);
         }
     }
+
+    public static void WriteActionIf(
+        this TextWriter @this, bool condition, Action<TextWriter> action)
+    {
+        if (condition == true)
+        {
+            action(@this);
+        }
+    }
 }

@@ -1,41 +1,50 @@
-using System.Security;
 using LibplanetConsole.Common;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
-internal sealed class NodeProcess(Node node) : ProcessBase
+internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProcessBase
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public bool Detach { get; set; }
 
-    public required SecureString PrivateKey { get; init; }
-
-    public AppEndPoint? NodeEndPoint { get; set; }
-
-    public string StoreDirectory { get; set; } = string.Empty;
-
-    public string LogDirectory { get; set; } = string.Empty;
-
-    public bool ManualStart { get; set; }
-
-    protected override string FileName => IsDotnetRuntime ? DotnetPath : NodePath;
-
-    protected override string[] Arguments
+    public override string[] Arguments
     {
         get
         {
-            var privateKey = AppPrivateKey.FromSecureString(PrivateKey);
-            var argumentList = new List<string>
+            var argumentList = new List<string>();
+            if (nodeOptions.RepositoryPath != string.Empty)
             {
-                "--end-point",
-                EndPoint.ToString(),
-                "--private-key",
-                AppPrivateKey.ToString(privateKey),
-            };
+                argumentList.Add("start");
+                argumentList.Add(nodeOptions.RepositoryPath);
+            }
+            else
+            {
+                argumentList.Add("run");
+                argumentList.Add("--end-point");
+                argumentList.Add(nodeOptions.EndPoint.ToString());
+                argumentList.Add("--private-key");
+                argumentList.Add(AppPrivateKey.ToString(nodeOptions.PrivateKey));
 
-            if (IsDotnetRuntime == true)
-            {
-                argumentList.Insert(0, NodePath);
+                if (nodeOptions.StorePath != string.Empty)
+                {
+                    argumentList.Add("--store-path");
+                    argumentList.Add(nodeOptions.StorePath);
+                }
+
+                if (nodeOptions.LogPath != string.Empty)
+                {
+                    argumentList.Add("--log-path");
+                    argumentList.Add(nodeOptions.LogPath);
+                }
+
+                if (nodeOptions.SeedEndPoint is { } seedEndPoint)
+                {
+                    argumentList.Add("--seed-end-point");
+                    argumentList.Add(seedEndPoint.ToString());
+                }
+
+                var extendedArguments = GetArguments(serviceProvider: node, obj: node);
+                argumentList.AddRange(extendedArguments);
             }
 
             if (NewWindow != true)
@@ -43,40 +52,11 @@ internal sealed class NodeProcess(Node node) : ProcessBase
                 argumentList.Add("--no-repl");
             }
 
-            if (StoreDirectory != string.Empty)
-            {
-                var storePath = Path.Combine(StoreDirectory, $"{privateKey.Address}:S");
-                argumentList.Add("--store-path");
-                argumentList.Add(storePath);
-            }
-
-            if (LogDirectory != string.Empty)
-            {
-                var logFilename = $"node-{privateKey.Address:S}.log";
-                var logPath = Path.Combine(LogDirectory, logFilename);
-                argumentList.Add("--log-path");
-                argumentList.Add(logPath);
-            }
-
-            if (NodeEndPoint is { } nodeEndPoint)
-            {
-                argumentList.Add("--node-end-point");
-                argumentList.Add(nodeEndPoint.ToString());
-            }
-
-            if (ManualStart == true)
-            {
-                argumentList.Add("--manual-start");
-            }
-
             if (Detach != true)
             {
                 argumentList.Add("--parent");
                 argumentList.Add(Environment.ProcessId.ToString());
             }
-
-            var extendedArguments = GetArguments(serviceProvider: node, obj: node);
-            argumentList.AddRange(extendedArguments);
 
             return [.. argumentList];
         }

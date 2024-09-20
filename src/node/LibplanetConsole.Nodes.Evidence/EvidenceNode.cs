@@ -3,8 +3,8 @@ using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Evidence;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Nodes.Evidence;
 
@@ -17,7 +17,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
 
     public async Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
     {
-        var blockChain = node.GetService<BlockChain>();
+        var blockChain = node.GetRequiredService<BlockChain>();
         var height = blockChain.Tip.Index;
         var validatorAddress = node.Address;
         var evidence = new TestEvidence(height, (Address)validatorAddress, DateTimeOffset.UtcNow);
@@ -29,7 +29,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
     public async Task<EvidenceInfo[]> GetEvidenceAsync(
         long height, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetService<BlockChain>();
+        var blockChain = node.GetRequiredService<BlockChain>();
         var block = height == -1 ? blockChain.Tip : blockChain[height];
         var evidences = block.Evidence.Select(item => new EvidenceInfo()
         {
@@ -46,7 +46,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
     public async Task<EvidenceInfo> GetEvidenceAsync(
         string evidenceId, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetService<BlockChain>();
+        var blockChain = node.GetRequiredService<BlockChain>();
         if (blockChain.GetCommittedEvidence(EvidenceId.Parse(evidenceId)) is { } evidence)
         {
             await Task.CompletedTask;
@@ -60,7 +60,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
 
     public async Task<EvidenceInfo[]> GetPendingEvidenceAsync(CancellationToken cancellationToken)
     {
-        var blockChain = node.GetService<BlockChain>();
+        var blockChain = node.GetRequiredService<BlockChain>();
         var evidences = blockChain.GetPendingEvidence().Select(item => (EvidenceInfo)item);
         await Task.CompletedTask;
         return [.. evidences];
@@ -69,7 +69,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
     public async Task<EvidenceInfo> GetPendingEvidenceAsync(
         string evidenceId, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetService<BlockChain>();
+        var blockChain = node.GetRequiredService<BlockChain>();
         if (blockChain.GetPendingEvidence(EvidenceId.Parse(evidenceId)) is { } evidence)
         {
             await Task.CompletedTask;

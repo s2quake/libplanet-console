@@ -25,9 +25,9 @@ public sealed record class GenesisOptions
             = new List(Validators.Select(item => item.ToByteArray()));
         var timestamp = Timestamp.ToUnixTimeMilliseconds();
         var dictionary = Dictionary.Empty
-                            .Add(nameof(GenesisKey), genesisKey)
-                            .Add(nameof(Validators), genesisValidators)
-                            .Add(nameof(Timestamp), timestamp);
+            .Add(nameof(GenesisKey), genesisKey)
+            .Add(nameof(Validators), genesisValidators)
+            .Add(nameof(Timestamp), timestamp);
         return _codec.Encode(dictionary);
     }
 }

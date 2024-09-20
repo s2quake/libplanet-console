@@ -2,9 +2,12 @@
 
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
+    <PackageReference Include="NJsonSchema" Version="11.0.2" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.2" />
   </ItemGroup>
-
 
   <!-- $(CommandsDirectory) exists. -->
   <ItemGroup Condition="Exists('$(CommandsDirectory)')">
@@ -26,6 +29,9 @@
   <!-- $(ConfigurationsDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
     <PackageReference Include="JSSoft.Configurations" Version="$(JSSoftConfigurationsVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Settings\LibplanetConsole.Settings.csproj" />
   </ItemGroup>
 
 </Project>

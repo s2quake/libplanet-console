@@ -2,124 +2,180 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
-using LibplanetConsole.Common.Threading;
-using LibplanetConsole.Frameworks;
 using static LibplanetConsole.Consoles.ProcessEnvironment;
 
 namespace LibplanetConsole.Consoles;
 
-internal abstract class ProcessBase : IAsyncDisposable
+public abstract class ProcessBase
 {
+    private const int MillisecondsDelay = 10000;
+
     private readonly StringBuilder _outBuilder = new();
     private readonly StringBuilder _errorBuilder = new();
     private Process? _process;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private Task _exitTask = Task.CompletedTask;
+    private TaskCompletionSource? _errorTaskCompletionSource;
+    private TaskCompletionSource? _outputTaskCompletionSource;
+
+    public event DataReceivedEventHandler? ErrorDataReceived;
+
+    public event DataReceivedEventHandler? OutputDataReceived;
 
     public int Id => _process?.Id ?? -1;
 
-    public bool IsRunning => _process?.HasExited != true;
-
-    public bool Detach { get; set; }
+    public bool IsRunning => _process is not null;
 
     public bool NewWindow { get; set; }
 
-    protected abstract string FileName { get; }
+    public string WorkingDirectory { get; set; } = string.Empty;
 
-    protected abstract string[] Arguments { get; }
+    public virtual bool SupportsDotnetRuntime => false;
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public abstract string FileName { get; }
+
+    public abstract string[] Arguments { get; }
+
+    public override string? ToString() => GetArguments(GetProcessStartInfo());
+
+    public void Run() => Run(MillisecondsDelay);
+
+    public void Run(int millisecondsDelay)
     {
         if (_process is not null)
         {
-            throw new InvalidOperationException("The process is already disposed.");
+            throw new InvalidOperationException("The process is already running.");
         }
 
-        _process = GetProcess();
-        if (NewWindow != true)
+        _process = new Process { StartInfo = GetProcessStartInfo(), };
+
+        try
         {
-            _process.OutputDataReceived += Process_OutputDataReceived;
-            _process.ErrorDataReceived += Process_ErrorDataReceived;
+            if (NewWindow is not true)
+            {
+                _outputTaskCompletionSource = new TaskCompletionSource();
+                _errorTaskCompletionSource = new TaskCompletionSource();
+                _process.OutputDataReceived += Process_OutputDataReceived;
+                _process.ErrorDataReceived += Process_ErrorDataReceived;
+            }
+
+            if (_process.Start() is not true)
+            {
+                throw new InvalidOperationException("Failed to start the process.");
+            }
+
+            if (NewWindow is not true)
+            {
+                _process.BeginOutputReadLine();
+                _process.BeginErrorReadLine();
+            }
+
+            if (_process.WaitForExit(millisecondsDelay) is true)
+            {
+                _outputTaskCompletionSource?.Task.Wait();
+                _errorTaskCompletionSource?.Task.Wait();
+                if (_process.ExitCode != 0)
+                {
+                    throw new ProcessExecutionException(_errorBuilder.ToString(), _process.ExitCode)
+                    {
+                        CommandLine = GetCommandLine(),
+                    };
+                }
+            }
+            else
+            {
+                _process.Kill();
+                throw new OperationCanceledException("The process is not exited.");
+            }
         }
-
-        ApplicationLogger.Debug("Process staring: " + JsonUtility.Serialize(new
+        finally
         {
-            HashCode = _process.GetHashCode(),
-            _process.StartInfo.FileName,
-            Arguments = GetArguments(_process.StartInfo),
-            _process.StartInfo.WorkingDirectory,
-        }));
-
-        if (_process.Start() != true)
-        {
-            throw new InvalidOperationException("Failed to start the process.");
+            _outBuilder.Clear();
+            _errorBuilder.Clear();
+            _outputTaskCompletionSource = null;
+            _errorTaskCompletionSource = null;
+            _process.Dispose();
+            _process = null;
         }
-
-        ApplicationLogger.Debug("Process started: " + JsonUtility.Serialize(new
-        {
-            HashCode = _process.GetHashCode(),
-            _process.Id,
-        }));
-
-        if (NewWindow != true)
-        {
-            _process.BeginOutputReadLine();
-            _process.BeginErrorReadLine();
-        }
-
-        await Task.Delay(1, cancellationToken);
-        if (_process.HasExited == true)
-        {
-            throw new InvalidOperationException(_errorBuilder.ToString());
-        }
-
-        _cancellationTokenSource = new CancellationTokenSource();
-        _exitTask = WaitForExitAsync(_cancellationTokenSource.Token);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        if (_process is null)
+        if (_process is not null)
         {
-            throw new InvalidOperationException("The process is already disposed.");
+            throw new InvalidOperationException("The process is already running.");
         }
 
-        if (_cancellationTokenSource is not null)
+        _process = new Process { StartInfo = GetProcessStartInfo(), };
+
+        try
         {
-            await _cancellationTokenSource.CancelAsync();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
+            if (NewWindow is not true)
+            {
+                _outputTaskCompletionSource = new TaskCompletionSource();
+                _errorTaskCompletionSource = new TaskCompletionSource();
+                _process.OutputDataReceived += Process_OutputDataReceived;
+                _process.ErrorDataReceived += Process_ErrorDataReceived;
+            }
+
+            if (_process.Start() is not true)
+            {
+                throw new InvalidOperationException("Failed to start the process.");
+            }
+
+            if (NewWindow is not true)
+            {
+                _process.BeginOutputReadLine();
+                _process.BeginErrorReadLine();
+            }
+
+            await _process.WaitForExitAsync(cancellationToken);
+            if (_process.ExitCode is not 0)
+            {
+                if (_outputTaskCompletionSource is not null)
+                {
+                    await _outputTaskCompletionSource.Task;
+                }
+
+                if (_errorTaskCompletionSource is not null)
+                {
+                    await _errorTaskCompletionSource.Task;
+                }
+
+                if (_process.ExitCode != 0)
+                {
+                    throw new ProcessExecutionException(_errorBuilder.ToString(), _process.ExitCode)
+                    {
+                        CommandLine = GetCommandLine(),
+                    };
+                }
+            }
         }
-
-        _process.Close();
-        await _process.WaitForExitAsync(cancellationToken);
-        _process = null;
-        await _exitTask;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_cancellationTokenSource is not null)
+        catch (OperationCanceledException)
         {
-            await _cancellationTokenSource.CancelAsync();
-            _cancellationTokenSource = null;
+            _process.Kill();
+            throw;
         }
-
-        _process?.Dispose();
-        _process = null;
-        await _exitTask;
+        finally
+        {
+            _outBuilder.Clear();
+            _errorBuilder.Clear();
+            _outputTaskCompletionSource = null;
+            _errorTaskCompletionSource = null;
+            _process.Dispose();
+            _process = null;
+        }
     }
 
     public string GetCommandLine()
     {
         var filename = FileName;
         var arguments = CommandUtility.Join(Arguments);
-        return $"{filename} {arguments}";
+        var items = new string[] { filename, arguments };
+        return string.Join(" ", items.Where(item => item != string.Empty));
     }
 
-// Reflection should not be used to increase accessibility of classes, methods, or fields
+    // Reflection should not be used to increase accessibility of classes, methods, or fields
 #pragma warning disable S3011
     private static string GetArguments(ProcessStartInfo processStartInfo)
     {
@@ -135,32 +191,32 @@ internal abstract class ProcessBase : IAsyncDisposable
     }
 #pragma warning restore S3011
 
-    private Process GetProcess()
-    {
-        var startInfo = GetProcessStartInfo();
-        startInfo.CreateNoWindow = NewWindow != true;
-        startInfo.UseShellExecute = IsWindows == true && NewWindow == true;
-        startInfo.RedirectStandardOutput = NewWindow != true;
-        startInfo.RedirectStandardError = NewWindow != true;
-        startInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-        return new Process { StartInfo = startInfo, };
-    }
-
     private ProcessStartInfo GetProcessStartInfo()
     {
-        if (NewWindow == true)
+        var startInfo = GetProcessStartInfoByPlatform();
+        startInfo.CreateNoWindow = NewWindow is not true;
+        startInfo.UseShellExecute = IsWindows is true && NewWindow is true;
+        startInfo.RedirectStandardOutput = NewWindow is not true;
+        startInfo.RedirectStandardError = NewWindow is not true;
+        startInfo.WorkingDirectory = WorkingDirectory.Fallback(Directory.GetCurrentDirectory());
+        return startInfo;
+    }
+
+    private ProcessStartInfo GetProcessStartInfoByPlatform()
+    {
+        if (NewWindow is true)
         {
-            if (IsOSX == true)
+            if (IsOSX is true)
             {
                 return GetProcessStartInfoOnMacOS();
             }
 
-            if (IsWindows == true)
+            if (IsWindows is true)
             {
                 return GetProcessStartInfoOnWindows();
             }
 
-            if (IsLinux == true)
+            if (IsLinux is true)
             {
                 return GetProcessStartInfoOnLinux();
             }
@@ -168,13 +224,33 @@ internal abstract class ProcessBase : IAsyncDisposable
             throw new NotSupportedException("The new terminal is not supported on this platform.");
         }
 
-        return new ProcessStartInfo(FileName, Arguments);
+        return new ProcessStartInfo(GetFileName(), GetArguments());
+    }
+
+    private string GetFileName()
+    {
+        if (SupportsDotnetRuntime is true && IsDotnetRuntime is true)
+        {
+            return DotnetPath;
+        }
+
+        return FileName;
+    }
+
+    private string[] GetArguments()
+    {
+        if (SupportsDotnetRuntime is true && IsDotnetRuntime is true)
+        {
+            return [FileName, .. Arguments];
+        }
+
+        return Arguments;
     }
 
     private ProcessStartInfo GetProcessStartInfoOnMacOS()
     {
-        var filename = FileName;
-        var arguments = CommandUtility.Join(Arguments);
+        var filename = GetFileName();
+        var arguments = CommandUtility.Join(GetArguments());
         var script = $"tell application \"Terminal\"\n" +
                      $"  do script \"{filename} {arguments}; exit\"\n" +
                      $"  activate\n" +
@@ -193,8 +269,8 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     private ProcessStartInfo GetProcessStartInfoOnWindows()
     {
-        var filename = $"\"{FileName}\"";
-        var arguments = CommandUtility.Join(Arguments);
+        var filename = $"\"{GetFileName()}\"";
+        var arguments = CommandUtility.Join(GetArguments());
         var tempFile = TempFile.WriteAllText($"& {filename} {arguments}");
         var scriptList = new List<string>
         {
@@ -217,8 +293,8 @@ internal abstract class ProcessBase : IAsyncDisposable
 
     private ProcessStartInfo GetProcessStartInfoOnLinux()
     {
-        var filename = FileName;
-        var arguments = CommandUtility.Join(Arguments);
+        var filename = GetFileName();
+        var arguments = CommandUtility.Join(GetArguments());
 
         return new ProcessStartInfo
         {
@@ -239,6 +315,12 @@ internal abstract class ProcessBase : IAsyncDisposable
         {
             _outBuilder.AppendLine(text);
         }
+        else
+        {
+            _outputTaskCompletionSource?.SetResult();
+        }
+
+        OutputDataReceived?.Invoke(sender, e);
     }
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
@@ -247,23 +329,11 @@ internal abstract class ProcessBase : IAsyncDisposable
         {
             _errorBuilder.AppendLine(text);
         }
-    }
-
-    private async Task WaitForExitAsync(CancellationToken cancellationToken)
-    {
-        while (cancellationToken.IsCancellationRequested != true)
+        else
         {
-            if (_process is null)
-            {
-                break;
-            }
-
-            if (_process.HasExited == true)
-            {
-                break;
-            }
-
-            await TaskUtility.TryDelay(100, cancellationToken);
+            _errorTaskCompletionSource?.SetResult();
         }
+
+        ErrorDataReceived?.Invoke(sender, e);
     }
 }

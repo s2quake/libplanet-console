@@ -1,8 +1,8 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Explorer;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Nodes.Explorer.Commands;
 
@@ -15,7 +15,7 @@ internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : Comman
     public async Task StartAsync(
         string endPoint = "", CancellationToken cancellationToken = default)
     {
-        var explorerNode = serviceProvider.GetService<IExplorerNode>();
+        var explorerNode = serviceProvider.GetRequiredService<IExplorerNode>();
         var explorerOptions = new ExplorerOptions
         {
             EndPoint = AppEndPoint.ParseOrNext(endPoint),
@@ -27,7 +27,7 @@ internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : Comman
     [CommandMethod]
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        var explorerNode = serviceProvider.GetService<IExplorerNode>();
+        var explorerNode = serviceProvider.GetRequiredService<IExplorerNode>();
         await explorerNode.StopAsync(cancellationToken);
     }
 }

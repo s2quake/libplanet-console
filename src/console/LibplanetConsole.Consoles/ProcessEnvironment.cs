@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using static System.Runtime.InteropServices.RuntimeInformation;
 
 namespace LibplanetConsole.Consoles;
@@ -107,7 +107,7 @@ internal static class ProcessEnvironment
         {
             if (IsDotnetRuntime == true)
             {
-                return IsWindows ? ".exe" : ".dll";
+                return ".dll";
             }
 
             return IsWindows ? ".exe" : string.Empty;
@@ -277,7 +277,8 @@ internal static class ProcessEnvironment
     public static ImmutableArray<string> GetArguments(
         IServiceProvider serviceProvider, object obj)
     {
-        var argumentProviders = serviceProvider.GetService<IEnumerable<IProcessArgumentProvider>>();
+        var argumentProviders
+            = serviceProvider.GetRequiredService<IEnumerable<IProcessArgumentProvider>>();
         return GetArguments(argumentProviders, obj);
     }
 
@@ -289,8 +290,9 @@ internal static class ProcessEnvironment
         if (IsWindows == true)
         {
             processStartInfo.FileName = "powershell";
-            processStartInfo.Arguments
-                = "-Command 'Get-Command dotnet | Select-Object -ExpandProperty Source'";
+            processStartInfo.ArgumentList.Add("-Command");
+            processStartInfo.ArgumentList.Add(
+                "Get-Command dotnet | Select-Object -ExpandProperty Source");
         }
         else if (IsOSX == true || IsLinux == true)
         {

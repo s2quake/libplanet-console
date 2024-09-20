@@ -1,51 +1,66 @@
+using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles.Executable;
 
-[ApplicationSettings]
+[ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("The endpoint of the console to run." +
-                    "If omitted, one of the random ports will be used.")]
+    [CommandSummary("The endpoint of the libplanet-console. " +
+                    "If omitted, a random endpoint is used.")]
+    [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
+#if DEBUG
+    [CommandProperty(InitValue = 1)]
+#else
     [CommandProperty(InitValue = 4)]
-    [CommandSummary("The number of nodes to run.\n" +
-                    "If omitted, the default value is 4.\n" +
-                    "If --nodes option is set, this option is ignored.")]
-    [CommandPropertyCondition(nameof(Nodes), null, OnSet = true)]
+#endif
+    [CommandSummary("The number of nodes to run. If omitted, 4 nodes are run.\n" +
+                    "Mutually exclusive with '--nodes' option.")]
+    [CommandPropertyExclusion(nameof(Nodes))]
+    [JsonIgnore]
     public int NodeCount { get; init; }
 
     [CommandProperty]
-    [CommandSummary("The private keys of the nodes to run.\n" +
-                    "Example: --nodes \"key1,key2,...\"")]
-    [CommandPropertyCondition(nameof(NodeCount), null, OnSet = true)]
+    [CommandSummary("The private keys of the nodes to run. ex) --nodes \"key1,key2,...\"\n" +
+                    "Mutually exclusive with '--node-count' option.")]
+    [CommandPropertyExclusion(nameof(NodeCount))]
+    [JsonIgnore]
     public string[] Nodes { get; init; } = [];
 
+#if DEBUG
+    [CommandProperty(InitValue = 1)]
+#else
     [CommandProperty(InitValue = 2)]
-    [CommandSummary("The number of clients to run.\n" +
-                    "If omitted, the default value is 2.\n" +
-                    "If --clients option is set, this option is ignored.")]
-    [CommandPropertyCondition(nameof(Clients), null, OnSet = true)]
+#endif
+    [CommandSummary("The number of clients to run. If omitted, 2 clients are run.\n" +
+                    "Mutually exclusive with '--clients' option.")]
+    [CommandPropertyExclusion(nameof(Clients))]
+    [JsonIgnore]
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to run.\n" +
-                    "Example: --clients \"key1,key2,...\"")]
-    [CommandPropertyCondition(nameof(ClientCount), null, OnSet = true)]
+    [CommandSummary("The private keys of the clients to run. ex) --clients \"key1,key2,...\"\n" +
+                    "Mutually exclusive with '--client-count' option.")]
+    [CommandPropertyExclusion(nameof(ClientCount))]
+    [JsonIgnore]
     public string[] Clients { get; init; } = [];
 
     [CommandProperty]
-    [CommandSummary("The directory path to store data of each node. " +
-                    "If omitted, the data is stored in memory.")]
-    public string StorePath { get; init; } = string.Empty;
+    [CommandSummary("The directory path to store log.")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
+    public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The directory path to store log.")]
-    public string LogPath { get; set; } = string.Empty;
+    [CommandSummary("The directory path to store log of the library.")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
+    public string LibraryLogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and the client processes will not run.")]
@@ -54,37 +69,33 @@ internal sealed record class ApplicationSettings
     [CommandPropertySwitch]
     [CommandSummary($"If set, the node and the client processes start in a new window.\n" +
                     $"This option cannot be used with --no-process option.")]
-    [CommandPropertyCondition(nameof(NoProcess), false)]
+    [CommandPropertyExclusion(nameof(NoProcess))]
     public bool NewWindow { get; set; }
 
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and the client processes are detached from the console.\n" +
                     "This option cannot be used with --no-process option.\n" +
                     "And this option is only available if the --new-window option is set.")]
-    [CommandPropertyCondition(nameof(NewWindow), true)]
+    [CommandPropertyExclusion(nameof(NewWindow))]
     public bool Detach { get; set; }
 
-    [CommandPropertySwitch('m', useName: true)]
-    [CommandSummary("If set, The service does not start automatically " +
-                    "when the node and client processes are executed.\n" +
-                    $"This option cannot be used with --no-process or --detach option.")]
-    [CommandPropertyCondition(nameof(NoProcess), false)]
-    [CommandPropertyCondition(nameof(Detach), false)]
-    public bool ManualStart { get; set; }
-
-    public static implicit operator ApplicationOptions(ApplicationSettings settings)
+    public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
+        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var nodeOptions = GetNodeOptions(endPoint, GetNodes());
+        var clientOptions = GetClientOptions(nodeOptions, GetClients());
+        var repository = new Repository(endPoint, nodeOptions, clientOptions);
         return new ApplicationOptions(endPoint)
         {
-            Nodes = settings.GetNodes(),
-            Clients = settings.GetClients(),
-            StoreDirectory = GetFullPath(settings.StorePath),
-            LogDirectory = GetFullPath(settings.LogPath),
-            NoProcess = settings.NoProcess,
-            NewWindow = settings.NewWindow,
-            Detach = settings.Detach,
-            ManualStart = settings.ManualStart,
+            LogPath = GetFullPath(LogPath),
+            LibraryLogPath = GetFullPath(LibraryLogPath),
+            Nodes = repository.Nodes,
+            Clients = repository.Clients,
+            Genesis = repository.Genesis,
+            NoProcess = NoProcess,
+            NewWindow = NewWindow,
+            Detach = Detach,
+            Components = components,
         };
 
         static string GetFullPath(string path)
@@ -108,11 +119,36 @@ internal sealed record class ApplicationSettings
         return options;
     }
 
+    private static NodeOptions[] GetNodeOptions(
+        AppEndPoint endPoint, AppPrivateKey[] nodePrivateKeys)
+    {
+        return [.. nodePrivateKeys.Select(key => new NodeOptions
+        {
+            EndPoint = AppEndPoint.Next(),
+            PrivateKey = key,
+            SeedEndPoint = endPoint,
+        })];
+    }
+
+    private static ClientOptions[] GetClientOptions(
+        NodeOptions[] nodeOptions, AppPrivateKey[] clientPrivateKeys)
+    {
+        return [.. clientPrivateKeys.Select(key => new ClientOptions
+        {
+            EndPoint = AppEndPoint.Next(),
+            NodeEndPoint = Random(nodeOptions).EndPoint,
+            PrivateKey = key,
+        })];
+
+        static NodeOptions Random(NodeOptions[] nodeOptions)
+            => nodeOptions[System.Random.Shared.Next(nodeOptions.Length)];
+    }
+
     private AppPrivateKey[] GetNodes()
     {
         if (Nodes.Length > 0)
         {
-            return [.. Nodes.Select(item => AppPrivateKey.Parse(item))];
+            return [.. Nodes.Select(AppPrivateKey.Parse)];
         }
 
         return [.. Enumerable.Range(0, NodeCount).Select(item => new AppPrivateKey())];
@@ -122,7 +158,7 @@ internal sealed record class ApplicationSettings
     {
         if (Clients.Length > 0)
         {
-            return [.. Clients.Select(item => AppPrivateKey.Parse(item))];
+            return [.. Clients.Select(AppPrivateKey.Parse)];
         }
 
         return [.. Enumerable.Range(0, ClientCount).Select(item => new AppPrivateKey())];

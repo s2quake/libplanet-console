@@ -1,55 +1,61 @@
+using System.ComponentModel;
+using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Clients.Executable;
 
-[ApplicationSettings]
+[ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint on which the Client Service will run. " +
-                    "If omitted, host is 127.0.0.1 and port is set to random.")]
+    [CommandSummary("Indicates the EndPoint on which the client will run. " +
+                    "If omitted, a random endpoint is used.")]
+    [AppEndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the client. " +
                     "If omitted, a random private key is used.")]
+    [AppPrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
+    [JsonIgnore]
+    [Category]
     public int ParentProcessId { get; init; }
-
-    [CommandProperty("seed")]
-    [CommandSummary("Use --node-end-point as the Seed EndPoint. " +
-                    "Get the EndPoint of the Node to connect to from Seed.")]
-    [CommandPropertyCondition(nameof(NodeEndPoint), "", IsNot = true)]
-    public bool IsSeed { get; init; }
 
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    [AppEndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path to store log.")]
+    [CommandSummary("Indicates the file path to save logs.")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
+    [DefaultValue("")]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
-    [CommandSummary("If set, the REPL is not started.")]
+    [CommandSummary("If set, the client runs without REPL.")]
+    [JsonIgnore]
     public bool NoREPL { get; init; }
 
-    public static implicit operator ApplicationOptions(ApplicationSettings settings)
+    public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(settings.EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(settings.PrivateKey);
+        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
-            ParentProcessId = settings.ParentProcessId,
-            IsSeed = settings.IsSeed,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(settings.NodeEndPoint),
-            LogPath = GetFullPath(settings.LogPath),
-            NoREPL = settings.NoREPL,
+            ParentProcessId = ParentProcessId,
+            NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
+            LogPath = GetFullPath(LogPath),
+            NoREPL = NoREPL,
+            Components = components,
         };
 
         static string GetFullPath(string path)

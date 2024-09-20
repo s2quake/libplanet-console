@@ -3,13 +3,15 @@ using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles.Commands;
 
 [Export(typeof(ICommand))]
+[Export]
 [CommandSummary("Provides client-related commands.")]
 [method: ImportingConstructor]
-internal sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
+public sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
@@ -52,13 +54,17 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     public async Task NewAsync(
         string privateKey = "", CancellationToken cancellationToken = default)
     {
-        var options = new AddNewOptions
+        var clientOptions = new ClientOptions
         {
+            EndPoint = AppEndPoint.Next(),
             PrivateKey = AppPrivateKey.ParseOrRandom(privateKey),
+        };
+        var options = new AddNewClientOptions
+        {
+            ClientOptions = clientOptions,
             NoProcess = NewProperties.NoProcess,
             Detach = NewProperties.Detach,
             NewWindow = NewProperties.NewWindow,
-            ManualStart = NewProperties.ManualStart,
         };
         var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
@@ -105,7 +111,7 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
     public async Task StartAsync(
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
-        var nodes = application.GetService<NodeCollection>();
+        var nodes = application.GetRequiredService<NodeCollection>();
         var address = Address;
         var node = nodeAddress == string.Empty
             ? nodes.RandomNode()
@@ -123,21 +129,6 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
         var address = Address;
         var client = application.GetClient(address);
         await client.StopAsync(cancellationToken);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Display command line to execute the client process.")]
-    public void CommandLine()
-    {
-        var address = Address;
-        var client = application.GetClient(address);
-        var clientProcess = client.CreateProcess();
-        var nodes = application.GetService<NodeCollection>();
-        var node = nodes.RandomNode();
-        clientProcess.Detach = true;
-        clientProcess.NewWindow = true;
-        clientProcess.NodeEndPoint = node.EndPoint;
-        Out.WriteLine(clientProcess.GetCommandLine());
     }
 
     [CommandMethod]
@@ -196,21 +187,13 @@ internal sealed partial class ClientCommand(ApplicationBase application, IClient
         [CommandPropertySwitch]
         [CommandSummary("The client is started in a new window.\n" +
                         "This option cannot be used with --no-process option.")]
-        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyExclusion(nameof(NoProcess))]
         public static bool Detach { get; set; }
 
         [CommandPropertySwitch]
         [CommandSummary("The client is started in a new window.\n" +
                         "This option cannot be used with --no-process option.")]
-        [CommandPropertyCondition(nameof(NoProcess), false)]
+        [CommandPropertyExclusion(nameof(NoProcess))]
         public static bool NewWindow { get; set; }
-
-        [CommandPropertySwitch('m', useName: true)]
-        [CommandSummary("The service does not start automatically " +
-                        "when the client process is executed.\n" +
-                        "This option cannot be used with --no-process or --detach option.")]
-        [CommandPropertyCondition(nameof(NoProcess), false)]
-        [CommandPropertyCondition(nameof(Detach), false)]
-        public static bool ManualStart { get; set; }
     }
 }

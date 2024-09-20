@@ -1,16 +1,15 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Security;
 using Bencodex;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Consoles;
@@ -19,33 +18,38 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 {
     private static readonly Codec _codec = new();
     private readonly ApplicationContainer _container;
-    private readonly SecureString _privateKey;
+    private readonly NodeOptions _nodeOptions;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<INodeService, INodeCallback> _remoteService;
     private readonly RemoteService<IBlockChainService, IBlockChainCallback> _blockChainService;
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
+    private readonly CancellationTokenSource _processCancellationTokenSource = new();
     private AppEndPoint? _blocksyncEndPoint;
     private AppEndPoint? _consensusEndPoint;
     private Guid _closeToken;
     private NodeInfo _nodeInfo;
     private bool _isDisposed;
     private bool _isInProgress;
+    private NodeProcess? _process;
+    private Task _processTask = Task.CompletedTask;
 
-    public Node(ApplicationBase application, AppPrivateKey privateKey, NodeOptions nodeOptions)
+    public Node(ApplicationBase application, NodeOptions nodeOptions)
     {
         _container = application.CreateChildContainer(this);
-        _privateKey = privateKey.ToSecureString();
+        _nodeOptions = nodeOptions;
         _container.ComposeExportedValue<INode>(this);
         _container.ComposeExportedValue(this);
         _contents = [.. _container.GetExportedValues<INodeContent>()];
-        _logger = application.GetService<ILogger>();
+        _logger = application.GetRequiredService<ILogger>();
         _remoteService = new(this);
         _blockChainService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, _blockChainService, .. GetRemoteServices(_container)]);
-        PublicKey = privateKey.PublicKey;
-        NodeOptions = nodeOptions;
+            [_remoteService, _blockChainService, .. GetRemoteServices(_container)])
+        {
+            EndPoint = nodeOptions.EndPoint,
+        };
+        PublicKey = nodeOptions.PrivateKey.PublicKey;
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         _logger.Debug("Node is created: {Address}", Address);
     }
@@ -74,13 +78,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public bool IsRunning { get; private set; }
 
-    public NodeOptions NodeOptions { get; }
-
-    public AppEndPoint EndPoint
-    {
-        get => _remoteServiceContext.EndPoint;
-        set => _remoteServiceContext.EndPoint = value;
-    }
+    public AppEndPoint EndPoint => _nodeOptions.EndPoint;
 
     public NodeInfo Info => _nodeInfo;
 
@@ -120,7 +118,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public override string ToString() => $"{Address:S}: {EndPoint}";
 
-    public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
+    public byte[] Sign(object obj) => _nodeOptions.PrivateKey.Sign(obj);
 
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -169,7 +167,10 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
             message: "Node is not attached.");
 
         using var scope = new ProgressScope(this);
-        _nodeInfo = await _remoteService.Service.StartAsync(cancellationToken);
+        var application = this.GetRequiredService<ApplicationBase>();
+        var seedEndPoint = AppEndPoint.ToString(
+            _nodeOptions.SeedEndPoint ?? application.Info.EndPoint);
+        _nodeInfo = await _remoteService.Service.StartAsync(seedEndPoint, cancellationToken);
         _blocksyncEndPoint = AppEndPoint.Parse(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = AppEndPoint.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
@@ -198,6 +199,12 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
+        await _processCancellationTokenSource.CancelAsync();
+        _processCancellationTokenSource.Dispose();
+        await _processTask;
+        _processTask = Task.CompletedTask;
+        _process = null;
+
         _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
         await _remoteServiceContext.CloseAsync(_closeToken);
         _closeToken = Guid.Empty;
@@ -209,18 +216,33 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         GC.SuppressFinalize(this);
     }
 
-    public NodeProcess CreateProcess()
+    public Task StartProcessAsync(AddNewNodeOptions options, CancellationToken cancellationToken)
     {
-        var endPoint = EndPoint;
-        var application = IServiceProviderExtensions.GetService<ApplicationBase>(this);
-        return new NodeProcess(this)
+        if (_process is not null)
         {
-            EndPoint = endPoint,
-            PrivateKey = _privateKey,
-            NodeEndPoint = application.Info.EndPoint,
-            StoreDirectory = application.Info.StoreDirectory,
-            LogDirectory = application.Info.LogDirectory,
+            throw new InvalidOperationException("Node process is already running.");
+        }
+
+        var nodeOptions = _nodeOptions;
+        var process = new NodeProcess(this, nodeOptions)
+        {
+            Detach = options.Detach,
+            NewWindow = options.NewWindow,
         };
+        var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, _processCancellationTokenSource.Token);
+        _logger.Debug(process.ToString());
+        _processTask = process.RunAsync(cancellationTokenSource.Token)
+            .ContinueWith(
+                task =>
+                {
+                    _processTask = Task.CompletedTask;
+                    _process = null;
+                    cancellationTokenSource.Dispose();
+                },
+                cancellationToken);
+        _process = process;
+        return Task.CompletedTask;
     }
 
     void INodeCallback.OnStarted(NodeInfo nodeInfo)

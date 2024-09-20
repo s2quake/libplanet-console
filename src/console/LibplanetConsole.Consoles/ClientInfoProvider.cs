@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles;
 
@@ -14,7 +14,7 @@ internal sealed class ClientInfoProvider : InfoProviderBase<Client>
             yield return item;
         }
 
-        var contents = obj.GetService<IEnumerable<IClientContent>>();
+        var contents = obj.GetRequiredService<IEnumerable<IClientContent>>();
 
         foreach (var content in contents)
         {

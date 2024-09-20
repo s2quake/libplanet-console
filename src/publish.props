@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PublishSingleFile>true</PublishSingleFile>
-    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    <SelfContained>false</SelfContained>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>

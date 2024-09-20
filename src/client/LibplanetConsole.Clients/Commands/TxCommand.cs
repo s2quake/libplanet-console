@@ -12,8 +12,7 @@ internal sealed class TxCommand(IClient client, IBlockChain blockChain) : Comman
     [CommandPropertyRequired]
     public string Text { get; set; } = string.Empty;
 
-    protected override async Task OnExecuteAsync(
-        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         var action = new StringAction
         {

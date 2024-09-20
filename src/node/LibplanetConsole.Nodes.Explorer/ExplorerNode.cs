@@ -14,7 +14,8 @@ namespace LibplanetConsole.Nodes.Explorer;
 [Export(typeof(IApplicationService))]
 [Export]
 [method: ImportingConstructor]
-internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, IApplicationService
+internal sealed class ExplorerNode(
+    INode node, ILogger logger, ExplorerSettings settings) : IExplorerNode, IApplicationService
 {
     private IWebHost? _webHost;
 
@@ -66,12 +67,11 @@ internal sealed class ExplorerNode(INode node, ILogger logger) : IExplorerNode, 
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        var endPoint = ApplicationSettingsParser.Peek<ExplorerNodeSettings>().ExplorerEndPoint;
-        if (endPoint is not null)
+        if (settings.IsExplorerEnabled is true)
         {
             var options = new ExplorerOptions
             {
-                EndPoint = AppEndPoint.ParseOrNext(endPoint),
+                EndPoint = AppEndPoint.ParseOrNext(settings.ExplorerEndPoint),
             };
             await StartAsync(options, cancellationToken);
         }

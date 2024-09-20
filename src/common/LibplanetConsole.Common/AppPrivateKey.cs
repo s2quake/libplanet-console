@@ -15,6 +15,7 @@ namespace LibplanetConsole.Common;
 [JsonConverter(typeof(AppPrivateKeyJsonConverter))]
 public sealed record class AppPrivateKey
 {
+    public const string RegularExpression = "[0-9a-fA-F]{64}";
     private static readonly Codec _codec = new();
     private readonly PrivateKey _privateKey;
 
@@ -99,6 +100,8 @@ public sealed record class AppPrivateKey
         var json = Encoding.UTF8.GetString(decrypted);
         return JsonSerializer.Deserialize(json, type);
     }
+
+    public byte[] Decrypt(byte[] bytes) => _privateKey.Decrypt(bytes);
 
     public T Decrypt<T>(string text)
         where T : notnull => Decrypt(text, typeof(T)) switch

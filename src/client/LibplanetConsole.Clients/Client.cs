@@ -1,9 +1,9 @@
 using System.Security;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Nodes;
 using LibplanetConsole.Nodes.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Clients;
@@ -63,10 +63,11 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public bool IsRunning { get; private set; }
 
-    private INodeService RemoteNodeService => _application.GetService<RemoteNodeService>().Service;
+    private INodeService RemoteNodeService
+        => _application.GetRequiredService<RemoteNodeService>().Service;
 
     private IBlockChainService RemoteBlockChainService
-        => _application.GetService<RemoteBlockChainService>().Service;
+        => _application.GetRequiredService<RemoteBlockChainService>().Service;
 
     public override string ToString() => $"[{Address}]";
 
@@ -79,7 +80,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
             throw new InvalidOperationException("The client is already running.");
         }
 
-        _remoteNodeContext = _application.GetService<RemoteNodeContext>();
+        _remoteNodeContext = _application.GetRequiredService<RemoteNodeContext>();
         _remoteNodeContext.EndPoint = NodeEndPoint;
         _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
         _remoteNodeContext.Closed += RemoteNodeContext_Closed;

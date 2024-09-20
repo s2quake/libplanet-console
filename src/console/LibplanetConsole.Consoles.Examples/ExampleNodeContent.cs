@@ -4,25 +4,18 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Consoles.Services;
 using LibplanetConsole.Examples.Services;
-using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles.Examples;
 
 [Export(typeof(IExampleNodeContent))]
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
-internal sealed class ExampleNodeContent
-    : NodeContentBase, IExampleNodeCallback, IExampleNodeContent, INodeContentService
+[method: ImportingConstructor]
+internal sealed class ExampleNodeContent(INode node, ExampleSettings settings)
+    : NodeContentBase(node), IExampleNodeCallback, IExampleNodeContent, INodeContentService
 {
-    private readonly RemoteService<IExampleNodeService, IExampleNodeCallback> _remoteService;
     private readonly StringBuilder _log = new();
-
-    [ImportingConstructor]
-    public ExampleNodeContent(INode node)
-        : base(node)
-    {
-        _remoteService = new RemoteService<IExampleNodeService, IExampleNodeCallback>(this);
-    }
+    private RemoteService<IExampleNodeService, IExampleNodeCallback>? _remoteService;
 
     public event EventHandler<ItemEventArgs<AppAddress>>? Subscribed;
 
@@ -30,12 +23,14 @@ internal sealed class ExampleNodeContent
 
     public int Count { get; private set; }
 
-    public bool IsExample { get; }
-        = ApplicationSettingsParser.Peek<ExampleNodeSettings>().IsNodeExample;
+    public bool IsExample { get; } = settings.IsNodeExample;
 
-    IRemoteService INodeContentService.RemoteService => _remoteService;
+    IRemoteService INodeContentService.RemoteService => RemoteService;
 
-    private IExampleNodeService Service => _remoteService.Service;
+    private IExampleNodeService Service => RemoteService.Service;
+
+    private RemoteService<IExampleNodeService, IExampleNodeCallback> RemoteService
+        => _remoteService ??= new RemoteService<IExampleNodeService, IExampleNodeCallback>(this);
 
     public Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken)
         => Service.GetAddressesAsync(cancellationToken);
