@@ -3,9 +3,9 @@ using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Consoles.Commands;
 using LibplanetConsole.Guild;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles.Guild.Commands;
 
@@ -26,7 +26,7 @@ internal sealed class NodeGuildCommand(
     public async Task NewAsync(CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new CreateGuildOptions
         {
             Name = "Guild",
@@ -44,7 +44,7 @@ internal sealed class NodeGuildCommand(
     public async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new DeleteGuildOptions
         {
         };
@@ -61,7 +61,7 @@ internal sealed class NodeGuildCommand(
         AppAddress guildAddress, CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new RequestJoinOptions
         {
             GuildAddress = guildAddress,
@@ -80,7 +80,7 @@ internal sealed class NodeGuildCommand(
         CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new CancelJoinOptions
         {
         };
@@ -98,7 +98,7 @@ internal sealed class NodeGuildCommand(
         AppAddress memberAddress, CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new AcceptJoinOptions
         {
             MemberAddress = memberAddress,
@@ -117,7 +117,7 @@ internal sealed class NodeGuildCommand(
         AppAddress memberAddress, CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new RejectJoinOptions
         {
             MemberAddress = memberAddress,
@@ -135,7 +135,7 @@ internal sealed class NodeGuildCommand(
     public async Task LeaveAsync(CancellationToken cancellationToken)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new LeaveGuildOptions
         {
         };
@@ -153,7 +153,7 @@ internal sealed class NodeGuildCommand(
         AppAddress memberAddress, CancellationToken cancellationToken)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new BanMemberOptions
         {
             MemberAddress = memberAddress,
@@ -172,7 +172,7 @@ internal sealed class NodeGuildCommand(
         AppAddress memberAddress, CancellationToken cancellationToken)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var options = new UnbanMemberOptions
         {
             MemberAddress = memberAddress,
@@ -191,7 +191,7 @@ internal sealed class NodeGuildCommand(
         AppAddress guildAddress = default, CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var guildNode = node.GetService<IGuildNodeContent>();
+        var guildNode = node.GetRequiredService<IGuildNodeContent>();
         var members = await guildNode.GetGuildMembersAsync(GetGuildAddress(), cancellationToken);
         var sb = new StringBuilder();
         for (var i = 0; i < members.Length; i++)

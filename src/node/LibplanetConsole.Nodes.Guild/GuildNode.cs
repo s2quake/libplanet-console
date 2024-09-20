@@ -8,6 +8,7 @@ using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Guild;
+using Microsoft.Extensions.DependencyInjection;
 using Nekoyume;
 using Nekoyume.Action.Guild;
 using Nekoyume.Model.Guild;
@@ -141,7 +142,7 @@ internal sealed class GuildNode : IGuildNode, IDisposable
     {
         AppAddress GetGuild()
         {
-            var blockChain = _node.GetService<BlockChain>();
+            var blockChain = _node.GetRequiredService<BlockChain>();
             var block = height == long.MaxValue ? blockChain.Tip : blockChain[height];
             var worldState = GetWorldState(blockChain, block);
             var agentAddress = new AgentAddress((Address)address);
@@ -161,7 +162,7 @@ internal sealed class GuildNode : IGuildNode, IDisposable
     {
         AppAddress[] GetGuildMembers()
         {
-            var blockChain = _node.GetService<BlockChain>();
+            var blockChain = _node.GetRequiredService<BlockChain>();
             var block = height == long.MaxValue ? blockChain.Tip : blockChain[height];
             var worldState = GetWorldState(blockChain, block);
             var trie = worldState.GetAccountState(Addresses.GuildParticipant).Trie;
@@ -196,7 +197,7 @@ internal sealed class GuildNode : IGuildNode, IDisposable
 
     private GuildInfo GetGuildInfo()
     {
-        var blockChain = _node.GetService<BlockChain>();
+        var blockChain = _node.GetRequiredService<BlockChain>();
         var worldState = blockChain.GetNextWorldState() ?? blockChain.GetWorldState();
         var agentAddress = new AgentAddress((Address)_node.Address);
         if (GuildParticipantModule.GetJoinedGuild(worldState, agentAddress) is { } guildAddress)
