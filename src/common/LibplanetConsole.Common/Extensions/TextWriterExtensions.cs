@@ -10,10 +10,11 @@ public static class TextWriterExtensions
         @this.WriteLine(json);
     }
 
-    public static Task WriteLineAsJsonAsync(this TextWriter @this, object obj)
+    public static async Task WriteLineAsJsonAsync(
+        this TextWriter @this, object obj, CancellationToken cancellationToken)
     {
-        var json = JsonUtility.Serialize(obj, isColorized: true);
-        return @this.WriteLineAsync(json);
+        var json = await JsonUtility.SerializeAsync(obj, isColorized: true, cancellationToken);
+        await @this.WriteLineAsync(json);
     }
 
     public static void WriteColoredLine(

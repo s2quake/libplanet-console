@@ -67,7 +67,7 @@ public sealed partial class ClientCommand(
         };
         var client = await clients.AddNewAsync(options, cancellationToken);
         var clientInfo = client.Info;
-        await Out.WriteLineAsJsonAsync(clientInfo);
+        await Out.WriteLineAsJsonAsync(clientInfo, cancellationToken);
     }
 
     [CommandMethod]

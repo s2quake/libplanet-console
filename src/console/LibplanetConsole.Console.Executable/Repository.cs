@@ -1,8 +1,10 @@
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
+using JSSoft.Commands;
 using Libplanet.Net;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Progresses;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Options;
 using static LibplanetConsole.Common.EndPointUtility;
@@ -12,6 +14,7 @@ namespace LibplanetConsole.Console.Executable;
 public sealed record class Repository
 {
     private const int DefaultTimeout = 10000;
+    private const int BlinkOfAnEye = 300;
 
     private byte[]? _genesis;
     private AppProtocolVersion? _appProtocolVersion;
@@ -132,7 +135,11 @@ public sealed record class Repository
         return CreateGenesis(genesisOptions);
     }
 
-    public dynamic Save(string repositoryPath, RepositoryPathResolver resolver)
+    public async Task<dynamic> SaveAsync(
+        string repositoryPath,
+        RepositoryPathResolver resolver,
+        CancellationToken cancellationToken,
+        IProgress<ProgressInfo> progress)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
         {
@@ -185,56 +192,74 @@ public sealed record class Repository
                 },
             },
         };
+        var stepProgress = progress.Step(0.0, 1.0, 3 + Nodes.Length + Clients.Length);
 
         info.RepositoryPath = repositoryPath;
 
-        SaveGenesis(genesisPath);
+        stepProgress.Next("Saving the genesis...");
+        await SaveGenesisAsync(genesisPath, cancellationToken);
         info.GenesisPath = genesisPath;
-        SaveAppProtocolVersion(appProtocolVersionPath);
+        await SaveAppProtocolVersionAsync(appProtocolVersionPath, cancellationToken);
         info.AppProtocolVersionPath = appProtocolVersionPath;
-        SaveSettingsSchema(schemaPath);
+        stepProgress.Next("Saving the schema...");
+        await SaveSettingsSchemaAsync(schemaPath, cancellationToken);
         info.SchemaPath = schemaPath;
-        SaveSettings(schemaPath, settingsPath, applicationOptions, kestrelOptions);
+        stepProgress.Next("Saving the settings...");
+        await SaveSettingsAsync(
+            schemaPath, settingsPath, applicationOptions, kestrelOptions, cancellationToken);
         info.SettingsPath = settingsPath;
 
         info.Nodes = new List<ExpandoObject>(Nodes.Length);
         PathUtility.EnsureDirectory(nodesPath);
-        Array.ForEach(Nodes, node =>
+        for (var i = 0; i < Nodes.Length; i++)
         {
-            var genesisPath = resolver.GetGenesisPath(repositoryPath);
-            var nodePath = resolver.GetNodePath(nodesPath, node.PrivateKey);
+            stepProgress.Next($"Initializing node {i}...");
+            var node = Nodes[i];
             var process = new NodeRepositoryProcess
             {
                 PrivateKey = node.PrivateKey,
                 Port = GetPort(node.EndPoint),
-                OutputPath = nodePath,
-                GenesisPath = genesisPath,
+                OutputPath = resolver.GetNodePath(nodesPath, node.PrivateKey),
+                GenesisPath = resolver.GetGenesisPath(repositoryPath),
                 AppProtocolVersionPath = appProtocolVersionPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
                 ActionProviderType = node.ActionProviderType,
             };
             var sb = new StringBuilder();
+            using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
+            using var linkedCancellationTokenSource
+                = CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken, processCancellationTokenSource.Token);
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
-            process.Run(DefaultTimeout);
+            await process.RunAsync(linkedCancellationTokenSource.Token);
             info.Nodes.Add(JsonUtility.DeserializeSchema<ExpandoObject>(sb.ToString()));
-        });
+        }
 
         info.Clients = new List<ExpandoObject>(Clients.Length);
         PathUtility.EnsureDirectory(clientsPath);
-        Array.ForEach(Clients, client =>
+        for (var i = 0; i < Clients.Length; i++)
         {
-            var clientPath = resolver.GetClientPath(clientsPath, client.PrivateKey);
+            stepProgress.Next($"Initializing client {i}...");
+            var client = Clients[i];
             var process = new ClientRepositoryProcess
             {
                 PrivateKey = client.PrivateKey,
                 Port = GetPort(client.EndPoint),
-                OutputPath = clientPath,
+                OutputPath = resolver.GetClientPath(clientsPath, client.PrivateKey),
             };
             var sb = new StringBuilder();
+            using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
+            using var linkedCancellationTokenSource
+                = CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken, processCancellationTokenSource.Token);
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
-            process.Run(DefaultTimeout);
+            await process.RunAsync(linkedCancellationTokenSource.Token);
             info.Clients.Add(JsonUtility.DeserializeSchema<ExpandoObject>(sb.ToString()));
-        });
+        }
+
+        await Task.Delay(1000, default);
+        stepProgress.Complete("Done.");
+        await Task.Delay(BlinkOfAnEye, default);
 
         return info;
     }
@@ -253,32 +278,35 @@ public sealed record class Repository
         return CreateGenesis(genesisOptions);
     }
 
-    private static void SaveSettingsSchema(string schemaPath)
+    private static async Task SaveSettingsSchemaAsync(
+        string schemaPath, CancellationToken cancellationToken)
     {
         var schemaBuilder = OptionsSchemaBuilder.Create();
         var schema = schemaBuilder.Build();
-        File.WriteAllLines(schemaPath, [schema]);
+        await File.WriteAllLinesAsync(schemaPath, [schema], cancellationToken);
     }
 
-    private void SaveGenesis(string genesisPath)
+    private async Task SaveGenesisAsync(string genesisPath, CancellationToken cancellationToken)
     {
         var genesis = Genesis;
         var hex = ByteUtil.Hex(genesis);
-        File.WriteAllLines(genesisPath, [hex]);
+        await File.WriteAllLinesAsync(genesisPath, [hex], cancellationToken);
     }
 
-    private void SaveAppProtocolVersion(string appProtocolVersionPath)
+    private async Task SaveAppProtocolVersionAsync(
+        string appProtocolVersionPath, CancellationToken cancellationToken)
     {
         var appProtocolVersion = AppProtocolVersion;
         var hex = appProtocolVersion.Token;
-        File.WriteAllLines(appProtocolVersionPath, [hex]);
+        await File.WriteAllLinesAsync(appProtocolVersionPath, [hex], cancellationToken);
     }
 
-    private static void SaveSettings(
+    private static async Task SaveSettingsAsync(
         string schemaPath,
         string settingsPath,
         ApplicationOptions applicationOptions,
-        dynamic kestrelOptions)
+        dynamic kestrelOptions,
+        CancellationToken cancellationToken)
     {
         var schemaRelativePath = PathUtility.GetRelativePath(settingsPath, schemaPath);
         var settings = new Settings
@@ -288,7 +316,7 @@ public sealed record class Repository
             Kestrel = kestrelOptions,
         };
         var json = JsonUtility.SerializeSchema(settings);
-        File.WriteAllLines(settingsPath, [json]);
+        await File.WriteAllLinesAsync(settingsPath, [json], cancellationToken);
     }
 
     private sealed record class Settings
