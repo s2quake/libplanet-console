@@ -5,11 +5,12 @@ using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
+using ShellProgressBar;
 
 namespace LibplanetConsole.Consoles.Executable.EntryCommands;
 
 [CommandSummary("Create a new repository to run Libplanet nodes and clients from the console.")]
-internal sealed class InitializeCommand : CommandBase
+internal sealed class InitializeCommand : CommandAsyncBase
 {
     public InitializeCommand()
         : base("init")
@@ -70,8 +71,10 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Genesis")]
     public DateTimeOffset DateTimeOffset { get; set; }
 
-    protected override void OnExecute()
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
+        var progress = new CommandProgress();
+
         var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
         var prevEndPoint = EndPoint != string.Empty ? endPoint : null;
@@ -94,7 +97,8 @@ internal sealed class InitializeCommand : CommandBase
         {
             Condition = Quiet is false,
         };
-        dynamic info = repository.Save(outputPath, resolver);
+        dynamic info = await repository.SaveAsync(
+            outputPath, resolver, cancellationToken, progress);
         info.GenesisArguments = new
         {
             GenesisKey = AppPrivateKey.ToString(genesisKey),
@@ -102,8 +106,8 @@ internal sealed class InitializeCommand : CommandBase
                 item => AppPublicKey.ToString(item.PrivateKey.PublicKey)),
             Timestamp = dateTimeOffset,
         };
-
-        TextWriterExtensions.WriteLineAsJson(writer, info);
+        progress.Dispose();
+        await TextWriterExtensions.WriteLineAsJsonAsync(writer, info);
     }
 
     private NodeOptions[] GetNodeOptions(ref AppEndPoint? prevEndPoint)

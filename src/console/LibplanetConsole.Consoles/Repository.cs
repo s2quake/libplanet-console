@@ -2,8 +2,10 @@ using System.ComponentModel;
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
+using JSSoft.Commands;
 using Libplanet.Common;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Progresses;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles;
@@ -11,6 +13,7 @@ namespace LibplanetConsole.Consoles;
 public sealed record class Repository
 {
     private const int DefaultTimeout = 10000;
+    private const int BlinkOfAnEye = 300;
 
     public Repository(AppEndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
     {
@@ -80,7 +83,11 @@ public sealed record class Repository
         }
     }
 
-    public dynamic Save(string repositoryPath, RepositoryPathResolver resolver)
+    public async Task<dynamic> SaveAsync(
+        string repositoryPath,
+        RepositoryPathResolver resolver,
+        CancellationToken cancellationToken,
+        IProgress<ProgressInfo> progress)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
         {
@@ -107,20 +114,25 @@ public sealed record class Repository
         var settingsPath = resolver.GetSettingsPath(repositoryPath);
         var schemaPath = resolver.GetSettingsSchemaPath(repositoryPath);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
+        var stepProgress = progress.Step(0.0, 1.0, 3 + Nodes.Length + Clients.Length);
 
         info.RepositoryPath = repositoryPath;
 
-        SaveGenesis(genesisPath);
+        stepProgress.Next("Saving the genesis...");
+        await SaveGenesisAsync(genesisPath, cancellationToken);
         info.GenesisPath = genesisPath;
-        SaveSettingsSchema(schemaPath);
+        stepProgress.Next("Saving the schema...");
+        await SaveSettingsSchemaAsync(schemaPath, cancellationToken);
         info.SchemaPath = schemaPath;
-        SaveSettings(schemaPath, settingsPath);
+        stepProgress.Next("Saving the settings...");
+        await SaveSettingsAsync(schemaPath, settingsPath, cancellationToken);
         info.SettingsPath = settingsPath;
 
         info.Nodes = new List<ExpandoObject>(Nodes.Length);
-        Array.ForEach(Nodes, node =>
+        for (var i = 0; i < Nodes.Length; i++)
         {
-            var genesisPath = resolver.GetGenesisPath(repositoryPath);
+            stepProgress.Next($"Initializing node {i}...");
+            var node = Nodes[i];
             var nodesPath = resolver.GetNodesPath(repositoryPath);
             var nodePath = resolver.GetNodePath(nodesPath, node.PrivateKey);
             var process = new NodeRepositoryProcess
@@ -131,14 +143,20 @@ public sealed record class Repository
                 GenesisPath = genesisPath,
             };
             var sb = new StringBuilder();
+            using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
+            using var linkedCancellationTokenSource
+                = CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken, processCancellationTokenSource.Token);
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
-            process.Run(DefaultTimeout);
+            await process.RunAsync(linkedCancellationTokenSource.Token);
             info.Nodes.Add(JsonUtility.Deserialize<ExpandoObject>(sb.ToString()));
-        });
+        }
 
         info.Clients = new List<ExpandoObject>(Clients.Length);
-        Array.ForEach(Clients, client =>
+        for (var i = 0; i < Clients.Length; i++)
         {
+            stepProgress.Next($"Initializing client {i}...");
+            var client = Clients[i];
             var clientsPath = resolver.GetClientsPath(repositoryPath);
             var clientPath = resolver.GetClientPath(clientsPath, client.PrivateKey);
             var process = new ClientRepositoryProcess
@@ -148,10 +166,18 @@ public sealed record class Repository
                 OutputPath = clientPath,
             };
             var sb = new StringBuilder();
+            using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
+            using var linkedCancellationTokenSource
+                = CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken, processCancellationTokenSource.Token);
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
-            process.Run(DefaultTimeout);
+            await process.RunAsync(linkedCancellationTokenSource.Token);
             info.Clients.Add(JsonUtility.Deserialize<ExpandoObject>(sb.ToString()));
-        });
+        }
+
+        await Task.Delay(1000, default);
+        stepProgress.Complete("Done.");
+        await Task.Delay(BlinkOfAnEye, default);
 
         return info;
     }
@@ -171,21 +197,23 @@ public sealed record class Repository
         return settings.Application;
     }
 
-    private static void SaveSettingsSchema(string schemaPath)
+    private static async Task SaveSettingsSchemaAsync(
+        string schemaPath, CancellationToken cancellationToken)
     {
         var schemaBuilder = new ApplicationSettingsSchemaBuilder();
         var schema = schemaBuilder.Build();
-        File.WriteAllLines(schemaPath, [schema]);
+        await File.WriteAllLinesAsync(schemaPath, [schema], cancellationToken);
     }
 
-    private void SaveGenesis(string genesisPath)
+    private async Task SaveGenesisAsync(string genesisPath, CancellationToken cancellationToken)
     {
         var genesis = Genesis;
         var hex = ByteUtil.Hex(genesis);
-        File.WriteAllLines(genesisPath, [hex]);
+        await File.WriteAllLinesAsync(genesisPath, [hex], cancellationToken);
     }
 
-    private void SaveSettings(string schemaPath, string settingsPath)
+    private async Task SaveSettingsAsync(
+        string schemaPath, string settingsPath, CancellationToken cancellationToken)
     {
         var schemaRelativePath = PathUtility.GetRelativePath(settingsPath, schemaPath);
         var settings = new Settings
@@ -199,7 +227,7 @@ public sealed record class Repository
             },
         };
         var json = JsonUtility.Serialize(settings);
-        File.WriteAllLines(settingsPath, [json]);
+        await File.WriteAllLinesAsync(settingsPath, [json], cancellationToken);
     }
 
     private sealed record class Settings
