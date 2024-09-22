@@ -12,13 +12,13 @@ internal sealed partial class Application(ApplicationOptions options)
 {
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        await base.OnRunAsync(cancellationToken);
         var message = "Welcome to console for Libplanet.";
         var sw = new StringWriter();
         var commandContext = this.GetRequiredService<CommandContext>();
         var terminal = this.GetRequiredService<SystemTerminal>();
         commandContext.Out = sw;
         await Console.Out.WriteColoredLineAsync(message, TerminalColorType.BrightGreen);
-        await base.OnRunAsync(cancellationToken);
         await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
         await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
         await sw.WriteLineAsync();
@@ -35,7 +35,8 @@ internal sealed partial class Application(ApplicationOptions options)
         CancellationToken cancellationToken,
         IProgress<ProgressInfo> progress)
     {
-        return base.OnServiceInitializeAsync(serviceCollection, cancellationToken, progress);
+        var commandProgress = new CommandProgress();
+        return base.OnServiceInitializeAsync(serviceCollection, cancellationToken, commandProgress);
     }
 
 }

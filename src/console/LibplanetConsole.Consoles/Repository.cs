@@ -114,7 +114,7 @@ public sealed record class Repository
         var settingsPath = resolver.GetSettingsPath(repositoryPath);
         var schemaPath = resolver.GetSettingsSchemaPath(repositoryPath);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
-        var stepProgress = progress.PreProgress(0.0, 1.0, 3 + Nodes.Length + Clients.Length);
+        var stepProgress = progress.PostProgress(0.0, 1.0, 3 + Nodes.Length + Clients.Length);
 
         info.RepositoryPath = repositoryPath;
 
