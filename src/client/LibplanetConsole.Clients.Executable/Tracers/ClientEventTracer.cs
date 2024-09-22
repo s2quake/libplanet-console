@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
@@ -12,7 +13,7 @@ internal sealed class ClientEventTracer(IClient client)
     : IApplicationService, IDisposable
 {
     public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         client.Started += Client_Started;
         client.Stopped += Client_Stopped;

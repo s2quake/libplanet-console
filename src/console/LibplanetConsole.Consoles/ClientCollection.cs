@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Frameworks;
@@ -125,7 +126,7 @@ internal sealed class ClientCollection(
     }
 
     async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         var info = _application.Info;
         await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);

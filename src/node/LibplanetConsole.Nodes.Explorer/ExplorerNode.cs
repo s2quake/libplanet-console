@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using Libplanet.Explorer;
 using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
@@ -65,7 +66,7 @@ internal sealed class ExplorerNode(
     }
 
     async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         if (settings.IsExplorerEnabled is true)
         {

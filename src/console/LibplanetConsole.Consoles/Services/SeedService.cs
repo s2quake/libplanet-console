@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Frameworks;
@@ -52,7 +53,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
     }
 
     async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         await _blocksyncSeed.StartAsync(cancellationToken);
         await _consensusSeed.StartAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
@@ -11,7 +12,7 @@ internal sealed class BlockChainEventTracer(IBlockChain blockChain)
     : IApplicationService, IDisposable
 {
     public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         blockChain.BlockAppended += BlockChain_BlockAppended;
         return Task.CompletedTask;

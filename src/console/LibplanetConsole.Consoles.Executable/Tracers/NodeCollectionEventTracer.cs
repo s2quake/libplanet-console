@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
@@ -14,7 +15,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     private INode? _current;
 
     public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         UpdateCurrent(_nodes.Current);
         foreach (var node in _nodes)

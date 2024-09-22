@@ -1,6 +1,7 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using JSSoft.Commands;
 using LibplanetConsole.Clients.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;

@@ -3,9 +3,9 @@ using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
+using JSSoft.Commands.Extensions;
 using Libplanet.Common;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Progresses;
 using LibplanetConsole.Frameworks;
 
 namespace LibplanetConsole.Consoles;
@@ -114,7 +114,7 @@ public sealed record class Repository
         var settingsPath = resolver.GetSettingsPath(repositoryPath);
         var schemaPath = resolver.GetSettingsSchemaPath(repositoryPath);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
-        var stepProgress = progress.Step(0.0, 1.0, 3 + Nodes.Length + Clients.Length);
+        var stepProgress = progress.PreProgress(0.0, 1.0, 3 + Nodes.Length + Clients.Length);
 
         info.RepositoryPath = repositoryPath;
 
@@ -175,7 +175,6 @@ public sealed record class Repository
             info.Clients.Add(JsonUtility.Deserialize<ExpandoObject>(sb.ToString()));
         }
 
-        await Task.Delay(1000, default);
         stepProgress.Complete("Done.");
         await Task.Delay(BlinkOfAnEye, default);
 

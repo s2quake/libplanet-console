@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Frameworks;
@@ -51,7 +52,7 @@ internal sealed class SeedService(ApplicationBase application)
     }
 
     async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         if (application.Info.SeedEndPoint == application.Info.EndPoint)
         {

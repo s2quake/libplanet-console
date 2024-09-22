@@ -1,6 +1,8 @@
+using JSSoft.Commands;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Frameworks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Consoles.Executable;
@@ -26,4 +28,14 @@ internal sealed partial class Application(ApplicationOptions options)
         await Console.Out.WriteAsync(sw.ToString());
         await terminal.StartAsync(cancellationToken);
     }
+
+
+    protected override Task OnServiceInitializeAsync(
+        ApplicationServiceCollection serviceCollection,
+        CancellationToken cancellationToken,
+        IProgress<ProgressInfo> progress)
+    {
+        return base.OnServiceInitializeAsync(serviceCollection, cancellationToken, progress);
+    }
+
 }

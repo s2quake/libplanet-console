@@ -1,4 +1,5 @@
 using System.Collections;
+using JSSoft.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -11,14 +12,17 @@ public sealed class ApplicationServiceCollection(
     private readonly IApplicationService[] _applicationServices = Sort(applicationServices);
 
     public async Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken,
+        IProgress<ProgressInfo> progress)
     {
         var logger = serviceProvider.GetService<ILogger>();
         for (var i = 0; i < _applicationServices.Length; i++)
         {
             var serviceName = _applicationServices[i].GetType().Name;
             logger?.Debug("Application service initializing: {0}", serviceName);
-            await _applicationServices[i].InitializeAsync(serviceProvider, cancellationToken);
+            await _applicationServices[i].InitializeAsync(
+                cancellationToken, progress);
             logger?.Debug("Application service initialized: {0}", serviceName);
         }
     }

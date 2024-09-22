@@ -1,3 +1,4 @@
+using JSSoft.Commands;
 using Serilog;
 using Serilog.Events;
 
@@ -16,7 +17,7 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
         _synchronizationContext = SynchronizationContext.Current!;
     }
 
-    public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
+    public abstract ApplicationServiceCollection ApplicationServices { get; }
 
     public abstract ILogger Logger { get; }
 
@@ -111,9 +112,16 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
     }
 
     protected virtual Task OnRunAsync(CancellationToken cancellationToken)
-        => ApplicationServices.InitializeAsync(this, cancellationToken: default);
+        => OnServiceInitializeAsync(
+            ApplicationServices, cancellationToken, new Progress<ProgressInfo>());
 
     protected virtual ValueTask OnDisposeAsync() => ValueTask.CompletedTask;
+
+    protected virtual Task OnServiceInitializeAsync(
+        ApplicationServiceCollection serviceCollection,
+        CancellationToken cancellationToken,
+        IProgress<ProgressInfo> progress)
+        => serviceCollection.InitializeAsync(this, cancellationToken, progress);
 
     private static bool IsApplicationLog(Type applicationType, LogEvent e)
     {

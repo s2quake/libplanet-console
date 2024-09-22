@@ -1,6 +1,8 @@
+using JSSoft.Commands;
+
 namespace LibplanetConsole.Frameworks;
 
 public interface IApplicationService
 {
-    Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken);
+    Task InitializeAsync(CancellationToken cancellationToken, IProgress<ProgressInfo> progress);
 }

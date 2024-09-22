@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Frameworks;
@@ -13,7 +14,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
     private readonly IClientCollection _clients = clients;
 
     public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IProgress<ProgressInfo> progress)
     {
         foreach (var client in _clients)
         {
