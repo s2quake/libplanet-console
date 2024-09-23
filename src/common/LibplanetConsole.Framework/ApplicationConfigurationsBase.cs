@@ -1,7 +1,7 @@
 using JSSoft.Configurations;
 using JSSoft.Configurations.Extensions;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public abstract class ApplicationConfigurationsBase : ConfigurationsBase
 {

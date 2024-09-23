@@ -1,7 +1,7 @@
 using System.Collections.Specialized;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public interface IClientCollection : IEnumerable<IClient>, INotifyCollectionChanged
 {

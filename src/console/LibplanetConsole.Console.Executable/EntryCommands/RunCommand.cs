@@ -1,7 +1,7 @@
 using JSSoft.Commands;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Consoles.Executable.EntryCommands;
+namespace LibplanetConsole.Console.Executable.EntryCommands;
 
 [CommandSummary("Run the Libplanet console.")]
 [CommandExample("run --end-point localhost:5000 --node-count 4 --client-count 2")]
@@ -29,7 +29,7 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
         try
         {
             var applicationOptions = _applicationSettings.ToOptions([.. _settingsCollection]);
-            var @out = Console.Out;
+            var @out = System.Console.Out;
             await using var application = new Application(applicationOptions);
             await @out.WriteLineAsync();
             await application.RunAsync();
@@ -37,7 +37,7 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
         }
         catch (CommandParsingException e)
         {
-            e.Print(Console.Out);
+            e.Print(System.Console.Out);
             Environment.Exit(1);
         }
     }

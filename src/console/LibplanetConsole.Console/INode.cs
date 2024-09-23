@@ -1,7 +1,7 @@
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
+using LibplanetConsole.Node;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {

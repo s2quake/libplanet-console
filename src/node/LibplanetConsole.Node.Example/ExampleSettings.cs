@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using JSSoft.Commands;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Examples;
+namespace LibplanetConsole.Node.Example;
 
 [ApplicationSettings]
 internal sealed class ExampleSettings

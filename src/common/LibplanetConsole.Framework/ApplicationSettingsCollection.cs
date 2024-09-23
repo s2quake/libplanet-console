@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using JSSoft.Commands;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public sealed class ApplicationSettingsCollection : IEnumerable<object>
 {

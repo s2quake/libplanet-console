@@ -1,7 +1,7 @@
 using JSSoft.Commands;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Clients.Executable.EntryCommands;
+namespace LibplanetConsole.Client.Executable.EntryCommands;
 
 [CommandSummary("Run the Libplanet client.")]
 internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor

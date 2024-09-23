@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Clients.Services;
+namespace LibplanetConsole.Client.Services;
 
 public interface IClientCallback
 {

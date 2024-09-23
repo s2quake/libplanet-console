@@ -3,11 +3,11 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 [Dependency(typeof(NodeCollection))]
 [method: ImportingConstructor]

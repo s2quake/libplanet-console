@@ -3,7 +3,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Clients.Services;
+namespace LibplanetConsole.Client.Services;
 
 [Export(typeof(ILocalService))]
 [Export(typeof(IClientService))]

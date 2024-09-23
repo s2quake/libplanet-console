@@ -3,7 +3,7 @@ using LibplanetConsole.Common.Services;
 using LibplanetConsole.Evidence;
 using LibplanetConsole.Evidence.Services;
 
-namespace LibplanetConsole.Nodes.Evidence.Services;
+namespace LibplanetConsole.Node.Evidence.Services;
 
 [Export(typeof(ILocalService))]
 [method: ImportingConstructor]

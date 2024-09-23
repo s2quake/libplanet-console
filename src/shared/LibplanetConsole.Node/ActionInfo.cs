@@ -1,7 +1,7 @@
 using Bencodex.Types;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 public readonly record struct ActionInfo
 {

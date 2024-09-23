@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Examples.Services;
+namespace LibplanetConsole.Example.Services;
 
 public interface IExampleNodeService
 {

@@ -1,6 +1,6 @@
 using JSSoft.Commands;
 
-namespace LibplanetConsole.Consoles.Executable.Commands;
+namespace LibplanetConsole.Console.Executable.Commands;
 
 internal static class IndexProperties
 {

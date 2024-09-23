@@ -1,11 +1,11 @@
-using LibplanetConsole.Nodes;
+using LibplanetConsole.Node;
 
 #if LIBPLANET_CONSOLE
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 #elif LIBPLANET_NODE
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 #elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 #else
 #error "Either LIBPLANET_CONSOLE or LIBPLANET_NODE must be defined."
 #endif

@@ -3,7 +3,7 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Clients.Executable;
+namespace LibplanetConsole.Client.Executable;
 
 internal sealed class Application(ApplicationOptions options) : ApplicationBase(options)
 {

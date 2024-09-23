@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Executable;
+namespace LibplanetConsole.Node.Executable;
 
 [Export(typeof(IApplicationConfigurations))]
 [method: ImportingConstructor]

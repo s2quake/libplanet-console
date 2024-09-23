@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition;
 
-namespace LibplanetConsole.Consoles.Examples;
+namespace LibplanetConsole.Console.Example;
 
 [Export(typeof(IProcessArgumentProvider))]
 internal sealed class ExampleClientProcessArgumentProvider

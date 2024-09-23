@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public sealed record class NodeOptions
 {

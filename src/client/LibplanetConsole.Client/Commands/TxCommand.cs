@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Actions;
 
-namespace LibplanetConsole.Clients.Commands;
+namespace LibplanetConsole.Client.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]

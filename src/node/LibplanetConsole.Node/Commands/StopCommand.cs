@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 
-namespace LibplanetConsole.Nodes.Commands;
+namespace LibplanetConsole.Node.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Stop node.")]

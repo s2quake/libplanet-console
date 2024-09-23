@@ -3,7 +3,7 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Clients.Commands;
+namespace LibplanetConsole.Client.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Print client application information.")]

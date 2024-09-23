@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using LibplanetConsole.Consoles.Tests.Extensions;
+using LibplanetConsole.Console.Tests.Extensions;
 
-namespace LibplanetConsole.Consoles.Tests;
+namespace LibplanetConsole.Console.Tests;
 
 public sealed class ConsoleApplicationFixture : IDisposable
 {
@@ -12,7 +12,7 @@ public sealed class ConsoleApplicationFixture : IDisposable
     public ConsoleApplicationFixture()
     {
         var assembly = typeof(ProcessTest).Assembly;
-        var codePath = "LibplanetConsole.Consoles.Tests.ConsoleApplicationSource.cs";
+        var codePath = "LibplanetConsole.Console.Tests.ConsoleApplicationSource.cs";
         var code = assembly.GetManifestResourceString(codePath);
         var assemblyName = Path.GetRandomFileName();
         var assemblyPath = Path.Combine(_tempDirectory, $"{assemblyName}.dll");

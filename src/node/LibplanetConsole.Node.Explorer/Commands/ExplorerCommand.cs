@@ -4,7 +4,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Nodes.Explorer.Commands;
+namespace LibplanetConsole.Node.Explorer.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides commands for the explorer(GraphQL).")]

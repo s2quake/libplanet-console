@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 [Export(typeof(IInfoProvider))]
 internal sealed class ApplicationInfoProvider : InfoProviderBase<ApplicationBase>

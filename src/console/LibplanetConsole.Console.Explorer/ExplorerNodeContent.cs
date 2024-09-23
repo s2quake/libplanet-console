@@ -1,12 +1,12 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Console.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
 using Serilog;
 
-namespace LibplanetConsole.Consoles.Explorer;
+namespace LibplanetConsole.Console.Explorer;
 
 [Export(typeof(IExplorerNodeContent))]
 [Export(typeof(INodeContentService))]

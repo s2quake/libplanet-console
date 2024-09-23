@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class DependencyAttribute : Attribute

@@ -5,9 +5,9 @@ using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
+using LibplanetConsole.Node;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 internal sealed partial class Client : IBlockChain
 {

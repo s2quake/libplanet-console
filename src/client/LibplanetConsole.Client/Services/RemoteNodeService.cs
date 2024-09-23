@@ -1,8 +1,8 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Nodes.Services;
+using LibplanetConsole.Node.Services;
 
-namespace LibplanetConsole.Clients.Services;
+namespace LibplanetConsole.Client.Services;
 
 [Export]
 [Export(typeof(IRemoteService))]

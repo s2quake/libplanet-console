@@ -2,7 +2,7 @@ using System.Collections;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public sealed class ApplicationServiceCollection(
     IEnumerable<IApplicationService> applicationServices)

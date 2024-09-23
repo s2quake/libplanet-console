@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 public readonly record struct ApplicationInfo
 {

@@ -1,9 +1,9 @@
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Executable.Commands;
+namespace LibplanetConsole.Node.Executable.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Get and set options")]

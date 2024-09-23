@@ -2,11 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
-    <ProjectReference Include="..\..\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Consoles\LibplanetConsole.Consoles.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Consoles.Examples\LibplanetConsole.Consoles.Examples.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Consoles.Explorer\LibplanetConsole.Consoles.Explorer.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Consoles.Evidence\LibplanetConsole.Consoles.Evidence.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console\LibplanetConsole.Console.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console.Example\LibplanetConsole.Console.Example.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console.Explorer\LibplanetConsole.Console.Explorer.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console.Evidence\LibplanetConsole.Console.Evidence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,12 +22,12 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />
 
   <Target Name="RestoreDependenciesProject" BeforeTargets="Restore">
-    <MSBuild Projects="..\..\node\LibplanetConsole.Nodes.Executable\LibplanetConsole.Nodes.Executable.csproj" Targets="Restore" />
-    <MSBuild Projects="..\..\client\LibplanetConsole.Clients.Executable\LibplanetConsole.Clients.Executable.csproj" Targets="Restore" />
+    <MSBuild Projects="..\..\node\LibplanetConsole.Node.Executable\LibplanetConsole.Node.Executable.csproj" Targets="Restore" />
+    <MSBuild Projects="..\..\client\LibplanetConsole.Client.Executable\LibplanetConsole.Client.Executable.csproj" Targets="Restore" />
   </Target>
   <Target Name="BuildDependenciesProject" BeforeTargets="Build">
-    <MSBuild Projects="..\..\node\LibplanetConsole.Nodes.Executable\LibplanetConsole.Nodes.Executable.csproj" Targets="Build" />
-    <MSBuild Projects="..\..\client\LibplanetConsole.Clients.Executable\LibplanetConsole.Clients.Executable.csproj" Targets="Build" />
+    <MSBuild Projects="..\..\node\LibplanetConsole.Node.Executable\LibplanetConsole.Node.Executable.csproj" Targets="Build" />
+    <MSBuild Projects="..\..\client\LibplanetConsole.Client.Executable\LibplanetConsole.Client.Executable.csproj" Targets="Build" />
   </Target>
 
 </Project>

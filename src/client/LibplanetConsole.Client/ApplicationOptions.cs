@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 public sealed record class ApplicationOptions
 {

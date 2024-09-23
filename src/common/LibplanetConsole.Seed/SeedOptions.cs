@@ -1,6 +1,6 @@
 ﻿using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Seeds;
+namespace LibplanetConsole.Seed;
 
 public sealed record class SeedOptions
 {

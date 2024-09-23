@@ -3,7 +3,7 @@ using System.Reflection;
 using JSSoft.Commands;
 using LibplanetConsole.Settings;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public sealed class ApplicationSettingsSchemaBuilder : SettingsSchemaBuilder
 {

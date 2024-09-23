@@ -6,7 +6,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Evidence;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Nodes.Evidence;
+namespace LibplanetConsole.Node.Evidence;
 
 [Export(typeof(IEvidenceNode))]
 [Export]

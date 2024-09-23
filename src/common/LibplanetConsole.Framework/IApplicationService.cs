@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public interface IApplicationService
 {

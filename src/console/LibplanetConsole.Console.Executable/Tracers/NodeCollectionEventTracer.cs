@@ -2,9 +2,9 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Consoles.Executable.Tracers;
+namespace LibplanetConsole.Console.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
@@ -84,7 +84,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
             {
                 var message = $"Node created: {node.Address:S}";
                 var colorType = TerminalColorType.BrightBlue;
-                Console.Out.WriteColoredLine(message, colorType);
+                System.Console.Out.WriteColoredLine(message, colorType);
                 AttachEvent(node);
             }
         }
@@ -94,7 +94,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
             {
                 var message = $"Node deleted: {node.Address:S}";
                 var colorType = TerminalColorType.BrightBlue;
-                Console.Out.WriteColoredLine(message, colorType);
+                System.Console.Out.WriteColoredLine(message, colorType);
                 DetachEvent(node);
             }
         }
@@ -106,7 +106,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
         var message = $"Block #{blockInfo.Height} '{hash:S}' Appended by '{miner:S}'";
-        Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
+        System.Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
     }
 
     private void Node_Attached(object? sender, EventArgs e)
@@ -115,7 +115,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             var message = $"Node attached: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -125,7 +125,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             var message = $"Node detached: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -135,7 +135,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             var message = $"Node started: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -145,7 +145,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         {
             var message = $"Node stopped: {node.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 }

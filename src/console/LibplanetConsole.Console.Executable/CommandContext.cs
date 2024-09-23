@@ -1,9 +1,9 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
-using LibplanetConsole.Consoles.Executable.Commands;
+using LibplanetConsole.Console.Executable.Commands;
 
-namespace LibplanetConsole.Consoles.Executable;
+namespace LibplanetConsole.Console.Executable;
 
 [Export(typeof(CommandContext))]
 [CommandSummary("Provides a prompt for input and execution of commands.")]

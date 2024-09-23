@@ -4,10 +4,10 @@ using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
-using LibplanetConsole.Nodes.Services;
+using LibplanetConsole.Node;
+using LibplanetConsole.Node.Services;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 internal sealed partial class Node
 {

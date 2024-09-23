@@ -1,13 +1,13 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using LibplanetConsole.Clients.Services;
+using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
-using LibplanetConsole.Frameworks.Extensions;
+using LibplanetConsole.Framework;
+using LibplanetConsole.Framework.Extensions;
 using Serilog;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 public abstract class ApplicationBase : ApplicationFramework, IApplication
 {

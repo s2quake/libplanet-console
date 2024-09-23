@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Clients.Executable.EntryCommands;
+namespace LibplanetConsole.Client.Executable.EntryCommands;
 
 [CommandSummary("Creates a schema of the application settings.")]
 [Category("Tools")]

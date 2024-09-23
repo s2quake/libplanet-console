@@ -6,9 +6,9 @@ using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Executable;
+namespace LibplanetConsole.Node.Executable;
 
 [ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings

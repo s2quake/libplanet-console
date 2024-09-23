@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Nodes.Services;
+namespace LibplanetConsole.Node.Services;
 
 public interface INodeService
 {

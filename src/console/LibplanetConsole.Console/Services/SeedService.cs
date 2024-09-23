@@ -1,10 +1,10 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Frameworks;
-using LibplanetConsole.Seeds;
+using LibplanetConsole.Framework;
+using LibplanetConsole.Seed;
 
-namespace LibplanetConsole.Consoles.Services;
+namespace LibplanetConsole.Console.Services;
 
 [Export]
 [Export(typeof(ILocalService))]
@@ -14,19 +14,19 @@ internal sealed class SeedService : LocalService<ISeedService>,
 {
     private readonly ApplicationBase _application;
     private readonly AppPrivateKey _seedNodePrivateKey = new();
-    private readonly Seed _blocksyncSeed;
-    private readonly Seed _consensusSeed;
+    private readonly Seed.Seed _blocksyncSeed;
+    private readonly Seed.Seed _consensusSeed;
 
     [ImportingConstructor]
     public SeedService(ApplicationBase application)
     {
         _application = application;
-        _blocksyncSeed = new Seed(new()
+        _blocksyncSeed = new Seed.Seed(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = AppEndPoint.Next(),
         });
-        _consensusSeed = new Seed(new()
+        _consensusSeed = new Seed.Seed(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = AppEndPoint.Next(),

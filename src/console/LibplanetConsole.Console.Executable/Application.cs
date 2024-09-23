@@ -3,7 +3,7 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Consoles.Executable;
+namespace LibplanetConsole.Console.Executable;
 
 internal sealed partial class Application(ApplicationOptions options)
     : ApplicationBase(options), IApplication
@@ -15,15 +15,15 @@ internal sealed partial class Application(ApplicationOptions options)
         var commandContext = this.GetRequiredService<CommandContext>();
         var terminal = this.GetRequiredService<SystemTerminal>();
         commandContext.Out = sw;
-        await Console.Out.WriteColoredLineAsync(message, TerminalColorType.BrightGreen);
+        await System.Console.Out.WriteColoredLineAsync(message, TerminalColorType.BrightGreen);
         await base.OnRunAsync(cancellationToken);
         await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
         await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
         await sw.WriteLineAsync();
         await commandContext.ExecuteAsync(args: [], cancellationToken: default);
         await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-        commandContext.Out = Console.Out;
-        await Console.Out.WriteAsync(sw.ToString());
+        commandContext.Out = System.Console.Out;
+        await System.Console.Out.WriteAsync(sw.ToString());
         await terminal.StartAsync(cancellationToken);
     }
 }

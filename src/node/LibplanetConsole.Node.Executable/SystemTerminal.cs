@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 
-namespace LibplanetConsole.Nodes.Executable;
+namespace LibplanetConsole.Node.Executable;
 
 [Export]
 internal sealed class SystemTerminal : SystemTerminalBase

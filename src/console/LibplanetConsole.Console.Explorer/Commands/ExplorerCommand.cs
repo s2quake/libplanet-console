@@ -2,10 +2,10 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Consoles.Commands;
+using LibplanetConsole.Console.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Consoles.Explorer.Commands;
+namespace LibplanetConsole.Console.Explorer.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]

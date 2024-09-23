@@ -5,7 +5,7 @@ using Libplanet.Net.Consensus;
 using Libplanet.Net.Messages;
 using Libplanet.Types.Consensus;
 
-namespace LibplanetConsole.Nodes.Evidence.Extensions;
+namespace LibplanetConsole.Node.Evidence.Extensions;
 
 internal static class ContextExtensions
 {

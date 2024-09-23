@@ -1,7 +1,7 @@
 ﻿using JSSoft.Commands;
 using JSSoft.Commands.Extensions;
-using LibplanetConsole.Consoles.Executable;
-using LibplanetConsole.Consoles.Executable.EntryCommands;
+using LibplanetConsole.Console.Executable;
+using LibplanetConsole.Console.Executable.EntryCommands;
 
 var commands = new ICommand[]
 {

@@ -4,9 +4,9 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Clients.Executable;
+namespace LibplanetConsole.Client.Executable;
 
 [ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings

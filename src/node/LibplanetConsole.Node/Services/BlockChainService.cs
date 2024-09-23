@@ -4,7 +4,7 @@ using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Nodes.Services;
+namespace LibplanetConsole.Node.Services;
 
 [Export(typeof(ILocalService))]
 internal sealed class BlockChainService

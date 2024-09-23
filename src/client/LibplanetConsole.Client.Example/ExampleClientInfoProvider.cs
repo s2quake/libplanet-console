@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Clients.Examples;
+namespace LibplanetConsole.Client.Example;
 
 [Export(typeof(IInfoProvider))]
 [method: ImportingConstructor]

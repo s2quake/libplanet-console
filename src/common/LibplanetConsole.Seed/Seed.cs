@@ -6,9 +6,9 @@ using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
 using Serilog;
-using static LibplanetConsole.Seeds.PeerUtility;
+using static LibplanetConsole.Seed.PeerUtility;
 
-namespace LibplanetConsole.Seeds;
+namespace LibplanetConsole.Seed;
 
 public sealed class Seed(SeedOptions seedOptions)
 {

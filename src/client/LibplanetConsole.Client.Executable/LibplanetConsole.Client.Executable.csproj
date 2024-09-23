@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\LibplanetConsole.Clients\LibplanetConsole.Clients.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Clients.Examples\LibplanetConsole.Clients.Examples.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Client\LibplanetConsole.Client.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Client.Example\LibplanetConsole.Client.Example.csproj" />
   </ItemGroup>
 
   <ItemGroup>

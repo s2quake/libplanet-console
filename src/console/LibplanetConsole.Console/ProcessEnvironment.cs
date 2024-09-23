@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using static System.Runtime.InteropServices.RuntimeInformation;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 internal static class ProcessEnvironment
 {
@@ -187,7 +187,7 @@ internal static class ProcessEnvironment
                 throw new InvalidOperationException(
                     $"Directory of the executing assembly location '{location}' is not found.");
             var expectedDirectory = $"{WorkspacePath}/src/console/" +
-                                    $"LibplanetConsole.Consoles.Executable/" +
+                                    $"LibplanetConsole.Console.Executable/" +
                                     $"bin/{Configuration}/{Framework}";
             var d1 = Path.GetFullPath(expectedDirectory);
             var d2 = Path.GetFullPath(directory);
@@ -218,7 +218,7 @@ internal static class ProcessEnvironment
         get
         {
             return Path.GetFullPath(
-                $"{WorkspacePath}/src/node/LibplanetConsole.Nodes.Executable/bin/{Configuration}/" +
+                $"{WorkspacePath}/src/node/LibplanetConsole.Node.Executable/bin/{Configuration}/" +
                 $"{Framework}/libplanet-node{Extension}");
         }
     }
@@ -243,7 +243,7 @@ internal static class ProcessEnvironment
         get
         {
             return Path.GetFullPath(
-                $"{WorkspacePath}/src/client/LibplanetConsole.Clients.Executable/bin/" +
+                $"{WorkspacePath}/src/client/LibplanetConsole.Client.Executable/bin/" +
                 $"{Configuration}/{Framework}/libplanet-client{Extension}");
         }
     }

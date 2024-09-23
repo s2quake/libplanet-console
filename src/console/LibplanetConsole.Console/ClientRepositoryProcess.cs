@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 internal sealed class ClientRepositoryProcess : ClientProcessBase
 {

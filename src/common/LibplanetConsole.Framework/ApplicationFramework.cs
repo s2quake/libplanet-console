@@ -1,7 +1,7 @@
 using Serilog;
 using Serilog.Events;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 {

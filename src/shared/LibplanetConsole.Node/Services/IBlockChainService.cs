@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Nodes.Services;
+namespace LibplanetConsole.Node.Services;
 
 public interface IBlockChainService
 {

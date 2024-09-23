@@ -3,7 +3,7 @@ using System.ComponentModel.Composition.Primitives;
 using System.Data;
 using System.Reflection;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposable
 {

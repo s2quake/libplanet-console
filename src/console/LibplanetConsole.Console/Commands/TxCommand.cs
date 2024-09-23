@@ -3,7 +3,7 @@ using JSSoft.Commands;
 using LibplanetConsole.Common.Actions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Consoles.Commands;
+namespace LibplanetConsole.Console.Commands;
 
 [Export(typeof(ICommand))]
 [method: ImportingConstructor]

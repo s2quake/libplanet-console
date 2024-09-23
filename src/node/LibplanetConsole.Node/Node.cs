@@ -20,9 +20,9 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using static LibplanetConsole.Nodes.PeerUtility;
+using static LibplanetConsole.Node.PeerUtility;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 internal sealed partial class Node : IActionRenderer, INode
 {

@@ -4,7 +4,7 @@ using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Consoles.Evidence.Commands;
+namespace LibplanetConsole.Console.Evidence.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides evidence-related commands.")]

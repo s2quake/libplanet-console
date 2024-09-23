@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace LibplanetConsole.Consoles.Tests;
+namespace LibplanetConsole.Console.Tests;
 
 internal static class ConsoleApplicationCompiler
 {
@@ -14,7 +14,7 @@ internal static class ConsoleApplicationCompiler
         var references = new MetadataReference[]
         {
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.Console).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Thread).Assembly.Location),
             MetadataReference.CreateFromFile(GetRuntimeLibraryPath("System.Runtime.dll")),
         };

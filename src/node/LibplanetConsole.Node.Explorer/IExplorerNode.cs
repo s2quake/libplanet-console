@@ -1,6 +1,6 @@
 ﻿using LibplanetConsole.Explorer;
 
-namespace LibplanetConsole.Nodes.Explorer;
+namespace LibplanetConsole.Node.Explorer;
 
 public interface IExplorerNode
 {

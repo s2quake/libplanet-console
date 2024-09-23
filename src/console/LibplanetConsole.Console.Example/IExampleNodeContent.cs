@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles.Examples;
+namespace LibplanetConsole.Console.Example;
 
 public interface IExampleNodeContent
 {

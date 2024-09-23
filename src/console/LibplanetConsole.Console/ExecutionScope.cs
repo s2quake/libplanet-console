@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public sealed class ExecutionScope
 {

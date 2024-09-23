@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Commands;
 
-namespace LibplanetConsole.Consoles.Examples;
+namespace LibplanetConsole.Console.Example;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Example node commands for a quick start.")]

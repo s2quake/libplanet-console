@@ -1,7 +1,7 @@
 using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 public readonly record struct ClientInfo
 {

@@ -3,7 +3,7 @@
 using System.Reflection;
 using Libplanet.Net.Consensus;
 
-namespace LibplanetConsole.Nodes.Evidence.Extensions;
+namespace LibplanetConsole.Node.Evidence.Extensions;
 
 internal static class ConsensusReactorExtensions
 {

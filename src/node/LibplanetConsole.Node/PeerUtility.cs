@@ -3,7 +3,7 @@ using Libplanet.Crypto;
 using Libplanet.Net;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 internal static class PeerUtility
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace LibplanetConsole.Consoles.Tests.Executable;
+namespace LibplanetConsole.Console.Tests.Executable;
 
 public class Program
 {

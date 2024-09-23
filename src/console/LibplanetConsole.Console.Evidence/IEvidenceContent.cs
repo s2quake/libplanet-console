@@ -1,6 +1,6 @@
 using LibplanetConsole.Evidence;
 
-namespace LibplanetConsole.Consoles.Evidence;
+namespace LibplanetConsole.Console.Evidence;
 
 internal interface IEvidenceContent
 {

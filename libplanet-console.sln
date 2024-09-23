@@ -7,11 +7,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4194F59A-6D6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{0F5944E2-178A-44BF-8A09-29CAD668764A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Seeds", "src\common\LibplanetConsole.Seeds\LibplanetConsole.Seeds.csproj", "{E91A50E1-2E90-446B-BDB0-D88E0F153290}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Seed", "src\common\LibplanetConsole.Seed\LibplanetConsole.Seed.csproj", "{E91A50E1-2E90-446B-BDB0-D88E0F153290}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "console", "console", "{CAB76DA9-6E57-4422-98C6-DD2D6299F675}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles", "src\console\LibplanetConsole.Consoles\LibplanetConsole.Consoles.csproj", "{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Console", "src\console\LibplanetConsole.Console\LibplanetConsole.Console.csproj", "{7B2D3BF1-A244-4868-A6B7-B717DB7BCAA2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{56942891-CFBD-41E4-8881-47F455D7BEFD}"
 EndProject
@@ -19,39 +19,39 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Tests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Common", "src\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj", "{EE8624C9-0976-4F28-8AE4-5D217D33D5BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Frameworks", "src\common\LibplanetConsole.Frameworks\LibplanetConsole.Frameworks.csproj", "{8F93F8B9-D885-4D41-8DC2-D74AFF5691A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Framework", "src\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj", "{8F93F8B9-D885-4D41-8DC2-D74AFF5691A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "node", "node", "{4A8F8EE9-769C-4C97-89BC-19D038E69998}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "client", "client", "{1DEAA4CE-E29B-4379-BAF6-20B79A5946CB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles.Executable", "src\console\LibplanetConsole.Consoles.Executable\LibplanetConsole.Consoles.Executable.csproj", "{4A3CD9CD-C5C5-43EF-9EB6-91E1386B6FCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Console.Executable", "src\console\LibplanetConsole.Console.Executable\LibplanetConsole.Console.Executable.csproj", "{4A3CD9CD-C5C5-43EF-9EB6-91E1386B6FCA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Clients.Executable", "src\client\LibplanetConsole.Clients.Executable\LibplanetConsole.Clients.Executable.csproj", "{B5AEBA31-6069-491B-8310-8F14BFF72F33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Client.Executable", "src\client\LibplanetConsole.Client.Executable\LibplanetConsole.Client.Executable.csproj", "{B5AEBA31-6069-491B-8310-8F14BFF72F33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Clients", "src\client\LibplanetConsole.Clients\LibplanetConsole.Clients.csproj", "{8749087F-5DE0-46AB-82D6-5009B3D9E2AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Client", "src\client\LibplanetConsole.Client\LibplanetConsole.Client.csproj", "{8749087F-5DE0-46AB-82D6-5009B3D9E2AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes.Executable", "src\node\LibplanetConsole.Nodes.Executable\LibplanetConsole.Nodes.Executable.csproj", "{F5DCB11A-EA32-441A-AF34-B66359C3EA50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Node.Executable", "src\node\LibplanetConsole.Node.Executable\LibplanetConsole.Node.Executable.csproj", "{F5DCB11A-EA32-441A-AF34-B66359C3EA50}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes", "src\node\LibplanetConsole.Nodes\LibplanetConsole.Nodes.csproj", "{217938CF-B2B8-41BB-A193-475430421265}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Node", "src\node\LibplanetConsole.Node\LibplanetConsole.Node.csproj", "{217938CF-B2B8-41BB-A193-475430421265}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes.Examples", "src\node\LibplanetConsole.Nodes.Examples\LibplanetConsole.Nodes.Examples.csproj", "{6ECDC75B-1B38-4480-AD15-CE0F330CD70B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Node.Example", "src\node\LibplanetConsole.Node.Example\LibplanetConsole.Node.Example.csproj", "{6ECDC75B-1B38-4480-AD15-CE0F330CD70B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Clients.Examples", "src\client\LibplanetConsole.Clients.Examples\LibplanetConsole.Clients.Examples.csproj", "{2CA203CA-1980-4B11-82E1-0E5812D86C63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Client.Example", "src\client\LibplanetConsole.Client.Example\LibplanetConsole.Client.Example.csproj", "{2CA203CA-1980-4B11-82E1-0E5812D86C63}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles.Examples", "src\console\LibplanetConsole.Consoles.Examples\LibplanetConsole.Consoles.Examples.csproj", "{ACE75CD7-E4FD-4B9E-943E-EF3BB11DECDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Console.Example", "src\console\LibplanetConsole.Console.Example\LibplanetConsole.Console.Example.csproj", "{ACE75CD7-E4FD-4B9E-943E-EF3BB11DECDF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Nodes.Explorer", "src\node\LibplanetConsole.Nodes.Explorer\LibplanetConsole.Nodes.Explorer.csproj", "{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Node.Explorer", "src\node\LibplanetConsole.Node.Explorer\LibplanetConsole.Node.Explorer.csproj", "{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Consoles.Explorer", "src\console\LibplanetConsole.Consoles.Explorer\LibplanetConsole.Consoles.Explorer.csproj", "{AF1A0011-2795-42FD-B67B-7F1956268577}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Console.Explorer", "src\console\LibplanetConsole.Console.Explorer\LibplanetConsole.Console.Explorer.csproj", "{AF1A0011-2795-42FD-B67B-7F1956268577}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibplanetConsole.Common.Tests", "test\LibplanetConsole.Common.Tests\LibplanetConsole.Common.Tests.csproj", "{65341396-A058-4577-9B70-C1DD3D146501}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Nodes.Evidence", "src\node\LibplanetConsole.Nodes.Evidence\LibplanetConsole.Nodes.Evidence.csproj", "{4C151EAE-2105-4DA1-B645-C09513EA8532}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Node.Evidence", "src\node\LibplanetConsole.Node.Evidence\LibplanetConsole.Node.Evidence.csproj", "{4C151EAE-2105-4DA1-B645-C09513EA8532}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Consoles.Evidence", "src\console\LibplanetConsole.Consoles.Evidence\LibplanetConsole.Consoles.Evidence.csproj", "{965DF40E-F3BA-45F2-A177-A3DE550C824E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Console.Evidence", "src\console\LibplanetConsole.Console.Evidence\LibplanetConsole.Console.Evidence.csproj", "{965DF40E-F3BA-45F2-A177-A3DE550C824E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Consoles.Tests", "test\LibplanetConsole.Consoles.Tests\LibplanetConsole.Consoles.Tests.csproj", "{27DE2BC6-4EBC-4905-AC2F-1DF839CBF4A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Console.Tests", "test\LibplanetConsole.Console.Tests\LibplanetConsole.Console.Tests.csproj", "{27DE2BC6-4EBC-4905-AC2F-1DF839CBF4A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Settings", "src\common\LibplanetConsole.Settings\LibplanetConsole.Settings.csproj", "{9CB83BAC-B52F-4C48-A8F6-197D3DF3DE04}"
 EndProject

@@ -1,9 +1,9 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Examples.Services;
+using LibplanetConsole.Example.Services;
 
-namespace LibplanetConsole.Nodes.Examples;
+namespace LibplanetConsole.Node.Example;
 
 [Export(typeof(ILocalService))]
 internal sealed class ExampleNodeService : LocalService<IExampleNodeService, IExampleNodeCallback>,

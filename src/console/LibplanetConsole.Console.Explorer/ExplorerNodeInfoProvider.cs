@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles.Explorer;
+namespace LibplanetConsole.Console.Explorer;
 
 [Export(typeof(IInfoProvider))]
 internal sealed class ExplorerNodeInfoProvider

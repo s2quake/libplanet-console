@@ -1,6 +1,6 @@
 using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Consoles.Services;
+namespace LibplanetConsole.Console.Services;
 
 public interface INodeContentService
 {

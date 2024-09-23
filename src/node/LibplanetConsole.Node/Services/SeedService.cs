@@ -1,10 +1,9 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Frameworks;
-using LibplanetConsole.Seeds;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Services;
+namespace LibplanetConsole.Node.Services;
 
 [Export(typeof(ILocalService))]
 [Export(typeof(IApplicationService))]
@@ -13,8 +12,8 @@ internal sealed class SeedService(ApplicationBase application)
     : LocalService<ISeedService>, ISeedService, IApplicationService, IAsyncDisposable
 {
     private readonly AppPrivateKey _seedNodePrivateKey = new();
-    private Seed? _blocksyncSeed;
-    private Seed? _consensusSeed;
+    private Seed.Seed? _blocksyncSeed;
+    private Seed.Seed? _consensusSeed;
 
     public async Task<SeedInfo> GetSeedAsync(
         AppPublicKey publicKey, CancellationToken cancellationToken)
@@ -55,12 +54,12 @@ internal sealed class SeedService(ApplicationBase application)
     {
         if (application.Info.SeedEndPoint == application.Info.EndPoint)
         {
-            _blocksyncSeed = new Seed(new()
+            _blocksyncSeed = new Seed.Seed(new()
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = AppEndPoint.Next(),
             });
-            _consensusSeed = new Seed(new()
+            _consensusSeed = new Seed.Seed(new()
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = AppEndPoint.Next(),

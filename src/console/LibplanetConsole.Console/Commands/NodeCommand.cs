@@ -5,7 +5,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Consoles.Commands;
+namespace LibplanetConsole.Console.Commands;
 
 [Export(typeof(ICommand))]
 [Export]

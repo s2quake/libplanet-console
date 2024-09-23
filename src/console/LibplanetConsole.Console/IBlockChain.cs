@@ -2,7 +2,7 @@ using Bencodex.Types;
 using Libplanet.Action;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public interface IBlockChain
 {

@@ -6,7 +6,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
 
-namespace LibplanetConsole.Nodes.Executable.EntryCommands;
+namespace LibplanetConsole.Node.Executable.EntryCommands;
 
 [CommandSummary("Create a new repository to run the node")]
 internal sealed class InitializeCommand : CommandBase

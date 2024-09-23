@@ -1,10 +1,10 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 using LibplanetConsole.Settings;
 
-namespace LibplanetConsole.Nodes.Executable.EntryCommands;
+namespace LibplanetConsole.Node.Executable.EntryCommands;
 
 [CommandSummary("Start the Libplanet node with settings.")]
 internal sealed class StartCommand : CommandAsyncBase

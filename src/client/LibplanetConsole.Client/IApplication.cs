@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 public interface IApplication : IAsyncDisposable, IServiceProvider
 {

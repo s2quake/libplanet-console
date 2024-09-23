@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace LibplanetConsole.Consoles.Tests.Extensions;
+namespace LibplanetConsole.Console.Tests.Extensions;
 
 internal static class AssemblyExtensions
 {

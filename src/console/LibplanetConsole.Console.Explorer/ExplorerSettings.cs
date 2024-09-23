@@ -1,7 +1,7 @@
 using JSSoft.Commands;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Consoles.Explorer;
+namespace LibplanetConsole.Console.Explorer;
 
 [ApplicationSettings]
 internal sealed class ExplorerSettings

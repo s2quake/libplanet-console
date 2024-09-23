@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 
-namespace LibplanetConsole.Frameworks.Extensions;
+namespace LibplanetConsole.Framework.Extensions;
 
 public static class CompositionContainerExtensions
 {

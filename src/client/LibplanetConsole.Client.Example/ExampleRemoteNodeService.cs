@@ -1,9 +1,9 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Examples.Services;
+using LibplanetConsole.Example.Services;
 
-namespace LibplanetConsole.Clients.Examples;
+namespace LibplanetConsole.Client.Example;
 
 [Export]
 internal sealed class ExampleRemoteNodeService

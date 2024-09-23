@@ -1,6 +1,6 @@
 using System.ComponentModel.Composition.Primitives;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 internal sealed class ApplicationExport(Export export, Action<IAsyncDisposable> exportAction)
     : Export

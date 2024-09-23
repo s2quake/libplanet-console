@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Nodes.Evidence.Commands;
+namespace LibplanetConsole.Node.Evidence.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Provides evidence-related commands.")]

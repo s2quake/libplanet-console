@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\console\LibplanetConsole.Consoles.Executable\LibplanetConsole.Consoles.Executable.csproj" />
+    <ProjectReference Include="..\..\src\console\LibplanetConsole.Console.Executable\LibplanetConsole.Console.Executable.csproj" />
   </ItemGroup>
 
 </Project>

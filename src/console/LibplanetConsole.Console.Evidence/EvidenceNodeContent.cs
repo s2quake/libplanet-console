@@ -1,10 +1,10 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Console.Services;
 using LibplanetConsole.Evidence;
 using LibplanetConsole.Evidence.Services;
 
-namespace LibplanetConsole.Consoles.Evidence;
+namespace LibplanetConsole.Console.Evidence;
 
 [Export(typeof(INodeContent))]
 [Export(typeof(IEvidenceContent))]

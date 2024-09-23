@@ -1,7 +1,7 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
 
-namespace LibplanetConsole.Consoles.Explorer;
+namespace LibplanetConsole.Console.Explorer;
 
 public interface IExplorerNodeContent
 {

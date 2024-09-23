@@ -10,7 +10,7 @@ using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 internal sealed partial class Node : IBlockChain
 {

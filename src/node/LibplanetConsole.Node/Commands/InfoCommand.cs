@@ -3,7 +3,7 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Nodes.Commands;
+namespace LibplanetConsole.Node.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Print node application information.")]

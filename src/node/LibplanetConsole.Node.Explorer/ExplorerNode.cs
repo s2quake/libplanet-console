@@ -2,13 +2,13 @@
 using Libplanet.Explorer;
 using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Nodes.Explorer;
+namespace LibplanetConsole.Node.Explorer;
 
 [Export(typeof(IExplorerNode))]
 [Export(typeof(IApplicationService))]

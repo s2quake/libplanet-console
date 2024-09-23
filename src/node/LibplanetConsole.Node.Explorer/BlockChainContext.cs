@@ -6,7 +6,7 @@ using Libplanet.Net;
 using Libplanet.Store;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Nodes.Explorer;
+namespace LibplanetConsole.Node.Explorer;
 
 internal sealed class BlockChainContext(INode node) : IBlockChainContext
 {

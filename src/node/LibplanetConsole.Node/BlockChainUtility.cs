@@ -9,7 +9,7 @@ using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
 using LibplanetConsole.Common.Actions;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 internal static class BlockChainUtility
 {

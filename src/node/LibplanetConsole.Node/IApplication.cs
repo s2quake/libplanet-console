@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 public interface IApplication : IAsyncDisposable, IServiceProvider
 {

@@ -1,8 +1,8 @@
 using Libplanet.Action;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
+using LibplanetConsole.Node;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 public interface IClient : IVerifier
 {

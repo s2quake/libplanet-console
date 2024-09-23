@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common.DataAnnotations;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Explorer;
+namespace LibplanetConsole.Node.Explorer;
 
 [ApplicationSettings]
 internal sealed class ExplorerSettings

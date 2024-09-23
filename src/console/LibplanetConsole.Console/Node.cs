@@ -5,14 +5,14 @@ using Bencodex;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles.Services;
-using LibplanetConsole.Frameworks;
-using LibplanetConsole.Nodes;
-using LibplanetConsole.Nodes.Services;
+using LibplanetConsole.Console.Services;
+using LibplanetConsole.Framework;
+using LibplanetConsole.Node;
+using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockChainCallback
 {

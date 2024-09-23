@@ -8,7 +8,7 @@
           "name": "C#: Libplanet Console - Initialize",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
+          "program": "${workspaceFolder}/src/console/LibplanetConsole.Console.Executable/bin/Debug/net8.0/libplanet-console.dll",
           "console": "integratedTerminal",
           "args": [
                 "init",
@@ -19,7 +19,7 @@
           "name": "C#: Libplanet Console - Start",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
+          "program": "${workspaceFolder}/src/console/LibplanetConsole.Console.Executable/bin/Debug/net8.0/libplanet-console.dll",
           "console": "integratedTerminal",
           "args": [
                 "start",
@@ -30,7 +30,7 @@
           "name": "C#: Libplanet Console - Run",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/console/LibplanetConsole.Consoles.Executable/bin/Debug/net8.0/libplanet-console.dll",
+          "program": "${workspaceFolder}/src/console/LibplanetConsole.Console.Executable/bin/Debug/net8.0/libplanet-console.dll",
           "console": "integratedTerminal",
           "args": [
                 "run"
@@ -40,7 +40,7 @@
           "name": "C#: Libplanet Node",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
+          "program": "${workspaceFolder}/src/node/LibplanetConsole.Node.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
             "run"
@@ -50,7 +50,7 @@
           "name": "C#: Libplanet Client",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/client/LibplanetConsole.Clients.Executable/bin/Debug/net8.0/libplanet-client.dll",
+          "program": "${workspaceFolder}/src/client/LibplanetConsole.Client.Executable/bin/Debug/net8.0/libplanet-client.dll",
           "console": "integratedTerminal",
           "args": [
               "run",
@@ -62,7 +62,7 @@
           "name": "C#: Libplanet Two Nodes (1/2)",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
+          "program": "${workspaceFolder}/src/node/LibplanetConsole.Node.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
               "--private-key",
@@ -77,7 +77,7 @@
           "name": "C#: Libplanet Two Nodes (2/2)",
           "type": "coreclr",
           "request": "launch",
-          "program": "${workspaceFolder}/src/node/LibplanetConsole.Nodes.Executable/bin/Debug/net8.0/libplanet-node.dll",
+          "program": "${workspaceFolder}/src/node/LibplanetConsole.Node.Executable/bin/Debug/net8.0/libplanet-node.dll",
           "console": "integratedTerminal",
           "args": [
               "--private-key",

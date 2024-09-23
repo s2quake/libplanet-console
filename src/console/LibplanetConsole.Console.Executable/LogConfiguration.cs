@@ -1,10 +1,10 @@
 using System.ComponentModel.Composition;
 using JSSoft.Configurations;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 using Serilog;
 using Serilog.Events;
 
-namespace LibplanetConsole.Consoles.Executable;
+namespace LibplanetConsole.Console.Executable;
 
 [Export(typeof(IApplicationConfiguration))]
 [ConfigurationName("log")]

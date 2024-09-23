@@ -2,7 +2,7 @@ using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 [Export(typeof(IInfoProvider))]
 internal sealed class ClientInfoProvider : InfoProviderBase<Client>

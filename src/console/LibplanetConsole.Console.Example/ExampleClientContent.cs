@@ -1,8 +1,8 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Examples.Services;
+using LibplanetConsole.Example.Services;
 
-namespace LibplanetConsole.Consoles.Examples;
+namespace LibplanetConsole.Console.Example;
 
 [Export(typeof(IExampleClientContent))]
 [Export(typeof(IClientContent))]

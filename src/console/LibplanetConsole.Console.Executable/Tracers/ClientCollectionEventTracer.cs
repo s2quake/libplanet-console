@@ -2,9 +2,9 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Consoles.Executable.Tracers;
+namespace LibplanetConsole.Console.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]
@@ -59,7 +59,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
             {
                 var message = $"Client created: {client.Address:S}";
                 var colorType = TerminalColorType.BrightBlue;
-                Console.Out.WriteColoredLine(message, colorType);
+                System.Console.Out.WriteColoredLine(message, colorType);
                 AttachEvent(client);
             }
         }
@@ -69,7 +69,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
             {
                 var message = $"Client deleted: {client.Address:S}";
                 var colorType = TerminalColorType.BrightBlue;
-                Console.Out.WriteColoredLine(message, colorType);
+                System.Console.Out.WriteColoredLine(message, colorType);
                 DetachEvent(client);
             }
         }
@@ -81,7 +81,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             var message = $"Client attached: {client.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -91,7 +91,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             var message = $"Client detached: {client.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -101,7 +101,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             var message = $"Client started: {client.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 
@@ -111,7 +111,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             var message = $"Client stopped: {client.Address:S}";
             var colorType = TerminalColorType.BrightBlue;
-            Console.Out.WriteColoredLine(message, colorType);
+            System.Console.Out.WriteColoredLine(message, colorType);
         }
     }
 }

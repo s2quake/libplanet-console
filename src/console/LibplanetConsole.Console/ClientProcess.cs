@@ -1,7 +1,7 @@
 using LibplanetConsole.Common;
-using static LibplanetConsole.Consoles.ProcessEnvironment;
+using static LibplanetConsole.Console.ProcessEnvironment;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
     : ClientProcessBase

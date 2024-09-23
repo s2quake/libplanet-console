@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 [Export(typeof(IProcessArgumentProvider))]
 internal sealed class NodeProcessArgumentProvider : ProcessArgumentProviderBase<Node>

@@ -1,7 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 
-namespace LibplanetConsole.Consoles.Executable.EntryCommands;
+namespace LibplanetConsole.Console.Executable.EntryCommands;
 
 [CommandSummary("Run the libplanet-console using the given repository path.")]
 internal sealed class StartCommand : CommandAsyncBase
@@ -24,7 +24,7 @@ internal sealed class StartCommand : CommandAsyncBase
             LogPath = repository.LogPath,
             LibraryLogPath = repository.LibraryLogPath,
         };
-        var @out = Console.Out;
+        var @out = System.Console.Out;
         await using var application = new Application(applicationOptions);
         await @out.WriteLineAsync();
         await application.RunAsync();

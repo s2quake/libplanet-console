@@ -1,6 +1,6 @@
 using Libplanet.Action.Loader;
 
-namespace LibplanetConsole.Nodes;
+namespace LibplanetConsole.Node;
 
 public interface IActionLoaderProvider
 {

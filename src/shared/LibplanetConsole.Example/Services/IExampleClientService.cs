@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Examples.Services;
+namespace LibplanetConsole.Example.Services;
 
 public interface IExampleClientService
 {

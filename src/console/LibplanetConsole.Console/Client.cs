@@ -1,17 +1,17 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using LibplanetConsole.Clients;
-using LibplanetConsole.Clients.Services;
+using LibplanetConsole.Client;
+using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles.Services;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Console.Services;
+using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 internal sealed class Client : IClient, IClientCallback
 {

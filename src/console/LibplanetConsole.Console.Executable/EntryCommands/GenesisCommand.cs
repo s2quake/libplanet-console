@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using LibplanetConsole.Common.Commands;
 
-namespace LibplanetConsole.Consoles.Executable.EntryCommands;
+namespace LibplanetConsole.Console.Executable.EntryCommands;
 
 [Category("Tools")]
 internal sealed class GenesisCommand : GenesisCommandBase

@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Libplanet.Types.Blocks;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
-using LibplanetConsole.Frameworks.Extensions;
+using LibplanetConsole.Framework;
+using LibplanetConsole.Framework.Extensions;
 using Serilog;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public abstract class ApplicationBase : ApplicationFramework, IApplication
 {

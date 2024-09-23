@@ -2,10 +2,10 @@ using System.ComponentModel.Composition;
 using System.Text;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles.Services;
-using LibplanetConsole.Examples.Services;
+using LibplanetConsole.Console.Services;
+using LibplanetConsole.Example.Services;
 
-namespace LibplanetConsole.Consoles.Examples;
+namespace LibplanetConsole.Console.Example;
 
 [Export(typeof(IExampleNodeContent))]
 [Export(typeof(INodeContentService))]

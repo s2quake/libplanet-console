@@ -1,6 +1,6 @@
 using LibplanetConsole.Evidence;
 
-namespace LibplanetConsole.Nodes.Evidence;
+namespace LibplanetConsole.Node.Evidence;
 
 public interface IEvidenceNode
 {

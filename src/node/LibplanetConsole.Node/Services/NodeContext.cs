@@ -1,7 +1,7 @@
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Nodes.Services;
+namespace LibplanetConsole.Node.Services;
 
 [Export]
 [method: ImportingConstructor]

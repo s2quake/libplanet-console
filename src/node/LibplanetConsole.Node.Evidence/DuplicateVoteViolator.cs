@@ -5,11 +5,11 @@ using Libplanet.Net.Consensus;
 using Libplanet.Net.Messages;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
-using LibplanetConsole.Nodes.Evidence.Extensions;
+using LibplanetConsole.Node.Evidence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Nodes.Evidence;
+namespace LibplanetConsole.Node.Evidence;
 
 internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
 {

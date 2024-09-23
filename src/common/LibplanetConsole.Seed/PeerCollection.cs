@@ -4,7 +4,7 @@ using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
 using Serilog;
 
-namespace LibplanetConsole.Seeds;
+namespace LibplanetConsole.Seed;
 
 public sealed class PeerCollection : IEnumerable<Peer>
 {

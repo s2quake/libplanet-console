@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Clients.Services;
+namespace LibplanetConsole.Client.Services;
 
 public interface IClientService
 {

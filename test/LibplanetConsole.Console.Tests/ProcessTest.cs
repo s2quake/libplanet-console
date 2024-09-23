@@ -1,6 +1,6 @@
 using Xunit.Extensions.AssemblyFixture;
 
-namespace LibplanetConsole.Consoles.Tests;
+namespace LibplanetConsole.Console.Tests;
 
 public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixture)
     : IAssemblyFixture<ConsoleApplicationFixture>

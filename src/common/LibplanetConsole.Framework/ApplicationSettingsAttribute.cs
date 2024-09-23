@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace LibplanetConsole.Frameworks;
+namespace LibplanetConsole.Framework;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ApplicationSettingsAttribute(string name) : Attribute

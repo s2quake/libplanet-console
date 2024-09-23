@@ -3,7 +3,7 @@ using LibplanetConsole.Common.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
 
-namespace LibplanetConsole.Nodes.Explorer.Services;
+namespace LibplanetConsole.Node.Explorer.Services;
 
 [Export(typeof(ILocalService))]
 internal sealed class ExplorerNodeService : LocalService<IExplorerService, IExplorerCallback>,

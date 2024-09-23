@@ -1,7 +1,7 @@
-using LibplanetConsole.Clients;
+using LibplanetConsole.Client;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {

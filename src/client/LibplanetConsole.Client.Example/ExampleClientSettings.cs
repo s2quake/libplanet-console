@@ -1,7 +1,7 @@
 using JSSoft.Commands;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Clients.Examples;
+namespace LibplanetConsole.Client.Example;
 
 [ApplicationSettings]
 internal sealed class ExampleClientSettings

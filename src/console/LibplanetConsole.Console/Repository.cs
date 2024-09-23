@@ -4,9 +4,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Libplanet.Common;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Consoles;
+namespace LibplanetConsole.Console;
 
 public sealed record class Repository
 {

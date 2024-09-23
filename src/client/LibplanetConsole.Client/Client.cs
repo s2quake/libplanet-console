@@ -1,12 +1,12 @@
 using System.Security;
-using LibplanetConsole.Clients.Services;
+using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
-using LibplanetConsole.Nodes;
-using LibplanetConsole.Nodes.Services;
+using LibplanetConsole.Node;
+using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace LibplanetConsole.Clients;
+namespace LibplanetConsole.Client;
 
 internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallback
 {

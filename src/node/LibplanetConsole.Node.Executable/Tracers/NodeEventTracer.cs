@@ -1,9 +1,9 @@
 using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Nodes.Executable.Tracers;
+namespace LibplanetConsole.Node.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
 [method: ImportingConstructor]

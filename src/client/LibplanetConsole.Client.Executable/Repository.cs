@@ -1,10 +1,10 @@
 using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
+using LibplanetConsole.Framework;
 using static LibplanetConsole.Common.PathUtility;
 
-namespace LibplanetConsole.Clients.Executable;
+namespace LibplanetConsole.Client.Executable;
 
 public sealed record class Repository
 {

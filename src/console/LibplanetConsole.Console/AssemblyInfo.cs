@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("LibplanetConsole.Consoles.Tests")]
+[assembly: InternalsVisibleTo("LibplanetConsole.Console.Tests")]
