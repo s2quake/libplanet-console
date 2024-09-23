@@ -11,8 +11,8 @@ public class Program
         while (DateTimeOffset.UtcNow < dateTimeOffset.AddMilliseconds(delay))
         {
             System.Threading.Thread.Sleep(100);
-            Console.Out.WriteLine(dateTimeOffset);
-            Console.Error.WriteLine(dateTimeOffset);
+            System.Console.Out.WriteLine(dateTimeOffset);
+            System.Console.Error.WriteLine(dateTimeOffset);
         }
     }
 }
