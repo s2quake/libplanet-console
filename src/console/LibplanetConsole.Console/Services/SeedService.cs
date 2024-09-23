@@ -14,34 +14,34 @@ internal sealed class SeedService : LocalService<ISeedService>,
 {
     private readonly ApplicationBase _application;
     private readonly AppPrivateKey _seedNodePrivateKey = new();
-    private readonly Seed.Seed _blocksyncSeed;
-    private readonly Seed.Seed _consensusSeed;
+    private readonly SeedNode _blocksyncSeedNode;
+    private readonly SeedNode _consensusSeedNode;
 
     [ImportingConstructor]
     public SeedService(ApplicationBase application)
     {
         _application = application;
-        _blocksyncSeed = new Seed.Seed(new()
+        _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = AppEndPoint.Next(),
         });
-        _consensusSeed = new Seed.Seed(new()
+        _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = AppEndPoint.Next(),
         });
     }
 
-    public AppPeer BlocksyncSeedPeer => _blocksyncSeed.BoundPeer;
+    public AppPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
 
-    public AppPeer ConsensusSeedPeer => _consensusSeed.BoundPeer;
+    public AppPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
     public async Task<SeedInfo> GetSeedAsync(
         AppPublicKey publicKey, CancellationToken cancellationToken)
     {
-        var seedPeer = _blocksyncSeed.BoundPeer;
-        var consensusSeedPeer = _consensusSeed.BoundPeer;
+        var seedPeer = _blocksyncSeedNode.BoundPeer;
+        var consensusSeedPeer = _consensusSeedNode.BoundPeer;
         var seedInfo = new SeedInfo
         {
             BlocksyncSeedPeer = seedPeer,
@@ -54,13 +54,13 @@ internal sealed class SeedService : LocalService<ISeedService>,
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        await _blocksyncSeed.StartAsync(cancellationToken);
-        await _consensusSeed.StartAsync(cancellationToken);
+        await _blocksyncSeedNode.StartAsync(cancellationToken);
+        await _consensusSeedNode.StartAsync(cancellationToken);
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        await _blocksyncSeed.StopAsync(cancellationToken: default);
-        await _consensusSeed.StopAsync(cancellationToken: default);
+        await _blocksyncSeedNode.StopAsync(cancellationToken: default);
+        await _consensusSeedNode.StopAsync(cancellationToken: default);
     }
 }

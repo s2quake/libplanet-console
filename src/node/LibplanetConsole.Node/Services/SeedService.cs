@@ -2,6 +2,7 @@ using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Seed;
 
 namespace LibplanetConsole.Node.Services;
 
@@ -12,19 +13,19 @@ internal sealed class SeedService(ApplicationBase application)
     : LocalService<ISeedService>, ISeedService, IApplicationService, IAsyncDisposable
 {
     private readonly AppPrivateKey _seedNodePrivateKey = new();
-    private Seed.Seed? _blocksyncSeed;
-    private Seed.Seed? _consensusSeed;
+    private SeedNode? _blocksyncSeedNode;
+    private SeedNode? _consensusSeedNode;
 
     public async Task<SeedInfo> GetSeedAsync(
         AppPublicKey publicKey, CancellationToken cancellationToken)
     {
-        if (_blocksyncSeed is null || _consensusSeed is null)
+        if (_blocksyncSeedNode is null || _consensusSeedNode is null)
         {
             throw new InvalidOperationException("The SeedService is not running.");
         }
 
-        var seedPeer = _blocksyncSeed.BoundPeer;
-        var consensusSeedPeer = _consensusSeed.BoundPeer;
+        var seedPeer = _blocksyncSeedNode.BoundPeer;
+        var consensusSeedPeer = _consensusSeedNode.BoundPeer;
         var seedInfo = new SeedInfo
         {
             BlocksyncSeedPeer = seedPeer,
@@ -36,16 +37,16 @@ internal sealed class SeedService(ApplicationBase application)
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (_blocksyncSeed is not null)
+        if (_blocksyncSeedNode is not null)
         {
-            await _blocksyncSeed.StopAsync(cancellationToken: default);
-            _blocksyncSeed = null;
+            await _blocksyncSeedNode.StopAsync(cancellationToken: default);
+            _blocksyncSeedNode = null;
         }
 
-        if (_consensusSeed is not null)
+        if (_consensusSeedNode is not null)
         {
-            await _consensusSeed.StopAsync(cancellationToken: default);
-            _consensusSeed = null;
+            await _consensusSeedNode.StopAsync(cancellationToken: default);
+            _consensusSeedNode = null;
         }
     }
 
@@ -54,18 +55,18 @@ internal sealed class SeedService(ApplicationBase application)
     {
         if (application.Info.SeedEndPoint == application.Info.EndPoint)
         {
-            _blocksyncSeed = new Seed.Seed(new()
+            _blocksyncSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = AppEndPoint.Next(),
             });
-            _consensusSeed = new Seed.Seed(new()
+            _consensusSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
                 EndPoint = AppEndPoint.Next(),
             });
-            await _blocksyncSeed.StartAsync(cancellationToken);
-            await _consensusSeed.StartAsync(cancellationToken);
+            await _blocksyncSeedNode.StartAsync(cancellationToken);
+            await _consensusSeedNode.StartAsync(cancellationToken);
         }
     }
 }

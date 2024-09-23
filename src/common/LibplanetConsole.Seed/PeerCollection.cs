@@ -10,7 +10,7 @@ public sealed class PeerCollection : IEnumerable<Peer>
 {
     private readonly ConcurrentDictionary<AppAddress, Peer> _infoByAddress = [];
     private readonly SeedOptions _seedOptions;
-    private readonly ILogger _logger = Log.ForContext<Seed>();
+    private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
     internal PeerCollection(SeedOptions seedOptions)
     {

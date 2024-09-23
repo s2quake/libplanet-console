@@ -10,14 +10,14 @@ using static LibplanetConsole.Seed.PeerUtility;
 
 namespace LibplanetConsole.Seed;
 
-public sealed class Seed(SeedOptions seedOptions)
+public sealed class SeedNode(SeedOptions seedOptions)
 {
     public static readonly PrivateKey AppProtocolKey = (PrivateKey)GenesisOptions.AppProtocolKey;
 
     public static readonly AppProtocolVersion AppProtocolVersion
         = AppProtocolVersion.Sign(AppProtocolKey, GenesisOptions.AppProtocolVersion);
 
-    private readonly ILogger _logger = Log.ForContext<Seed>();
+    private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
     private ITransport? _transport;
     private CancellationTokenSource? _cancellationTokenSource;
