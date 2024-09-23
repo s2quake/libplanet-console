@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- $(LibplanetDirectory) exists. -->
+  <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.Store\Libplanet.Store.csproj" />
+    <ProjectReference Include="$(LibplanetDirectory)src\Libplanet.RocksDBStore\Libplanet.RocksDBStore.csproj" />
+  </ItemGroup>
+
+  <!-- $(LibplanetDirectory) does not exist. -->
+  <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
+    <PackageReference Include="Libplanet.Store" Version="$(LibplanetVersion)" />
+    <PackageReference Include="Libplanet.RocksDBStore" Version="$(LibplanetVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\LibplanetConsole.Seed\LibplanetConsole.Seed.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
+  </ItemGroup>
+
+</Project>

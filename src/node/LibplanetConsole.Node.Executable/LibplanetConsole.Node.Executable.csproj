@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Node.Example\LibplanetConsole.Node.Example.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Node.Explorer\LibplanetConsole.Node.Explorer.csproj" />
+    <ProjectReference Include="..\..\node\LibplanetConsole.Node.Evidence\LibplanetConsole.Node.Evidence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>libplanet-node</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />
+
+</Project>

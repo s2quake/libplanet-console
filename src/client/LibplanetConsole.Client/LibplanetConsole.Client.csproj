@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Client\**\*.cs" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DefineConstants>LIBPLANET_CLIENT</DefineConstants>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Seed\LibplanetConsole.Seed.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Client\**\*.cs" />
+  </ItemGroup>
+
+</Project>

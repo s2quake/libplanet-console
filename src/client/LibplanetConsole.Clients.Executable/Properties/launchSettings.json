@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "LibplanetConsole.Clients.Executable": {
-      "commandName": "Project",
-      "commandLineArgs": "--seed-end-point 127.0.0.1:5353",
-      "workingDirectory": "$(SolutionDir)"
-    }
-  }
-}
