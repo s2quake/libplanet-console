@@ -83,11 +83,29 @@ internal sealed record class ApplicationSettings
     [JsonIgnore]
     public bool IsSingleNode { get; set; }
 
+    [CommandProperty("module-path")]
+    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+                    "the IActionProvider.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    [DefaultValue("")]
+    public string ActionProviderModulePath { get; set; } = string.Empty;
+
+    [CommandProperty("module-type")]
+    [CommandSummary("Indicates the type name of the IActionProvider.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    [DefaultValue("")]
+    public string ActionProviderType { get; set; } = string.Empty;
+
     public ApplicationOptions ToOptions(object[] components)
     {
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
         var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
         var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
+        var actionProvider = ModuleLoader.LoadActionLoader(
+            ActionProviderModulePath, ActionProviderType);
         return new ApplicationOptions(endPoint, privateKey, genesis)
         {
             ParentProcessId = ParentProcessId,
@@ -97,6 +115,7 @@ internal sealed record class ApplicationSettings
             LibraryLogPath = GetFullPath(LibraryLogPath),
             NoREPL = NoREPL,
             Components = components,
+            ActionProvider = actionProvider,
         };
 
         static string GetFullPath(string path)
@@ -115,13 +134,13 @@ internal sealed record class ApplicationSettings
 
     private static byte[] CreateGenesis(AppPrivateKey privateKey)
     {
-        var validatorKey = new AppPublicKey[]
+        var genesisOptions = new GenesisOptions
         {
-            privateKey.PublicKey,
+            GenesisKey = privateKey,
+            Validators = [privateKey.PublicKey],
+            Timestamp = DateTimeOffset.UtcNow,
         };
-        var dateTimeOffset = DateTimeOffset.UtcNow;
-        var genesisBlock = BlockUtility.CreateGenesisBlock(
-            privateKey, validatorKey, dateTimeOffset);
+        var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
         return BlockUtility.SerializeBlock(genesisBlock);
     }
 

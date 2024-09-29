@@ -12,11 +12,9 @@ public abstract class ProcessBase
 {
     private const int MillisecondsDelay = 10000;
 
-    private readonly StringBuilder _outBuilder = new();
     private readonly StringBuilder _errorBuilder = new();
     private Process? _process;
     private TaskCompletionSource? _errorTaskCompletionSource;
-    private TaskCompletionSource? _outputTaskCompletionSource;
 
     public event DataReceivedEventHandler? ErrorDataReceived;
 
@@ -53,7 +51,6 @@ public abstract class ProcessBase
         {
             if (NewWindow is not true)
             {
-                _outputTaskCompletionSource = new TaskCompletionSource();
                 _errorTaskCompletionSource = new TaskCompletionSource();
                 _process.OutputDataReceived += Process_OutputDataReceived;
                 _process.ErrorDataReceived += Process_ErrorDataReceived;
@@ -72,7 +69,6 @@ public abstract class ProcessBase
 
             if (_process.WaitForExit(millisecondsDelay) is true)
             {
-                _outputTaskCompletionSource?.Task.Wait();
                 _errorTaskCompletionSource?.Task.Wait();
                 if (_process.ExitCode != 0)
                 {
@@ -90,9 +86,7 @@ public abstract class ProcessBase
         }
         finally
         {
-            _outBuilder.Clear();
             _errorBuilder.Clear();
-            _outputTaskCompletionSource = null;
             _errorTaskCompletionSource = null;
             _process.Dispose();
             _process = null;
@@ -112,7 +106,6 @@ public abstract class ProcessBase
         {
             if (NewWindow is not true)
             {
-                _outputTaskCompletionSource = new TaskCompletionSource();
                 _errorTaskCompletionSource = new TaskCompletionSource();
                 _process.OutputDataReceived += Process_OutputDataReceived;
                 _process.ErrorDataReceived += Process_ErrorDataReceived;
@@ -132,11 +125,6 @@ public abstract class ProcessBase
             await _process.WaitForExitAsync(cancellationToken);
             if (_process.ExitCode is not 0)
             {
-                if (_outputTaskCompletionSource is not null)
-                {
-                    await _outputTaskCompletionSource.Task;
-                }
-
                 if (_errorTaskCompletionSource is not null)
                 {
                     await _errorTaskCompletionSource.Task;
@@ -158,9 +146,7 @@ public abstract class ProcessBase
         }
         finally
         {
-            _outBuilder.Clear();
             _errorBuilder.Clear();
-            _outputTaskCompletionSource = null;
             _errorTaskCompletionSource = null;
             _process.Dispose();
             _process = null;
@@ -311,15 +297,6 @@ public abstract class ProcessBase
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
-        if (e.Data is string text)
-        {
-            _outBuilder.AppendLine(text);
-        }
-        else
-        {
-            _outputTaskCompletionSource?.SetResult();
-        }
-
         OutputDataReceived?.Invoke(sender, e);
     }
 
@@ -327,7 +304,12 @@ public abstract class ProcessBase
     {
         if (e.Data is string text)
         {
-            _errorBuilder.AppendLine(text);
+            if (_errorBuilder.Length > 0)
+            {
+                _errorBuilder.AppendLine();
+            }
+
+            _errorBuilder.Append(text);
         }
         else
         {

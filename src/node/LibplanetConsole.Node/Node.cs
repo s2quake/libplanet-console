@@ -3,7 +3,6 @@ using System.Security;
 using System.Security.Cryptography;
 using Bencodex.Types;
 using Libplanet.Action;
-using Libplanet.Action.Loader;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Common;
@@ -15,10 +14,9 @@ using Libplanet.Net.Transports;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
-using Microsoft.Extensions.DependencyInjection;
+using LibplanetConsole.Seed;
 using Serilog;
 using static LibplanetConsole.Node.PeerUtility;
 
@@ -36,8 +34,8 @@ internal sealed partial class Node : IActionRenderer, INode
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
     private readonly ILogger _logger;
     private readonly byte[] _genesis;
-    private readonly AppProtocolVersion _appProtocolVersion = AppProtocolVersion.Sign(
-        (PrivateKey)GenesisOptions.AppProtocolKey, GenesisOptions.AppProtocolVersion);
+    private readonly AppProtocolVersion _appProtocolVersion = SeedNode.AppProtocolVersion;
+    private readonly IActionProvider _actionProvider;
 
     private AppEndPoint? _seedEndPoint;
     private AppEndPoint? _blocksyncEndPoint;
@@ -53,6 +51,7 @@ internal sealed partial class Node : IActionRenderer, INode
         _privateKey = options.PrivateKey.ToSecureString();
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
+        _actionProvider = options.ActionProvider ?? ActionProvider.Default;
         _logger = logger;
         _genesis = options.Genesis;
         UpdateNodeInfo();
@@ -182,12 +181,11 @@ internal sealed partial class Node : IActionRenderer, INode
             TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
         };
-        var actionLoaders = CollectActionLoaders(_serviceProvider);
         var blockChain = BlockChainUtility.CreateBlockChain(
             genesisBlock: BlockUtility.DeserializeBlock(_genesis),
             storePath: storePath,
             renderer: this,
-            actionLoaders: actionLoaders);
+            actionProvider: _actionProvider);
 
         _blocksyncEndPoint = blocksyncEndPoint;
         _consensusEndPoint = consensusEndPoint;
@@ -286,16 +284,6 @@ internal sealed partial class Node : IActionRenderer, INode
             UpdateNodeInfo();
             BlockAppended?.Invoke(this, new(blockInfo));
         }
-    }
-
-    private static IActionLoader[] CollectActionLoaders(IServiceProvider serviceProvider)
-    {
-        var actionLoaderProviders
-            = serviceProvider.GetRequiredService<IEnumerable<IActionLoaderProvider>>();
-        var actionLoaderList
-            = actionLoaderProviders.Select(item => item.GetActionLoader()).ToList();
-        actionLoaderList.Add(new AssemblyActionLoader(typeof(AssemblyActionLoader).Assembly));
-        return [.. actionLoaderList];
     }
 
     private static async Task<NetMQTransport> CreateTransport(

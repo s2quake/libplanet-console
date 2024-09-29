@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Libplanet.Common;
 using LibplanetConsole.Common;
+using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console;
@@ -12,15 +13,13 @@ public sealed record class Repository
 {
     private const int DefaultTimeout = 10000;
 
+    private byte[]? _genesis;
+
     public Repository(AppEndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
     {
         EndPoint = endPoint;
         Nodes = nodes;
         Clients = clients;
-        Genesis = BlockUtility.SerializeBlock(BlockUtility.CreateGenesisBlock(
-            genesisKey: new AppPrivateKey(),
-            validatorKeys: nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
-            dateTimeOffset: DateTimeOffset.UtcNow));
     }
 
     public AppEndPoint EndPoint { get; }
@@ -29,13 +28,28 @@ public sealed record class Repository
 
     public ClientOptions[] Clients { get; } = [];
 
-    public byte[] Genesis { get; init; } = [];
+    public byte[] Genesis
+    {
+        get => _genesis ??= CreateDefaultGenesis();
+        init => _genesis = value;
+    }
 
     public string LogPath { get; init; } = string.Empty;
 
     public string LibraryLogPath { get; init; } = string.Empty;
 
     public string Source { get; private set; } = string.Empty;
+
+    public static byte[] CreateGenesis(GenesisOptions genesisOptions)
+    {
+        var genesisProcess = new NodeGenesisProcess
+        {
+            GenesisOptions = genesisOptions,
+        };
+
+        var genesis = genesisProcess.RunWithResult();
+        return ByteUtil.ParseHex(genesis);
+    }
 
     public static Repository Load(string repositoryPath, RepositoryPathResolver resolver)
     {
@@ -154,6 +168,20 @@ public sealed record class Repository
         });
 
         return info;
+    }
+
+    private byte[] CreateDefaultGenesis()
+    {
+        var genesisOptions = new GenesisOptions
+        {
+            GenesisKey = new AppPrivateKey(),
+            Validators = Nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
+            Timestamp = DateTimeOffset.UtcNow,
+            ActionProviderModulePath = string.Empty,
+            ActionProviderType = string.Empty,
+        };
+
+        return CreateGenesis(genesisOptions);
     }
 
     private static byte[] LoadGenesis(string genesisPath)

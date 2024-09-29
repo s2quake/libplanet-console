@@ -1,5 +1,4 @@
 using Libplanet.Action;
-using Libplanet.Action.Loader;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Policies;
 using Libplanet.Blockchain.Renderers;
@@ -7,7 +6,6 @@ using Libplanet.RocksDBStore;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
 using Libplanet.Types.Blocks;
-using LibplanetConsole.Common.Actions;
 
 namespace LibplanetConsole.Node;
 
@@ -17,13 +15,18 @@ internal static class BlockChainUtility
         Block genesisBlock,
         string storePath,
         IRenderer renderer,
-        IActionLoader[] actionLoaders)
+        IActionProvider actionProvider)
     {
         var isNew = storePath == string.Empty || Directory.Exists(storePath) != true;
         var (store, stateStore) = GetStore(storePath);
-        var actionLoader = new AggregateTypedActionLoader(actionLoaders);
+        var actionLoader = actionProvider.GetActionLoader();
+        var policyActionsRegistry = new PolicyActionsRegistry(
+            beginBlockActions: actionProvider.BeginBlockActions,
+            endBlockActions: actionProvider.EndBlockActions,
+            beginTxActions: actionProvider.BeginTxActions,
+            endTxActions: actionProvider.EndTxActions);
         var actionEvaluator = new ActionEvaluator(
-            policyActionsRegistry: new(),
+            policyActionsRegistry: policyActionsRegistry,
             stateStore,
             actionLoader);
         var policy = new BlockPolicy(

@@ -65,10 +65,22 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
-    [CommandProperty("date-time")]
+    [CommandProperty("timestamp")]
     [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
     [Category("Genesis")]
     public DateTimeOffset DateTimeOffset { get; set; }
+
+    [CommandProperty("module-path")]
+    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+                    "the IActionProvider.")]
+    [Category("Genesis")]
+    public string ActionProviderModulePath { get; set; } = string.Empty;
+
+    [CommandProperty("module-type")]
+    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
+    [Category("Genesis")]
+    public string ActionProviderType { get; set; } = string.Empty;
 
     protected override void OnExecute()
     {
@@ -80,12 +92,18 @@ internal sealed class InitializeCommand : CommandBase
         var outputPath = Path.GetFullPath(RepositoryPath);
         var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
             ? DateTimeOffset : DateTimeOffset.UtcNow;
+        var genesisOptions = new GenesisOptions
+        {
+            GenesisKey = genesisKey,
+            Validators = nodeOptions.Select(item => item.PrivateKey.PublicKey).ToArray(),
+            Timestamp = dateTimeOffset,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
+        };
+        var genesis = Repository.CreateGenesis(genesisOptions);
         var repository = new Repository(endPoint, nodeOptions, clientOptions)
         {
-            Genesis = BlockUtility.SerializeBlock(BlockUtility.CreateGenesisBlock(
-                genesisKey: genesisKey,
-                validatorKeys: nodeOptions.Select(item => item.PrivateKey.PublicKey).ToArray(),
-                dateTimeOffset: dateTimeOffset)),
+            Genesis = genesis,
             LogPath = "app.log",
             LibraryLogPath = "library.log",
         };
@@ -101,6 +119,8 @@ internal sealed class InitializeCommand : CommandBase
             Validators = nodeOptions.Select(
                 item => AppPublicKey.ToString(item.PrivateKey.PublicKey)),
             Timestamp = dateTimeOffset,
+            ActionProviderModulePath,
+            ActionProviderType,
         };
 
         TextWriterExtensions.WriteLineAsJson(writer, info);

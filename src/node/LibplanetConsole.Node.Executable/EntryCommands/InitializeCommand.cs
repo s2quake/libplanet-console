@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
@@ -71,7 +72,7 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
-    [CommandProperty("date-time")]
+    [CommandProperty("timestamp")]
     [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"\n" +
                     "Requires the '--single-node' option to be set.")]
     [Category("Genesis")]
@@ -81,6 +82,22 @@ internal sealed class InitializeCommand : CommandBase
     [CommandPropertySwitch("quiet", 'q')]
     [CommandSummary("If set, the command does not output any information.")]
     public bool Quiet { get; set; }
+
+    [CommandProperty("module-path")]
+    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+                    "the IActionProvider.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [Category("Genesis")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    public string ActionProviderModulePath { get; set; } = string.Empty;
+
+    [CommandProperty("module-type")]
+    [CommandSummary("Indicates the type name of the IActionProvider.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
+    [Category("Genesis")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    public string ActionProviderType { get; set; } = string.Empty;
 
     protected override void OnExecute()
     {
@@ -100,6 +117,8 @@ internal sealed class InitializeCommand : CommandBase
             LibraryLogPath = libraryLogPath,
             GenesisPath = genesisPath,
             SeedEndPoint = IsSingleNode is true ? endPoint : null,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         };
         dynamic info = repository.Save(outputPath);
         using var writer = new ConditionalTextWriter(Out)
@@ -109,20 +128,30 @@ internal sealed class InitializeCommand : CommandBase
 
         if (IsSingleNode is true)
         {
-            var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
-            var validatorKeys = new AppPublicKey[] { privateKey.PublicKey };
-            var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
-                ? DateTimeOffset : DateTimeOffset.UtcNow;
-            var genesis = BlockUtility.CreateGenesisString(
-                genesisKey, validatorKeys, dateTimeOffset);
-            File.WriteAllLines(genesisPath, [genesis]);
+            var genesisOptions = new GenesisOptions
+            {
+                GenesisKey = AppPrivateKey.ParseOrRandom(GenesisKey),
+                Validators = [privateKey.PublicKey],
+                Timestamp = DateTimeOffset != DateTimeOffset.MinValue
+                    ? DateTimeOffset : DateTimeOffset.UtcNow,
+                ActionProviderModulePath = ActionProviderModulePath,
+                ActionProviderType = ActionProviderType,
+            };
+
+            var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
+            var genesis = BlockUtility.SerializeBlock(genesisBlock);
+            var genesisString = ByteUtil.Hex(genesis);
+            File.WriteAllLines(genesisPath, [genesisString]);
             info.GenesisArguments = new
             {
-                GenesisKey = AppPrivateKey.ToString(genesisKey),
-                Validators = validatorKeys,
-                Timestamp = dateTimeOffset,
+                GenesisKey = AppPrivateKey.ToString(genesisOptions.GenesisKey),
+                Validators = genesisOptions.Validators.Select(
+                    item => AppPublicKey.ToString(item)),
+                genesisOptions.Timestamp,
+                genesisOptions.ActionProviderModulePath,
+                genesisOptions.ActionProviderType,
             };
-            info.Genesis = genesis;
+            info.Genesis = genesisString;
         }
 
         TextWriterExtensions.WriteLineAsJson(writer, info);
