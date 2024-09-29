@@ -54,4 +54,8 @@
     <ProjectReference Include="..\LibplanetConsole.DataAnnotations\LibplanetConsole.DataAnnotations.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Bencodex" Version="0.16.0" />
+  </ItemGroup>
+
 </Project>

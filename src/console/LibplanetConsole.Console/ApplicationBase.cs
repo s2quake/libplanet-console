@@ -3,9 +3,9 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Libplanet.Types.Blocks;
-using LibplanetConsole.Common;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
+using LibplanetConsole.Node;
 using Serilog;
 
 namespace LibplanetConsole.Console;

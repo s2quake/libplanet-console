@@ -1,3 +1,4 @@
+using System.Globalization;
 using Xunit.Extensions.AssemblyFixture;
 
 namespace LibplanetConsole.Console.Tests;
@@ -94,7 +95,9 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
     {
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var process = new TestProcess(dotnetPath, "--help");
+        using var outputCollector = new ProcessOutputCollector(process);
         process.Run();
+        Assert.NotEmpty(outputCollector.Output);
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
     }
@@ -104,7 +107,9 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
     {
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var process = new TestProcess(dotnetPath, "--help");
+        using var outputCollector = new ProcessOutputCollector(process);
         await process.RunAsync(default);
+        Assert.NotEmpty(outputCollector.Output);
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
     }
@@ -114,12 +119,18 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
     {
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var process = new TestProcess(dotnetPath, "--help");
+        var outputCollector1 = new ProcessOutputCollector(process);
         process.Run();
+        outputCollector1.Dispose();
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
+        var outputCollector2 = new ProcessOutputCollector(process);
         process.Run();
+        outputCollector2.Dispose();
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
+
+        Assert.Equal(outputCollector1.Output, outputCollector2.Output);
     }
 
     [Fact]
@@ -127,12 +138,18 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
     {
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var process = new TestProcess(dotnetPath, "--help");
+        var outputCollector1 = new ProcessOutputCollector(process);
         await process.RunAsync(default);
+        outputCollector1.Dispose();
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
+        var outputCollector2 = new ProcessOutputCollector(process);
         await process.RunAsync(default);
+        outputCollector2.Dispose();
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
+
+        Assert.Equal(outputCollector1.Output, outputCollector2.Output);
     }
 
     [Fact]
@@ -141,7 +158,14 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var executionPath = consoleApplicationFixture.ExecutionPath;
         var process = new TestProcess(dotnetPath, executionPath);
+        using var outputCollector = new ProcessOutputCollector(process);
+        var expectedTimestamp = DateTimeOffset.UtcNow + TimeSpan.FromMilliseconds(1000);
         process.Run();
+        var output = outputCollector.Output;
+        var lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var actualTimestamp = DateTimeOffset.Parse(lines.Last(), CultureInfo.CurrentCulture);
+
+        Assert.True(actualTimestamp >= expectedTimestamp);
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
     }
@@ -152,7 +176,14 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var executionPath = consoleApplicationFixture.ExecutionPath;
         var process = new TestProcess(dotnetPath, executionPath);
+        using var outputCollector = new ProcessOutputCollector(process);
+        var expectedTimestamp = DateTimeOffset.UtcNow + TimeSpan.FromMilliseconds(1000);
         await process.RunAsync(default);
+        var output = outputCollector.Output;
+        var lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var actualTimestamp = DateTimeOffset.Parse(lines.Last(), CultureInfo.CurrentCulture);
+
+        Assert.True(actualTimestamp >= expectedTimestamp);
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
     }
@@ -213,11 +244,21 @@ public sealed class ProcessTest(ConsoleApplicationFixture consoleApplicationFixt
     {
         var dotnetPath = ProcessEnvironment.DotnetPath;
         var executionPath = consoleApplicationFixture.ExecutionPath;
-        var process = new TestProcess(dotnetPath, executionPath, "1000");
+        var millisecondsDelay = Random.Shared.Next(1000, 2000);
+        var process = new TestProcess(dotnetPath, executionPath, $"{millisecondsDelay}");
+        using var outputCollector = new ProcessOutputCollector(process);
+        var expectedTimestamp
+            = DateTimeOffset.UtcNow + TimeSpan.FromMilliseconds(millisecondsDelay);
         var task = process.RunAsync(default);
+
         Assert.True(process.IsRunning);
         Assert.NotEqual(-1, process.Id);
         await task;
+
+        var output = outputCollector.Output;
+        var lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var actualTimestamp = DateTimeOffset.Parse(lines.Last(), CultureInfo.CurrentCulture);
+        Assert.True(actualTimestamp >= expectedTimestamp);
         Assert.False(process.IsRunning);
         Assert.Equal(-1, process.Id);
     }

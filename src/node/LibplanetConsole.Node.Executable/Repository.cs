@@ -27,6 +27,10 @@ public sealed record class Repository
 
     public string Source { get; private set; } = string.Empty;
 
+    public string ActionProviderModulePath { get; init; } = string.Empty;
+
+    public string ActionProviderType { get; init; } = string.Empty;
+
     public static Repository Load(string settingsPath)
     {
         if (Path.IsPathRooted(settingsPath) is false)
@@ -50,6 +54,8 @@ public sealed record class Repository
             LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, directoryName),
             Source = settingsPath,
             SeedEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.SeedEndPoint),
+            ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
+            ActionProviderType = applicationSettings.ActionProviderType,
         };
     }
 
@@ -95,6 +101,8 @@ public sealed record class Repository
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
                 LibraryLogPath = GetRelativePathFromDirectory(repositoryPath, LibraryLogPath),
                 SeedEndPoint = AppEndPoint.ToString(SeedEndPoint),
+                ActionProviderModulePath = ActionProviderModulePath,
+                ActionProviderType = ActionProviderType,
             },
         };
 

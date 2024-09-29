@@ -10,7 +10,7 @@ namespace LibplanetConsole.Common;
 
 [JsonConverter(typeof(AppAddressJsonConverter))]
 [TypeConverter(typeof(AppAddressConverter))]
-public readonly record struct AppAddress : IFormattable
+public readonly partial record struct AppAddress : IFormattable
 {
     public const string RegularExpression = "0x[0-9a-fA-F]{40}";
     private readonly Address _address;
@@ -35,6 +35,9 @@ public readonly record struct AppAddress : IFormattable
 
     public static AppAddress? ParseOrDefault(string text)
         => text == string.Empty ? null : Parse(text);
+
+    public static AppAddress ParseOrFallback(string text, AppAddress fallback)
+        => text == string.Empty ? fallback : Parse(text);
 
     public static bool TryParse(string text, [MaybeNullWhen(false)] out AppAddress address)
     {

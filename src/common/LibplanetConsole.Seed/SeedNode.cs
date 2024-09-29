@@ -12,10 +12,11 @@ namespace LibplanetConsole.Seed;
 
 public sealed class SeedNode(SeedOptions seedOptions)
 {
-    public static readonly PrivateKey AppProtocolKey = (PrivateKey)GenesisOptions.AppProtocolKey;
+    public static readonly AppPrivateKey AppProtocolKey
+        = AppPrivateKey.Parse("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
     public static readonly AppProtocolVersion AppProtocolVersion
-        = AppProtocolVersion.Sign(AppProtocolKey, GenesisOptions.AppProtocolVersion);
+        = AppProtocolVersion.Sign((PrivateKey)AppProtocolKey, 1);
 
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
