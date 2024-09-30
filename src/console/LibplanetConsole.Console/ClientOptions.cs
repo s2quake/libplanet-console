@@ -6,11 +6,11 @@ namespace LibplanetConsole.Console;
 
 public sealed record class ClientOptions
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
     public required PrivateKey PrivateKey { get; init; }
 
-    public AppEndPoint? NodeEndPoint { get; init; }
+    public EndPoint? NodeEndPoint { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
 
@@ -32,10 +32,10 @@ public sealed record class ClientOptions
 
         return new()
         {
-            EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
+            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            NodeEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.NodeEndPoint),
+            NodeEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.NodeEndPoint),
             RepositoryPath = repositoryPath,
         };
     }

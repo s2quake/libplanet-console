@@ -57,7 +57,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public AppEndPoint EndPoint => _clientServiceContext.EndPoint;
+    public EndPoint EndPoint => _clientServiceContext.EndPoint;
 
     public ApplicationInfo Info => _info;
 

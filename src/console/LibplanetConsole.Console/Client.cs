@@ -6,6 +6,7 @@ using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
@@ -67,7 +68,7 @@ internal sealed class Client : IClient, IClientCallback
 
     public bool IsRunning { get; private set; }
 
-    public AppEndPoint EndPoint => _remoteServiceContext.EndPoint;
+    public EndPoint EndPoint => _remoteServiceContext.EndPoint;
 
     public ClientInfo Info => _clientInfo;
 

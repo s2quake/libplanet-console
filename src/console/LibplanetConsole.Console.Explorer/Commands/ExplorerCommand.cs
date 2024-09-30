@@ -28,7 +28,7 @@ internal sealed partial class ExplorerCommand(
         var explorerNode = node.GetRequiredService<IExplorerNodeContent>();
         if (endPoint != string.Empty)
         {
-            explorerNode.EndPoint = AppEndPoint.Parse(endPoint);
+            explorerNode.EndPoint = EndPointUtility.Parse(endPoint);
         }
 
         await explorerNode.StartAsync(cancellationToken);

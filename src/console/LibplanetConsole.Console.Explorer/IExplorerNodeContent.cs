@@ -9,7 +9,7 @@ public interface IExplorerNodeContent
 
     event EventHandler? Stopped;
 
-    AppEndPoint EndPoint { get; set; }
+    EndPoint EndPoint { get; set; }
 
     ExplorerInfo Info { get; }
 

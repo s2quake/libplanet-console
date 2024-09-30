@@ -9,6 +9,7 @@
     <Using Include="Libplanet.Action.Loader" />
     <Using Include="Bencodex" />
     <Using Include="Bencodex.Types" />
+    <Using Include="System.Net" />
   </ItemGroup>
 
 </Project>

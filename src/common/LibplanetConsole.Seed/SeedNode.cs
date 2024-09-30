@@ -25,7 +25,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
         = new("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
     public static readonly AppProtocolVersion AppProtocolVersion
-        = AppProtocolVersion.Sign((PrivateKey)AppProtocolKey, 1);
+        = AppProtocolVersion.Sign(AppProtocolKey, 1);
 
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
@@ -40,7 +40,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
     public PeerCollection Peers { get; } = new(seedOptions);
 
-    public BoundPeer BoundPeer => new(
+    public BoundPeer BoundPeer { get; } = new(
         seedOptions.PrivateKey.PublicKey, (DnsEndPoint)seedOptions.EndPoint);
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -111,15 +111,14 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
     private static async Task<NetMQTransport> CreateTransport(SeedOptions seedOptions)
     {
-        var privateKey = (PrivateKey)seedOptions.PrivateKey;
+        var privateKey = seedOptions.PrivateKey;
         var appProtocolVersion = AppProtocolVersion;
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,
             TrustedAppProtocolVersionSigners = [],
         };
-        var host = seedOptions.EndPoint.Host;
-        var port = seedOptions.EndPoint.Port;
+        var (host, port) = EndPointUtility.GetHostAndPort(seedOptions.EndPoint);
         var hostOptions = new HostOptions(host, [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }

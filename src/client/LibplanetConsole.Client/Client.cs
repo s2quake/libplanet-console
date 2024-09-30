@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security;
 using Libplanet.Crypto;
 using LibplanetConsole.Client.Services;
@@ -15,7 +16,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private readonly ApplicationBase _application;
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
-    private AppEndPoint? _nodeEndPoint;
+    private EndPoint? _nodeEndPoint;
     private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
     private ClientInfo _info;
@@ -48,7 +49,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public NodeInfo NodeInfo { get; private set; }
 
-    public AppEndPoint NodeEndPoint
+    public EndPoint NodeEndPoint
     {
         get => _nodeEndPoint ??
             throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");

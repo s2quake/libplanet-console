@@ -6,7 +6,7 @@
 //     public void Test1()
 //     {
 //         var publicKey = new PrivateKey().PublicKey;
-//         var endPoint = new AppEndPoint("localhost", 12345);
+//         var endPoint = new EndPoint("localhost", 12345);
 //         var peer = new AppPeer(publicKey, endPoint);
 //         Assert.Equal(publicKey, peer.PublicKey);
 //         Assert.Equal(endPoint, peer.EndPoint);

@@ -40,13 +40,13 @@ public static partial class BlockUtility
         var nonce = 0L;
         var transaction = Transaction.Create(
             nonce: nonce,
-            privateKey: (PrivateKey)genesisKey,
+            privateKey: genesisKey,
             genesisHash: null,
             actions: [.. actions.Select(item => item.PlainValue)],
             timestamp: dateTimeOffset);
         var transactions = ImmutableList.Create(transaction);
         return ProposeGenesisBlock(
-            privateKey: (PrivateKey)genesisKey,
+            privateKey: genesisKey,
             transactions: transactions,
             timestamp: dateTimeOffset);
     }

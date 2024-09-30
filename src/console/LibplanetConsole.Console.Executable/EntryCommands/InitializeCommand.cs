@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Net;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -85,7 +86,7 @@ internal sealed class InitializeCommand : CommandBase
     protected override void OnExecute()
     {
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var prevEndPoint = EndPoint != string.Empty ? endPoint : null;
         var nodeOptions = GetNodeOptions(ref prevEndPoint);
         var clientOptions = GetClientOptions(ref prevEndPoint);
@@ -126,14 +127,13 @@ internal sealed class InitializeCommand : CommandBase
         TextWriterExtensions.WriteLineAsJson(writer, info);
     }
 
-    private NodeOptions[] GetNodeOptions(ref AppEndPoint? prevEndPoint)
+    private NodeOptions[] GetNodeOptions(ref EndPoint? prevEndPoint)
     {
         var privateKeys = GetNodes();
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint is not null
-                ? new AppEndPoint(prevEndPoint.Host, prevEndPoint.Port + 1) : AppEndPoint.Next();
+            var endPoint = prevEndPoint ?? EndPointUtility.Next();
             var nodeOptions = new NodeOptions
             {
                 EndPoint = endPoint,
@@ -152,14 +152,13 @@ internal sealed class InitializeCommand : CommandBase
         return [.. nodeOptionsList];
     }
 
-    private ClientOptions[] GetClientOptions(ref AppEndPoint? prevEndPoint)
+    private ClientOptions[] GetClientOptions(ref EndPoint? prevEndPoint)
     {
         var privateKeys = GetClients();
         var clientOptionsList = new List<ClientOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint is not null
-                ? new AppEndPoint(prevEndPoint.Host, prevEndPoint.Port + 1) : AppEndPoint.Next();
+            var endPoint = prevEndPoint ?? EndPointUtility.Next();
             var clientOptions = new ClientOptions
             {
                 EndPoint = endPoint,

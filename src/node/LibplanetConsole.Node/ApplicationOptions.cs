@@ -4,14 +4,14 @@ namespace LibplanetConsole.Node;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(AppEndPoint endPoint, PrivateKey privateKey, byte[] genesis)
+    public ApplicationOptions(EndPoint endPoint, PrivateKey privateKey, byte[] genesis)
     {
         EndPoint = endPoint;
         PrivateKey = privateKey;
         Genesis = genesis;
     }
 
-    public AppEndPoint EndPoint { get; }
+    public EndPoint EndPoint { get; }
 
     public PrivateKey PrivateKey { get; }
 
@@ -19,7 +19,7 @@ public sealed record class ApplicationOptions
 
     public int ParentProcessId { get; init; }
 
-    public AppEndPoint? SeedEndPoint { get; init; }
+    public EndPoint? SeedEndPoint { get; init; }
 
     public string StorePath { get; init; } = string.Empty;
 

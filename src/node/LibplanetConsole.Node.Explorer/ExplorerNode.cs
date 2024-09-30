@@ -35,12 +35,12 @@ internal sealed class ExplorerNode(
             throw new InvalidOperationException("The explorer is already running.");
         }
 
-        var endPoint = options.EndPoint;
+        var (host, port) = EndPointUtility.GetHostAndPort(options.EndPoint);
         _webHost = WebHost.CreateDefaultBuilder()
                     .ConfigureServices(services => services.AddSingleton(node))
                     .UseStartup<ExplorerStartup<BlockChainContext>>()
                     .UseSerilog()
-                    .UseUrls($"http://{endPoint.Host}:{endPoint.Port}/")
+                    .UseUrls($"http://{host}:{port}/")
                     .Build();
 
         await _webHost.StartAsync(cancellationToken);
@@ -71,7 +71,7 @@ internal sealed class ExplorerNode(
         {
             var options = new ExplorerOptions
             {
-                EndPoint = AppEndPoint.ParseOrNext(settings.ExplorerEndPoint),
+                EndPoint = EndPointUtility.ParseOrNext(settings.ExplorerEndPoint),
             };
             await StartAsync(options, cancellationToken);
         }

@@ -6,7 +6,7 @@ internal sealed class ClientRepositoryProcess : ClientProcessBase
 {
     public required PrivateKey PrivateKey { get; init; }
 
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
     public string OutputPath { get; set; } = string.Empty;
 
@@ -17,6 +17,6 @@ internal sealed class ClientRepositoryProcess : ClientProcessBase
         "--private-key",
         PrivateKeyUtility.ToString(PrivateKey),
         "--end-point",
-        AppEndPoint.ToString(EndPoint),
+        EndPointUtility.ToString(EndPoint),
     ];
 }

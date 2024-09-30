@@ -81,7 +81,7 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var nodeOptions = GetNodeOptions(endPoint, GetNodes());
         var clientOptions = GetClientOptions(nodeOptions, GetClients());
         var repository = new Repository(endPoint, nodeOptions, clientOptions);
@@ -120,11 +120,11 @@ internal sealed record class ApplicationSettings
     }
 
     private static NodeOptions[] GetNodeOptions(
-        AppEndPoint endPoint, PrivateKey[] nodePrivateKeys)
+        EndPoint endPoint, PrivateKey[] nodePrivateKeys)
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
-            EndPoint = AppEndPoint.Next(),
+            EndPoint = EndPointUtility.Next(),
             PrivateKey = key,
             SeedEndPoint = endPoint,
         })];
@@ -135,7 +135,7 @@ internal sealed record class ApplicationSettings
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
-            EndPoint = AppEndPoint.Next(),
+            EndPoint = EndPointUtility.Next(),
             NodeEndPoint = Random(nodeOptions).EndPoint,
             PrivateKey = key,
         })];
@@ -148,7 +148,7 @@ internal sealed record class ApplicationSettings
     {
         if (Nodes.Length > 0)
         {
-            return [.. Nodes.Select(PrivateKey.Parse)];
+            return [.. Nodes.Select(item => new PrivateKey(item))];
         }
 
         return [.. Enumerable.Range(0, NodeCount).Select(item => new PrivateKey())];
@@ -158,7 +158,7 @@ internal sealed record class ApplicationSettings
     {
         if (Clients.Length > 0)
         {
-            return [.. Clients.Select(PrivateKey.Parse)];
+            return [.. Clients.Select(item => new PrivateKey(item))];
         }
 
         return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];

@@ -7,13 +7,20 @@ namespace LibplanetConsole.Common.DataAnnotations;
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class EndPointAttribute : RegularExpressionAttribute
 {
+    public const string HostExpression
+        = @"(?:(?:[a-zA-Z0-9\-\.]+)|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))";
+
+    public const string PortExpression = @"\d{1,5}";
+    public static readonly string RegularExpression
+        = $"{HostExpression}:{PortExpression}";
+
     public EndPointAttribute()
-        : base($"^{AppEndPoint.RegularExpression}$")
+        : base($"^{RegularExpression}$")
     {
     }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class AppEndPointArrayAttribute : ArrayAttribute<EndPointAttribute>
+public sealed class EndPointArrayAttribute : ArrayAttribute<EndPointAttribute>
 {
 }

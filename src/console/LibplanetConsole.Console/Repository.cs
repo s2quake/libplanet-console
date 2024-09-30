@@ -15,14 +15,14 @@ public sealed record class Repository
 
     private byte[]? _genesis;
 
-    public Repository(AppEndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
+    public Repository(EndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
     {
         EndPoint = endPoint;
         Nodes = nodes;
         Clients = clients;
     }
 
-    public AppEndPoint EndPoint { get; }
+    public EndPoint EndPoint { get; }
 
     public NodeOptions[] Nodes { get; } = [];
 
@@ -68,7 +68,7 @@ public sealed record class Repository
             .Select(LoadClientOptions)
             .ToArray();
         var applicationSettings = LoadSettings(repositoryPath, resolver);
-        var endPoint = AppEndPoint.Parse(applicationSettings.EndPoint);
+        var endPoint = EndPointUtility.Parse(applicationSettings.EndPoint);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
 
         return new(endPoint, nodeOptions, clientOptions)

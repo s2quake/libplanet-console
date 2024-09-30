@@ -6,18 +6,18 @@
 // namespace LibplanetConsole.Common;
 
 // [JsonConverter(typeof(AppPeerJsonConverter))]
-// public readonly struct AppPeer(PublicKey publicKey, AppEndPoint endPoint)
+// public readonly struct AppPeer(PublicKey publicKey, EndPoint endPoint)
 // {
 //     public const string HostExpression
 //         = @"(?:(?:[a-zA-Z0-9\-\.]+)|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))";
 
 //     public const string PortExpression = @"\d{1,5}";
 //     public static readonly string RegularExpression
-//         = $"^{PublicKeyAttribute.RegularExpression},{AppEndPoint.RegularExpression}$";
+//         = $"^{PublicKeyAttribute.RegularExpression},{EndPoint.RegularExpression}$";
 
 //     public PublicKey PublicKey { get; } = publicKey;
 
-//     public AppEndPoint EndPoint { get; } = endPoint;
+//     public EndPoint EndPoint { get; } = endPoint;
 
 //     public Address Address => PublicKey.Address;
 
@@ -30,7 +30,7 @@
 //         if (items.Length == 2)
 //         {
 //             var publicKey = PublicKey.FromHex(items[0]);
-//             var endPoint = AppEndPoint.Parse(items[1].Trim());
+//             var endPoint = EndPointUtility.Parse(items[1].Trim());
 //             return new AppPeer(publicKey, endPoint);
 //         }
 

@@ -28,7 +28,7 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
 
     public async Task<NodeInfo> StartAsync(string seedEndPoint, CancellationToken cancellationToken)
     {
-        _node.SeedEndPoint = AppEndPoint.Parse(seedEndPoint);
+        _node.SeedEndPoint = EndPointUtility.Parse(seedEndPoint);
         await _node.StartAsync(cancellationToken);
         _logger.Information("Node started.");
         return _node.Info;

@@ -3,24 +3,25 @@ using System.Text.Json.Serialization;
 
 namespace LibplanetConsole.Common.Converters;
 
-public sealed class AppEndPointJsonConverter : JsonConverter<AppEndPoint>
+public sealed class EndPointJsonConverter : JsonConverter<EndPoint>
 {
-    public override AppEndPoint? Read(
+    public override EndPoint? Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
     {
         if (reader.GetString() is string text)
         {
-            return AppEndPoint.Parse(text);
+            return EndPointUtility.Parse(text);
         }
 
-        throw new JsonException("Cannot read AppEndPoint from JSON.");
+        throw new JsonException("Cannot read EndPoint from JSON.");
     }
 
     public override void Write(
-        Utf8JsonWriter writer, AppEndPoint value, JsonSerializerOptions options)
+        Utf8JsonWriter writer, EndPoint value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.ToString());
+        var text = EndPointUtility.ToString(value);
+        writer.WriteStringValue(text);
     }
 }

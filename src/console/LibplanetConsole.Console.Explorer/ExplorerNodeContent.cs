@@ -17,14 +17,14 @@ internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerSe
 {
     private readonly ILogger _logger = logger;
     private readonly ExecutionScope _executionScope = new();
-    private AppEndPoint _endPoint = AppEndPoint.Next();
+    private EndPoint _endPoint = EndPointUtility.Next();
     private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
 
     public event EventHandler? Started;
 
     public event EventHandler? Stopped;
 
-    public AppEndPoint EndPoint
+    public EndPoint EndPoint
     {
         get => _endPoint;
         set

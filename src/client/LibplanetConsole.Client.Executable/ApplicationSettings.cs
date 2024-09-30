@@ -47,12 +47,12 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = ParentProcessId,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
+            NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),
             LogPath = GetFullPath(LogPath),
             NoREPL = NoREPL,
             Components = components,

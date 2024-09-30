@@ -101,7 +101,7 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
         var actionProvider = ModuleLoader.LoadActionLoader(
@@ -121,11 +121,11 @@ internal sealed record class ApplicationSettings
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
 
-        AppEndPoint? GetSeedEndPoint()
+        EndPoint? GetSeedEndPoint()
         {
             if (SeedEndPoint != string.Empty)
             {
-                return AppEndPoint.Parse(SeedEndPoint);
+                return EndPointUtility.Parse(SeedEndPoint);
             }
 
             return IsSingleNode is true ? endPoint : null;

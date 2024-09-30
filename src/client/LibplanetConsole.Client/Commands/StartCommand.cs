@@ -17,7 +17,7 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var nodeEndPoint = AppEndPoint.ParseOrFallback(NodeEndPoint, client.NodeEndPoint);
+        var nodeEndPoint = EndPointUtility.ParseOrFallback(NodeEndPoint, client.NodeEndPoint);
         client.NodeEndPoint = nodeEndPoint;
         await client.StartAsync(cancellationToken);
     }

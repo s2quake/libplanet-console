@@ -19,7 +19,7 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     bool IsRunning { get; }
 
-    AppEndPoint EndPoint { get; }
+    EndPoint EndPoint { get; }
 
     ClientInfo Info { get; }
 

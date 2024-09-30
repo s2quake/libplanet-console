@@ -26,8 +26,8 @@ internal sealed partial class Node
         var genesisHash = _nodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: (PrivateKey)privateKey,
-            genesisHash: (BlockHash)genesisHash,
+            privateKey: privateKey,
+            genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txId = await _blockChainService.Service.SendTransactionAsync(
             transaction: tx.Serialize(),

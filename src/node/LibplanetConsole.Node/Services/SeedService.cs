@@ -58,12 +58,12 @@ internal sealed class SeedService(ApplicationBase application)
             _blocksyncSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                EndPoint = AppEndPoint.Next(),
+                EndPoint = EndPointUtility.Next(),
             });
             _consensusSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                EndPoint = AppEndPoint.Next(),
+                EndPoint = EndPointUtility.Next(),
             });
             await _blocksyncSeedNode.StartAsync(cancellationToken);
             await _consensusSeedNode.StartAsync(cancellationToken);

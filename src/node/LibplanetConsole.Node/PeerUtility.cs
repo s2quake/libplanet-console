@@ -11,5 +11,5 @@
 //         => new((PublicKey)peer.PublicKey, (DnsEndPoint)peer.EndPoint);
 
 //     public static AppPeer ToAppPeer(BoundPeer boundPeer)
-//         => new((PublicKey)boundPeer.PublicKey, (AppEndPoint)boundPeer.EndPoint);
+//         => new((PublicKey)boundPeer.PublicKey, (EndPoint)boundPeer.EndPoint);
 // }

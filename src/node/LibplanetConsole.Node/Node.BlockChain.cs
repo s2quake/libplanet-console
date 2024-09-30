@@ -31,7 +31,7 @@ internal sealed partial class Node : IBlockChain
         var values = actions.Select(item => item.PlainValue).ToArray();
         var transaction = Transaction.Create(
             nonce: nonce,
-            privateKey: (PrivateKey)privateKey,
+            privateKey: privateKey,
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values));
         await AddTransactionAsync(transaction, cancellationToken);

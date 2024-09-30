@@ -23,8 +23,8 @@ internal sealed partial class Client : IBlockChain
         var genesisHash = NodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: (PrivateKey)privateKey,
-            genesisHash: (BlockHash)genesisHash,
+            privateKey: privateKey,
+            genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txData = tx.Serialize();
         _logger.Debug("Client sends a transaction: {TxId}", tx.Id);

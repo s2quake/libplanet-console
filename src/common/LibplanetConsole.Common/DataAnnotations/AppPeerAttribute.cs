@@ -12,7 +12,7 @@
 
 //     public const string PortExpression = @"\d{1,5}";
 //     public static readonly string RegularExpression
-//         = $"^{PublicKeyAttribute.RegularExpression},{AppEndPoint.RegularExpression}$";
+//         = $"^{PublicKeyAttribute.RegularExpression},{EndPoint.RegularExpression}$";
 
 //     public AppPeerAttribute()
 //         : base($"^{RegularExpression}$")

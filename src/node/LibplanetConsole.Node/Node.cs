@@ -37,9 +37,9 @@ internal sealed partial class Node : IActionRenderer, INode
     private readonly AppProtocolVersion _appProtocolVersion = SeedNode.AppProtocolVersion;
     private readonly IActionProvider _actionProvider;
 
-    private AppEndPoint? _seedEndPoint;
-    private AppEndPoint? _blocksyncEndPoint;
-    private AppEndPoint? _consensusEndPoint;
+    private EndPoint? _seedEndPoint;
+    private EndPoint? _blocksyncEndPoint;
+    private EndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
@@ -64,13 +64,13 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public event EventHandler? Stopped;
 
-    public AppEndPoint SwarmEndPoint
+    public EndPoint SwarmEndPoint
     {
         get => _blocksyncEndPoint ?? throw new InvalidOperationException();
         set => _blocksyncEndPoint = value;
     }
 
-    public AppEndPoint ConsensusEndPoint
+    public EndPoint ConsensusEndPoint
     {
         get => _consensusEndPoint ?? throw new InvalidOperationException();
         set => _consensusEndPoint = value;
@@ -105,7 +105,7 @@ internal sealed partial class Node : IActionRenderer, INode
         }
     }
 
-    public AppEndPoint SeedEndPoint
+    public EndPoint SeedEndPoint
     {
         get => _seedEndPoint ??
             throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
@@ -155,8 +155,8 @@ internal sealed partial class Node : IActionRenderer, INode
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
-        var blocksyncEndPoint = _blocksyncEndPoint ?? AppEndPoint.Next();
-        var consensusEndPoint = _consensusEndPoint ?? AppEndPoint.Next();
+        var blocksyncEndPoint = _blocksyncEndPoint ?? EndPointUtility.Next();
+        var consensusEndPoint = _consensusEndPoint ?? EndPointUtility.Next();
         var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
         var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
         var swarmTransport
@@ -176,7 +176,7 @@ internal sealed partial class Node : IActionRenderer, INode
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = [consensusSeedPeer],
-            ConsensusPort = consensusEndPoint.Port,
+            ConsensusPort = EndPointUtility.GetHostAndPort(consensusEndPoint).Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
@@ -287,18 +287,19 @@ internal sealed partial class Node : IActionRenderer, INode
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, AppEndPoint endPoint, AppProtocolVersion appProtocolVersion)
+        PrivateKey privateKey, EndPoint endPoint, AppProtocolVersion appProtocolVersion)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,
         };
-        var hostOptions = new HostOptions(endPoint.Host, [], endPoint.Port);
+        var (host, port) = EndPointUtility.GetHostAndPort(endPoint);
+        var hostOptions = new HostOptions(host, [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
     private static async Task<SeedInfo> GetSeedInfoAsync(
-        AppEndPoint seedEndPoint, CancellationToken cancellationToken)
+        EndPoint seedEndPoint, CancellationToken cancellationToken)
     {
         var remoteService = new RemoteService<ISeedService>();
         var remoteServiceContext = new RemoteServiceContext([remoteService])
@@ -344,8 +345,8 @@ internal sealed partial class Node : IActionRenderer, INode
         {
             nodeInfo = nodeInfo with
             {
-                SwarmEndPoint = AppEndPoint.ToString(SwarmEndPoint),
-                ConsensusEndPoint = AppEndPoint.ToString(ConsensusEndPoint),
+                SwarmEndPoint = EndPointUtility.ToString(SwarmEndPoint),
+                ConsensusEndPoint = EndPointUtility.ToString(ConsensusEndPoint),
                 GenesisHash = BlockChain.Genesis.Hash,
                 TipHash = BlockChain.Tip.Hash,
                 IsRunning = IsRunning,

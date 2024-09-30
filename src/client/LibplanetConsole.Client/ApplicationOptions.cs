@@ -4,19 +4,19 @@ namespace LibplanetConsole.Client;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(AppEndPoint endPoint, PrivateKey privateKey)
+    public ApplicationOptions(EndPoint endPoint, PrivateKey privateKey)
     {
         EndPoint = endPoint;
         PrivateKey = privateKey;
     }
 
-    public AppEndPoint EndPoint { get; }
+    public EndPoint EndPoint { get; }
 
     public PrivateKey PrivateKey { get; }
 
     public int ParentProcessId { get; init; }
 
-    public AppEndPoint? NodeEndPoint { get; init; }
+    public EndPoint? NodeEndPoint { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
 

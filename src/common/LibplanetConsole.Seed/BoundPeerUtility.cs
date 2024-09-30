@@ -18,7 +18,7 @@ public static class BoundPeerUtility
         if (items.Length == 2)
         {
             var publicKey = PublicKey.FromHex(items[0]);
-            var endPoint = (DnsEndPoint)AppEndPoint.Parse(items[1].Trim());
+            var endPoint = (DnsEndPoint)EndPointUtility.Parse(items[1].Trim());
             return new BoundPeer(publicKey, endPoint);
         }
 

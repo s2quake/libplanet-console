@@ -4,5 +4,5 @@ namespace LibplanetConsole.Explorer;
 
 public sealed record class ExplorerOptions
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 }

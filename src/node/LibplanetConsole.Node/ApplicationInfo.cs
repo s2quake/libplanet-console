@@ -4,9 +4,9 @@ namespace LibplanetConsole.Node;
 
 public readonly record struct ApplicationInfo
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
-    public required AppEndPoint? SeedEndPoint { get; init; }
+    public required EndPoint? SeedEndPoint { get; init; }
 
     public required string StorePath { get; init; }
 

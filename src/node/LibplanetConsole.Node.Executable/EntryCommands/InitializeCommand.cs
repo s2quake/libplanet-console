@@ -102,7 +102,7 @@ internal sealed class InitializeCommand : CommandBase
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var storePath = Path.Combine(outputPath, StorePath.Fallback("store"));
         var logPath = Path.Combine(outputPath, LogPath.Fallback("app.log"));
