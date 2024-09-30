@@ -146,7 +146,7 @@ internal sealed class InitializeCommand : CommandBase
             {
                 GenesisKey = AppPrivateKey.ToString(genesisOptions.GenesisKey),
                 Validators = genesisOptions.Validators.Select(
-                    item => AppPublicKey.ToString(item)),
+                    item => item.ToHex(compress: false)),
                 genesisOptions.Timestamp,
                 genesisOptions.ActionProviderModulePath,
                 genesisOptions.ActionProviderType,

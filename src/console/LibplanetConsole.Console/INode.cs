@@ -23,7 +23,7 @@ public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISign
 
     NodeInfo Info { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
     Task AttachAsync(CancellationToken cancellationToken);
 

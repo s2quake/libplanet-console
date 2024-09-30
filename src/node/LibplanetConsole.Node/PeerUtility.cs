@@ -11,5 +11,5 @@ internal static class PeerUtility
         => new((PublicKey)peer.PublicKey, (DnsEndPoint)peer.EndPoint);
 
     public static AppPeer ToAppPeer(BoundPeer boundPeer)
-        => new((AppPublicKey)boundPeer.PublicKey, (AppEndPoint)boundPeer.EndPoint);
+        => new((PublicKey)boundPeer.PublicKey, (AppEndPoint)boundPeer.EndPoint);
 }

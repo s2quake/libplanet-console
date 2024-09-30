@@ -117,7 +117,7 @@ internal sealed class InitializeCommand : CommandBase
         {
             GenesisKey = AppPrivateKey.ToString(genesisKey),
             Validators = nodeOptions.Select(
-                item => AppPublicKey.ToString(item.PrivateKey.PublicKey)),
+                item => item.PrivateKey.PublicKey.ToHex(compress: false)),
             Timestamp = dateTimeOffset,
             ActionProviderModulePath,
             ActionProviderType,

@@ -17,7 +17,7 @@ internal sealed class SeedService(ApplicationBase application)
     private SeedNode? _consensusSeedNode;
 
     public async Task<SeedInfo> GetSeedAsync(
-        AppPublicKey publicKey, CancellationToken cancellationToken)
+        PublicKey publicKey, CancellationToken cancellationToken)
     {
         if (_blocksyncSeedNode is null || _consensusSeedNode is null)
         {

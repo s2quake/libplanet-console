@@ -8,7 +8,7 @@ public readonly record struct SeedInfo
 
     public AppPeer ConsensusSeedPeer { get; init; }
 
-    public SeedInfo Encrypt(AppPublicKey publicKey) => this with
+    public SeedInfo Encrypt(PublicKey publicKey) => this with
     {
     };
 

@@ -24,7 +24,7 @@ internal sealed class ActionProvider : IActionProvider
 
     public ImmutableArray<IAction> EndTxActions { get; } = [];
 
-    public IAction[] GetGenesisActions(AppPrivateKey genesisKey, AppPublicKey[] validatorKeys)
+    public IAction[] GetGenesisActions(AppPrivateKey genesisKey, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
             .Select(item => new Validator((PublicKey)item, BigInteger.One))

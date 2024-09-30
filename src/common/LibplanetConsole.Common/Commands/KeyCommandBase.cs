@@ -26,7 +26,6 @@ public abstract class KeyCommandBase : CommandMethodBase
             {
                 PrivateKey = AppPrivateKey.ToString(privateKey),
                 privateKey.PublicKey,
-                PublicKeyShort = privateKey.PublicKey.ToShortString(),
                 privateKey.Address,
             };
         }).ToArray();
@@ -43,7 +42,6 @@ public abstract class KeyCommandBase : CommandMethodBase
         var info = new
         {
             key.PublicKey,
-            PublicKeyShort = key.PublicKey.ToShortString(),
         };
         Out.WriteLineAsJson(info);
     }
@@ -83,7 +81,7 @@ public abstract class KeyCommandBase : CommandMethodBase
             return privateKey.Address;
         }
 
-        if (AppPublicKey.TryParse(key, out var publicKey) == true)
+        if (PublicKey.FromHex(key) is { } publicKey)
         {
             return publicKey.Address;
         }

@@ -71,7 +71,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     public AppEndPoint ConsensusEndPoint
         => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
     public Address Address => PublicKey.Address;
 

@@ -23,7 +23,7 @@ public sealed class GenesisCommand : CommandBase
     [CommandPropertyExclusion(nameof(ValidatorCount))]
     [CommandSummary("The public keys of the validators. mutually exclusive with " +
                     "'--validator-count'.")]
-    [AppPublicKeyArray]
+    [PublicKeyArray]
     public string[] Validators { get; set; } = [];
 
     [CommandProperty]
@@ -90,11 +90,11 @@ public sealed class GenesisCommand : CommandBase
         }
     }
 
-    private AppPublicKey[] GetValidators()
+    private PublicKey[] GetValidators()
     {
         if (Validators.Length > 0)
         {
-            return [.. Validators.Select(AppPublicKey.Parse)];
+            return [.. Validators.Select(PublicKey.FromHex)];
         }
         else if (ValidatorCount > 0)
         {

@@ -15,6 +15,7 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Seed;
 using Serilog;
@@ -82,7 +83,7 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public bool IsDisposed => _isDisposed;
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
     public Address Address => PublicKey.Address;
 

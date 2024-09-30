@@ -17,7 +17,7 @@ public interface IClient : IVerifier
 
     bool IsRunning { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
     Address Address { get; }
 

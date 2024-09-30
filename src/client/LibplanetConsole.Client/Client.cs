@@ -2,6 +2,7 @@ using System.Security;
 using Libplanet.Crypto;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +38,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public event EventHandler<StopEventArgs>? Stopped;
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
     public Address Address => PublicKey.Address;
 

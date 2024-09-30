@@ -23,7 +23,7 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     ClientInfo Info { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
     Task AttachAsync(CancellationToken cancellationToken);
 

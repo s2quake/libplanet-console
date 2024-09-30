@@ -1,25 +1,26 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Libplanet.Crypto;
 
 namespace LibplanetConsole.Common.Converters;
 
-public sealed class AppPublicKeyJsonConverter : JsonConverter<AppPublicKey>
+public sealed class PublicKeyJsonConverter : JsonConverter<PublicKey>
 {
-    public override AppPublicKey Read(
+    public override PublicKey Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
     {
         if (reader.GetString() is string text)
         {
-            return AppPublicKey.Parse(text);
+            return PublicKey.FromHex(text);
         }
 
-        throw new JsonException("Cannot read AppPublicKey from JSON.");
+        throw new JsonException("Cannot read PublicKey from JSON.");
     }
 
     public override void Write(
-        Utf8JsonWriter writer, AppPublicKey value, JsonSerializerOptions options)
+        Utf8JsonWriter writer, PublicKey value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
     }

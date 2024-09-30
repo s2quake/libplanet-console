@@ -38,7 +38,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
     public AppPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
     public async Task<SeedInfo> GetSeedAsync(
-        AppPublicKey publicKey, CancellationToken cancellationToken)
+        PublicKey publicKey, CancellationToken cancellationToken)
     {
         var seedPeer = _blocksyncSeedNode.BoundPeer;
         var consensusSeedPeer = _consensusSeedNode.BoundPeer;

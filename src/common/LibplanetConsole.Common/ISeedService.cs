@@ -1,6 +1,8 @@
+using Libplanet.Crypto;
+
 namespace LibplanetConsole.Common;
 
 public interface ISeedService
 {
-    Task<SeedInfo> GetSeedAsync(AppPublicKey publicKey, CancellationToken cancellationToken);
+    Task<SeedInfo> GetSeedAsync(PublicKey publicKey, CancellationToken cancellationToken);
 }

@@ -59,7 +59,7 @@ internal sealed class Client : IClient, IClientCallback
 
     public event EventHandler? Disposed;
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
     public Address Address => PublicKey.Address;
 

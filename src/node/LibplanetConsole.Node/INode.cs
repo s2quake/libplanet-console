@@ -14,7 +14,7 @@ public interface INode : IVerifier, ISigner, IServiceProvider
 
     bool IsRunning { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
     Address Address => PublicKey.Address;
 

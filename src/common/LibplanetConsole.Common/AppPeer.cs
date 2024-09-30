@@ -1,20 +1,21 @@
 using System.Text.Json.Serialization;
 using Libplanet.Crypto;
 using LibplanetConsole.Common.Converters;
+using LibplanetConsole.Common.DataAnnotations;
 
 namespace LibplanetConsole.Common;
 
 [JsonConverter(typeof(AppPeerJsonConverter))]
-public readonly struct AppPeer(AppPublicKey publicKey, AppEndPoint endPoint)
+public readonly struct AppPeer(PublicKey publicKey, AppEndPoint endPoint)
 {
     public const string HostExpression
         = @"(?:(?:[a-zA-Z0-9\-\.]+)|(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))";
 
     public const string PortExpression = @"\d{1,5}";
     public static readonly string RegularExpression
-        = $"^{AppPublicKey.RegularExpression},{AppEndPoint.RegularExpression}$";
+        = $"^{PublicKeyAttribute.RegularExpression},{AppEndPoint.RegularExpression}$";
 
-    public AppPublicKey PublicKey { get; } = publicKey;
+    public PublicKey PublicKey { get; } = publicKey;
 
     public AppEndPoint EndPoint { get; } = endPoint;
 
@@ -28,7 +29,7 @@ public readonly struct AppPeer(AppPublicKey publicKey, AppEndPoint endPoint)
         var items = text.Split(',', StringSplitOptions.RemoveEmptyEntries);
         if (items.Length == 2)
         {
-            var publicKey = AppPublicKey.Parse(items[0]);
+            var publicKey = PublicKey.FromHex(items[0]);
             var endPoint = AppEndPoint.Parse(items[1].Trim());
             return new AppPeer(publicKey, endPoint);
         }
