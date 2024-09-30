@@ -61,5 +61,6 @@ public class RemoteServiceContext
 
     private sealed class InternalClientContext(IService[] services) : ClientContext(services)
     {
+        //  : ISerializer
     }
 }

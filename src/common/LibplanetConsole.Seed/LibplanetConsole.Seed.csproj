@@ -14,4 +14,9 @@
     <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
   </ItemGroup>
 
+   <ItemGroup>
+    <Using Include="Libplanet.Crypto" />
+    <Using Include="Libplanet.Net" />
+  </ItemGroup>
+
 </Project>

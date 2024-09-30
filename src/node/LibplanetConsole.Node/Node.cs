@@ -19,7 +19,6 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Seed;
 using Serilog;
-using static LibplanetConsole.Node.PeerUtility;
 
 namespace LibplanetConsole.Node;
 
@@ -93,13 +92,13 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public Swarm Swarm => _swarm ?? throw new InvalidOperationException();
 
-    public AppPeer[] Peers
+    public BoundPeer[] Peers
     {
         get
         {
             if (_swarm is not null)
             {
-                return [.. _swarm.Peers.Select(item => ToAppPeer(item))];
+                return [.. _swarm.Peers.Select(item => item)];
             }
 
             throw new InvalidOperationException();
@@ -164,10 +163,10 @@ internal sealed partial class Node : IActionRenderer, INode
             = await CreateTransport(privateKey, blocksyncEndPoint, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = [ToBoundPeer(blocksyncSeedPeer)],
+            StaticPeers = [blocksyncSeedPeer],
             BootstrapOptions = new()
             {
-                SeedPeers = [ToBoundPeer(blocksyncSeedPeer)],
+                SeedPeers = [blocksyncSeedPeer],
             },
         };
         var consensusTransport = await CreateTransport(
@@ -176,7 +175,7 @@ internal sealed partial class Node : IActionRenderer, INode
             appProtocolVersion: appProtocolVersion);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [ToBoundPeer(consensusSeedPeer)],
+            SeedPeers = [consensusSeedPeer],
             ConsensusPort = consensusEndPoint.Port,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
@@ -314,8 +313,7 @@ internal sealed partial class Node : IActionRenderer, INode
         {
             for (var i = 0; i < 10; i++)
             {
-                var decrypted = await service.GetSeedAsync(publicKey, cancellationToken);
-                var seedInfo = decrypted.Decrypt(privateKey);
+                var seedInfo = await service.GetSeedAsync(publicKey, cancellationToken);
                 if (Equals(seedInfo, SeedInfo.Empty) != true)
                 {
                     return seedInfo;
@@ -351,7 +349,7 @@ internal sealed partial class Node : IActionRenderer, INode
                 GenesisHash = (AppHash)BlockChain.Genesis.Hash,
                 TipHash = (AppHash)BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
-                Peers = [.. Peers],
+                // Peers = [.. Peers],
             };
         }
 

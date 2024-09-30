@@ -1,6 +1,6 @@
 using Libplanet.Crypto;
 
-namespace LibplanetConsole.Common;
+namespace LibplanetConsole.Seed;
 
 public interface ISeedService
 {

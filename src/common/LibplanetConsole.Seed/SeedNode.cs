@@ -1,17 +1,26 @@
-﻿using Dasync.Collections;
+﻿using System.ComponentModel;
+using System.Net;
+using System.Text.Json.Serialization;
+using Dasync.Collections;
 using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
+using LibplanetConsole.Seed.Converters;
 using Serilog;
-using static LibplanetConsole.Seed.PeerUtility;
 
 namespace LibplanetConsole.Seed;
 
 public sealed class SeedNode(SeedOptions seedOptions)
 {
+    static SeedNode()
+    {
+        TypeDescriptor.AddAttributes(
+            typeof(BoundPeer), new JsonConverterAttribute(typeof(BoundPeerJsonConverter)));
+    }
+
     public static readonly AppPrivateKey AppProtocolKey
         = AppPrivateKey.Parse("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
@@ -31,8 +40,8 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
     public PeerCollection Peers { get; } = new(seedOptions);
 
-    public AppPeer BoundPeer => new(
-        seedOptions.PrivateKey.PublicKey, seedOptions.EndPoint);
+    public BoundPeer BoundPeer => new(
+        seedOptions.PrivateKey.PublicKey, (DnsEndPoint)seedOptions.EndPoint);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -149,7 +158,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
         {
             case FindNeighborsMsg:
                 var alivePeers = peers.Where(item => item.IsAlive)
-                                      .Select(item => ToBoundPeer(item.AppPeer))
+                                      .Select(item => item.BoundPeer)
                                       .ToArray();
                 var neighborsMsg = new NeighborsMsg(alivePeers);
                 await transport.ReplyMessageAsync(
@@ -169,7 +178,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
         if (message.Remote is BoundPeer boundPeer)
         {
-            peers.AddOrUpdate(ToAppPeer(boundPeer), transport);
+            peers.AddOrUpdate(boundPeer, transport);
         }
     }
 }

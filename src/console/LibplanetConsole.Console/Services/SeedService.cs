@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
@@ -33,9 +34,9 @@ internal sealed class SeedService : LocalService<ISeedService>,
         });
     }
 
-    public AppPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
+    public BoundPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
 
-    public AppPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
+    public BoundPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
     public async Task<SeedInfo> GetSeedAsync(
         PublicKey publicKey, CancellationToken cancellationToken)

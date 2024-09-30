@@ -26,7 +26,7 @@ public sealed class PeerCollection : IEnumerable<Peer>
     IEnumerator IEnumerable.GetEnumerator()
         => _infoByAddress.Values.GetEnumerator();
 
-    internal void AddOrUpdate(AppPeer boundPeer, ITransport transport)
+    internal void AddOrUpdate(BoundPeer boundPeer, ITransport transport)
     {
         _infoByAddress.AddOrUpdate(
             key: boundPeer.Address,
