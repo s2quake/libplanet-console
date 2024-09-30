@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Transports;
-using LibplanetConsole.Common;
-using static LibplanetConsole.Seed.PeerUtility;
 
 namespace LibplanetConsole.Seed;
 
@@ -10,15 +8,15 @@ public sealed class Peer
 {
     private readonly ITransport _transport;
 
-    internal Peer(ITransport transport, AppPeer appPeer)
+    internal Peer(ITransport transport, BoundPeer appPeer)
     {
         _transport = transport;
-        AppPeer = appPeer;
+        BoundPeer = appPeer;
     }
 
-    public AppAddress Address => AppPeer.Address;
+    public Address Address => BoundPeer.Address;
 
-    public AppPeer AppPeer { get; }
+    public BoundPeer BoundPeer { get; }
 
     public DateTimeOffset LastUpdated { get; private set; }
 
@@ -43,7 +41,7 @@ public sealed class Peer
             var pingMsg = new PingMsg();
             var stopwatch = Stopwatch.StartNew();
             var replyMessage = await _transport.SendMessageAsync(
-                ToBoundPeer(AppPeer),
+                BoundPeer,
                 pingMsg,
                 timeout,
                 cancellationToken);

@@ -1,15 +1,13 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Console;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(AppEndPoint endPoint)
+    public ApplicationOptions(EndPoint endPoint)
     {
         EndPoint = endPoint;
     }
 
-    public AppEndPoint EndPoint { get; }
+    public EndPoint EndPoint { get; }
 
     public NodeOptions[] Nodes { get; init; } = [];
 

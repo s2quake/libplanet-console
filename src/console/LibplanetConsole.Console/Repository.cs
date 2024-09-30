@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
-using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
@@ -15,14 +14,14 @@ public sealed record class Repository
 
     private byte[]? _genesis;
 
-    public Repository(AppEndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
+    public Repository(EndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
     {
         EndPoint = endPoint;
         Nodes = nodes;
         Clients = clients;
     }
 
-    public AppEndPoint EndPoint { get; }
+    public EndPoint EndPoint { get; }
 
     public NodeOptions[] Nodes { get; } = [];
 
@@ -68,7 +67,7 @@ public sealed record class Repository
             .Select(LoadClientOptions)
             .ToArray();
         var applicationSettings = LoadSettings(repositoryPath, resolver);
-        var endPoint = AppEndPoint.Parse(applicationSettings.EndPoint);
+        var endPoint = EndPointUtility.Parse(applicationSettings.EndPoint);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
 
         return new(endPoint, nodeOptions, clientOptions)
@@ -81,14 +80,14 @@ public sealed record class Repository
 
         NodeOptions LoadNodeOptions(string nodePath)
         {
-            var privateKey = AppPrivateKey.Parse(Path.GetFileName(nodePath));
+            var privateKey = new PrivateKey(Path.GetFileName(nodePath));
             var settingsPath = resolver.GetNodeSettingsPath(nodePath, privateKey);
             return NodeOptions.Load(settingsPath);
         }
 
         ClientOptions LoadClientOptions(string clientPath)
         {
-            var privateKey = AppPrivateKey.Parse(Path.GetFileName(clientPath));
+            var privateKey = new PrivateKey(Path.GetFileName(clientPath));
             var settingsPath = resolver.GetClientSettingsPath(clientPath, privateKey);
             return ClientOptions.Load(settingsPath);
         }
@@ -174,7 +173,7 @@ public sealed record class Repository
     {
         var genesisOptions = new GenesisOptions
         {
-            GenesisKey = new AppPrivateKey(),
+            GenesisKey = new PrivateKey(),
             Validators = Nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
             Timestamp = DateTimeOffset.UtcNow,
             ActionProviderModulePath = string.Empty,
@@ -221,7 +220,7 @@ public sealed record class Repository
             Schema = schemaRelativePath,
             Application = new ApplicationSettings
             {
-                EndPoint = EndPoint.ToString(),
+                EndPoint = EndPointUtility.ToString(EndPoint),
                 LogPath = LogPath,
                 LibraryLogPath = LibraryLogPath,
             },

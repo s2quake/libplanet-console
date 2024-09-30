@@ -19,11 +19,11 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     bool IsRunning { get; }
 
-    AppEndPoint EndPoint { get; }
+    EndPoint EndPoint { get; }
 
     ClientInfo Info { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
     Task AttachAsync(CancellationToken cancellationToken);
 
@@ -33,5 +33,5 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<AppId> SendTransactionAsync(string text, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken);
 }

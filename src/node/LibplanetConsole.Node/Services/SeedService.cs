@@ -1,8 +1,8 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Seed;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Services;
 
@@ -12,12 +12,12 @@ namespace LibplanetConsole.Node.Services;
 internal sealed class SeedService(ApplicationBase application)
     : LocalService<ISeedService>, ISeedService, IApplicationService, IAsyncDisposable
 {
-    private readonly AppPrivateKey _seedNodePrivateKey = new();
+    private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
 
     public async Task<SeedInfo> GetSeedAsync(
-        AppPublicKey publicKey, CancellationToken cancellationToken)
+        PublicKey publicKey, CancellationToken cancellationToken)
     {
         if (_blocksyncSeedNode is null || _consensusSeedNode is null)
         {
@@ -53,17 +53,17 @@ internal sealed class SeedService(ApplicationBase application)
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        if (application.Info.SeedEndPoint == application.Info.EndPoint)
+        if (CompareEndPoint(application.Info.SeedEndPoint, application.Info.EndPoint) is true)
         {
             _blocksyncSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                EndPoint = AppEndPoint.Next(),
+                EndPoint = NextEndPoint(),
             });
             _consensusSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                EndPoint = AppEndPoint.Next(),
+                EndPoint = NextEndPoint(),
             });
             await _blocksyncSeedNode.StartAsync(cancellationToken);
             await _consensusSeedNode.StartAsync(cancellationToken);

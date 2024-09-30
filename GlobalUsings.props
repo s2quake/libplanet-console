@@ -1,0 +1,15 @@
+<Project>
+
+  <ItemGroup>
+    <Using Include="Libplanet.Crypto" />
+    <Using Include="Libplanet.Common" />
+    <Using Include="Libplanet.Types.Blocks" />
+    <Using Include="Libplanet.Types.Tx" />
+    <Using Include="Libplanet.Action" />
+    <Using Include="Libplanet.Action.Loader" />
+    <Using Include="Bencodex" />
+    <Using Include="Bencodex.Types" />
+    <Using Include="System.Net" />
+  </ItemGroup>
+
+</Project>

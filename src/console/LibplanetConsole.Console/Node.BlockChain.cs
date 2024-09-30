@@ -1,9 +1,4 @@
-using Bencodex.Types;
-using Libplanet.Action;
-using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-using Libplanet.Types.Tx;
-using LibplanetConsole.Common;
+using System.Security.Cryptography;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Services;
 
@@ -13,10 +8,10 @@ internal sealed partial class Node
 {
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = _nodeOptions.PrivateKey;
@@ -25,8 +20,8 @@ internal sealed partial class Node
         var genesisHash = _nodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: (PrivateKey)privateKey,
-            genesisHash: (BlockHash)genesisHash,
+            privateKey: privateKey,
+            genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txId = await _blockChainService.Service.SendTransactionAsync(
             transaction: tx.Serialize(),
@@ -35,7 +30,7 @@ internal sealed partial class Node
         return txId;
     }
 
-    public Task<AppId> SendTransactionAsync(
+    public Task<TxId> SendTransactionAsync(
         Transaction transaction, CancellationToken cancellationToken)
     {
         return _blockChainService.Service.SendTransactionAsync(
@@ -48,13 +43,13 @@ internal sealed partial class Node
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
-    public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
         => _blockChainService.Service.GetTipHashAsync(cancellationToken);
 
     public async Task<IValue> GetStateAsync(
-        AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        BlockHash? blockHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var bytes = await _blockChainService.Service.GetStateAsync(
@@ -66,9 +61,9 @@ internal sealed partial class Node
     }
 
     public async Task<IValue> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        HashDigest<SHA256> stateRootHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var bytes = await _blockChainService.Service.GetStateByStateRootHashAsync(
@@ -79,11 +74,11 @@ internal sealed partial class Node
         return _codec.Decode(bytes);
     }
 
-    public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => _blockChainService.Service.GetBlockHashAsync(height, cancellationToken);
 
     public async Task<T> GetActionAsync<T>(
-        AppId txId,
+        TxId txId,
         int actionIndex,
         CancellationToken cancellationToken)
         where T : IAction

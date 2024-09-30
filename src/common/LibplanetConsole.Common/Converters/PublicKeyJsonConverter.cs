@@ -3,23 +3,23 @@ using System.Text.Json.Serialization;
 
 namespace LibplanetConsole.Common.Converters;
 
-public sealed class AppIdJsonConverter : JsonConverter<AppId>
+public sealed class PublicKeyJsonConverter : JsonConverter<PublicKey>
 {
-    public override AppId Read(
+    public override PublicKey Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
     {
         if (reader.GetString() is string text)
         {
-            return AppId.Parse(text);
+            return PublicKey.FromHex(text);
         }
 
-        throw new JsonException("Cannot read AppId from JSON.");
+        throw new JsonException("Cannot read PublicKey from JSON.");
     }
 
     public override void Write(
-        Utf8JsonWriter writer, AppId value, JsonSerializerOptions options)
+        Utf8JsonWriter writer, PublicKey value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
     }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using LibplanetConsole.Client.Services;
-using LibplanetConsole.Common;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
 using Serilog;
@@ -57,7 +56,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     public override ApplicationServiceCollection ApplicationServices { get; }
 
-    public AppEndPoint EndPoint => _clientServiceContext.EndPoint;
+    public EndPoint EndPoint => _clientServiceContext.EndPoint;
 
     public ApplicationInfo Info => _info;
 

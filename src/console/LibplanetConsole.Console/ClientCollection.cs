@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,15 +62,15 @@ internal sealed class ClientCollection(
 
     public Client this[int index] => _clientList[index];
 
-    public Client this[AppAddress address] => _clientList.Single(item => item.Address == address);
+    public Client this[Address address] => _clientList.Single(item => item.Address == address);
 
     IClient IClientCollection.this[int index] => this[index];
 
-    IClient IClientCollection.this[AppAddress address] => this[address];
+    IClient IClientCollection.this[Address address] => this[address];
 
     public bool Contains(Client item) => _clientList.Contains(item);
 
-    public bool Contains(AppAddress address) => _clientList.Exists(item => item.Address == address);
+    public bool Contains(Address address) => _clientList.Exists(item => item.Address == address);
 
     public int IndexOf(Client item)
     {
@@ -86,7 +85,7 @@ internal sealed class ClientCollection(
         return -1;
     }
 
-    public int IndexOf(AppAddress address)
+    public int IndexOf(Address address)
     {
         for (var i = 0; i < _clientList.Count; i++)
         {

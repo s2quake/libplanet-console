@@ -5,6 +5,7 @@ using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
@@ -58,15 +59,15 @@ internal sealed class Client : IClient, IClientCallback
 
     public event EventHandler? Disposed;
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public bool IsAttached => _closeToken != Guid.Empty;
 
     public bool IsRunning { get; private set; }
 
-    public AppEndPoint EndPoint => _remoteServiceContext.EndPoint;
+    public EndPoint EndPoint => _remoteServiceContext.EndPoint;
 
     public ClientInfo Info => _clientInfo;
 
@@ -109,7 +110,7 @@ internal sealed class Client : IClient, IClientCallback
         }
     }
 
-    public override string ToString() => $"{Address:S}: {EndPoint}";
+    public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
 
     public byte[] Sign(object obj) => _clientOptions.PrivateKey.Sign(obj);
 
@@ -160,7 +161,7 @@ internal sealed class Client : IClient, IClientCallback
             message: "Client is not attached.");
 
         _clientInfo = await _remoteService.Service.StartAsync(
-            node.EndPoint.ToString(), cancellationToken);
+            EndPointUtility.ToString(node.EndPoint), cancellationToken);
         _node = node;
         IsRunning = true;
         _logger.Debug("Client is started: {Address}", Address);
@@ -184,7 +185,7 @@ internal sealed class Client : IClient, IClientCallback
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task<AppId> SendTransactionAsync(string text, CancellationToken cancellationToken)
+    public async Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken)
     {
         var transactionOptions = new TransactionOptions
         {

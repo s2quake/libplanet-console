@@ -1,6 +1,7 @@
 using System.Security;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private readonly ApplicationBase _application;
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
-    private AppEndPoint? _nodeEndPoint;
+    private EndPoint? _nodeEndPoint;
     private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
     private ClientInfo _info;
@@ -36,9 +37,9 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public event EventHandler<StopEventArgs>? Stopped;
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public TextWriter Out { get; set; } = Console.Out;
 
@@ -46,7 +47,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public NodeInfo NodeInfo { get; private set; }
 
-    public AppEndPoint NodeEndPoint
+    public EndPoint NodeEndPoint
     {
         get => _nodeEndPoint ??
             throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");

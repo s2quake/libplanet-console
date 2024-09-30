@@ -6,11 +6,11 @@ namespace LibplanetConsole.Console;
 
 public sealed record class NodeOptions
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
-    public AppEndPoint? SeedEndPoint { get; init; }
+    public EndPoint? SeedEndPoint { get; init; }
 
     public string StorePath { get; init; } = string.Empty;
 
@@ -36,12 +36,12 @@ public sealed record class NodeOptions
 
         return new()
         {
-            EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
-            PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
+            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
+            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
             LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, repositoryPath),
-            SeedEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.SeedEndPoint),
+            SeedEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.SeedEndPoint),
             RepositoryPath = repositoryPath,
         };
     }

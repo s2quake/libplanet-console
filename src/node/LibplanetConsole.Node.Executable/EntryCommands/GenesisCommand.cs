@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using JSSoft.Commands;
-using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
@@ -16,14 +15,14 @@ public sealed class GenesisCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The private key of the genesis block. " +
                     "if omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(ValidatorCount))]
     [CommandSummary("The public keys of the validators. mutually exclusive with " +
                     "'--validator-count'.")]
-    [AppPublicKeyArray]
+    [PublicKeyArray]
     public string[] Validators { get; set; } = [];
 
     [CommandProperty]
@@ -53,8 +52,7 @@ public sealed class GenesisCommand : CommandBase
 
     protected override void OnExecute()
     {
-        var genesisKey = GenesisKey != string.Empty
-            ? AppPrivateKey.Parse(GenesisKey) : new AppPrivateKey();
+        var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
         var validatorKeys = GetValidators();
         var dateTimeOffset = DateTimeOffset == DateTimeOffset.MinValue
             ? DateTimeOffset.UtcNow : DateTimeOffset;
@@ -80,7 +78,7 @@ public sealed class GenesisCommand : CommandBase
             {
                 GenesisArguments = new
                 {
-                    GenesisKey = AppPrivateKey.ToString(genesisKey),
+                    GenesisKey = PrivateKeyUtility.ToString(genesisKey),
                     Validators = validatorKeys,
                     Timestamp = dateTimeOffset,
                 },
@@ -90,16 +88,16 @@ public sealed class GenesisCommand : CommandBase
         }
     }
 
-    private AppPublicKey[] GetValidators()
+    private PublicKey[] GetValidators()
     {
         if (Validators.Length > 0)
         {
-            return [.. Validators.Select(AppPublicKey.Parse)];
+            return [.. Validators.Select(PublicKey.FromHex)];
         }
         else if (ValidatorCount > 0)
         {
             return Enumerable.Range(0, ValidatorCount)
-                .Select(_ => new AppPrivateKey().PublicKey)
+                .Select(_ => new PrivateKey().PublicKey)
                 .ToArray();
         }
         else

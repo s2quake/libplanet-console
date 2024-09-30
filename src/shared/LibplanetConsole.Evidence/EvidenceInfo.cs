@@ -1,5 +1,4 @@
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Evidence;
 
@@ -9,7 +8,7 @@ public readonly record struct EvidenceInfo
 
     public string Id { get; init; }
 
-    public AppAddress TargetAddress { get; init; }
+    public Address TargetAddress { get; init; }
 
     public long Height { get; init; }
 
@@ -22,7 +21,7 @@ public readonly record struct EvidenceInfo
             Type = evidence.GetType().Name,
             Id = evidence.Id.ToString(),
             Height = evidence.Height,
-            TargetAddress = (AppAddress)evidence.TargetAddress,
+            TargetAddress = evidence.TargetAddress,
             Timestamp = evidence.Timestamp,
         };
     }

@@ -1,4 +1,3 @@
-using Libplanet.Action;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node;
 
@@ -16,15 +15,15 @@ public interface IClient : IVerifier
 
     bool IsRunning { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
-    AppAddress Address { get; }
+    Address Address { get; }
 
-    AppEndPoint NodeEndPoint { get; set; }
+    EndPoint NodeEndPoint { get; set; }
 
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

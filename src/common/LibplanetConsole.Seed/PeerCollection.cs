@@ -1,14 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using Libplanet.Net.Transports;
-using LibplanetConsole.Common;
 using Serilog;
 
 namespace LibplanetConsole.Seed;
 
 public sealed class PeerCollection : IEnumerable<Peer>
 {
-    private readonly ConcurrentDictionary<AppAddress, Peer> _infoByAddress = [];
+    private readonly ConcurrentDictionary<Address, Peer> _infoByAddress = [];
     private readonly SeedOptions _seedOptions;
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
@@ -25,7 +24,7 @@ public sealed class PeerCollection : IEnumerable<Peer>
     IEnumerator IEnumerable.GetEnumerator()
         => _infoByAddress.Values.GetEnumerator();
 
-    internal void AddOrUpdate(AppPeer boundPeer, ITransport transport)
+    internal void AddOrUpdate(BoundPeer boundPeer, ITransport transport)
     {
         _infoByAddress.AddOrUpdate(
             key: boundPeer.Address,

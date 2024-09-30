@@ -1,4 +1,3 @@
-using System.Net;
 using JSSoft.Communication;
 
 namespace LibplanetConsole.Common.Services;
@@ -6,7 +5,7 @@ namespace LibplanetConsole.Common.Services;
 public class LocalServiceContext
 {
     private readonly InternalServerContext _serverContext;
-    private AppEndPoint? _endPoint;
+    private EndPoint? _endPoint;
 
     public LocalServiceContext(IEnumerable<ILocalService> localServices)
     {
@@ -24,13 +23,13 @@ public class LocalServiceContext
 
     public event EventHandler<StopEventArgs>? Stopped;
 
-    public AppEndPoint EndPoint
+    public EndPoint EndPoint
     {
         get => _endPoint ?? throw new InvalidOperationException("EndPoint is not set.");
         set
         {
             _endPoint = value;
-            _serverContext.EndPoint = (EndPoint)value;
+            _serverContext.EndPoint = value;
         }
     }
 

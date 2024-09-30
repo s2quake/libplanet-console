@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Node;
 
 public readonly partial record struct BlockInfo
@@ -10,9 +8,9 @@ public readonly partial record struct BlockInfo
 
     public long Height { get; init; }
 
-    public AppHash Hash { get; init; }
+    public BlockHash Hash { get; init; }
 
-    public AppAddress Miner { get; init; }
+    public Address Miner { get; init; }
 
     public TransactionInfo[] Transactions { get; init; } = [];
 }

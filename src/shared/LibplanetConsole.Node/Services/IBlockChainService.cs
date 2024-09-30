@@ -1,28 +1,28 @@
-using LibplanetConsole.Common;
+using System.Security.Cryptography;
 
 namespace LibplanetConsole.Node.Services;
 
 public interface IBlockChainService
 {
-    Task<AppId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
 
-    Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
+    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
-    Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken);
+    Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken);
 
     Task<byte[]> GetStateAsync(
-        AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        BlockHash? blockHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken);
 
     Task<byte[]> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        HashDigest<SHA256> stateRootHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken);
 
-    Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
+    Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
 
-    Task<byte[]> GetActionAsync(AppId txId, int actionIndex, CancellationToken cancellationToken);
+    Task<byte[]> GetActionAsync(TxId txId, int actionIndex, CancellationToken cancellationToken);
 }

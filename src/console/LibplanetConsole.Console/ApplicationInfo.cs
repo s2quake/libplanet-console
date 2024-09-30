@@ -1,10 +1,8 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Console;
 
 public readonly record struct ApplicationInfo
 {
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
     public required string LogPath { get; init; }
 

@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Console;
 
 public interface IApplication : IAsyncDisposable, IServiceProvider
@@ -18,6 +16,6 @@ public interface IApplication : IAsyncDisposable, IServiceProvider
 
     IAddressable GetAddressable(string address);
 
-    IAddressable GetAddressable(AppAddress address)
+    IAddressable GetAddressable(Address address)
         => GetAddressable(address.ToString());
 }

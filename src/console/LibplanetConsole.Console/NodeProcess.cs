@@ -21,9 +21,9 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
             {
                 argumentList.Add("run");
                 argumentList.Add("--end-point");
-                argumentList.Add(nodeOptions.EndPoint.ToString());
+                argumentList.Add(EndPointUtility.ToString(nodeOptions.EndPoint));
                 argumentList.Add("--private-key");
-                argumentList.Add(AppPrivateKey.ToString(nodeOptions.PrivateKey));
+                argumentList.Add(PrivateKeyUtility.ToString(nodeOptions.PrivateKey));
 
                 if (nodeOptions.StorePath != string.Empty)
                 {
@@ -40,7 +40,7 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
                 if (nodeOptions.SeedEndPoint is { } seedEndPoint)
                 {
                     argumentList.Add("--seed-end-point");
-                    argumentList.Add(seedEndPoint.ToString());
+                    argumentList.Add(EndPointUtility.ToString(seedEndPoint));
                 }
 
                 var extendedArguments = GetArguments(serviceProvider: node, obj: node);

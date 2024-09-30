@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Node;
 
 public readonly record struct NodeInfo
@@ -12,15 +10,13 @@ public readonly record struct NodeInfo
 
     public string ConsensusEndPoint { get; init; }
 
-    public AppAddress Address { get; init; }
+    public Address Address { get; init; }
 
-    public AppHash GenesisHash { get; init; }
+    public BlockHash GenesisHash { get; init; }
 
-    public AppHash TipHash { get; init; }
+    public BlockHash TipHash { get; init; }
 
     public bool IsRunning { get; init; }
-
-    public AppPeer[] Peers { get; init; }
 
     public static NodeInfo Empty { get; } = new NodeInfo
     {
@@ -28,6 +24,5 @@ public readonly record struct NodeInfo
         AppProtocolVersion = string.Empty,
         SwarmEndPoint = string.Empty,
         ConsensusEndPoint = string.Empty,
-        Peers = [],
     };
 }

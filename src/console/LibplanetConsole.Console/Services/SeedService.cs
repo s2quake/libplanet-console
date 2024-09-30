@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
@@ -13,7 +14,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
     ISeedService, IApplicationService, IAsyncDisposable
 {
     private readonly ApplicationBase _application;
-    private readonly AppPrivateKey _seedNodePrivateKey = new();
+    private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 
@@ -24,21 +25,21 @@ internal sealed class SeedService : LocalService<ISeedService>,
         _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = AppEndPoint.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
         });
         _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = AppEndPoint.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
         });
     }
 
-    public AppPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
+    public BoundPeer BlocksyncSeedPeer => _blocksyncSeedNode.BoundPeer;
 
-    public AppPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
+    public BoundPeer ConsensusSeedPeer => _consensusSeedNode.BoundPeer;
 
     public async Task<SeedInfo> GetSeedAsync(
-        AppPublicKey publicKey, CancellationToken cancellationToken)
+        PublicKey publicKey, CancellationToken cancellationToken)
     {
         var seedPeer = _blocksyncSeedNode.BoundPeer;
         var consensusSeedPeer = _consensusSeedNode.BoundPeer;

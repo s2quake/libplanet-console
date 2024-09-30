@@ -4,9 +4,9 @@ namespace LibplanetConsole.Console;
 
 internal sealed class NodeRepositoryProcess : NodeProcessBase
 {
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
     public string OutputPath { get; set; } = string.Empty;
 
@@ -17,9 +17,9 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
         "init",
         OutputPath,
         "--private-key",
-        AppPrivateKey.ToString(PrivateKey),
+        PrivateKeyUtility.ToString(PrivateKey),
         "--end-point",
-        AppEndPoint.ToString(EndPoint),
+        EndPointUtility.ToString(EndPoint),
         "--genesis-path",
         GenesisPath,
     ];

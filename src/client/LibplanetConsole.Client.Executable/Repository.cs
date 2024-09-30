@@ -11,11 +11,11 @@ public sealed record class Repository
     public const string SettingsFileName = "client-settings.json";
     public const string SettingsSchemaFileName = "client-settings-schema.json";
 
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
-    public AppEndPoint? NodeEndPoint { get; init; }
+    public EndPoint? NodeEndPoint { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
 
@@ -37,11 +37,11 @@ public sealed record class Repository
 
         return new()
         {
-            EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
-            PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
+            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
+            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
             Source = settingsPath,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.NodeEndPoint),
+            NodeEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.NodeEndPoint),
         };
     }
 
@@ -80,10 +80,10 @@ public sealed record class Repository
             Schema = SettingsSchemaFileName,
             Application = new ApplicationSettings
             {
-                EndPoint = EndPoint.ToString(),
-                PrivateKey = AppPrivateKey.ToString(privateKey),
+                EndPoint = EndPointUtility.ToString(EndPoint),
+                PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
-                NodeEndPoint = AppEndPoint.ToString(NodeEndPoint),
+                NodeEndPoint = EndPointUtility.ToString(NodeEndPoint),
             },
         };
 

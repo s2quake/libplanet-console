@@ -2,9 +2,9 @@ namespace LibplanetConsole.Common;
 
 public sealed record class GenesisOptions
 {
-    public AppPrivateKey GenesisKey { get; init; } = new();
+    public PrivateKey GenesisKey { get; init; } = new();
 
-    public AppPublicKey[] Validators { get; init; } = [];
+    public PublicKey[] Validators { get; init; } = [];
 
     public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.MinValue;
 

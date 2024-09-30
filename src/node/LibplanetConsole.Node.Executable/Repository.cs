@@ -11,11 +11,11 @@ public sealed record class Repository
     public const string SettingsFileName = "node-settings.json";
     public const string SettingsSchemaFileName = "node-settings-schema.json";
 
-    public required AppEndPoint EndPoint { get; init; }
+    public required EndPoint EndPoint { get; init; }
 
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
-    public AppEndPoint? SeedEndPoint { get; init; }
+    public EndPoint? SeedEndPoint { get; init; }
 
     public string StorePath { get; init; } = string.Empty;
 
@@ -47,13 +47,13 @@ public sealed record class Repository
 
         return new()
         {
-            EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
-            PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
+            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
+            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, directoryName),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
             LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, directoryName),
             Source = settingsPath,
-            SeedEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.SeedEndPoint),
+            SeedEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.SeedEndPoint),
             ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
             ActionProviderType = applicationSettings.ActionProviderType,
         };
@@ -94,13 +94,13 @@ public sealed record class Repository
             Schema = SettingsSchemaFileName,
             Application = new ApplicationSettings
             {
-                EndPoint = EndPoint.ToString(),
-                PrivateKey = AppPrivateKey.ToString(privateKey),
+                EndPoint = EndPointUtility.ToString(EndPoint),
+                PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
                 LibraryLogPath = GetRelativePathFromDirectory(repositoryPath, LibraryLogPath),
-                SeedEndPoint = AppEndPoint.ToString(SeedEndPoint),
+                SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
             },

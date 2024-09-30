@@ -5,15 +5,17 @@ using LibplanetConsole.DataAnnotations;
 namespace LibplanetConsole.Common.DataAnnotations;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class AppPrivateKeyAttribute : RegularExpressionAttribute
+public sealed class AddressAttribute : RegularExpressionAttribute
 {
-    public AppPrivateKeyAttribute()
-        : base($"^{AppPrivateKey.RegularExpression}$")
+    public const string RegularExpression = "0x[0-9a-fA-F]{40}";
+
+    public AddressAttribute()
+        : base($"^{RegularExpression}$")
     {
     }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class AppPrivateKeyArrayAttribute : ArrayAttribute<AppPrivateKeyAttribute>
+public sealed class AddressArrayAttribute : ArrayAttribute<AddressAttribute>
 {
 }

@@ -1,6 +1,3 @@
-using Bencodex.Types;
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Node;
 
 public readonly record struct ActionInfo
@@ -23,7 +20,7 @@ public readonly record struct ActionInfo
 
     public string TypeId { get; init; } = string.Empty;
 
-    public AppId TxId { get; init; } = default;
+    public TxId TxId { get; init; } = default;
 
     public int Index { get; init; }
 }

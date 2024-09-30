@@ -1,7 +1,6 @@
 using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node.Example.Commands;
 
@@ -14,13 +13,13 @@ internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
     [CommandMethod]
     public void Subscribe(string address)
     {
-        sampleNode.Subscribe(AppAddress.Parse(address));
+        sampleNode.Subscribe(new Address(address));
     }
 
     [CommandMethod]
     public void Unsubscribe(string address)
     {
-        sampleNode.Unsubscribe(AppAddress.Parse(address));
+        sampleNode.Unsubscribe(new Address(address));
     }
 
     [CommandMethod]

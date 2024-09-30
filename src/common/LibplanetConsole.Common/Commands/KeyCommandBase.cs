@@ -20,12 +20,11 @@ public abstract class KeyCommandBase : CommandMethodBase
 
         var info = Enumerable.Range(0, count).Select(_ =>
         {
-            var privateKey = new AppPrivateKey();
+            var privateKey = new PrivateKey();
             return new
             {
-                PrivateKey = AppPrivateKey.ToString(privateKey),
+                PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 privateKey.PublicKey,
-                PublicKeyShort = privateKey.PublicKey.ToShortString(),
                 privateKey.Address,
             };
         }).ToArray();
@@ -38,11 +37,10 @@ public abstract class KeyCommandBase : CommandMethodBase
         [CommandSummary("Indicates the private key that corresponds to the public key.")]
         string privateKey)
     {
-        var key = AppPrivateKey.Parse(privateKey);
+        var key = new PrivateKey(privateKey);
         var info = new
         {
             key.PublicKey,
-            PublicKeyShort = key.PublicKey.ToShortString(),
         };
         Out.WriteLineAsJson(info);
     }
@@ -70,19 +68,19 @@ public abstract class KeyCommandBase : CommandMethodBase
     {
         var info = new
         {
-            Address = AppAddress.Parse(address).Derive(keyword),
+            Address = new Address(address).Derive(keyword),
         };
         Out.WriteLineAsJson(info);
     }
 
-    private static AppAddress GetAddress(string key)
+    private static Address GetAddress(string key)
     {
-        if (AppPrivateKey.TryParse(key, out var privateKey) == true)
+        if (PrivateKeyUtility.TryParse(key, out var privateKey) == true)
         {
             return privateKey.Address;
         }
 
-        if (AppPublicKey.TryParse(key, out var publicKey) == true)
+        if (PublicKey.FromHex(key) is { } publicKey)
         {
             return publicKey.Address;
         }

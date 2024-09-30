@@ -18,7 +18,7 @@ internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : Comman
         var explorerNode = serviceProvider.GetRequiredService<IExplorerNode>();
         var explorerOptions = new ExplorerOptions
         {
-            EndPoint = AppEndPoint.ParseOrNext(endPoint),
+            EndPoint = EndPointUtility.ParseOrNext(endPoint),
         };
         await explorerNode.StartAsync(explorerOptions, cancellationToken);
         await Console.Out.WriteLineAsync($"http://{explorerOptions.EndPoint}/ui/playground");

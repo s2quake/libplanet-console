@@ -1,5 +1,4 @@
 #if LIBPLANET_NODE
-using System.Linq;
 using Libplanet.Blockchain;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
@@ -12,8 +11,8 @@ public readonly partial record struct BlockInfo
     public BlockInfo(BlockChain blockChain, Block block)
     {
         Height = block.Index;
-        Hash = (AppHash)block.Hash;
-        Miner = (AppAddress)block.Miner;
+        Hash = block.Hash;
+        Miner = block.Miner;
         Transactions = [.. block.Transactions.Select(GetTransaction)];
 
         TransactionInfo GetTransaction(Transaction transaction)

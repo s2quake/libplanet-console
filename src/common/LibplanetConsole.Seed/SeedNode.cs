@@ -1,22 +1,20 @@
-﻿using Dasync.Collections;
-using Libplanet.Crypto;
-using Libplanet.Net;
+﻿using System.Net;
+using Dasync.Collections;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
 using Serilog;
-using static LibplanetConsole.Seed.PeerUtility;
 
 namespace LibplanetConsole.Seed;
 
 public sealed class SeedNode(SeedOptions seedOptions)
 {
-    public static readonly AppPrivateKey AppProtocolKey
-        = AppPrivateKey.Parse("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
+    public static readonly PrivateKey AppProtocolKey
+        = new("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
     public static readonly AppProtocolVersion AppProtocolVersion
-        = AppProtocolVersion.Sign((PrivateKey)AppProtocolKey, 1);
+        = AppProtocolVersion.Sign(AppProtocolKey, 1);
 
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
@@ -31,8 +29,8 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
     public PeerCollection Peers { get; } = new(seedOptions);
 
-    public AppPeer BoundPeer => new(
-        seedOptions.PrivateKey.PublicKey, seedOptions.EndPoint);
+    public BoundPeer BoundPeer { get; } = new(
+        seedOptions.PrivateKey.PublicKey, (DnsEndPoint)seedOptions.EndPoint);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -102,15 +100,14 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
     private static async Task<NetMQTransport> CreateTransport(SeedOptions seedOptions)
     {
-        var privateKey = (PrivateKey)seedOptions.PrivateKey;
+        var privateKey = seedOptions.PrivateKey;
         var appProtocolVersion = AppProtocolVersion;
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,
             TrustedAppProtocolVersionSigners = [],
         };
-        var host = seedOptions.EndPoint.Host;
-        var port = seedOptions.EndPoint.Port;
+        var (host, port) = EndPointUtility.GetHostAndPort(seedOptions.EndPoint);
         var hostOptions = new HostOptions(host, [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
@@ -149,7 +146,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
         {
             case FindNeighborsMsg:
                 var alivePeers = peers.Where(item => item.IsAlive)
-                                      .Select(item => ToBoundPeer(item.AppPeer))
+                                      .Select(item => item.BoundPeer)
                                       .ToArray();
                 var neighborsMsg = new NeighborsMsg(alivePeers);
                 await transport.ReplyMessageAsync(
@@ -169,7 +166,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
 
         if (message.Remote is BoundPeer boundPeer)
         {
-            peers.AddOrUpdate(ToAppPeer(boundPeer), transport);
+            peers.AddOrUpdate(boundPeer, transport);
         }
     }
 }

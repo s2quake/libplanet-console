@@ -1,5 +1,4 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common;
 using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Client.Example;
@@ -15,7 +14,7 @@ internal sealed class ExampleClient(
 {
     private readonly ExampleRemoteNodeService _remoteNodeService = remoteNodeService;
 
-    public AppAddress Address => client.Address;
+    public Address Address => client.Address;
 
     public bool IsExample { get; } = settings.IsExample;
 

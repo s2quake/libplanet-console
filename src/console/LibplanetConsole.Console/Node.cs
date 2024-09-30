@@ -1,9 +1,9 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using Bencodex;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
@@ -25,8 +25,8 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
-    private AppEndPoint? _blocksyncEndPoint;
-    private AppEndPoint? _consensusEndPoint;
+    private EndPoint? _blocksyncEndPoint;
+    private EndPoint? _consensusEndPoint;
     private Guid _closeToken;
     private NodeInfo _nodeInfo;
     private bool _isDisposed;
@@ -64,21 +64,21 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public event EventHandler? Disposed;
 
-    public AppEndPoint SwarmEndPoint
+    public EndPoint SwarmEndPoint
         => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
 
-    public AppEndPoint ConsensusEndPoint
+    public EndPoint ConsensusEndPoint
         => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
-    public AppPublicKey PublicKey { get; }
+    public PublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public bool IsAttached => _closeToken != Guid.Empty;
 
     public bool IsRunning { get; private set; }
 
-    public AppEndPoint EndPoint => _nodeOptions.EndPoint;
+    public EndPoint EndPoint => _nodeOptions.EndPoint;
 
     public NodeInfo Info => _nodeInfo;
 
@@ -116,7 +116,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         }
     }
 
-    public override string ToString() => $"{Address:S}: {EndPoint}";
+    public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
 
     public byte[] Sign(object obj) => _nodeOptions.PrivateKey.Sign(obj);
 
@@ -168,11 +168,11 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
         using var scope = new ProgressScope(this);
         var application = this.GetRequiredService<ApplicationBase>();
-        var seedEndPoint = AppEndPoint.ToString(
+        var seedEndPoint = EndPointUtility.ToString(
             _nodeOptions.SeedEndPoint ?? application.Info.EndPoint);
         _nodeInfo = await _remoteService.Service.StartAsync(seedEndPoint, cancellationToken);
-        _blocksyncEndPoint = AppEndPoint.Parse(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = AppEndPoint.Parse(_nodeInfo.ConsensusEndPoint);
+        _blocksyncEndPoint = EndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
+        _consensusEndPoint = EndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
         _logger.Debug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);

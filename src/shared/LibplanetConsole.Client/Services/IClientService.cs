@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Client.Services;
 
 public interface IClientService
@@ -10,6 +8,6 @@ public interface IClientService
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 
-    Task<AppId> SendTransactionAsync(
+    Task<TxId> SendTransactionAsync(
         TransactionOptions transactionOptions, CancellationToken cancellationToken);
 }

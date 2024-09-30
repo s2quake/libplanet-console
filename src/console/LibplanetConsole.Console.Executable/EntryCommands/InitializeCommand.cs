@@ -25,7 +25,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The endpoint of the libplanet-console. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty(InitValue = 4)]
@@ -38,7 +38,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("The private keys of the nodes to create. ex) --nodes \"key1,key2,...\"\n" +
                     "Mutually exclusive with '--node-count' option.")]
     [CommandPropertyExclusion(nameof(NodeCount))]
-    [AppPrivateKeyArray]
+    [PrivateKeyArray]
     public string[] Nodes { get; init; } = [];
 
     [CommandProperty(InitValue = 2)]
@@ -51,7 +51,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("The private keys of the clients to create. ex) --clients \"key1,key2,...\"\n" +
                     "Mutually exclusive with '--client-count' option.")]
     [CommandPropertyExclusion(nameof(ClientCount))]
-    [AppPrivateKeyArray]
+    [PrivateKeyArray]
     public string[] Clients { get; init; } = [];
 
     [CommandPropertySwitch("quiet", 'q')]
@@ -61,7 +61,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The private key of the genesis block. " +
                     "if omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
@@ -84,8 +84,8 @@ internal sealed class InitializeCommand : CommandBase
 
     protected override void OnExecute()
     {
-        var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
+        var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var prevEndPoint = EndPoint != string.Empty ? endPoint : null;
         var nodeOptions = GetNodeOptions(ref prevEndPoint);
         var clientOptions = GetClientOptions(ref prevEndPoint);
@@ -115,9 +115,9 @@ internal sealed class InitializeCommand : CommandBase
         dynamic info = repository.Save(outputPath, resolver);
         info.GenesisArguments = new
         {
-            GenesisKey = AppPrivateKey.ToString(genesisKey),
+            GenesisKey = PrivateKeyUtility.ToString(genesisKey),
             Validators = nodeOptions.Select(
-                item => AppPublicKey.ToString(item.PrivateKey.PublicKey)),
+                item => item.PrivateKey.PublicKey.ToHex(compress: false)),
             Timestamp = dateTimeOffset,
             ActionProviderModulePath,
             ActionProviderType,
@@ -126,14 +126,13 @@ internal sealed class InitializeCommand : CommandBase
         TextWriterExtensions.WriteLineAsJson(writer, info);
     }
 
-    private NodeOptions[] GetNodeOptions(ref AppEndPoint? prevEndPoint)
+    private NodeOptions[] GetNodeOptions(ref EndPoint? prevEndPoint)
     {
         var privateKeys = GetNodes();
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint is not null
-                ? new AppEndPoint(prevEndPoint.Host, prevEndPoint.Port + 1) : AppEndPoint.Next();
+            var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
             var nodeOptions = new NodeOptions
             {
                 EndPoint = endPoint,
@@ -152,14 +151,13 @@ internal sealed class InitializeCommand : CommandBase
         return [.. nodeOptionsList];
     }
 
-    private ClientOptions[] GetClientOptions(ref AppEndPoint? prevEndPoint)
+    private ClientOptions[] GetClientOptions(ref EndPoint? prevEndPoint)
     {
         var privateKeys = GetClients();
         var clientOptionsList = new List<ClientOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint is not null
-                ? new AppEndPoint(prevEndPoint.Host, prevEndPoint.Port + 1) : AppEndPoint.Next();
+            var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
             var clientOptions = new ClientOptions
             {
                 EndPoint = endPoint,
@@ -176,23 +174,23 @@ internal sealed class InitializeCommand : CommandBase
         return [.. clientOptionsList];
     }
 
-    private AppPrivateKey[] GetNodes()
+    private PrivateKey[] GetNodes()
     {
         if (Nodes.Length > 0)
         {
-            return [.. Nodes.Select(item => AppPrivateKey.Parse(item))];
+            return [.. Nodes.Select(item => new PrivateKey(item))];
         }
 
-        return [.. Enumerable.Range(0, NodeCount).Select(item => new AppPrivateKey())];
+        return [.. Enumerable.Range(0, NodeCount).Select(item => new PrivateKey())];
     }
 
-    private AppPrivateKey[] GetClients()
+    private PrivateKey[] GetClients()
     {
         if (Clients.Length > 0)
         {
-            return [.. Clients.Select(item => AppPrivateKey.Parse(item))];
+            return [.. Clients.Select(item => new PrivateKey(item))];
         }
 
-        return [.. Enumerable.Range(0, ClientCount).Select(item => new AppPrivateKey())];
+        return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
     }
 }

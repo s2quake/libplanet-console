@@ -1,4 +1,3 @@
-using System.Net;
 using JSSoft.Communication;
 
 namespace LibplanetConsole.Common.Services;
@@ -6,7 +5,7 @@ namespace LibplanetConsole.Common.Services;
 public class RemoteServiceContext
 {
     private readonly InternalClientContext _clientContext;
-    private AppEndPoint? _endPoint;
+    private EndPoint? _endPoint;
 
     public RemoteServiceContext(IEnumerable<IRemoteService> remoteServices)
     {
@@ -19,13 +18,13 @@ public class RemoteServiceContext
 
     public event EventHandler? Closed;
 
-    public AppEndPoint EndPoint
+    public EndPoint EndPoint
     {
         get => _endPoint ?? throw new InvalidOperationException("EndPoint is not set.");
         set
         {
             _endPoint = value;
-            _clientContext.EndPoint = (EndPoint)value;
+            _clientContext.EndPoint = value;
         }
     }
 

@@ -1,4 +1,3 @@
-using Libplanet.Action;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node;
@@ -13,13 +12,13 @@ public interface INode : IVerifier, ISigner, IServiceProvider
 
     bool IsRunning { get; }
 
-    AppPublicKey PublicKey { get; }
+    PublicKey PublicKey { get; }
 
-    AppAddress Address => PublicKey.Address;
+    Address Address => PublicKey.Address;
 
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<AppId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

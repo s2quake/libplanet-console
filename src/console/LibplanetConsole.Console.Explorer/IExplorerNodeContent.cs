@@ -1,4 +1,3 @@
-using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
 
 namespace LibplanetConsole.Console.Explorer;
@@ -9,7 +8,7 @@ public interface IExplorerNodeContent
 
     event EventHandler? Stopped;
 
-    AppEndPoint EndPoint { get; set; }
+    EndPoint EndPoint { get; set; }
 
     ExplorerInfo Info { get; }
 

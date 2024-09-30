@@ -1,9 +1,7 @@
 using System.Numerics;
-using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Messages;
-using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Node.Evidence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +45,7 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
         INode node, long height, int round, BigInteger power)
     {
         var hash = new BlockHash(GetRandomBytes(BlockHash.Size));
-        var publicKey = (PublicKey)node.PublicKey;
+        var publicKey = node.PublicKey;
         var voteMetadata = new VoteMetadata(
             height,
             round,
@@ -76,7 +74,7 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
         var round = (int)consensusContext.Round;
         var context = consensusContext.GetContext();
         var validatorSet = context.GetValidatorSet();
-        var publicKey = (PublicKey)node.PublicKey;
+        var publicKey = node.PublicKey;
         var validator = validatorSet.Validators.First(item => item.PublicKey == publicKey);
         var power = validator.Power;
         var vote = MakeRandomVote(node, height, round, power);

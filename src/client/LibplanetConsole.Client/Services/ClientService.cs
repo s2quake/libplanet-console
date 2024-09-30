@@ -28,7 +28,7 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     public async Task<ClientInfo> StartAsync(
         string nodeEndPoint, CancellationToken cancellationToken)
     {
-        _client.NodeEndPoint = AppEndPoint.Parse(nodeEndPoint);
+        _client.NodeEndPoint = EndPointUtility.Parse(nodeEndPoint);
         await _client.StartAsync(cancellationToken);
         return _client.Info;
     }
@@ -36,7 +36,7 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     public Task StopAsync(CancellationToken cancellationToken)
         => _client.StopAsync(cancellationToken);
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         TransactionOptions transactionOptions, CancellationToken cancellationToken)
     {
         if (transactionOptions.TryVerify(_client) == true)

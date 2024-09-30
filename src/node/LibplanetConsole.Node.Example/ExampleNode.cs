@@ -10,20 +10,20 @@ internal sealed class ExampleNode(
     IApplication application, ExampleSettings settings) : IExampleNode
 {
     private readonly IApplication _application = application;
-    private readonly HashSet<AppAddress> _addresses = [];
+    private readonly HashSet<Address> _addresses = [];
 
-    public event EventHandler<ItemEventArgs<AppAddress>>? Subscribed;
+    public event EventHandler<ItemEventArgs<Address>>? Subscribed;
 
-    public event EventHandler<ItemEventArgs<AppAddress>>? Unsubscribed;
+    public event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
 
     public int Count => _addresses.Count;
 
     public bool IsExample { get; } = settings.IsExample;
 
-    public Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken)
+    public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
         => _application.InvokeAsync(() => _addresses.ToArray(), cancellationToken);
 
-    public void Subscribe(AppAddress address)
+    public void Subscribe(Address address)
     {
         if (_addresses.Contains(address) == true)
         {
@@ -31,11 +31,11 @@ internal sealed class ExampleNode(
         }
 
         _addresses.Add(address);
-        Subscribed?.Invoke(this, new ItemEventArgs<AppAddress>(address));
+        Subscribed?.Invoke(this, new ItemEventArgs<Address>(address));
         Console.Out.WriteLine($"Subscribed: '{address}'");
     }
 
-    public void Unsubscribe(AppAddress address)
+    public void Unsubscribe(Address address)
     {
         if (_addresses.Contains(address) != true)
         {
@@ -43,7 +43,7 @@ internal sealed class ExampleNode(
         }
 
         _addresses.Remove(address);
-        Unsubscribed?.Invoke(this, new ItemEventArgs<AppAddress>(address));
+        Unsubscribed?.Invoke(this, new ItemEventArgs<Address>(address));
         Console.Out.WriteLine($"Unsubscribed: '{address}'");
     }
 }

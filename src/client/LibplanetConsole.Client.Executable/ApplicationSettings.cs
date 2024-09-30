@@ -14,13 +14,13 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint on which the client will run. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the client. " +
                     "If omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
@@ -31,7 +31,7 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the node to connect to.")]
-    [AppEndPoint]
+    [EndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -47,12 +47,12 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions(object[] components)
     {
-        var endPoint = AppEndPoint.ParseOrNext(EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
+        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
+        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         return new ApplicationOptions(endPoint, privateKey)
         {
             ParentProcessId = ParentProcessId,
-            NodeEndPoint = AppEndPoint.ParseOrDefault(NodeEndPoint),
+            NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),
             LogPath = GetFullPath(LogPath),
             NoREPL = NoREPL,
             Components = components,

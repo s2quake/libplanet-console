@@ -1,12 +1,5 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using Bencodex;
-using Bencodex.Types;
-using Libplanet.Action;
-using Libplanet.Common;
-using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node;
@@ -33,20 +26,20 @@ public static partial class BlockUtility
     }
 
     private static Block CreateGenesisBlock(
-        AppPrivateKey genesisKey,
+        PrivateKey genesisKey,
         DateTimeOffset dateTimeOffset,
         IAction[] actions)
     {
         var nonce = 0L;
         var transaction = Transaction.Create(
             nonce: nonce,
-            privateKey: (PrivateKey)genesisKey,
+            privateKey: genesisKey,
             genesisHash: null,
             actions: [.. actions.Select(item => item.PlainValue)],
             timestamp: dateTimeOffset);
         var transactions = ImmutableList.Create(transaction);
         return ProposeGenesisBlock(
-            privateKey: (PrivateKey)genesisKey,
+            privateKey: genesisKey,
             transactions: transactions,
             timestamp: dateTimeOffset);
     }

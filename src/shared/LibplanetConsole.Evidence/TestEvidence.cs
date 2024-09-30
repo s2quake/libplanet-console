@@ -1,6 +1,4 @@
 using System.Globalization;
-using Bencodex.Types;
-using Libplanet.Crypto;
 using Libplanet.Types.Evidence;
 
 namespace LibplanetConsole.Evidence;

@@ -1,6 +1,4 @@
-using Bencodex.Types;
-using Libplanet.Action;
-using LibplanetConsole.Common;
+using System.Security.Cryptography;
 
 namespace LibplanetConsole.Node;
 
@@ -8,26 +6,26 @@ public interface IBlockChain
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
-    Task<AppId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
-    Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
+    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
-    Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken);
+    Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(
-        AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        BlockHash? blockHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken);
 
     Task<IValue> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        HashDigest<SHA256> stateRootHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken);
 
-    Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
+    Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
 
-    Task<T> GetActionAsync<T>(AppId txId, int actionIndex, CancellationToken cancellationToken)
+    Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
 }

@@ -1,7 +1,5 @@
 using System.ComponentModel.Composition;
-using Bencodex;
-using Libplanet.Types.Tx;
-using LibplanetConsole.Common;
+using System.Security.Cryptography;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Node.Services;
@@ -20,24 +18,24 @@ internal sealed class BlockChainService
         _node.BlockAppended += Node_BlockAppended;
     }
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         byte[] transaction, CancellationToken cancellationToken)
     {
         var tx = Transaction.Deserialize(transaction);
         await _node.AddTransactionAsync(tx, cancellationToken);
-        return (AppId)tx.Id;
+        return tx.Id;
     }
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => _node.GetNextNonceAsync(address, cancellationToken);
 
-    public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
         => _node.GetTipHashAsync(cancellationToken);
 
     public async Task<byte[]> GetStateAsync(
-        AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        BlockHash? blockHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var value = await _node.GetStateAsync(
@@ -46,9 +44,9 @@ internal sealed class BlockChainService
     }
 
     public async Task<byte[]> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        HashDigest<SHA256> stateRootHash,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var value = await _node.GetStateByStateRootHashAsync(
@@ -56,11 +54,11 @@ internal sealed class BlockChainService
         return _codec.Encode(value);
     }
 
-    public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => _node.GetBlockHashAsync(height, cancellationToken);
 
     public Task<byte[]> GetActionAsync(
-        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        TxId txId, int actionIndex, CancellationToken cancellationToken)
         => _node.GetActionAsync(txId, actionIndex, cancellationToken);
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)

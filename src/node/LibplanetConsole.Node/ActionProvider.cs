@@ -1,12 +1,7 @@
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Reflection;
-using Bencodex.Types;
-using Libplanet.Action;
-using Libplanet.Action.Loader;
-using Libplanet.Crypto;
 using Libplanet.Types.Consensus;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Framework;
 
@@ -24,10 +19,10 @@ internal sealed class ActionProvider : IActionProvider
 
     public ImmutableArray<IAction> EndTxActions { get; } = [];
 
-    public IAction[] GetGenesisActions(AppPrivateKey genesisKey, AppPublicKey[] validatorKeys)
+    public IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
-            .Select(item => new Validator((PublicKey)item, BigInteger.One))
+            .Select(item => new Validator(item, BigInteger.One))
             .ToArray();
         var validatorSet = new ValidatorSet(validators: [.. validators]);
         var actions = new IAction[]
