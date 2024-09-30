@@ -16,7 +16,7 @@ internal sealed partial class Node : IBlockChain
 {
     private static readonly Codec _codec = new();
 
-    public async Task<AppId> AddTransactionAsync(
+    public async Task<TxId> AddTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
@@ -35,7 +35,7 @@ internal sealed partial class Node : IBlockChain
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values));
         await AddTransactionAsync(transaction, cancellationToken);
-        return (AppId)transaction.Id;
+        return (TxId)transaction.Id;
     }
 
     public async Task AddTransactionAsync(
@@ -46,7 +46,7 @@ internal sealed partial class Node : IBlockChain
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        _logger.Debug("Node adds a transaction: {AppId}", transaction.Id);
+        _logger.Debug("Node adds a transaction: {TxId}", transaction.Id);
         var blockChain = BlockChain;
         var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
         {
@@ -72,7 +72,7 @@ internal sealed partial class Node : IBlockChain
             throw new InvalidOperationException(sb.ToString());
         }
 
-        _logger.Debug("Node added a transaction: {AppId}", transaction.Id);
+        _logger.Debug("Node added a transaction: {TxId}", transaction.Id);
     }
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
@@ -176,7 +176,7 @@ internal sealed partial class Node : IBlockChain
     }
 
     public Task<byte[]> GetActionAsync(
-        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        TxId txId, int actionIndex, CancellationToken cancellationToken)
     {
         byte[] GetAction()
         {
@@ -190,7 +190,7 @@ internal sealed partial class Node : IBlockChain
     }
 
     public Task<T> GetActionAsync<T>(
-        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction
     {
         T GetAction()

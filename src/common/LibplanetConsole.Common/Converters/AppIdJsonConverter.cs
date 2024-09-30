@@ -1,26 +1,26 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+// using System.Text.Json;
+// using System.Text.Json.Serialization;
 
-namespace LibplanetConsole.Common.Converters;
+// namespace LibplanetConsole.Common.Converters;
 
-public sealed class AppIdJsonConverter : JsonConverter<AppId>
-{
-    public override AppId Read(
-        ref Utf8JsonReader reader,
-        Type typeToConvert,
-        JsonSerializerOptions options)
-    {
-        if (reader.GetString() is string text)
-        {
-            return AppId.Parse(text);
-        }
+// public sealed class TxIdJsonConverter : JsonConverter<TxId>
+// {
+//     public override TxId Read(
+//         ref Utf8JsonReader reader,
+//         Type typeToConvert,
+//         JsonSerializerOptions options)
+//     {
+//         if (reader.GetString() is string text)
+//         {
+//             return TxId.Parse(text);
+//         }
 
-        throw new JsonException("Cannot read AppId from JSON.");
-    }
+//         throw new JsonException("Cannot read TxId from JSON.");
+//     }
 
-    public override void Write(
-        Utf8JsonWriter writer, AppId value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.ToString());
-    }
-}
+//     public override void Write(
+//         Utf8JsonWriter writer, TxId value, JsonSerializerOptions options)
+//     {
+//         writer.WriteStringValue(value.ToString());
+//     }
+// }

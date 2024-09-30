@@ -16,7 +16,7 @@ internal sealed partial class Node
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = _nodeOptions.PrivateKey;
@@ -35,7 +35,7 @@ internal sealed partial class Node
         return txId;
     }
 
-    public Task<AppId> SendTransactionAsync(
+    public Task<TxId> SendTransactionAsync(
         Transaction transaction, CancellationToken cancellationToken)
     {
         return _blockChainService.Service.SendTransactionAsync(
@@ -83,7 +83,7 @@ internal sealed partial class Node
         => _blockChainService.Service.GetBlockHashAsync(height, cancellationToken);
 
     public async Task<T> GetActionAsync<T>(
-        AppId txId,
+        TxId txId,
         int actionIndex,
         CancellationToken cancellationToken)
         where T : IAction

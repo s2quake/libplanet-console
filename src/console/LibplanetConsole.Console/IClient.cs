@@ -33,5 +33,5 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<AppId> SendTransactionAsync(string text, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken);
 }

@@ -36,7 +36,7 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
     public Task StopAsync(CancellationToken cancellationToken)
         => _client.StopAsync(cancellationToken);
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         TransactionOptions transactionOptions, CancellationToken cancellationToken)
     {
         if (transactionOptions.TryVerify(_client) == true)

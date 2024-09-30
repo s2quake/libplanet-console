@@ -21,12 +21,12 @@ internal sealed class BlockChainService
         _node.BlockAppended += Node_BlockAppended;
     }
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         byte[] transaction, CancellationToken cancellationToken)
     {
         var tx = Transaction.Deserialize(transaction);
         await _node.AddTransactionAsync(tx, cancellationToken);
-        return (AppId)tx.Id;
+        return (TxId)tx.Id;
     }
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
@@ -61,7 +61,7 @@ internal sealed class BlockChainService
         => _node.GetBlockHashAsync(height, cancellationToken);
 
     public Task<byte[]> GetActionAsync(
-        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        TxId txId, int actionIndex, CancellationToken cancellationToken)
         => _node.GetActionAsync(txId, actionIndex, cancellationToken);
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)

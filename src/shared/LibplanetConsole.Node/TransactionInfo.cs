@@ -9,7 +9,7 @@ public readonly partial record struct TransactionInfo
     {
     }
 
-    public AppId Id { get; init; } = default;
+    public TxId Id { get; init; } = default;
 
     public Address Signer { get; init; } = default;
 

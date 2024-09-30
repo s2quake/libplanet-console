@@ -5,7 +5,7 @@ namespace LibplanetConsole.Node.Services;
 
 public interface IBlockChainService
 {
-    Task<AppId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(byte[] transaction, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
@@ -25,5 +25,5 @@ public interface IBlockChainService
 
     Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
 
-    Task<byte[]> GetActionAsync(AppId txId, int actionIndex, CancellationToken cancellationToken);
+    Task<byte[]> GetActionAsync(TxId txId, int actionIndex, CancellationToken cancellationToken);
 }

@@ -22,5 +22,5 @@ public interface INode : IVerifier, ISigner, IServiceProvider
 
     Task StopAsync(CancellationToken cancellationToken);
 
-    Task<AppId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

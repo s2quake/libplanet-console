@@ -10,6 +10,6 @@ public interface IClientService
 
     Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken);
 
-    Task<AppId> SendTransactionAsync(
+    Task<TxId> SendTransactionAsync(
         TransactionOptions transactionOptions, CancellationToken cancellationToken);
 }

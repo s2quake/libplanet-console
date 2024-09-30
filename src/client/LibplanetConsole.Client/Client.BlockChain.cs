@@ -13,7 +13,7 @@ internal sealed partial class Client : IBlockChain
 {
     private static readonly Codec _codec = new();
 
-    public async Task<AppId> SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         var privateKey = AppPrivateKey.FromSecureString(_privateKey);
@@ -26,7 +26,7 @@ internal sealed partial class Client : IBlockChain
             genesisHash: (BlockHash)genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txData = tx.Serialize();
-        _logger.Debug("Client sends a transaction: {AppId}", tx.Id);
+        _logger.Debug("Client sends a transaction: {TxId}", tx.Id);
         return await RemoteBlockChainService.SendTransactionAsync(txData, cancellationToken);
     }
 
@@ -62,7 +62,7 @@ internal sealed partial class Client : IBlockChain
     }
 
     public async Task<T> GetActionAsync<T>(
-        AppId txId, int actionIndex, CancellationToken cancellationToken)
+        TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction
     {
         var bytes = await RemoteBlockChainService.GetActionAsync(

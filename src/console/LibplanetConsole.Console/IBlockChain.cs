@@ -9,7 +9,7 @@ public interface IBlockChain
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
-    Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
@@ -29,6 +29,6 @@ public interface IBlockChain
 
     Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
 
-    Task<T> GetActionAsync<T>(AppId txId, int actionIndex, CancellationToken cancellationToken)
+    Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
 }

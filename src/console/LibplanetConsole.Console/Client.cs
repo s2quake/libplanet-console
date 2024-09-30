@@ -185,7 +185,7 @@ internal sealed class Client : IClient, IClientCallback
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task<AppId> SendTransactionAsync(string text, CancellationToken cancellationToken)
+    public async Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken)
     {
         var transactionOptions = new TransactionOptions
         {
