@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Actions;
+using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Commands;
 
@@ -19,6 +20,6 @@ internal sealed class TxCommand(IClient client, IBlockChain blockChain) : Comman
             Value = Text,
         };
         await blockChain.SendTransactionAsync([action], cancellationToken);
-        await Out.WriteLineAsync($"{client.Address:S}: {Text}");
+        await Out.WriteLineAsync($"{client.Address.ToShortString()}: {Text}");
     }
 }

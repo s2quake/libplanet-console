@@ -153,7 +153,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
         var node = application.GetNode(address);
         var action = new StringAction { Value = text };
         await node.SendTransactionAsync([action], cancellationToken);
-        await Out.WriteLineAsync($"{node.Address:S}: {text}");
+        await Out.WriteLineAsync($"{node.Address.ToShortString()}: {text}");
     }
 
     private static TerminalColorType? GetForeground(INode node, bool isCurrent)

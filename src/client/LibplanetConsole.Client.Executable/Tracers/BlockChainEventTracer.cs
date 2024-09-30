@@ -27,7 +27,8 @@ internal sealed class BlockChainEventTracer(IBlockChain blockChain)
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Height} '{hash:S}' Appended by '{miner:S}'";
+        var message = $"Block #{blockInfo.Height} '{hash.ToShortString()}' " +
+                      $"Appended by '{miner.ToShortString()}'";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 }

@@ -110,7 +110,7 @@ internal sealed class Client : IClient, IClientCallback
         }
     }
 
-    public override string ToString() => $"{Address:S}: {EndPoint}";
+    public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
 
     public byte[] Sign(object obj) => _clientOptions.PrivateKey.Sign(obj);
 

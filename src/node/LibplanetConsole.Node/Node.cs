@@ -114,7 +114,7 @@ internal sealed partial class Node : IActionRenderer, INode
         }
     }
 
-    public override string ToString() => $"{Address:S}";
+    public override string ToString() => $"{Address.ToShortString()}";
 
     public object? GetService(Type serviceType)
     {

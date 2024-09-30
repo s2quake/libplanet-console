@@ -57,7 +57,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             foreach (IClient client in e.NewItems!)
             {
-                var message = $"Client created: {client.Address:S}";
+                var message = $"Client created: {client.Address.ToShortString()}";
                 var colorType = TerminalColorType.BrightBlue;
                 System.Console.Out.WriteColoredLine(message, colorType);
                 AttachEvent(client);
@@ -67,7 +67,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
         {
             foreach (IClient client in e.OldItems!)
             {
-                var message = $"Client deleted: {client.Address:S}";
+                var message = $"Client deleted: {client.Address.ToShortString()}";
                 var colorType = TerminalColorType.BrightBlue;
                 System.Console.Out.WriteColoredLine(message, colorType);
                 DetachEvent(client);
@@ -79,7 +79,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
     {
         if (sender is IClient client)
         {
-            var message = $"Client attached: {client.Address:S}";
+            var message = $"Client attached: {client.Address.ToShortString()}";
             var colorType = TerminalColorType.BrightBlue;
             System.Console.Out.WriteColoredLine(message, colorType);
         }
@@ -89,7 +89,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
     {
         if (sender is IClient client)
         {
-            var message = $"Client detached: {client.Address:S}";
+            var message = $"Client detached: {client.Address.ToShortString()}";
             var colorType = TerminalColorType.BrightBlue;
             System.Console.Out.WriteColoredLine(message, colorType);
         }
@@ -99,7 +99,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
     {
         if (sender is IClient client)
         {
-            var message = $"Client started: {client.Address:S}";
+            var message = $"Client started: {client.Address.ToShortString()}";
             var colorType = TerminalColorType.BrightBlue;
             System.Console.Out.WriteColoredLine(message, colorType);
         }
@@ -109,7 +109,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
     {
         if (sender is IClient client)
         {
-            var message = $"Client stopped: {client.Address:S}";
+            var message = $"Client stopped: {client.Address.ToShortString()}";
             var colorType = TerminalColorType.BrightBlue;
             System.Console.Out.WriteColoredLine(message, colorType);
         }

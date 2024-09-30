@@ -20,4 +20,7 @@ public static class AddressExtensions
 
     public static Address Derive(this Address @this, string key)
         => Derive(@this, Encoding.UTF8.GetBytes(key));
+
+    public static string ToShortString(this Address @this)
+        => @this.ToString()[..8];
 }
