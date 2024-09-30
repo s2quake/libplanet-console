@@ -15,7 +15,7 @@ public interface IActionProvider
 
     ImmutableArray<IAction> EndTxActions { get; }
 
-    IAction[] GetGenesisActions(AppPrivateKey genesisKey, PublicKey[] validatorKeys);
+    IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys);
 
     IActionLoader GetActionLoader();
 }

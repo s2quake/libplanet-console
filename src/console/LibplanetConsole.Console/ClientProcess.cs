@@ -24,7 +24,7 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
                 argumentList.Add("--end-point");
                 argumentList.Add(clientOptions.EndPoint.ToString());
                 argumentList.Add("--private-key");
-                argumentList.Add(AppPrivateKey.ToString(clientOptions.PrivateKey));
+                argumentList.Add(PrivateKeyUtility.ToString(clientOptions.PrivateKey));
 
                 if (clientOptions.LogPath != string.Empty)
                 {

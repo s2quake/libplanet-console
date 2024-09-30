@@ -23,13 +23,13 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("Indicates the private key of the client. " +
                     "If omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The endpoint of the client. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
@@ -46,7 +46,7 @@ internal sealed class InitializeCommand : CommandBase
     {
         var outputPath = Path.GetFullPath(OutputPath);
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
+        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var logPath = Path.Combine(outputPath, LogPath.Fallback("app.log"));
         var repository = new Repository
         {

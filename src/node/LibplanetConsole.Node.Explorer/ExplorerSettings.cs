@@ -21,7 +21,7 @@ internal sealed class ExplorerSettings
     [CommandSummary("")]
     [CommandPropertyDependency(nameof(IsExplorerEnabled))]
     [JsonPropertyName("endPoint")]
-    [AppEndPoint]
+    [EndPoint]
     [Category(Explorer)]
     public string ExplorerEndPoint { get; init; } = string.Empty;
 }

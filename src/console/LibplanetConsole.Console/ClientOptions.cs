@@ -8,7 +8,7 @@ public sealed record class ClientOptions
 {
     public required AppEndPoint EndPoint { get; init; }
 
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
     public AppEndPoint? NodeEndPoint { get; init; }
 
@@ -33,7 +33,7 @@ public sealed record class ClientOptions
         return new()
         {
             EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
-            PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
+            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
             NodeEndPoint = AppEndPoint.ParseOrDefault(applicationSettings.NodeEndPoint),
             RepositoryPath = repositoryPath,

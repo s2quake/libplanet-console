@@ -12,7 +12,7 @@ namespace LibplanetConsole.Node.Services;
 internal sealed class SeedService(ApplicationBase application)
     : LocalService<ISeedService>, ISeedService, IApplicationService, IAsyncDisposable
 {
-    private readonly AppPrivateKey _seedNodePrivateKey = new();
+    private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
 

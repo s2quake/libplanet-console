@@ -17,7 +17,7 @@ internal sealed partial class Client : IBlockChain
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var address = privateKey.Address;
         var nonce = await RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
         var genesisHash = NodeInfo.GenesisHash;

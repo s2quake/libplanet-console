@@ -5,15 +5,15 @@ using LibplanetConsole.DataAnnotations;
 namespace LibplanetConsole.Common.DataAnnotations;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class AppEndPointAttribute : RegularExpressionAttribute
+public sealed class EndPointAttribute : RegularExpressionAttribute
 {
-    public AppEndPointAttribute()
+    public EndPointAttribute()
         : base($"^{AppEndPoint.RegularExpression}$")
     {
     }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class AppEndPointArrayAttribute : ArrayAttribute<AppEndPointAttribute>
+public sealed class AppEndPointArrayAttribute : ArrayAttribute<EndPointAttribute>
 {
 }

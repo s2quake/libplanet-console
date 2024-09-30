@@ -139,7 +139,7 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
-    public byte[] Sign(object obj) => AppPrivateKey.FromSecureString(_privateKey).Sign(obj);
+    public byte[] Sign(object obj) => PrivateKeyUtility.FromSecureString(_privateKey).Sign(obj);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -152,7 +152,7 @@ internal sealed partial class Node : IActionRenderer, INode
         }
 
         var seedInfo = await GetSeedInfoAsync(_seedEndPoint, cancellationToken);
-        var privateKey = (PrivateKey)AppPrivateKey.FromSecureString(_privateKey);
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
         var blocksyncEndPoint = _blocksyncEndPoint ?? AppEndPoint.Next();
@@ -307,7 +307,7 @@ internal sealed partial class Node : IActionRenderer, INode
         };
         var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
         var service = remoteService.Service;
-        var privateKey = new AppPrivateKey();
+        var privateKey = new PrivateKey();
         var publicKey = privateKey.PublicKey;
         try
         {

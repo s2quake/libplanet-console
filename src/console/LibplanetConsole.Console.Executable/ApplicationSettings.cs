@@ -13,7 +13,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("The endpoint of the libplanet-console. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
 #if DEBUG
@@ -120,7 +120,7 @@ internal sealed record class ApplicationSettings
     }
 
     private static NodeOptions[] GetNodeOptions(
-        AppEndPoint endPoint, AppPrivateKey[] nodePrivateKeys)
+        AppEndPoint endPoint, PrivateKey[] nodePrivateKeys)
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
@@ -131,7 +131,7 @@ internal sealed record class ApplicationSettings
     }
 
     private static ClientOptions[] GetClientOptions(
-        NodeOptions[] nodeOptions, AppPrivateKey[] clientPrivateKeys)
+        NodeOptions[] nodeOptions, PrivateKey[] clientPrivateKeys)
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
@@ -144,23 +144,23 @@ internal sealed record class ApplicationSettings
             => nodeOptions[System.Random.Shared.Next(nodeOptions.Length)];
     }
 
-    private AppPrivateKey[] GetNodes()
+    private PrivateKey[] GetNodes()
     {
         if (Nodes.Length > 0)
         {
-            return [.. Nodes.Select(AppPrivateKey.Parse)];
+            return [.. Nodes.Select(PrivateKey.Parse)];
         }
 
-        return [.. Enumerable.Range(0, NodeCount).Select(item => new AppPrivateKey())];
+        return [.. Enumerable.Range(0, NodeCount).Select(item => new PrivateKey())];
     }
 
-    private AppPrivateKey[] GetClients()
+    private PrivateKey[] GetClients()
     {
         if (Clients.Length > 0)
         {
-            return [.. Clients.Select(AppPrivateKey.Parse)];
+            return [.. Clients.Select(PrivateKey.Parse)];
         }
 
-        return [.. Enumerable.Range(0, ClientCount).Select(item => new AppPrivateKey())];
+        return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
     }
 }

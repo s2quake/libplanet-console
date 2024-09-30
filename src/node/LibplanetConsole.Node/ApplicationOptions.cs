@@ -4,7 +4,7 @@ namespace LibplanetConsole.Node;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(AppEndPoint endPoint, AppPrivateKey privateKey, byte[] genesis)
+    public ApplicationOptions(AppEndPoint endPoint, PrivateKey privateKey, byte[] genesis)
     {
         EndPoint = endPoint;
         PrivateKey = privateKey;
@@ -13,7 +13,7 @@ public sealed record class ApplicationOptions
 
     public AppEndPoint EndPoint { get; }
 
-    public AppPrivateKey PrivateKey { get; }
+    public PrivateKey PrivateKey { get; }
 
     public byte[] Genesis { get; }
 

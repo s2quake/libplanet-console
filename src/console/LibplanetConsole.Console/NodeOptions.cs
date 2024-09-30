@@ -8,7 +8,7 @@ public sealed record class NodeOptions
 {
     public required AppEndPoint EndPoint { get; init; }
 
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
     public AppEndPoint? SeedEndPoint { get; init; }
 
@@ -37,7 +37,7 @@ public sealed record class NodeOptions
         return new()
         {
             EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
-            PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
+            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
             LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, repositoryPath),

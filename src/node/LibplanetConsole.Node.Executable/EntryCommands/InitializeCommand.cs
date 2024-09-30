@@ -25,13 +25,13 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("Indicates the private key of the node. " +
                     "If omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The endpoint of the node. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
@@ -68,7 +68,7 @@ internal sealed class InitializeCommand : CommandBase
                     "if omitted, a random private key is used.\n" +
                     "Requires the '--single-node' option to be set.")]
     [CommandPropertyDependency(nameof(IsSingleNode))]
-    [AppPrivateKey]
+    [PrivateKey]
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
@@ -103,7 +103,7 @@ internal sealed class InitializeCommand : CommandBase
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
+        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var storePath = Path.Combine(outputPath, StorePath.Fallback("store"));
         var logPath = Path.Combine(outputPath, LogPath.Fallback("app.log"));
         var libraryLogPath = Path.Combine(outputPath, LibraryLogPath.Fallback("library.log"));
@@ -130,7 +130,7 @@ internal sealed class InitializeCommand : CommandBase
         {
             var genesisOptions = new GenesisOptions
             {
-                GenesisKey = AppPrivateKey.ParseOrRandom(GenesisKey),
+                GenesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey),
                 Validators = [privateKey.PublicKey],
                 Timestamp = DateTimeOffset != DateTimeOffset.MinValue
                     ? DateTimeOffset : DateTimeOffset.UtcNow,
@@ -144,7 +144,7 @@ internal sealed class InitializeCommand : CommandBase
             File.WriteAllLines(genesisPath, [genesisString]);
             info.GenesisArguments = new
             {
-                GenesisKey = AppPrivateKey.ToString(genesisOptions.GenesisKey),
+                GenesisKey = PrivateKeyUtility.ToString(genesisOptions.GenesisKey),
                 Validators = genesisOptions.Validators.Select(
                     item => item.ToHex(compress: false)),
                 genesisOptions.Timestamp,

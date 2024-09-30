@@ -23,7 +23,7 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
                 argumentList.Add("--end-point");
                 argumentList.Add(nodeOptions.EndPoint.ToString());
                 argumentList.Add("--private-key");
-                argumentList.Add(AppPrivateKey.ToString(nodeOptions.PrivateKey));
+                argumentList.Add(PrivateKeyUtility.ToString(nodeOptions.PrivateKey));
 
                 if (nodeOptions.StorePath != string.Empty)
                 {

@@ -46,7 +46,7 @@ internal sealed class ActionProvider : IActionProvider
         return new AggregateTypedActionLoader(actionLoaders);
     }
 
-    public IAction[] GetGenesisActions(AppPrivateKey genesisKey, PublicKey[] validatorKeys)
+    public IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
             .Select(item => new Validator((PublicKey)item, BigInteger.One))

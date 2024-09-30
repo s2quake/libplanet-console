@@ -13,7 +13,7 @@ public sealed record class Repository
 
     public required AppEndPoint EndPoint { get; init; }
 
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
     public AppEndPoint? SeedEndPoint { get; init; }
 
@@ -48,7 +48,7 @@ public sealed record class Repository
         return new()
         {
             EndPoint = AppEndPoint.Parse(applicationSettings.EndPoint),
-            PrivateKey = AppPrivateKey.Parse(applicationSettings.PrivateKey),
+            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, directoryName),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
             LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, directoryName),
@@ -95,7 +95,7 @@ public sealed record class Repository
             Application = new ApplicationSettings
             {
                 EndPoint = EndPoint.ToString(),
-                PrivateKey = AppPrivateKey.ToString(privateKey),
+                PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),

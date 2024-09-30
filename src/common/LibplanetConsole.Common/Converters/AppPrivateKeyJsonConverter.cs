@@ -3,19 +3,19 @@ using System.Text.Json.Serialization;
 
 namespace LibplanetConsole.Common.Converters;
 
-public sealed class AppPrivateKeyJsonConverter : JsonConverter<AppPrivateKey>
+public sealed class PrivateKeyJsonConverter : JsonConverter<PrivateKey>
 {
-    public override AppPrivateKey Read(
+    public override PrivateKey Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
     {
-        throw new JsonException($"{nameof(AppPrivateKey)} is not supported for security reasons.");
+        throw new JsonException($"{nameof(PrivateKey)} is not supported for security reasons.");
     }
 
     public override void Write(
-        Utf8JsonWriter writer, AppPrivateKey value, JsonSerializerOptions options)
+        Utf8JsonWriter writer, PrivateKey value, JsonSerializerOptions options)
     {
-        throw new JsonException($"{nameof(AppPrivateKey)} is not supported for security reasons.");
+        throw new JsonException($"{nameof(PrivateKey)} is not supported for security reasons.");
     }
 }

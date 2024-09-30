@@ -4,7 +4,7 @@ namespace LibplanetConsole.Console;
 
 internal sealed class ClientRepositoryProcess : ClientProcessBase
 {
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
     public required AppEndPoint EndPoint { get; init; }
 
@@ -15,7 +15,7 @@ internal sealed class ClientRepositoryProcess : ClientProcessBase
        "init",
         OutputPath,
         "--private-key",
-        AppPrivateKey.ToString(PrivateKey),
+        PrivateKeyUtility.ToString(PrivateKey),
         "--end-point",
         AppEndPoint.ToString(EndPoint),
     ];

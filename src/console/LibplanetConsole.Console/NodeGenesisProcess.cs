@@ -10,7 +10,7 @@ internal sealed class NodeGenesisProcess : NodeProcessBase
     [
         "genesis",
         "--genesis-key",
-        AppPrivateKey.ToString(GenesisOptions.GenesisKey),
+        PrivateKeyUtility.ToString(GenesisOptions.GenesisKey),
         "--validators",
         string.Join(",", GenesisOptions.Validators.Select(item => item.ToString())),
         "--timestamp",

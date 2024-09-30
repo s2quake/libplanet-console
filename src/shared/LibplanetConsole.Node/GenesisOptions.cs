@@ -2,7 +2,7 @@ namespace LibplanetConsole.Common;
 
 public sealed record class GenesisOptions
 {
-    public AppPrivateKey GenesisKey { get; init; } = new();
+    public PrivateKey GenesisKey { get; init; } = new();
 
     public PublicKey[] Validators { get; init; } = [];
 

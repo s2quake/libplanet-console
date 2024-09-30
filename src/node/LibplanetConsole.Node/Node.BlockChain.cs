@@ -24,7 +24,7 @@ internal sealed partial class Node : IBlockChain
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        var privateKey = AppPrivateKey.FromSecureString(_privateKey);
+        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var blockChain = BlockChain;
         var genesisBlock = blockChain.Genesis;
         var nonce = blockChain.GetNextTxNonce(privateKey.Address);

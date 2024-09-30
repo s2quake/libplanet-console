@@ -81,14 +81,14 @@ public sealed record class Repository
 
         NodeOptions LoadNodeOptions(string nodePath)
         {
-            var privateKey = AppPrivateKey.Parse(Path.GetFileName(nodePath));
+            var privateKey = new PrivateKey(Path.GetFileName(nodePath));
             var settingsPath = resolver.GetNodeSettingsPath(nodePath, privateKey);
             return NodeOptions.Load(settingsPath);
         }
 
         ClientOptions LoadClientOptions(string clientPath)
         {
-            var privateKey = AppPrivateKey.Parse(Path.GetFileName(clientPath));
+            var privateKey = new PrivateKey(Path.GetFileName(clientPath));
             var settingsPath = resolver.GetClientSettingsPath(clientPath, privateKey);
             return ClientOptions.Load(settingsPath);
         }
@@ -174,7 +174,7 @@ public sealed record class Repository
     {
         var genesisOptions = new GenesisOptions
         {
-            GenesisKey = new AppPrivateKey(),
+            GenesisKey = new PrivateKey(),
             Validators = Nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
             Timestamp = DateTimeOffset.UtcNow,
             ActionProviderModulePath = string.Empty,

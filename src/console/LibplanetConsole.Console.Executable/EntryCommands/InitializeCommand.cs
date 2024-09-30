@@ -25,7 +25,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The endpoint of the libplanet-console. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty(InitValue = 4)]
@@ -38,7 +38,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("The private keys of the nodes to create. ex) --nodes \"key1,key2,...\"\n" +
                     "Mutually exclusive with '--node-count' option.")]
     [CommandPropertyExclusion(nameof(NodeCount))]
-    [AppPrivateKeyArray]
+    [PrivateKeyArray]
     public string[] Nodes { get; init; } = [];
 
     [CommandProperty(InitValue = 2)]
@@ -51,7 +51,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("The private keys of the clients to create. ex) --clients \"key1,key2,...\"\n" +
                     "Mutually exclusive with '--client-count' option.")]
     [CommandPropertyExclusion(nameof(ClientCount))]
-    [AppPrivateKeyArray]
+    [PrivateKeyArray]
     public string[] Clients { get; init; } = [];
 
     [CommandPropertySwitch("quiet", 'q')]
@@ -61,7 +61,7 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The private key of the genesis block. " +
                     "if omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
@@ -84,7 +84,7 @@ internal sealed class InitializeCommand : CommandBase
 
     protected override void OnExecute()
     {
-        var genesisKey = AppPrivateKey.ParseOrRandom(GenesisKey);
+        var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
         var prevEndPoint = EndPoint != string.Empty ? endPoint : null;
         var nodeOptions = GetNodeOptions(ref prevEndPoint);
@@ -115,7 +115,7 @@ internal sealed class InitializeCommand : CommandBase
         dynamic info = repository.Save(outputPath, resolver);
         info.GenesisArguments = new
         {
-            GenesisKey = AppPrivateKey.ToString(genesisKey),
+            GenesisKey = PrivateKeyUtility.ToString(genesisKey),
             Validators = nodeOptions.Select(
                 item => item.PrivateKey.PublicKey.ToHex(compress: false)),
             Timestamp = dateTimeOffset,
@@ -176,23 +176,23 @@ internal sealed class InitializeCommand : CommandBase
         return [.. clientOptionsList];
     }
 
-    private AppPrivateKey[] GetNodes()
+    private PrivateKey[] GetNodes()
     {
         if (Nodes.Length > 0)
         {
-            return [.. Nodes.Select(item => AppPrivateKey.Parse(item))];
+            return [.. Nodes.Select(item => new PrivateKey(item))];
         }
 
-        return [.. Enumerable.Range(0, NodeCount).Select(item => new AppPrivateKey())];
+        return [.. Enumerable.Range(0, NodeCount).Select(item => new PrivateKey())];
     }
 
-    private AppPrivateKey[] GetClients()
+    private PrivateKey[] GetClients()
     {
         if (Clients.Length > 0)
         {
-            return [.. Clients.Select(item => AppPrivateKey.Parse(item))];
+            return [.. Clients.Select(item => new PrivateKey(item))];
         }
 
-        return [.. Enumerable.Range(0, ClientCount).Select(item => new AppPrivateKey())];
+        return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
     }
 }

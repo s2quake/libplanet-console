@@ -21,8 +21,8 @@ public sealed class SeedNode(SeedOptions seedOptions)
             typeof(BoundPeer), new JsonConverterAttribute(typeof(BoundPeerJsonConverter)));
     }
 
-    public static readonly AppPrivateKey AppProtocolKey
-        = AppPrivateKey.Parse("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
+    public static readonly PrivateKey AppProtocolKey
+        = new("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 
     public static readonly AppProtocolVersion AppProtocolVersion
         = AppProtocolVersion.Sign((PrivateKey)AppProtocolKey, 1);

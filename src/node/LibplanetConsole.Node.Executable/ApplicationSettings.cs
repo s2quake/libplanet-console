@@ -16,13 +16,13 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint on which the node will run. " +
                     "If omitted, a random endpoint is used.")]
-    [AppEndPoint]
+    [EndPoint]
     public string EndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the node. " +
                     "If omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
@@ -34,7 +34,7 @@ internal sealed record class ApplicationSettings
     [CommandProperty]
     [CommandSummary("Indicates the EndPoint of the seed node to connect to.")]
     [CommandPropertyExclusion(nameof(IsSingleNode))]
-    [AppEndPoint]
+    [EndPoint]
     public string SeedEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -102,7 +102,7 @@ internal sealed record class ApplicationSettings
     public ApplicationOptions ToOptions(object[] components)
     {
         var endPoint = AppEndPoint.ParseOrNext(EndPoint);
-        var privateKey = AppPrivateKey.ParseOrRandom(PrivateKey);
+        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
         var actionProvider = ModuleLoader.LoadActionLoader(
             ActionProviderModulePath, ActionProviderType);
@@ -132,7 +132,7 @@ internal sealed record class ApplicationSettings
         }
     }
 
-    private static byte[] CreateGenesis(AppPrivateKey privateKey)
+    private static byte[] CreateGenesis(PrivateKey privateKey)
     {
         var genesisOptions = new GenesisOptions
         {

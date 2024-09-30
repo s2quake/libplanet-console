@@ -33,7 +33,7 @@ public static partial class BlockUtility
     }
 
     private static Block CreateGenesisBlock(
-        AppPrivateKey genesisKey,
+        PrivateKey genesisKey,
         DateTimeOffset dateTimeOffset,
         IAction[] actions)
     {

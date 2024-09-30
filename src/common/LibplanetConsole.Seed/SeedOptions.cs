@@ -4,7 +4,7 @@ namespace LibplanetConsole.Seed;
 
 public sealed record class SeedOptions
 {
-    public required AppPrivateKey PrivateKey { get; init; }
+    public required PrivateKey PrivateKey { get; init; }
 
     public required AppEndPoint EndPoint { get; init; }
 

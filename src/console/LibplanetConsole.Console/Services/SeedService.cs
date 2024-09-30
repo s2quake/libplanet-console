@@ -14,7 +14,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
     ISeedService, IApplicationService, IAsyncDisposable
 {
     private readonly ApplicationBase _application;
-    private readonly AppPrivateKey _seedNodePrivateKey = new();
+    private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 

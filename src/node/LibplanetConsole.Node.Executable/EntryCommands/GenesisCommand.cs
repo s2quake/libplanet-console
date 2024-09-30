@@ -16,7 +16,7 @@ public sealed class GenesisCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The private key of the genesis block. " +
                     "if omitted, a random private key is used.")]
-    [AppPrivateKey]
+    [PrivateKey]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty]
@@ -53,8 +53,7 @@ public sealed class GenesisCommand : CommandBase
 
     protected override void OnExecute()
     {
-        var genesisKey = GenesisKey != string.Empty
-            ? AppPrivateKey.Parse(GenesisKey) : new AppPrivateKey();
+        var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
         var validatorKeys = GetValidators();
         var dateTimeOffset = DateTimeOffset == DateTimeOffset.MinValue
             ? DateTimeOffset.UtcNow : DateTimeOffset;
@@ -80,7 +79,7 @@ public sealed class GenesisCommand : CommandBase
             {
                 GenesisArguments = new
                 {
-                    GenesisKey = AppPrivateKey.ToString(genesisKey),
+                    GenesisKey = PrivateKeyUtility.ToString(genesisKey),
                     Validators = validatorKeys,
                     Timestamp = dateTimeOffset,
                 },
@@ -99,7 +98,7 @@ public sealed class GenesisCommand : CommandBase
         else if (ValidatorCount > 0)
         {
             return Enumerable.Range(0, ValidatorCount)
-                .Select(_ => new AppPrivateKey().PublicKey)
+                .Select(_ => new PrivateKey().PublicKey)
                 .ToArray();
         }
         else
