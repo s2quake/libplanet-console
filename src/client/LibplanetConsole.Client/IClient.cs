@@ -1,4 +1,5 @@
 using Libplanet.Action;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node;
 
@@ -18,7 +19,7 @@ public interface IClient : IVerifier
 
     AppPublicKey PublicKey { get; }
 
-    AppAddress Address { get; }
+    Address Address { get; }
 
     AppEndPoint NodeEndPoint { get; set; }
 

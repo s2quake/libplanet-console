@@ -4,17 +4,17 @@ namespace LibplanetConsole.Node.Example;
 
 public interface IExampleNode
 {
-    event EventHandler<ItemEventArgs<AppAddress>>? Subscribed;
+    event EventHandler<ItemEventArgs<Address>>? Subscribed;
 
-    event EventHandler<ItemEventArgs<AppAddress>>? Unsubscribed;
+    event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
 
     int Count { get; }
 
     bool IsExample { get; }
 
-    Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken);
+    Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken);
 
-    void Subscribe(AppAddress address);
+    void Subscribe(Address address);
 
-    void Unsubscribe(AppAddress address);
+    void Unsubscribe(Address address);
 }

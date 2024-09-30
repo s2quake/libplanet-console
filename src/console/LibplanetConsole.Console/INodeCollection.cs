@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console;
@@ -13,15 +14,15 @@ public interface INodeCollection : IEnumerable<INode>, INotifyCollectionChanged
 
     INode this[int index] { get; }
 
-    INode this[AppAddress address] { get; }
+    INode this[Address address] { get; }
 
     bool Contains(INode item);
 
-    bool Contains(AppAddress address);
+    bool Contains(Address address);
 
     int IndexOf(INode item);
 
-    int IndexOf(AppAddress address);
+    int IndexOf(Address address);
 
     Task<INode> AddNewAsync(AddNewNodeOptions options, CancellationToken cancellationToken);
 }

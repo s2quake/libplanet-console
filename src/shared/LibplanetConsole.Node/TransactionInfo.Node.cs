@@ -9,7 +9,7 @@ public readonly partial record struct TransactionInfo
     public TransactionInfo(TxExecution execution, ITransaction transaction)
     {
         Id = (AppId)transaction.Id;
-        Signer = (AppAddress)transaction.Signer;
+        Signer = transaction.Signer;
         Actions = GetActionInfos(transaction);
         IsFailed = execution.Fail;
     }

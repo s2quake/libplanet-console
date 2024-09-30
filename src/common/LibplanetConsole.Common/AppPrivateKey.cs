@@ -33,7 +33,7 @@ public sealed record class AppPrivateKey
 
     public AppPublicKey PublicKey => (AppPublicKey)_privateKey.PublicKey;
 
-    public AppAddress Address => (AppAddress)_privateKey.PublicKey.Address;
+    public Address Address => _privateKey.PublicKey.Address;
 
     public static explicit operator AppPrivateKey(PrivateKey privateKey)
         => new(privateKey);

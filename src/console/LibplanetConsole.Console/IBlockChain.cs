@@ -1,5 +1,6 @@
 using Bencodex.Types;
 using Libplanet.Action;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console;
@@ -10,20 +11,20 @@ public interface IBlockChain
 
     Task<AppId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
-    Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken);
+    Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
     Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(
         AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken);
 
     Task<IValue> GetStateByStateRootHashAsync(
         AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken);
 
     Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);

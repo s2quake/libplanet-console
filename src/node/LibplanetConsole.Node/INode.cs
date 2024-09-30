@@ -1,4 +1,5 @@
 using Libplanet.Action;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node;
@@ -15,7 +16,7 @@ public interface INode : IVerifier, ISigner, IServiceProvider
 
     AppPublicKey PublicKey { get; }
 
-    AppAddress Address => PublicKey.Address;
+    Address Address => PublicKey.Address;
 
     Task StartAsync(CancellationToken cancellationToken);
 

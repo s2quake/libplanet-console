@@ -1,4 +1,5 @@
 using System.Security;
+using Libplanet.Crypto;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node;
@@ -38,7 +39,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public AppPublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public TextWriter Out { get; set; } = Console.Out;
 

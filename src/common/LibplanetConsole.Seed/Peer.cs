@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Libplanet.Crypto;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
@@ -16,7 +17,7 @@ public sealed class Peer
         AppPeer = appPeer;
     }
 
-    public AppAddress Address => AppPeer.Address;
+    public Address Address => AppPeer.Address;
 
     public AppPeer AppPeer { get; }
 

@@ -20,7 +20,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
         var blockChain = node.GetRequiredService<BlockChain>();
         var height = blockChain.Tip.Index;
         var validatorAddress = node.Address;
-        var evidence = new TestEvidence(height, (Address)validatorAddress, DateTimeOffset.UtcNow);
+        var evidence = new TestEvidence(height, validatorAddress, DateTimeOffset.UtcNow);
         blockChain.AddEvidence(evidence);
         await Task.CompletedTask;
         return (EvidenceInfo)evidence;
@@ -36,7 +36,7 @@ internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
             Type = item.GetType().Name,
             Id = item.Id.ToString(),
             Height = item.Height,
-            TargetAddress = (AppAddress)item.TargetAddress,
+            TargetAddress = item.TargetAddress,
             Timestamp = item.Timestamp,
         });
         await Task.CompletedTask;

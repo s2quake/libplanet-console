@@ -1,6 +1,7 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using Libplanet.Crypto;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
@@ -60,7 +61,7 @@ internal sealed class Client : IClient, IClientCallback
 
     public AppPublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public bool IsAttached => _closeToken != Guid.Empty;
 

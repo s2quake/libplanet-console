@@ -31,16 +31,16 @@ internal sealed class ExampleNodeService : LocalService<IExampleNodeService, IEx
         return addresses.Length;
     }
 
-    public Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken)
+    public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
         => _exampleNode.GetAddressesAsync(cancellationToken);
 
-    public void Subscribe(AppAddress address) => _exampleNode.Subscribe(address);
+    public void Subscribe(Address address) => _exampleNode.Subscribe(address);
 
-    public void Unsubscribe(AppAddress address) => _exampleNode.Unsubscribe(address);
+    public void Unsubscribe(Address address) => _exampleNode.Unsubscribe(address);
 
-    private void ExampleNode_Subscribed(object? sender, ItemEventArgs<AppAddress> e)
+    private void ExampleNode_Subscribed(object? sender, ItemEventArgs<Address> e)
         => Callback.OnSubscribed(e.Item);
 
-    private void ExampleNode_Unsubscribed(object? sender, ItemEventArgs<AppAddress> e)
+    private void ExampleNode_Unsubscribed(object? sender, ItemEventArgs<Address> e)
         => Callback.OnUnsubscribed(e.Item);
 }

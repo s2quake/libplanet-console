@@ -1,5 +1,6 @@
 using System.ComponentModel.Composition;
 using Bencodex;
+using Libplanet.Crypto;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
@@ -28,7 +29,7 @@ internal sealed class BlockChainService
         return (AppId)tx.Id;
     }
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => _node.GetNextNonceAsync(address, cancellationToken);
 
     public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
@@ -36,8 +37,8 @@ internal sealed class BlockChainService
 
     public async Task<byte[]> GetStateAsync(
         AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var value = await _node.GetStateAsync(
@@ -47,8 +48,8 @@ internal sealed class BlockChainService
 
     public async Task<byte[]> GetStateByStateRootHashAsync(
         AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var value = await _node.GetStateByStateRootHashAsync(

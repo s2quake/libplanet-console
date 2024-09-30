@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Libplanet.Crypto;
 using LibplanetConsole.Common.Converters;
 
 namespace LibplanetConsole.Common;
@@ -17,7 +18,7 @@ public readonly struct AppPeer(AppPublicKey publicKey, AppEndPoint endPoint)
 
     public AppEndPoint EndPoint { get; } = endPoint;
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public static string ToString(AppPeer? peer)
         => peer?.ToString() ?? string.Empty;

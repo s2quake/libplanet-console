@@ -84,7 +84,7 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public AppPublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
 

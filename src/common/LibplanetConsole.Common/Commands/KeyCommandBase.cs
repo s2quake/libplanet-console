@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using Libplanet.Crypto;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Common.Commands;
@@ -70,12 +71,12 @@ public abstract class KeyCommandBase : CommandMethodBase
     {
         var info = new
         {
-            Address = AppAddress.Parse(address).Derive(keyword),
+            Address = new Address(address).Derive(keyword),
         };
         Out.WriteLineAsJson(info);
     }
 
-    private static AppAddress GetAddress(string key)
+    private static Address GetAddress(string key)
     {
         if (AppPrivateKey.TryParse(key, out var privateKey) == true)
         {

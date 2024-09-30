@@ -1,10 +1,10 @@
-using LibplanetConsole.Common;
+using Libplanet.Crypto;
 
 namespace LibplanetConsole.Example.Services;
 
 public interface IExampleNodeCallback
 {
-    void OnSubscribed(AppAddress address);
+    void OnSubscribed(Address address);
 
-    void OnUnsubscribed(AppAddress address);
+    void OnUnsubscribed(Address address);
 }

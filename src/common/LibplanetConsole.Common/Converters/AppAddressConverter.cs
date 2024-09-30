@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Libplanet.Crypto;
 
 namespace LibplanetConsole.Common.Converters;
 
@@ -18,7 +19,7 @@ internal sealed class AppAddressConverter : TypeConverter
     {
         if (value is string text)
         {
-            return AppAddress.ParseOrDefault(text);
+            return ParseOrDefault(text);
         }
 
         return base.ConvertFrom(context, culture, value);
@@ -27,11 +28,14 @@ internal sealed class AppAddressConverter : TypeConverter
     public override object? ConvertTo(
         ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
     {
-        if (value is AppAddress address)
+        if (value is Address address)
         {
             return address.ToString();
         }
 
         return base.ConvertTo(context, culture, value, destinationType);
     }
+
+    public static Address? ParseOrDefault(string text)
+        => text == string.Empty ? null : new Address(text);
 }

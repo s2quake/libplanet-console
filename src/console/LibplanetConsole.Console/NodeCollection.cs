@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Console.Services;
@@ -65,15 +66,15 @@ internal sealed class NodeCollection(
 
     public Node this[int index] => _nodeList[index];
 
-    public Node this[AppAddress address] => _nodeList.Single(item => item.Address == address);
+    public Node this[Address address] => _nodeList.Single(item => item.Address == address);
 
     INode INodeCollection.this[int index] => this[index];
 
-    INode INodeCollection.this[AppAddress address] => this[address];
+    INode INodeCollection.this[Address address] => this[address];
 
     public bool Contains(Node item) => _nodeList.Contains(item);
 
-    public bool Contains(AppAddress address) => _nodeList.Exists(item => item.Address == address);
+    public bool Contains(Address address) => _nodeList.Exists(item => item.Address == address);
 
     public int IndexOf(Node item)
     {
@@ -88,7 +89,7 @@ internal sealed class NodeCollection(
         return -1;
     }
 
-    public int IndexOf(AppAddress address)
+    public int IndexOf(Address address)
     {
         for (var i = 0; i < _nodeList.Count; i++)
         {

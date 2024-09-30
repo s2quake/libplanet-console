@@ -2,6 +2,7 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using Bencodex;
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Services;
@@ -72,7 +73,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public AppPublicKey PublicKey { get; }
 
-    public AppAddress Address => PublicKey.Address;
+    public Address Address => PublicKey.Address;
 
     public bool IsAttached => _closeToken != Guid.Empty;
 

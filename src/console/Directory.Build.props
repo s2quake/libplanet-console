@@ -14,4 +14,8 @@
     <DefineConstants>LIBPLANET_CONSOLE</DefineConstants>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" />
+  </ItemGroup>
+
 </Project>

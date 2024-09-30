@@ -1,3 +1,4 @@
+using Libplanet.Crypto;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node;
@@ -12,7 +13,7 @@ public readonly record struct NodeInfo
 
     public string ConsensusEndPoint { get; init; }
 
-    public AppAddress Address { get; init; }
+    public Address Address { get; init; }
 
     public AppHash GenesisHash { get; init; }
 

@@ -27,7 +27,7 @@ internal sealed partial class Node : IBlockChain
         var privateKey = AppPrivateKey.FromSecureString(_privateKey);
         var blockChain = BlockChain;
         var genesisBlock = blockChain.Genesis;
-        var nonce = blockChain.GetNextTxNonce((Address)privateKey.Address);
+        var nonce = blockChain.GetNextTxNonce(privateKey.Address);
         var values = actions.Select(item => item.PlainValue).ToArray();
         var transaction = Transaction.Create(
             nonce: nonce,
@@ -75,7 +75,7 @@ internal sealed partial class Node : IBlockChain
         _logger.Debug("Node added a transaction: {AppId}", transaction.Id);
     }
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
@@ -87,7 +87,7 @@ internal sealed partial class Node : IBlockChain
         long GetNextNonce()
         {
             var blockChain = BlockChain;
-            var nonce = blockChain.GetNextTxNonce((Address)address);
+            var nonce = blockChain.GetNextTxNonce(address);
             return nonce;
         }
     }
@@ -110,8 +110,8 @@ internal sealed partial class Node : IBlockChain
 
     public Task<IValue> GetStateAsync(
         AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
@@ -127,8 +127,8 @@ internal sealed partial class Node : IBlockChain
             var worldState = isTip
                 ? blockChain.GetNextWorldState() ?? blockChain.GetWorldState(block.Hash)
                 : blockChain.GetWorldState(block.Hash);
-            var account = worldState.GetAccountState((Address)accountAddress);
-            return account.GetState((Address)address)
+            var account = worldState.GetAccountState(accountAddress);
+            return account.GetState(address)
                 ?? throw new InvalidOperationException("State not found.");
         }
 
@@ -137,8 +137,8 @@ internal sealed partial class Node : IBlockChain
 
     public Task<IValue> GetStateByStateRootHashAsync(
         AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
@@ -150,8 +150,8 @@ internal sealed partial class Node : IBlockChain
         {
             var blockChain = BlockChain;
             var worldState = blockChain.GetWorldState((HashDigest<SHA256>)stateRootHash);
-            var account = worldState.GetAccountState((Address)accountAddress);
-            return account.GetState((Address)address)
+            var account = worldState.GetAccountState(accountAddress);
+            return account.GetState(address)
                 ?? throw new InvalidOperationException("State not found.");
         }
 

@@ -7,8 +7,10 @@ namespace LibplanetConsole.Common.DataAnnotations;
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class AppAddressAttribute : RegularExpressionAttribute
 {
+    public const string RegularExpression = "0x[0-9a-fA-F]{40}";
+
     public AppAddressAttribute()
-        : base($"^{AppAddress.RegularExpression}$")
+        : base($"^{RegularExpression}$")
     {
     }
 }

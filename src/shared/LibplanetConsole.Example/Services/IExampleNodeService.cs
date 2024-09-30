@@ -1,14 +1,14 @@
-using LibplanetConsole.Common;
+using Libplanet.Crypto;
 
 namespace LibplanetConsole.Example.Services;
 
 public interface IExampleNodeService
 {
-    void Subscribe(AppAddress address);
+    void Subscribe(Address address);
 
-    void Unsubscribe(AppAddress address);
+    void Unsubscribe(Address address);
 
     Task<int> GetAddressCountAsync(CancellationToken cancellationToken);
 
-    Task<AppAddress[]> GetAddressesAsync(CancellationToken cancellationToken);
+    Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken);
 }

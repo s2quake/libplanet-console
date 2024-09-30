@@ -33,7 +33,7 @@ internal sealed partial class Client : IBlockChain
     public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => RemoteBlockChainService.GetBlockHashAsync(height, cancellationToken);
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
 
     public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
@@ -41,8 +41,8 @@ internal sealed partial class Client : IBlockChain
 
     public async Task<IValue> GetStateAsync(
         AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var value = await RemoteBlockChainService.GetStateAsync(
@@ -52,8 +52,8 @@ internal sealed partial class Client : IBlockChain
 
     public async Task<IValue> GetStateByStateRootHashAsync(
         AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var value = await RemoteBlockChainService.GetStateByStateRootHashAsync(

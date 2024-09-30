@@ -13,7 +13,7 @@ internal sealed partial class Node
 {
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
-    public Task<long> GetNextNonceAsync(AppAddress address, CancellationToken cancellationToken)
+    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
 
     public async Task<AppId> SendTransactionAsync(
@@ -53,8 +53,8 @@ internal sealed partial class Node
 
     public async Task<IValue> GetStateAsync(
         AppHash blockHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var bytes = await _blockChainService.Service.GetStateAsync(
@@ -67,8 +67,8 @@ internal sealed partial class Node
 
     public async Task<IValue> GetStateByStateRootHashAsync(
         AppHash stateRootHash,
-        AppAddress accountAddress,
-        AppAddress address,
+        Address accountAddress,
+        Address address,
         CancellationToken cancellationToken)
     {
         var bytes = await _blockChainService.Service.GetStateByStateRootHashAsync(

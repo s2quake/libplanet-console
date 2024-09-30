@@ -19,7 +19,7 @@ public readonly partial record struct AppPublicKey : IFormattable
 
     public AppPublicKey(PublicKey publicKey) => _publicKey = publicKey;
 
-    public AppAddress Address => new(_publicKey.Address);
+    public Address Address => _publicKey.Address;
 
     public static explicit operator AppPublicKey(PublicKey publicKey)
         => new(publicKey);
