@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Crypto;
@@ -13,21 +14,21 @@ public interface IBlockChain
 
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
-    Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken);
+    Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(
-        AppHash blockHash,
+        BlockHash? blockHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken);
 
     Task<IValue> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
+        HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken);
 
-    Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
+    Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
 
     Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;

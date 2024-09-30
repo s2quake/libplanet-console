@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Bencodex;
 using Bencodex.Types;
 using Libplanet.Action;
@@ -30,17 +31,17 @@ internal sealed partial class Client : IBlockChain
         return await RemoteBlockChainService.SendTransactionAsync(txData, cancellationToken);
     }
 
-    public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => RemoteBlockChainService.GetBlockHashAsync(height, cancellationToken);
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
 
-    public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
         => RemoteBlockChainService.GetTipHashAsync(cancellationToken);
 
     public async Task<IValue> GetStateAsync(
-        AppHash blockHash,
+        BlockHash? blockHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -51,7 +52,7 @@ internal sealed partial class Client : IBlockChain
     }
 
     public async Task<IValue> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
+        HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)

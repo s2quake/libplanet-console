@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Crypto;
@@ -48,11 +49,11 @@ internal sealed partial class Node
         BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
     }
 
-    public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
         => _blockChainService.Service.GetTipHashAsync(cancellationToken);
 
     public async Task<IValue> GetStateAsync(
-        AppHash blockHash,
+        BlockHash? blockHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -66,7 +67,7 @@ internal sealed partial class Node
     }
 
     public async Task<IValue> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
+        HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -79,7 +80,7 @@ internal sealed partial class Node
         return _codec.Decode(bytes);
     }
 
-    public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => _blockChainService.Service.GetBlockHashAsync(height, cancellationToken);
 
     public async Task<T> GetActionAsync<T>(

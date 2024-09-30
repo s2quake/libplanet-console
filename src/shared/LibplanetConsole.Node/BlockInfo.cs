@@ -11,7 +11,7 @@ public readonly partial record struct BlockInfo
 
     public long Height { get; init; }
 
-    public AppHash Hash { get; init; }
+    public BlockHash Hash { get; init; }
 
     public Address Miner { get; init; }
 

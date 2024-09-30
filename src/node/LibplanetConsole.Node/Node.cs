@@ -346,8 +346,8 @@ internal sealed partial class Node : IActionRenderer, INode
             {
                 SwarmEndPoint = AppEndPoint.ToString(SwarmEndPoint),
                 ConsensusEndPoint = AppEndPoint.ToString(ConsensusEndPoint),
-                GenesisHash = (AppHash)BlockChain.Genesis.Hash,
-                TipHash = (AppHash)BlockChain.Tip.Hash,
+                GenesisHash = BlockChain.Genesis.Hash,
+                TipHash = BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
                 // Peers = [.. Peers],
             };

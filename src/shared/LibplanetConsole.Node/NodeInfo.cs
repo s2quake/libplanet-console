@@ -16,9 +16,9 @@ public readonly record struct NodeInfo
 
     public Address Address { get; init; }
 
-    public AppHash GenesisHash { get; init; }
+    public BlockHash GenesisHash { get; init; }
 
-    public AppHash TipHash { get; init; }
+    public BlockHash TipHash { get; init; }
 
     public bool IsRunning { get; init; }
 

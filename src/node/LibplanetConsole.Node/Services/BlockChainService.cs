@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Security.Cryptography;
 using Bencodex;
 using Libplanet.Crypto;
 using Libplanet.Types.Tx;
@@ -26,17 +27,17 @@ internal sealed class BlockChainService
     {
         var tx = Transaction.Deserialize(transaction);
         await _node.AddTransactionAsync(tx, cancellationToken);
-        return (TxId)tx.Id;
+        return tx.Id;
     }
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
         => _node.GetNextNonceAsync(address, cancellationToken);
 
-    public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
         => _node.GetTipHashAsync(cancellationToken);
 
     public async Task<byte[]> GetStateAsync(
-        AppHash blockHash,
+        BlockHash? blockHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -47,7 +48,7 @@ internal sealed class BlockChainService
     }
 
     public async Task<byte[]> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
+        HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -57,7 +58,7 @@ internal sealed class BlockChainService
         return _codec.Encode(value);
     }
 
-    public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
         => _node.GetBlockHashAsync(height, cancellationToken);
 
     public Task<byte[]> GetActionAsync(

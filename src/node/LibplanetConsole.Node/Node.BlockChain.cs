@@ -35,7 +35,7 @@ internal sealed partial class Node : IBlockChain
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values));
         await AddTransactionAsync(transaction, cancellationToken);
-        return (TxId)transaction.Id;
+        return transaction.Id;
     }
 
     public async Task AddTransactionAsync(
@@ -92,24 +92,24 @@ internal sealed partial class Node : IBlockChain
         }
     }
 
-    public Task<AppHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        AppHash GetTipHash()
+        BlockHash GetTipHash()
         {
             var blockChain = BlockChain;
-            return (AppHash)blockChain.Tip.Hash;
+            return blockChain.Tip.Hash;
         }
 
         return Task.Run(GetTipHash, cancellationToken);
     }
 
     public Task<IValue> GetStateAsync(
-        AppHash blockHash,
+        BlockHash? blockHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -122,7 +122,7 @@ internal sealed partial class Node : IBlockChain
         IValue GetStateByBlockHash()
         {
             var blockChain = BlockChain;
-            var block = blockHash == default ? blockChain.Tip : blockChain[(BlockHash)blockHash];
+            var block = blockHash is null ? blockChain.Tip : blockChain[blockHash.Value];
             var isTip = block.Hash.Equals(blockChain.Tip.Hash);
             var worldState = isTip
                 ? blockChain.GetNextWorldState() ?? blockChain.GetWorldState(block.Hash)
@@ -136,7 +136,7 @@ internal sealed partial class Node : IBlockChain
     }
 
     public Task<IValue> GetStateByStateRootHashAsync(
-        AppHash stateRootHash,
+        HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -149,7 +149,7 @@ internal sealed partial class Node : IBlockChain
         IValue GetStateByStateRootHash()
         {
             var blockChain = BlockChain;
-            var worldState = blockChain.GetWorldState((HashDigest<SHA256>)stateRootHash);
+            var worldState = blockChain.GetWorldState(stateRootHash);
             var account = worldState.GetAccountState(accountAddress);
             return account.GetState(address)
                 ?? throw new InvalidOperationException("State not found.");
@@ -158,18 +158,18 @@ internal sealed partial class Node : IBlockChain
         return Task.Run(GetStateByStateRootHash, cancellationToken);
     }
 
-    public Task<AppHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        AppHash GetBlockHash()
+        BlockHash GetBlockHash()
         {
             var blockChain = BlockChain;
             var block = blockChain[height];
-            return (AppHash)block.Hash;
+            return block.Hash;
         }
 
         return Task.Run(GetBlockHash, cancellationToken);
@@ -181,7 +181,7 @@ internal sealed partial class Node : IBlockChain
         byte[] GetAction()
         {
             var blockChain = BlockChain;
-            var transaction = blockChain.GetTransaction((TxId)txId);
+            var transaction = blockChain.GetTransaction(txId);
             var action = transaction.Actions[actionIndex];
             return _codec.Encode(action);
         }
@@ -196,7 +196,7 @@ internal sealed partial class Node : IBlockChain
         T GetAction()
         {
             var blockChain = BlockChain;
-            var transaction = blockChain.GetTransaction((TxId)txId);
+            var transaction = blockChain.GetTransaction(txId);
             var value = transaction.Actions[actionIndex];
             if (Activator.CreateInstance(typeof(T)) is T action)
             {

@@ -8,7 +8,7 @@ public readonly partial record struct TransactionInfo
 {
     public TransactionInfo(TxExecution execution, ITransaction transaction)
     {
-        Id = (TxId)transaction.Id;
+        Id = transaction.Id;
         Signer = transaction.Signer;
         Actions = GetActionInfos(transaction);
         IsFailed = execution.Fail;
@@ -20,7 +20,7 @@ public readonly partial record struct TransactionInfo
         for (var i = 0; i < transaction.Actions.Count; i++)
         {
             var action = transaction.Actions[i];
-            infos[i] = new ActionInfo(action) { Index = i, TxId = (TxId)transaction.Id };
+            infos[i] = new ActionInfo(action) { Index = i, TxId = transaction.Id };
         }
 
         return infos;

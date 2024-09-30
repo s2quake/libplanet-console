@@ -31,7 +31,7 @@ public sealed record class AppPrivateKey
     {
     }
 
-    public PublicKey PublicKey => (PublicKey)_privateKey.PublicKey;
+    public PublicKey PublicKey => _privateKey.PublicKey;
 
     public Address Address => _privateKey.PublicKey.Address;
 

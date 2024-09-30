@@ -11,7 +11,7 @@ public readonly partial record struct BlockInfo
     public BlockInfo(BlockChain blockChain, Block block)
     {
         Height = block.Index;
-        Hash = (AppHash)block.Hash;
+        Hash = block.Hash;
         Miner = block.Miner;
         Transactions = [.. block.Transactions.Select(GetTransaction)];
 

@@ -27,7 +27,7 @@ internal sealed class ActionProvider : IActionProvider
     public IAction[] GetGenesisActions(AppPrivateKey genesisKey, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
-            .Select(item => new Validator((PublicKey)item, BigInteger.One))
+            .Select(item => new Validator(item, BigInteger.One))
             .ToArray();
         var validatorSet = new ValidatorSet(validators: [.. validators]);
         var actions = new IAction[]
