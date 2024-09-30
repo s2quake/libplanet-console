@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using Libplanet.Crypto;
 
 namespace LibplanetConsole.Common.Extensions;
 

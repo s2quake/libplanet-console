@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Client.Services;
 
 public interface IClientService

@@ -1,6 +1,4 @@
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
-using LibplanetConsole.Common;
 using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Client.Example;

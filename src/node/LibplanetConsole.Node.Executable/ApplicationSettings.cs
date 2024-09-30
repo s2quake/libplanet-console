@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
-using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;

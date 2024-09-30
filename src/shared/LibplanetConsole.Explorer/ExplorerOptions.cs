@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Explorer;
 
 public sealed record class ExplorerOptions

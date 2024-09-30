@@ -1,5 +1,3 @@
-using Libplanet.Crypto;
-
 namespace LibplanetConsole.Console;
 
 public interface IAddressable

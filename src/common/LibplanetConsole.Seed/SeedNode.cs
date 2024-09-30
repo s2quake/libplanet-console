@@ -1,26 +1,15 @@
-﻿using System.ComponentModel;
-using System.Net;
-using System.Text.Json.Serialization;
+﻿using System.Net;
 using Dasync.Collections;
-using Libplanet.Crypto;
-using Libplanet.Net;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
-using LibplanetConsole.Seed.Converters;
 using Serilog;
 
 namespace LibplanetConsole.Seed;
 
 public sealed class SeedNode(SeedOptions seedOptions)
 {
-    static SeedNode()
-    {
-        TypeDescriptor.AddAttributes(
-            typeof(BoundPeer), new JsonConverterAttribute(typeof(BoundPeerJsonConverter)));
-    }
-
     public static readonly PrivateKey AppProtocolKey
         = new("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
 

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Net;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -133,7 +132,7 @@ internal sealed class InitializeCommand : CommandBase
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint ?? EndPointUtility.Next();
+            var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
             var nodeOptions = new NodeOptions
             {
                 EndPoint = endPoint,
@@ -158,7 +157,7 @@ internal sealed class InitializeCommand : CommandBase
         var clientOptionsList = new List<ClientOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint ?? EndPointUtility.Next();
+            var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
             var clientOptions = new ClientOptions
             {
                 EndPoint = endPoint,

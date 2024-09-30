@@ -1,5 +1,4 @@
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Evidence;
 

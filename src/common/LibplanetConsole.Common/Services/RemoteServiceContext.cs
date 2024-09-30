@@ -1,4 +1,3 @@
-using System.Net;
 using JSSoft.Communication;
 
 namespace LibplanetConsole.Common.Services;
@@ -61,6 +60,5 @@ public class RemoteServiceContext
 
     private sealed class InternalClientContext(IService[] services) : ClientContext(services)
     {
-        //  : ISerializer
     }
 }

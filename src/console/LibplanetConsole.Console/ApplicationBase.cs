@@ -2,7 +2,6 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Libplanet.Types.Blocks;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
 using LibplanetConsole.Node;

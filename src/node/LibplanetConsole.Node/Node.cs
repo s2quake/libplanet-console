@@ -1,18 +1,12 @@
 using System.Collections.Concurrent;
 using System.Security;
 using System.Security.Cryptography;
-using Bencodex.Types;
-using Libplanet.Action;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
-using Libplanet.Common;
-using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
-using Libplanet.Types.Blocks;
-using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -155,8 +149,8 @@ internal sealed partial class Node : IActionRenderer, INode
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
-        var blocksyncEndPoint = _blocksyncEndPoint ?? EndPointUtility.Next();
-        var consensusEndPoint = _consensusEndPoint ?? EndPointUtility.Next();
+        var blocksyncEndPoint = _blocksyncEndPoint ?? EndPointUtility.NextEndPoint();
+        var consensusEndPoint = _consensusEndPoint ?? EndPointUtility.NextEndPoint();
         var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
         var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
         var swarmTransport
@@ -350,7 +344,6 @@ internal sealed partial class Node : IActionRenderer, INode
                 GenesisHash = BlockChain.Genesis.Hash,
                 TipHash = BlockChain.Tip.Hash,
                 IsRunning = IsRunning,
-                // Peers = [.. Peers],
             };
         }
 

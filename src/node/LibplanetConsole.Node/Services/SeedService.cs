@@ -1,8 +1,8 @@
 using System.ComponentModel.Composition;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Seed;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Services;
 
@@ -53,17 +53,17 @@ internal sealed class SeedService(ApplicationBase application)
     async Task IApplicationService.InitializeAsync(
         IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        if (application.Info.SeedEndPoint == application.Info.EndPoint)
+        if (CompareEndPoint(application.Info.SeedEndPoint, application.Info.EndPoint) is true)
         {
             _blocksyncSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                EndPoint = EndPointUtility.Next(),
+                EndPoint = NextEndPoint(),
             });
             _consensusSeedNode = new SeedNode(new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                EndPoint = EndPointUtility.Next(),
+                EndPoint = NextEndPoint(),
             });
             await _blocksyncSeedNode.StartAsync(cancellationToken);
             await _consensusSeedNode.StartAsync(cancellationToken);

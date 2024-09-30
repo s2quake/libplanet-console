@@ -1,4 +1,3 @@
-using System.Net;
 using JSSoft.Communication;
 
 namespace LibplanetConsole.Common.Services;

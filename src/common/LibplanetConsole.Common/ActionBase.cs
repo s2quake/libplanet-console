@@ -1,6 +1,4 @@
 using System.Reflection;
-using Bencodex.Types;
-using Libplanet.Action;
 using Libplanet.Action.State;
 
 namespace LibplanetConsole.Common;

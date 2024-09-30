@@ -1,13 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Net;
 using System.Net.Sockets;
-using System.Security;
-using System.Text;
-using System.Text.Json;
-using Bencodex;
-using Bencodex.Types;
-using Libplanet.Crypto;
-using Microsoft.AspNetCore.Http;
 using CommunicationUtility = JSSoft.Communication.EndPointUtility;
 
 namespace LibplanetConsole.Common;
@@ -17,12 +9,12 @@ public static class EndPointUtility
     private static readonly object LockObject = new();
     private static readonly List<int> PortList = [];
 
-    public static EndPoint Next() => new DnsEndPoint("localhost", GetPort());
+    public static EndPoint NextEndPoint() => new DnsEndPoint("localhost", GetPort());
 
     public static EndPoint Parse(string text) => CommunicationUtility.Parse(text);
 
     public static EndPoint ParseOrNext(string text)
-        => text == string.Empty ? Next() : Parse(text);
+        => text == string.Empty ? NextEndPoint() : Parse(text);
 
     public static EndPoint ParseOrFallback(string text, EndPoint fallback)
         => text == string.Empty ? fallback : Parse(text);
@@ -52,9 +44,6 @@ public static class EndPointUtility
         };
     }
 
-    // public static string ToString(EndPoint? endPoint)
-    //     => endPoint is not null ? endPoint.ToString() : string.Empty;
-
     public static string ToString(EndPoint? endPoint)
     {
         if (endPoint is DnsEndPoint dnsEndPoint)
@@ -67,6 +56,23 @@ public static class EndPointUtility
         }
 
         return endPoint?.ToString() ?? string.Empty;
+    }
+
+    public static bool CompareEndPoint(EndPoint? endPoint1, EndPoint? endPoint2)
+    {
+        if (endPoint1 is null && endPoint2 is null)
+        {
+            return true;
+        }
+
+        if (endPoint1 is null || endPoint2 is null)
+        {
+            return false;
+        }
+
+        var (host1, port1) = GetHostAndPort(endPoint1);
+        var (host2, port2) = GetHostAndPort(endPoint2);
+        return host1 == host2 && port1 == port2;
     }
 
     private static int GetPort()

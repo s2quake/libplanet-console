@@ -1,8 +1,6 @@
 using System.ComponentModel.Composition;
 using Libplanet.Blockchain;
-using Libplanet.Crypto;
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Common;
 using LibplanetConsole.Evidence;
 using Microsoft.Extensions.DependencyInjection;
 

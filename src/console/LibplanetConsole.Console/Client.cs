@@ -1,7 +1,6 @@
 using System.Collections;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using Libplanet.Crypto;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
@@ -162,7 +161,7 @@ internal sealed class Client : IClient, IClientCallback
             message: "Client is not attached.");
 
         _clientInfo = await _remoteService.Service.StartAsync(
-            node.EndPoint.ToString(), cancellationToken);
+            EndPointUtility.ToString(node.EndPoint), cancellationToken);
         _node = node;
         IsRunning = true;
         _logger.Debug("Client is started: {Address}", Address);

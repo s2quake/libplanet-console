@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Console;
 
 public sealed record class ApplicationOptions

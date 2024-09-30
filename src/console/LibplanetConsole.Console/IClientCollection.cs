@@ -1,5 +1,4 @@
 using System.Collections.Specialized;
-using Libplanet.Crypto;
 
 namespace LibplanetConsole.Console;
 

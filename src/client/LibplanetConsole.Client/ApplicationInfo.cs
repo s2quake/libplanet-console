@@ -1,5 +1,3 @@
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Client;
 
 public readonly record struct ApplicationInfo

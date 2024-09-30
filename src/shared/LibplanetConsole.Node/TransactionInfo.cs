@@ -1,6 +1,3 @@
-using Libplanet.Crypto;
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Node;
 
 public readonly partial record struct TransactionInfo

@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
-using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
@@ -221,7 +220,7 @@ public sealed record class Repository
             Schema = schemaRelativePath,
             Application = new ApplicationSettings
             {
-                EndPoint = EndPoint.ToString(),
+                EndPoint = EndPointUtility.ToString(EndPoint),
                 LogPath = LogPath,
                 LibraryLogPath = LibraryLogPath,
             },

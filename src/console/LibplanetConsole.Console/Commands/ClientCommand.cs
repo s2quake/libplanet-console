@@ -56,7 +56,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     {
         var clientOptions = new ClientOptions
         {
-            EndPoint = EndPointUtility.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
             PrivateKey = PrivateKeyUtility.ParseOrRandom(privateKey),
         };
         var options = new AddNewClientOptions

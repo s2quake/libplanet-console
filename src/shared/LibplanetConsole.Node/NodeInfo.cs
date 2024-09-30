@@ -1,7 +1,3 @@
-using Libplanet.Crypto;
-// using Libplanet.Net;
-using LibplanetConsole.Common;
-
 namespace LibplanetConsole.Node;
 
 public readonly record struct NodeInfo
@@ -22,14 +18,11 @@ public readonly record struct NodeInfo
 
     public bool IsRunning { get; init; }
 
-    // public BoundPeer[] Peers { get; init; }
-
     public static NodeInfo Empty { get; } = new NodeInfo
     {
         ProcessId = -1,
         AppProtocolVersion = string.Empty,
         SwarmEndPoint = string.Empty,
         ConsensusEndPoint = string.Empty,
-        // Peers = [],
     };
 }

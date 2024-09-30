@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using Libplanet.Crypto;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;

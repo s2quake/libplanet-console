@@ -1,6 +1,3 @@
-using Libplanet.Crypto;
-using Libplanet.Types.Blocks;
-
 namespace LibplanetConsole.Client;
 
 public readonly record struct ClientInfo

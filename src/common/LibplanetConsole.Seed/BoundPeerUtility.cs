@@ -1,6 +1,4 @@
 ﻿using System.Net;
-using Libplanet.Crypto;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Seed;
@@ -9,7 +7,7 @@ public static class BoundPeerUtility
 {
     public static string ToString(BoundPeer? boundPeer)
         => boundPeer is not null
-            ? $"{boundPeer.PublicKey.ToHex(compress: false)}, {boundPeer.EndPoint.Host}:{boundPeer.EndPoint.Port}"
+            ? $"{boundPeer.PublicKey.ToHex(compress: false)}, {ToString(boundPeer.EndPoint)}"
             : string.Empty;
 
     public static BoundPeer Parse(string text)
@@ -25,5 +23,8 @@ public static class BoundPeerUtility
         throw new FormatException($"'{text}' is not supported.");
     }
 
-    public static BoundPeer? ParseOrDefault(string text) => text == string.Empty ? null : Parse(text);
+    public static BoundPeer? ParseOrDefault(string text)
+        => text == string.Empty ? null : Parse(text);
+
+    private static string ToString(DnsEndPoint endPoint) => EndPointUtility.ToString(endPoint);
 }

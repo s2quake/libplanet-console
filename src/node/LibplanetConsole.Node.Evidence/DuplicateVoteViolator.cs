@@ -1,9 +1,7 @@
 using System.Numerics;
-using Libplanet.Crypto;
 using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Messages;
-using Libplanet.Types.Blocks;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Node.Evidence.Extensions;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,5 +1,3 @@
-using Libplanet.Crypto;
-
 namespace LibplanetConsole.Example.Services;
 
 public interface IExampleNodeService

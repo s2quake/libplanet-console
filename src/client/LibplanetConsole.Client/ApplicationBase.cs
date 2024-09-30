@@ -2,7 +2,6 @@ using System.Collections;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using LibplanetConsole.Client.Services;
-using LibplanetConsole.Common;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
 using Serilog;

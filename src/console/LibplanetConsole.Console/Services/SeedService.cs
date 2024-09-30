@@ -25,12 +25,12 @@ internal sealed class SeedService : LocalService<ISeedService>,
         _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = EndPointUtility.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
         });
         _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = EndPointUtility.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
         });
     }
 

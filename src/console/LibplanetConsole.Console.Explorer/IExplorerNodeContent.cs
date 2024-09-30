@@ -1,4 +1,3 @@
-using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
 
 namespace LibplanetConsole.Console.Explorer;

@@ -1,5 +1,4 @@
 using System.Dynamic;
-using System.Net;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Framework;

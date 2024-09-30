@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using JSSoft.Commands;
-using Libplanet.Common;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;

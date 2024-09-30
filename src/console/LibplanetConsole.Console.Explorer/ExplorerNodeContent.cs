@@ -17,7 +17,7 @@ internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerSe
 {
     private readonly ILogger _logger = logger;
     private readonly ExecutionScope _executionScope = new();
-    private EndPoint _endPoint = EndPointUtility.Next();
+    private EndPoint _endPoint = EndPointUtility.NextEndPoint();
     private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
 
     public event EventHandler? Started;

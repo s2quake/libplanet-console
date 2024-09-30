@@ -22,7 +22,7 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
             {
                 argumentList.Add("run");
                 argumentList.Add("--end-point");
-                argumentList.Add(clientOptions.EndPoint.ToString());
+                argumentList.Add(EndPointUtility.ToString(clientOptions.EndPoint));
                 argumentList.Add("--private-key");
                 argumentList.Add(PrivateKeyUtility.ToString(clientOptions.PrivateKey));
 
@@ -35,7 +35,7 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
                 if (clientOptions.NodeEndPoint is { } nodeEndPoint)
                 {
                     argumentList.Add("--node-end-point");
-                    argumentList.Add(nodeEndPoint.ToString());
+                    argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
                 }
 
                 var extendedArguments = GetArguments(serviceProvider: client, obj: client);

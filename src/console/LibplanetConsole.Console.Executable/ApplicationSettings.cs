@@ -124,7 +124,7 @@ internal sealed record class ApplicationSettings
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
-            EndPoint = EndPointUtility.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
             PrivateKey = key,
             SeedEndPoint = endPoint,
         })];
@@ -135,7 +135,7 @@ internal sealed record class ApplicationSettings
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
-            EndPoint = EndPointUtility.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
             NodeEndPoint = Random(nodeOptions).EndPoint,
             PrivateKey = key,
         })];

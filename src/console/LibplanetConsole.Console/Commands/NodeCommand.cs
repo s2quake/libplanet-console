@@ -65,7 +65,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     {
         var nodeOptions = new NodeOptions
         {
-            EndPoint = EndPointUtility.Next(),
+            EndPoint = EndPointUtility.NextEndPoint(),
             PrivateKey = PrivateKeyUtility.ParseOrRandom(privateKey),
         };
         var options = new AddNewNodeOptions
