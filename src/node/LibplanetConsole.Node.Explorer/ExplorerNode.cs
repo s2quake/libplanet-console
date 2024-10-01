@@ -44,7 +44,12 @@ internal sealed class ExplorerNode(
                     .Build();
 
         await _webHost.StartAsync(cancellationToken);
-        Info = new() { EndPoint = options.EndPoint, IsRunning = true, };
+        Info = new()
+        {
+            EndPoint = options.EndPoint,
+            IsRunning = true,
+            Url = $"http://{host}:{port}/ui/playground",
+        };
         logger.Debug("Explorer is started: {EndPoint}", Info.EndPoint);
         Started?.Invoke(this, EventArgs.Empty);
         return Info;

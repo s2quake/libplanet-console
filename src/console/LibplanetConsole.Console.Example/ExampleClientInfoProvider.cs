@@ -7,8 +7,16 @@ namespace LibplanetConsole.Console.Example;
 internal sealed class ExampleClientInfoProvider
     : InfoProviderBase<ExampleClientContent>
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(ExampleClientContent obj)
+    public ExampleClientInfoProvider()
+        : base(nameof(ExampleClientContent))
     {
-        yield return (nameof(obj.IsExample), obj.IsExample);
+    }
+
+    protected override object? GetInfos(ExampleClientContent obj)
+    {
+        return new
+        {
+            obj.IsExample,
+        };
     }
 }

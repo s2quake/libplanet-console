@@ -6,15 +6,13 @@ namespace LibplanetConsole.Client.Example;
 [Export(typeof(IInfoProvider))]
 [method: ImportingConstructor]
 internal sealed class ExampleClientInfoProvider(ExampleClient exampleClient)
-    : InfoProviderBase<IApplication>
+    : InfoProviderBase<IApplication>(nameof(ExampleClient))
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(IApplication obj)
+    protected override object? GetInfos(IApplication obj)
     {
-        yield return (
-            Name: nameof(ExampleClient),
-            Value: new
-            {
-                exampleClient.IsExample,
-            });
+        return new
+        {
+            exampleClient.IsExample,
+        };
     }
 }

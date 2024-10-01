@@ -7,8 +7,16 @@ namespace LibplanetConsole.Console.Example;
 internal sealed class ExampleNodeInfoProvider
     : InfoProviderBase<ExampleNodeContent>
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(ExampleNodeContent obj)
+    public ExampleNodeInfoProvider()
+        : base(nameof(ExampleNodeContent))
     {
-        yield return (nameof(obj.IsExample), obj.IsExample);
+    }
+
+    protected override object? GetInfos(ExampleNodeContent obj)
+    {
+        return new
+        {
+            obj.IsExample,
+        };
     }
 }

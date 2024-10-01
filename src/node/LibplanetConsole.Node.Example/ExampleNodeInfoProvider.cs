@@ -6,13 +6,13 @@ namespace LibplanetConsole.Node.Example;
 [Export(typeof(IInfoProvider))]
 [method: ImportingConstructor]
 internal sealed class ExampleNodeInfoProvider(ExampleNode exampleNode)
-    : InfoProviderBase<IApplication>
+    : InfoProviderBase<IApplication>(nameof(ExampleNode))
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(IApplication obj)
+    protected override object? GetInfos(IApplication obj)
     {
-        yield return (nameof(ExampleNode), new
+        return new
         {
             exampleNode.IsExample,
-        });
+        };
     }
 }

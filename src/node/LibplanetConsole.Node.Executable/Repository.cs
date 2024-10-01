@@ -42,7 +42,7 @@ public sealed record class Repository
         var directoryName = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
         var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.Deserialize<Settings>(json);
+        var settings = JsonUtility.DeserializeSchema<Settings>(json);
         var applicationSettings = settings.Application;
 
         return new()
@@ -106,7 +106,7 @@ public sealed record class Repository
             },
         };
 
-        var json = JsonUtility.Serialize(settings);
+        var json = JsonUtility.SerializeSchema(settings);
         File.WriteAllLines(settingsPath, [json]);
 
         dynamic info = new ExpandoObject();

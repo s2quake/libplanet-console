@@ -5,10 +5,7 @@ namespace LibplanetConsole.Node;
 
 [Export(typeof(IInfoProvider))]
 [method: ImportingConstructor]
-internal sealed class NodeInfoProvider(Node node) : InfoProviderBase<ApplicationBase>
+internal sealed class NodeInfoProvider(Node node) : InfoProviderBase<ApplicationBase>(nameof(Node))
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(ApplicationBase obj)
-    {
-        yield return (nameof(Node), node.Info);
-    }
+    protected override object? GetInfos(ApplicationBase obj) => node.Info;
 }

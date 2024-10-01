@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,22 +8,23 @@ namespace LibplanetConsole.Console;
 [Export(typeof(IInfoProvider))]
 internal sealed class NodeInfoProvider : InfoProviderBase<Node>
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(Node obj)
+    public NodeInfoProvider()
+        : base(nameof(Node))
     {
-        foreach (var item in InfoUtility.EnumerateValues(obj.Info))
-        {
-            yield return item;
-        }
+    }
 
+    protected override object? GetInfos(Node obj)
+    {
+        var props = InfoUtility.ToDictionary(obj.Info);
         var contents = obj.GetRequiredService<IEnumerable<INodeContent>>();
-
+        var builder = ImmutableDictionary.CreateBuilder<string, object?>();
+        builder.AddRange(props);
         foreach (var content in contents)
         {
             var contentInfos = InfoUtility.GetInfo(serviceProvider: obj, obj: content);
-            if (contentInfos.Count > 0)
-            {
-                yield return (content.Name, contentInfos);
-            }
+            builder.Add(content.Name, contentInfos);
         }
+
+        return builder.ToImmutableDictionary();
     }
 }

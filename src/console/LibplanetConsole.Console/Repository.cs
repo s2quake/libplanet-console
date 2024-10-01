@@ -146,7 +146,7 @@ public sealed record class Repository
             var sb = new StringBuilder();
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
             process.Run(DefaultTimeout);
-            info.Nodes.Add(JsonUtility.Deserialize<ExpandoObject>(sb.ToString()));
+            info.Nodes.Add(JsonUtility.DeserializeSchema<ExpandoObject>(sb.ToString()));
         });
 
         info.Clients = new List<ExpandoObject>(Clients.Length);
@@ -163,7 +163,7 @@ public sealed record class Repository
             var sb = new StringBuilder();
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
             process.Run(DefaultTimeout);
-            info.Clients.Add(JsonUtility.Deserialize<ExpandoObject>(sb.ToString()));
+            info.Clients.Add(JsonUtility.DeserializeSchema<ExpandoObject>(sb.ToString()));
         });
 
         return info;
@@ -194,7 +194,7 @@ public sealed record class Repository
     {
         var settingsPath = resolver.GetSettingsPath(repositoryPath);
         var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.Deserialize<Settings>(json);
+        var settings = JsonUtility.DeserializeSchema<Settings>(json);
         return settings.Application;
     }
 
@@ -225,7 +225,7 @@ public sealed record class Repository
                 LibraryLogPath = LibraryLogPath,
             },
         };
-        var json = JsonUtility.Serialize(settings);
+        var json = JsonUtility.SerializeSchema(settings);
         File.WriteAllLines(settingsPath, [json]);
     }
 
