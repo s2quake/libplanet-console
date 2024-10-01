@@ -84,18 +84,14 @@ internal sealed class InitializeCommand : CommandBase
 
     [CommandProperty("module-path")]
     [CommandSummary("Indicates the path or the name of the assembly that provides " +
-                    "the IActionProvider.\n" +
-                    "Requires the '--single-node' option to be set.")]
+                    "the IActionProvider")]
     [Category("Genesis")]
-    [CommandPropertyDependency(nameof(IsSingleNode))]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Indicates the type name of the IActionProvider.")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
-    [CommandPropertyDependency(nameof(IsSingleNode))]
     public string ActionProviderType { get; set; } = string.Empty;
 
     protected override void OnExecute()

@@ -140,6 +140,8 @@ internal sealed class InitializeCommand : CommandBase
                 StorePath = "store",
                 LogPath = "app.log",
                 LibraryLogPath = "library.log",
+                ActionProviderModulePath = ActionProviderModulePath,
+                ActionProviderType = ActionProviderType,
             };
             nodeOptionsList.Add(nodeOptions);
             if (prevEndPoint is not null)
