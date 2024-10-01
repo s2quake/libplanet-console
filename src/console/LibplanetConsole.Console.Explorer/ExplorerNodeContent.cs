@@ -8,12 +8,12 @@ using Serilog;
 
 namespace LibplanetConsole.Console.Explorer;
 
-[Export(typeof(IExplorerNodeContent))]
+[Export(typeof(IExplorer))]
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
 [method: ImportingConstructor]
 internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerSettings settings)
-    : NodeContentBase(node), IExplorerNodeContent, IExplorerCallback, INodeContentService
+    : NodeContentBase(node), IExplorer, IExplorerCallback, INodeContentService
 {
     private readonly ILogger _logger = logger;
     private readonly ExecutionScope _executionScope = new();

@@ -10,11 +10,11 @@ public abstract class InfoProviderBase<T>(string name) : IInfoProvider
     {
         if (obj is T t)
         {
-            return GetInfos(t);
+            return GetInfo(t);
         }
 
         throw new NotSupportedException("The object is not supported.");
     }
 
-    protected abstract object? GetInfos(T obj);
+    protected abstract object? GetInfo(T obj);
 }

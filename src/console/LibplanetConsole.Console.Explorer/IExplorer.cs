@@ -2,7 +2,7 @@ using LibplanetConsole.Explorer;
 
 namespace LibplanetConsole.Console.Explorer;
 
-public interface IExplorerNodeContent
+public interface IExplorer
 {
     event EventHandler? Started;
 

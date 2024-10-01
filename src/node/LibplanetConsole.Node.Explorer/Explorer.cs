@@ -10,12 +10,12 @@ using Serilog;
 
 namespace LibplanetConsole.Node.Explorer;
 
-[Export(typeof(IExplorerNode))]
+[Export(typeof(IExplorer))]
 [Export(typeof(IApplicationService))]
 [Export]
 [method: ImportingConstructor]
-internal sealed class ExplorerNode(
-    INode node, ILogger logger, ExplorerSettings settings) : IExplorerNode, IApplicationService
+internal sealed class Explorer(
+    INode node, ILogger logger, ExplorerSettings settings) : IExplorer, IApplicationService
 {
     private IWebHost? _webHost;
 

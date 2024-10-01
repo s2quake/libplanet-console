@@ -12,7 +12,7 @@ internal sealed class ExampleClientInfoProvider
     {
     }
 
-    protected override object? GetInfos(ExampleClientContent obj)
+    protected override object? GetInfo(ExampleClientContent obj)
     {
         return new
         {

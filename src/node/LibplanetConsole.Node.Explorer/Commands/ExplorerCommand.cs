@@ -15,19 +15,19 @@ internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : Comman
     public async Task StartAsync(
         string endPoint = "", CancellationToken cancellationToken = default)
     {
-        var explorerNode = serviceProvider.GetRequiredService<IExplorerNode>();
+        var explorer = serviceProvider.GetRequiredService<IExplorer>();
         var explorerOptions = new ExplorerOptions
         {
             EndPoint = EndPointUtility.ParseOrNext(endPoint),
         };
-        await explorerNode.StartAsync(explorerOptions, cancellationToken);
+        await explorer.StartAsync(explorerOptions, cancellationToken);
         await Console.Out.WriteLineAsync($"http://{explorerOptions.EndPoint}/ui/playground");
     }
 
     [CommandMethod]
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        var explorerNode = serviceProvider.GetRequiredService<IExplorerNode>();
-        await explorerNode.StopAsync(cancellationToken);
+        var explorer = serviceProvider.GetRequiredService<IExplorer>();
+        await explorer.StopAsync(cancellationToken);
     }
 }

@@ -13,7 +13,7 @@ internal sealed class NodeInfoProvider : InfoProviderBase<Node>
     {
     }
 
-    protected override object? GetInfos(Node obj)
+    protected override object? GetInfo(Node obj)
     {
         var props = InfoUtility.ToDictionary(obj.Info);
         var contents = obj.GetRequiredService<IEnumerable<INodeContent>>();

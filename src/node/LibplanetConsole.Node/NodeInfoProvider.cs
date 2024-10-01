@@ -7,5 +7,5 @@ namespace LibplanetConsole.Node;
 [method: ImportingConstructor]
 internal sealed class NodeInfoProvider(Node node) : InfoProviderBase<ApplicationBase>(nameof(Node))
 {
-    protected override object? GetInfos(ApplicationBase obj) => node.Info;
+    protected override object? GetInfo(ApplicationBase obj) => node.Info;
 }

@@ -12,7 +12,7 @@ internal sealed class ExampleNodeInfoProvider
     {
     }
 
-    protected override object? GetInfos(ExampleNodeContent obj)
+    protected override object? GetInfo(ExampleNodeContent obj)
     {
         return new
         {

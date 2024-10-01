@@ -2,7 +2,7 @@
 
 namespace LibplanetConsole.Node.Explorer;
 
-public interface IExplorerNode
+public interface IExplorer
 {
     event EventHandler? Started;
 
