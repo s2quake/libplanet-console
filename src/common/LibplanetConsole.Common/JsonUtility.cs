@@ -14,6 +14,13 @@ public static class JsonUtility
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    private static readonly JsonSerializerOptions SchemaSerializerOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
@@ -34,6 +41,9 @@ public static class JsonUtility
 
         return json;
     }
+
+    public static string SerializeSchema(object value)
+        => JsonSerializer.Serialize(value, SchemaSerializerOptions);
 
     public static string ToColorizedString(string json)
     {
@@ -58,6 +68,16 @@ public static class JsonUtility
     public static T Deserialize<T>(string value)
     {
         if (JsonSerializer.Deserialize<T>(value, SerializerOptions) is T t)
+        {
+            return t;
+        }
+
+        throw new ArgumentException("Cannot deserialize the object.", nameof(value));
+    }
+
+    public static T DeserializeSchema<T>(string value)
+    {
+        if (JsonSerializer.Deserialize<T>(value, SchemaSerializerOptions) is T t)
         {
             return t;
         }

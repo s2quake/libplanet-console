@@ -31,7 +31,7 @@ public sealed record class NodeOptions
         var repositoryPath = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
         var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.Deserialize<Settings>(json);
+        var settings = JsonUtility.DeserializeSchema<Settings>(json);
         var applicationSettings = settings.Application;
 
         return new()

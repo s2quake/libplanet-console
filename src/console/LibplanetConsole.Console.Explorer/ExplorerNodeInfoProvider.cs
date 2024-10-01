@@ -7,10 +7,18 @@ namespace LibplanetConsole.Console.Explorer;
 internal sealed class ExplorerNodeInfoProvider
     : InfoProviderBase<ExplorerNodeContent>
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(ExplorerNodeContent obj)
+    public ExplorerNodeInfoProvider()
+        : base("Explorer")
     {
-        yield return (nameof(obj.EndPoint), obj.EndPoint);
-        yield return (nameof(obj.IsRunning), obj.IsRunning);
-        yield return ("Url", $"http://{obj.EndPoint}/ui/playground");
+    }
+
+    protected override object? GetInfos(ExplorerNodeContent obj)
+    {
+        return new
+        {
+            obj.EndPoint,
+            obj.IsRunning,
+            Url = obj.IsRunning ? $"http://{obj.EndPoint}/ui/playground" : string.Empty,
+        };
     }
 }

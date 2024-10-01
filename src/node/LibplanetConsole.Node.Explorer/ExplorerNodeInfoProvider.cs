@@ -6,17 +6,7 @@ namespace LibplanetConsole.Node.Explorer;
 [Export(typeof(IInfoProvider))]
 [method: ImportingConstructor]
 internal sealed class ExplorerNodeInfoProvider(ExplorerNode explorerNode)
-    : InfoProviderBase<IApplication>
+    : InfoProviderBase<IApplication>(nameof(ExplorerNode))
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(IApplication obj)
-    {
-        var name = nameof(ExplorerNode);
-        var value = new
-        {
-            explorerNode.Info.EndPoint,
-            Url = $"http://{explorerNode.Info.EndPoint}/ui/playground",
-            explorerNode.IsRunning,
-        };
-        yield return (name, value);
-    }
+    protected override object? GetInfos(IApplication obj) => explorerNode.Info;
 }

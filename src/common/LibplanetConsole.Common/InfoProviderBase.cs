@@ -1,10 +1,12 @@
 namespace LibplanetConsole.Common;
 
-public abstract class InfoProviderBase<T> : IInfoProvider
+public abstract class InfoProviderBase<T>(string name) : IInfoProvider
 {
+    public string Name { get; } = name;
+
     bool IInfoProvider.CanSupport(Type type) => typeof(T).IsAssignableFrom(type) == true;
 
-    IEnumerable<(string Name, object? Value)> IInfoProvider.GetInfos(object obj)
+    object? IInfoProvider.GetInfo(object obj)
     {
         if (obj is T t)
         {
@@ -14,5 +16,5 @@ public abstract class InfoProviderBase<T> : IInfoProvider
         throw new NotSupportedException("The object is not supported.");
     }
 
-    protected abstract IEnumerable<(string Name, object? Value)> GetInfos(T obj);
+    protected abstract object? GetInfos(T obj);
 }

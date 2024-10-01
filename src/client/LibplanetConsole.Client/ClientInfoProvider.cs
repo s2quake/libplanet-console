@@ -5,10 +5,11 @@ namespace LibplanetConsole.Client;
 
 [Export(typeof(IInfoProvider))]
 [method: ImportingConstructor]
-internal sealed class ClientInfoProvider(Client client) : InfoProviderBase<ApplicationBase>
+internal sealed class ClientInfoProvider(Client client)
+    : InfoProviderBase<ApplicationBase>(nameof(Client))
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(ApplicationBase obj)
+    protected override object? GetInfos(ApplicationBase obj)
     {
-        yield return (nameof(Client), client.Info);
+        return client.Info;
     }
 }
