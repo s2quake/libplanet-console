@@ -9,7 +9,7 @@ namespace LibplanetConsole.Node.Evidence.Commands;
 [CommandSummary("Provides evidence-related commands.")]
 [Category("Evidence")]
 [method: ImportingConstructor]
-internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
+internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     : CommandMethodBase
 {
     public override bool IsEnabled => node.IsRunning is true;
@@ -18,7 +18,7 @@ internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
     [CommandSummary("Adds a new evidence.")]
     public async Task NewAsync(CancellationToken cancellationToken)
     {
-        var evidenceInfo = await evidenceNode.AddEvidenceAsync(cancellationToken);
+        var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfo);
     }
 
@@ -26,7 +26,7 @@ internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
     [CommandSummary("Raises a infraction.")]
     public async Task RaiseAsync(CancellationToken cancellationToken)
     {
-        await evidenceNode.ViolateAsync(cancellationToken);
+        await evidence.ViolateAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -37,8 +37,8 @@ internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
         var height = ListProperties.Height;
         var isPending = ListProperties.IsPending;
         var evidenceInfos = isPending == true ?
-            await evidenceNode.GetPendingEvidenceAsync(cancellationToken) :
-            await evidenceNode.GetEvidenceAsync(height, cancellationToken);
+            await evidence.GetPendingEvidenceAsync(cancellationToken) :
+            await evidence.GetEvidenceAsync(height, cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfos);
     }
 
@@ -49,8 +49,8 @@ internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
     {
         var isPending = GetProperties.IsPending;
         var evidenceInfo = isPending == true ?
-            await evidenceNode.GetPendingEvidenceAsync(evidenceId, cancellationToken) :
-            await evidenceNode.GetEvidenceAsync(evidenceId, cancellationToken);
+            await evidence.GetPendingEvidenceAsync(evidenceId, cancellationToken) :
+            await evidence.GetEvidenceAsync(evidenceId, cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfo);
     }
 
@@ -58,7 +58,7 @@ internal sealed class EvidenceCommand(INode node, IEvidenceNode evidenceNode)
     [CommandMethod]
     public async Task UnjailAsync(CancellationToken cancellationToken)
     {
-        await evidenceNode.UnjailAsync(cancellationToken);
+        await evidence.UnjailAsync(cancellationToken);
     }
 #endif // LIBPLANET_DPOS
 

@@ -1,12 +1,19 @@
 using LibplanetConsole.Evidence;
 
-namespace LibplanetConsole.Console.Evidence;
+namespace LibplanetConsole.Node.Evidence;
 
-internal interface IEvidenceContent
+public interface IEvidence
 {
     Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken);
 
     Task<EvidenceInfo[]> GetEvidenceAsync(long height, CancellationToken cancellationToken);
+
+    Task<EvidenceInfo> GetEvidenceAsync(string evidenceId, CancellationToken cancellationToken);
+
+    Task<EvidenceInfo[]> GetPendingEvidenceAsync(CancellationToken cancellationToken);
+
+    Task<EvidenceInfo> GetPendingEvidenceAsync(
+        string evidenceId, CancellationToken cancellationToken);
 
     Task ViolateAsync(CancellationToken cancellationToken);
 
