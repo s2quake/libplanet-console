@@ -43,6 +43,18 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
                     argumentList.Add(EndPointUtility.ToString(seedEndPoint));
                 }
 
+                if (nodeOptions.ActionProviderModulePath != string.Empty)
+                {
+                    argumentList.Add("--module-path");
+                    argumentList.Add(nodeOptions.ActionProviderModulePath);
+                }
+
+                if (nodeOptions.ActionProviderType != string.Empty)
+                {
+                    argumentList.Add("--module-type");
+                    argumentList.Add(nodeOptions.ActionProviderType);
+                }
+
                 var extendedArguments = GetArguments(serviceProvider: node, obj: node);
                 argumentList.AddRange(extendedArguments);
             }

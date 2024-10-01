@@ -12,7 +12,9 @@
       "console": "integratedTerminal",
       "args": [
         "init",
-        ".data"
+        ".data",
+        "--module-type",
+        "LibplanetConsole.Node.Delegation.ActionProvider, LibplanetConsole.Node.Delegation"
       ]
     },
     {

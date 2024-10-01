@@ -142,6 +142,8 @@ public sealed record class Repository
                 EndPoint = node.EndPoint,
                 OutputPath = nodePath,
                 GenesisPath = genesisPath,
+                ActionProviderModulePath = node.ActionProviderModulePath,
+                ActionProviderType = node.ActionProviderType,
             };
             var sb = new StringBuilder();
             process.OutputDataReceived += (_, e) => sb.AppendLine(e.Data);
