@@ -6,10 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Evidence;
 
-[Export(typeof(IEvidenceNode))]
+[Export(typeof(IEvidence))]
 [Export]
 [method: ImportingConstructor]
-internal sealed class EvidenceNode(INode node) : IEvidenceNode, IAsyncDisposable
+internal sealed class Evidence(INode node) : IEvidence, IAsyncDisposable
 {
     private readonly DuplicateVoteViolator _duplicateVotePerpetrator = new(node);
 

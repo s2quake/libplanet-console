@@ -11,5 +11,5 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<ApplicationBase
     {
     }
 
-    protected override object? GetInfos(ApplicationBase obj) => obj.Info;
+    protected override object? GetInfo(ApplicationBase obj) => obj.Info;
 }

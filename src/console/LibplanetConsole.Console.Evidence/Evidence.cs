@@ -7,11 +7,11 @@ using LibplanetConsole.Evidence.Services;
 namespace LibplanetConsole.Console.Evidence;
 
 [Export(typeof(INodeContent))]
-[Export(typeof(IEvidenceContent))]
+[Export(typeof(IEvidence))]
 [Export(typeof(INodeContentService))]
 [method: ImportingConstructor]
-internal sealed class EvidenceNodeContent(INode node)
-    : INodeContent, IEvidenceContent, INodeContentService
+internal sealed class Evidence(INode node)
+    : INodeContent, IEvidence, INodeContentService
 {
     private readonly RemoteService<IEvidenceService> _evidenceService = new();
 

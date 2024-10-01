@@ -13,7 +13,7 @@ internal sealed class ClientInfoProvider : InfoProviderBase<Client>
     {
     }
 
-    protected override object? GetInfos(Client obj)
+    protected override object? GetInfo(Client obj)
     {
         var props = InfoUtility.ToDictionary(obj.Info);
         var contents = obj.GetRequiredService<IEnumerable<IClientContent>>();

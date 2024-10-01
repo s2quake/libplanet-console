@@ -8,7 +8,7 @@ namespace LibplanetConsole.Client;
 internal sealed class ClientInfoProvider(Client client)
     : InfoProviderBase<ApplicationBase>(nameof(Client))
 {
-    protected override object? GetInfos(ApplicationBase obj)
+    protected override object? GetInfo(ApplicationBase obj)
     {
         return client.Info;
     }

@@ -25,13 +25,13 @@ internal sealed partial class ExplorerCommand(
         string endPoint = "", CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var explorerNode = node.GetRequiredService<IExplorerNodeContent>();
+        var explorer = node.GetRequiredService<IExplorer>();
         if (endPoint != string.Empty)
         {
-            explorerNode.EndPoint = EndPointUtility.Parse(endPoint);
+            explorer.EndPoint = EndPointUtility.Parse(endPoint);
         }
 
-        await explorerNode.StartAsync(cancellationToken);
+        await explorer.StartAsync(cancellationToken);
     }
 
     [CommandMethod]
@@ -41,7 +41,7 @@ internal sealed partial class ExplorerCommand(
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         var node = application.GetNode(Address);
-        var explorerNode = node.GetRequiredService<IExplorerNodeContent>();
-        await explorerNode.StopAsync(cancellationToken);
+        var explorer = node.GetRequiredService<IExplorer>();
+        await explorer.StopAsync(cancellationToken);
     }
 }

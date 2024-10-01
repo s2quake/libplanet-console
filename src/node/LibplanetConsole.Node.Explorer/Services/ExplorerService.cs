@@ -6,37 +6,37 @@ using LibplanetConsole.Explorer.Services;
 namespace LibplanetConsole.Node.Explorer.Services;
 
 [Export(typeof(ILocalService))]
-internal sealed class ExplorerNodeService : LocalService<IExplorerService, IExplorerCallback>,
+internal sealed class ExplorerService : LocalService<IExplorerService, IExplorerCallback>,
     IExplorerService, IDisposable
 {
-    private readonly ExplorerNode _explorerNode;
+    private readonly Explorer _explorer;
 
     [ImportingConstructor]
-    public ExplorerNodeService(ExplorerNode explorerNode)
+    public ExplorerService(Explorer explorer)
     {
-        _explorerNode = explorerNode;
-        _explorerNode.Started += ExplorerNode_Started;
-        _explorerNode.Stopped += ExplorerNode_Stopped;
+        _explorer = explorer;
+        _explorer.Started += ExplorerNode_Started;
+        _explorer.Stopped += ExplorerNode_Stopped;
     }
 
     public void Dispose()
     {
-        _explorerNode.Started -= ExplorerNode_Started;
-        _explorerNode.Stopped -= ExplorerNode_Stopped;
+        _explorer.Started -= ExplorerNode_Started;
+        _explorer.Stopped -= ExplorerNode_Stopped;
     }
 
     public Task<ExplorerInfo> GetInfoAsync(CancellationToken cancellationToken)
-        => Task.Run(() => _explorerNode.Info, cancellationToken);
+        => Task.Run(() => _explorer.Info, cancellationToken);
 
     public Task<ExplorerInfo> StartAsync(
         ExplorerOptions options, CancellationToken cancellationToken)
-        => _explorerNode.StartAsync(options, cancellationToken);
+        => _explorer.StartAsync(options, cancellationToken);
 
     public Task StopAsync(CancellationToken cancellationToken)
-        => _explorerNode.StopAsync(cancellationToken);
+        => _explorer.StopAsync(cancellationToken);
 
     private void ExplorerNode_Started(object? sender, EventArgs e)
-        => Callback.OnStarted(_explorerNode.Info);
+        => Callback.OnStarted(_explorer.Info);
 
     private void ExplorerNode_Stopped(object? sender, EventArgs e)
         => Callback.OnStopped();

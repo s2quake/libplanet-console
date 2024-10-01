@@ -18,8 +18,8 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetRequiredService<IEvidenceContent>();
-        var evidenceInfo = await evidenceContent.AddEvidenceAsync(cancellationToken);
+        var evidence = node.GetRequiredService<IEvidence>();
+        var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfo);
     }
 
@@ -28,16 +28,16 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetRequiredService<IEvidenceContent>();
-        await evidenceContent.ViolateAsync(cancellationToken);
+        var evidence = node.GetRequiredService<IEvidence>();
+        await evidence.ViolateAsync(cancellationToken);
     }
 
     [CommandMethod]
     public async Task ListAsync(long height = -1, CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetRequiredService<IEvidenceContent>();
-        var evidenceInfos = await evidenceContent.GetEvidenceAsync(height, cancellationToken);
+        var evidence = node.GetRequiredService<IEvidence>();
+        var evidenceInfos = await evidence.GetEvidenceAsync(height, cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfos);
     }
 
@@ -47,8 +47,8 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidenceContent = node.GetService<IEvidenceContent>();
-        await evidenceContent.UnjailAsync(cancellationToken);
+        var evidence = node.GetService<IEvidenceContent>();
+        await evidence.UnjailAsync(cancellationToken);
     }
 #endif // LIBPLANET_DPOS
 }
