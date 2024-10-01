@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Node;
 
 public interface IBlockChain
 {
@@ -11,6 +11,10 @@ public interface IBlockChain
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
     Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken);
+
+    Task<IValue> GetStateAsync(
+        Address accountAddress, Address address, CancellationToken cancellationToken)
+        => GetStateAsync(blockHash: null, accountAddress, address, cancellationToken);
 
     Task<IValue> GetStateAsync(
         BlockHash? blockHash,
@@ -28,4 +32,7 @@ public interface IBlockChain
 
     Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
+
+    Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken);
 }

@@ -1,5 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Node.Bank;
+using LibplanetConsole.Node.Delegation;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Example;
 using LibplanetConsole.Node.Executable.Commands;
@@ -34,6 +36,8 @@ internal static class ServiceCollectionExtensions
         @this.AddEvidence();
         @this.AddExample();
         @this.AddExplorer();
+        @this.AddDelegation();
+        @this.AddBank();
 
         return @this;
     }

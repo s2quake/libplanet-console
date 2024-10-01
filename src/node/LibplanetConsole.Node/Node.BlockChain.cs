@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Libplanet.Action.State;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 
@@ -9,7 +10,7 @@ internal sealed partial class Node : IBlockChain
 {
     private static readonly Codec _codec = new();
 
-    public async Task<TxId> AddTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
@@ -122,7 +123,8 @@ internal sealed partial class Node : IBlockChain
                 : blockChain.GetWorldState(block.Hash);
             var account = worldState.GetAccountState(accountAddress);
             return account.GetState(address)
-                ?? throw new InvalidOperationException("State not found.");
+                ?? throw new InvalidOperationException(
+                    $"Account '{accountAddress}' does not have state '{address}'.");
         }
 
         return Task.Run(GetStateByBlockHash, cancellationToken: cancellationToken);
@@ -201,5 +203,18 @@ internal sealed partial class Node : IBlockChain
         }
 
         return Task.Run(GetAction, cancellationToken);
+    }
+
+    public Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken)
+    {
+        FungibleAssetValue GetBalance()
+        {
+            var blockChain = BlockChain;
+            var worldState = blockChain.GetWorldState();
+            return worldState.GetBalance(address, currency);
+        }
+
+        return Task.Run(GetBalance, cancellationToken);
     }
 }

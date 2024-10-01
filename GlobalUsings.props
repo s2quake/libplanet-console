@@ -3,6 +3,7 @@
   <ItemGroup>
     <Using Include="Libplanet.Crypto" />
     <Using Include="Libplanet.Common" />
+    <Using Include="Libplanet.Types.Assets" />
     <Using Include="Libplanet.Types.Blocks" />
     <Using Include="Libplanet.Types.Tx" />
     <Using Include="Libplanet.Action" />

@@ -2,6 +2,7 @@ using LibplanetConsole.Client.Commands;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
+using LibplanetConsole.Node;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client;

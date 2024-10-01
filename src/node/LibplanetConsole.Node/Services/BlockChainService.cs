@@ -62,6 +62,10 @@ internal sealed class BlockChainService
         TxId txId, int actionIndex, CancellationToken cancellationToken)
         => _node.GetActionAsync(txId, actionIndex, cancellationToken);
 
+    public Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken)
+        => _node.GetBalanceAsync(address, currency, cancellationToken);
+
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;

@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Node;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;

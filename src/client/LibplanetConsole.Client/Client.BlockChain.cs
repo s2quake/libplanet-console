@@ -71,4 +71,8 @@ internal sealed partial class Client : IBlockChain
 
         throw new InvalidOperationException("Action not found.");
     }
+
+    public Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken)
+        => RemoteBlockChainService.GetBalanceAsync(address, currency, cancellationToken);
 }

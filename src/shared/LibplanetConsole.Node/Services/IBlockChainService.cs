@@ -25,4 +25,7 @@ public interface IBlockChainService
     Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken);
 
     Task<byte[]> GetActionAsync(TxId txId, int actionIndex, CancellationToken cancellationToken);
+
+    Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken);
 }
