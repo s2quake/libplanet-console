@@ -53,24 +53,21 @@ public sealed class InitializeStates : ActionBase
 
         var repository = new ValidatorRepository(world, context);
         var validators = Validators;
-        var validatorList = new List();
         foreach (var validator in validators)
         {
             var validatorDelegatee = new ValidatorDelegatee(
                 validator.OperatorAddress, validator.PublicKey, repository.World.GetGoldCurrency(), repository);
-            var delegationFAV = validatorDelegatee.MinSelfDelegation;
+            var delegationFAV = FungibleAssetValue.FromRawValue(
+                    validatorDelegatee.DelegationCurrency, validator.Power);
 
             repository.SetValidatorDelegatee(validatorDelegatee);
             var validatorDelegator = repository.GetValidatorDelegator(validator.OperatorAddress);
             repository.TransferAsset(
                 GoldCurrencyState.Address, validatorDelegator.DelegationPoolAddress, delegationFAV);
             validatorDelegator.Delegate(validatorDelegatee, delegationFAV, context.BlockIndex);
-
-            validatorList = validatorList.Add(validator.Bencoded);
         }
 
         repository.SetAbstainHistory(new());
-        repository.SetValidatorList(new ValidatorList(validatorList));
         world = repository.World;
 
         return world;

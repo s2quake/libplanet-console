@@ -12,6 +12,8 @@ namespace LibplanetConsole.Node.Delegation;
 
 internal sealed class ActionProvider : IActionProvider
 {
+    private const int DefaultPower = 1000;
+
     public ImmutableArray<IAction> BeginBlockActions { get; } =
     [
         new SlashValidator(),
@@ -45,7 +47,7 @@ internal sealed class ActionProvider : IActionProvider
     public IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
-            .Select(item => new Validator(item, BigInteger.One))
+            .Select(item => new Validator(item, DefaultPower))
             .ToArray();
         var action = new InitializeStates
         {
