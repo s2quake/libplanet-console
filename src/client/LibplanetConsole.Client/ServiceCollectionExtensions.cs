@@ -2,28 +2,28 @@ using JSSoft.Commands;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
-using LibplanetConsole.Node.Commands;
-using LibplanetConsole.Node.Services;
+using LibplanetConsole.Client.Commands;
+using LibplanetConsole.Client.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Node;
+namespace LibplanetConsole.Client;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNodeApplication<T>(
+    public static IServiceCollection AddClientApplication<T>(
         this IServiceCollection services, ApplicationOptions options)
         where T : ApplicationBase
     {
         services.AddSingleton(
-            ApplicationFramework.CreateLogger(typeof(T), options.LogPath, options.LibraryLogPath));
+            ApplicationFramework.CreateLogger(typeof(T), options.LogPath, string.Empty));
         services.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
-        services.AddSingletonWithInterfaces<INode, IBlockChain, Node>();
-        services.AddSingleton<NodeContext>();
+        services.AddSingletonWithInterfaces<IClient, IBlockChain, Client>();
 
-        services.AddSingletonWithInterfaces<ILocalService, IApplicationService, SeedService>();
-
-        services.AddSingletonWithInterface<ILocalService, BlockChainService>();
-        services.AddSingletonWithInterface<ILocalService, NodeService>();
+        services.AddSingletonWithInterfaces<ILocalService, IClientService, ClientService>();
+        services.AddSingleton<ClientServiceContext>();
+        services.AddSingletonWithInterface<IRemoteService, RemoteBlockChainService>();
+        services.AddSingleton<RemoteNodeContext>();
+        services.AddSingletonWithInterface<IRemoteService, RemoteNodeService>();
 
         services.AddSingletonWithInterface<ICommand, AddressCommand>();
         services.AddSingletonWithInterface<ICommand, ExitCommand>();

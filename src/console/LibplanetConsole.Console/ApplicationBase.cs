@@ -11,13 +11,12 @@ namespace LibplanetConsole.Console;
 
 public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
-    private readonly ApplicationContainer _container;
+    private readonly IServiceProvider _serviceProvider;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
     private readonly ConsoleServiceContext _consoleContext;
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
@@ -26,21 +25,21 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
-        _container = new(this);
-        _container.AddSingleton(_logger);
-        _nodes = new NodeCollection(this, options.Nodes);
-        _clients = new ClientCollection(this, options.Clients);
-        _container.AddSingleton(this);
-        _container.AddSingleton<IApplication>(_ => this);
-        _container.AddSingleton<IServiceProvider>(_ => this);
-        _container.AddSingleton(_nodes);
-        _container.AddSingleton<INodeCollection>(_ => _nodes);
-        _container.AddSingleton<IApplicationService>(_ => _nodes);
-        _container.AddSingleton(_clients);
-        _container.AddSingleton<IClientCollection>(_ => _clients);
-        _container.AddSingleton<IApplicationService>(_ => _clients);
+        // _container = new(this);
+        // _container.AddSingleton(_logger);
+        // _nodes = new NodeCollection(this, options.Nodes);
+        // _clients = new ClientCollection(this, options.Clients);
+        // _container.AddSingleton(this);
+        // _container.AddSingleton<IApplication>(_ => this);
+        // _container.AddSingleton<IServiceProvider>(_ => this);
+        // _container.AddSingleton(_nodes);
+        // _container.AddSingleton<INodeCollection>(_ => _nodes);
+        // _container.AddSingleton<IApplicationService>(_ => _nodes);
+        // _container.AddSingleton(_clients);
+        // _container.AddSingleton<IClientCollection>(_ => _clients);
+        // _container.AddSingleton<IApplicationService>(_ => _clients);
         // _container.ComposeExportedValues(options.Components);
-        _serviceProvider = _container.BuildServiceProvider();
+        // _serviceProvider = _container.BuildServiceProvider();
         _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
         _consoleContext.EndPoint = options.EndPoint;
         _info = new()
@@ -120,8 +119,8 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         // }
     }
 
-    public ApplicationContainer CreateChildContainer(object owner)
-        => new(owner, _container);
+    // public ApplicationContainer CreateChildContainer(object owner)
+    //     => new(owner, _container);
 
     IClient IApplication.GetClient(string address) => GetClient(address);
 
@@ -157,7 +156,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     {
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
         await base.OnDisposeAsync();
-        await _container.DisposeAsync();
+        // await _container.DisposeAsync();
     }
 
     private static bool IsEquals(IAddressable addressable, string address)

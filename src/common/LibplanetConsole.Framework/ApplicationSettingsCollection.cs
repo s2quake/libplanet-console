@@ -11,7 +11,7 @@ public sealed class ApplicationSettingsCollection : IEnumerable<object>
 
     public ApplicationSettingsCollection()
     {
-        var assemblies = ApplicationContainer.GetAssemblies();
+        var assemblies = ApplicationServiceCollection.GetAssemblies();
         var query = from assembly in assemblies
                     from type in assembly.GetTypes()
                     where IsApplicationSettings(type) == true

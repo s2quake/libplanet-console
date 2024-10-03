@@ -45,7 +45,7 @@ internal sealed record class ApplicationSettings
     [JsonIgnore]
     public bool NoREPL { get; init; }
 
-    public ApplicationOptions ToOptions(object[] components)
+    public ApplicationOptions ToOptions()
     {
         var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
@@ -55,7 +55,6 @@ internal sealed record class ApplicationSettings
             NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),
             LogPath = GetFullPath(LogPath),
             NoREPL = NoREPL,
-            Components = components,
         };
 
         static string GetFullPath(string path)

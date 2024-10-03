@@ -2,8 +2,6 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Node.Executable.Commands;
-using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Settings;
 using Microsoft.Extensions.DependencyInjection;
 

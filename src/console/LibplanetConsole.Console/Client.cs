@@ -14,14 +14,14 @@ namespace LibplanetConsole.Console;
 
 internal sealed class Client : IClient, IClientCallback
 {
-    private readonly ApplicationContainer _container;
+    // private readonly ApplicationContainer _container;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ClientOptions _clientOptions;
     private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<IClientService, IClientCallback> _remoteService;
     private readonly IClientContent[] _contents;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
-    private readonly IServiceProvider _serviceProvider;
     private Guid _closeToken;
     private ClientInfo _clientInfo;
     private INode? _node;

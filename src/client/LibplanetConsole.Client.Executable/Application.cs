@@ -5,7 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client.Executable;
 
-internal sealed class Application(ApplicationOptions options) : ApplicationBase(options)
+internal sealed class Application(IServiceProvider serviceProvider, ApplicationOptions options)
+    : ApplicationBase(serviceProvider, options)
 {
     private readonly ApplicationOptions _options = options;
     private Task _waitInputTask = Task.CompletedTask;
