@@ -10,13 +10,12 @@ namespace LibplanetConsole.Console;
 
 [Dependency(typeof(SeedService))]
 internal sealed class NodeCollection(
-    ApplicationBase application, NodeOptions[] nodeOptions)
+    IServiceProvider serviceProvider, NodeOptions[] nodeOptions)
     : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
-    private readonly ApplicationBase _application = application;
     private readonly List<Node> _nodeList = new(nodeOptions.Length);
-    private readonly ILogger _logger = application.GetRequiredService<ILogger>();
+    private readonly ILogger _logger = serviceProvider.GetRequiredService<ILogger>();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private Node? _current;
     private bool _isDisposed;
@@ -123,7 +122,7 @@ internal sealed class NodeCollection(
 
     async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
-        var info = _application.Info;
+        var info = serviceProvider.GetRequiredService<IApplication>().Info;
         await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
         Current = _nodeList.FirstOrDefault();
 
@@ -196,7 +195,7 @@ internal sealed class NodeCollection(
     {
         lock (LockObject)
         {
-            return new Node(_application, nodeOptions);
+            return new Node(serviceProvider, nodeOptions);
         }
     }
 

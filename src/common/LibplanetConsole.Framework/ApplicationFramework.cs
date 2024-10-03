@@ -12,7 +12,6 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly ILogger _logger;
     private bool _isDisposed;
-    private IApplicationService[] _applicationServices = [];
 
     protected ApplicationFramework(IServiceProvider serviceProvider)
     {
@@ -22,11 +21,40 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
         _synchronizationContext = SynchronizationContext.Current!;
     }
 
-    // public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
-
     public abstract ILogger Logger { get; }
 
     protected virtual bool CanClose => false;
+
+    public static ILogger CreateLogger(
+        Type applicationType, string logPath, string libraryLogPath)
+    {
+        var loggerConfiguration = new LoggerConfiguration();
+        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+        if (logPath != string.Empty)
+        {
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByIncludingOnly(e => IsApplicationLog(applicationType, e))
+                    .WriteTo.File(logPath));
+        }
+
+        if (libraryLogPath != string.Empty)
+        {
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByExcluding(e => IsApplicationLog(applicationType, e))
+                    .WriteTo.File(libraryLogPath));
+        }
+
+        Log.Logger = loggerConfiguration.CreateLogger();
+        var logger = Log.ForContext(applicationType);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
+        };
+
+        return logger;
+    }
 
     public Task InvokeAsync(Action action, CancellationToken cancellationToken)
     {
@@ -85,46 +113,15 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 
     public abstract object? GetService(Type serviceType);
 
-    public static ILogger CreateLogger(
-        Type applicationType, string logPath, string libraryLogPath)
-    {
-        var loggerConfiguration = new LoggerConfiguration();
-        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
-        if (logPath != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => IsApplicationLog(applicationType, e))
-                    .WriteTo.File(logPath));
-        }
-
-        if (libraryLogPath != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByExcluding(e => IsApplicationLog(applicationType, e))
-                    .WriteTo.File(libraryLogPath));
-        }
-
-        Log.Logger = loggerConfiguration.CreateLogger();
-        var logger = Log.ForContext(applicationType);
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
-    }
-
     protected virtual async Task OnRunAsync(CancellationToken cancellationToken)
     {
-        _applicationServices = Sort(_serviceProvider.GetServices<IApplicationService>());
+        var applicationServices = Sort(_serviceProvider.GetServices<IApplicationService>());
 
-        for (var i = 0; i < _applicationServices.Length; i++)
+        for (var i = 0; i < applicationServices.Length; i++)
         {
-            var serviceName = _applicationServices[i].GetType().Name;
+            var serviceName = applicationServices[i].GetType().Name;
             _logger?.Debug("Application service initializing: {0}", serviceName);
-            await _applicationServices[i].InitializeAsync(cancellationToken);
+            await applicationServices[i].InitializeAsync(cancellationToken);
             _logger?.Debug("Application service initialized: {0}", serviceName);
         }
     }

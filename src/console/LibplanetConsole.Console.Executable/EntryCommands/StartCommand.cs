@@ -1,5 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Framework;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -24,8 +26,14 @@ internal sealed class StartCommand : CommandAsyncBase
             LogPath = repository.LogPath,
             LibraryLogPath = repository.LibraryLogPath,
         };
+        var serviceCollection = new ApplicationServiceCollection();
+
+        serviceCollection.AddSingleton(applicationOptions);
+        serviceCollection.AddConsoleApplication<Application>(applicationOptions);
+
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
         var @out = System.Console.Out;
-        await using var application = new Application(applicationOptions);
+        await using var application = serviceProvider.GetRequiredService<Application>();
         await @out.WriteLineAsync();
         await application.RunAsync();
         await @out.WriteLineAsync("\u001b0");

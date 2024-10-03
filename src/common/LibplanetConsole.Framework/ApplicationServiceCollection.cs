@@ -6,7 +6,6 @@ namespace LibplanetConsole.Framework;
 public sealed class ApplicationServiceCollection : ServiceCollection
 {
     public ApplicationServiceCollection()
-        : this(new())
     {
     }
 

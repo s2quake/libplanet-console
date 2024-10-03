@@ -79,7 +79,7 @@ internal sealed record class ApplicationSettings
     [CommandPropertyExclusion(nameof(NewWindow))]
     public bool Detach { get; set; }
 
-    public ApplicationOptions ToOptions(object[] components)
+    public ApplicationOptions ToOptions()
     {
         var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var nodeOptions = GetNodeOptions(endPoint, GetNodes());
@@ -95,7 +95,6 @@ internal sealed record class ApplicationSettings
             NoProcess = NoProcess,
             NewWindow = NewWindow,
             Detach = Detach,
-            Components = components,
         };
 
         static string GetFullPath(string path)

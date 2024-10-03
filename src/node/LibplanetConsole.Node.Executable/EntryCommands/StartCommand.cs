@@ -36,7 +36,7 @@ internal sealed class StartCommand : CommandAsyncBase
         try
         {
             var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            var serviceCollection = new ApplicationServiceCollection();
+            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
             var applicationSettings = Load(settingsPath) with
             {
                 ParentProcessId = ParentProcessId,

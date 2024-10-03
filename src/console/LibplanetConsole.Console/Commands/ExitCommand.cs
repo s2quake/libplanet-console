@@ -1,7 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console.Executable.Commands;
+namespace LibplanetConsole.Console.Commands;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Exit the application.")]

@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Framework.Extensions;
 using LibplanetConsole.Node;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -19,27 +16,15 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly ILogger _logger;
     private Guid _closeToken;
 
-    protected ApplicationBase(ApplicationOptions options)
-        : base(null)
+    protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
+        : base(serviceProvider)
     {
-        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
+        _serviceProvider = serviceProvider;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
-        // _container = new(this);
-        // _container.AddSingleton(_logger);
-        // _nodes = new NodeCollection(this, options.Nodes);
-        // _clients = new ClientCollection(this, options.Clients);
-        // _container.AddSingleton(this);
-        // _container.AddSingleton<IApplication>(_ => this);
-        // _container.AddSingleton<IServiceProvider>(_ => this);
-        // _container.AddSingleton(_nodes);
-        // _container.AddSingleton<INodeCollection>(_ => _nodes);
-        // _container.AddSingleton<IApplicationService>(_ => _nodes);
-        // _container.AddSingleton(_clients);
-        // _container.AddSingleton<IClientCollection>(_ => _clients);
-        // _container.AddSingleton<IApplicationService>(_ => _clients);
-        // _container.ComposeExportedValues(options.Components);
-        // _serviceProvider = _container.BuildServiceProvider();
+        _nodes = serviceProvider.GetRequiredService<NodeCollection>();
+        _clients = serviceProvider.GetRequiredService<ClientCollection>();
         _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
         _consoleContext.EndPoint = options.EndPoint;
         _info = new()
@@ -51,11 +36,8 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             NewWindow = options.NewWindow,
         };
         GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
-        // ApplicationServices = new(_serviceProvider.GetRequiredService<IEnumerable<IApplicationService>>());
         _logger.Debug("Application initialized.");
     }
-
-    // public override ApplicationServiceCollection ApplicationServices { get; }
 
     public ApplicationInfo Info => _info;
 
@@ -91,36 +73,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         => _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
 
     public override object? GetService(Type serviceType)
-    {
-        return _serviceProvider.GetService(serviceType);
-        // var isMultiple = serviceType.IsGenericType &&
-        //     serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
-
-        // if (isMultiple == true)
-        // {
-        //     var itemType = serviceType.GenericTypeArguments[0];
-        //     var contractName = AttributedModelServices.GetContractName(itemType);
-        //     var items = _container.GetExportedValues<object?>(contractName);
-        //     var listGenericType = typeof(List<>);
-        //     var list = listGenericType.MakeGenericType(itemType);
-        //     var ci = list.GetConstructor([typeof(int)]) ?? throw new UnreachableException();
-        //     var instance = (IList)ci.Invoke([items.Count(),]);
-        //     foreach (var item in items)
-        //     {
-        //         instance.Add(item);
-        //     }
-
-        //     return instance;
-        // }
-        // else
-        // {
-        //     var contractName = AttributedModelServices.GetContractName(serviceType);
-        //     return _container.GetExportedValue<object?>(contractName);
-        // }
-    }
-
-    // public ApplicationContainer CreateChildContainer(object owner)
-    //     => new(owner, _container);
+        => _serviceProvider.GetService(serviceType);
 
     IClient IApplication.GetClient(string address) => GetClient(address);
 
@@ -156,7 +109,6 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     {
         await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
         await base.OnDisposeAsync();
-        // await _container.DisposeAsync();
     }
 
     private static bool IsEquals(IAddressable addressable, string address)

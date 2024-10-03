@@ -15,6 +15,7 @@ namespace LibplanetConsole.Console;
 internal sealed class Client : IClient, IClientCallback
 {
     // private readonly ApplicationContainer _container;
+    private readonly ApplicationServiceCollection _serviceCollection;
     private readonly IServiceProvider _serviceProvider;
     private readonly ClientOptions _clientOptions;
     private readonly RemoteServiceContext _remoteServiceContext;
@@ -32,10 +33,8 @@ internal sealed class Client : IClient, IClientCallback
 
     public Client(ApplicationBase application, ClientOptions clientOptions)
     {
-        _container = application.CreateChildContainer(this);
+        _serviceCollection = new();
         _clientOptions = clientOptions;
-        _container.AddSingleton<IClient>(this);
-        _serviceProvider = _container.BuildServiceProvider();
         _contents = [.. _serviceProvider.GetServices<IClientContent>()];
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
@@ -89,26 +88,6 @@ internal sealed class Client : IClient, IClientCallback
         }
 
         return _serviceProvider.GetService(serviceType);
-        // if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
-        //     serviceType.GenericTypeArguments.Length == 1)
-        // {
-        //     var itemType = serviceType.GenericTypeArguments[0];
-        //     var items = GetInstances(itemType);
-        //     var listGenericType = typeof(List<>);
-        //     var list = listGenericType.MakeGenericType(itemType);
-        //     var ci = list.GetConstructor([typeof(int)])!;
-        //     var instance = (IList)ci.Invoke([items.Count(),]);
-        //     foreach (var item in items)
-        //     {
-        //         instance.Add(item);
-        //     }
-
-        //     return instance;
-        // }
-        // else
-        // {
-        //     return GetInstance(serviceType);
-        // }
     }
 
     public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
@@ -214,7 +193,7 @@ internal sealed class Client : IClient, IClientCallback
         }
 
         IsRunning = false;
-        await _container.DisposeAsync();
+        // await _container.DisposeAsync();
         _isDisposed = true;
         _logger.Debug("Client is disposed: {Address}", Address);
         Disposed?.Invoke(this, EventArgs.Empty);
