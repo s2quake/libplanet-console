@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Client;
 
-public interface IApplication : IAsyncDisposable, IServiceProvider
+public interface IApplication : IAsyncDisposable
 {
     ApplicationInfo Info { get; }
 

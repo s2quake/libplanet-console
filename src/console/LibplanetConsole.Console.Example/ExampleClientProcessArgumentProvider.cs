@@ -2,7 +2,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IProcessArgumentProvider))]
 internal sealed class ExampleClientProcessArgumentProvider
     : ProcessArgumentProviderBase<ExampleClientContent>
 {

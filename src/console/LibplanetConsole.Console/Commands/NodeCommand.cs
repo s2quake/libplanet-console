@@ -6,8 +6,6 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
 
-[Export(typeof(ICommand))]
-[Export]
 [CommandSummary("Provides node-related commands.")]
 public sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
     : CommandMethodBase

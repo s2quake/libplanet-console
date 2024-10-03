@@ -6,8 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
-[Export(typeof(ICommand))]
-[Export]
 [CommandSummary("Provides client-related commands.")]
 public sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
     : CommandMethodBase

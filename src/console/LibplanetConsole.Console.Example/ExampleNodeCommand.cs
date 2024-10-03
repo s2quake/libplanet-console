@@ -4,7 +4,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Example node commands for a quick start.")]
 internal sealed class ExampleNodeCommand(IApplication application) : CommandMethodBase
 {

@@ -6,9 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Explorer.Commands;
 
-[Export(typeof(ICommand))]
-internal sealed partial class ExplorerCommand(
-    NodeCommand nodeCommand, IApplication application)
+internal sealed partial class ExplorerCommand(NodeCommand nodeCommand, IApplication application)
     : CommandMethodBase(nodeCommand)
 {
     [CommandPropertyRequired(DefaultValue = "")]

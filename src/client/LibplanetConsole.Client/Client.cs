@@ -19,10 +19,10 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private Guid _closeToken;
     private ClientInfo _info;
 
-    public Client(IServiceProvider serviceProvider, ApplicationOptions options, ILogger logger)
+    public Client(IServiceProvider serviceProvider, ApplicationOptions options)
     {
         _serviceProvider = serviceProvider;
-        _logger = logger;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _logger.Debug("Client is creating...: {Address}", options.PrivateKey.Address);
         _nodeEndPoint = options.NodeEndPoint;
         _privateKey = options.PrivateKey.ToSecureString();

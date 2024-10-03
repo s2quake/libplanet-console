@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Sends a transaction using a simple string.")]
 internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
 {

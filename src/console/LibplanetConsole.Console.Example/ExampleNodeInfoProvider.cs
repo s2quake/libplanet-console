@@ -2,7 +2,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IInfoProvider))]
 internal sealed class ExampleNodeInfoProvider
     : InfoProviderBase<ExampleNodeContent>
 {

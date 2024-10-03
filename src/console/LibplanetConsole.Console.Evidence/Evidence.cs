@@ -6,9 +6,6 @@ using LibplanetConsole.Evidence.Services;
 
 namespace LibplanetConsole.Console.Evidence;
 
-[Export(typeof(INodeContent))]
-[Export(typeof(IEvidence))]
-[Export(typeof(INodeContentService))]
 internal sealed class Evidence(INode node)
     : INodeContent, IEvidence, INodeContentService
 {

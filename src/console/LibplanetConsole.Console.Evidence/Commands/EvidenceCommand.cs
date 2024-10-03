@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Evidence.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Provides evidence-related commands.")]
 [Category("Evidence")]
 internal sealed class EvidenceCommand(INodeCollection nodes)

@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 
-[Export(typeof(IProcessArgumentProvider))]
 internal sealed class ClientProcessArgumentProvider : ProcessArgumentProviderBase<Client>
 {
     protected override IEnumerable<string> GetArguments(Client obj)

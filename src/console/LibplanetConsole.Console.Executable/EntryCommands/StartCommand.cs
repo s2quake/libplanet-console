@@ -28,8 +28,8 @@ internal sealed class StartCommand : CommandAsyncBase
         };
         var serviceCollection = new ApplicationServiceCollection();
 
-        serviceCollection.AddSingleton(applicationOptions);
-        serviceCollection.AddConsoleApplication<Application>(applicationOptions);
+        serviceCollection.AddConsole(applicationOptions);
+        serviceCollection.AddApplication(applicationOptions);
 
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         var @out = System.Console.Out;

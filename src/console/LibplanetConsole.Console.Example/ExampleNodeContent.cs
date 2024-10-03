@@ -6,9 +6,6 @@ using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IExampleNodeContent))]
-[Export(typeof(INodeContentService))]
-[Export(typeof(INodeContent))]
 internal sealed class ExampleNodeContent(INode node, ExampleSettings settings)
     : NodeContentBase(node), IExampleNodeCallback, IExampleNodeContent, INodeContentService
 {

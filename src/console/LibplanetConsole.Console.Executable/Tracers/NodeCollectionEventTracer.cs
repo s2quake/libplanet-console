@@ -6,7 +6,6 @@ using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
 internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplicationService
 {
     private readonly INodeCollection _nodes = nodes;

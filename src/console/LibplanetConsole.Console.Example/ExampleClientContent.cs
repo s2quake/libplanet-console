@@ -4,8 +4,6 @@ using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IExampleClientContent))]
-[Export(typeof(IClientContent))]
 internal sealed class ExampleClientContent(IClient client, ExampleClientSettings settings)
     : ClientContentBase(client), IExampleClientContent
 {

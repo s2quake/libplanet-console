@@ -6,7 +6,6 @@ using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
 internal sealed class ClientCollectionEventTracer(IClientCollection clients) : IApplicationService
 {
     private readonly IClientCollection _clients = clients;

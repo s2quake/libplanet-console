@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 
-[Export(typeof(IInfoProvider))]
 internal sealed class ClientInfoProvider : InfoProviderBase<Client>
 {
     public ClientInfoProvider()

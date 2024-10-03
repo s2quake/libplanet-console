@@ -2,7 +2,6 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Framework.Extensions;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,31 +10,28 @@ namespace LibplanetConsole.Node;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication<T>(
+    public static IServiceCollection AddNode(
         this IServiceCollection @this, ApplicationOptions options)
-        where T : ApplicationBase
     {
-        @this.AddSingleton(
-            ApplicationFramework.CreateLogger(typeof(T), options.LogPath, options.LibraryLogPath));
-        @this.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
-        @this.AddSingletonWithInterfaces<INode, IBlockChain, Node>();
+        @this.AddSingleton(s => new Node(s, options))
+             .AddSingleton<INode>(s => s.GetRequiredService<Node>())
+             .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
         @this.AddSingleton<NodeContext>();
+        @this.AddSingleton<SeedService>()
+             .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
+             .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
+        @this.AddSingleton<ILocalService, BlockChainService>();
+        @this.AddSingleton<ILocalService, NodeService>();
+        @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
+        @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
 
-        @this.AddSingletonWithInterfaces<ILocalService, IApplicationService, SeedService>();
-
-        @this.AddSingletonWithInterface<ILocalService, BlockChainService>();
-        @this.AddSingletonWithInterface<ILocalService, NodeService>();
-
-        @this.AddSingletonWithInterface<IInfoProvider, ApplicationInfoProvider>();
-        @this.AddSingletonWithInterface<IInfoProvider, NodeInfoProvider>();
-
-        @this.AddSingletonWithInterface<ICommand, AddressCommand>();
-        @this.AddSingletonWithInterface<ICommand, ExitCommand>();
-        @this.AddSingletonWithInterface<ICommand, InfoCommand>();
-        @this.AddSingletonWithInterface<ICommand, KeyCommand>();
-        @this.AddSingletonWithInterface<ICommand, StartCommand>();
-        @this.AddSingletonWithInterface<ICommand, StopCommand>();
-        @this.AddSingletonWithInterface<ICommand, TxCommand>();
+        @this.AddSingleton<ICommand, AddressCommand>();
+        @this.AddSingleton<ICommand, ExitCommand>();
+        @this.AddSingleton<ICommand, InfoCommand>();
+        @this.AddSingleton<ICommand, KeyCommand>();
+        @this.AddSingleton<ICommand, StartCommand>();
+        @this.AddSingleton<ICommand, StopCommand>();
+        @this.AddSingleton<ICommand, TxCommand>();
         return @this;
     }
 }

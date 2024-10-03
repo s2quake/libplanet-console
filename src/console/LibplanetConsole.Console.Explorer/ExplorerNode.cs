@@ -7,10 +7,7 @@ using Serilog;
 
 namespace LibplanetConsole.Console.Explorer;
 
-[Export(typeof(IExplorer))]
-[Export(typeof(INodeContentService))]
-[Export(typeof(INodeContent))]
-internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerSettings settings)
+internal sealed class ExplorerNode(INode node, ILogger logger, ExplorerSettings settings)
     : NodeContentBase(node), IExplorer, IExplorerCallback, INodeContentService
 {
     private readonly ILogger _logger = logger;

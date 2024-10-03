@@ -31,9 +31,8 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
             var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
             var applicationOptions = _applicationSettings.ToOptions();
 
-            serviceCollection.AddSingleton(applicationOptions);
-            serviceCollection.AddApplication<Application>(applicationOptions);
-            serviceCollection.AddExecutable();
+            serviceCollection.AddNode(applicationOptions);
+            serviceCollection.AddApplication(applicationOptions);
 
             using var serviceProvider = serviceCollection.BuildServiceProvider();
             var @out = Console.Out;

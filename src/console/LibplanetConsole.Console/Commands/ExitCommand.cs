@@ -3,7 +3,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Exit the application.")]
 internal sealed class ExitCommand(IApplication application) : CommandBase
 {

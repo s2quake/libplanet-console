@@ -3,20 +3,28 @@ using LibplanetConsole.Client.Example;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Framework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client.Executable;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddClientExecutable(this IServiceCollection @this)
+    public static IServiceCollection AddApplication(
+        this IServiceCollection @this, ApplicationOptions options)
     {
+        @this.AddSingleton(s => new Application(s, options));
+        @this.AddSingleton<IApplication>(s => s.GetRequiredService<Application>());
+        @this.AddSingleton(
+            ApplicationFramework.CreateLogger(
+                typeof(Application), options.LogPath, string.Empty));
+
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();
 
-        @this.AddSingletonWithInterface<ICommand, HelpCommand>();
-        @this.AddSingletonWithInterface<ICommand, VersionCommand>();
+        @this.AddSingleton<HelpCommand>()
+             .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
+        @this.AddSingleton<VersionCommand>()
+             .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
         @this.AddSingleton<IApplicationService, BlockChainEventTracer>();
         @this.AddSingleton<IApplicationService, ClientEventTracer>();

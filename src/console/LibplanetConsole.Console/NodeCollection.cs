@@ -100,7 +100,7 @@ internal sealed class NodeCollection(
     public async Task<Node> AddNewAsync(
         AddNewNodeOptions options, CancellationToken cancellationToken)
     {
-        var node = CreateNew(options.NodeOptions);
+        var node = NodeFactory.CreateNew(serviceProvider, options.NodeOptions);
         if (options.NoProcess != true)
         {
             await node.StartProcessAsync(options, cancellationToken);
@@ -189,14 +189,6 @@ internal sealed class NodeCollection(
 
         var nodeIndex = Random.Shared.Next(Count);
         return _nodeList[nodeIndex];
-    }
-
-    private Node CreateNew(NodeOptions nodeOptions)
-    {
-        lock (LockObject)
-        {
-            return new Node(serviceProvider, nodeOptions);
-        }
     }
 
     private void Node_Disposed(object? sender, EventArgs e)

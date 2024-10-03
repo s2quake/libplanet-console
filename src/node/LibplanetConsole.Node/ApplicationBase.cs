@@ -10,11 +10,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly Node _node;
-    private readonly NodeContext _nodeContext;
     private readonly Process? _parentProcess;
-    private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
+    private readonly ApplicationInfo _info;
     private readonly Task _waitForExitTask = Task.CompletedTask;
+    private NodeContext? _nodeContext;
     private Guid _closeToken;
 
     protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
@@ -25,12 +25,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
         _node = serviceProvider.GetRequiredService<Node>();
-        _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
-        _nodeContext.EndPoint = options.EndPoint;
-        _logger.Debug(options.EndPoint.ToString());
         _info = new()
         {
-            EndPoint = _nodeContext.EndPoint,
+            EndPoint = options.EndPoint,
             SeedEndPoint = options.SeedEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,
@@ -46,8 +43,6 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug("Application initialized.");
     }
 
-    public EndPoint EndPoint => _nodeContext.EndPoint;
-
     public ApplicationInfo Info => _info;
 
     public override ILogger Logger => _logger;
@@ -59,6 +54,8 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
+        _nodeContext.EndPoint = _info.EndPoint;
         _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
         await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
@@ -67,7 +64,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
+        if (_nodeContext is not null)
+        {
+            await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
+        }
+
         await _waitForExitTask;
     }
 

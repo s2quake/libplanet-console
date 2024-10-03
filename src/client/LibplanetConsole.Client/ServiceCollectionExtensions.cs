@@ -1,40 +1,39 @@
-using JSSoft.Commands;
 using LibplanetConsole.Client.Commands;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Framework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddClientApplication<T>(
+    public static IServiceCollection AddClient(
         this IServiceCollection @this, ApplicationOptions options)
-        where T : ApplicationBase
     {
-        @this.AddSingleton(
-            ApplicationFramework.CreateLogger(typeof(T), options.LogPath, string.Empty));
-        @this.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
-        @this.AddSingletonWithInterfaces<IClient, IBlockChain, Client>();
+        @this.AddSingleton(s => new Client(s, options))
+             .AddSingleton<IClient>(s => s.GetRequiredService<Client>())
+             .AddSingleton<IBlockChain>(s => s.GetRequiredService<Client>());
 
-        @this.AddSingletonWithInterfaces<ILocalService, IClientService, ClientService>();
+        @this.AddSingleton<ClientService>()
+             .AddSingleton<ILocalService>(s => s.GetRequiredService<ClientService>())
+             .AddSingleton<IClientService>(s => s.GetRequiredService<ClientService>());
         @this.AddSingleton<ClientServiceContext>();
-        @this.AddSingletonWithInterface<IRemoteService, RemoteBlockChainService>();
+        @this.AddSingleton<RemoteBlockChainService>()
+             .AddSingleton<IRemoteService>(s => s.GetRequiredService<RemoteBlockChainService>());
         @this.AddSingleton<RemoteNodeContext>();
-        @this.AddSingletonWithInterface<IRemoteService, RemoteNodeService>();
+        @this.AddSingleton<RemoteNodeService>()
+             .AddSingleton<IRemoteService>(s => s.GetRequiredService<RemoteNodeService>());
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, ClientInfoProvider>();
 
-        @this.AddSingletonWithInterface<ICommand, AddressCommand>();
-        @this.AddSingletonWithInterface<ICommand, ExitCommand>();
-        @this.AddSingletonWithInterface<ICommand, InfoCommand>();
-        @this.AddSingletonWithInterface<ICommand, KeyCommand>();
-        @this.AddSingletonWithInterface<ICommand, StartCommand>();
-        @this.AddSingletonWithInterface<ICommand, StopCommand>();
-        @this.AddSingletonWithInterface<ICommand, TxCommand>();
+        @this.AddSingleton<AddressCommand>();
+        @this.AddSingleton<ExitCommand>();
+        @this.AddSingleton<InfoCommand>();
+        @this.AddSingleton<KeyCommand>();
+        @this.AddSingleton<StartCommand>();
+        @this.AddSingleton<StopCommand>();
+        @this.AddSingleton<TxCommand>();
         return @this;
     }
 }

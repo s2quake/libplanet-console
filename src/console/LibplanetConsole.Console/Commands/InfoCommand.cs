@@ -4,7 +4,6 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Print console application information.")]
 internal sealed class InfoCommand(IApplication application) : CommandBase
 {

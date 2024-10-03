@@ -6,20 +6,15 @@ using LibplanetConsole.Seed;
 
 namespace LibplanetConsole.Console.Services;
 
-[Export]
-[Export(typeof(ILocalService))]
-[Export(typeof(IApplicationService))]
 internal sealed class SeedService : LocalService<ISeedService>,
     ISeedService, IApplicationService, IAsyncDisposable
 {
-    private readonly ApplicationBase _application;
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 
-    public SeedService(ApplicationBase application)
+    public SeedService(IApplication application)
     {
-        _application = application;
         _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
@@ -47,7 +42,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
             ConsensusSeedPeer = consensusSeedPeer,
         };
 
-        return await _application.InvokeAsync(() => seedInfo, cancellationToken);
+        return await Task.Run(() => seedInfo, cancellationToken);
     }
 
     async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)

@@ -11,9 +11,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly IServiceProvider _serviceProvider;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
-    private readonly ConsoleServiceContext _consoleContext;
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
+    private ConsoleServiceContext? _consoleContext;
     private Guid _closeToken;
 
     protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
@@ -25,11 +25,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug("Application initializing...");
         _nodes = serviceProvider.GetRequiredService<NodeCollection>();
         _clients = serviceProvider.GetRequiredService<ClientCollection>();
-        _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
-        _consoleContext.EndPoint = options.EndPoint;
         _info = new()
         {
-            EndPoint = _consoleContext.EndPoint,
+            EndPoint = options.EndPoint,
             LogPath = options.LogPath,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
@@ -101,13 +99,20 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
+        _consoleContext.EndPoint = _info.EndPoint;
         _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
         await base.OnRunAsync(cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
+        if (_consoleContext is not null)
+        {
+            await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
+            _consoleContext = null;
+        }
+
         await base.OnDisposeAsync();
     }
 

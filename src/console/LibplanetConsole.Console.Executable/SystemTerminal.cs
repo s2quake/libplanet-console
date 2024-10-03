@@ -4,7 +4,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Executable;
 
-[Export]
 internal sealed class SystemTerminal : SystemTerminalBase
 {
     private readonly CommandContext _commandContext;

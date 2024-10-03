@@ -3,7 +3,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Example client commands for a quick start.")]
 internal sealed class ExampleClientCommand(IApplication application) : CommandMethodBase
 {

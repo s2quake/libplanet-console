@@ -9,13 +9,12 @@ namespace LibplanetConsole.Console;
 
 [Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
-    ApplicationBase application, ClientOptions[] clientOptions)
+    IServiceProvider serviceProvider, ClientOptions[] clientOptions)
     : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
-    private readonly ApplicationBase _application = application;
     private readonly List<Client> _clientList = new(clientOptions.Length);
-    private readonly ILogger _logger = application.GetRequiredService<ILogger>();
+    private readonly ILogger _logger = serviceProvider.GetRequiredService<ILogger>();
     private Client? _current;
     private bool _isDisposed;
 
@@ -99,7 +98,7 @@ internal sealed class ClientCollection(
     public async Task<Client> AddNewAsync(
         AddNewClientOptions options, CancellationToken cancellationToken)
     {
-        var client = CreateNew(options.ClientOptions);
+        var client = ClientFactory.CreateNew(serviceProvider, options.ClientOptions);
         if (options.NoProcess != true)
         {
             await client.StartProcessAsync(options, cancellationToken);
@@ -112,7 +111,7 @@ internal sealed class ClientCollection(
 
         if (client.IsAttached is true && options.ClientOptions.NodeEndPoint is null)
         {
-            var nodes = _application.GetRequiredService<NodeCollection>();
+            var nodes = serviceProvider.GetRequiredService<NodeCollection>();
             var node = nodes.RandomNode();
             await client.StartAsync(node, cancellationToken);
         }
@@ -123,7 +122,7 @@ internal sealed class ClientCollection(
 
     async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
-        var info = _application.Info;
+        var info = serviceProvider.GetRequiredService<IApplication>().Info;
         await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
         Current = _clientList.FirstOrDefault();
 
@@ -171,22 +170,11 @@ internal sealed class ClientCollection(
         _ => -1,
     };
 
-    IEnumerator<Client> IEnumerable<Client>.GetEnumerator()
-        => _clientList.GetEnumerator();
+    IEnumerator<Client> IEnumerable<Client>.GetEnumerator() => _clientList.GetEnumerator();
 
-    IEnumerator<IClient> IEnumerable<IClient>.GetEnumerator()
-        => _clientList.GetEnumerator();
+    IEnumerator<IClient> IEnumerable<IClient>.GetEnumerator() => _clientList.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator()
-        => _clientList.GetEnumerator();
-
-    private Client CreateNew(ClientOptions clientOptions)
-    {
-        lock (LockObject)
-        {
-            return new Client(_application, clientOptions);
-        }
-    }
+    IEnumerator IEnumerable.GetEnumerator() => _clientList.GetEnumerator();
 
     private void Client_Disposed(object? sender, EventArgs e)
     {
