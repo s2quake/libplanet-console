@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.Composition;
-using Libplanet.Explorer;
+﻿using Libplanet.Explorer;
 using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Framework;
@@ -10,12 +9,8 @@ using Serilog;
 
 namespace LibplanetConsole.Node.Explorer;
 
-[Export(typeof(IExplorer))]
-[Export(typeof(IApplicationService))]
-[Export]
-[method: ImportingConstructor]
-internal sealed class Explorer(
-    INode node, ILogger logger, ExplorerSettings settings) : IExplorer, IApplicationService
+internal sealed class Explorer(INode node, ILogger logger, ExplorerSettings settings)
+    : IExplorer, IApplicationService
 {
     private IWebHost? _webHost;
 
@@ -69,8 +64,7 @@ internal sealed class Explorer(
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
         if (settings.IsExplorerEnabled is true)
         {

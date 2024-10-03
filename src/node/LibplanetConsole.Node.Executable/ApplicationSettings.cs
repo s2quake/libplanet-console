@@ -98,7 +98,7 @@ internal sealed record class ApplicationSettings
     [DefaultValue("")]
     public string ActionProviderType { get; set; } = string.Empty;
 
-    public ApplicationOptions ToOptions(object[] components)
+    public ApplicationOptions ToOptions()
     {
         var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
@@ -113,7 +113,6 @@ internal sealed record class ApplicationSettings
             LogPath = GetFullPath(LogPath),
             LibraryLogPath = GetFullPath(LibraryLogPath),
             NoREPL = NoREPL,
-            Components = components,
             ActionProvider = actionProvider,
         };
 

@@ -1,53 +1,38 @@
-using System.Collections;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Framework.Extensions;
 using LibplanetConsole.Node.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Node;
 
 public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
-    private readonly ApplicationContainer _container;
+    private readonly IServiceProvider _serviceProvider;
     private readonly Node _node;
-    private readonly NodeContext _nodeContext;
     private readonly Process? _parentProcess;
-    private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
+    private readonly ApplicationInfo _info;
     private readonly Task _waitForExitTask = Task.CompletedTask;
+    private NodeContext? _nodeContext;
     private Guid _closeToken;
 
-    protected ApplicationBase(ApplicationOptions options)
+    protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
+        : base(serviceProvider)
     {
-        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
+        _serviceProvider = serviceProvider;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
-        _node = new Node(this, options, _logger);
-        _container = new(this);
-        _container.ComposeExportedValue(_logger);
-        _container.ComposeExportedValue<IApplication>(this);
-        _container.ComposeExportedValue(this);
-        _container.ComposeExportedValue<IServiceProvider>(this);
-        _container.ComposeExportedValue(_node);
-        _container.ComposeExportedValue<INode>(_node);
-        _container.ComposeExportedValue<IBlockChain>(_node);
-        _container.ComposeExportedValues(options.Components);
-        _container.ComposeParts(options.Components);
-        _nodeContext = _container.GetValue<NodeContext>();
-        _nodeContext.EndPoint = options.EndPoint;
-        _logger.Debug(options.EndPoint.ToString());
-        _container.GetValue<IApplicationConfigurations>();
+        _node = serviceProvider.GetRequiredService<Node>();
         _info = new()
         {
-            EndPoint = _nodeContext.EndPoint,
+            EndPoint = options.EndPoint,
             SeedEndPoint = options.SeedEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,
             ParentProcessId = options.ParentProcessId,
         };
-        ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
@@ -58,10 +43,6 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug("Application initialized.");
     }
 
-    public override ApplicationServiceCollection ApplicationServices { get; }
-
-    public EndPoint EndPoint => _nodeContext.EndPoint;
-
     public ApplicationInfo Info => _info;
 
     public override ILogger Logger => _logger;
@@ -69,36 +50,14 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override bool CanClose => _parentProcess?.HasExited == true;
 
     public override object? GetService(Type serviceType)
-    {
-        var isMultiple = serviceType.IsGenericType &&
-            serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
-
-        if (isMultiple == true)
-        {
-            var itemType = serviceType.GenericTypeArguments[0];
-            var contractName = AttributedModelServices.GetContractName(itemType);
-            var items = _container.GetExportedValues<object?>(contractName);
-            var listGenericType = typeof(List<>);
-            var list = listGenericType.MakeGenericType(itemType);
-            var ci = list.GetConstructor([typeof(int)]) ?? throw new UnreachableException();
-            var instance = (IList)ci.Invoke([items.Count(),]);
-            foreach (var item in items)
-            {
-                instance.Add(item);
-            }
-
-            return instance;
-        }
-        else
-        {
-            var contractName = AttributedModelServices.GetContractName(serviceType);
-            return _container.GetExportedValue<object?>(contractName);
-        }
-    }
+        => _serviceProvider.GetService(serviceType);
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
+        _nodeContext.EndPoint = _info.EndPoint;
         _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
+        _logger.Debug("NodeContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
     }
@@ -106,8 +65,12 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
-        await _container.DisposeAsync();
+        if (_nodeContext is not null)
+        {
+            await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
+            _logger.Debug("NodeContext is closed: {EndPoint}", _info.EndPoint);
+        }
+
         await _waitForExitTask;
     }
 

@@ -12,6 +12,7 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Seed;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Node;
@@ -38,7 +39,7 @@ internal sealed partial class Node : IActionRenderer, INode
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
 
-    public Node(IServiceProvider serviceProvider, ApplicationOptions options, ILogger logger)
+    public Node(IServiceProvider serviceProvider, ApplicationOptions options)
     {
         _serviceProvider = serviceProvider;
         _seedEndPoint = options.SeedEndPoint;
@@ -46,7 +47,7 @@ internal sealed partial class Node : IActionRenderer, INode
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
         _actionProvider = options.ActionProvider ?? ActionProvider.Default;
-        _logger = logger;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _genesis = options.Genesis;
         UpdateNodeInfo();
         _logger.Debug("Node is created: {Address}", Address);
@@ -228,20 +229,21 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
-        _blocksyncEndPoint = null;
-        _consensusEndPoint = null;
-
-        if (_swarm is not null)
+        if (_isDisposed is false)
         {
-            await _swarm.StopAsync(cancellationToken: default);
-            _swarm.Dispose();
-        }
+            _blocksyncEndPoint = null;
+            _consensusEndPoint = null;
 
-        await (_startTask ?? Task.CompletedTask);
-        _startTask = Task.CompletedTask;
-        _isDisposed = true;
+            if (_swarm is not null)
+            {
+                await _swarm.StopAsync(cancellationToken: default);
+                _swarm.Dispose();
+            }
+
+            await (_startTask ?? Task.CompletedTask);
+            _startTask = Task.CompletedTask;
+            _isDisposed = true;
+        }
     }
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)

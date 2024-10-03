@@ -1,20 +1,21 @@
-using System.ComponentModel.Composition;
 using System.Security.Cryptography;
 using LibplanetConsole.Common.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace LibplanetConsole.Node.Services;
 
-[Export(typeof(ILocalService))]
 internal sealed class BlockChainService
     : LocalService<IBlockChainService, IBlockChainCallback>, IBlockChainService
 {
     private static readonly Codec _codec = new();
+    private readonly ILogger _logger;
     private readonly Node _node;
 
-    [ImportingConstructor]
     public BlockChainService(Node node)
     {
         _node = node;
+        _logger = node.GetRequiredService<ILogger>();
         _node.BlockAppended += Node_BlockAppended;
     }
 
@@ -65,5 +66,6 @@ internal sealed class BlockChainService
     {
         var blockInfo = e.BlockInfo;
         Callback.OnBlockAppended(blockInfo);
+        _logger.Debug("Callback.OnBlockAppended: {BlockHash}", blockInfo.Hash);
     }
 }

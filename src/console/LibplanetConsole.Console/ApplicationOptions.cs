@@ -24,6 +24,4 @@ public sealed record class ApplicationOptions
     public bool Detach { get; init; }
 
     public bool NewWindow { get; init; }
-
-    public object[] Components { get; init; } = [];
 }

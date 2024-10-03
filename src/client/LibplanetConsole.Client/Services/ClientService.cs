@@ -1,17 +1,13 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Client.Services;
 
-[Export(typeof(ILocalService))]
-[Export(typeof(IClientService))]
 internal sealed class ClientService : LocalService<IClientService, IClientCallback>, IClientService
 {
     private readonly Client _client;
 
-    [ImportingConstructor]
     public ClientService(Client client)
     {
         _client = client;

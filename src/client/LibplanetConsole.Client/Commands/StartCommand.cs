@@ -1,12 +1,9 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Start client.")]
-[method: ImportingConstructor]
 internal sealed class StartCommand(Client client) : CommandAsyncBase
 {
     public override bool IsEnabled => client.IsRunning is false;

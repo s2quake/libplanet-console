@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Specialized;
-using System.ComponentModel.Composition;
-using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -9,15 +7,13 @@ using Serilog;
 namespace LibplanetConsole.Console;
 
 [Dependency(typeof(NodeCollection))]
-[method: ImportingConstructor]
 internal sealed class ClientCollection(
-    ApplicationBase application, ClientOptions[] clientOptions)
+    IServiceProvider serviceProvider, ClientOptions[] clientOptions)
     : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
 {
     private static readonly object LockObject = new();
-    private readonly ApplicationBase _application = application;
     private readonly List<Client> _clientList = new(clientOptions.Length);
-    private readonly ILogger _logger = application.GetRequiredService<ILogger>();
+    private readonly ILogger _logger = serviceProvider.GetRequiredService<ILogger>();
     private Client? _current;
     private bool _isDisposed;
 
@@ -101,7 +97,7 @@ internal sealed class ClientCollection(
     public async Task<Client> AddNewAsync(
         AddNewClientOptions options, CancellationToken cancellationToken)
     {
-        var client = CreateNew(options.ClientOptions);
+        var client = ClientFactory.CreateNew(serviceProvider, options.ClientOptions);
         if (options.NoProcess != true)
         {
             await client.StartProcessAsync(options, cancellationToken);
@@ -114,7 +110,7 @@ internal sealed class ClientCollection(
 
         if (client.IsAttached is true && options.ClientOptions.NodeEndPoint is null)
         {
-            var nodes = _application.GetRequiredService<NodeCollection>();
+            var nodes = serviceProvider.GetRequiredService<NodeCollection>();
             var node = nodes.RandomNode();
             await client.StartAsync(node, cancellationToken);
         }
@@ -123,10 +119,9 @@ internal sealed class ClientCollection(
         return client;
     }
 
-    async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
-        var info = _application.Info;
+        var info = serviceProvider.GetRequiredService<IApplication>().Info;
         await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
         Current = _clientList.FirstOrDefault();
 
@@ -145,17 +140,19 @@ internal sealed class ClientCollection(
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
-        for (var i = _clientList.Count - 1; i >= 0; i--)
+        if (_isDisposed is false)
         {
-            var item = _clientList[i]!;
-            await item.DisposeAsync();
-            _logger.Debug("Disposed a client: {Address}", item.Address);
-        }
+            for (var i = _clientList.Count - 1; i >= 0; i--)
+            {
+                var client = _clientList[i]!;
+                client.Disposed -= Client_Disposed;
+                await ClientFactory.DisposeScopeAsync(client);
+                _logger.Debug("Disposed a client: {Address}", client.Address);
+            }
 
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 
     async Task<IClient> IClientCollection.AddNewAsync(
@@ -174,22 +171,11 @@ internal sealed class ClientCollection(
         _ => -1,
     };
 
-    IEnumerator<Client> IEnumerable<Client>.GetEnumerator()
-        => _clientList.GetEnumerator();
+    IEnumerator<Client> IEnumerable<Client>.GetEnumerator() => _clientList.GetEnumerator();
 
-    IEnumerator<IClient> IEnumerable<IClient>.GetEnumerator()
-        => _clientList.GetEnumerator();
+    IEnumerator<IClient> IEnumerable<IClient>.GetEnumerator() => _clientList.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator()
-        => _clientList.GetEnumerator();
-
-    private Client CreateNew(ClientOptions clientOptions)
-    {
-        lock (LockObject)
-        {
-            return new Client(_application, clientOptions);
-        }
-    }
+    IEnumerator IEnumerable.GetEnumerator() => _clientList.GetEnumerator();
 
     private void Client_Disposed(object? sender, EventArgs e)
     {

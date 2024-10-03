@@ -2,7 +2,7 @@ using static LibplanetConsole.Console.ProcessEnvironment;
 
 namespace LibplanetConsole.Console;
 
-internal abstract class NodeProcessBase : ProcessBase
+public abstract class NodeProcessBase : ProcessBase
 {
     public override sealed bool SupportsDotnetRuntime => true;
 

@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Explorer;
@@ -6,9 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Explorer.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Provides commands for the explorer(GraphQL).")]
-[method: ImportingConstructor]
 internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : CommandMethodBase
 {
     [CommandMethod]

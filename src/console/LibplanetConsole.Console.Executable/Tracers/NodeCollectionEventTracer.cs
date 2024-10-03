@@ -1,20 +1,16 @@
 using System.Collections.Specialized;
-using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplicationService
 {
     private readonly INodeCollection _nodes = nodes;
     private INode? _current;
 
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         UpdateCurrent(_nodes.Current);
         foreach (var node in _nodes)

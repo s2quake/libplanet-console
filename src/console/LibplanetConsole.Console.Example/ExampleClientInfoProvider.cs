@@ -1,18 +1,16 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IInfoProvider))]
 internal sealed class ExampleClientInfoProvider
-    : InfoProviderBase<ExampleClientContent>
+    : InfoProviderBase<ExampleClient>
 {
     public ExampleClientInfoProvider()
-        : base(nameof(ExampleClientContent))
+        : base(nameof(ExampleClient))
     {
     }
 
-    protected override object? GetInfo(ExampleClientContent obj)
+    protected override object? GetInfo(ExampleClient obj)
     {
         return new
         {

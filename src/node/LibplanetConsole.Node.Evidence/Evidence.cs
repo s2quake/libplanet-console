@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using Libplanet.Blockchain;
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Evidence;
@@ -6,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Evidence;
 
-[Export(typeof(IEvidence))]
-[Export]
-[method: ImportingConstructor]
 internal sealed class Evidence(INode node) : IEvidence, IAsyncDisposable
 {
     private readonly DuplicateVoteViolator _duplicateVotePerpetrator = new(node);

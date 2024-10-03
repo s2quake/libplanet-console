@@ -1,12 +1,9 @@
-using System.ComponentModel.Composition;
-
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IProcessArgumentProvider))]
 internal sealed class ExampleNodeProcessArgumentProvider
-    : ProcessArgumentProviderBase<ExampleNodeContent>
+    : ProcessArgumentProviderBase<ExampleNode>
 {
-    protected override IEnumerable<string> GetArguments(ExampleNodeContent obj)
+    protected override IEnumerable<string> GetArguments(ExampleNode obj)
     {
         if (obj.IsExample == true)
         {

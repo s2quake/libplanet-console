@@ -1,17 +1,13 @@
-using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class BlockChainEventTracer(IBlockChain blockChain)
     : IApplicationService, IDisposable
 {
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         blockChain.BlockAppended += BlockChain_BlockAppended;
         return Task.CompletedTask;

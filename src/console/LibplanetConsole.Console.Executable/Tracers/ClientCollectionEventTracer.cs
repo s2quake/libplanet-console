@@ -1,19 +1,15 @@
 using System.Collections.Specialized;
-using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class ClientCollectionEventTracer(IClientCollection clients) : IApplicationService
 {
     private readonly IClientCollection _clients = clients;
 
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         foreach (var client in _clients)
         {

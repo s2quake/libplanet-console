@@ -1,14 +1,11 @@
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Evidence.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Provides evidence-related commands.")]
 [Category("Evidence")]
-[method: ImportingConstructor]
 internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     : CommandMethodBase
 {

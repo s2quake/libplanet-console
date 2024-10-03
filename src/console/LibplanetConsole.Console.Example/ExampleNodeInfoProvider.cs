@@ -1,18 +1,16 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(IInfoProvider))]
 internal sealed class ExampleNodeInfoProvider
-    : InfoProviderBase<ExampleNodeContent>
+    : InfoProviderBase<ExampleNode>
 {
     public ExampleNodeInfoProvider()
-        : base(nameof(ExampleNodeContent))
+        : base(nameof(ExampleNode))
     {
     }
 
-    protected override object? GetInfo(ExampleNodeContent obj)
+    protected override object? GetInfo(ExampleNode obj)
     {
         return new
         {

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 
@@ -5,22 +6,55 @@ namespace LibplanetConsole.Framework;
 
 public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ManualResetEvent _closeEvent = new(false);
     private readonly SynchronizationContext _synchronizationContext;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly ILogger _logger;
     private bool _isDisposed;
 
-    protected ApplicationFramework()
+    protected ApplicationFramework(IServiceProvider serviceProvider)
     {
         SynchronizationContext.SetSynchronizationContext(new());
+        _logger = serviceProvider.GetRequiredService<ILogger>();
+        _serviceProvider = serviceProvider;
         _synchronizationContext = SynchronizationContext.Current!;
     }
-
-    public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
 
     public abstract ILogger Logger { get; }
 
     protected virtual bool CanClose => false;
+
+    public static ILogger CreateLogger(
+        Type applicationType, string logPath, string libraryLogPath)
+    {
+        var loggerConfiguration = new LoggerConfiguration();
+        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+        if (logPath != string.Empty)
+        {
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByIncludingOnly(e => IsApplicationLog(applicationType, e))
+                    .WriteTo.File(logPath));
+        }
+
+        if (libraryLogPath != string.Empty)
+        {
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByExcluding(e => IsApplicationLog(applicationType, e))
+                    .WriteTo.File(libraryLogPath));
+        }
+
+        Log.Logger = loggerConfiguration.CreateLogger();
+        var logger = Log.ForContext(applicationType);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
+        };
+
+        return logger;
+    }
 
     public Task InvokeAsync(Action action, CancellationToken cancellationToken)
     {
@@ -67,51 +101,31 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed == true, this);
-
-        Logger.Debug("Application disposing...");
-        await OnDisposeAsync();
-        _cancellationTokenSource.Dispose();
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
-        Logger.Debug("Application disposed.");
+        if (_isDisposed is false)
+        {
+            Logger.Debug("Application disposing...");
+            await OnDisposeAsync();
+            _cancellationTokenSource.Dispose();
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+            Logger.Debug("Application disposed.");
+        }
     }
 
     public abstract object? GetService(Type serviceType);
 
-    protected static ILogger CreateLogger(
-        Type applicationType, string logPath, string libraryLogPath)
+    protected virtual async Task OnRunAsync(CancellationToken cancellationToken)
     {
-        var loggerConfiguration = new LoggerConfiguration();
-        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
-        if (logPath != string.Empty)
+        var applicationServices = Sort(_serviceProvider.GetServices<IApplicationService>());
+
+        for (var i = 0; i < applicationServices.Length; i++)
         {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => IsApplicationLog(applicationType, e))
-                    .WriteTo.File(logPath));
+            var serviceName = applicationServices[i].GetType().Name;
+            _logger?.Debug("Application service initializing: {0}", serviceName);
+            await applicationServices[i].InitializeAsync(cancellationToken);
+            _logger?.Debug("Application service initialized: {0}", serviceName);
         }
-
-        if (libraryLogPath != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByExcluding(e => IsApplicationLog(applicationType, e))
-                    .WriteTo.File(libraryLogPath));
-        }
-
-        Log.Logger = loggerConfiguration.CreateLogger();
-        var logger = Log.ForContext(applicationType);
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
     }
-
-    protected virtual Task OnRunAsync(CancellationToken cancellationToken)
-        => ApplicationServices.InitializeAsync(this, cancellationToken: default);
 
     protected virtual ValueTask OnDisposeAsync() => ValueTask.CompletedTask;
 
@@ -133,5 +147,15 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
         }
 
         return value == applicationType.FullName;
+    }
+
+    private static IApplicationService[] Sort(IEnumerable<IApplicationService> items)
+    {
+        return DependencyUtility.TopologicalSort(items, GetDependencies).ToArray();
+
+        IEnumerable<IApplicationService> GetDependencies(IApplicationService item)
+        {
+            return DependencyUtility.GetDependencies(item, items);
+        }
     }
 }

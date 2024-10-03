@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
@@ -7,10 +6,7 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
 
-[Export(typeof(ICommand))]
-[Export]
 [CommandSummary("Provides node-related commands.")]
-[method: ImportingConstructor]
 public sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
     : CommandMethodBase
 {

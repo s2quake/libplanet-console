@@ -1,17 +1,13 @@
-using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Node.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class NodeEventTracer(IApplication application, INode node)
     : IApplicationService, IDisposable
 {
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         node.Started += Node_Started;
         node.Stopped += Node_Stopped;

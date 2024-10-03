@@ -11,7 +11,7 @@ namespace LibplanetConsole.Client;
 
 internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallback
 {
-    private readonly ApplicationBase _application;
+    private readonly IServiceProvider _serviceProvider;
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
     private EndPoint? _nodeEndPoint;
@@ -19,11 +19,11 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private Guid _closeToken;
     private ClientInfo _info;
 
-    public Client(ApplicationBase application, ApplicationOptions options)
+    public Client(IServiceProvider serviceProvider, ApplicationOptions options)
     {
-        _logger = application.Logger;
+        _serviceProvider = serviceProvider;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _logger.Debug("Client is creating...: {Address}", options.PrivateKey.Address);
-        _application = application;
         _nodeEndPoint = options.NodeEndPoint;
         _privateKey = options.PrivateKey.ToSecureString();
         _info = new() { Address = options.PrivateKey.Address };
@@ -65,10 +65,10 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     public bool IsRunning { get; private set; }
 
     private INodeService RemoteNodeService
-        => _application.GetRequiredService<RemoteNodeService>().Service;
+        => _serviceProvider.GetRequiredService<RemoteNodeService>().Service;
 
     private IBlockChainService RemoteBlockChainService
-        => _application.GetRequiredService<RemoteBlockChainService>().Service;
+        => _serviceProvider.GetRequiredService<RemoteBlockChainService>().Service;
 
     public override string ToString() => $"[{Address}]";
 
@@ -81,7 +81,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
             throw new InvalidOperationException("The client is already running.");
         }
 
-        _remoteNodeContext = _application.GetRequiredService<RemoteNodeContext>();
+        _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
         _remoteNodeContext.EndPoint = NodeEndPoint;
         _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
         _remoteNodeContext.Closed += RemoteNodeContext_Closed;

@@ -5,8 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Executable;
 
-internal sealed partial class Application(ApplicationOptions options)
-    : ApplicationBase(options), IApplication
+internal sealed partial class Application(
+    IServiceProvider serviceProvider, ApplicationOptions options)
+    : ApplicationBase(serviceProvider, options), IApplication
 {
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {

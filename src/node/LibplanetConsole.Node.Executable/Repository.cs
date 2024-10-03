@@ -25,39 +25,9 @@ public sealed record class Repository
 
     public string GenesisPath { get; init; } = string.Empty;
 
-    public string Source { get; private set; } = string.Empty;
-
     public string ActionProviderModulePath { get; init; } = string.Empty;
 
     public string ActionProviderType { get; init; } = string.Empty;
-
-    public static Repository Load(string settingsPath)
-    {
-        if (Path.IsPathRooted(settingsPath) is false)
-        {
-            throw new ArgumentException(
-                $"'{settingsPath}' must be an absolute path.", nameof(settingsPath));
-        }
-
-        var directoryName = Path.GetDirectoryName(settingsPath)
-            ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
-        var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.DeserializeSchema<Settings>(json);
-        var applicationSettings = settings.Application;
-
-        return new()
-        {
-            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
-            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
-            StorePath = Path.GetFullPath(applicationSettings.StorePath, directoryName),
-            LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
-            LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, directoryName),
-            Source = settingsPath,
-            SeedEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.SeedEndPoint),
-            ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
-            ActionProviderType = applicationSettings.ActionProviderType,
-        };
-    }
 
     public dynamic Save(string repositoryPath)
     {

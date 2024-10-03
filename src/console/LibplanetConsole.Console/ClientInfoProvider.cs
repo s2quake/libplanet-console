@@ -1,11 +1,9 @@
 using System.Collections.Immutable;
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 
-[Export(typeof(IInfoProvider))]
 internal sealed class ClientInfoProvider : InfoProviderBase<Client>
 {
     public ClientInfoProvider()

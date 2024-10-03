@@ -1,12 +1,9 @@
-using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Commands;
 
 namespace LibplanetConsole.Console.Example;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Example node commands for a quick start.")]
-[method: ImportingConstructor]
 internal sealed class ExampleNodeCommand(IApplication application) : CommandMethodBase
 {
     [CommandMethod]
@@ -15,7 +12,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             sampleNode.Subscribe(client.Address);
         }
@@ -32,7 +29,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             sampleNode.Unsubscribe(client.Address);
         }
@@ -48,7 +45,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             Out.WriteLine(sampleNode.Count);
         }
@@ -64,7 +61,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             var addresses = await sampleNode.GetAddressesAsync(cancellationToken);
             var sb = new StringBuilder();

@@ -1,60 +1,41 @@
-using System.Collections;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Framework.Extensions;
 using LibplanetConsole.Node;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Console;
 
 public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
-    private readonly ApplicationContainer _container;
+    private readonly IServiceProvider _serviceProvider;
     private readonly NodeCollection _nodes;
     private readonly ClientCollection _clients;
-    private readonly ConsoleServiceContext _consoleContext;
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
+    private ConsoleServiceContext? _consoleContext;
     private Guid _closeToken;
 
-    protected ApplicationBase(ApplicationOptions options)
+    protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
+        : base(serviceProvider)
     {
-        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
+        _serviceProvider = serviceProvider;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
-        _container = new(this);
-        _container.ComposeExportedValue(_logger);
-        _nodes = new NodeCollection(this, options.Nodes);
-        _clients = new ClientCollection(this, options.Clients);
-        _container.ComposeExportedValue(this);
-        _container.ComposeExportedValue<IApplication>(this);
-        _container.ComposeExportedValue<IServiceProvider>(this);
-        _container.ComposeExportedValue(_nodes);
-        _container.ComposeExportedValue<INodeCollection>(_nodes);
-        _container.ComposeExportedValue<IApplicationService>(_nodes);
-        _container.ComposeExportedValue(_clients);
-        _container.ComposeExportedValue<IClientCollection>(_clients);
-        _container.ComposeExportedValue<IApplicationService>(_clients);
-        _container.ComposeExportedValues(options.Components);
-        _consoleContext = _container.GetValue<ConsoleServiceContext>();
-        _consoleContext.EndPoint = options.EndPoint;
-        _container.GetValue<IApplicationConfigurations>();
+        _nodes = serviceProvider.GetRequiredService<NodeCollection>();
+        _clients = serviceProvider.GetRequiredService<ClientCollection>();
         _info = new()
         {
-            EndPoint = _consoleContext.EndPoint,
+            EndPoint = options.EndPoint,
             LogPath = options.LogPath,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
             NewWindow = options.NewWindow,
         };
         GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
-        ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
         _logger.Debug("Application initialized.");
     }
-
-    public override ApplicationServiceCollection ApplicationServices { get; }
 
     public ApplicationInfo Info => _info;
 
@@ -90,35 +71,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         => _nodes.Concat<IAddressable>(_clients).Single(item => IsEquals(item, address));
 
     public override object? GetService(Type serviceType)
-    {
-        var isMultiple = serviceType.IsGenericType &&
-            serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
-
-        if (isMultiple == true)
-        {
-            var itemType = serviceType.GenericTypeArguments[0];
-            var contractName = AttributedModelServices.GetContractName(itemType);
-            var items = _container.GetExportedValues<object?>(contractName);
-            var listGenericType = typeof(List<>);
-            var list = listGenericType.MakeGenericType(itemType);
-            var ci = list.GetConstructor([typeof(int)]) ?? throw new UnreachableException();
-            var instance = (IList)ci.Invoke([items.Count(),]);
-            foreach (var item in items)
-            {
-                instance.Add(item);
-            }
-
-            return instance;
-        }
-        else
-        {
-            var contractName = AttributedModelServices.GetContractName(serviceType);
-            return _container.GetExportedValue<object?>(contractName);
-        }
-    }
-
-    public ApplicationContainer CreateChildContainer(object owner)
-        => new(owner, _container);
+        => _serviceProvider.GetService(serviceType);
 
     IClient IApplication.GetClient(string address) => GetClient(address);
 
@@ -146,15 +99,21 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
+        _consoleContext.EndPoint = _info.EndPoint;
         _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
         await base.OnRunAsync(cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
+        if (_consoleContext is not null)
+        {
+            await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
+            _consoleContext = null;
+        }
+
         await base.OnDisposeAsync();
-        await _container.DisposeAsync();
     }
 
     private static bool IsEquals(IAddressable addressable, string address)

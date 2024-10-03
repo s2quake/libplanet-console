@@ -37,7 +37,8 @@ internal sealed class ActionProvider : IActionProvider
 
     public IActionLoader GetActionLoader()
     {
-        var assemblies = ApplicationContainer.GetAssemblies(Assembly.GetExecutingAssembly());
+        var executingAssembly = Assembly.GetExecutingAssembly();
+        var assemblies = ApplicationServiceCollection.GetAssemblies(executingAssembly);
         var actionLoaders = assemblies.Select(item => new AssemblyActionLoader(item)).ToArray();
         return new AggregateTypedActionLoader(actionLoaders);
     }

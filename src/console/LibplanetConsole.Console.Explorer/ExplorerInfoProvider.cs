@@ -1,18 +1,15 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Explorer;
 
-[Export(typeof(IInfoProvider))]
-internal sealed class ExplorerInfoProvider
-    : InfoProviderBase<ExplorerNodeContent>
+internal sealed class ExplorerInfoProvider : InfoProviderBase<Explorer>
 {
     public ExplorerInfoProvider()
         : base("Explorer")
     {
     }
 
-    protected override object? GetInfo(ExplorerNodeContent obj)
+    protected override object? GetInfo(Explorer obj)
     {
         return new
         {

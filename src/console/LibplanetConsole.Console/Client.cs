@@ -1,6 +1,3 @@
-using System.Collections;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
@@ -8,7 +5,6 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
-using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -16,36 +12,26 @@ namespace LibplanetConsole.Console;
 
 internal sealed class Client : IClient, IClientCallback
 {
-    private readonly ApplicationContainer _container;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ClientOptions _clientOptions;
-    private readonly RemoteServiceContext _remoteServiceContext;
     private readonly RemoteService<IClientService, IClientCallback> _remoteService;
-    private readonly IClientContent[] _contents;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
+    private RemoteServiceContext? _remoteServiceContext;
     private Guid _closeToken;
     private ClientInfo _clientInfo;
-    private INode? _node;
     private bool _isDisposed;
     private bool _isInProgress;
     private ClientProcess? _process;
     private Task _processTask = Task.CompletedTask;
 
-    public Client(ApplicationBase application, ClientOptions clientOptions)
+    public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
-        _container = application.CreateChildContainer(this);
+        _serviceProvider = serviceProvider;
         _clientOptions = clientOptions;
-        _container.ComposeExportedValue<IClient>(this);
-        _contents = [.. _container.GetExportedValues<IClientContent>()];
         _remoteService = new(this);
-        _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_container)])
-        {
-            EndPoint = clientOptions.EndPoint,
-        };
-        _logger = application.GetRequiredService<ILogger>();
+        _logger = _serviceProvider.GetRequiredService<ILogger>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
-        _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         _logger.Debug("Client is created: {Address}", Address);
     }
 
@@ -67,48 +53,11 @@ internal sealed class Client : IClient, IClientCallback
 
     public bool IsRunning { get; private set; }
 
-    public EndPoint EndPoint => _remoteServiceContext.EndPoint;
+    public EndPoint EndPoint => _clientOptions.EndPoint;
 
     public ClientInfo Info => _clientInfo;
 
-    public object? GetService(Type serviceType)
-    {
-        if (serviceType == typeof(IServiceProvider))
-        {
-            return this;
-        }
-
-        if (serviceType == typeof(INode))
-        {
-            return _node;
-        }
-
-        if (serviceType == typeof(IEnumerable<IClientContent>))
-        {
-            return _contents;
-        }
-
-        if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
-            serviceType.GenericTypeArguments.Length == 1)
-        {
-            var itemType = serviceType.GenericTypeArguments[0];
-            var items = GetInstances(itemType);
-            var listGenericType = typeof(List<>);
-            var list = listGenericType.MakeGenericType(itemType);
-            var ci = list.GetConstructor([typeof(int)])!;
-            var instance = (IList)ci.Invoke([items.Count(),]);
-            foreach (var item in items)
-            {
-                instance.Add(item);
-            }
-
-            return instance;
-        }
-        else
-        {
-            return GetInstance(serviceType);
-        }
-    }
+    public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 
     public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
 
@@ -130,8 +79,19 @@ internal sealed class Client : IClient, IClientCallback
             condition: _closeToken != Guid.Empty,
             message: "Client is already attached.");
 
+        if (_remoteServiceContext is not null)
+        {
+            throw new InvalidOperationException("Client is already attached.");
+        }
+
         using var scope = new ProgressScope(this);
+        _remoteServiceContext = new RemoteServiceContext(
+            [_remoteService, .. GetRemoteServices(_serviceProvider)])
+        {
+            EndPoint = _clientOptions.EndPoint,
+        };
         _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
+        _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         IsRunning = _clientInfo.IsRunning;
         _logger.Debug("Client is attached: {Address}", Address);
@@ -145,7 +105,13 @@ internal sealed class Client : IClient, IClientCallback
             condition: _closeToken == Guid.Empty,
             message: "Client is not attached.");
 
+        if (_remoteServiceContext is null)
+        {
+            throw new InvalidOperationException("Client is not attached.");
+        }
+
         using var scope = new ProgressScope(this);
+        _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
         await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         _closeToken = Guid.Empty;
         _logger.Debug("Client is detached: {Address}", Address);
@@ -162,7 +128,6 @@ internal sealed class Client : IClient, IClientCallback
 
         _clientInfo = await _remoteService.Service.StartAsync(
             EndPointUtility.ToString(node.EndPoint), cancellationToken);
-        _node = node;
         IsRunning = true;
         _logger.Debug("Client is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
@@ -177,7 +142,6 @@ internal sealed class Client : IClient, IClientCallback
             message: "Client is not attached.");
 
         await _remoteService.Service.StopAsync(cancellationToken);
-        _node = null;
         _closeToken = Guid.Empty;
         _clientInfo = default;
         IsRunning = false;
@@ -197,27 +161,28 @@ internal sealed class Client : IClient, IClientCallback
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        await _processCancellationTokenSource.CancelAsync();
-        _processCancellationTokenSource.Dispose();
-        await _processTask;
-        _processTask = Task.CompletedTask;
-        _process = null;
-
-        _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-        if (_closeToken != Guid.Empty)
+        if (_isDisposed is false)
         {
-            await _remoteServiceContext.CloseAsync(_closeToken);
-            _closeToken = Guid.Empty;
-        }
+            await _processCancellationTokenSource.CancelAsync();
+            _processCancellationTokenSource.Dispose();
+            await _processTask;
+            _processTask = Task.CompletedTask;
+            _process = null;
 
-        IsRunning = false;
-        await _container.DisposeAsync();
-        _isDisposed = true;
-        _logger.Debug("Client is disposed: {Address}", Address);
-        Disposed?.Invoke(this, EventArgs.Empty);
-        GC.SuppressFinalize(this);
+            if (_remoteServiceContext is not null)
+            {
+                _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+                await _remoteServiceContext.CloseAsync(_closeToken);
+                _remoteServiceContext = null;
+            }
+
+            _closeToken = Guid.Empty;
+            IsRunning = false;
+            _isDisposed = true;
+            _logger.Debug("Client is disposed: {Address}", Address);
+            Disposed?.Invoke(this, EventArgs.Empty);
+            GC.SuppressFinalize(this);
+        }
     }
 
     public ClientProcess CreateProcess() => new(this, _clientOptions);
@@ -272,32 +237,25 @@ internal sealed class Client : IClient, IClientCallback
     }
 
     private static IEnumerable<IRemoteService> GetRemoteServices(
-        CompositionContainer compositionContainer)
+        IServiceProvider serviceProvider)
     {
-        foreach (var item in compositionContainer.GetExportedValues<IClientContentService>())
+        foreach (var item in serviceProvider.GetServices<IClientContentService>())
         {
             yield return item.RemoteService;
         }
     }
 
-    private object? GetInstance(Type serviceType)
-    {
-        var contractName = AttributedModelServices.GetContractName(serviceType);
-        return _container.GetExportedValue<object>(contractName);
-    }
-
-    private IEnumerable<object> GetInstances(Type service)
-    {
-        var contractName = AttributedModelServices.GetContractName(service);
-        return _container.GetExportedValues<object>(contractName);
-    }
-
     private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {
-        if (_isInProgress is not true && IsRunning is true)
+        if (sender is RemoteServiceContext remoteServiceContext)
         {
-            _closeToken = Guid.Empty;
-            Detached?.Invoke(this, EventArgs.Empty);
+            remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+            _remoteServiceContext = null;
+            if (_isInProgress is not true && IsRunning is true)
+            {
+                _closeToken = Guid.Empty;
+                Detached?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 
