@@ -4,7 +4,7 @@ using JSSoft.Commands;
 namespace LibplanetConsole.Node.Example.Commands;
 
 [CommandSummary("Example node commands for a quick start.")]
-internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
+internal sealed class ExampleCommand(IExample sampleNode)
     : CommandMethodBase
 {
     [CommandMethod]

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -6,7 +5,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
 
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Console.Executable;
 
 public sealed record class Repository
 {
@@ -50,7 +49,8 @@ public sealed record class Repository
         return ByteUtil.ParseHex(genesis);
     }
 
-    public static Repository Load(string repositoryPath, RepositoryPathResolver resolver)
+    public static NodeOptions[] LoadNodeOptions(
+        string repositoryPath, RepositoryPathResolver resolver)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
         {
@@ -59,24 +59,9 @@ public sealed record class Repository
         }
 
         var nodesPath = resolver.GetNodesPath(repositoryPath);
-        var nodeOptions = Directory.GetDirectories(nodesPath)
+        return Directory.GetDirectories(nodesPath)
             .Select(LoadNodeOptions)
             .ToArray();
-        var clientsPath = resolver.GetClientsPath(repositoryPath);
-        var clientOptions = Directory.GetDirectories(clientsPath)
-            .Select(LoadClientOptions)
-            .ToArray();
-        var applicationSettings = LoadSettings(repositoryPath, resolver);
-        var endPoint = EndPointUtility.Parse(applicationSettings.EndPoint);
-        var genesisPath = resolver.GetGenesisPath(repositoryPath);
-
-        return new(endPoint, nodeOptions, clientOptions)
-        {
-            Genesis = LoadGenesis(genesisPath),
-            LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, repositoryPath),
-            Source = repositoryPath,
-        };
 
         NodeOptions LoadNodeOptions(string nodePath)
         {
@@ -84,6 +69,21 @@ public sealed record class Repository
             var settingsPath = resolver.GetNodeSettingsPath(nodePath, privateKey);
             return NodeOptions.Load(settingsPath);
         }
+    }
+
+    public static ClientOptions[] LoadClientOptions(
+        string repositoryPath, RepositoryPathResolver resolver)
+    {
+        if (Path.IsPathRooted(repositoryPath) is false)
+        {
+            throw new ArgumentException(
+                $"'{repositoryPath}' must be an absolute path.", nameof(repositoryPath));
+        }
+
+        var clientsPath = resolver.GetClientsPath(repositoryPath);
+        return Directory.GetDirectories(clientsPath)
+            .Select(LoadClientOptions)
+            .ToArray();
 
         ClientOptions LoadClientOptions(string clientPath)
         {
@@ -120,6 +120,15 @@ public sealed record class Repository
         var settingsPath = resolver.GetSettingsPath(repositoryPath);
         var schemaPath = resolver.GetSettingsSchemaPath(repositoryPath);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
+        var nodesPath = resolver.GetNodesPath(repositoryPath);
+        var clientsPath = resolver.GetClientsPath(repositoryPath);
+        var applicationSettings = new ApplicationSettings
+        {
+            EndPoint = EndPointUtility.ToString(EndPoint),
+            GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
+            LogPath = LogPath,
+            LibraryLogPath = LibraryLogPath,
+        };
 
         info.RepositoryPath = repositoryPath;
 
@@ -127,14 +136,14 @@ public sealed record class Repository
         info.GenesisPath = genesisPath;
         SaveSettingsSchema(schemaPath);
         info.SchemaPath = schemaPath;
-        SaveSettings(schemaPath, settingsPath);
+        SaveSettings(schemaPath, settingsPath, applicationSettings);
         info.SettingsPath = settingsPath;
 
         info.Nodes = new List<ExpandoObject>(Nodes.Length);
+        PathUtility.EnsureDirectory(nodesPath);
         Array.ForEach(Nodes, node =>
         {
             var genesisPath = resolver.GetGenesisPath(repositoryPath);
-            var nodesPath = resolver.GetNodesPath(repositoryPath);
             var nodePath = resolver.GetNodePath(nodesPath, node.PrivateKey);
             var process = new NodeRepositoryProcess
             {
@@ -152,9 +161,9 @@ public sealed record class Repository
         });
 
         info.Clients = new List<ExpandoObject>(Clients.Length);
+        PathUtility.EnsureDirectory(clientsPath);
         Array.ForEach(Clients, client =>
         {
-            var clientsPath = resolver.GetClientsPath(repositoryPath);
             var clientPath = resolver.GetClientPath(clientsPath, client.PrivateKey);
             var process = new ClientRepositoryProcess
             {
@@ -185,21 +194,6 @@ public sealed record class Repository
         return CreateGenesis(genesisOptions);
     }
 
-    private static byte[] LoadGenesis(string genesisPath)
-    {
-        var text = File.ReadAllLines(genesisPath);
-        return ByteUtil.ParseHex(text[0]);
-    }
-
-    private static ApplicationSettings LoadSettings(
-        string repositoryPath, RepositoryPathResolver resolver)
-    {
-        var settingsPath = resolver.GetSettingsPath(repositoryPath);
-        var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.DeserializeSchema<Settings>(json);
-        return settings.Application;
-    }
-
     private static void SaveSettingsSchema(string schemaPath)
     {
         var schemaBuilder = new ApplicationSettingsSchemaBuilder();
@@ -214,18 +208,14 @@ public sealed record class Repository
         File.WriteAllLines(genesisPath, [hex]);
     }
 
-    private void SaveSettings(string schemaPath, string settingsPath)
+    private static void SaveSettings(
+        string schemaPath, string settingsPath, ApplicationSettings applicationSettings)
     {
         var schemaRelativePath = PathUtility.GetRelativePath(settingsPath, schemaPath);
         var settings = new Settings
         {
             Schema = schemaRelativePath,
-            Application = new ApplicationSettings
-            {
-                EndPoint = EndPointUtility.ToString(EndPoint),
-                LogPath = LogPath,
-                LibraryLogPath = LibraryLogPath,
-            },
+            Application = applicationSettings,
         };
         var json = JsonUtility.SerializeSchema(settings);
         File.WriteAllLines(settingsPath, [json]);
@@ -237,16 +227,5 @@ public sealed record class Repository
         public required string Schema { get; init; } = string.Empty;
 
         public required ApplicationSettings Application { get; init; }
-    }
-
-    private sealed record class ApplicationSettings
-    {
-        public required string EndPoint { get; init; }
-
-        [DefaultValue("")]
-        public string LogPath { get; init; } = string.Empty;
-
-        [DefaultValue("")]
-        public string LibraryLogPath { get; init; } = string.Empty;
     }
 }

@@ -1,4 +1,3 @@
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Console;

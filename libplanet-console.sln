@@ -183,6 +183,4 @@ Global
 		{FEF8E9D4-CBB7-4EFC-A5C2-2C9E91498D79} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		SolutionGuid = {3227501A-47F1-4FA6-A69C-B5801260FEC9}
 	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-	EndGlobalSection
 EndGlobal

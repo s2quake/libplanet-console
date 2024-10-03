@@ -26,14 +26,15 @@ public abstract class ClientContentBase : IClientContent, IDisposable
 
     void IDisposable.Dispose()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        Client.Attached -= Client_Attached;
-        Client.Detached -= Client_Detached;
-        Client.Started -= Client_Started;
-        Client.Stopped -= Client_Stopped;
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
+        if (_isDisposed is false)
+        {
+            Client.Attached -= Client_Attached;
+            Client.Detached -= Client_Detached;
+            Client.Started -= Client_Started;
+            Client.Stopped -= Client_Stopped;
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 
     protected virtual void OnClientAttached()

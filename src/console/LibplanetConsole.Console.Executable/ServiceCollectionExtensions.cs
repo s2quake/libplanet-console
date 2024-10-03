@@ -1,6 +1,9 @@
 using JSSoft.Commands;
+using LibplanetConsole.Console.Evidence;
+using LibplanetConsole.Console.Example;
 using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
+using LibplanetConsole.Console.Explorer;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +30,10 @@ internal static class ServiceCollectionExtensions
 
         @this.AddSingleton<IApplicationService, ClientCollectionEventTracer>();
         @this.AddSingleton<IApplicationService, NodeCollectionEventTracer>();
+
+        @this.AddExample();
+        @this.AddEvidence();
+        @this.AddExplorer();
 
         return @this;
     }

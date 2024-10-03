@@ -7,6 +7,7 @@ namespace LibplanetConsole.Console;
 internal static class NodeFactory
 {
     private static readonly ConcurrentDictionary<IServiceProvider, Descriptor> _valueByKey = [];
+    private static readonly ConcurrentDictionary<Node, AsyncServiceScope> _scopeByNode = [];
 
     public static Node Create(IServiceProvider serviceProvider)
     {
@@ -14,16 +15,24 @@ internal static class NodeFactory
         {
             var nodeOptions = descriptor.NodeOptions;
             var node = new Node(serviceProvider, nodeOptions);
-            node.Disposed += (s, e) => descriptor.ServiceScope.Dispose();
+            _scopeByNode.AddOrUpdate(node, descriptor.ServiceScope, (k, v) => v);
             return node;
         }
 
         throw new UnreachableException("This should not be called.");
     }
 
+    public static async ValueTask DisposeScopeAsync(Node node)
+    {
+        if (_scopeByNode.Remove(node, out var serviceScope) is true)
+        {
+            await serviceScope.DisposeAsync();
+        }
+    }
+
     public static Node CreateNew(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
-        var serviceScope = serviceProvider.CreateScope();
+        var serviceScope = serviceProvider.CreateAsyncScope();
         _valueByKey.AddOrUpdate(
             serviceScope.ServiceProvider,
             new Descriptor
@@ -42,6 +51,6 @@ internal static class NodeFactory
     {
         public required NodeOptions NodeOptions { get; init; }
 
-        public required IServiceScope ServiceScope { get; init; }
+        public required AsyncServiceScope ServiceScope { get; init; }
     }
 }

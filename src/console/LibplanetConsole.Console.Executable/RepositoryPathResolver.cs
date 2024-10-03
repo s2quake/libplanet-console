@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Console.Executable;
 
 public class RepositoryPathResolver
 {

@@ -101,14 +101,15 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed == true, this);
-
-        Logger.Debug("Application disposing...");
-        await OnDisposeAsync();
-        _cancellationTokenSource.Dispose();
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
-        Logger.Debug("Application disposed.");
+        if (_isDisposed is false)
+        {
+            Logger.Debug("Application disposing...");
+            await OnDisposeAsync();
+            _cancellationTokenSource.Dispose();
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+            Logger.Debug("Application disposed.");
+        }
     }
 
     public abstract object? GetService(Type serviceType);

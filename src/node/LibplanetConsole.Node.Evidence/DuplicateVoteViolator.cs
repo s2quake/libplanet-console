@@ -14,6 +14,7 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
     private const int Timeout = 5000;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly ILogger _logger = node.GetRequiredService<ILogger>();
+    private bool _isDisposed;
 
     public bool IsRunning { get; private set; }
 
@@ -37,8 +38,13 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await _cancellationTokenSource.CancelAsync();
-        _cancellationTokenSource.Dispose();
+        if (_isDisposed is false)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.Dispose();
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 
     private static Vote MakeRandomVote(

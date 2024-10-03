@@ -19,10 +19,11 @@ public sealed class ProcessOutputCollector : IDisposable
 
     public void Dispose()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        _process.OutputDataReceived -= Process_OutputDataReceived;
-        _isDisposed = true;
+        if (_isDisposed is false)
+        {
+            _process.OutputDataReceived -= Process_OutputDataReceived;
+            _isDisposed = true;
+        }
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)

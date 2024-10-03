@@ -7,13 +7,21 @@ using Serilog;
 
 namespace LibplanetConsole.Console.Explorer;
 
-internal sealed class ExplorerNode(INode node, ILogger logger, ExplorerSettings settings)
-    : NodeContentBase(node), IExplorer, IExplorerCallback, INodeContentService
+internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, INodeContentService
 {
-    private readonly ILogger _logger = logger;
+    private readonly ILogger _logger;
     private readonly ExecutionScope _executionScope = new();
+    private readonly ExplorerSettings _settings;
     private EndPoint _endPoint = EndPointUtility.NextEndPoint();
     private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
+
+    public Explorer(INode node, ILogger logger, ExplorerSettings settings)
+        : base(node)
+    {
+        _settings = settings;
+        _logger = logger;
+        _logger.Debug("Explorer is created: {NodeAddress}", node.Address);
+    }
 
     public event EventHandler? Started;
 
@@ -114,7 +122,7 @@ internal sealed class ExplorerNode(INode node, ILogger logger, ExplorerSettings 
     {
         base.OnNodeStarted();
 
-        if (settings.UseExplorer == true)
+        if (_settings.UseExplorer == true)
         {
             await StartAsync(cancellationToken: default);
         }

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Specialized;
-using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -141,17 +140,19 @@ internal sealed class ClientCollection(
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
-        for (var i = _clientList.Count - 1; i >= 0; i--)
+        if (_isDisposed is false)
         {
-            var item = _clientList[i]!;
-            await item.DisposeAsync();
-            _logger.Debug("Disposed a client: {Address}", item.Address);
-        }
+            for (var i = _clientList.Count - 1; i >= 0; i--)
+            {
+                var client = _clientList[i]!;
+                client.Disposed -= Client_Disposed;
+                await ClientFactory.DisposeScopeAsync(client);
+                _logger.Debug("Disposed a client: {Address}", client.Address);
+            }
 
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 
     async Task<IClient> IClientCollection.AddNewAsync(

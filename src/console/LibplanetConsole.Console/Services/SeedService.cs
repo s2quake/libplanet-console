@@ -12,6 +12,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
     private readonly PrivateKey _seedNodePrivateKey = new();
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
+    private bool _isDisposed;
 
     public SeedService(IApplication application)
     {
@@ -53,7 +54,11 @@ internal sealed class SeedService : LocalService<ISeedService>,
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        await _blocksyncSeedNode.StopAsync(cancellationToken: default);
-        await _consensusSeedNode.StopAsync(cancellationToken: default);
+        if (_isDisposed is false)
+        {
+            await _blocksyncSeedNode.StopAsync(cancellationToken: default);
+            await _consensusSeedNode.StopAsync(cancellationToken: default);
+            _isDisposed = true;
+        }
     }
 }

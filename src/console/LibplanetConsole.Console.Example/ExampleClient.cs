@@ -1,11 +1,10 @@
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Console.Example;
 
-internal sealed class ExampleClientContent(IClient client, ExampleClientSettings settings)
-    : ClientContentBase(client), IExampleClientContent
+internal sealed class ExampleClient(IClient client, ExampleClientSettings settings)
+    : ClientContentBase(client), IExampleClient
 {
     private readonly RemoteService<IExampleClientService> _remoteService = new();
 

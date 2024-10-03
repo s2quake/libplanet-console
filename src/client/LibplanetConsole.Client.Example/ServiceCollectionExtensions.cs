@@ -9,12 +9,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddExample(this IServiceCollection @this)
     {
-        @this.AddSingleton<ExampleClient>()
-             .AddSingleton<IExampleClient>(s => s.GetRequiredService<ExampleClient>());
-        @this.AddSingleton<ICommand, ExampleClientCommand>();
-        @this.AddSingleton<IInfoProvider, ExampleClientInfoProvider>();
-        @this.AddSingleton<ILocalService, ExampleClientService>();
-        @this.AddSingleton<ExampleRemoteNodeService>();
+        @this.AddSingleton<Example>()
+             .AddSingleton<IExample>(s => s.GetRequiredService<Example>());
+        @this.AddSingleton<ICommand, ExampleCommand>();
+        @this.AddSingleton<IInfoProvider, ExampleInfoProvider>();
+        @this.AddSingleton<ILocalService, ExampleService>();
+        @this.AddSingleton<ExampleRemoteService>();
         return @this;
     }
 }

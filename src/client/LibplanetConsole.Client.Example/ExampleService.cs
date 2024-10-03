@@ -3,7 +3,7 @@ using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Client.Example;
 
-internal sealed class ExampleClientService(IExampleClient sampleClient)
+internal sealed class ExampleService(IExample sampleClient)
     : LocalService<IExampleClientService>, IExampleClientService
 {
     public void Subscribe() => sampleClient.Subscribe();

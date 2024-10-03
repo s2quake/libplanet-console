@@ -2,8 +2,8 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Example;
 
-internal sealed class ExampleClientInfoProvider(ExampleClient exampleClient)
-    : InfoProviderBase<IApplication>(nameof(ExampleClient))
+internal sealed class ExampleInfoProvider(Example exampleClient)
+    : InfoProviderBase<IApplication>(nameof(Example))
 {
     protected override object? GetInfo(IApplication obj)
     {

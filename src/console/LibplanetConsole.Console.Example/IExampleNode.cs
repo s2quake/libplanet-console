@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Node.Example;
+namespace LibplanetConsole.Console.Example;
 
 public interface IExampleNode
 {
@@ -9,8 +9,6 @@ public interface IExampleNode
     event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
 
     int Count { get; }
-
-    bool IsExample { get; }
 
     Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken);
 

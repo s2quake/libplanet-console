@@ -2,13 +2,13 @@ using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Client.Example;
 
-internal sealed class ExampleClient(
+internal sealed class Example(
     IClient client,
-    ExampleRemoteNodeService remoteNodeService,
-    ExampleClientSettings settings)
-    : IExampleClient
+    ExampleRemoteService remoteNodeService,
+    ExampleSettings settings)
+    : IExample
 {
-    private readonly ExampleRemoteNodeService _remoteNodeService = remoteNodeService;
+    private readonly ExampleRemoteService _remoteNodeService = remoteNodeService;
 
     public Address Address => client.Address;
 

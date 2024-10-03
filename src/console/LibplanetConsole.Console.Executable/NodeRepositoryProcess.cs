@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Console.Executable;
 
 internal sealed class NodeRepositoryProcess : NodeProcessBase
 {

@@ -1,6 +1,5 @@
 using System.Collections.Specialized;
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 

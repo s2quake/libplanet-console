@@ -1,14 +1,16 @@
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console.Example;
+namespace LibplanetConsole.Node.Example;
 
-public interface IExampleNodeContent
+public interface IExample
 {
     event EventHandler<ItemEventArgs<Address>>? Subscribed;
 
     event EventHandler<ItemEventArgs<Address>>? Unsubscribed;
 
     int Count { get; }
+
+    bool IsExample { get; }
 
     Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken);
 

@@ -6,8 +6,8 @@ using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Console.Example;
 
-internal sealed class ExampleNodeContent(INode node, ExampleSettings settings)
-    : NodeContentBase(node), IExampleNodeCallback, IExampleNodeContent, INodeContentService
+internal sealed class ExampleNode(INode node, ExampleSettings settings)
+    : NodeContentBase(node), IExampleNodeCallback, IExampleNode, INodeContentService
 {
     private readonly StringBuilder _log = new();
     private RemoteService<IExampleNodeService, IExampleNodeCallback>? _remoteService;

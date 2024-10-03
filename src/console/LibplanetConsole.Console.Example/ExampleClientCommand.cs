@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
@@ -11,7 +10,7 @@ internal sealed class ExampleClientCommand(IApplication application) : CommandMe
     {
         var client = application.GetClient(clientAddress);
 
-        if (client.GetService(typeof(IExampleClientContent)) is IExampleClientContent sampleClient)
+        if (client.GetService(typeof(IExampleClient)) is IExampleClient sampleClient)
         {
             sampleClient.Subscribe();
         }
@@ -27,7 +26,7 @@ internal sealed class ExampleClientCommand(IApplication application) : CommandMe
     {
         var client = application.GetClient(clientAddress);
 
-        if (client.GetService(typeof(IExampleClientContent)) is IExampleClientContent sampleClient)
+        if (client.GetService(typeof(IExampleClient)) is IExampleClient sampleClient)
         {
             sampleClient.Unsubscribe();
         }

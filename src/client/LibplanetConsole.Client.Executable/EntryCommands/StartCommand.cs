@@ -42,9 +42,9 @@ internal sealed class StartCommand : CommandAsyncBase
             serviceCollection.AddClient(applicationOptions);
             serviceCollection.AddApplication(applicationOptions);
 
-            using var serviceProvider = serviceCollection.BuildServiceProvider();
+            await using var serviceProvider = serviceCollection.BuildServiceProvider();
             var @out = Console.Out;
-            await using var application = serviceProvider.GetRequiredService<Application>();
+            var application = serviceProvider.GetRequiredService<Application>();
             await @out.WriteLineAsync();
             await application.RunAsync();
             await @out.WriteLineAsync("\u001b0");

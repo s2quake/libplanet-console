@@ -10,7 +10,7 @@ namespace LibplanetConsole.Node.Executable.EntryCommands;
 [CommandSummary("Start the Libplanet node with settings.")]
 internal sealed class StartCommand : CommandAsyncBase
 {
-    private static readonly ApplicationSettingsCollection _settingsCollection = new();
+    private readonly ApplicationSettingsCollection _settingsCollection = new();
 
     [CommandPropertyRequired]
     [CommandSummary("The path of the repository.")]
@@ -36,20 +36,20 @@ internal sealed class StartCommand : CommandAsyncBase
         try
         {
             var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
             var applicationSettings = Load(settingsPath) with
             {
                 ParentProcessId = ParentProcessId,
                 NoREPL = NoREPL,
             };
             var applicationOptions = applicationSettings.ToOptions();
+            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
 
             serviceCollection.AddNode(applicationOptions);
             serviceCollection.AddApplication(applicationOptions);
 
-            using var serviceProvider = serviceCollection.BuildServiceProvider();
+            await using var serviceProvider = serviceCollection.BuildServiceProvider();
             var @out = Console.Out;
-            await using var application = serviceProvider.GetRequiredService<Application>();
+            var application = serviceProvider.GetRequiredService<Application>();
             await @out.WriteLineAsync();
             await application.RunAsync();
             await @out.WriteLineAsync("\u001b0");
@@ -61,7 +61,7 @@ internal sealed class StartCommand : CommandAsyncBase
         }
     }
 
-    private static ApplicationSettings Load(string settingsPath)
+    private ApplicationSettings Load(string settingsPath)
     {
         SettingsLoader.Load(settingsPath, _settingsCollection.ToDictionary());
         return _settingsCollection.Peek<ApplicationSettings>();

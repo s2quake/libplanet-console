@@ -57,6 +57,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
         _nodeContext.EndPoint = _info.EndPoint;
         _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
+        _logger.Debug("NodeContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
     }
@@ -67,6 +68,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         if (_nodeContext is not null)
         {
             await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
+            _logger.Debug("NodeContext is closed: {EndPoint}", _info.EndPoint);
         }
 
         await _waitForExitTask;

@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 

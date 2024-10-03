@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Specialized;
-using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +15,6 @@ internal sealed class NodeCollection(
     private static readonly object LockObject = new();
     private readonly List<Node> _nodeList = new(nodeOptions.Length);
     private readonly ILogger _logger = serviceProvider.GetRequiredService<ILogger>();
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
     private Node? _current;
     private bool _isDisposed;
 
@@ -141,18 +139,19 @@ internal sealed class NodeCollection(
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
-        await _cancellationTokenSource.CancelAsync();
-        _cancellationTokenSource.Dispose();
-        for (var i = _nodeList.Count - 1; i >= 0; i--)
+        if (_isDisposed is false)
         {
-            var item = _nodeList[i]!;
-            await item.DisposeAsync();
-        }
+            for (var i = _nodeList.Count - 1; i >= 0; i--)
+            {
+                var node = _nodeList[i]!;
+                node.Disposed -= Node_Disposed;
+                await NodeFactory.DisposeScopeAsync(node);
+                _logger.Debug("Disposed a client: {Address}", node.Address);
+            }
 
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 
     async Task<INode> INodeCollection.AddNewAsync(

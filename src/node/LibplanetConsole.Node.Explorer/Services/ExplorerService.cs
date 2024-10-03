@@ -1,25 +1,32 @@
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
+using Serilog;
 
 namespace LibplanetConsole.Node.Explorer.Services;
 
 internal sealed class ExplorerService : LocalService<IExplorerService, IExplorerCallback>,
     IExplorerService, IDisposable
 {
+    private readonly INode _node;
     private readonly Explorer _explorer;
+    private readonly ILogger _logger;
 
-    public ExplorerService(Explorer explorer)
+    public ExplorerService(INode node, Explorer explorer, ILogger logger)
     {
+        _node = node;
         _explorer = explorer;
+        _logger = logger;
         _explorer.Started += ExplorerNode_Started;
         _explorer.Stopped += ExplorerNode_Stopped;
+        _logger.Debug("ExplorerService is created: {NodeAddress}", node.Address);
     }
 
     public void Dispose()
     {
         _explorer.Started -= ExplorerNode_Started;
         _explorer.Stopped -= ExplorerNode_Stopped;
+        _logger.Debug("ExplorerService is disposed: {NodeAddress}", _node.Address);
     }
 
     public Task<ExplorerInfo> GetInfoAsync(CancellationToken cancellationToken)

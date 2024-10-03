@@ -229,20 +229,21 @@ internal sealed partial class Node : IActionRenderer, INode
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-
-        _blocksyncEndPoint = null;
-        _consensusEndPoint = null;
-
-        if (_swarm is not null)
+        if (_isDisposed is false)
         {
-            await _swarm.StopAsync(cancellationToken: default);
-            _swarm.Dispose();
-        }
+            _blocksyncEndPoint = null;
+            _consensusEndPoint = null;
 
-        await (_startTask ?? Task.CompletedTask);
-        _startTask = Task.CompletedTask;
-        _isDisposed = true;
+            if (_swarm is not null)
+            {
+                await _swarm.StopAsync(cancellationToken: default);
+                _swarm.Dispose();
+            }
+
+            await (_startTask ?? Task.CompletedTask);
+            _startTask = Task.CompletedTask;
+            _isDisposed = true;
+        }
     }
 
     void IRenderer.RenderBlock(Block oldTip, Block newTip)

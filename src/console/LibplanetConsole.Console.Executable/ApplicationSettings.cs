@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Console.Executable;
 
@@ -53,6 +55,20 @@ internal sealed record class ApplicationSettings
     public string[] Clients { get; init; } = [];
 
     [CommandProperty]
+    [CommandPropertyExclusion(nameof(Genesis))]
+    [CommandSummary("Indicates the file path to load the genesis block.\n" +
+                    "Mutually exclusive with '--genesis' option.")]
+    [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
+    public string GenesisPath { get; init; } = string.Empty;
+
+    [CommandProperty]
+    [CommandPropertyExclusion(nameof(GenesisPath))]
+    [CommandSummary("Indicates a hexadecimal genesis string. If omitted, a random genesis block " +
+                    "is used.\nMutually exclusive with '--genesis-path' option.")]
+    [JsonIgnore]
+    public string Genesis { get; init; } = string.Empty;
+
+    [CommandProperty]
     [CommandSummary("The directory path to store log.")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
@@ -85,13 +101,14 @@ internal sealed record class ApplicationSettings
         var nodeOptions = GetNodeOptions(endPoint, GetNodes());
         var clientOptions = GetClientOptions(nodeOptions, GetClients());
         var repository = new Repository(endPoint, nodeOptions, clientOptions);
+        var genesis = TryGetGenesis(out var g) == true ? g : repository.Genesis;
         return new ApplicationOptions(endPoint)
         {
             LogPath = GetFullPath(LogPath),
             LibraryLogPath = GetFullPath(LibraryLogPath),
             Nodes = repository.Nodes,
             Clients = repository.Clients,
-            Genesis = repository.Genesis,
+            Genesis = genesis,
             NoProcess = NoProcess,
             NewWindow = NewWindow,
             Detach = Detach,
@@ -161,5 +178,24 @@ internal sealed record class ApplicationSettings
         }
 
         return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
+    }
+
+    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
+    {
+        if (GenesisPath != string.Empty)
+        {
+            var lines = File.ReadAllLines(GenesisPath);
+            genesis = ByteUtil.ParseHex(lines[0]);
+            return true;
+        }
+
+        if (Genesis != string.Empty)
+        {
+            genesis = ByteUtil.ParseHex(Genesis);
+            return true;
+        }
+
+        genesis = null!;
+        return false;
     }
 }

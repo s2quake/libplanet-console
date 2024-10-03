@@ -170,27 +170,28 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        await _processCancellationTokenSource.CancelAsync();
-        _processCancellationTokenSource.Dispose();
-        await _processTask;
-        _processTask = Task.CompletedTask;
-        _process = null;
-
-        if (_remoteServiceContext is not null)
+        if (_isDisposed is false)
         {
-            _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-            await _remoteServiceContext.CloseAsync(_closeToken);
-            _remoteServiceContext = null;
-        }
+            await _processCancellationTokenSource.CancelAsync();
+            _processCancellationTokenSource.Dispose();
+            await _processTask;
+            _processTask = Task.CompletedTask;
+            _process = null;
 
-        _closeToken = Guid.Empty;
-        IsRunning = false;
-        _isDisposed = true;
-        _logger.Debug("Node is disposed: {Address}", Address);
-        Disposed?.Invoke(this, EventArgs.Empty);
-        GC.SuppressFinalize(this);
+            if (_remoteServiceContext is not null)
+            {
+                _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+                await _remoteServiceContext.CloseAsync(_closeToken);
+                _remoteServiceContext = null;
+            }
+
+            _closeToken = Guid.Empty;
+            IsRunning = false;
+            _isDisposed = true;
+            _logger.Debug("Node is disposed: {Address}", Address);
+            Disposed?.Invoke(this, EventArgs.Empty);
+            GC.SuppressFinalize(this);
+        }
     }
 
     public Task StartProcessAsync(AddNewNodeOptions options, CancellationToken cancellationToken)

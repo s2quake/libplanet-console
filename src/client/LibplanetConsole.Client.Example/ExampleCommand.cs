@@ -3,7 +3,7 @@ using JSSoft.Commands;
 namespace LibplanetConsole.Client.Example;
 
 [CommandSummary("Example client commands for a quick start.")]
-internal sealed class ExampleClientCommand(IExampleClient sampleClient)
+internal sealed class ExampleCommand(IExample sampleClient)
     : CommandMethodBase
 {
     [CommandMethod]

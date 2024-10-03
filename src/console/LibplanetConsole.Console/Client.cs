@@ -20,7 +20,6 @@ internal sealed class Client : IClient, IClientCallback
     private RemoteServiceContext? _remoteServiceContext;
     private Guid _closeToken;
     private ClientInfo _clientInfo;
-    private INode? _node;
     private bool _isDisposed;
     private bool _isInProgress;
     private ClientProcess? _process;
@@ -129,7 +128,6 @@ internal sealed class Client : IClient, IClientCallback
 
         _clientInfo = await _remoteService.Service.StartAsync(
             EndPointUtility.ToString(node.EndPoint), cancellationToken);
-        _node = node;
         IsRunning = true;
         _logger.Debug("Client is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
@@ -144,7 +142,6 @@ internal sealed class Client : IClient, IClientCallback
             message: "Client is not attached.");
 
         await _remoteService.Service.StopAsync(cancellationToken);
-        _node = null;
         _closeToken = Guid.Empty;
         _clientInfo = default;
         IsRunning = false;
@@ -164,27 +161,28 @@ internal sealed class Client : IClient, IClientCallback
 
     public async ValueTask DisposeAsync()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        await _processCancellationTokenSource.CancelAsync();
-        _processCancellationTokenSource.Dispose();
-        await _processTask;
-        _processTask = Task.CompletedTask;
-        _process = null;
-
-        if (_remoteServiceContext is not null)
+        if (_isDisposed is false)
         {
-            _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-            await _remoteServiceContext.CloseAsync(_closeToken);
-            _remoteServiceContext = null;
-        }
+            await _processCancellationTokenSource.CancelAsync();
+            _processCancellationTokenSource.Dispose();
+            await _processTask;
+            _processTask = Task.CompletedTask;
+            _process = null;
 
-        _closeToken = Guid.Empty;
-        IsRunning = false;
-        _isDisposed = true;
-        _logger.Debug("Client is disposed: {Address}", Address);
-        Disposed?.Invoke(this, EventArgs.Empty);
-        GC.SuppressFinalize(this);
+            if (_remoteServiceContext is not null)
+            {
+                _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+                await _remoteServiceContext.CloseAsync(_closeToken);
+                _remoteServiceContext = null;
+            }
+
+            _closeToken = Guid.Empty;
+            IsRunning = false;
+            _isDisposed = true;
+            _logger.Debug("Client is disposed: {Address}", Address);
+            Disposed?.Invoke(this, EventArgs.Empty);
+            GC.SuppressFinalize(this);
+        }
     }
 
     public ClientProcess CreateProcess() => new(this, _clientOptions);

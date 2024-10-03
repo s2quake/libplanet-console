@@ -10,11 +10,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddExample(this IServiceCollection @this)
     {
-        @this.AddSingleton<ExampleNode>()
-             .AddSingleton<IExampleNode>(s => s.GetRequiredService<ExampleNode>());
-        @this.AddSingleton<IInfoProvider, ExampleNodeInfoProvider>();
-        @this.AddSingleton<ILocalService, ExampleNodeService>();
-        @this.AddSingleton<ICommand, ExampleNodeCommand>();
+        @this.AddSingleton<Example>()
+             .AddSingleton<IExample>(s => s.GetRequiredService<Example>());
+        @this.AddSingleton<IInfoProvider, ExampleInfoProvider>();
+        @this.AddSingleton<ILocalService, ExampleService>();
+        @this.AddSingleton<ICommand, ExampleCommand>();
         return @this;
     }
 }

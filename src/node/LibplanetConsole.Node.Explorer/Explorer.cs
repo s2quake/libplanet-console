@@ -9,8 +9,8 @@ using Serilog;
 
 namespace LibplanetConsole.Node.Explorer;
 
-internal sealed class Explorer(
-    INode node, ILogger logger, ExplorerSettings settings) : IExplorer, IApplicationService
+internal sealed class Explorer(INode node, ILogger logger, ExplorerSettings settings)
+    : IExplorer, IApplicationService
 {
     private IWebHost? _webHost;
 

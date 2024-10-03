@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using JSSoft.Commands;
+using LibplanetConsole.Settings;
 
 namespace LibplanetConsole.Framework;
 
@@ -30,6 +31,11 @@ public sealed class ApplicationSettingsCollection : IEnumerable<object>
         }
 
         return dictionary;
+    }
+
+    public void Load(string settingsPath)
+    {
+        SettingsLoader.Load(settingsPath, ToDictionary());
     }
 
     public void Parse(string[] args)

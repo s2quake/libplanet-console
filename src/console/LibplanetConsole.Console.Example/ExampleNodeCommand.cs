@@ -1,6 +1,5 @@
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
@@ -13,7 +12,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             sampleNode.Subscribe(client.Address);
         }
@@ -30,7 +29,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
         var node = application.GetNode(nodeAddress);
         var client = application.GetClient(clientAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             sampleNode.Unsubscribe(client.Address);
         }
@@ -46,7 +45,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             Out.WriteLine(sampleNode.Count);
         }
@@ -62,7 +61,7 @@ internal sealed class ExampleNodeCommand(IApplication application) : CommandMeth
     {
         var node = application.GetNode(nodeAddress);
 
-        if (node.GetService(typeof(IExampleNodeContent)) is IExampleNodeContent sampleNode)
+        if (node.GetService(typeof(IExampleNode)) is IExampleNode sampleNode)
         {
             var addresses = await sampleNode.GetAddressesAsync(cancellationToken);
             var sb = new StringBuilder();

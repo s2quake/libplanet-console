@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Console.Executable.Commands;
 
 namespace LibplanetConsole.Console.Executable;

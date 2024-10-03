@@ -26,14 +26,15 @@ public abstract class NodeContentBase : INodeContent, IDisposable
 
     void IDisposable.Dispose()
     {
-        ObjectDisposedException.ThrowIf(_isDisposed, this);
-
-        Node.Attached -= Node_Attached;
-        Node.Detached -= Node_Detached;
-        Node.Started -= Node_Started;
-        Node.Stopped -= Node_Stopped;
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
+        if (_isDisposed is false)
+        {
+            Node.Attached -= Node_Attached;
+            Node.Detached -= Node_Detached;
+            Node.Started -= Node_Started;
+            Node.Stopped -= Node_Stopped;
+            _isDisposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 
     protected virtual void OnNodeAttached()

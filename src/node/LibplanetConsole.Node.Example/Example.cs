@@ -2,7 +2,7 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node.Example;
 
-internal sealed class ExampleNode(ExampleSettings settings) : IExampleNode
+internal sealed class Example(ExampleSettings settings) : IExample
 {
     private readonly HashSet<Address> _addresses = [];
 

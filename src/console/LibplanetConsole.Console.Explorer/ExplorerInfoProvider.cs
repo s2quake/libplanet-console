@@ -2,14 +2,14 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Explorer;
 
-internal sealed class ExplorerInfoProvider : InfoProviderBase<ExplorerNode>
+internal sealed class ExplorerInfoProvider : InfoProviderBase<Explorer>
 {
     public ExplorerInfoProvider()
         : base("Explorer")
     {
     }
 
-    protected override object? GetInfo(ExplorerNode obj)
+    protected override object? GetInfo(Explorer obj)
     {
         return new
         {
