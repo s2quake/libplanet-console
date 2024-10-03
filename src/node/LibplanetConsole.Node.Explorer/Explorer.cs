@@ -9,9 +9,6 @@ using Serilog;
 
 namespace LibplanetConsole.Node.Explorer;
 
-[Export(typeof(IExplorer))]
-[Export(typeof(IApplicationService))]
-[Export]
 internal sealed class Explorer(
     INode node, ILogger logger, ExplorerSettings settings) : IExplorer, IApplicationService
 {

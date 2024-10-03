@@ -1,11 +1,9 @@
 using JSSoft.Commands;
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Node.Executable.Commands;
 
 namespace LibplanetConsole.Node.Executable;
 
-[Export(typeof(CommandContext))]
 [CommandSummary("Provides a prompt for input and execution of commands.")]
 [CommandDescription("REPL for libplanet node.")]
 internal sealed class CommandContext(

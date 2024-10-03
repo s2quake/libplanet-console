@@ -45,8 +45,8 @@ internal sealed class StartCommand : CommandAsyncBase
             var applicationOptions = applicationSettings.ToOptions();
 
             serviceCollection.AddSingleton(applicationOptions);
-            serviceCollection.AddNodeApplication<Application>(applicationOptions);
-            serviceCollection.AddNodeExecutable();
+            serviceCollection.AddApplication<Application>(applicationOptions);
+            serviceCollection.AddExecutable();
 
             using var serviceProvider = serviceCollection.BuildServiceProvider();
             var @out = Console.Out;

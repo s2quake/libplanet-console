@@ -2,12 +2,8 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node.Example;
 
-[Export(typeof(IExampleNode))]
-[Export]
-internal sealed class ExampleNode(
-    IApplication application, ExampleSettings settings) : IExampleNode
+internal sealed class ExampleNode(ExampleSettings settings) : IExampleNode
 {
-    private readonly IApplication _application = application;
     private readonly HashSet<Address> _addresses = [];
 
     public event EventHandler<ItemEventArgs<Address>>? Subscribed;
@@ -19,7 +15,7 @@ internal sealed class ExampleNode(
     public bool IsExample { get; } = settings.IsExample;
 
     public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
-        => _application.InvokeAsync(() => _addresses.ToArray(), cancellationToken);
+        => Task.Run(() => _addresses.ToArray(), cancellationToken);
 
     public void Subscribe(Address address)
     {

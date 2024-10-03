@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
@@ -10,28 +11,30 @@ namespace LibplanetConsole.Node;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNodeApplication<T>(
-        this IServiceCollection services, ApplicationOptions options)
+    public static IServiceCollection AddApplication<T>(
+        this IServiceCollection @this, ApplicationOptions options)
         where T : ApplicationBase
     {
-        services.AddSingleton(
+        @this.AddSingleton(
             ApplicationFramework.CreateLogger(typeof(T), options.LogPath, options.LibraryLogPath));
-        services.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
-        services.AddSingletonWithInterfaces<INode, IBlockChain, Node>();
-        services.AddSingleton<NodeContext>();
+        @this.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
+        @this.AddSingletonWithInterfaces<INode, IBlockChain, Node>();
+        @this.AddSingleton<NodeContext>();
 
-        services.AddSingletonWithInterfaces<ILocalService, IApplicationService, SeedService>();
+        @this.AddSingletonWithInterfaces<ILocalService, IApplicationService, SeedService>();
 
-        services.AddSingletonWithInterface<ILocalService, BlockChainService>();
-        services.AddSingletonWithInterface<ILocalService, NodeService>();
+        @this.AddSingletonWithInterface<ILocalService, BlockChainService>();
+        @this.AddSingletonWithInterface<ILocalService, NodeService>();
 
-        services.AddSingletonWithInterface<ICommand, AddressCommand>();
-        services.AddSingletonWithInterface<ICommand, ExitCommand>();
-        services.AddSingletonWithInterface<ICommand, InfoCommand>();
-        services.AddSingletonWithInterface<ICommand, KeyCommand>();
-        services.AddSingletonWithInterface<ICommand, StartCommand>();
-        services.AddSingletonWithInterface<ICommand, StopCommand>();
-        services.AddSingletonWithInterface<ICommand, TxCommand>();
-        return services;
+        @this.AddSingletonWithInterface<IInfoProvider, ApplicationInfoProvider>();
+
+        @this.AddSingletonWithInterface<ICommand, AddressCommand>();
+        @this.AddSingletonWithInterface<ICommand, ExitCommand>();
+        @this.AddSingletonWithInterface<ICommand, InfoCommand>();
+        @this.AddSingletonWithInterface<ICommand, KeyCommand>();
+        @this.AddSingletonWithInterface<ICommand, StartCommand>();
+        @this.AddSingletonWithInterface<ICommand, StopCommand>();
+        @this.AddSingletonWithInterface<ICommand, TxCommand>();
+        return @this;
     }
 }

@@ -4,7 +4,6 @@ using Serilog;
 
 namespace LibplanetConsole.Node.Services;
 
-[Export(typeof(ILocalService))]
 internal sealed class NodeService : LocalService<INodeService, INodeCallback>, INodeService
 {
     private readonly Node _node;

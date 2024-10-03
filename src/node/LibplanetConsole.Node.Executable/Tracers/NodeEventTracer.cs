@@ -1,11 +1,9 @@
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Node.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
 internal sealed class NodeEventTracer(IApplication application, INode node)
     : IApplicationService, IDisposable
 {

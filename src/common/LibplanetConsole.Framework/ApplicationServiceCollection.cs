@@ -13,7 +13,7 @@ public sealed class ApplicationServiceCollection : ServiceCollection
     {
         foreach (var settings in settingsCollection)
         {
-            this.AddSingleton(settings);
+            this.AddSingleton(settings.GetType(), settings);
         }
     }
 

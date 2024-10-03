@@ -1,10 +1,8 @@
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node.Example.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Example node commands for a quick start.")]
 internal sealed class ExampleNodeCommand(IExampleNode sampleNode)
     : CommandMethodBase

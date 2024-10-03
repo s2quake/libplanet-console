@@ -1,10 +1,5 @@
-using System.ComponentModel;
 using JSSoft.Commands;
-using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Node.Executable.Commands;
-using LibplanetConsole.Node.Executable.Tracers;
-using LibplanetConsole.Settings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
@@ -37,8 +32,8 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
             var applicationOptions = _applicationSettings.ToOptions();
 
             serviceCollection.AddSingleton(applicationOptions);
-            serviceCollection.AddNodeApplication<Application>(applicationOptions);
-            serviceCollection.AddNodeExecutable();
+            serviceCollection.AddApplication<Application>(applicationOptions);
+            serviceCollection.AddExecutable();
 
             using var serviceProvider = serviceCollection.BuildServiceProvider();
             var @out = Console.Out;

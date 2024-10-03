@@ -1,4 +1,3 @@
-using System.Collections;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;

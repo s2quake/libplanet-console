@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Explorer.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Provides commands for the explorer(GraphQL).")]
 internal sealed class ExplorerCommand(IServiceProvider serviceProvider) : CommandMethodBase
 {

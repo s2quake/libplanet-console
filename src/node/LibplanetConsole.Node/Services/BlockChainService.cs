@@ -1,10 +1,8 @@
 using System.Security.Cryptography;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Node.Services;
 
-[Export(typeof(ILocalService))]
 internal sealed class BlockChainService
     : LocalService<IBlockChainService, IBlockChainCallback>, IBlockChainService
 {

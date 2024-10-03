@@ -1,14 +1,10 @@
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Seed;
-using Nito.AsyncEx;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Services;
 
-[Export(typeof(ILocalService))]
-[Export(typeof(IApplicationService))]
 internal sealed class SeedService(ApplicationOptions options)
     : LocalService<ISeedService>, ISeedService, IApplicationService, IAsyncDisposable
 {

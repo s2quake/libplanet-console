@@ -4,7 +4,6 @@ using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Node.Example;
 
-[Export(typeof(ILocalService))]
 internal sealed class ExampleNodeService : LocalService<IExampleNodeService, IExampleNodeCallback>,
     IExampleNodeService, IDisposable
 {

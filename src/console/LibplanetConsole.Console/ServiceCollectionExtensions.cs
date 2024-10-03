@@ -11,25 +11,25 @@ namespace LibplanetConsole.Console;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddConsoleApplication<T>(
-        this IServiceCollection services, ApplicationOptions options)
+        this IServiceCollection @this, ApplicationOptions options)
         where T : ApplicationBase
     {
-        services.AddSingleton(
+        @this.AddSingleton(
             ApplicationFramework.CreateLogger(typeof(T), options.LogPath, string.Empty));
-        services.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
-        services.AddSingletonWithInterfaces<INodeCollection, IApplicationService, NodeCollection>();
-        services.AddSingletonWithInterfaces<
+        @this.AddSingletonWithInterfaces<IApplication, IServiceProvider, T>();
+        @this.AddSingletonWithInterfaces<INodeCollection, IApplicationService, NodeCollection>();
+        @this.AddSingletonWithInterfaces<
             IClientCollection, IApplicationService, ClientCollection>();
 
-        services.AddSingleton<ConsoleServiceContext>();
-        services.AddSingletonWithInterfaces<ILocalService, IApplicationService, SeedService>();
+        @this.AddSingleton<ConsoleServiceContext>();
+        @this.AddSingletonWithInterfaces<ILocalService, IApplicationService, SeedService>();
 
-        services.AddSingletonWithInterface<ICommand, ClientCommand>();
-        services.AddSingletonWithInterface<ICommand, ExitCommand>();
-        services.AddSingletonWithInterface<ICommand, InfoCommand>();
-        services.AddSingletonWithInterface<ICommand, KeyCommand>();
-        services.AddSingletonWithInterface<ICommand, NodeCommand>();
-        services.AddSingletonWithInterface<ICommand, TxCommand>();
-        return services;
+        @this.AddSingletonWithInterface<ICommand, ClientCommand>();
+        @this.AddSingletonWithInterface<ICommand, ExitCommand>();
+        @this.AddSingletonWithInterface<ICommand, InfoCommand>();
+        @this.AddSingletonWithInterface<ICommand, KeyCommand>();
+        @this.AddSingletonWithInterface<ICommand, NodeCommand>();
+        @this.AddSingletonWithInterface<ICommand, TxCommand>();
+        return @this;
     }
 }

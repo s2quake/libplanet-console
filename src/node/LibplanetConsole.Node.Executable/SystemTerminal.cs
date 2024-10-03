@@ -1,10 +1,8 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node.Executable;
 
-[Export]
 internal sealed class SystemTerminal : SystemTerminalBase
 {
     private readonly CommandContext _commandContext;

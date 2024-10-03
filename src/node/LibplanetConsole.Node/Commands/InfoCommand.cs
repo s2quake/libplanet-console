@@ -4,7 +4,6 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Print node application information.")]
 internal sealed class InfoCommand(IApplication application) : CommandBase
 {
