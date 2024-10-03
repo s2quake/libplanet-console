@@ -9,8 +9,7 @@ namespace LibplanetConsole.Client.Executable.Tracers;
 internal sealed class BlockChainEventTracer(IBlockChain blockChain)
     : IApplicationService, IDisposable
 {
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         blockChain.BlockAppended += BlockChain_BlockAppended;
         return Task.CompletedTask;

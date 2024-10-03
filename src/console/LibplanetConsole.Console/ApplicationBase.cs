@@ -21,6 +21,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
+        : base(null)
     {
         _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
         _logger.Debug(Environment.CommandLine);
@@ -51,11 +52,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             NewWindow = options.NewWindow,
         };
         GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
-        ApplicationServices = new(_serviceProvider.GetRequiredService<IEnumerable<IApplicationService>>());
+        // ApplicationServices = new(_serviceProvider.GetRequiredService<IEnumerable<IApplicationService>>());
         _logger.Debug("Application initialized.");
     }
 
-    public override ApplicationServiceCollection ApplicationServices { get; }
+    // public override ApplicationServiceCollection ApplicationServices { get; }
 
     public ApplicationInfo Info => _info;
 

@@ -12,8 +12,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
     private readonly INodeCollection _nodes = nodes;
     private INode? _current;
 
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         UpdateCurrent(_nodes.Current);
         foreach (var node in _nodes)

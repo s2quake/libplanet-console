@@ -10,7 +10,7 @@ namespace LibplanetConsole.Node;
 
 public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
-    private readonly ApplicationContainer _container;
+    // private readonly ApplicationContainer _container;
     private readonly Node _node;
     private readonly NodeContext _nodeContext;
     private readonly Process? _parentProcess;
@@ -20,23 +20,26 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly IServiceProvider _serviceProvider;
     private Guid _closeToken;
 
-    protected ApplicationBase(ApplicationOptions options)
+    protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
+        : base(serviceProvider)
     {
-        _logger = CreateLogger(GetType(), options.LogPath, options.LibraryLogPath);
+        _serviceProvider = serviceProvider;
+        _logger = serviceProvider.GetRequiredService<ILogger>();
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
-        _node = new Node(this, options, _logger);
-        _container = new(this);
-        _container.AddSingleton(_logger);
-        _container.AddSingleton<IApplication>(_ => this);
-        _container.AddSingleton(this);
-        _container.AddSingleton<IServiceProvider>(_ => this);
-        _container.AddSingleton(_node);
-        _container.AddSingleton<INode>(_ => _node);
-        _container.AddSingleton<IBlockChain>(_ => _node);
+        _node = serviceProvider.GetRequiredService<Node>();
+        // _container = new(this);
+        // _container.AddSingleton(_logger);
+        // _container.AddSingleton<IApplication>(_ => this);
+        // _container.AddSingleton(this);
+        // _container.AddSingleton<IServiceProvider>(_ => this);
+        // _container.AddSingleton(_node);
+        // _container.AddSingleton<INode>(_ => _node);
+        // _container.AddSingleton<IBlockChain>(_ => _node);
+        // _container.AddSingleton<NodeContext>();
         // _container.ComposeExportedValues(options.Components);
         // _container.ComposeParts(options.Components);
-        _serviceProvider = _container.BuildServiceProvider();
+        // _serviceProvider = _container.BuildServiceProvider();
         _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
         _nodeContext.EndPoint = options.EndPoint;
         _logger.Debug(options.EndPoint.ToString());
@@ -49,7 +52,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             LogPath = options.LogPath,
             ParentProcessId = options.ParentProcessId,
         };
-        ApplicationServices = new(_serviceProvider.GetServices<IApplicationService>());
+        // ApplicationServices = new(_serviceProvider.GetServices<IApplicationService>());
         if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
@@ -60,7 +63,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug("Application initialized.");
     }
 
-    public override ApplicationServiceCollection ApplicationServices { get; }
+    // public override ApplicationServiceCollection ApplicationServices { get; }
 
     public EndPoint EndPoint => _nodeContext.EndPoint;
 
@@ -110,7 +113,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     {
         await base.OnDisposeAsync();
         await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
-        await _container.DisposeAsync();
+        // await _container.DisposeAsync();
         await _waitForExitTask;
     }
 

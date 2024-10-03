@@ -9,8 +9,7 @@ namespace LibplanetConsole.Node.Executable.Tracers;
 internal sealed class NodeEventTracer(IApplication application, INode node)
     : IApplicationService, IDisposable
 {
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         node.Started += Node_Started;
         node.Stopped += Node_Stopped;

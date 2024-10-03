@@ -67,8 +67,7 @@ internal sealed class Explorer(
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
         if (settings.IsExplorerEnabled is true)
         {

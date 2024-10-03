@@ -50,8 +50,7 @@ internal sealed class SeedService : LocalService<ISeedService>,
         return await _application.InvokeAsync(() => seedInfo, cancellationToken);
     }
 
-    async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
         await _blocksyncSeedNode.StartAsync(cancellationToken);
         await _consensusSeedNode.StartAsync(cancellationToken);

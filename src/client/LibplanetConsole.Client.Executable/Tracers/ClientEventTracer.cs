@@ -9,8 +9,7 @@ namespace LibplanetConsole.Client.Executable.Tracers;
 internal sealed class ClientEventTracer(IClient client)
     : IApplicationService, IDisposable
 {
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         client.Started += Client_Started;
         client.Stopped += Client_Stopped;

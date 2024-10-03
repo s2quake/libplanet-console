@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 
@@ -5,18 +6,23 @@ namespace LibplanetConsole.Framework;
 
 public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ManualResetEvent _closeEvent = new(false);
     private readonly SynchronizationContext _synchronizationContext;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly ILogger _logger;
     private bool _isDisposed;
+    private IApplicationService[] _applicationServices = [];
 
-    protected ApplicationFramework()
+    protected ApplicationFramework(IServiceProvider serviceProvider)
     {
         SynchronizationContext.SetSynchronizationContext(new());
+        _logger = serviceProvider.GetRequiredService<ILogger>();
+        _serviceProvider = serviceProvider;
         _synchronizationContext = SynchronizationContext.Current!;
     }
 
-    public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
+    // public virtual ApplicationServiceCollection ApplicationServices { get; } = new([]);
 
     public abstract ILogger Logger { get; }
 
@@ -79,7 +85,7 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 
     public abstract object? GetService(Type serviceType);
 
-    protected static ILogger CreateLogger(
+    public static ILogger CreateLogger(
         Type applicationType, string logPath, string libraryLogPath)
     {
         var loggerConfiguration = new LoggerConfiguration();
@@ -110,8 +116,18 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
         return logger;
     }
 
-    protected virtual Task OnRunAsync(CancellationToken cancellationToken)
-        => ApplicationServices.InitializeAsync(this, cancellationToken: default);
+    protected virtual async Task OnRunAsync(CancellationToken cancellationToken)
+    {
+        _applicationServices = Sort(_serviceProvider.GetServices<IApplicationService>());
+
+        for (var i = 0; i < _applicationServices.Length; i++)
+        {
+            var serviceName = _applicationServices[i].GetType().Name;
+            _logger?.Debug("Application service initializing: {0}", serviceName);
+            await _applicationServices[i].InitializeAsync(cancellationToken);
+            _logger?.Debug("Application service initialized: {0}", serviceName);
+        }
+    }
 
     protected virtual ValueTask OnDisposeAsync() => ValueTask.CompletedTask;
 
@@ -133,5 +149,15 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
         }
 
         return value == applicationType.FullName;
+    }
+
+    private static IApplicationService[] Sort(IEnumerable<IApplicationService> items)
+    {
+        return DependencyUtility.TopologicalSort(items, GetDependencies).ToArray();
+
+        IEnumerable<IApplicationService> GetDependencies(IApplicationService item)
+        {
+            return DependencyUtility.GetDependencies(item, items);
+        }
     }
 }

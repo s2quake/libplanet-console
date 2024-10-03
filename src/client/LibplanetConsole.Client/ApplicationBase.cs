@@ -21,6 +21,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
+        : base(null)
     {
         _logger = CreateLogger(GetType(), options.LogPath, string.Empty);
         _logger.Debug(Environment.CommandLine);
@@ -56,7 +57,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug("Application initialized.");
     }
 
-    public override ApplicationServiceCollection ApplicationServices { get; }
+    // public override ApplicationServiceCollection ApplicationServices { get; }
 
     public EndPoint EndPoint => _clientServiceContext.EndPoint;
 

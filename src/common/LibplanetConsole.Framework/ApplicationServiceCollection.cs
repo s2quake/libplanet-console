@@ -1,40 +1,19 @@
-using System.Collections;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace LibplanetConsole.Framework;
 
-public sealed class ApplicationServiceCollection(
-    IEnumerable<IApplicationService> applicationServices)
-    : IEnumerable<IApplicationService>
+public sealed class ApplicationServiceCollection : ServiceCollection
 {
-    private readonly IApplicationService[] _applicationServices = Sort(applicationServices);
-
-    public async Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public ApplicationServiceCollection()
+        : this(new())
     {
-        var logger = serviceProvider.GetService<ILogger>();
-        for (var i = 0; i < _applicationServices.Length; i++)
-        {
-            var serviceName = _applicationServices[i].GetType().Name;
-            logger?.Debug("Application service initializing: {0}", serviceName);
-            await _applicationServices[i].InitializeAsync(serviceProvider, cancellationToken);
-            logger?.Debug("Application service initialized: {0}", serviceName);
-        }
     }
 
-    IEnumerator<IApplicationService> IEnumerable<IApplicationService>.GetEnumerator()
-        => _applicationServices.OfType<IApplicationService>().GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => _applicationServices.GetEnumerator();
-
-    private static IApplicationService[] Sort(IEnumerable<IApplicationService> items)
+    public ApplicationServiceCollection(ApplicationSettingsCollection settingsCollection)
     {
-        return DependencyUtility.TopologicalSort(items, GetDependencies).ToArray();
-
-        IEnumerable<IApplicationService> GetDependencies(IApplicationService item)
+        foreach (var settings in settingsCollection)
         {
-            return DependencyUtility.GetDependencies(item, items);
+            this.AddSingleton(settings);
         }
     }
 }

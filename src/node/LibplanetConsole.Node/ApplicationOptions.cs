@@ -27,7 +27,5 @@ public sealed record class ApplicationOptions
 
     public bool NoREPL { get; init; }
 
-    public object[] Components { get; init; } = [];
-
     public IActionProvider? ActionProvider { get; init; }
 }

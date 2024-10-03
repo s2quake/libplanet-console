@@ -121,8 +121,7 @@ internal sealed class NodeCollection(
         return node;
     }
 
-    async Task IApplicationService.InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
     {
         var info = _application.Info;
         await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);

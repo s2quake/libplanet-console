@@ -1,5 +1,11 @@
+using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Node.Executable.Commands;
+using LibplanetConsole.Node.Executable.Tracers;
+using LibplanetConsole.Settings;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -27,9 +33,16 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
     {
         try
         {
-            var applicationOptions = _applicationSettings.ToOptions([.. _settingsCollection]);
+            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
+            var applicationOptions = _applicationSettings.ToOptions();
+
+            serviceCollection.AddSingleton(applicationOptions);
+            serviceCollection.AddNodeApplication<Application>(applicationOptions);
+            serviceCollection.AddNodeExecutable();
+
+            using var serviceProvider = serviceCollection.BuildServiceProvider();
             var @out = Console.Out;
-            await using var application = new Application(applicationOptions);
+            await using var application = serviceProvider.GetRequiredService<Application>();
             await @out.WriteLineAsync();
             await application.RunAsync();
             await @out.WriteLineAsync("\u001b0");

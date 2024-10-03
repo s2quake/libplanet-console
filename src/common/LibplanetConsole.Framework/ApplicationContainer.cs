@@ -32,15 +32,15 @@ public sealed class ApplicationContainer : ServiceCollection, IAsyncDisposable
 
     public static IEnumerable<Assembly> GetAssemblies(Assembly assembly)
     {
-        // var directory = Path.GetDirectoryName(assembly.Location)!;
+        var directory = Path.GetDirectoryName(assembly.Location)!;
+        var files = Directory.GetFiles(directory, "LibplanetConsole.*.dll");
         // var directoryCatalog = new DirectoryCatalog(directory, "LibplanetConsole.*.dll");
-        // string[] paths =
-        // [
-        //     assembly.Location,
-        //     .. directoryCatalog.LoadedFiles,
-        // ];
-        // return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
-        return [];
+        string[] paths =
+        [
+            assembly.Location,
+            .. files,
+        ];
+        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
     }
 
     public async ValueTask DisposeAsync()

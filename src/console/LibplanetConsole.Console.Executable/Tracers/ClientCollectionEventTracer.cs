@@ -11,8 +11,7 @@ internal sealed class ClientCollectionEventTracer(IClientCollection clients) : I
 {
     private readonly IClientCollection _clients = clients;
 
-    public Task InitializeAsync(
-        IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         foreach (var client in _clients)
         {
