@@ -1,5 +1,4 @@
 using System.Security;
-using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
@@ -15,7 +14,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
     private EndPoint? _nodeEndPoint;
-    private RemoteNodeContext? _remoteNodeContext;
+    // private RemoteNodeContext? _remoteNodeContext;
     private Guid _closeToken;
     private ClientInfo _info;
 
@@ -64,11 +63,11 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public bool IsRunning { get; private set; }
 
-    private INodeService RemoteNodeService
-        => _serviceProvider.GetRequiredService<RemoteNodeService>().Service;
+    // private INodeService RemoteNodeService
+    //     => _serviceProvider.GetRequiredService<RemoteNodeService>().Service;
 
-    private IBlockChainService RemoteBlockChainService
-        => _serviceProvider.GetRequiredService<RemoteBlockChainService>().Service;
+    // private IBlockChainService RemoteBlockChainService
+    //     => _serviceProvider.GetRequiredService<RemoteBlockChainService>().Service;
 
     public override string ToString() => $"[{Address}]";
 
@@ -76,16 +75,16 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_remoteNodeContext is not null)
-        {
-            throw new InvalidOperationException("The client is already running.");
-        }
+        // if (_remoteNodeContext is not null)
+        // {
+        //     throw new InvalidOperationException("The client is already running.");
+        // }
 
-        _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
-        _remoteNodeContext.EndPoint = NodeEndPoint;
-        _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
-        _remoteNodeContext.Closed += RemoteNodeContext_Closed;
-        NodeInfo = await RemoteNodeService.GetInfoAsync(cancellationToken);
+        // _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
+        // _remoteNodeContext.EndPoint = NodeEndPoint;
+        // _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
+        // _remoteNodeContext.Closed += RemoteNodeContext_Closed;
+        // NodeInfo = await RemoteNodeService.GetInfoAsync(cancellationToken);
         _info = _info with { NodeAddress = NodeInfo.Address };
         IsRunning = true;
         _logger.LogDebug(
@@ -95,15 +94,15 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_remoteNodeContext is null)
-        {
-            throw new InvalidOperationException("The client is not running.");
-        }
+        // if (_remoteNodeContext is null)
+        // {
+        //     throw new InvalidOperationException("The client is not running.");
+        // }
 
-        _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
-        await _remoteNodeContext.CloseAsync(_closeToken, cancellationToken);
-        _info = _info with { NodeAddress = default };
-        _remoteNodeContext = null;
+        // _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
+        // await _remoteNodeContext.CloseAsync(_closeToken, cancellationToken);
+        // _info = _info with { NodeAddress = default };
+        // _remoteNodeContext = null;
         _closeToken = Guid.Empty;
         IsRunning = false;
         _logger.LogDebug("Client is stopped: {Address}", Address);
@@ -127,12 +126,12 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public async ValueTask DisposeAsync()
     {
-        if (_remoteNodeContext is not null)
-        {
-            _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
-            await _remoteNodeContext.CloseAsync(_closeToken);
-            _remoteNodeContext = null;
-        }
+        // if (_remoteNodeContext is not null)
+        // {
+        //     _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
+        //     await _remoteNodeContext.CloseAsync(_closeToken);
+        //     _remoteNodeContext = null;
+        // }
     }
 
     void INodeCallback.OnStarted(NodeInfo nodeInfo) => NodeInfo = nodeInfo;
@@ -146,11 +145,11 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     private void RemoteNodeContext_Closed(object? sender, EventArgs e)
     {
-        if (_remoteNodeContext is not null)
-        {
-            _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
-            _remoteNodeContext = null;
-        }
+        // if (_remoteNodeContext is not null)
+        // {
+        //     _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
+        //     _remoteNodeContext = null;
+        // }
 
         _closeToken = Guid.Empty;
         IsRunning = false;

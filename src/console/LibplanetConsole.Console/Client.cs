@@ -1,10 +1,7 @@
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Console.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -14,10 +11,10 @@ internal sealed class Client : IClient, IClientCallback
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ClientOptions _clientOptions;
-    private readonly RemoteService<IClientService, IClientCallback> _remoteService;
+    // private readonly RemoteService<IClientService, IClientCallback> _remoteService;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
-    private RemoteServiceContext? _remoteServiceContext;
+    // private RemoteServiceContext? _remoteServiceContext;
     private Guid _closeToken;
     private ClientInfo _clientInfo;
     private bool _isDisposed;
@@ -68,8 +65,9 @@ internal sealed class Client : IClient, IClientCallback
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         InvalidOperationExceptionUtility.ThrowIf(IsRunning is not true, "Client is not running.");
 
-        _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
-        return _clientInfo;
+        // _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
+        // return _clientInfo;
+        throw new NotImplementedException();
     }
 
     public async Task AttachAsync(CancellationToken cancellationToken)
@@ -79,20 +77,20 @@ internal sealed class Client : IClient, IClientCallback
             condition: _closeToken != Guid.Empty,
             message: "Client is already attached.");
 
-        if (_remoteServiceContext is not null)
-        {
-            throw new InvalidOperationException("Client is already attached.");
-        }
+        // if (_remoteServiceContext is not null)
+        // {
+        //     throw new InvalidOperationException("Client is already attached.");
+        // }
 
         using var scope = new ProgressScope(this);
-        _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_serviceProvider)])
-        {
-            EndPoint = _clientOptions.EndPoint,
-        };
-        _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
-        _remoteServiceContext.Closed += RemoteServiceContext_Closed;
-        _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
+        // _remoteServiceContext = new RemoteServiceContext(
+        //     [_remoteService, .. GetRemoteServices(_serviceProvider)])
+        // {
+        //     EndPoint = _clientOptions.EndPoint,
+        // };
+        // _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
+        // _remoteServiceContext.Closed += RemoteServiceContext_Closed;
+        // _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         IsRunning = _clientInfo.IsRunning;
         _logger.LogDebug("Client is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
@@ -105,14 +103,14 @@ internal sealed class Client : IClient, IClientCallback
             condition: _closeToken == Guid.Empty,
             message: "Client is not attached.");
 
-        if (_remoteServiceContext is null)
-        {
-            throw new InvalidOperationException("Client is not attached.");
-        }
+        // if (_remoteServiceContext is null)
+        // {
+        //     throw new InvalidOperationException("Client is not attached.");
+        // }
 
-        using var scope = new ProgressScope(this);
-        _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-        await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
+        // using var scope = new ProgressScope(this);
+        // _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+        // await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         _closeToken = Guid.Empty;
         _logger.LogDebug("Client is detached: {Address}", Address);
         Detached?.Invoke(this, EventArgs.Empty);
@@ -126,8 +124,8 @@ internal sealed class Client : IClient, IClientCallback
             condition: _closeToken == Guid.Empty,
             message: "Client is not attached.");
 
-        _clientInfo = await _remoteService.Service.StartAsync(
-            EndPointUtility.ToString(node.EndPoint), cancellationToken);
+        // _clientInfo = await _remoteService.Service.StartAsync(
+        //     EndPointUtility.ToString(node.EndPoint), cancellationToken);
         IsRunning = true;
         _logger.LogDebug("Client is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
@@ -141,7 +139,7 @@ internal sealed class Client : IClient, IClientCallback
             condition: _closeToken == Guid.Empty,
             message: "Client is not attached.");
 
-        await _remoteService.Service.StopAsync(cancellationToken);
+        // await _remoteService.Service.StopAsync(cancellationToken);
         _closeToken = Guid.Empty;
         _clientInfo = default;
         IsRunning = false;
@@ -155,8 +153,9 @@ internal sealed class Client : IClient, IClientCallback
         {
             Text = text,
         };
-        return await _remoteService.Service.SendTransactionAsync(
-            transactionOptions.Sign(this), cancellationToken);
+        // return await _remoteService.Service.SendTransactionAsync(
+        //     transactionOptions.Sign(this), cancellationToken);
+        throw new NotImplementedException();
     }
 
     public async ValueTask DisposeAsync()
@@ -169,12 +168,12 @@ internal sealed class Client : IClient, IClientCallback
             _processTask = Task.CompletedTask;
             _process = null;
 
-            if (_remoteServiceContext is not null)
-            {
-                _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-                await _remoteServiceContext.CloseAsync(_closeToken);
-                _remoteServiceContext = null;
-            }
+            // if (_remoteServiceContext is not null)
+            // {
+            //     _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+            //     await _remoteServiceContext.CloseAsync(_closeToken);
+            //     _remoteServiceContext = null;
+            // }
 
             _closeToken = Guid.Empty;
             IsRunning = false;
@@ -236,28 +235,28 @@ internal sealed class Client : IClient, IClientCallback
         }
     }
 
-    private static IEnumerable<IRemoteService> GetRemoteServices(
-        IServiceProvider serviceProvider)
-    {
-        foreach (var item in serviceProvider.GetServices<IClientContentService>())
-        {
-            yield return item.RemoteService;
-        }
-    }
+    // private static IEnumerable<IRemoteService> GetRemoteServices(
+    //     IServiceProvider serviceProvider)
+    // {
+    //     foreach (var item in serviceProvider.GetServices<IClientContentService>())
+    //     {
+    //         yield return item.RemoteService;
+    //     }
+    // }
 
-    private void RemoteServiceContext_Closed(object? sender, EventArgs e)
-    {
-        if (sender is RemoteServiceContext remoteServiceContext)
-        {
-            remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-            _remoteServiceContext = null;
-            if (_isInProgress is not true && IsRunning is true)
-            {
-                _closeToken = Guid.Empty;
-                Detached?.Invoke(this, EventArgs.Empty);
-            }
-        }
-    }
+    // private void RemoteServiceContext_Closed(object? sender, EventArgs e)
+    // {
+    //     if (sender is RemoteServiceContext remoteServiceContext)
+    //     {
+    //         remoteServiceContext.Closed -= RemoteServiceContext_Closed;
+    //         _remoteServiceContext = null;
+    //         if (_isInProgress is not true && IsRunning is true)
+    //         {
+    //             _closeToken = Guid.Empty;
+    //             Detached?.Invoke(this, EventArgs.Empty);
+    //         }
+    //     }
+    // }
 
     private sealed class ProgressScope : IDisposable
     {

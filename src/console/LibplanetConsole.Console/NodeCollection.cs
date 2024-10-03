@@ -1,14 +1,13 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-[Dependency(typeof(SeedService))]
+// [Dependency(typeof(SeedService))]
 internal sealed class NodeCollection(
     IServiceProvider serviceProvider, NodeOptions[] nodeOptions)
     : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable

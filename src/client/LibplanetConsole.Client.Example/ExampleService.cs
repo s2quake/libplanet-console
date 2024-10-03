@@ -1,12 +1,12 @@
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Example.Services;
+// using LibplanetConsole.Common.Services;
+// using LibplanetConsole.Example.Services;
 
-namespace LibplanetConsole.Client.Example;
+// namespace LibplanetConsole.Client.Example;
 
-internal sealed class ExampleService(IExample sampleClient)
-    : LocalService<IExampleClientService>, IExampleClientService
-{
-    public void Subscribe() => sampleClient.Subscribe();
+// internal sealed class ExampleService(IExample sampleClient)
+//     : LocalService<IExampleClientService>, IExampleClientService
+// {
+//     public void Subscribe() => sampleClient.Subscribe();
 
-    public void Unsubscribe() => sampleClient.Unsubscribe();
-}
+//     public void Unsubscribe() => sampleClient.Unsubscribe();
+// }

@@ -1,31 +1,39 @@
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Console.Services;
 using LibplanetConsole.Evidence;
 using LibplanetConsole.Evidence.Services;
 
 namespace LibplanetConsole.Console.Evidence;
 
 internal sealed class Evidence(INode node)
-    : INodeContent, IEvidence, INodeContentService
+    : INodeContent, IEvidence
+    // , INodeContentService
 {
-    private readonly RemoteService<IEvidenceService> _evidenceService = new();
+    // private readonly RemoteService<IEvidenceService> _evidenceService = new();
 
     INode INodeContent.Node => node;
 
     string INodeContent.Name => "evidence";
 
-    IRemoteService INodeContentService.RemoteService => _evidenceService;
+    // IRemoteService INodeContentService.RemoteService => _evidenceService;
 
-    private IEvidenceService Service => _evidenceService.Service;
+    // private IEvidenceService Service => _evidenceService.Service;
 
     public Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
-        => Service.AddEvidenceAsync(cancellationToken);
+    {
+        // return Service.AddEvidenceAsync(cancellationToken);
+        throw new NotImplementedException();
+    }
 
     public Task<EvidenceInfo[]> GetEvidenceAsync(long height, CancellationToken cancellationToken)
-        => Service.GetEvidenceAsync(height, cancellationToken);
+    {
+        // return Service.GetEvidenceAsync(height, cancellationToken);
+        throw new NotImplementedException();
+    }
 
     public Task ViolateAsync(CancellationToken cancellationToken)
-        => Service.ViolateAsync(cancellationToken);
+    {
+        // return Service.ViolateAsync(cancellationToken);
+        throw new NotImplementedException();
+    }
 
 #if LIBPLANET_DPOS
     public Task UnjailAsync(CancellationToken cancellationToken)

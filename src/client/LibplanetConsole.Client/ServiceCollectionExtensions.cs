@@ -1,7 +1,6 @@
 using LibplanetConsole.Client.Commands;
-using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
+// using LibplanetConsole.Common.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client;
@@ -15,15 +14,15 @@ public static class ServiceCollectionExtensions
              .AddSingleton<IClient>(s => s.GetRequiredService<Client>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Client>());
 
-        @this.AddSingleton<ClientService>()
-             .AddSingleton<ILocalService>(s => s.GetRequiredService<ClientService>())
-             .AddSingleton<IClientService>(s => s.GetRequiredService<ClientService>());
-        @this.AddSingleton<ClientServiceContext>();
-        @this.AddSingleton<RemoteBlockChainService>()
-             .AddSingleton<IRemoteService>(s => s.GetRequiredService<RemoteBlockChainService>());
-        @this.AddSingleton<RemoteNodeContext>();
-        @this.AddSingleton<RemoteNodeService>()
-             .AddSingleton<IRemoteService>(s => s.GetRequiredService<RemoteNodeService>());
+     //    @this.AddSingleton<ClientService>()
+          //    .AddSingleton<ILocalService>(s => s.GetRequiredService<ClientService>())
+          //    .AddSingleton<IClientService>(s => s.GetRequiredService<ClientService>());
+     //    @this.AddSingleton<ClientServiceContext>();
+     //    @this.AddSingleton<RemoteBlockChainService>();
+          //    .AddSingleton<IRemoteService>(s => s.GetRequiredService<RemoteBlockChainService>());
+     //    @this.AddSingleton<RemoteNodeContext>();
+     //    @this.AddSingleton<RemoteNodeService>();
+          //    .AddSingleton<IRemoteService>(s => s.GetRequiredService<RemoteNodeService>());
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, ClientInfoProvider>();
 

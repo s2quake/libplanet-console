@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Node.Example.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +12,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<Example>()
              .AddSingleton<IExample>(s => s.GetRequiredService<Example>());
         @this.AddSingleton<IInfoProvider, ExampleInfoProvider>();
-        @this.AddSingleton<ILocalService, ExampleService>();
+        // @this.AddSingleton<ILocalService, ExampleService>();
         @this.AddSingleton<ICommand, ExampleCommand>();
         return @this;
     }

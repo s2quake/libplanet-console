@@ -1,8 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Commands;
-using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,10 +25,10 @@ public static class ServiceCollectionExtensions
           @this.AddScoped(ClientFactory.Create)
                .AddScoped<IClient>(s => s.GetRequiredService<Client>());
 
-          @this.AddSingleton<ConsoleServiceContext>();
-          @this.AddSingleton<SeedService>()
-               .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
-               .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
+          // @this.AddSingleton<ConsoleServiceContext>();
+          // @this.AddSingleton<SeedService>()
+          //      .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
+          //      .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
 
           @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
           @this.AddSingleton<IInfoProvider, ClientInfoProvider>();

@@ -10,7 +10,6 @@ using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -297,34 +296,35 @@ internal sealed partial class Node : IActionRenderer, INode
     private static async Task<SeedInfo> GetSeedInfoAsync(
         EndPoint seedEndPoint, CancellationToken cancellationToken)
     {
-        var remoteService = new RemoteService<ISeedService>();
-        var remoteServiceContext = new RemoteServiceContext([remoteService])
-        {
-            EndPoint = seedEndPoint,
-        };
-        var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
-        var service = remoteService.Service;
-        var privateKey = new PrivateKey();
-        var publicKey = privateKey.PublicKey;
-        try
-        {
-            for (var i = 0; i < 10; i++)
-            {
-                var seedInfo = await service.GetSeedAsync(publicKey, cancellationToken);
-                if (Equals(seedInfo, SeedInfo.Empty) != true)
-                {
-                    return seedInfo;
-                }
+        // var remoteService = new RemoteService<ISeedService>();
+        // var remoteServiceContext = new RemoteServiceContext([remoteService])
+        // {
+        //     EndPoint = seedEndPoint,
+        // };
+        // var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
+        // var service = remoteService.Service;
+        // var privateKey = new PrivateKey();
+        // var publicKey = privateKey.PublicKey;
+        // try
+        // {
+        //     for (var i = 0; i < 10; i++)
+        //     {
+        //         var seedInfo = await service.GetSeedAsync(publicKey, cancellationToken);
+        //         if (Equals(seedInfo, SeedInfo.Empty) != true)
+        //         {
+        //             return seedInfo;
+        //         }
 
-                await Task.Delay(500, cancellationToken);
-            }
+        //         await Task.Delay(500, cancellationToken);
+        //     }
 
-            throw new InvalidOperationException("No seed information is available.");
-        }
-        finally
-        {
-            await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
-        }
+        //     throw new InvalidOperationException("No seed information is available.");
+        // }
+        // finally
+        // {
+        //     await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
+        // }
+        throw new NotImplementedException();
     }
 
     private void UpdateNodeInfo()

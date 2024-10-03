@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Node.Services;
@@ -16,12 +15,12 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton(s => new Node(s, options))
              .AddSingleton<INode>(s => s.GetRequiredService<Node>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
-        @this.AddSingleton<NodeContext>();
-        @this.AddSingleton<SeedService>()
-             .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
-             .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
-        @this.AddSingleton<ILocalService, BlockChainService>();
-        @this.AddSingleton<ILocalService, NodeService>();
+        // @this.AddSingleton<NodeContext>();
+        // @this.AddSingleton<SeedService>()
+            //  .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
+            //  .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
+        // @this.AddSingleton<ILocalService, BlockChainService>();
+        // @this.AddSingleton<ILocalService, NodeService>();
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
 

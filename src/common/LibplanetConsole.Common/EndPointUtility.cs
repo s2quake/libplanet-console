@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Sockets;
-using CommunicationUtility = JSSoft.Communication.EndPointUtility;
 
 namespace LibplanetConsole.Common;
 
@@ -11,7 +10,20 @@ public static class EndPointUtility
 
     public static EndPoint NextEndPoint() => new DnsEndPoint("localhost", GetPort());
 
-    public static EndPoint Parse(string text) => CommunicationUtility.Parse(text);
+    public static EndPoint Parse(string text)
+    {
+        var items = text.Split(':');
+        if (IPAddress.TryParse(items[0], out var address) == true)
+        {
+            return new IPEndPoint(address, int.Parse(items[1]));
+        }
+        else if (items.Length == 2)
+        {
+            return new DnsEndPoint(items[0], int.Parse(items[1]));
+        }
+
+        throw new NotSupportedException($"'{text}' is not supported.");
+    }
 
     public static EndPoint ParseOrNext(string text)
         => text == string.Empty ? NextEndPoint() : Parse(text);
@@ -24,14 +36,16 @@ public static class EndPointUtility
 
     public static bool TryParse(string text, [MaybeNullWhen(false)] out EndPoint endPoint)
     {
-        if (CommunicationUtility.TryParse(text, out var value))
+        try
         {
-            endPoint = value;
+            endPoint = Parse(text);
             return true;
         }
-
-        endPoint = null;
-        return false;
+        catch
+        {
+            endPoint = null;
+            return false;
+        }
     }
 
     public static (string Host, int Port) GetHostAndPort(EndPoint endPoint)

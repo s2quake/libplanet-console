@@ -2,12 +2,12 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using Microsoft.Extensions.Logging;
 
-namespace LibplanetConsole.Node.Services;
+// namespace LibplanetConsole.Node.Services;
 
-internal sealed class NodeService : LocalService<INodeService, INodeCallback>, INodeService
-{
-    private readonly Node _node;
-    private readonly ILogger _logger;
+// internal sealed class NodeService : LocalService<INodeService, INodeCallback>, INodeService
+// {
+//     private readonly Node _node;
+//     private readonly ILogger _logger;
 
     public NodeService(Node node, ILogger<NodeService> logger)
     {
@@ -17,11 +17,11 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
         _node.Stopped += (s, e) => Callback.OnStopped();
     }
 
-    public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
-    {
-        await Task.CompletedTask;
-        return _node.Info;
-    }
+//     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
+//     {
+//         await Task.CompletedTask;
+//         return _node.Info;
+//     }
 
     public async Task<NodeInfo> StartAsync(string seedEndPoint, CancellationToken cancellationToken)
     {
@@ -31,6 +31,6 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
         return _node.Info;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-        => _node.StopAsync(cancellationToken);
-}
+//     public Task StopAsync(CancellationToken cancellationToken)
+//         => _node.StopAsync(cancellationToken);
+// }

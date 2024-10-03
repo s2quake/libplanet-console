@@ -31,30 +31,13 @@
     <PackageReference Include="JSSoft.Terminals" Version="$(JSSoftCommandsVersion)" />
   </ItemGroup>
 
-  <!-- $(CommunicationDirectory) exists. -->
-  <ItemGroup Condition="Exists('$(CommunicationDirectory)')">
-    <ProjectReference Include="$(CommunicationDirectory)src\JSSoft.Communication\JSSoft.Communication.csproj" />
-  </ItemGroup>
-
-  <!-- $(CommunicationDirectory) does not exist. -->
-  <ItemGroup Condition="!Exists('$(CommunicationDirectory)')">
-    <PackageReference Include="JSSoft.Communication" Version="$(JSSoftCommunicationVersion)" />
-  </ItemGroup>
-
-  <!-- $(ConfigurationsDirectory) exists. -->
-  <ItemGroup Condition="Exists('$(ConfigurationsDirectory)')">
-    <ProjectReference Include="$(ConfigurationsDirectory)src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
-  </ItemGroup>
-
-  <!-- $(ConfigurationsDirectory) does not exist. -->
-  <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
-    <PackageReference Include="JSSoft.Configurations" Version="$(JSSoftConfigurationsVersion)" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.DataAnnotations\LibplanetConsole.DataAnnotations.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Bencodex" Version="0.16.0" />
   </ItemGroup>
 

@@ -1,8 +1,8 @@
-using LibplanetConsole.Common.Services;
+// using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Console.Services;
+// namespace LibplanetConsole.Console.Services;
 
-public interface INodeContentService
-{
-    IRemoteService RemoteService { get; }
-}
+// public interface INodeContentService
+// {
+//     IRemoteService RemoteService { get; }
+// }

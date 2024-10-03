@@ -1,16 +1,15 @@
 using System.Text;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Console.Services;
 using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Console.Example;
 
 internal sealed class ExampleNode(INode node, ExampleSettings settings)
-    : NodeContentBase(node), IExampleNodeCallback, IExampleNode, INodeContentService
+    : NodeContentBase(node), IExampleNodeCallback, IExampleNode
+    // , INodeContentService
 {
     private readonly StringBuilder _log = new();
-    private RemoteService<IExampleNodeService, IExampleNodeCallback>? _remoteService;
+    // private RemoteService<IExampleNodeService, IExampleNodeCallback>? _remoteService;
 
     public event EventHandler<ItemEventArgs<Address>>? Subscribed;
 
@@ -20,30 +19,45 @@ internal sealed class ExampleNode(INode node, ExampleSettings settings)
 
     public bool IsExample { get; } = settings.IsNodeExample;
 
-    IRemoteService INodeContentService.RemoteService => RemoteService;
+    // IRemoteService INodeContentService.RemoteService => RemoteService;
 
-    private IExampleNodeService Service => RemoteService.Service;
+    // private IExampleNodeService Service => RemoteService.Service;
 
-    private RemoteService<IExampleNodeService, IExampleNodeCallback> RemoteService
-        => _remoteService ??= new RemoteService<IExampleNodeService, IExampleNodeCallback>(this);
+    // private RemoteService<IExampleNodeService, IExampleNodeCallback> RemoteService
+    // {
+    //     get
+    //     {
+    //         // return _remoteService ??= new RemoteService<IExampleNodeService, IExampleNodeCallback>(this);
+    //         throw new NotImplementedException();
+    //     }
+    // }
 
     public Task<Address[]> GetAddressesAsync(CancellationToken cancellationToken)
-        => Service.GetAddressesAsync(cancellationToken);
+    {
+        // return Service.GetAddressesAsync(cancellationToken);
+        throw new NotImplementedException();
+    }
 
-    public void Subscribe(Address address) => Service.Subscribe(address);
+    public void Subscribe(Address address)
+    {
+        // Service.Subscribe(address);
+    }
 
-    public void Unsubscribe(Address address) => Service.Unsubscribe(address);
+    public void Unsubscribe(Address address)
+    {
+        // Service.Unsubscribe(address);
+    }
 
     async void IExampleNodeCallback.OnSubscribed(Address address)
     {
-        Count = await Service.GetAddressCountAsync(CancellationToken.None);
+        // Count = await Service.GetAddressCountAsync(CancellationToken.None);
         _log.AppendLine($"{nameof(IExampleNodeCallback.OnSubscribed)}: {address}");
         Subscribed?.Invoke(this, new ItemEventArgs<Address>(address));
     }
 
     async void IExampleNodeCallback.OnUnsubscribed(Address address)
     {
-        Count = await Service.GetAddressCountAsync(CancellationToken.None);
+        // Count = await Service.GetAddressCountAsync(CancellationToken.None);
         _log.AppendLine($"{nameof(IExampleNodeCallback.OnUnsubscribed)}: {address}");
         Unsubscribed?.Invoke(this, new ItemEventArgs<Address>(address));
     }

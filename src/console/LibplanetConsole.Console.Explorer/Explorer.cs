@@ -1,19 +1,18 @@
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Console.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console.Explorer;
 
-internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, INodeContentService
+internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback
+// , INodeContentService
 {
     private readonly ILogger _logger;
     private readonly ExecutionScope _executionScope = new();
     private readonly ExplorerSettings _settings;
     private EndPoint _endPoint = EndPointUtility.NextEndPoint();
-    private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
+    // private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
 
     public Explorer(INode node, ILogger<Explorer> logger, ExplorerSettings settings)
         : base(node)
@@ -46,12 +45,12 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
 
     public bool IsRunning { get; private set; }
 
-    IRemoteService INodeContentService.RemoteService => RemoteService;
+    // IRemoteService INodeContentService.RemoteService => RemoteService;
 
-    private IExplorerService Service => RemoteService.Service;
+    // private IExplorerService Service => RemoteService.Service;
 
-    private RemoteService<IExplorerService, IExplorerCallback> RemoteService
-        => _remoteService ??= new RemoteService<IExplorerService, IExplorerCallback>(this);
+    // private RemoteService<IExplorerService, IExplorerCallback> RemoteService
+    //     => _remoteService ??= new RemoteService<IExplorerService, IExplorerCallback>(this);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -67,7 +66,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
         {
             EndPoint = EndPoint,
         };
-        Info = await Service.StartAsync(options, cancellationToken);
+        // Info = await Service.StartAsync(options, cancellationToken);
         IsRunning = true;
         _logger.LogDebug("Explorer is started: {NodeAddress} {EndPoint}", nodeAddress, endPoint);
         Started?.Invoke(this, EventArgs.Empty);
@@ -81,7 +80,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
         }
 
         using var scope = _executionScope.Enter();
-        await Service.StopAsync(cancellationToken);
+        // await Service.StopAsync(cancellationToken);
         IsRunning = false;
         _logger.LogDebug("Explorer is stopped.: {NodeAddress}", Node.Address);
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -114,7 +113,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
     protected async override void OnNodeAttached()
     {
         base.OnNodeAttached();
-        Info = await Service.GetInfoAsync(cancellationToken: default);
+        // Info = await Service.GetInfoAsync(cancellationToken: default);
         IsRunning = Info.IsRunning;
     }
 

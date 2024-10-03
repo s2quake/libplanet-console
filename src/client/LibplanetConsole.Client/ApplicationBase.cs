@@ -15,7 +15,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
     private readonly Task _waitForExitTask = Task.CompletedTask;
-    private ClientServiceContext? _clientServiceContext;
+    // private ClientServiceContext? _clientServiceContext;
     private Guid _closeToken;
 
     protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
@@ -26,7 +26,6 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.LogDebug(Environment.CommandLine);
         _logger.LogDebug("Application initializing...");
         _client = serviceProvider.GetRequiredService<Client>();
-
         _info = new()
         {
             EndPoint = options.EndPoint,

@@ -15,7 +15,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly ILogger<ApplicationBase> _logger;
     private readonly ApplicationInfo _info;
     private readonly Task _waitForExitTask = Task.CompletedTask;
-    private NodeContext? _nodeContext;
+    // private NodeContext? _nodeContext;
     private Guid _closeToken;
 
     protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)

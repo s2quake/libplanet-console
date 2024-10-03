@@ -27,13 +27,22 @@ internal sealed partial class Client : IBlockChain
     }
 
     public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
-        => RemoteBlockChainService.GetBlockHashAsync(height, cancellationToken);
+    {
+        // => RemoteBlockChainService.GetBlockHashAsync(height, cancellationToken);
+        throw new NotImplementedException();
+    }
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
-        => RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
+    {
+        // return RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
+        throw new NotImplementedException();
+    }
 
     public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
-        => RemoteBlockChainService.GetTipHashAsync(cancellationToken);
+    {
+        // return RemoteBlockChainService.GetTipHashAsync(cancellationToken);
+        throw new NotImplementedException();
+    }
 
     public async Task<IValue> GetStateAsync(
         BlockHash? blockHash,
@@ -41,9 +50,10 @@ internal sealed partial class Client : IBlockChain
         Address address,
         CancellationToken cancellationToken)
     {
-        var value = await RemoteBlockChainService.GetStateAsync(
-            blockHash, accountAddress, address, cancellationToken);
-        return _codec.Decode(value);
+        // var value = await RemoteBlockChainService.GetStateAsync(
+        //     blockHash, accountAddress, address, cancellationToken);
+        // return _codec.Decode(value);
+        throw new NotImplementedException();
     }
 
     public async Task<IValue> GetStateByStateRootHashAsync(
@@ -52,24 +62,26 @@ internal sealed partial class Client : IBlockChain
         Address address,
         CancellationToken cancellationToken)
     {
-        var value = await RemoteBlockChainService.GetStateByStateRootHashAsync(
-            stateRootHash, accountAddress, address, cancellationToken);
-        return _codec.Decode(value);
+        // var value = await RemoteBlockChainService.GetStateByStateRootHashAsync(
+        //     stateRootHash, accountAddress, address, cancellationToken);
+        // return _codec.Decode(value);
+        throw new NotImplementedException();
     }
 
     public async Task<T> GetActionAsync<T>(
         TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction
     {
-        var bytes = await RemoteBlockChainService.GetActionAsync(
-            txId, actionIndex, cancellationToken);
-        var value = _codec.Decode(bytes);
-        if (Activator.CreateInstance(typeof(T)) is T action)
-        {
-            action.LoadPlainValue(value);
-            return action;
-        }
+        // var bytes = await RemoteBlockChainService.GetActionAsync(
+        //     txId, actionIndex, cancellationToken);
+        // var value = _codec.Decode(bytes);
+        // if (Activator.CreateInstance(typeof(T)) is T action)
+        // {
+        //     action.LoadPlainValue(value);
+        //     return action;
+        // }
 
-        throw new InvalidOperationException("Action not found.");
+        // throw new InvalidOperationException("Action not found.");
+        throw new NotImplementedException();
     }
 }

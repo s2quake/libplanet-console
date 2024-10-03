@@ -1,9 +1,9 @@
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Node.Services;
+// using LibplanetConsole.Common.Services;
+// using LibplanetConsole.Node.Services;
 
-namespace LibplanetConsole.Client.Services;
+// namespace LibplanetConsole.Client.Services;
 
-internal sealed class RemoteNodeService(Client client)
-    : RemoteService<INodeService, INodeCallback>(client)
-{
-}
+// internal sealed class RemoteNodeService(Client client)
+//     : RemoteService<INodeService, INodeCallback>(client)
+// {
+// }

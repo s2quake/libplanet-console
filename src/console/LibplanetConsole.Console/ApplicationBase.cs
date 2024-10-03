@@ -13,7 +13,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly ClientCollection _clients;
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
-    private ConsoleServiceContext? _consoleContext;
+    // private ConsoleServiceContext? _consoleContext;
     private Guid _closeToken;
 
     protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)

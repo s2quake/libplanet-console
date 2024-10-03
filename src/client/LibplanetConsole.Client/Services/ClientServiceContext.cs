@@ -1,8 +1,8 @@
-using LibplanetConsole.Common.Services;
+// using LibplanetConsole.Common.Services;
 
-namespace LibplanetConsole.Client.Services;
+// namespace LibplanetConsole.Client.Services;
 
-internal sealed class ClientServiceContext(
-    IEnumerable<ILocalService> localServices) : LocalServiceContext([.. localServices])
-{
-}
+// internal sealed class ClientServiceContext(
+//     IEnumerable<ILocalService> localServices) : LocalServiceContext([.. localServices])
+// {
+// }
