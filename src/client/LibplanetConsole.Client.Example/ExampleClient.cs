@@ -1,10 +1,7 @@
-using LibplanetConsole.Common;
 using LibplanetConsole.Example.Services;
 
 namespace LibplanetConsole.Client.Example;
 
-[Export(typeof(IExampleClient))]
-[Export]
 internal sealed class ExampleClient(
     IClient client,
     ExampleRemoteNodeService remoteNodeService,

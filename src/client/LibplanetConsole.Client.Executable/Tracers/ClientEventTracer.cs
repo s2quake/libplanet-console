@@ -5,7 +5,6 @@ using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
 internal sealed class ClientEventTracer(IClient client)
     : IApplicationService, IDisposable
 {

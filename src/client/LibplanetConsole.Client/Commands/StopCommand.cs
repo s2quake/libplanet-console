@@ -1,9 +1,7 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Stop client.")]
 internal sealed class StopCommand(IClient client) : CommandAsyncBase
 {

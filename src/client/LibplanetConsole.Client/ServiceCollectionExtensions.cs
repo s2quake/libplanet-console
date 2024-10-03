@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Client.Commands;
 using LibplanetConsole.Client.Services;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
@@ -24,6 +25,8 @@ public static class ServiceCollectionExtensions
         @this.AddSingletonWithInterface<IRemoteService, RemoteBlockChainService>();
         @this.AddSingleton<RemoteNodeContext>();
         @this.AddSingletonWithInterface<IRemoteService, RemoteNodeService>();
+        @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
+        @this.AddSingleton<IInfoProvider, ClientInfoProvider>();
 
         @this.AddSingletonWithInterface<ICommand, AddressCommand>();
         @this.AddSingletonWithInterface<ICommand, ExitCommand>();

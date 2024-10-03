@@ -2,7 +2,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Example;
 
-[Export(typeof(IInfoProvider))]
 internal sealed class ExampleClientInfoProvider(ExampleClient exampleClient)
     : InfoProviderBase<IApplication>(nameof(ExampleClient))
 {

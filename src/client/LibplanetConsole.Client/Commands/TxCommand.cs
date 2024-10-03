@@ -1,11 +1,9 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Sends a transaction to store simple string.")]
 internal sealed class TxCommand(IClient client, IBlockChain blockChain) : CommandAsyncBase
 {

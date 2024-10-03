@@ -1,11 +1,9 @@
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 
-[Export(typeof(IApplicationService))]
 internal sealed class BlockChainEventTracer(IBlockChain blockChain)
     : IApplicationService, IDisposable
 {

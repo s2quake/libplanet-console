@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingletonWithInterface<ILocalService, NodeService>();
 
         @this.AddSingletonWithInterface<IInfoProvider, ApplicationInfoProvider>();
+        @this.AddSingletonWithInterface<IInfoProvider, NodeInfoProvider>();
 
         @this.AddSingletonWithInterface<ICommand, AddressCommand>();
         @this.AddSingletonWithInterface<ICommand, ExitCommand>();

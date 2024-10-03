@@ -3,7 +3,6 @@ using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Commands;
 
-[Export(typeof(ICommand))]
 [CommandSummary("Start client.")]
 internal sealed class StartCommand(Client client) : CommandAsyncBase
 {
