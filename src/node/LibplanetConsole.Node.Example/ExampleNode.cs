@@ -1,11 +1,9 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node.Example;
 
 [Export(typeof(IExampleNode))]
 [Export]
-[method: ImportingConstructor]
 internal sealed class ExampleNode(
     IApplication application, ExampleSettings settings) : IExampleNode
 {

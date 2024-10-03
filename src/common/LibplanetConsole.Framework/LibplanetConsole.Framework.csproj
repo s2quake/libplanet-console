@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
@@ -21,17 +20,7 @@
     <PackageReference Include="JSSoft.Terminals" Version="$(JSSoftCommandsVersion)" />
   </ItemGroup>
 
-  <!-- $(ConfigurationsDirectory) exists. -->
-  <ItemGroup Condition="Exists('$(ConfigurationsDirectory)')">
-    <ProjectReference Include="$(ConfigurationsDirectory)src\JSSoft.Configurations\JSSoft.Configurations.csproj" />
-  </ItemGroup>
-
-  <!-- $(ConfigurationsDirectory) does not exist. -->
-  <ItemGroup Condition="!Exists('$(ConfigurationsDirectory)')">
-    <PackageReference Include="JSSoft.Configurations" Version="$(JSSoftConfigurationsVersion)" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Settings\LibplanetConsole.Settings.csproj" />
   </ItemGroup>
-
 </Project>

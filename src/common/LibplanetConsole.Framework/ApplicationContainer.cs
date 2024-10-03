@@ -1,11 +1,10 @@
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
 using System.Data;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Framework;
 
-public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposable
+public sealed class ApplicationContainer : ServiceCollection, IAsyncDisposable
 {
     private static readonly object _lock = new();
     private readonly HashSet<IAsyncDisposable> _instanceHash = [];
@@ -14,14 +13,12 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
     private readonly ApplicationContainer? _parentContainer;
 
     public ApplicationContainer(object owner)
-        : base(GetCatalog(GetAssemblies(owner)))
     {
         _owner = owner;
     }
 
     public ApplicationContainer(
         object owner, ApplicationContainer container)
-        : base(container.Catalog, container)
     {
         _parentContainer = container;
         _owner = owner;
@@ -35,19 +32,20 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
 
     public static IEnumerable<Assembly> GetAssemblies(Assembly assembly)
     {
-        var directory = Path.GetDirectoryName(assembly.Location)!;
-        var directoryCatalog = new DirectoryCatalog(directory, "LibplanetConsole.*.dll");
-        string[] paths =
-        [
-            assembly.Location,
-            .. directoryCatalog.LoadedFiles,
-        ];
-        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
+        // var directory = Path.GetDirectoryName(assembly.Location)!;
+        // var directoryCatalog = new DirectoryCatalog(directory, "LibplanetConsole.*.dll");
+        // string[] paths =
+        // [
+        //     assembly.Location,
+        //     .. directoryCatalog.LoadedFiles,
+        // ];
+        // return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
+        return [];
     }
 
     public async ValueTask DisposeAsync()
     {
-        base.Dispose();
+        // base.Dispose();
         for (var i = _instanceList.Count - 1; i >= 0; i--)
         {
             await _instanceList[i].DisposeAsync();
@@ -63,36 +61,36 @@ public sealed class ApplicationContainer : CompositionContainer, IAsyncDisposabl
     }
 #pragma warning restore S2953
 
-    protected override IEnumerable<Export>? GetExportsCore(
-        ImportDefinition definition, AtomicComposition? atomicComposition)
-    {
-        if (base.GetExportsCore(definition, atomicComposition) is { } exports)
-        {
-            foreach (var export in exports)
-            {
-                yield return new ApplicationExport(export, OnExport);
-            }
-        }
-    }
+    // protected override IEnumerable<Export>? GetExportsCore(
+    //     ImportDefinition definition, AtomicComposition? atomicComposition)
+    // {
+    //     if (base.GetExportsCore(definition, atomicComposition) is { } exports)
+    //     {
+    //         foreach (var export in exports)
+    //         {
+    //             yield return new ApplicationExport(export, OnExport);
+    //         }
+    //     }
+    // }
 
-    private static AggregateCatalog GetCatalog(IEnumerable<Assembly> assemblies)
-    {
-        var assemblyCatalogs = assemblies.Select(item => new AssemblyCatalog(item));
-        return new AggregateCatalog(assemblyCatalogs);
-    }
+    // private static AggregateCatalog GetCatalog(IEnumerable<Assembly> assemblies)
+    // {
+    //     var assemblyCatalogs = assemblies.Select(item => new AssemblyCatalog(item));
+    //     return new AggregateCatalog(assemblyCatalogs);
+    // }
 
-    private void OnExport(IAsyncDisposable asyncDisposable)
-    {
-        lock (_lock)
-        {
-            if (ContainsExport(asyncDisposable) != true &&
-                _parentContainer?.ContainsExport(asyncDisposable) != true)
-            {
-                _instanceHash.Add(asyncDisposable);
-                _instanceList.Add(asyncDisposable);
-            }
-        }
-    }
+    // private void OnExport(IAsyncDisposable asyncDisposable)
+    // {
+    //     lock (_lock)
+    //     {
+    //         if (ContainsExport(asyncDisposable) != true &&
+    //             _parentContainer?.ContainsExport(asyncDisposable) != true)
+    //         {
+    //             _instanceHash.Add(asyncDisposable);
+    //             _instanceList.Add(asyncDisposable);
+    //         }
+    //     }
+    // }
 
     private bool ContainsExport(IAsyncDisposable asyncDisposable)
         => _owner == asyncDisposable || _instanceHash.Contains(asyncDisposable);

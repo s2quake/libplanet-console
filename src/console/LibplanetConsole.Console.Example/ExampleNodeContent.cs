@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using System.Text;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
@@ -10,7 +9,6 @@ namespace LibplanetConsole.Console.Example;
 [Export(typeof(IExampleNodeContent))]
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
-[method: ImportingConstructor]
 internal sealed class ExampleNodeContent(INode node, ExampleSettings settings)
     : NodeContentBase(node), IExampleNodeCallback, IExampleNodeContent, INodeContentService
 {

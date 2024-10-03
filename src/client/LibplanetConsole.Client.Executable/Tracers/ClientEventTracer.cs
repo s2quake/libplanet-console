@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
@@ -7,7 +6,6 @@ using LibplanetConsole.Framework;
 namespace LibplanetConsole.Client.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class ClientEventTracer(IClient client)
     : IApplicationService, IDisposable
 {

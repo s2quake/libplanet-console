@@ -1,6 +1,4 @@
 using System.Collections;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
@@ -23,6 +21,7 @@ internal sealed class Client : IClient, IClientCallback
     private readonly IClientContent[] _contents;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
+    private readonly IServiceProvider _serviceProvider;
     private Guid _closeToken;
     private ClientInfo _clientInfo;
     private INode? _node;
@@ -35,11 +34,12 @@ internal sealed class Client : IClient, IClientCallback
     {
         _container = application.CreateChildContainer(this);
         _clientOptions = clientOptions;
-        _container.ComposeExportedValue<IClient>(this);
-        _contents = [.. _container.GetExportedValues<IClientContent>()];
+        _container.AddSingleton<IClient>(this);
+        _serviceProvider = _container.BuildServiceProvider();
+        _contents = [.. _serviceProvider.GetServices<IClientContent>()];
         _remoteService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, .. GetRemoteServices(_container)])
+            [_remoteService, .. GetRemoteServices(_serviceProvider)])
         {
             EndPoint = clientOptions.EndPoint,
         };
@@ -88,26 +88,27 @@ internal sealed class Client : IClient, IClientCallback
             return _contents;
         }
 
-        if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
-            serviceType.GenericTypeArguments.Length == 1)
-        {
-            var itemType = serviceType.GenericTypeArguments[0];
-            var items = GetInstances(itemType);
-            var listGenericType = typeof(List<>);
-            var list = listGenericType.MakeGenericType(itemType);
-            var ci = list.GetConstructor([typeof(int)])!;
-            var instance = (IList)ci.Invoke([items.Count(),]);
-            foreach (var item in items)
-            {
-                instance.Add(item);
-            }
+        return _serviceProvider.GetService(serviceType);
+        // if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
+        //     serviceType.GenericTypeArguments.Length == 1)
+        // {
+        //     var itemType = serviceType.GenericTypeArguments[0];
+        //     var items = GetInstances(itemType);
+        //     var listGenericType = typeof(List<>);
+        //     var list = listGenericType.MakeGenericType(itemType);
+        //     var ci = list.GetConstructor([typeof(int)])!;
+        //     var instance = (IList)ci.Invoke([items.Count(),]);
+        //     foreach (var item in items)
+        //     {
+        //         instance.Add(item);
+        //     }
 
-            return instance;
-        }
-        else
-        {
-            return GetInstance(serviceType);
-        }
+        //     return instance;
+        // }
+        // else
+        // {
+        //     return GetInstance(serviceType);
+        // }
     }
 
     public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
@@ -272,25 +273,25 @@ internal sealed class Client : IClient, IClientCallback
     }
 
     private static IEnumerable<IRemoteService> GetRemoteServices(
-        CompositionContainer compositionContainer)
+        IServiceProvider serviceProvider)
     {
-        foreach (var item in compositionContainer.GetExportedValues<IClientContentService>())
+        foreach (var item in serviceProvider.GetServices<IClientContentService>())
         {
             yield return item.RemoteService;
         }
     }
 
-    private object? GetInstance(Type serviceType)
-    {
-        var contractName = AttributedModelServices.GetContractName(serviceType);
-        return _container.GetExportedValue<object>(contractName);
-    }
+    // private object? GetInstance(Type serviceType)
+    // {
+    //     var contractName = AttributedModelServices.GetContractName(serviceType);
+    //     return _container.GetExportedValue<object>(contractName);
+    // }
 
-    private IEnumerable<object> GetInstances(Type service)
-    {
-        var contractName = AttributedModelServices.GetContractName(service);
-        return _container.GetExportedValues<object>(contractName);
-    }
+    // private IEnumerable<object> GetInstances(Type service)
+    // {
+    //     var contractName = AttributedModelServices.GetContractName(service);
+    //     return _container.GetExportedValues<object>(contractName);
+    // }
 
     private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {

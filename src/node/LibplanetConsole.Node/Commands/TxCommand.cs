@@ -1,12 +1,11 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Commands;
 
 [Export(typeof(ICommand))]
-[method: ImportingConstructor]
 [CommandSummary("Adds a transaction to store simple string.")]
 internal sealed class TxCommand(INode node, IBlockChain blockChain) : CommandAsyncBase
 {

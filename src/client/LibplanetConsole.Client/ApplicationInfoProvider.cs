@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client;

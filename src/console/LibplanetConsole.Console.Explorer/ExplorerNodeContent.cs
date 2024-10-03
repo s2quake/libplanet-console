@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
@@ -11,7 +10,6 @@ namespace LibplanetConsole.Console.Explorer;
 [Export(typeof(IExplorer))]
 [Export(typeof(INodeContentService))]
 [Export(typeof(INodeContent))]
-[method: ImportingConstructor]
 internal sealed class ExplorerNodeContent(INode node, ILogger logger, ExplorerSettings settings)
     : NodeContentBase(node), IExplorer, IExplorerCallback, INodeContentService
 {

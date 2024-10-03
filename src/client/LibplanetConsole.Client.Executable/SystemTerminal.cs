@@ -1,6 +1,6 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Executable;
 
@@ -9,7 +9,6 @@ internal sealed class SystemTerminal : SystemTerminalBase
 {
     private readonly CommandContext _commandContext;
 
-    [ImportingConstructor]
     public SystemTerminal(IApplication application, CommandContext commandContext)
     {
         _commandContext = commandContext;

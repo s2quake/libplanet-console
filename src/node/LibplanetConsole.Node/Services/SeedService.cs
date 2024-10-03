@@ -1,4 +1,4 @@
-using System.ComponentModel.Composition;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Seed;
@@ -8,7 +8,6 @@ namespace LibplanetConsole.Node.Services;
 
 [Export(typeof(ILocalService))]
 [Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class SeedService(ApplicationBase application)
     : LocalService<ISeedService>, ISeedService, IApplicationService, IAsyncDisposable
 {

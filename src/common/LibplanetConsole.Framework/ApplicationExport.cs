@@ -1,19 +1,19 @@
-using System.ComponentModel.Composition.Primitives;
+// using System.ComponentModel.Composition.Primitives;
 
-namespace LibplanetConsole.Framework;
+// namespace LibplanetConsole.Framework;
 
-internal sealed class ApplicationExport(Export export, Action<IAsyncDisposable> exportAction)
-    : Export
-{
-    public override ExportDefinition Definition => export.Definition;
+// internal sealed class ApplicationExport(Export export, Action<IAsyncDisposable> exportAction)
+//     : Export
+// {
+//     public override ExportDefinition Definition => export.Definition;
 
-    protected override object? GetExportedValueCore()
-    {
-        if (export.Value is IAsyncDisposable asyncDisposable)
-        {
-            exportAction.Invoke(asyncDisposable);
-        }
+//     protected override object? GetExportedValueCore()
+//     {
+//         if (export.Value is IAsyncDisposable asyncDisposable)
+//         {
+//             exportAction.Invoke(asyncDisposable);
+//         }
 
-        return export.Value;
-    }
-}
+//         return export.Value;
+//     }
+// }

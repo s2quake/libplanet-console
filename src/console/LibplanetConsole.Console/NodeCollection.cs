@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Specialized;
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
@@ -10,7 +9,6 @@ using Serilog;
 namespace LibplanetConsole.Console;
 
 [Dependency(typeof(SeedService))]
-[method: ImportingConstructor]
 internal sealed class NodeCollection(
     ApplicationBase application, NodeOptions[] nodeOptions)
     : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Specialized;
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +8,6 @@ using Serilog;
 namespace LibplanetConsole.Console;
 
 [Dependency(typeof(NodeCollection))]
-[method: ImportingConstructor]
 internal sealed class ClientCollection(
     ApplicationBase application, ClientOptions[] clientOptions)
     : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable

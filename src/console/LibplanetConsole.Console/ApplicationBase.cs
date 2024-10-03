@@ -1,10 +1,10 @@
 using System.Collections;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Framework.Extensions;
 using LibplanetConsole.Node;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace LibplanetConsole.Console;
@@ -17,6 +17,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly ConsoleServiceContext _consoleContext;
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
+    private readonly IServiceProvider _serviceProvider;
     private Guid _closeToken;
 
     protected ApplicationBase(ApplicationOptions options)
@@ -25,22 +26,22 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         _logger.Debug(Environment.CommandLine);
         _logger.Debug("Application initializing...");
         _container = new(this);
-        _container.ComposeExportedValue(_logger);
+        _container.AddSingleton(_logger);
         _nodes = new NodeCollection(this, options.Nodes);
         _clients = new ClientCollection(this, options.Clients);
-        _container.ComposeExportedValue(this);
-        _container.ComposeExportedValue<IApplication>(this);
-        _container.ComposeExportedValue<IServiceProvider>(this);
-        _container.ComposeExportedValue(_nodes);
-        _container.ComposeExportedValue<INodeCollection>(_nodes);
-        _container.ComposeExportedValue<IApplicationService>(_nodes);
-        _container.ComposeExportedValue(_clients);
-        _container.ComposeExportedValue<IClientCollection>(_clients);
-        _container.ComposeExportedValue<IApplicationService>(_clients);
-        _container.ComposeExportedValues(options.Components);
-        _consoleContext = _container.GetValue<ConsoleServiceContext>();
+        _container.AddSingleton(this);
+        _container.AddSingleton<IApplication>(_ => this);
+        _container.AddSingleton<IServiceProvider>(_ => this);
+        _container.AddSingleton(_nodes);
+        _container.AddSingleton<INodeCollection>(_ => _nodes);
+        _container.AddSingleton<IApplicationService>(_ => _nodes);
+        _container.AddSingleton(_clients);
+        _container.AddSingleton<IClientCollection>(_ => _clients);
+        _container.AddSingleton<IApplicationService>(_ => _clients);
+        // _container.ComposeExportedValues(options.Components);
+        _serviceProvider = _container.BuildServiceProvider();
+        _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
         _consoleContext.EndPoint = options.EndPoint;
-        _container.GetValue<IApplicationConfigurations>();
         _info = new()
         {
             EndPoint = _consoleContext.EndPoint,
@@ -50,7 +51,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             NewWindow = options.NewWindow,
         };
         GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
-        ApplicationServices = new(_container.GetExportedValues<IApplicationService>());
+        ApplicationServices = new(_serviceProvider.GetRequiredService<IEnumerable<IApplicationService>>());
         _logger.Debug("Application initialized.");
     }
 
@@ -91,30 +92,31 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     public override object? GetService(Type serviceType)
     {
-        var isMultiple = serviceType.IsGenericType &&
-            serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+        return _serviceProvider.GetService(serviceType);
+        // var isMultiple = serviceType.IsGenericType &&
+        //     serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
 
-        if (isMultiple == true)
-        {
-            var itemType = serviceType.GenericTypeArguments[0];
-            var contractName = AttributedModelServices.GetContractName(itemType);
-            var items = _container.GetExportedValues<object?>(contractName);
-            var listGenericType = typeof(List<>);
-            var list = listGenericType.MakeGenericType(itemType);
-            var ci = list.GetConstructor([typeof(int)]) ?? throw new UnreachableException();
-            var instance = (IList)ci.Invoke([items.Count(),]);
-            foreach (var item in items)
-            {
-                instance.Add(item);
-            }
+        // if (isMultiple == true)
+        // {
+        //     var itemType = serviceType.GenericTypeArguments[0];
+        //     var contractName = AttributedModelServices.GetContractName(itemType);
+        //     var items = _container.GetExportedValues<object?>(contractName);
+        //     var listGenericType = typeof(List<>);
+        //     var list = listGenericType.MakeGenericType(itemType);
+        //     var ci = list.GetConstructor([typeof(int)]) ?? throw new UnreachableException();
+        //     var instance = (IList)ci.Invoke([items.Count(),]);
+        //     foreach (var item in items)
+        //     {
+        //         instance.Add(item);
+        //     }
 
-            return instance;
-        }
-        else
-        {
-            var contractName = AttributedModelServices.GetContractName(serviceType);
-            return _container.GetExportedValue<object?>(contractName);
-        }
+        //     return instance;
+        // }
+        // else
+        // {
+        //     var contractName = AttributedModelServices.GetContractName(serviceType);
+        //     return _container.GetExportedValue<object?>(contractName);
+        // }
     }
 
     public ApplicationContainer CreateChildContainer(object owner)

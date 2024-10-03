@@ -1,12 +1,11 @@
-using System.ComponentModel.Composition;
 using System.Text;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Example;
 
 [Export(typeof(ICommand))]
 [CommandSummary("Example node commands for a quick start.")]
-[method: ImportingConstructor]
 internal sealed class ExampleNodeCommand(IApplication application) : CommandMethodBase
 {
     [CommandMethod]

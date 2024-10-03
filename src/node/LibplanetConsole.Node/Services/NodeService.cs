@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using Serilog;
@@ -11,7 +10,6 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     private readonly Node _node;
     private readonly ILogger _logger;
 
-    [ImportingConstructor]
     public NodeService(Node node, ILogger logger)
     {
         _node = node;

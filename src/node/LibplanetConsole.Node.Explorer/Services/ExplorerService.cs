@@ -1,4 +1,4 @@
-using System.ComponentModel.Composition;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
@@ -11,7 +11,6 @@ internal sealed class ExplorerService : LocalService<IExplorerService, IExplorer
 {
     private readonly Explorer _explorer;
 
-    [ImportingConstructor]
     public ExplorerService(Explorer explorer)
     {
         _explorer = explorer;

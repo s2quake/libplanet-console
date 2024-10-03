@@ -1,6 +1,6 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
+using LibplanetConsole.Common;
 using LibplanetConsole.Node.Executable.Commands;
 
 namespace LibplanetConsole.Node.Executable;
@@ -8,9 +8,8 @@ namespace LibplanetConsole.Node.Executable;
 [Export(typeof(CommandContext))]
 [CommandSummary("Provides a prompt for input and execution of commands.")]
 [CommandDescription("REPL for libplanet node.")]
-[method: ImportingConstructor]
 internal sealed class CommandContext(
-    [ImportMany] IEnumerable<ICommand> commands,
+    IEnumerable<ICommand> commands,
     HelpCommand helpCommand,
     VersionCommand versionCommand)
     : CommandContextBase(commands)

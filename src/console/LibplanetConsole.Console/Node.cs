@@ -1,6 +1,4 @@
 using System.Collections;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -25,6 +23,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     private readonly INodeContent[] _contents;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
+    private readonly IServiceProvider _serviceProvider;
     private EndPoint? _blocksyncEndPoint;
     private EndPoint? _consensusEndPoint;
     private Guid _closeToken;
@@ -38,14 +37,15 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     {
         _container = application.CreateChildContainer(this);
         _nodeOptions = nodeOptions;
-        _container.ComposeExportedValue<INode>(this);
-        _container.ComposeExportedValue(this);
-        _contents = [.. _container.GetExportedValues<INodeContent>()];
+        _container.AddSingleton(this);
+        _container.AddSingleton<INode>(_ => this);
+        _serviceProvider = _container.BuildServiceProvider();
+        _contents = [.. _serviceProvider.GetServices<INodeContent>()];
         _logger = application.GetRequiredService<ILogger>();
         _remoteService = new(this);
         _blockChainService = new(this);
         _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, _blockChainService, .. GetRemoteServices(_container)])
+            [_remoteService, _blockChainService, .. GetRemoteServices(_serviceProvider)])
         {
             EndPoint = nodeOptions.EndPoint,
         };
@@ -94,26 +94,28 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
             return _contents;
         }
 
-        if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
-            serviceType.GenericTypeArguments.Length == 1)
-        {
-            var itemType = serviceType.GenericTypeArguments[0];
-            var items = GetInstances(itemType);
-            var listGenericType = typeof(List<>);
-            var list = listGenericType.MakeGenericType(itemType);
-            var ci = list.GetConstructor([typeof(int)])!;
-            var instance = (IList)ci.Invoke([items.Count(),]);
-            foreach (var item in items)
-            {
-                instance.Add(item);
-            }
+        return _serviceProvider.GetService(serviceType);
 
-            return instance;
-        }
-        else
-        {
-            return GetInstance(serviceType);
-        }
+        // if (typeof(IEnumerable).IsAssignableFrom(serviceType) &&
+        //     serviceType.GenericTypeArguments.Length == 1)
+        // {
+        //     var itemType = serviceType.GenericTypeArguments[0];
+        //     var items = GetInstances(itemType);
+        //     var listGenericType = typeof(List<>);
+        //     var list = listGenericType.MakeGenericType(itemType);
+        //     var ci = list.GetConstructor([typeof(int)])!;
+        //     var instance = (IList)ci.Invoke([items.Count(),]);
+        //     foreach (var item in items)
+        //     {
+        //         instance.Add(item);
+        //     }
+
+        //     return instance;
+        // }
+        // else
+        // {
+        //     return GetInstance(serviceType);
+        // }
     }
 
     public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
@@ -266,25 +268,25 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     }
 
     private static IEnumerable<IRemoteService> GetRemoteServices(
-        CompositionContainer compositionContainer)
+        IServiceProvider serviceProvider)
     {
-        foreach (var item in compositionContainer.GetExportedValues<INodeContentService>())
+        foreach (var item in serviceProvider.GetServices<INodeContentService>())
         {
             yield return item.RemoteService;
         }
     }
 
-    private object? GetInstance(Type serviceType)
-    {
-        var contractName = AttributedModelServices.GetContractName(serviceType);
-        return _container.GetExportedValue<object>(contractName);
-    }
+    // private object? GetInstance(Type serviceType)
+    // {
+    //     var contractName = AttributedModelServices.GetContractName(serviceType);
+    //     return _container.GetExportedValue<object>(contractName);
+    // }
 
-    private IEnumerable<object> GetInstances(Type service)
-    {
-        var contractName = AttributedModelServices.GetContractName(service);
-        return _container.GetExportedValues<object>(contractName);
-    }
+    // private IEnumerable<object> GetInstances(Type service)
+    // {
+    //     var contractName = AttributedModelServices.GetContractName(service);
+    //     return _container.GetExportedValues<object>(contractName);
+    // }
 
     private void RemoteServiceContext_Closed(object? sender, EventArgs e)
     {

@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Services;
@@ -11,7 +10,6 @@ internal sealed class ClientService : LocalService<IClientService, IClientCallba
 {
     private readonly Client _client;
 
-    [ImportingConstructor]
     public ClientService(Client client)
     {
         _client = client;

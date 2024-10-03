@@ -1,5 +1,5 @@
-using System.ComponentModel.Composition;
 using System.Security.Cryptography;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 
 namespace LibplanetConsole.Node.Services;
@@ -11,7 +11,6 @@ internal sealed class BlockChainService
     private static readonly Codec _codec = new();
     private readonly Node _node;
 
-    [ImportingConstructor]
     public BlockChainService(Node node)
     {
         _node = node;

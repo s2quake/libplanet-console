@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Example.Services;
@@ -11,7 +10,6 @@ internal sealed class ExampleNodeService : LocalService<IExampleNodeService, IEx
 {
     private readonly ExampleNode _exampleNode;
 
-    [ImportingConstructor]
     public ExampleNodeService(ExampleNode exampleNode)
     {
         _exampleNode = exampleNode;

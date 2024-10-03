@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
@@ -10,7 +9,6 @@ namespace LibplanetConsole.Console.Commands;
 [Export(typeof(ICommand))]
 [Export]
 [CommandSummary("Provides client-related commands.")]
-[method: ImportingConstructor]
 public sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
     : CommandMethodBase
 {

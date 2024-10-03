@@ -5,8 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CommandsDirectory>$(MSBuildThisFileDirectory).submodules\commands\</CommandsDirectory>
-    <CommunicationDirectory>$(MSBuildThisFileDirectory).submodules\communication\</CommunicationDirectory>
-    <ConfigurationDirectory>$(MSBuildThisFileDirectory).submodules\configurations\</ConfigurationDirectory>
     <LibplanetDirectory>$(MSBuildThisFileDirectory).submodules\libplanet\</LibplanetDirectory>
     <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
   </PropertyGroup>

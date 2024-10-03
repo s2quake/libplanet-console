@@ -1,4 +1,3 @@
-using System.ComponentModel.Composition;
 using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
@@ -18,7 +17,6 @@ internal sealed class SeedService : LocalService<ISeedService>,
     private readonly SeedNode _blocksyncSeedNode;
     private readonly SeedNode _consensusSeedNode;
 
-    [ImportingConstructor]
     public SeedService(ApplicationBase application)
     {
         _application = application;

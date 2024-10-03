@@ -1,16 +1,15 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Client.Executable.Commands;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Client.Executable;
 
 [Export(typeof(CommandContext))]
 [CommandSummary("Provides a prompt for input and execution of commands.")]
 [CommandDescription("REPL for libplanet client.")]
-[method: ImportingConstructor]
 internal class CommandContext(
-    [ImportMany] IEnumerable<ICommand> commands,
+    IEnumerable<ICommand> commands,
     HelpCommand helpCommand,
     VersionCommand versionCommand)
     : CommandContextBase(commands)

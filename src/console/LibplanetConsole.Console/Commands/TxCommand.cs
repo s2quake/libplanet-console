@@ -1,5 +1,5 @@
-using System.ComponentModel.Composition;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace LibplanetConsole.Console.Commands;
 
 [Export(typeof(ICommand))]
-[method: ImportingConstructor]
 [CommandSummary("Sends a transaction using a simple string.")]
 internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
 {

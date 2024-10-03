@@ -1,4 +1,4 @@
-using System.ComponentModel.Composition;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Evidence;
@@ -9,7 +9,6 @@ namespace LibplanetConsole.Console.Evidence;
 [Export(typeof(INodeContent))]
 [Export(typeof(IEvidence))]
 [Export(typeof(INodeContentService))]
-[method: ImportingConstructor]
 internal sealed class Evidence(INode node)
     : INodeContent, IEvidence, INodeContentService
 {

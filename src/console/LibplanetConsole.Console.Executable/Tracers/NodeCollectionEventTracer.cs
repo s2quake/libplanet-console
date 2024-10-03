@@ -1,13 +1,12 @@
 using System.Collections.Specialized;
-using System.ComponentModel.Composition;
 using JSSoft.Terminals;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
 [Export(typeof(IApplicationService))]
-[method: ImportingConstructor]
 internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplicationService
 {
     private readonly INodeCollection _nodes = nodes;
