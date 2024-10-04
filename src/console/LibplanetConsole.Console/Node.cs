@@ -6,7 +6,7 @@ using LibplanetConsole.Console.Services;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
@@ -33,11 +33,11 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     {
         _serviceProvider = serviceProvider;
         _nodeOptions = nodeOptions;
-        _logger = _serviceProvider.GetRequiredService<ILogger>();
+        _logger = _serviceProvider.GetLogger<Node>();
         _remoteService = new(this);
         _blockChainService = new(this);
         PublicKey = nodeOptions.PrivateKey.PublicKey;
-        _logger.Debug("Node is created: {Address}", Address);
+        _logger.LogDebug("Node is created: {Address}", Address);
     }
 
     public event EventHandler? Attached;
@@ -106,7 +106,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
         _nodeInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         IsRunning = _nodeInfo.IsRunning;
-        _logger.Debug("Node is attached: {Address}", Address);
+        _logger.LogDebug("Node is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
     }
 
@@ -127,7 +127,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         _remoteServiceContext = null;
         _closeToken = Guid.Empty;
-        _logger.Debug("Node is detached: {Address}", Address);
+        _logger.LogDebug("Node is detached: {Address}", Address);
         Detached?.Invoke(this, EventArgs.Empty);
     }
 
@@ -147,7 +147,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         _blocksyncEndPoint = EndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
         _consensusEndPoint = EndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
-        _logger.Debug("Node is started: {Address}", Address);
+        _logger.LogDebug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -164,7 +164,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         _closeToken = Guid.Empty;
         _nodeInfo = NodeInfo.Empty;
         IsRunning = false;
-        _logger.Debug("Node is stopped: {Address}", Address);
+        _logger.LogDebug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -188,7 +188,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
             _closeToken = Guid.Empty;
             IsRunning = false;
             _isDisposed = true;
-            _logger.Debug("Node is disposed: {Address}", Address);
+            _logger.LogDebug("Node is disposed: {Address}", Address);
             Disposed?.Invoke(this, EventArgs.Empty);
             GC.SuppressFinalize(this);
         }
@@ -209,7 +209,7 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         };
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, _processCancellationTokenSource.Token);
-        _logger.Debug(process.ToString());
+        _logger.LogDebug(process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
             .ContinueWith(
                 task =>

@@ -3,6 +3,7 @@ using LibplanetConsole.Client.Example;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client.Executable;
@@ -14,9 +15,6 @@ internal static class ServiceCollectionExtensions
     {
         @this.AddSingleton(s => new Application(s, options));
         @this.AddSingleton<IApplication>(s => s.GetRequiredService<Application>());
-        @this.AddSingleton(
-            ApplicationFramework.CreateLogger(
-                typeof(Application), options.LogPath, string.Empty));
 
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();
@@ -30,6 +28,7 @@ internal static class ServiceCollectionExtensions
         @this.AddSingleton<IApplicationService, ClientEventTracer>();
 
         @this.AddExample();
+        @this.AddLogging(options.LogPath, string.Empty);
 
         return @this;
     }

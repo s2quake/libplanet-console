@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
 
@@ -21,7 +22,7 @@ internal sealed partial class Client : IBlockChain
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txData = tx.Serialize();
-        _logger.Debug("Client sends a transaction: {TxId}", tx.Id);
+        _logger.LogDebug("Client sends a transaction: {TxId}", tx.Id);
         return await RemoteBlockChainService.SendTransactionAsync(txData, cancellationToken);
     }
 

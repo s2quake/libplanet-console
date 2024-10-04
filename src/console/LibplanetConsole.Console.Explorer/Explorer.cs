@@ -3,7 +3,7 @@ using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Explorer;
 using LibplanetConsole.Explorer.Services;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console.Explorer;
 
@@ -15,12 +15,12 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
     private EndPoint _endPoint = EndPointUtility.NextEndPoint();
     private RemoteService<IExplorerService, IExplorerCallback>? _remoteService;
 
-    public Explorer(INode node, ILogger logger, ExplorerSettings settings)
+    public Explorer(INode node, ILogger<Explorer> logger, ExplorerSettings settings)
         : base(node)
     {
         _settings = settings;
         _logger = logger;
-        _logger.Debug("Explorer is created: {NodeAddress}", node.Address);
+        _logger.LogDebug("Explorer is created: {NodeAddress}", node.Address);
     }
 
     public event EventHandler? Started;
@@ -69,7 +69,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
         };
         Info = await Service.StartAsync(options, cancellationToken);
         IsRunning = true;
-        _logger.Debug("Explorer is started: {NodeAddress} {EndPoint}", nodeAddress, endPoint);
+        _logger.LogDebug("Explorer is started: {NodeAddress} {EndPoint}", nodeAddress, endPoint);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -83,7 +83,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
         using var scope = _executionScope.Enter();
         await Service.StopAsync(cancellationToken);
         IsRunning = false;
-        _logger.Debug("Explorer is stopped.: {NodeAddress}", Node.Address);
+        _logger.LogDebug("Explorer is stopped.: {NodeAddress}", Node.Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -96,7 +96,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
             var endPoint = EndPoint.ToString();
             Info = explorerInfo;
             IsRunning = true;
-            _logger.Debug(message, nodeAddress, endPoint);
+            _logger.LogDebug(message, nodeAddress, endPoint);
             Started?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -106,7 +106,7 @@ internal sealed class Explorer : NodeContentBase, IExplorer, IExplorerCallback, 
         if (_executionScope.IsExecuting != true)
         {
             IsRunning = false;
-            _logger.Debug("Explorer is stopped by the remote service: {NodeAddress}", Node.Address);
+            _logger.LogDebug("Explorer is stopped by the remote service: {NodeAddress}", Node.Address);
             Stopped?.Invoke(this, EventArgs.Empty);
         }
     }

@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Services;
 
@@ -9,7 +9,7 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     private readonly Node _node;
     private readonly ILogger _logger;
 
-    public NodeService(Node node, ILogger logger)
+    public NodeService(Node node, ILogger<NodeService> logger)
     {
         _node = node;
         _logger = logger;
@@ -27,7 +27,7 @@ internal sealed class NodeService : LocalService<INodeService, INodeCallback>, I
     {
         _node.SeedEndPoint = EndPointUtility.Parse(seedEndPoint);
         await _node.StartAsync(cancellationToken);
-        _logger.Information("Node started.");
+        _logger.LogInformation("Node started.");
         return _node.Info;
     }
 

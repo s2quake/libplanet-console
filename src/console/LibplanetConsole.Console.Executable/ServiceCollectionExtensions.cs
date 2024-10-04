@@ -5,6 +5,7 @@ using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
 using LibplanetConsole.Console.Explorer;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Executable;
@@ -14,11 +15,10 @@ internal static class ServiceCollectionExtensions
     public static IServiceCollection AddApplication(
         this IServiceCollection @this, ApplicationOptions options)
     {
+        @this.AddLogging(options.LogPath, options.LibraryLogPath);
+
         @this.AddSingleton(s => new Application(s, options));
         @this.AddSingleton<IApplication>(s => s.GetRequiredService<Application>());
-        @this.AddSingleton(
-            ApplicationFramework.CreateLogger(
-                typeof(Application), options.LogPath, string.Empty));
 
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();

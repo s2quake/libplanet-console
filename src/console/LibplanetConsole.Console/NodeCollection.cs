@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Specialized;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
@@ -14,7 +15,7 @@ internal sealed class NodeCollection(
 {
     private static readonly object LockObject = new();
     private readonly List<Node> _nodeList = new(nodeOptions.Length);
-    private readonly ILogger _logger = serviceProvider.GetRequiredService<ILogger>();
+    private readonly ILogger _logger = serviceProvider.GetLogger<NodeCollection>();
     private Node? _current;
     private bool _isDisposed;
 
@@ -146,7 +147,7 @@ internal sealed class NodeCollection(
                 var node = _nodeList[i]!;
                 node.Disposed -= Node_Disposed;
                 await NodeFactory.DisposeScopeAsync(node);
-                _logger.Debug("Disposed a client: {Address}", node.Address);
+                _logger.LogDebug("Disposed a client: {Address}", node.Address);
             }
 
             _isDisposed = true;
@@ -206,7 +207,7 @@ internal sealed class NodeCollection(
             var index = _nodeList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
             _nodeList.Add(node);
-            _logger.Debug("Node is inserted into the collection: {Address}", node.Address);
+            _logger.LogDebug("Node is inserted into the collection: {Address}", node.Address);
             node.Disposed += Node_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -221,7 +222,7 @@ internal sealed class NodeCollection(
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
             node.Disposed -= Node_Disposed;
             _nodeList.RemoveAt(index);
-            _logger.Debug("Node is removed from the collection: {Address}", node.Address);
+            _logger.LogDebug("Node is removed from the collection: {Address}", node.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == node)
             {

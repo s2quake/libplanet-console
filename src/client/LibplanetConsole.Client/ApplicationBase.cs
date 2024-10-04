@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using LibplanetConsole.Client.Services;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
 
@@ -10,26 +11,25 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly Client _client;
-    private readonly ClientServiceContext _clientServiceContext;
     private readonly Process? _parentProcess;
     private readonly ApplicationInfo _info;
     private readonly ILogger _logger;
     private readonly Task _waitForExitTask = Task.CompletedTask;
+    private ClientServiceContext? _clientServiceContext;
     private Guid _closeToken;
 
     protected ApplicationBase(IServiceProvider serviceProvider, ApplicationOptions options)
         : base(serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _logger = CreateLogger(GetType(), options.LogPath, string.Empty);
-        _logger.Debug(Environment.CommandLine);
-        _logger.Debug("Application initializing...");
+        _logger = serviceProvider.GetLogger<ApplicationBase>();
+        _logger.LogDebug(Environment.CommandLine);
+        _logger.LogDebug("Application initializing...");
         _client = serviceProvider.GetRequiredService<Client>();
-        _clientServiceContext = serviceProvider.GetRequiredService<ClientServiceContext>();
-        _clientServiceContext.EndPoint = options.EndPoint;
+
         _info = new()
         {
-            EndPoint = _clientServiceContext.EndPoint,
+            EndPoint = options.EndPoint,
             NodeEndPoint = options.NodeEndPoint,
             LogPath = options.LogPath,
         };
@@ -40,14 +40,12 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             _waitForExitTask = WaitForExit(parentProcess, Cancel);
         }
 
-        _logger.Debug("Application initialized.");
+        _logger.LogDebug("Application initialized.");
     }
 
-    public EndPoint EndPoint => _clientServiceContext.EndPoint;
+    public EndPoint EndPoint => _info.EndPoint;
 
     public ApplicationInfo Info => _info;
-
-    public override ILogger Logger => _logger;
 
     protected override bool CanClose => _parentProcess?.HasExited == true;
 
@@ -56,7 +54,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _logger.LogDebug("ClientServiceContext is starting: {EndPoint}", _info.EndPoint);
+        _clientServiceContext = _serviceProvider.GetRequiredService<ClientServiceContext>();
+        _clientServiceContext.EndPoint = _info.EndPoint;
         _closeToken = await _clientServiceContext.StartAsync(cancellationToken: default);
+        _logger.LogDebug("ClientServiceContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
     }
@@ -64,7 +66,14 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
+        if (_clientServiceContext is not null)
+        {
+            _logger.LogDebug("ClientServiceContext is closing: {EndPoint}", _info.EndPoint);
+            await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
+            _clientServiceContext = null;
+            _logger.LogDebug("ClientServiceContext is closed: {EndPoint}", _info.EndPoint);
+        }
+
         await _waitForExitTask;
     }
 
@@ -79,7 +88,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         if (_info.NodeEndPoint is { } nodeEndPoint)
         {
             _client.NodeEndPoint = nodeEndPoint;
+            _logger.LogDebug("Client auto-starting: {EndPoint}", nodeEndPoint);
             await _client.StartAsync(cancellationToken);
+            _logger.LogDebug("Client auto-started: {EndPoint}", nodeEndPoint);
         }
     }
 }

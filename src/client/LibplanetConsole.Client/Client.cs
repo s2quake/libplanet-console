@@ -5,7 +5,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
 
@@ -22,13 +22,13 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     public Client(IServiceProvider serviceProvider, ApplicationOptions options)
     {
         _serviceProvider = serviceProvider;
-        _logger = serviceProvider.GetRequiredService<ILogger>();
-        _logger.Debug("Client is creating...: {Address}", options.PrivateKey.Address);
+        _logger = serviceProvider.GetLogger<Client>();
+        _logger.LogDebug("Client is creating...: {Address}", options.PrivateKey.Address);
         _nodeEndPoint = options.NodeEndPoint;
         _privateKey = options.PrivateKey.ToSecureString();
         _info = new() { Address = options.PrivateKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
-        _logger.Debug("Client is created: {Address}", Address);
+        _logger.LogDebug("Client is created: {Address}", Address);
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -88,7 +88,8 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
         NodeInfo = await RemoteNodeService.GetInfoAsync(cancellationToken);
         _info = _info with { NodeAddress = NodeInfo.Address };
         IsRunning = true;
-        _logger.Debug("Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
+        _logger.LogDebug(
+            "Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -105,7 +106,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
         _remoteNodeContext = null;
         _closeToken = Guid.Empty;
         IsRunning = false;
-        _logger.Debug("Client is stopped: {Address}", Address);
+        _logger.LogDebug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, new(StopReason.None));
     }
 

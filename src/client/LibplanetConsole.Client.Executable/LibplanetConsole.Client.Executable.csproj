@@ -5,14 +5,19 @@
     <ProjectReference Include="..\LibplanetConsole.Client.Example\LibplanetConsole.Client.Example.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-  </ItemGroup>
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>libplanet-client</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Logging\**\*.cs" />
+  </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />
 

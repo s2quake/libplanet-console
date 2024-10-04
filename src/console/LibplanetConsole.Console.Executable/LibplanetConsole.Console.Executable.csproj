@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="LibplanetConsole.Tests" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -19,12 +19,17 @@
     <AssemblyName>libplanet-console</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Logging\**\*.cs" />
+  </ItemGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />
 
   <Target Name="RestoreDependenciesProject" BeforeTargets="Restore">
     <MSBuild Projects="..\..\node\LibplanetConsole.Node.Executable\LibplanetConsole.Node.Executable.csproj" Targets="Restore" />
     <MSBuild Projects="..\..\client\LibplanetConsole.Client.Executable\LibplanetConsole.Client.Executable.csproj" Targets="Restore" />
   </Target>
+
   <Target Name="BuildDependenciesProject" BeforeTargets="Build">
     <MSBuild Projects="..\..\node\LibplanetConsole.Node.Executable\LibplanetConsole.Node.Executable.csproj" Targets="Build" />
     <MSBuild Projects="..\..\client\LibplanetConsole.Client.Executable\LibplanetConsole.Client.Executable.csproj" Targets="Build" />
