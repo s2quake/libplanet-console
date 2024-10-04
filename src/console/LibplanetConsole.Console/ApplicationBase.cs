@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Node;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
@@ -20,9 +20,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         : base(serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _logger = serviceProvider.GetRequiredService<ILogger>();
-        _logger.Debug(Environment.CommandLine);
-        _logger.Debug("Application initializing...");
+        _logger = serviceProvider.GetRequiredService<ILogger<ApplicationBase>>();
+        _logger.LogDebug(Environment.CommandLine);
+        _logger.LogDebug("Application initializing...");
         _nodes = serviceProvider.GetRequiredService<NodeCollection>();
         _clients = serviceProvider.GetRequiredService<ClientCollection>();
         _info = new()
@@ -34,12 +34,10 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             NewWindow = options.NewWindow,
         };
         GenesisBlock = BlockUtility.DeserializeBlock(options.Genesis);
-        _logger.Debug("Application initialized.");
+        _logger.LogDebug("Application initialized.");
     }
 
     public ApplicationInfo Info => _info;
-
-    public override ILogger Logger => _logger;
 
     internal Block GenesisBlock { get; }
 
@@ -99,9 +97,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _logger.LogDebug("ConsoleContext is starting: {EndPoint}", _info.EndPoint);
         _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
         _consoleContext.EndPoint = _info.EndPoint;
         _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
+        _logger.LogDebug("ConsoleContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
     }
 
@@ -109,8 +109,10 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     {
         if (_consoleContext is not null)
         {
+            _logger.LogDebug("ConsoleContext is closing: {EndPoint}", _info.EndPoint);
             await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
             _consoleContext = null;
+            _logger.LogDebug("ConsoleContext is closed: {EndPoint}", _info.EndPoint);
         }
 
         await base.OnDisposeAsync();

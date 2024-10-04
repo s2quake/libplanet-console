@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Specialized;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
@@ -13,7 +14,7 @@ internal sealed class ClientCollection(
 {
     private static readonly object LockObject = new();
     private readonly List<Client> _clientList = new(clientOptions.Length);
-    private readonly ILogger _logger = serviceProvider.GetRequiredService<ILogger>();
+    private readonly ILogger _logger = serviceProvider.GetLogger<ClientCollection>();
     private Client? _current;
     private bool _isDisposed;
 
@@ -147,7 +148,7 @@ internal sealed class ClientCollection(
                 var client = _clientList[i]!;
                 client.Disposed -= Client_Disposed;
                 await ClientFactory.DisposeScopeAsync(client);
-                _logger.Debug("Disposed a client: {Address}", client.Address);
+                _logger.LogDebug("Disposed a client: {Address}", client.Address);
             }
 
             _isDisposed = true;
@@ -193,7 +194,7 @@ internal sealed class ClientCollection(
             var index = _clientList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             _clientList.Add(client);
-            _logger.Debug("Client is inserted into the collection: {Address}", client.Address);
+            _logger.LogDebug("Client is inserted into the collection: {Address}", client.Address);
             client.Disposed += Client_Disposed;
             CollectionChanged?.Invoke(this, args);
         }
@@ -208,7 +209,7 @@ internal sealed class ClientCollection(
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
             client.Disposed -= Client_Disposed;
             _clientList.RemoveAt(index);
-            _logger.Debug("Client is removed from the collection: {Address}", client.Address);
+            _logger.LogDebug("Client is removed from the collection: {Address}", client.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == client)
             {

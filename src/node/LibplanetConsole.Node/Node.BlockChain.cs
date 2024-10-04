@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 
@@ -39,7 +40,7 @@ internal sealed partial class Node : IBlockChain
             condition: IsRunning != true,
             message: "Node is not running.");
 
-        _logger.Debug("Node adds a transaction: {TxId}", transaction.Id);
+        _logger.LogDebug("Node adds a transaction: {TxId}", transaction.Id);
         var blockChain = BlockChain;
         var manualResetEvent = _eventByTxId.GetOrAdd(transaction.Id, _ =>
         {
@@ -65,7 +66,7 @@ internal sealed partial class Node : IBlockChain
             throw new InvalidOperationException(sb.ToString());
         }
 
-        _logger.Debug("Node added a transaction: {TxId}", transaction.Id);
+        _logger.LogDebug("Node added a transaction: {TxId}", transaction.Id);
     }
 
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)

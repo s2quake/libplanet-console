@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Framework;
 
@@ -10,51 +9,18 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
     private readonly ManualResetEvent _closeEvent = new(false);
     private readonly SynchronizationContext _synchronizationContext;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly ILogger _logger;
+    private readonly ILogger<ApplicationFramework> _logger;
     private bool _isDisposed;
 
     protected ApplicationFramework(IServiceProvider serviceProvider)
     {
         SynchronizationContext.SetSynchronizationContext(new());
-        _logger = serviceProvider.GetRequiredService<ILogger>();
+        _logger = serviceProvider.GetRequiredService<ILogger<ApplicationFramework>>();
         _serviceProvider = serviceProvider;
         _synchronizationContext = SynchronizationContext.Current!;
     }
 
-    public abstract ILogger Logger { get; }
-
     protected virtual bool CanClose => false;
-
-    public static ILogger CreateLogger(
-        Type applicationType, string logPath, string libraryLogPath)
-    {
-        var loggerConfiguration = new LoggerConfiguration();
-        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
-        if (logPath != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => IsApplicationLog(applicationType, e))
-                    .WriteTo.File(logPath));
-        }
-
-        if (libraryLogPath != string.Empty)
-        {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByExcluding(e => IsApplicationLog(applicationType, e))
-                    .WriteTo.File(libraryLogPath));
-        }
-
-        Log.Logger = loggerConfiguration.CreateLogger();
-        var logger = Log.ForContext(applicationType);
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-        {
-            logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
-        };
-
-        return logger;
-    }
 
     public Task InvokeAsync(Action action, CancellationToken cancellationToken)
     {
@@ -77,7 +43,7 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
 
     public void Cancel()
     {
-        Logger.Debug("Application canceled.");
+        _logger.LogDebug("Application canceled.");
         _cancellationTokenSource.Cancel();
         _closeEvent.Set();
     }
@@ -86,9 +52,9 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
     {
         ObjectDisposedException.ThrowIf(_isDisposed == true, this);
 
-        Logger.Debug("Application running...");
+        _logger.LogDebug("Application running...");
         await OnRunAsync(_cancellationTokenSource.Token);
-        Logger.Debug("Application waiting for close...");
+        _logger.LogDebug("Application waiting for close...");
         await Task.Run(() =>
         {
             while (CanClose != true && _closeEvent.WaitOne(1) != true)
@@ -96,19 +62,19 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
                 // Wait for close.
             }
         });
-        Logger.Debug("Application run completed.");
+        _logger.LogDebug("Application run completed.");
     }
 
     public async ValueTask DisposeAsync()
     {
         if (_isDisposed is false)
         {
-            Logger.Debug("Application disposing...");
+            _logger.LogDebug("Application disposing...");
             await OnDisposeAsync();
             _cancellationTokenSource.Dispose();
             _isDisposed = true;
             GC.SuppressFinalize(this);
-            Logger.Debug("Application disposed.");
+            _logger.LogDebug("Application disposed.");
         }
     }
 
@@ -121,33 +87,13 @@ public abstract class ApplicationFramework : IAsyncDisposable, IServiceProvider
         for (var i = 0; i < applicationServices.Length; i++)
         {
             var serviceName = applicationServices[i].GetType().Name;
-            _logger?.Debug("Application service initializing: {0}", serviceName);
+            _logger.LogDebug("Application service initializing: {ServiceName}", serviceName);
             await applicationServices[i].InitializeAsync(cancellationToken);
-            _logger?.Debug("Application service initialized: {0}", serviceName);
+            _logger.LogDebug("Application service initialized: {ServiceName}", serviceName);
         }
     }
 
     protected virtual ValueTask OnDisposeAsync() => ValueTask.CompletedTask;
-
-    private static bool IsApplicationLog(Type applicationType, LogEvent e)
-    {
-        if (e.Properties.TryGetValue("SourceContext", out var propertyValue) is false)
-        {
-            return false;
-        }
-
-        if (propertyValue is not ScalarValue scalarValue)
-        {
-            return false;
-        }
-
-        if (scalarValue.Value is not string value)
-        {
-            return false;
-        }
-
-        return value == applicationType.FullName;
-    }
 
     private static IApplicationService[] Sort(IEnumerable<IApplicationService> items)
     {

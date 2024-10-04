@@ -3,9 +3,10 @@ using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Messages;
 using Libplanet.Types.Consensus;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node.Evidence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Evidence;
 
@@ -13,7 +14,7 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
 {
     private const int Timeout = 5000;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly ILogger _logger = node.GetRequiredService<ILogger>();
+    private readonly ILogger _logger = node.GetLogger<DuplicateVoteViolator>();
     private bool _isDisposed;
 
     public bool IsRunning { get; private set; }
@@ -86,7 +87,7 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
         var vote = MakeRandomVote(node, height, round, power);
         var message = new ConsensusPreVoteMsg(vote);
         context.PublishMessage(message);
-        _logger.Debug("Violation invoked: {Height}, {Round}", height, round);
+        _logger.LogDebug("Violation invoked: {Height}, {Round}", height, round);
     }
 
     private sealed class RunningScope : IDisposable

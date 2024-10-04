@@ -1,7 +1,8 @@
 using System.Security.Cryptography;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Services;
 
@@ -15,7 +16,7 @@ internal sealed class BlockChainService
     public BlockChainService(Node node)
     {
         _node = node;
-        _logger = node.GetRequiredService<ILogger>();
+        _logger = node.GetLogger<BlockChainService>();
         _node.BlockAppended += Node_BlockAppended;
     }
 
@@ -66,6 +67,6 @@ internal sealed class BlockChainService
     {
         var blockInfo = e.BlockInfo;
         Callback.OnBlockAppended(blockInfo);
-        _logger.Debug("Callback.OnBlockAppended: {BlockHash}", blockInfo.Hash);
+        _logger.LogDebug("Callback.OnBlockAppended: {BlockHash}", blockInfo.Hash);
     }
 }

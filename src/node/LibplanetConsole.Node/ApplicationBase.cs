@@ -1,8 +1,9 @@
 using System.Diagnostics;
+using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 
@@ -11,7 +12,7 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     private readonly IServiceProvider _serviceProvider;
     private readonly Node _node;
     private readonly Process? _parentProcess;
-    private readonly ILogger _logger;
+    private readonly ILogger<ApplicationBase> _logger;
     private readonly ApplicationInfo _info;
     private readonly Task _waitForExitTask = Task.CompletedTask;
     private NodeContext? _nodeContext;
@@ -21,9 +22,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         : base(serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _logger = serviceProvider.GetRequiredService<ILogger>();
-        _logger.Debug(Environment.CommandLine);
-        _logger.Debug("Application initializing...");
+        _logger = serviceProvider.GetLogger<ApplicationBase>();
+        _logger.LogDebug(Environment.CommandLine);
+        _logger.LogDebug("Application initializing...");
         _node = serviceProvider.GetRequiredService<Node>();
         _info = new()
         {
@@ -40,12 +41,10 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
             _waitForExitTask = WaitForExit(parentProcess, Cancel);
         }
 
-        _logger.Debug("Application initialized.");
+        _logger.LogDebug("Application initialized.");
     }
 
     public ApplicationInfo Info => _info;
-
-    public override ILogger Logger => _logger;
 
     protected override bool CanClose => _parentProcess?.HasExited == true;
 
@@ -54,10 +53,11 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        _logger.LogDebug("NodeContext is starting: {EndPoint}", _info.EndPoint);
         _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
         _nodeContext.EndPoint = _info.EndPoint;
         _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
-        _logger.Debug("NodeContext is started: {EndPoint}", _info.EndPoint);
+        _logger.LogDebug("NodeContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
     }
@@ -67,8 +67,10 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
         await base.OnDisposeAsync();
         if (_nodeContext is not null)
         {
+            _logger.LogDebug("NodeContext is closing: {EndPoint}", _info.EndPoint);
             await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
-            _logger.Debug("NodeContext is closed: {EndPoint}", _info.EndPoint);
+            _nodeContext = null;
+            _logger.LogDebug("NodeContext is closed: {EndPoint}", _info.EndPoint);
         }
 
         await _waitForExitTask;
@@ -84,8 +86,10 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     {
         if (_info.SeedEndPoint is { } seedEndPoint)
         {
+            _logger.LogDebug("Node auto-starting: {EndPoint}", _info.EndPoint);
             _node.SeedEndPoint = seedEndPoint;
             await _node.StartAsync(cancellationToken);
+            _logger.LogDebug("Node auto-started: {EndPoint}", _info.EndPoint);
         }
     }
 }

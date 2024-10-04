@@ -6,7 +6,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
@@ -30,9 +30,9 @@ internal sealed class Client : IClient, IClientCallback
         _serviceProvider = serviceProvider;
         _clientOptions = clientOptions;
         _remoteService = new(this);
-        _logger = _serviceProvider.GetRequiredService<ILogger>();
+        _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
-        _logger.Debug("Client is created: {Address}", Address);
+        _logger.LogDebug("Client is created: {Address}", Address);
     }
 
     public event EventHandler? Attached;
@@ -94,7 +94,7 @@ internal sealed class Client : IClient, IClientCallback
         _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         IsRunning = _clientInfo.IsRunning;
-        _logger.Debug("Client is attached: {Address}", Address);
+        _logger.LogDebug("Client is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
     }
 
@@ -114,7 +114,7 @@ internal sealed class Client : IClient, IClientCallback
         _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
         await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
         _closeToken = Guid.Empty;
-        _logger.Debug("Client is detached: {Address}", Address);
+        _logger.LogDebug("Client is detached: {Address}", Address);
         Detached?.Invoke(this, EventArgs.Empty);
     }
 
@@ -129,7 +129,7 @@ internal sealed class Client : IClient, IClientCallback
         _clientInfo = await _remoteService.Service.StartAsync(
             EndPointUtility.ToString(node.EndPoint), cancellationToken);
         IsRunning = true;
-        _logger.Debug("Client is started: {Address}", Address);
+        _logger.LogDebug("Client is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -145,7 +145,7 @@ internal sealed class Client : IClient, IClientCallback
         _closeToken = Guid.Empty;
         _clientInfo = default;
         IsRunning = false;
-        _logger.Debug("Client is stopped: {Address}", Address);
+        _logger.LogDebug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
@@ -179,7 +179,7 @@ internal sealed class Client : IClient, IClientCallback
             _closeToken = Guid.Empty;
             IsRunning = false;
             _isDisposed = true;
-            _logger.Debug("Client is disposed: {Address}", Address);
+            _logger.LogDebug("Client is disposed: {Address}", Address);
             Disposed?.Invoke(this, EventArgs.Empty);
             GC.SuppressFinalize(this);
         }
@@ -202,7 +202,7 @@ internal sealed class Client : IClient, IClientCallback
         };
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, _processCancellationTokenSource.Token);
-        _logger.Debug(process.ToString());
+        _logger.LogDebug(process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
             .ContinueWith(
                 task =>

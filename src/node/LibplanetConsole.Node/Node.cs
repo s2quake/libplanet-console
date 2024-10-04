@@ -13,7 +13,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Services;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 
@@ -47,10 +47,10 @@ internal sealed partial class Node : IActionRenderer, INode
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
         _actionProvider = options.ActionProvider ?? ActionProvider.Default;
-        _logger = serviceProvider.GetRequiredService<ILogger>();
+        _logger = serviceProvider.GetLogger<Node>();
         _genesis = options.Genesis;
         UpdateNodeInfo();
-        _logger.Debug("Node is created: {Address}", Address);
+        _logger.LogDebug("Node is created: {Address}", Address);
     }
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -192,12 +192,12 @@ internal sealed partial class Node : IActionRenderer, INode
             consensusTransport: consensusTransport,
             consensusOption: consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
-        _logger.Debug("Node.Swarm is starting: {Address}", Address);
+        _logger.LogDebug("Node.Swarm is starting: {Address}", Address);
         await _swarm.BootstrapAsync(cancellationToken: default);
-        _logger.Debug("Node.Swarm is bootstrapped: {Address}", Address);
+        _logger.LogDebug("Node.Swarm is bootstrapped: {Address}", Address);
         IsRunning = true;
         UpdateNodeInfo();
-        _logger.Debug("Node is started: {Address}", Address);
+        _logger.LogDebug("Node is started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -212,9 +212,9 @@ internal sealed partial class Node : IActionRenderer, INode
         {
             await _swarm.StopAsync(cancellationToken: cancellationToken);
             await _startTask;
-            _logger.Debug("Node.Swarm is stopping: {Address}", Address);
+            _logger.LogDebug("Node.Swarm is stopping: {Address}", Address);
             _swarm.Dispose();
-            _logger.Debug("Node.Swarm is stopped: {Address}", Address);
+            _logger.LogDebug("Node.Swarm is stopped: {Address}", Address);
         }
 
         _blocksyncEndPoint = null;
@@ -223,7 +223,7 @@ internal sealed partial class Node : IActionRenderer, INode
         _startTask = Task.CompletedTask;
         IsRunning = false;
         UpdateNodeInfo();
-        _logger.Debug("Node is stopped: {Address}", Address);
+        _logger.LogDebug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 

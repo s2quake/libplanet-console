@@ -5,11 +5,11 @@ using LibplanetConsole.Framework;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Explorer;
 
-internal sealed class Explorer(INode node, ILogger logger, ExplorerSettings settings)
+internal sealed class Explorer(INode node, ILogger<Explorer> logger, ExplorerSettings settings)
     : IExplorer, IApplicationService
 {
     private IWebHost? _webHost;
@@ -34,7 +34,6 @@ internal sealed class Explorer(INode node, ILogger logger, ExplorerSettings sett
         _webHost = WebHost.CreateDefaultBuilder()
                     .ConfigureServices(services => services.AddSingleton(node))
                     .UseStartup<ExplorerStartup<BlockChainContext>>()
-                    .UseSerilog()
                     .UseUrls($"http://{host}:{port}/")
                     .Build();
 
@@ -45,7 +44,7 @@ internal sealed class Explorer(INode node, ILogger logger, ExplorerSettings sett
             IsRunning = true,
             Url = $"http://{host}:{port}/ui/playground",
         };
-        logger.Debug("Explorer is started: {EndPoint}", Info.EndPoint);
+        logger.LogDebug("Explorer is started: {EndPoint}", Info.EndPoint);
         Started?.Invoke(this, EventArgs.Empty);
         return Info;
     }
@@ -60,7 +59,7 @@ internal sealed class Explorer(INode node, ILogger logger, ExplorerSettings sett
         await _webHost.StopAsync(cancellationToken);
         _webHost = null;
         Info = new() { };
-        logger.Debug("Explorer is stopped.");
+        logger.LogDebug("Explorer is stopped.");
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
