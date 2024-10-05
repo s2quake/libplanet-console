@@ -32,8 +32,8 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         _serviceProvider = serviceProvider;
         _nodeOptions = nodeOptions;
         _logger = _serviceProvider.GetLogger<Node>();
-        _remoteService = new(this);
-        _blockChainService = new(this);
+        // _remoteService = new(this);
+        // _blockChainService = new(this);
         PublicKey = nodeOptions.PrivateKey.PublicKey;
         _logger.LogDebug("Node is created: {Address}", Address);
     }

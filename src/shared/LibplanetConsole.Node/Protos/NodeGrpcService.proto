@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Node.Grpc";
+
+package libplanet.console.node.v1;
+
+service NodeGrpcService {
+  rpc Start(StartRequest) returns (StartResponse);
+  rpc Stop(StopRequest) returns (StopResponse);
+  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+}
+
+message NodeInfo {
+    int32 processId = 1;
+    string appProtocolVersion = 2;
+    string swarmEndPoint = 3;
+    string consensusEndPoint = 4;
+    string address = 5;
+    string genesisHash = 6;
+    string tipHash = 7;
+    bool isRunning = 8;
+}
+
+message StartRequest {
+  string seedEndPoint = 1;
+}
+
+message StartResponse {
+    NodeInfo nodeInfo = 1;
+}
+
+message StopRequest {
+}
+
+message StopResponse {
+}
+
+message GetInfoRequest {
+}
+
+message GetInfoResponse {
+    NodeInfo nodeInfo = 1;
+}

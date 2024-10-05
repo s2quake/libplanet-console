@@ -1,21 +1,20 @@
-using JSSoft.Commands;
-using LibplanetConsole.Common;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Node.Explorer.Commands;
+using Libplanet.Explorer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Explorer;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddExplorer(this IServiceCollection @this)
+    public static IServiceCollection AddExplorer(
+        this IServiceCollection @this, IConfiguration configuration)
     {
-        @this.AddSingleton<Explorer>()
-             .AddSingleton<IExplorer>(s => s.GetRequiredService<Explorer>())
-             .AddSingleton<IApplicationService>(s => s.GetRequiredService<Explorer>());
-        @this.AddSingleton<IInfoProvider, ExplorerInfoProvider>();
-        // @this.AddSingleton<ILocalService, ExplorerService>();
-        @this.AddSingleton<ICommand, ExplorerCommand>();
+        var startup = new ExplorerStartup<BlockChainContext>(configuration);
+        startup.ConfigureServices(@this);
+        @this.AddEndpointsApiExplorer();
+        @this.AddSingleton<BlockChainContext>();
+        @this.AddSingleton(startup);
+
         return @this;
     }
 }

@@ -3,7 +3,6 @@ using LibplanetConsole.Console.Evidence;
 using LibplanetConsole.Console.Example;
 using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
-using LibplanetConsole.Console.Explorer;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +32,6 @@ internal static class ServiceCollectionExtensions
 
         @this.AddExample();
         @this.AddEvidence();
-        @this.AddExplorer();
 
         return @this;
     }

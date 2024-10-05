@@ -54,24 +54,23 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("NodeContext is starting: {EndPoint}", _info.EndPoint);
-        _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
-        _nodeContext.EndPoint = _info.EndPoint;
-        _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
+        // _nodeContext = _serviceProvider.GetRequiredService<NodeContext>();
+        // _nodeContext.EndPoint = _info.EndPoint;
+        // _closeToken = await _nodeContext.StartAsync(cancellationToken: default);
         _logger.LogDebug("NodeContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
-        await AutoStartAsync(cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        if (_nodeContext is not null)
-        {
-            _logger.LogDebug("NodeContext is closing: {EndPoint}", _info.EndPoint);
-            await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
-            _nodeContext = null;
-            _logger.LogDebug("NodeContext is closed: {EndPoint}", _info.EndPoint);
-        }
+        // if (_nodeContext is not null)
+        // {
+        //     _logger.LogDebug("NodeContext is closing: {EndPoint}", _info.EndPoint);
+        //     await _nodeContext.CloseAsync(_closeToken, cancellationToken: default);
+        //     _nodeContext = null;
+        //     _logger.LogDebug("NodeContext is closed: {EndPoint}", _info.EndPoint);
+        // }
 
         await _waitForExitTask;
     }
@@ -80,16 +79,5 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     {
         await process.WaitForExitAsync();
         cancelAction.Invoke();
-    }
-
-    private async Task AutoStartAsync(CancellationToken cancellationToken)
-    {
-        if (_info.SeedEndPoint is { } seedEndPoint)
-        {
-            _logger.LogDebug("Node auto-starting: {EndPoint}", _info.EndPoint);
-            _node.SeedEndPoint = seedEndPoint;
-            await _node.StartAsync(cancellationToken);
-            _logger.LogDebug("Node auto-started: {EndPoint}", _info.EndPoint);
-        }
     }
 }

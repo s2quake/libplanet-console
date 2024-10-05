@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using System.Security;
 using System.Security.Cryptography;
+using Grpc.Core;
+using Grpc.Net.Client;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Net;
@@ -11,7 +13,6 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
@@ -296,35 +297,19 @@ internal sealed partial class Node : IActionRenderer, INode
     private static async Task<SeedInfo> GetSeedInfoAsync(
         EndPoint seedEndPoint, CancellationToken cancellationToken)
     {
-        // var remoteService = new RemoteService<ISeedService>();
-        // var remoteServiceContext = new RemoteServiceContext([remoteService])
-        // {
-        //     EndPoint = seedEndPoint,
-        // };
-        // var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
-        // var service = remoteService.Service;
-        // var privateKey = new PrivateKey();
-        // var publicKey = privateKey.PublicKey;
-        // try
-        // {
-        //     for (var i = 0; i < 10; i++)
-        //     {
-        //         var seedInfo = await service.GetSeedAsync(publicKey, cancellationToken);
-        //         if (Equals(seedInfo, SeedInfo.Empty) != true)
-        //         {
-        //             return seedInfo;
-        //         }
+        var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
+        var channelOptions = new GrpcChannelOptions
+        {
+        };
+        using var channel = GrpcChannel.ForAddress(address, channelOptions);
+        var client = new Seed.Grpc.SeedGrpcService.SeedGrpcServiceClient(channel);
+        var request = new Seed.Grpc.GetSeedRequest
+        {
+            PublicKey = new PrivateKey().PublicKey.ToHex(compress: true),
+        };
 
-        //         await Task.Delay(500, cancellationToken);
-        //     }
-
-        //     throw new InvalidOperationException("No seed information is available.");
-        // }
-        // finally
-        // {
-        //     await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
-        // }
-        throw new NotImplementedException();
+        var response = await client.GetSeedAsync(request, cancellationToken: cancellationToken);
+        return response.SeedResult;
     }
 
     private void UpdateNodeInfo()

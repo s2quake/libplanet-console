@@ -12,18 +12,19 @@ internal sealed partial class Client : IBlockChain
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
-        var address = privateKey.Address;
-        var nonce = await RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
-        var genesisHash = NodeInfo.GenesisHash;
-        var tx = Transaction.Create(
-            nonce: nonce,
-            privateKey: privateKey,
-            genesisHash: genesisHash,
-            actions: [.. actions.Select(item => item.PlainValue)]);
-        var txData = tx.Serialize();
-        _logger.LogDebug("Client sends a transaction: {TxId}", tx.Id);
-        return await RemoteBlockChainService.SendTransactionAsync(txData, cancellationToken);
+        // var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        // var address = privateKey.Address;
+        // var nonce = await RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
+        // var genesisHash = NodeInfo.GenesisHash;
+        // var tx = Transaction.Create(
+        //     nonce: nonce,
+        //     privateKey: privateKey,
+        //     genesisHash: genesisHash,
+        //     actions: [.. actions.Select(item => item.PlainValue)]);
+        // var txData = tx.Serialize();
+        // _logger.LogDebug("Client sends a transaction: {TxId}", tx.Id);
+        // return await RemoteBlockChainService.SendTransactionAsync(txData, cancellationToken);
+        throw new NotImplementedException();
     }
 
     public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)

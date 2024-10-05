@@ -7,10 +7,16 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Client\**\*.cs" />
+    <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client"/>
   </ItemGroup>
 
   <PropertyGroup>
     <DefineConstants>LIBPLANET_CLIENT</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.64.0" />
+  </ItemGroup>
 
 </Project>

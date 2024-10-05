@@ -8,6 +8,11 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Client\**\*.cs" />
+    <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
   </ItemGroup>
 
 </Project>

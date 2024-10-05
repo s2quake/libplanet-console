@@ -26,7 +26,7 @@ internal sealed class Client : IClient, IClientCallback
     {
         _serviceProvider = serviceProvider;
         _clientOptions = clientOptions;
-        _remoteService = new(this);
+        // _remoteService = new(this);
         _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);

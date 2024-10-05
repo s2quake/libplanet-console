@@ -14,9 +14,17 @@
     <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
   </ItemGroup>
 
-   <ItemGroup>
+  <ItemGroup>
     <Using Include="Libplanet.Crypto" />
     <Using Include="Libplanet.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\*.proto" GrpcServices="Both" />
   </ItemGroup>
 
 </Project>

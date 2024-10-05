@@ -1,9 +1,9 @@
 using System.Security;
+using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
@@ -15,6 +15,7 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private readonly ILogger _logger;
     private EndPoint? _nodeEndPoint;
     // private RemoteNodeContext? _remoteNodeContext;
+    private Node.Grpc.NodeGrpcService.NodeGrpcServiceClient? _remoteNode;
     private Guid _closeToken;
     private ClientInfo _info;
 
@@ -75,10 +76,17 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        // if (_remoteNodeContext is not null)
-        // {
-        //     throw new InvalidOperationException("The client is already running.");
-        // }
+        if (_remoteNode is not null)
+        {
+            throw new InvalidOperationException("The client is already running.");
+        }
+
+        var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
+        var channelOptions = new GrpcChannelOptions
+        {
+        };
+        using var channel = GrpcChannel.ForAddress(address, channelOptions);
+        _remoteNode = new Node.Grpc.NodeGrpcService.NodeGrpcServiceClient(channel);
 
         // _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
         // _remoteNodeContext.EndPoint = NodeEndPoint;

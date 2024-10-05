@@ -1,8 +1,12 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Node.Explorer;
+using LibplanetConsole.Node.Services;
 using LibplanetConsole.Settings;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
@@ -35,6 +39,8 @@ internal sealed class StartCommand : CommandAsyncBase
     {
         try
         {
+            var builder = WebApplication.CreateBuilder();
+
             var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
             var applicationSettings = Load(settingsPath) with
             {
@@ -42,17 +48,41 @@ internal sealed class StartCommand : CommandAsyncBase
                 NoREPL = NoREPL,
             };
             var applicationOptions = applicationSettings.ToOptions();
-            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
 
-            serviceCollection.AddNode(applicationOptions);
-            serviceCollection.AddApplication(applicationOptions);
+            foreach (var settings in _settingsCollection)
+            {
+                builder.Services.AddSingleton(settings.GetType(), settings);
+            }
 
-            await using var serviceProvider = serviceCollection.BuildServiceProvider();
+            var (_, port) = EndPointUtility.GetHostAndPort(applicationOptions.EndPoint);
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                // Setup a HTTP/2 endpoint without TLS.
+                options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+                options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+            });
+
+            builder.Services.AddNode(applicationOptions);
+            builder.Services.AddApplication(applicationOptions);
+            builder.Services.AddExplorer(builder.Configuration);
+
+            builder.Services.AddGrpc();
+
+            using var app = builder.Build();
+
+            app.UseNode();
+            app.UseExplorer();
+            app.MapGet("/", () => "123");
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             var @out = Console.Out;
-            var application = serviceProvider.GetRequiredService<Application>();
+            await app.StartAsync(cancellationToken);
+            var application = app.Services.GetRequiredService<Application>();
             await @out.WriteLineAsync();
             await application.RunAsync();
             await @out.WriteLineAsync("\u001b0");
+            await app.StopAsync(cancellationToken);
         }
         catch (CommandParsingException e)
         {

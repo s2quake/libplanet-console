@@ -54,9 +54,9 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("ClientServiceContext is starting: {EndPoint}", _info.EndPoint);
-        _clientServiceContext = _serviceProvider.GetRequiredService<ClientServiceContext>();
-        _clientServiceContext.EndPoint = _info.EndPoint;
-        _closeToken = await _clientServiceContext.StartAsync(cancellationToken: default);
+        // _clientServiceContext = _serviceProvider.GetRequiredService<ClientServiceContext>();
+        // _clientServiceContext.EndPoint = _info.EndPoint;
+        // _closeToken = await _clientServiceContext.StartAsync(cancellationToken: default);
         _logger.LogDebug("ClientServiceContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
         await AutoStartAsync(cancellationToken);
@@ -65,13 +65,13 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async ValueTask OnDisposeAsync()
     {
         await base.OnDisposeAsync();
-        if (_clientServiceContext is not null)
-        {
-            _logger.LogDebug("ClientServiceContext is closing: {EndPoint}", _info.EndPoint);
-            await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
-            _clientServiceContext = null;
-            _logger.LogDebug("ClientServiceContext is closed: {EndPoint}", _info.EndPoint);
-        }
+        // if (_clientServiceContext is not null)
+        // {
+        //     _logger.LogDebug("ClientServiceContext is closing: {EndPoint}", _info.EndPoint);
+        //     await _clientServiceContext.CloseAsync(_closeToken, CancellationToken.None);
+        //     _clientServiceContext = null;
+        //     _logger.LogDebug("ClientServiceContext is closed: {EndPoint}", _info.EndPoint);
+        // }
 
         await _waitForExitTask;
     }

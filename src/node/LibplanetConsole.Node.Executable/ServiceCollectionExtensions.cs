@@ -32,7 +32,8 @@ internal static class ServiceCollectionExtensions
 
         @this.AddEvidence();
         @this.AddExample();
-        @this.AddExplorer();
+
+        @this.AddGrpc();
 
         return @this;
     }

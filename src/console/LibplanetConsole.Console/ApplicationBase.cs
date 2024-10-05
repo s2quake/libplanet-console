@@ -98,22 +98,22 @@ public abstract class ApplicationBase : ApplicationFramework, IApplication
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("ConsoleContext is starting: {EndPoint}", _info.EndPoint);
-        _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
-        _consoleContext.EndPoint = _info.EndPoint;
-        _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
+        // _consoleContext = _serviceProvider.GetRequiredService<ConsoleServiceContext>();
+        // _consoleContext.EndPoint = _info.EndPoint;
+        // _closeToken = await _consoleContext.StartAsync(cancellationToken: default);
         _logger.LogDebug("ConsoleContext is started: {EndPoint}", _info.EndPoint);
         await base.OnRunAsync(cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (_consoleContext is not null)
-        {
-            _logger.LogDebug("ConsoleContext is closing: {EndPoint}", _info.EndPoint);
-            await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
-            _consoleContext = null;
-            _logger.LogDebug("ConsoleContext is closed: {EndPoint}", _info.EndPoint);
-        }
+        // if (_consoleContext is not null)
+        // {
+        //     _logger.LogDebug("ConsoleContext is closing: {EndPoint}", _info.EndPoint);
+        //     await _consoleContext.CloseAsync(_closeToken, CancellationToken.None);
+        //     _consoleContext = null;
+        //     _logger.LogDebug("ConsoleContext is closed: {EndPoint}", _info.EndPoint);
+        // }
 
         await base.OnDisposeAsync();
     }
