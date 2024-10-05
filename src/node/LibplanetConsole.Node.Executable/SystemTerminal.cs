@@ -13,6 +13,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
         _commandContext = commandContext;
         _commandContext.Owner = applicationLifetime;
         Prompt = "libplanet-node $ ";
+        applicationLifetime.ApplicationStopping.Register(() => Prompt = "\u001b0");
     }
 
     protected override string FormatPrompt(string prompt) => prompt;

@@ -1,13 +1,25 @@
-// using LibplanetConsole.Common;
+using LibplanetConsole.Common;
+using Microsoft.Extensions.Hosting;
 
-// namespace LibplanetConsole.Node;
+namespace LibplanetConsole.Node;
 
-// internal sealed class ApplicationInfoProvider : InfoProviderBase<ApplicationBase>
-// {
-//     public ApplicationInfoProvider()
-//         : base("Application")
-//     {
-//     }
+internal sealed class ApplicationInfoProvider
+    : InfoProviderBase<IHostApplicationLifetime>
+{
+    private readonly ApplicationInfo _info;
 
-//     protected override object? GetInfo(ApplicationBase obj) => obj.Info;
-// }
+    public ApplicationInfoProvider(ApplicationOptions options)
+        : base("Application")
+    {
+        _info = new()
+        {
+            EndPoint = options.EndPoint,
+            SeedEndPoint = options.SeedEndPoint,
+            StorePath = options.StorePath,
+            LogPath = options.LogPath,
+            ParentProcessId = options.ParentProcessId,
+        };
+    }
+
+    protected override object? GetInfo(IHostApplicationLifetime obj) => _info;
+}

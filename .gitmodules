@@ -1,3 +1,0 @@
-[submodule ".submodules/commands"]
-	path = .submodules/commands
-	url = https://github.com/s2quake/commands.git

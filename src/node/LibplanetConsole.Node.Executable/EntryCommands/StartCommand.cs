@@ -77,12 +77,8 @@ internal sealed class StartCommand : CommandAsyncBase
             app.UseAuthorization();
 
             var @out = Console.Out;
+            await @out.WriteLineAsync();
             await app.RunAsync(cancellationToken);
-            // var application = app.Services.GetRequiredService<Application>();
-            // await @out.WriteLineAsync();
-            // await application.RunAsync();
-            await @out.WriteLineAsync("\u001b0");
-            // await app.StopAsync(cancellationToken);
         }
         catch (CommandParsingException e)
         {

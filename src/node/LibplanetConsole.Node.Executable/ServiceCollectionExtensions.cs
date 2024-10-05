@@ -15,9 +15,6 @@ internal static class ServiceCollectionExtensions
     {
         @this.AddLogging(options.LogPath, options.LibraryLogPath);
 
-        // @this.AddSingleton(s => new Application(s, options));
-        // @this.AddSingleton<IApplication>(s => s.GetRequiredService<Application>());
-
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();
         @this.AddHostedService<TerminalHostedService>();

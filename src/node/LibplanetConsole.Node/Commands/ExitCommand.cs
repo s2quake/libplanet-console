@@ -10,11 +10,14 @@ internal sealed class ExitCommand(IHostApplicationLifetime applicationLifetime)
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         var resetEvent = new ManualResetEvent(false);
-        applicationLifetime.ApplicationStopped.Register(() => resetEvent.Set());
-        applicationLifetime.StopApplication();
-        while (!resetEvent.WaitOne(100))
+        applicationLifetime.ApplicationStopping.Register(() =>
         {
-            await Task.Yield();
+            resetEvent.Set();
+        });
+        applicationLifetime.StopApplication();
+        while (!resetEvent.WaitOne(1))
+        {
+            await Task.Delay(1, default);
         }
     }
 }
