@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,19 +10,23 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddNode(
         this IServiceCollection @this, ApplicationOptions options)
     {
+        SynchronizationContext.SetSynchronizationContext(new());
+        @this.AddSingleton(SynchronizationContext.Current);
+        @this.AddSingleton(options);
         @this.AddSingleton<SeedService>()
              .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>())
              .AddHostedService(s => s.GetRequiredService<SeedService>());
-        @this.AddSingleton(s => new Node(s, options))
+        @this.AddSingleton<Node>()
              .AddSingleton<INode>(s => s.GetRequiredService<Node>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
         @this.AddHostedService<NodeHostedService>();
-        @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
-        @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
+        // @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
+        // @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
+
 
         @this.AddSingleton<ICommand, AddressCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();
-        @this.AddSingleton<ICommand, InfoCommand>();
+        // @this.AddSingleton<ICommand, InfoCommand>();
         @this.AddSingleton<ICommand, KeyCommand>();
         @this.AddSingleton<ICommand, StartCommand>();
         @this.AddSingleton<ICommand, StopCommand>();

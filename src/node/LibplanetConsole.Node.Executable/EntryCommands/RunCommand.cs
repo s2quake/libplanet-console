@@ -28,18 +28,18 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
     {
         try
         {
-            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
-            var applicationOptions = _applicationSettings.ToOptions();
+            // var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
+            // var applicationOptions = _applicationSettings.ToOptions();
 
-            serviceCollection.AddNode(applicationOptions);
-            serviceCollection.AddApplication(applicationOptions);
+            // serviceCollection.AddNode(applicationOptions);
+            // serviceCollection.AddApplication(applicationOptions);
 
-            await using var serviceProvider = serviceCollection.BuildServiceProvider();
-            var @out = Console.Out;
-            var application = serviceProvider.GetRequiredService<Application>();
-            await @out.WriteLineAsync();
-            await application.RunAsync();
-            await @out.WriteLineAsync("\u001b0");
+            // await using var serviceProvider = serviceCollection.BuildServiceProvider();
+            // var @out = Console.Out;
+            // var application = serviceProvider.GetRequiredService<Application>();
+            // await @out.WriteLineAsync();
+            // await application.RunAsync();
+            // await @out.WriteLineAsync("\u001b0");
         }
         catch (CommandParsingException e)
         {

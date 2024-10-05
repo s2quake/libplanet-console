@@ -1,9 +1,20 @@
 using JSSoft.Commands;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node.Commands;
 
 [CommandSummary("Exit the application.")]
-internal sealed class ExitCommand(IApplication application) : CommandBase
+internal sealed class ExitCommand(IHostApplicationLifetime applicationLifetime)
+    : CommandAsyncBase
 {
-    protected override void OnExecute() => application.Cancel();
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
+    {
+        var resetEvent = new ManualResetEvent(false);
+        applicationLifetime.ApplicationStopped.Register(() => resetEvent.Set());
+        applicationLifetime.StopApplication();
+        while (!resetEvent.WaitOne(100))
+        {
+            await Task.Yield();
+        }
+    }
 }

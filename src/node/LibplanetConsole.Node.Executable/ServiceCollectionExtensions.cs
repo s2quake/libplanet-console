@@ -15,19 +15,20 @@ internal static class ServiceCollectionExtensions
     {
         @this.AddLogging(options.LogPath, options.LibraryLogPath);
 
-        @this.AddSingleton(s => new Application(s, options));
-        @this.AddSingleton<IApplication>(s => s.GetRequiredService<Application>());
+        // @this.AddSingleton(s => new Application(s, options));
+        // @this.AddSingleton<IApplication>(s => s.GetRequiredService<Application>());
 
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();
+        @this.AddHostedService<TerminalHostedService>();
 
         @this.AddSingleton<HelpCommand>()
              .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
         @this.AddSingleton<VersionCommand>()
              .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
-        @this.AddSingleton<IApplicationService, BlockChainEventTracer>();
-        @this.AddSingleton<IApplicationService, NodeEventTracer>();
+        @this.AddHostedService<BlockChainEventTracer>();
+        @this.AddHostedService<NodeEventTracer>();
 
         @this.AddEvidence();
 

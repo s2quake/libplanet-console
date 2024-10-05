@@ -4,7 +4,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
-internal sealed class SeedService(IApplication application) : ISeedService, IHostedService
+internal sealed class SeedService(ApplicationOptions options) : ISeedService, IHostedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
@@ -31,8 +31,7 @@ internal sealed class SeedService(IApplication application) : ISeedService, IHos
 
     async Task IHostedService.StartAsync(CancellationToken cancellationToken)
     {
-        var info = application.Info;
-        if (CompareEndPoint(info.SeedEndPoint, info.EndPoint) is true)
+        if (CompareEndPoint(options.SeedEndPoint, options.EndPoint) is true)
         {
             _blocksyncSeedNode = new SeedNode(new()
             {
