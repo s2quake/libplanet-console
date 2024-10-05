@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
     <ProjectReference Include="..\..\node\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
-    <ProjectReference Include="..\..\node\LibplanetConsole.Node.Example\LibplanetConsole.Node.Example.csproj" />
     <ProjectReference Include="..\..\node\LibplanetConsole.Node.Explorer\LibplanetConsole.Node.Explorer.csproj" />
     <ProjectReference Include="..\..\node\LibplanetConsole.Node.Evidence\LibplanetConsole.Node.Evidence.csproj" />
   </ItemGroup>

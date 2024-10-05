@@ -2,7 +2,6 @@ using JSSoft.Commands;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Evidence;
-using LibplanetConsole.Node.Example;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
@@ -31,7 +30,6 @@ internal static class ServiceCollectionExtensions
         @this.AddSingleton<IApplicationService, NodeEventTracer>();
 
         @this.AddEvidence();
-        @this.AddExample();
 
         @this.AddGrpc();
 

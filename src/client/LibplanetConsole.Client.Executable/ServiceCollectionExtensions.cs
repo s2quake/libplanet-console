@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Client.Example;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Framework;
@@ -27,7 +26,6 @@ internal static class ServiceCollectionExtensions
         @this.AddSingleton<IApplicationService, BlockChainEventTracer>();
         @this.AddSingleton<IApplicationService, ClientEventTracer>();
 
-        @this.AddExample();
         @this.AddLogging(options.LogPath, string.Empty);
 
         return @this;

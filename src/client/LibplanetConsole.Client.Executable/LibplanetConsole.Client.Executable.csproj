@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Client\LibplanetConsole.Client.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Client.Example\LibplanetConsole.Client.Example.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
