@@ -4,6 +4,7 @@ using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
@@ -14,9 +15,9 @@ internal sealed partial class Client : IClient
     private readonly SecureString _privateKey;
     private readonly ILogger _logger;
     private EndPoint? _nodeEndPoint;
-    // private RemoteNodeContext? _remoteNodeContext;
     private Node.Grpc.NodeGrpcService.NodeGrpcServiceClient? _remoteNode;
     private Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient? _remoteBlockchain;
+    private GrpcChannel? _channel;
     private CancellationTokenSource? _cancellationTokenSource;
     private Task _callbackTask = Task.CompletedTask;
     private Guid _closeToken;
@@ -67,36 +68,31 @@ internal sealed partial class Client : IClient
 
     public bool IsRunning { get; private set; }
 
-    // private INodeService RemoteNodeService
-    //     => _serviceProvider.GetRequiredService<RemoteNodeService>().Service;
-
-    // private IBlockChainService RemoteBlockChainService
-    //     => _serviceProvider.GetRequiredService<RemoteBlockChainService>().Service;
-
     public override string ToString() => $"[{Address}]";
 
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_remoteNode is not null)
+        if (_channel is not null)
         {
             throw new InvalidOperationException("The client is already running.");
         }
 
-        // var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
         var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
         var channelOptions = new GrpcChannelOptions
         {
             ThrowOperationCanceledOnCancellation = true,
             MaxRetryAttempts = 1,
         };
-        var channel = GrpcChannel.ForAddress(address, channelOptions);
-        // var channel2 = GrpcChannel.ForAddress(address, channelOptions);
+        HubConnectionContext
+        _channel = GrpcChannel.ForAddress(address, channelOptions);
         _cancellationTokenSource = new();
-        _remoteNode = new Node.Grpc.NodeGrpcService.NodeGrpcServiceClient(channel);
-        _remoteBlockchain = new Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient(channel);
+        _remoteNode = new Node.Grpc.NodeGrpcService.NodeGrpcServiceClient(_channel);
+        _remoteBlockchain = new Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient(_channel);
         _callbackTask = CallbackAsync(_cancellationTokenSource.Token);
+
+        _channel.Target
 
         // _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
         // _remoteNodeContext.EndPoint = NodeEndPoint;
@@ -122,7 +118,6 @@ internal sealed partial class Client : IClient
                 throw new InvalidOperationException("The remote node is not ready.");
             }
 
-
             using var streamingCall = _remoteBlockchain.GetBlockAppendedStream(
                 new Node.Grpc.GetBlockAppendedStreamRequest(),
                 deadline: DateTime.UtcNow + TimeSpan.FromSeconds(10),
@@ -142,15 +137,18 @@ internal sealed partial class Client : IClient
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        // if (_remoteNodeContext is null)
-        // {
-        //     throw new InvalidOperationException("The client is not running.");
-        // }
+        if (_channel is null)
+        {
+            throw new InvalidOperationException("The client is not running.");
+        }
 
         // _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
         // await _remoteNodeContext.CloseAsync(_closeToken, cancellationToken);
         // _info = _info with { NodeAddress = default };
         // _remoteNodeContext = null;
+        await _channel.ShutdownAsync();
+        _channel.Dispose();
+        _channel = null;
         _closeToken = Guid.Empty;
         IsRunning = false;
         _logger.LogDebug("Client is stopped: {Address}", Address);

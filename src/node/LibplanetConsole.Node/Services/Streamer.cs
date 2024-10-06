@@ -1,8 +1,9 @@
 using Grpc.Core;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node.Services;
 
-internal abstract class Callback<T>(IAsyncStreamWriter<T> streamWriter)
+internal abstract class Streamer<T>(IAsyncStreamWriter<T> streamWriter)
 {
     private CancellationTokenSource? _cancellationTokenSource;
 
@@ -27,6 +28,15 @@ internal abstract class Callback<T>(IAsyncStreamWriter<T> streamWriter)
         }
     }
 
+    public async Task RunAsync(
+        IHostApplicationLifetime applicationLifetime, CancellationToken cancellationToken)
+    {
+        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken);
+        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
+        await RunAsync(cancellationTokenSource.Token);
+    }
+
     protected virtual async Task OnRun(CancellationToken cancellationToken)
     {
         while (cancellationToken.IsCancellationRequested is false)
@@ -35,7 +45,7 @@ internal abstract class Callback<T>(IAsyncStreamWriter<T> streamWriter)
         }
     }
 
-    protected async Task InvokeAsync(T value)
+    protected async void WriteValue(T value)
     {
         if (_cancellationTokenSource is null)
         {

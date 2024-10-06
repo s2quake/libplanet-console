@@ -8,25 +8,28 @@ service NodeGrpcService {
   rpc Start(StartRequest) returns (StartResponse);
   rpc Stop(StopRequest) returns (StopResponse);
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+
+  rpc GetStartedStream(GetStartedStreamRequest) returns (stream GetStartedStreamResponse);
+  rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
 }
 
 message NodeInfo {
-    int32 processId = 1;
-    string appProtocolVersion = 2;
-    string swarmEndPoint = 3;
-    string consensusEndPoint = 4;
+    int32 process_id = 1;
+    string app_protocol_version = 2;
+    string swarm_end_point = 3;
+    string consensus_end_point = 4;
     string address = 5;
-    string genesisHash = 6;
-    string tipHash = 7;
-    bool isRunning = 8;
+    string genesis_hash = 6;
+    string tip_hash = 7;
+    bool is_running = 8;
 }
 
 message StartRequest {
-  string seedEndPoint = 1;
+  string seed_end_point = 1;
 }
 
 message StartResponse {
-    NodeInfo nodeInfo = 1;
+    NodeInfo node_info = 1;
 }
 
 message StopRequest {
@@ -39,5 +42,18 @@ message GetInfoRequest {
 }
 
 message GetInfoResponse {
-    NodeInfo nodeInfo = 1;
+    NodeInfo node_info = 1;
+}
+
+message GetStartedStreamRequest {
+}
+
+message GetStartedStreamResponse {
+    NodeInfo node_info = 1;
+}
+
+message GetStoppedStreamRequest {
+}
+
+message GetStoppedStreamResponse {
 }

@@ -1,9 +1,12 @@
 using Grpc.Core;
 using LibplanetConsole.Node.Grpc;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node.Services;
 
-public sealed class NodeGrpcServiceV1(INode node) : NodeGrpcService.NodeGrpcServiceBase
+internal sealed class NodeGrpcServiceV1(
+    IHostApplicationLifetime applicationLifetime, INode node)
+    : NodeGrpcService.NodeGrpcServiceBase
 {
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
@@ -25,5 +28,30 @@ public sealed class NodeGrpcServiceV1(INode node) : NodeGrpcService.NodeGrpcServ
         };
 
         return Task.Run(Action, context.CancellationToken);
+    }
+
+    public override async Task GetStartedStream(
+        GetStartedStreamRequest request,
+        IServerStreamWriter<GetStartedStreamResponse> responseStream,
+        ServerCallContext context)
+    {
+        var streamer = new EventStreamer<GetStartedStreamResponse>(
+            responseStream,
+            handler => node.Started += handler,
+            handler => node.Started -= handler,
+            () => new GetStartedStreamResponse { NodeInfo = node.Info });
+        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
+    }
+
+    public override async Task GetStoppedStream(
+        GetStoppedStreamRequest request,
+        IServerStreamWriter<GetStoppedStreamResponse> responseStream,
+        ServerCallContext context)
+    {
+        var streamer = new EventStreamer<GetStoppedStreamResponse>(
+            responseStream,
+            handler => node.Stopped += handler,
+            handler => node.Stopped -= handler);
+        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
     }
 }

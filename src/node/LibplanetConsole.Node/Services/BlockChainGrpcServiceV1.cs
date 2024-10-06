@@ -75,36 +75,11 @@ internal sealed class BlockChainGrpcServiceV1(
         IServerStreamWriter<GetBlockAppendedStreamResponse> responseStream,
         ServerCallContext context)
     {
-        var blockChainCallback = new BlockAppendedCallback(responseStream, blockChain);
-        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            context.CancellationToken);
-        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
-        await blockChainCallback.RunAsync(cancellationTokenSource.Token);
-    }
-
-    private sealed class BlockAppendedCallback(
-        IAsyncStreamWriter<GetBlockAppendedStreamResponse> streamWriter, IBlockChain blockChain)
-        : Callback<GetBlockAppendedStreamResponse>(streamWriter)
-    {
-        protected override async Task OnRun(CancellationToken cancellationToken)
-        {
-            blockChain.BlockAppended += BlockChain_BlockAppended;
-            try
-            {
-                await  base.OnRun(cancellationToken);
-            }
-            finally
-            {
-                blockChain.BlockAppended -= BlockChain_BlockAppended;
-            }
-        }
-
-        private async void BlockChain_BlockAppended(object? sender, BlockEventArgs e)
-        {
-            await InvokeAsync(new GetBlockAppendedStreamResponse
-            {
-                BlockInfo = e.BlockInfo,
-            });
-        }
+        var streamer = new EventStreamer<GetBlockAppendedStreamResponse, BlockEventArgs>(
+            responseStream,
+            attach: handler => blockChain.BlockAppended += handler,
+            detach: handler => blockChain.BlockAppended -= handler,
+            selector: e => new GetBlockAppendedStreamResponse { BlockInfo = e.BlockInfo });
+        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
     }
 }
