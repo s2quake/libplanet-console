@@ -1,24 +1,34 @@
 using JSSoft.Terminals;
+using LibplanetConsole.Client;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 
-internal sealed class BlockChainEventTracer(IBlockChain blockChain)
-    : IApplicationService, IDisposable
+internal sealed class BlockChainEventTracer : IHostedService, IDisposable
 {
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    private readonly IBlockChain _blockChain;
+    private readonly ILogger<BlockChainEventTracer> _logger;
+
+    public BlockChainEventTracer(
+        IBlockChain blockChain, ILogger<BlockChainEventTracer> logger)
     {
-        blockChain.BlockAppended += BlockChain_BlockAppended;
-        return Task.CompletedTask;
+        _blockChain = blockChain;
+        _logger = logger;
+        _blockChain.BlockAppended += Client_BlockAppended;
     }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
     void IDisposable.Dispose()
     {
-        blockChain.BlockAppended -= BlockChain_BlockAppended;
+        _blockChain.BlockAppended -= Client_BlockAppended;
     }
 
-    private void BlockChain_BlockAppended(object? sender, BlockEventArgs e)
+    private void Client_BlockAppended(object? sender, BlockEventArgs e)
     {
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
@@ -26,5 +36,6 @@ internal sealed class BlockChainEventTracer(IBlockChain blockChain)
         var message = $"Block #{blockInfo.Height} '{hash.ToShortString()}' " +
                       $"Appended by '{miner.ToShortString()}'";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
+        _logger.LogInformation(message);
     }
 }

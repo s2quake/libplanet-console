@@ -5,60 +5,83 @@ option csharp_namespace = "LibplanetConsole.Node.Grpc";
 package libplanet.console.node.v1;
 
 service BlockChainGrpcService {
+  rpc IsReady(IsReadyRequest) returns (IsReadyResponse);
   rpc SendTransaction(SendTransactionRequest) returns (SendTransactionResponse);
   rpc GetNextNonce(GetNextNonceRequest) returns (GetNextNonceResponse);
   rpc GetTipHash(GetTipHashRequest) returns (GetTipHashResponse);
   rpc GetState(GetStateRequest) returns (GetStateResponse);
   rpc GetBlockHash(GetBlockHashRequest) returns (GetBlockHashResponse);
   rpc GetAction(GetActionRequest) returns (GetActionResponse);
+
+  rpc GetBlockAppendedStream(GetBlockAppendedStreamRequest) returns (stream GetBlockAppendedStreamResponse);
+}
+
+message BlockInfo {
+  int64 height = 1;
+  string hash = 2;
+  string miner = 3;
+}
+
+message IsReadyRequest {
+}
+
+message IsReadyResponse {
+  bool isReady = 1;
 }
 
 message SendTransactionRequest {
-    bytes transactionData = 1;
-  }
+  bytes transactionData = 1;
+}
 
-  message SendTransactionResponse {
-    string txId = 1;
-  }
+message SendTransactionResponse {
+  string txId = 1;
+}
 
-  message GetNextNonceRequest {
-    string address = 1;
-  }
+message GetNextNonceRequest {
+  string address = 1;
+}
 
-  message GetNextNonceResponse {
-    int64 nonce = 1;
-  }
+message GetNextNonceResponse {
+  int64 nonce = 1;
+}
 
-  message GetTipHashRequest {
-  }
+message GetTipHashRequest {
+}
 
-  message GetTipHashResponse {
-    string blockHash = 1;
-  }
+message GetTipHashResponse {
+  string blockHash = 1;
+}
 
-  message GetStateRequest {
-    optional string blockHash = 1;
-    string accountAddress = 2;
-    string address = 3;
-  }
+message GetStateRequest {
+  optional string blockHash = 1;
+  string accountAddress = 2;
+  string address = 3;
+}
 
-  message GetStateResponse {
-    bytes stateData = 1;
-  }
+message GetStateResponse {
+  bytes stateData = 1;
+}
 
-  message GetBlockHashRequest {
-    int64 height = 1;
-  }
+message GetBlockHashRequest {
+  int64 height = 1;
+}
 
-  message GetBlockHashResponse {
-    string blockHash = 1;
-  }
+message GetBlockHashResponse {
+  string blockHash = 1;
+}
 
-  message GetActionRequest {
-    string txId = 1;
-    int32 actionIndex = 2;
-  }
+message GetActionRequest {
+  string txId = 1;
+  int32 actionIndex = 2;
+}
 
-  message GetActionResponse {
-    bytes actionData = 1;
-  }
+message GetActionResponse {
+  bytes actionData = 1;
+}
+
+message GetBlockAppendedStreamRequest {
+}
+
+message GetBlockAppendedStreamResponse {
+  BlockInfo blockInfo = 1;
+}

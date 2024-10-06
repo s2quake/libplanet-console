@@ -10,10 +10,15 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddClient(
         this IServiceCollection @this, ApplicationOptions options)
     {
+        var synchronizationContext = SynchronizationContext.Current ?? new();
+        SynchronizationContext.SetSynchronizationContext(synchronizationContext);
+        @this.AddSingleton(synchronizationContext);
+        @this.AddSingleton(options);
+
         @this.AddSingleton(s => new Client(s, options))
              .AddSingleton<IClient>(s => s.GetRequiredService<Client>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Client>());
-
+        @this.AddHostedService<ClientHostedService>();
      //    @this.AddSingleton<ClientService>()
           //    .AddSingleton<ILocalService>(s => s.GetRequiredService<ClientService>())
           //    .AddSingleton<IClientService>(s => s.GetRequiredService<ClientService>());

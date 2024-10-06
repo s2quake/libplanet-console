@@ -2,13 +2,12 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
-using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockChainCallback
+internal sealed partial class Node : INode, IBlockChain
 {
     private static readonly Codec _codec = new();
     private readonly IServiceProvider _serviceProvider;
@@ -222,25 +221,25 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         return Task.CompletedTask;
     }
 
-    void INodeCallback.OnStarted(NodeInfo nodeInfo)
-    {
-        if (_isInProgress != true)
-        {
-            _nodeInfo = nodeInfo;
-            IsRunning = true;
-            Started?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    // void INodeCallback.OnStarted(NodeInfo nodeInfo)
+    // {
+    //     if (_isInProgress != true)
+    //     {
+    //         _nodeInfo = nodeInfo;
+    //         IsRunning = true;
+    //         Started?.Invoke(this, EventArgs.Empty);
+    //     }
+    // }
 
-    void INodeCallback.OnStopped()
-    {
-        if (_isInProgress != true)
-        {
-            _nodeInfo = NodeInfo.Empty;
-            IsRunning = false;
-            Stopped?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    // void INodeCallback.OnStopped()
+    // {
+    //     if (_isInProgress != true)
+    //     {
+    //         _nodeInfo = NodeInfo.Empty;
+    //         IsRunning = false;
+    //         Stopped?.Invoke(this, EventArgs.Empty);
+    //     }
+    // }
 
     // private static IEnumerable<IRemoteService> GetRemoteServices(
     //     IServiceProvider serviceProvider)

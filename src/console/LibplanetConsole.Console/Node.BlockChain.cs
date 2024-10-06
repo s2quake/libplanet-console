@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using LibplanetConsole.Node;
-using LibplanetConsole.Node.Services;
 
 namespace LibplanetConsole.Console;
 
@@ -42,11 +41,11 @@ internal sealed partial class Node
         throw new NotImplementedException();
     }
 
-    void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
-    {
-        _nodeInfo = _nodeInfo with { TipHash = blockInfo.Hash };
-        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
-    }
+    // void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
+    // {
+    //     _nodeInfo = _nodeInfo with { TipHash = blockInfo.Hash };
+    //     BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
+    // }
 
     public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {

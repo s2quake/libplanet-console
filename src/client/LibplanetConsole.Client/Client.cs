@@ -1,14 +1,14 @@
 using System.Security;
+using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
-using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
 
-internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallback
+internal sealed partial class Client : IClient
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly SecureString _privateKey;
@@ -16,6 +16,9 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
     private EndPoint? _nodeEndPoint;
     // private RemoteNodeContext? _remoteNodeContext;
     private Node.Grpc.NodeGrpcService.NodeGrpcServiceClient? _remoteNode;
+    private Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient? _remoteBlockchain;
+    private CancellationTokenSource? _cancellationTokenSource;
+    private Task _callbackTask = Task.CompletedTask;
     private Guid _closeToken;
     private ClientInfo _info;
 
@@ -81,12 +84,19 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
             throw new InvalidOperationException("The client is already running.");
         }
 
+        // var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
         var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
         var channelOptions = new GrpcChannelOptions
         {
+            ThrowOperationCanceledOnCancellation = true,
+            MaxRetryAttempts = 1,
         };
-        using var channel = GrpcChannel.ForAddress(address, channelOptions);
+        var channel = GrpcChannel.ForAddress(address, channelOptions);
+        // var channel2 = GrpcChannel.ForAddress(address, channelOptions);
+        _cancellationTokenSource = new();
         _remoteNode = new Node.Grpc.NodeGrpcService.NodeGrpcServiceClient(channel);
+        _remoteBlockchain = new Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient(channel);
+        _callbackTask = CallbackAsync(_cancellationTokenSource.Token);
 
         // _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
         // _remoteNodeContext.EndPoint = NodeEndPoint;
@@ -98,6 +108,36 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
         _logger.LogDebug(
             "Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
         Started?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task CallbackAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(2000, cancellationToken);
+            var callOptions = new CallOptions(deadline: DateTime.UtcNow.AddSeconds(1), cancellationToken: cancellationToken);
+            var response1 = await _remoteBlockchain.IsReadyAsync(new Node.Grpc.IsReadyRequest(), callOptions);
+            if (response1.IsReady is false)
+            {
+                throw new InvalidOperationException("The remote node is not ready.");
+            }
+
+
+            using var streamingCall = _remoteBlockchain.GetBlockAppendedStream(
+                new Node.Grpc.GetBlockAppendedStreamRequest(),
+                deadline: DateTime.UtcNow + TimeSpan.FromSeconds(10),
+                cancellationToken: cancellationToken);
+
+            while (await streamingCall.ResponseStream.MoveNext(cancellationToken))
+            {
+                var response = streamingCall.ResponseStream.Current;
+                InvokeBlockAppendedEvent(response.BlockInfo);
+            }
+        }
+        catch (Exception e)
+        {
+            int qwer = 0;
+        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -142,14 +182,14 @@ internal sealed partial class Client : IClient, INodeCallback, IBlockChainCallba
         // }
     }
 
-    void INodeCallback.OnStarted(NodeInfo nodeInfo) => NodeInfo = nodeInfo;
+    // void INodeCallback.OnStarted(NodeInfo nodeInfo) => NodeInfo = nodeInfo;
 
-    void INodeCallback.OnStopped() => NodeInfo = NodeInfo.Empty;
+    // void INodeCallback.OnStopped() => NodeInfo = NodeInfo.Empty;
 
-    void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
-    {
-        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
-    }
+    // void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
+    // {
+    //     BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
+    // }
 
     private void RemoteNodeContext_Closed(object? sender, EventArgs e)
     {

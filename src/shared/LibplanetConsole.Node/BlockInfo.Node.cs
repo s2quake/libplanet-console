@@ -13,7 +13,6 @@ public readonly partial record struct BlockInfo
         Height = block.Index;
         Hash = block.Hash;
         Miner = block.Miner;
-        Transactions = [.. block.Transactions.Select(GetTransaction)];
 
         TransactionInfo GetTransaction(Transaction transaction)
         {

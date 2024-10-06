@@ -1,12 +1,21 @@
 using Grpc.Core;
 using LibplanetConsole.Node.Grpc;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node.Services;
 
-internal sealed class BlockChainGrpcServiceV1(Node node, IBlockChain blockChain)
+internal sealed class BlockChainGrpcServiceV1(
+    Node node,
+    IBlockChain blockChain,
+    IHostApplicationLifetime applicationLifetime)
     : BlockChainGrpcService.BlockChainGrpcServiceBase
 {
     private static readonly Codec _codec = new();
+
+    public override Task<IsReadyResponse> IsReady(IsReadyRequest request, ServerCallContext context)
+    {
+        return Task.Run(() => new IsReadyResponse { IsReady = node.IsRunning });
+    }
 
     public async override Task<SendTransactionResponse> SendTransaction(
         SendTransactionRequest request, ServerCallContext context)
@@ -59,5 +68,43 @@ internal sealed class BlockChainGrpcServiceV1(Node node, IBlockChain blockChain)
         var actionIndex = request.ActionIndex;
         var action = await node.GetActionAsync(txId, actionIndex, context.CancellationToken);
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
+    }
+
+    public override async Task GetBlockAppendedStream(
+        GetBlockAppendedStreamRequest request,
+        IServerStreamWriter<GetBlockAppendedStreamResponse> responseStream,
+        ServerCallContext context)
+    {
+        var blockChainCallback = new BlockAppendedCallback(responseStream, blockChain);
+        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            context.CancellationToken);
+        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
+        await blockChainCallback.RunAsync(cancellationTokenSource.Token);
+    }
+
+    private sealed class BlockAppendedCallback(
+        IAsyncStreamWriter<GetBlockAppendedStreamResponse> streamWriter, IBlockChain blockChain)
+        : Callback<GetBlockAppendedStreamResponse>(streamWriter)
+    {
+        protected override async Task OnRun(CancellationToken cancellationToken)
+        {
+            blockChain.BlockAppended += BlockChain_BlockAppended;
+            try
+            {
+                await  base.OnRun(cancellationToken);
+            }
+            finally
+            {
+                blockChain.BlockAppended -= BlockChain_BlockAppended;
+            }
+        }
+
+        private async void BlockChain_BlockAppended(object? sender, BlockEventArgs e)
+        {
+            await InvokeAsync(new GetBlockAppendedStreamResponse
+            {
+                BlockInfo = e.BlockInfo,
+            });
+        }
     }
 }
