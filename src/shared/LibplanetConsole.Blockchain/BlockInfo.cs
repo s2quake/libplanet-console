@@ -1,6 +1,6 @@
-using LibplanetConsole.Node.Grpc;
+using LibplanetConsole.Blockchain.Grpc;
 
-namespace LibplanetConsole.Node;
+namespace LibplanetConsole.Blockchain;
 
 public readonly partial record struct BlockInfo
 {

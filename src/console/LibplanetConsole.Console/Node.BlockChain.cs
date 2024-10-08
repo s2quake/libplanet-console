@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using Grpc.Core;
+using LibplanetConsole.Blockchain;
+using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
 

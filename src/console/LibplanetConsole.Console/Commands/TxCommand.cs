@@ -27,7 +27,9 @@ internal sealed class TxCommand(INodeCollection nodes, IClientCollection clients
         }
         else if (addressable is IClient client)
         {
-            await client.SendTransactionAsync(text, cancellationToken);
+            var blockChain = client.GetRequiredService<IBlockChain>();
+            var action = new StringAction { Value = text };
+            await blockChain.SendTransactionAsync([action], cancellationToken);
             await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
         }
         else

@@ -17,7 +17,6 @@ internal sealed class ClientCollection(
     private readonly List<Client> _clientList = new(clientOptions.Length);
     private readonly ILogger _logger = serviceProvider.GetLogger<ClientCollection>();
     private Client? _current;
-    // private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
 
@@ -150,23 +149,6 @@ internal sealed class ClientCollection(
             _logger.LogDebug("Disposed a client: {Address}", client.Address);
         }
     }
-
-    // async ValueTask IAsyncDisposable.DisposeAsync()
-    // {
-    //     if (_isDisposed is false)
-    //     {
-    //         for (var i = _clientList.Count - 1; i >= 0; i--)
-    //         {
-    //             var client = _clientList[i]!;
-    //             client.Disposed -= Client_Disposed;
-    //             await ClientFactory.DisposeScopeAsync(client);
-    //             _logger.LogDebug("Disposed a client: {Address}", client.Address);
-    //         }
-
-    //         _isDisposed = true;
-    //         GC.SuppressFinalize(this);
-    //     }
-    // }
 
     async Task<IClient> IClientCollection.AddNewAsync(
         AddNewClientOptions options, CancellationToken cancellationToken)

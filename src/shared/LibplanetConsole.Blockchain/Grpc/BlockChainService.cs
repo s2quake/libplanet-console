@@ -3,9 +3,9 @@ using Grpc.Net.Client;
 using LibplanetConsole.Grpc;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
-using static LibplanetConsole.Node.Grpc.BlockChainGrpcService;
+using static LibplanetConsole.Blockchain.Grpc.BlockChainGrpcService;
 
-namespace LibplanetConsole.Node.Grpc;
+namespace LibplanetConsole.Blockchain.Grpc;
 
 internal sealed class BlockChainService(GrpcChannel channel)
     : BlockChainGrpcServiceClient(channel), IDisposable

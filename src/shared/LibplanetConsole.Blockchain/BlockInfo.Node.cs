@@ -4,7 +4,7 @@ using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Node;
+namespace LibplanetConsole.Blockchain;
 
 public readonly partial record struct BlockInfo
 {

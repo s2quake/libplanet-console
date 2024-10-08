@@ -4,10 +4,10 @@ using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Grpc;
 using Microsoft.Extensions.Hosting;
 
-namespace LibplanetConsole.Node.Grpc;
+namespace LibplanetConsole.Client.Grpc;
 
 internal sealed class BlockChainGrpcServiceV1(
-    Node node,
+    Client client,
     IBlockChain blockChain,
     IHostApplicationLifetime applicationLifetime)
     : BlockChainGrpcService.BlockChainGrpcServiceBase
@@ -16,15 +16,15 @@ internal sealed class BlockChainGrpcServiceV1(
 
     public override Task<IsReadyResponse> IsReady(IsReadyRequest request, ServerCallContext context)
     {
-        return Task.Run(() => new IsReadyResponse { IsReady = node.IsRunning });
+        return Task.Run(() => new IsReadyResponse { IsReady = client.IsRunning });
     }
 
     public async override Task<SendTransactionResponse> SendTransaction(
         SendTransactionRequest request, ServerCallContext context)
     {
-        var tx = Transaction.Deserialize(request.TransactionData.ToByteArray());
-        await node.SendTransactionAsync(tx, context.CancellationToken);
-        return new SendTransactionResponse { TxId = tx.Id.ToHex() };
+        var txData = request.TransactionData.ToByteArray();
+        var txId = await client.SendTransactionAsync(txData, context.CancellationToken);
+        return new SendTransactionResponse { TxId = txId.ToHex() };
     }
 
     public async override Task<GetNextNonceResponse> GetNextNonce(
@@ -68,7 +68,7 @@ internal sealed class BlockChainGrpcServiceV1(
     {
         var txId = TxId.FromHex(request.TxId);
         var actionIndex = request.ActionIndex;
-        var action = await node.GetActionAsync(txId, actionIndex, context.CancellationToken);
+        var action = await client.GetActionAsync(txId, actionIndex, context.CancellationToken);
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
     }
 

@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -160,7 +161,9 @@ public sealed partial class ClientCommand(
     {
         var address = Address;
         var client = clients.GetClientOrCurrent(address);
-        await client.SendTransactionAsync(text, cancellationToken);
+        var blockChain = client.GetRequiredService<IBlockChain>();
+        var action = new StringAction { Value = text };
+        await blockChain.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
     }
 

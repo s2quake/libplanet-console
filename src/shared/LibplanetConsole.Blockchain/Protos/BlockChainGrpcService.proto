@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Node.Grpc";
+option csharp_namespace = "LibplanetConsole.Blockchain.Grpc";
 
-package libplanet.console.node.v1;
+package libplanet.console.blockchain.v1;
 
 service BlockChainGrpcService {
   rpc IsReady(IsReadyRequest) returns (IsReadyResponse);

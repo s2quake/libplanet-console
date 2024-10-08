@@ -1,5 +1,6 @@
 using Grpc.Net.Client;
-using LibplanetConsole.Client.Grpc;
+using LibplanetConsole.Blockchain;
+using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;

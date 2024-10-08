@@ -4,6 +4,7 @@ using Libplanet.Blockchain.Renderers;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
+using BlockChain = Libplanet.Blockchain.BlockChain;
 
 namespace LibplanetConsole.Node;
 
