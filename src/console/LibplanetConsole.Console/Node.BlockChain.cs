@@ -31,6 +31,11 @@ internal sealed partial class Node
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
         var address = _privateKey.Address;
         var nonce = await GetNextNonceAsync(address, cancellationToken);
         var genesisHash = _nodeInfo.GenesisHash;

@@ -2,7 +2,6 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.DependencyInjection;

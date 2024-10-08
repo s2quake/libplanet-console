@@ -1,8 +1,8 @@
 using Grpc.Core;
-using LibplanetConsole.Node.Grpc;
+using LibplanetConsole.Grpc;
 using Microsoft.Extensions.Hosting;
 
-namespace LibplanetConsole.Node.Services;
+namespace LibplanetConsole.Node.Grpc;
 
 internal sealed class BlockChainGrpcServiceV1(
     Node node,

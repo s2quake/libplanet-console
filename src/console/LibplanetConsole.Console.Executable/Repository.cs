@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Console.Executable;
 

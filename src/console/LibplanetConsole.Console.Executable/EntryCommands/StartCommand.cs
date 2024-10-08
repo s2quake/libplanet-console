@@ -4,7 +4,6 @@ using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Settings;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -48,7 +47,6 @@ internal sealed class StartCommand : CommandAsyncBase
                 options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
                 options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
-            // var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
 
             builder.Services.AddConsole(applicationOptions);
             builder.Services.AddApplication(applicationOptions);
@@ -60,13 +58,6 @@ internal sealed class StartCommand : CommandAsyncBase
             var @out = System.Console.Out;
             await @out.WriteLineAsync();
             await app.RunAsync(cancellationToken);
-
-            // await using var serviceProvider = serviceCollection.BuildServiceProvider();
-            // var @out = System.Console.Out;
-            // await using var application = serviceProvider.GetRequiredService<Application>();
-            // await @out.WriteLineAsync();
-            // await application.RunAsync();
-            // await @out.WriteLineAsync("\u001b0");
         }
         catch (CommandParsingException e)
         {

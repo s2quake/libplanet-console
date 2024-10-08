@@ -11,7 +11,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddConsole(
         this IServiceCollection @this, ApplicationOptions options)
     {
-        //   @this.AddSingleton(s => (ApplicationBase)s.GetRequiredService<IApplication>());
         @this.AddSingleton(options);
         @this.AddSingleton(s => new NodeCollection(s, options.Nodes))
              .AddSingleton<INodeCollection>(s => s.GetRequiredService<NodeCollection>());
@@ -23,11 +22,6 @@ public static class ServiceCollectionExtensions
              .AddScoped<IBlockChain>(s => s.GetRequiredService<Node>());
         @this.AddScoped(ClientFactory.Create)
              .AddScoped<IClient>(s => s.GetRequiredService<Client>());
-
-        // @this.AddSingleton<ConsoleServiceContext>();
-        // @this.AddSingleton<SeedService>()
-        //      .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
-        //      .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
 
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
         @this.AddSingleton<IInfoProvider, ClientInfoProvider>();

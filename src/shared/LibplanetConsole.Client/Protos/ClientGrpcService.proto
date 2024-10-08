@@ -14,7 +14,7 @@ service ClientGrpcService {
   rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
 }
 
-message ClientInfo {
+message ClientInformation {
     string address = 5;
     string node_address = 6;
     string genesis_hash = 7;
@@ -32,7 +32,7 @@ message StartRequest {
 }
 
 message StartResponse {
-    ClientInfo client_info = 1;
+    ClientInformation client_info = 1;
 }
 
 message StopRequest {
@@ -45,14 +45,14 @@ message GetInfoRequest {
 }
 
 message GetInfoResponse {
-    ClientInfo client_info = 1;
+    ClientInformation client_info = 1;
 }
 
 message GetStartedStreamRequest {
 }
 
 message GetStartedStreamResponse {
-    ClientInfo client_info = 1;
+    ClientInformation client_info = 1;
 }
 
 message GetStoppedStreamRequest {

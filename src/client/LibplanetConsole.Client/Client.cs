@@ -3,6 +3,7 @@ using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
+using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
@@ -33,7 +34,7 @@ internal sealed partial class Client : IClient
 
     public event EventHandler? Started;
 
-    public event EventHandler<StopEventArgs>? Stopped;
+    public event EventHandler? Stopped;
 
     public PublicKey PublicKey { get; }
 
@@ -133,12 +134,12 @@ internal sealed partial class Client : IClient
         IsRunning = false;
         _info = _info with { NodeAddress = default };
         _logger.LogDebug("Client is stopped: {Address}", Address);
-        Stopped?.Invoke(this, new(StopReason.None));
+        Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public void InvokeNodeStartedEvent(NodeInfo nodeInfo)
+    public void InvokeNodeStartedEvent(NodeEventArgs e)
     {
-        NodeInfo = nodeInfo;
+        NodeInfo = e.NodeInfo;
         _info = _info with { NodeAddress = NodeInfo.Address };
     }
 
@@ -148,8 +149,8 @@ internal sealed partial class Client : IClient
         _info = _info with { NodeAddress = default };
     }
 
-    public void InvokeBlockAppendedEvent(BlockInfo blockInfo)
-        => BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
+    public void InvokeBlockAppendedEvent(BlockEventArgs e)
+        => BlockAppended?.Invoke(this, e);
 
     public async ValueTask DisposeAsync()
     {
@@ -174,7 +175,7 @@ internal sealed partial class Client : IClient
             _channel?.Dispose();
             _channel = null;
             IsRunning = false;
-            Stopped?.Invoke(this, new(StopReason.None));
+            Stopped?.Invoke(this, EventArgs.Empty);
         }
     }
 }

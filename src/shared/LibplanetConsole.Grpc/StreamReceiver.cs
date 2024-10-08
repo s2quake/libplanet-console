@@ -1,15 +1,7 @@
 #pragma warning disable SA1402 // File may only contain a single type
 using Grpc.Core;
 
-#if LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Grpc;
-#elif LIBPLANET_NODE
-namespace LibplanetConsole.Node.Grpc;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Grpc;
-#else
-#error "Either LIBPLANET_CONSOLE or LIBPLANET_NODE must be defined."
-#endif
+namespace LibplanetConsole.Grpc;
 
 internal sealed class StreamReceiver<TResponse>(
     AsyncServerStreamingCall<TResponse> streamingCall,

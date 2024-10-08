@@ -1,9 +1,11 @@
+#if LIBPLANET_CONSOLE || LIBPLANET_CLIENT
 using Grpc.Net.Client;
+using LibplanetConsole.Grpc;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
 using static LibplanetConsole.Node.Grpc.BlockChainGrpcService;
 
-namespace LibplanetConsole.Console.Grpc;
+namespace LibplanetConsole.Node.Grpc;
 
 internal sealed class BlockChainService(GrpcChannel channel)
     : BlockChainGrpcServiceClient(channel), IDisposable
@@ -47,3 +49,4 @@ internal sealed class BlockChainService(GrpcChannel channel)
         _blockAppendedReceiver = null;
     }
 }
+#endif // LIBPLANET_CONSOLE || LIBPLANET_CLIENT

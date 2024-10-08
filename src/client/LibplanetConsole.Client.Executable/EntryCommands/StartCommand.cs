@@ -62,6 +62,7 @@ internal sealed class StartCommand : CommandAsyncBase
 
             using var app = builder.Build();
 
+            app.UseClient();
             app.MapGet("/", () => "123");
             // app.UseAuthentication();
             // app.UseAuthorization();

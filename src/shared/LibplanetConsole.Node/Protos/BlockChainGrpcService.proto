@@ -16,7 +16,7 @@ service BlockChainGrpcService {
   rpc GetBlockAppendedStream(GetBlockAppendedStreamRequest) returns (stream GetBlockAppendedStreamResponse);
 }
 
-message BlockInfo {
+message BlockInformation {
   int64 height = 1;
   string hash = 2;
   string miner = 3;
@@ -86,5 +86,5 @@ message GetBlockAppendedStreamRequest {
 }
 
 message GetBlockAppendedStreamResponse {
-  BlockInfo block_info = 1;
+  BlockInformation block_info = 1;
 }

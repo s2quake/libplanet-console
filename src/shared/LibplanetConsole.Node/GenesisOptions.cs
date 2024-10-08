@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Common;
+namespace LibplanetConsole.Node;
 
 public sealed record class GenesisOptions
 {

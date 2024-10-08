@@ -2,7 +2,7 @@ using Grpc.Core;
 using LibplanetConsole.Seed;
 using LibplanetConsole.Seed.Grpc;
 
-namespace LibplanetConsole.Node.Services;
+namespace LibplanetConsole.Node.Grpc;
 
 public sealed class SeedGrpcServiceV1(ISeedService seedService)
     : SeedGrpcService.SeedGrpcServiceBase

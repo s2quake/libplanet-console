@@ -1,5 +1,4 @@
 using LibplanetConsole.Client;
-using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class Client : IClient, IClientCallback
+internal sealed class Client : IClient
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ClientOptions _clientOptions;
@@ -145,10 +144,10 @@ internal sealed class Client : IClient, IClientCallback
 
     public async Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken)
     {
-        var transactionOptions = new TransactionOptions
-        {
-            Text = text,
-        };
+        // var transactionOptions = new TransactionOptions
+        // {
+        //     Text = text,
+        // };
         // return await _remoteService.Service.SendTransactionAsync(
         //     transactionOptions.Sign(this), cancellationToken);
         throw new NotImplementedException();
@@ -210,25 +209,25 @@ internal sealed class Client : IClient, IClientCallback
         return Task.CompletedTask;
     }
 
-    void IClientCallback.OnStarted(ClientInfo clientInfo)
-    {
-        if (_isInProgress is not true)
-        {
-            _clientInfo = clientInfo;
-            IsRunning = true;
-            Started?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    // void IClientCallback.OnStarted(ClientInfo clientInfo)
+    // {
+    //     if (_isInProgress is not true)
+    //     {
+    //         _clientInfo = clientInfo;
+    //         IsRunning = true;
+    //         Started?.Invoke(this, EventArgs.Empty);
+    //     }
+    // }
 
-    void IClientCallback.OnStopped()
-    {
-        if (_isInProgress is not true)
-        {
-            _clientInfo = default;
-            IsRunning = false;
-            Stopped?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    // void IClientCallback.OnStopped()
+    // {
+    //     if (_isInProgress is not true)
+    //     {
+    //         _clientInfo = default;
+    //         IsRunning = false;
+    //         Stopped?.Invoke(this, EventArgs.Empty);
+    //     }
+    // }
 
     // private static IEnumerable<IRemoteService> GetRemoteServices(
     //     IServiceProvider serviceProvider)

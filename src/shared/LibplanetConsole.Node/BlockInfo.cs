@@ -1,4 +1,4 @@
-using GrpcBlockInfo = LibplanetConsole.Node.Grpc.BlockInfo;
+using LibplanetConsole.Node.Grpc;
 
 namespace LibplanetConsole.Node;
 
@@ -14,7 +14,7 @@ public readonly partial record struct BlockInfo
 
     public Address Miner { get; init; }
 
-    public static implicit operator BlockInfo(GrpcBlockInfo blockInfo)
+    public static implicit operator BlockInfo(BlockInformation blockInfo)
     {
         return new BlockInfo
         {
@@ -24,9 +24,9 @@ public readonly partial record struct BlockInfo
         };
     }
 
-    public static implicit operator GrpcBlockInfo(BlockInfo blockInfo)
+    public static implicit operator BlockInformation(BlockInfo blockInfo)
     {
-        return new GrpcBlockInfo
+        return new BlockInformation
         {
             Height = blockInfo.Height,
             Hash = blockInfo.Hash.ToString(),

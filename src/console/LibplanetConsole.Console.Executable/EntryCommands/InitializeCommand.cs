@@ -5,6 +5,7 @@ using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
