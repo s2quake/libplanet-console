@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -10,13 +11,12 @@ namespace LibplanetConsole.Console;
 // [Dependency(typeof(SeedService))]
 internal sealed class NodeCollection(
     IServiceProvider serviceProvider, NodeOptions[] nodeOptions)
-    : IEnumerable<Node>, INodeCollection, IApplicationService, IAsyncDisposable
+    : IEnumerable<Node>, INodeCollection, IHostedService
 {
     private static readonly object LockObject = new();
     private readonly List<Node> _nodeList = new(nodeOptions.Length);
     private readonly ILogger _logger = serviceProvider.GetLogger<NodeCollection>();
     private Node? _current;
-    private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
 
@@ -118,39 +118,33 @@ internal sealed class NodeCollection(
         return node;
     }
 
-    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
+    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
     {
-        var info = serviceProvider.GetRequiredService<IApplication>().Info;
+        var options = serviceProvider.GetRequiredService<ApplicationOptions>();
         await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
         Current = _nodeList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var options = new AddNewNodeOptions
+            var newOptions = new AddNewNodeOptions
             {
                 NodeOptions = nodeOptions[index],
-                NoProcess = info.NoProcess,
-                Detach = info.Detach,
-                NewWindow = info.NewWindow,
+                NoProcess = options.NoProcess,
+                Detach = options.Detach,
+                NewWindow = options.NewWindow,
             };
-            await AddNewAsync(options, cancellationToken);
+            await AddNewAsync(newOptions, cancellationToken);
         }
     }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    async Task IHostedService.StopAsync(CancellationToken cancellationToken)
     {
-        if (_isDisposed is false)
+        for (var i = _nodeList.Count - 1; i >= 0; i--)
         {
-            for (var i = _nodeList.Count - 1; i >= 0; i--)
-            {
-                var node = _nodeList[i]!;
-                node.Disposed -= Node_Disposed;
-                await NodeFactory.DisposeScopeAsync(node);
-                _logger.LogDebug("Disposed a client: {Address}", node.Address);
-            }
-
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
+            var node = _nodeList[i]!;
+            node.Disposed -= Node_Disposed;
+            await NodeFactory.DisposeScopeAsync(node);
+            _logger.LogDebug("Disposed a client: {Address}", node.Address);
         }
     }
 

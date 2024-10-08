@@ -1,6 +1,7 @@
 using JSSoft.Terminals;
 using LibplanetConsole.Client;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 

@@ -1,6 +1,6 @@
-namespace LibplanetConsole.Framework;
+// namespace LibplanetConsole.Framework;
 
-public interface IApplicationService
-{
-    Task InitializeAsync(CancellationToken cancellationToken);
-}
+// public interface IApplicationService
+// {
+//     Task InitializeAsync(CancellationToken cancellationToken);
+// }

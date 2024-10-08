@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -10,13 +11,13 @@ namespace LibplanetConsole.Console;
 [Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
     IServiceProvider serviceProvider, ClientOptions[] clientOptions)
-    : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
+    : IEnumerable<Client>, IClientCollection, IHostedService
 {
     private static readonly object LockObject = new();
     private readonly List<Client> _clientList = new(clientOptions.Length);
     private readonly ILogger _logger = serviceProvider.GetLogger<ClientCollection>();
     private Client? _current;
-    private bool _isDisposed;
+    // private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
 
@@ -120,41 +121,52 @@ internal sealed class ClientCollection(
         return client;
     }
 
-    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
+    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
     {
-        var info = serviceProvider.GetRequiredService<IApplication>().Info;
+        var options = serviceProvider.GetRequiredService<ApplicationOptions>();
         await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
         Current = _clientList.FirstOrDefault();
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {
-            var options = new AddNewClientOptions
+            var newOptions = new AddNewClientOptions
             {
                 ClientOptions = clientOptions[index],
-                NoProcess = info.NoProcess,
-                Detach = info.Detach,
-                NewWindow = info.NewWindow,
+                NoProcess = options.NoProcess,
+                Detach = options.Detach,
+                NewWindow = options.NewWindow,
             };
-            await AddNewAsync(options, cancellationToken);
+            await AddNewAsync(newOptions, cancellationToken);
         }
     }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    async Task IHostedService.StopAsync(CancellationToken cancellationToken)
     {
-        if (_isDisposed is false)
+        for (var i = _clientList.Count - 1; i >= 0; i--)
         {
-            for (var i = _clientList.Count - 1; i >= 0; i--)
-            {
-                var client = _clientList[i]!;
-                client.Disposed -= Client_Disposed;
-                await ClientFactory.DisposeScopeAsync(client);
-                _logger.LogDebug("Disposed a client: {Address}", client.Address);
-            }
-
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
+            var client = _clientList[i]!;
+            client.Disposed -= Client_Disposed;
+            await ClientFactory.DisposeScopeAsync(client);
+            _logger.LogDebug("Disposed a client: {Address}", client.Address);
         }
     }
+
+    // async ValueTask IAsyncDisposable.DisposeAsync()
+    // {
+    //     if (_isDisposed is false)
+    //     {
+    //         for (var i = _clientList.Count - 1; i >= 0; i--)
+    //         {
+    //             var client = _clientList[i]!;
+    //             client.Disposed -= Client_Disposed;
+    //             await ClientFactory.DisposeScopeAsync(client);
+    //             _logger.LogDebug("Disposed a client: {Address}", client.Address);
+    //         }
+
+    //         _isDisposed = true;
+    //         GC.SuppressFinalize(this);
+    //     }
+    // }
 
     async Task<IClient> IClientCollection.AddNewAsync(
         AddNewClientOptions options, CancellationToken cancellationToken)

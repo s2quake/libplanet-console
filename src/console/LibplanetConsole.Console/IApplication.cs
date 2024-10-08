@@ -1,21 +1,21 @@
-namespace LibplanetConsole.Console;
+// namespace LibplanetConsole.Console;
 
-public interface IApplication : IAsyncDisposable, IServiceProvider
-{
-    ApplicationInfo Info { get; }
+// public interface IApplication : IAsyncDisposable, IServiceProvider
+// {
+//     ApplicationInfo Info { get; }
 
-    Task InvokeAsync(Action action, CancellationToken cancellationToken);
+//     Task InvokeAsync(Action action, CancellationToken cancellationToken);
 
-    Task<T> InvokeAsync<T>(Func<T> func, CancellationToken cancellationToken);
+//     Task<T> InvokeAsync<T>(Func<T> func, CancellationToken cancellationToken);
 
-    void Cancel();
+//     void Cancel();
 
-    IClient GetClient(string address);
+//     IClient GetClient(string address);
 
-    INode GetNode(string address);
+//     INode GetNode(string address);
 
-    IAddressable GetAddressable(string address);
+//     IAddressable GetAddressable(string address);
 
-    IAddressable GetAddressable(Address address)
-        => GetAddressable(address.ToString());
-}
+//     IAddressable GetAddressable(Address address)
+//         => GetAddressable(address.ToString());
+// }

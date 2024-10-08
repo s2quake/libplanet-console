@@ -7,11 +7,13 @@ internal sealed class SystemTerminal : SystemTerminalBase
 {
     private readonly CommandContext _commandContext;
 
-    public SystemTerminal(IApplication application, CommandContext commandContext)
+    public SystemTerminal(
+        IHostApplicationLifetime applicationLifetime, CommandContext commandContext)
     {
         _commandContext = commandContext;
-        _commandContext.Owner = application;
+        _commandContext.Owner = applicationLifetime;
         Prompt = "libplanet-console $ ";
+        applicationLifetime.ApplicationStopping.Register(() => Prompt = "\u001b0");
     }
 
     protected override string FormatPrompt(string prompt) => prompt;

@@ -12,7 +12,7 @@ public sealed class ApplicationSettingsCollection : IEnumerable<object>
 
     public ApplicationSettingsCollection()
     {
-        var assemblies = ApplicationServiceCollection.GetAssemblies();
+        var assemblies = GetAssemblies(Assembly.GetEntryAssembly()!);
         var query = from assembly in assemblies
                     from type in assembly.GetTypes()
                     where IsApplicationSettings(type) == true
@@ -72,5 +72,17 @@ public sealed class ApplicationSettingsCollection : IEnumerable<object>
         }
 
         return settingsAttribute.GetSettingsName(type);
+    }
+
+    private static IEnumerable<Assembly> GetAssemblies(Assembly assembly)
+    {
+        var directory = Path.GetDirectoryName(assembly.Location)!;
+        var files = Directory.GetFiles(directory, "LibplanetConsole.*.dll");
+        string[] paths =
+        [
+            assembly.Location,
+            .. files,
+        ];
+        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
     }
 }

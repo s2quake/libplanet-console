@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Console;
 

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Sends a transaction using a simple string.")]
-internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
+internal sealed class TxCommand(INodeCollection nodes, IClientCollection clients) : CommandAsyncBase
 {
     [CommandPropertyRequired]
     public string Address { get; set; } = string.Empty;
@@ -16,7 +16,7 @@ internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var addressable = application.GetAddressable(Address);
+        var addressable = GetAddressable(new(Address));
         var text = Text;
         if (addressable is INode node)
         {
@@ -34,5 +34,20 @@ internal sealed class TxCommand(ApplicationBase application) : CommandAsyncBase
         {
             throw new InvalidOperationException("Invalid addressable.");
         }
+    }
+
+    private IAddressable GetAddressable(Address address)
+    {
+        if (nodes.Contains(address) is true)
+        {
+            return nodes[address];
+        }
+
+        if (clients.Contains(address) is true)
+        {
+            return clients[address];
+        }
+
+        throw new ArgumentException("Invalid address.");
     }
 }

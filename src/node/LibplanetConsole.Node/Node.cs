@@ -139,7 +139,10 @@ internal sealed partial class Node : IActionRenderer, INode
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
+        if (IsRunning is true)
+        {
+            throw new InvalidOperationException("Node is already running.");
+        }
 
         if (_seedEndPoint is null)
         {
@@ -204,9 +207,10 @@ internal sealed partial class Node : IActionRenderer, INode
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         if (_swarm is not null)
         {

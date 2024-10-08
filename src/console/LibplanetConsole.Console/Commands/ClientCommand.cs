@@ -2,12 +2,14 @@ using JSSoft.Commands;
 using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Console.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Provides client-related commands.")]
-public sealed partial class ClientCommand(ApplicationBase application, IClientCollection clients)
+public sealed partial class ClientCommand(
+    IServiceProvider serviceProvider, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
@@ -39,8 +41,8 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public void Info()
     {
         var address = Address;
-        var client = application.GetClient(address);
-        var clientInfo = InfoUtility.GetInfo(serviceProvider: application, obj: client);
+        var client = clients.GetClientOrCurrent(address);
+        var clientInfo = InfoUtility.GetInfo(serviceProvider, obj: client);
         Out.WriteLineAsJson(clientInfo);
     }
 
@@ -74,7 +76,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public async Task DeleteAsync()
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients.GetClientOrCurrent(address);
         await client.DisposeAsync();
     }
 
@@ -85,7 +87,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients.GetClientOrCurrent(address);
         await client.AttachAsync(cancellationToken);
     }
 
@@ -96,7 +98,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients.GetClientOrCurrent(address);
         await client.DetachAsync(cancellationToken);
     }
 
@@ -107,12 +109,10 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public async Task StartAsync(
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
-        var nodes = application.GetRequiredService<NodeCollection>();
+        var nodes = serviceProvider.GetRequiredService<NodeCollection>();
         var address = Address;
-        var node = nodeAddress == string.Empty
-            ? nodes.RandomNode()
-            : application.GetNode(nodeAddress);
-        var client = application.GetClient(address);
+        var node = nodes.GetNodeOrCurrent(nodeAddress);
+        var client = clients.GetClientOrCurrent(address);
         await client.StartAsync(node, cancellationToken);
     }
 
@@ -123,7 +123,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients.GetClientOrCurrent(address);
         await client.StopAsync(cancellationToken);
     }
 
@@ -134,7 +134,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
     public void Current()
     {
         var address = Address;
-        if (address != string.Empty && application.GetClient(address) is { } client)
+        if (address != string.Empty && clients.GetClientOrCurrent(address) is { } client)
         {
             clients.Current = client;
         }
@@ -159,7 +159,7 @@ public sealed partial class ClientCommand(ApplicationBase application, IClientCo
         CancellationToken cancellationToken)
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients.GetClientOrCurrent(address);
         await client.SendTransactionAsync(text, cancellationToken);
         await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
     }

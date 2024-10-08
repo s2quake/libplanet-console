@@ -13,12 +13,6 @@ public readonly partial record struct BlockInfo
         Height = block.Index;
         Hash = block.Hash;
         Miner = block.Miner;
-
-        TransactionInfo GetTransaction(Transaction transaction)
-        {
-            var execution = blockChain.GetTxExecution(block.Hash, transaction.Id);
-            return new TransactionInfo(execution, transaction) { Height = block.Index };
-        }
     }
 }
 #endif // LIBPLANET_NODE

@@ -14,9 +14,10 @@ internal sealed partial class Node : IBlockChain
         IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var blockChain = BlockChain;
@@ -36,9 +37,10 @@ internal sealed partial class Node : IBlockChain
         Transaction transaction, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         _logger.LogDebug("Node adds a transaction: {TxId}", transaction.Id);
         var blockChain = BlockChain;
@@ -72,9 +74,10 @@ internal sealed partial class Node : IBlockChain
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         return Task.Run(GetNextNonce, cancellationToken);
 
@@ -89,9 +92,10 @@ internal sealed partial class Node : IBlockChain
     public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         BlockHash GetTipHash()
         {
@@ -109,9 +113,10 @@ internal sealed partial class Node : IBlockChain
         CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         IValue GetStateByBlockHash()
         {
@@ -136,9 +141,10 @@ internal sealed partial class Node : IBlockChain
         CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         IValue GetStateByStateRootHash()
         {
@@ -155,9 +161,10 @@ internal sealed partial class Node : IBlockChain
     public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         BlockHash GetBlockHash()
         {

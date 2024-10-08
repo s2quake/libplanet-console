@@ -15,7 +15,6 @@ internal sealed class Client : IClient, IClientCallback
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
     // private RemoteServiceContext? _remoteServiceContext;
-    private Guid _closeToken;
     private ClientInfo _clientInfo;
     private bool _isDisposed;
     private bool _isInProgress;
@@ -46,7 +45,7 @@ internal sealed class Client : IClient, IClientCallback
 
     public Address Address => PublicKey.Address;
 
-    public bool IsAttached => _closeToken != Guid.Empty;
+    public bool IsAttached { get; private set; }
 
     public bool IsRunning { get; private set; }
 
@@ -63,7 +62,10 @@ internal sealed class Client : IClient, IClientCallback
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning is not true, "Client is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Client is not running.");
+        }
 
         // _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
         // return _clientInfo;
@@ -73,9 +75,6 @@ internal sealed class Client : IClient, IClientCallback
     public async Task AttachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken != Guid.Empty,
-            message: "Client is already attached.");
 
         // if (_remoteServiceContext is not null)
         // {
@@ -91,6 +90,7 @@ internal sealed class Client : IClient, IClientCallback
         // _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
         // _remoteServiceContext.Closed += RemoteServiceContext_Closed;
         // _clientInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
+        IsAttached = true;
         IsRunning = _clientInfo.IsRunning;
         _logger.LogDebug("Client is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
@@ -99,9 +99,6 @@ internal sealed class Client : IClient, IClientCallback
     public async Task DetachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken == Guid.Empty,
-            message: "Client is not attached.");
 
         // if (_remoteServiceContext is null)
         // {
@@ -111,7 +108,7 @@ internal sealed class Client : IClient, IClientCallback
         // using var scope = new ProgressScope(this);
         // _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
         // await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
-        _closeToken = Guid.Empty;
+        IsAttached = false;
         _logger.LogDebug("Client is detached: {Address}", Address);
         Detached?.Invoke(this, EventArgs.Empty);
     }
@@ -119,10 +116,10 @@ internal sealed class Client : IClient, IClientCallback
     public async Task StartAsync(INode node, CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning is true, "Client is already running.");
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken == Guid.Empty,
-            message: "Client is not attached.");
+        if (IsRunning is true)
+        {
+            throw new InvalidOperationException("Client is already running.");
+        }
 
         // _clientInfo = await _remoteService.Service.StartAsync(
         //     EndPointUtility.ToString(node.EndPoint), cancellationToken);
@@ -134,13 +131,12 @@ internal sealed class Client : IClient, IClientCallback
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning is not true, "Client is not running.");
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken == Guid.Empty,
-            message: "Client is not attached.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Client is not running.");
+        }
 
         // await _remoteService.Service.StopAsync(cancellationToken);
-        _closeToken = Guid.Empty;
         _clientInfo = default;
         IsRunning = false;
         _logger.LogDebug("Client is stopped: {Address}", Address);
@@ -175,7 +171,6 @@ internal sealed class Client : IClient, IClientCallback
             //     _remoteServiceContext = null;
             // }
 
-            _closeToken = Guid.Empty;
             IsRunning = false;
             _isDisposed = true;
             _logger.LogDebug("Client is disposed: {Address}", Address);

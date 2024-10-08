@@ -3,20 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Framework;
 
-public sealed class ApplicationServiceCollection : ServiceCollection
+public static class ApplicationServiceCollection
 {
-    public ApplicationServiceCollection()
-    {
-    }
-
-    public ApplicationServiceCollection(ApplicationSettingsCollection settingsCollection)
-    {
-        foreach (var settings in settingsCollection)
-        {
-            this.AddSingleton(settings.GetType(), settings);
-        }
-    }
-
     public static IEnumerable<Assembly> GetAssemblies()
         => GetAssemblies(Assembly.GetEntryAssembly()!);
 
