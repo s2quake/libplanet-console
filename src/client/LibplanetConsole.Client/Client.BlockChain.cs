@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
-using LibplanetConsole.Common;
+using Grpc.Core;
 using LibplanetConsole.Node;
-using Microsoft.Extensions.Logging;
+using LibplanetConsole.Node.Grpc;
 
 namespace LibplanetConsole.Client;
 
@@ -12,37 +12,76 @@ internal sealed partial class Client : IBlockChain
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        // var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
-        // var address = privateKey.Address;
-        // var nonce = await RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
-        // var genesisHash = NodeInfo.GenesisHash;
-        // var tx = Transaction.Create(
-        //     nonce: nonce,
-        //     privateKey: privateKey,
-        //     genesisHash: genesisHash,
-        //     actions: [.. actions.Select(item => item.PlainValue)]);
-        // var txData = tx.Serialize();
-        // _logger.LogDebug("Client sends a transaction: {TxId}", tx.Id);
-        // return await RemoteBlockChainService.SendTransactionAsync(txData, cancellationToken);
-        throw new NotImplementedException();
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var address = _privateKey.Address;
+        var nonce = await GetNextNonceAsync(address, cancellationToken);
+        var genesisHash = NodeInfo.GenesisHash;
+        var tx = Transaction.Create(
+            nonce: nonce,
+            privateKey: _privateKey,
+            genesisHash: genesisHash,
+            actions: [.. actions.Select(item => item.PlainValue)]);
+        var txData = tx.Serialize();
+        var request = new SendTransactionRequest
+        {
+            TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
+        };
+        var callOptions = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.SendTransactionAsync(request, callOptions);
+        return TxId.FromHex(response.TxId);
     }
 
-    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    public async Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
     {
-        // => RemoteBlockChainService.GetBlockHashAsync(height, cancellationToken);
-        throw new NotImplementedException();
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetBlockHashRequest
+        {
+            Height = height,
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetBlockHashAsync(request, options);
+        return BlockHash.FromString(response.BlockHash);
     }
 
-    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+    public async Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
     {
-        // return RemoteBlockChainService.GetNextNonceAsync(address, cancellationToken);
-        throw new NotImplementedException();
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetNextNonceRequest
+        {
+            Address = address.ToHex(),
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetNextNonceAsync(request, options);
+        return response.Nonce;
     }
 
-    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
+    public async Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {
-        // return RemoteBlockChainService.GetTipHashAsync(cancellationToken);
-        throw new NotImplementedException();
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetTipHashRequest();
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetTipHashAsync(request, options);
+        return BlockHash.FromString(response.BlockHash);
     }
 
     public async Task<IValue> GetStateAsync(
@@ -51,10 +90,21 @@ internal sealed partial class Client : IBlockChain
         Address address,
         CancellationToken cancellationToken)
     {
-        // var value = await RemoteBlockChainService.GetStateAsync(
-        //     blockHash, accountAddress, address, cancellationToken);
-        // return _codec.Decode(value);
-        throw new NotImplementedException();
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetStateRequest
+        {
+            BlockHash = blockHash?.ToString() ?? string.Empty,
+            AccountAddress = accountAddress.ToHex(),
+            Address = address.ToHex(),
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, options);
+        return _codec.Decode(response.StateData.ToByteArray());
     }
 
     public async Task<IValue> GetStateByStateRootHashAsync(
@@ -63,26 +113,47 @@ internal sealed partial class Client : IBlockChain
         Address address,
         CancellationToken cancellationToken)
     {
-        // var value = await RemoteBlockChainService.GetStateByStateRootHashAsync(
-        //     stateRootHash, accountAddress, address, cancellationToken);
-        // return _codec.Decode(value);
-        throw new NotImplementedException();
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetStateRequest
+        {
+            StateRootHash = stateRootHash.ToString(),
+            AccountAddress = accountAddress.ToHex(),
+            Address = address.ToHex(),
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, options);
+        return _codec.Decode(response.StateData.ToByteArray());
     }
 
     public async Task<T> GetActionAsync<T>(
         TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction
     {
-        // var bytes = await RemoteBlockChainService.GetActionAsync(
-        //     txId, actionIndex, cancellationToken);
-        // var value = _codec.Decode(bytes);
-        // if (Activator.CreateInstance(typeof(T)) is T action)
-        // {
-        //     action.LoadPlainValue(value);
-        //     return action;
-        // }
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
 
-        // throw new InvalidOperationException("Action not found.");
-        throw new NotImplementedException();
+        var request = new GetActionRequest
+        {
+            TxId = txId.ToHex(),
+            ActionIndex = actionIndex,
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetActionAsync(request, options);
+        var value = _codec.Decode(response.ActionData.ToByteArray());
+        if (Activator.CreateInstance(typeof(T)) is T action)
+        {
+            action.LoadPlainValue(value);
+            return action;
+        }
+
+        throw new InvalidOperationException("Action not found.");
     }
 }

@@ -8,6 +8,11 @@ internal sealed class NodeGrpcServiceV1(
     IHostApplicationLifetime applicationLifetime, INode node)
     : NodeGrpcService.NodeGrpcServiceBase
 {
+    public override Task<PingResponse> Ping(PingRequest request, ServerCallContext context)
+    {
+        return Task.FromResult(new PingResponse());
+    }
+
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
         await node.StartAsync(context.CancellationToken);

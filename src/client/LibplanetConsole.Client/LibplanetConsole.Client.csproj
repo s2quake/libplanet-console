@@ -7,6 +7,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Client\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Grpc\**\*.cs" />
     <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client"/>
   </ItemGroup>
 

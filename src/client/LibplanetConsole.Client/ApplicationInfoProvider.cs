@@ -14,10 +14,8 @@ internal sealed class ApplicationInfoProvider
         _info = new()
         {
             EndPoint = options.EndPoint,
-            // SeedEndPoint = options.SeedEndPoint,
-            // StorePath = options.StorePath,
+            NodeEndPoint = options.NodeEndPoint,
             LogPath = options.LogPath,
-            // ParentProcessId = options.ParentProcessId,
         };
     }
 

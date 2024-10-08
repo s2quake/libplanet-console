@@ -26,15 +26,15 @@ message IsReadyRequest {
 }
 
 message IsReadyResponse {
-  bool isReady = 1;
+  bool is_ready = 1;
 }
 
 message SendTransactionRequest {
-  bytes transactionData = 1;
+  bytes transaction_data = 1;
 }
 
 message SendTransactionResponse {
-  string txId = 1;
+  string tx_id = 1;
 }
 
 message GetNextNonceRequest {
@@ -49,17 +49,20 @@ message GetTipHashRequest {
 }
 
 message GetTipHashResponse {
-  string blockHash = 1;
+  string block_hash = 1;
 }
 
 message GetStateRequest {
-  optional string blockHash = 1;
-  string accountAddress = 2;
-  string address = 3;
+  oneof hash {
+    string block_hash = 1;
+    string state_root_hash = 2;
+  }
+  string account_address = 3;
+  string address = 4;
 }
 
 message GetStateResponse {
-  bytes stateData = 1;
+  bytes state_data = 1;
 }
 
 message GetBlockHashRequest {
@@ -67,21 +70,21 @@ message GetBlockHashRequest {
 }
 
 message GetBlockHashResponse {
-  string blockHash = 1;
+  string block_hash = 1;
 }
 
 message GetActionRequest {
-  string txId = 1;
-  int32 actionIndex = 2;
+  string tx_id = 1;
+  int32 action_index = 2;
 }
 
 message GetActionResponse {
-  bytes actionData = 1;
+  bytes action_data = 1;
 }
 
 message GetBlockAppendedStreamRequest {
 }
 
 message GetBlockAppendedStreamResponse {
-  BlockInfo blockInfo = 1;
+  BlockInfo block_info = 1;
 }

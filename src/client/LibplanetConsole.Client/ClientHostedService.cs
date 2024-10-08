@@ -15,10 +15,9 @@ internal sealed class ClientHostedService(
         applicationLifetime.ApplicationStarted.Register(async () =>
         {
             logger.LogInformation("Application started.");
-            if (options.NodeEndPoint is { } nodeEndPoint)
+            if (options.NodeEndPoint is not null)
             {
                 logger.LogDebug("Client auto-starting");
-                // client.SeedEndPoint = nodeEndPoint;
                 await client.StartAsync(cancellationToken);
                 logger.LogDebug("Client auto-started");
             }

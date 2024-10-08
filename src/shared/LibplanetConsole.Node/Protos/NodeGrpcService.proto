@@ -5,6 +5,7 @@ option csharp_namespace = "LibplanetConsole.Node.Grpc";
 package libplanet.console.node.v1;
 
 service NodeGrpcService {
+  rpc Ping(PingRequest) returns (PingResponse);
   rpc Start(StartRequest) returns (StartResponse);
   rpc Stop(StopRequest) returns (StopResponse);
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
@@ -22,6 +23,12 @@ message NodeInfo {
     string genesis_hash = 6;
     string tip_hash = 7;
     bool is_running = 8;
+}
+
+message PingRequest {
+}
+
+message PingResponse {
 }
 
 message StartRequest {

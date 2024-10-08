@@ -1,35 +1,29 @@
-using System.Security;
-using Grpc.Core;
 using Grpc.Net.Client;
+using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
 
 internal sealed partial class Client : IClient
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly SecureString _privateKey;
     private readonly ILogger _logger;
+    private readonly PrivateKey _privateKey;
     private EndPoint? _nodeEndPoint;
-    private Node.Grpc.NodeGrpcService.NodeGrpcServiceClient? _remoteNode;
-    private Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient? _remoteBlockchain;
+    private NodeService? _nodeService;
+    private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
     private CancellationTokenSource? _cancellationTokenSource;
-    private Task _callbackTask = Task.CompletedTask;
-    private Guid _closeToken;
     private ClientInfo _info;
 
-    public Client(IServiceProvider serviceProvider, ApplicationOptions options)
+    public Client(ILogger<Client> logger, ApplicationOptions options)
     {
-        _serviceProvider = serviceProvider;
-        _logger = serviceProvider.GetLogger<Client>();
+        _logger = logger;
+        _privateKey = options.PrivateKey;
         _logger.LogDebug("Client is creating...: {Address}", options.PrivateKey.Address);
         _nodeEndPoint = options.NodeEndPoint;
-        _privateKey = options.PrivateKey.ToSecureString();
         _info = new() { Address = options.PrivateKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);
@@ -79,60 +73,30 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("The client is already running.");
         }
 
+        await Task.Delay(1000);
+
         var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
         var channelOptions = new GrpcChannelOptions
         {
             ThrowOperationCanceledOnCancellation = true,
             MaxRetryAttempts = 1,
         };
-        HubConnectionContext
         _channel = GrpcChannel.ForAddress(address, channelOptions);
         _cancellationTokenSource = new();
-        _remoteNode = new Node.Grpc.NodeGrpcService.NodeGrpcServiceClient(_channel);
-        _remoteBlockchain = new Node.Grpc.BlockChainGrpcService.BlockChainGrpcServiceClient(_channel);
-        _callbackTask = CallbackAsync(_cancellationTokenSource.Token);
-
-        _channel.Target
-
-        // _remoteNodeContext = _serviceProvider.GetRequiredService<RemoteNodeContext>();
-        // _remoteNodeContext.EndPoint = NodeEndPoint;
-        // _closeToken = await _remoteNodeContext.OpenAsync(cancellationToken);
-        // _remoteNodeContext.Closed += RemoteNodeContext_Closed;
-        // NodeInfo = await RemoteNodeService.GetInfoAsync(cancellationToken);
+        _nodeService = new NodeService(_channel);
+        _nodeService.Disconnected += NodeService_Disconnected;
+        _nodeService.Started += (sender, e) => InvokeNodeStartedEvent(e);
+        _nodeService.Stopped += (sender, e) => InvokeNodeStoppedEvent();
+        _blockChainService = new BlockChainService(_channel);
+        _blockChainService.BlockAppended += (sender, e) => InvokeBlockAppendedEvent(e);
+        await Task.WhenAll(
+            _nodeService.StartAsync(cancellationToken),
+            _blockChainService.StartAsync(cancellationToken));
         _info = _info with { NodeAddress = NodeInfo.Address };
         IsRunning = true;
         _logger.LogDebug(
             "Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
         Started?.Invoke(this, EventArgs.Empty);
-    }
-
-    private async Task CallbackAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Task.Delay(2000, cancellationToken);
-            var callOptions = new CallOptions(deadline: DateTime.UtcNow.AddSeconds(1), cancellationToken: cancellationToken);
-            var response1 = await _remoteBlockchain.IsReadyAsync(new Node.Grpc.IsReadyRequest(), callOptions);
-            if (response1.IsReady is false)
-            {
-                throw new InvalidOperationException("The remote node is not ready.");
-            }
-
-            using var streamingCall = _remoteBlockchain.GetBlockAppendedStream(
-                new Node.Grpc.GetBlockAppendedStreamRequest(),
-                deadline: DateTime.UtcNow + TimeSpan.FromSeconds(10),
-                cancellationToken: cancellationToken);
-
-            while (await streamingCall.ResponseStream.MoveNext(cancellationToken))
-            {
-                var response = streamingCall.ResponseStream.Current;
-                InvokeBlockAppendedEvent(response.BlockInfo);
-            }
-        }
-        catch (Exception e)
-        {
-            int qwer = 0;
-        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -142,15 +106,32 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("The client is not running.");
         }
 
-        // _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
-        // await _remoteNodeContext.CloseAsync(_closeToken, cancellationToken);
-        // _info = _info with { NodeAddress = default };
-        // _remoteNodeContext = null;
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.Dispose();
+        }
+
+        if (_nodeService is not null)
+        {
+            _nodeService.Disconnected -= NodeService_Disconnected;
+            await _nodeService.StopAsync(cancellationToken);
+            _nodeService = null;
+        }
+
+        if (_blockChainService is not null)
+        {
+            await _blockChainService.StopAsync(cancellationToken);
+            _blockChainService = null;
+        }
+
         await _channel.ShutdownAsync();
         _channel.Dispose();
         _channel = null;
-        _closeToken = Guid.Empty;
+        _blockChainService = null;
+        _nodeService = null;
         IsRunning = false;
+        _info = _info with { NodeAddress = default };
         _logger.LogDebug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, new(StopReason.None));
     }
@@ -172,33 +153,28 @@ internal sealed partial class Client : IClient
 
     public async ValueTask DisposeAsync()
     {
-        // if (_remoteNodeContext is not null)
-        // {
-        //     _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
-        //     await _remoteNodeContext.CloseAsync(_closeToken);
-        //     _remoteNodeContext = null;
-        // }
+        _nodeService?.Dispose();
+        _nodeService = null;
+        _blockChainService?.Dispose();
+        _blockChainService = null;
+        _channel?.Dispose();
+        _channel = null;
+        IsRunning = false;
+        await ValueTask.CompletedTask;
     }
 
-    // void INodeCallback.OnStarted(NodeInfo nodeInfo) => NodeInfo = nodeInfo;
-
-    // void INodeCallback.OnStopped() => NodeInfo = NodeInfo.Empty;
-
-    // void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
-    // {
-    //     BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
-    // }
-
-    private void RemoteNodeContext_Closed(object? sender, EventArgs e)
+    private void NodeService_Disconnected(object? sender, EventArgs e)
     {
-        // if (_remoteNodeContext is not null)
-        // {
-        //     _remoteNodeContext.Closed -= RemoteNodeContext_Closed;
-        //     _remoteNodeContext = null;
-        // }
-
-        _closeToken = Guid.Empty;
-        IsRunning = false;
-        Stopped?.Invoke(this, new(StopReason.None));
+        if (_cancellationTokenSource?.IsCancellationRequested is false)
+        {
+            _nodeService?.Dispose();
+            _nodeService = null;
+            _blockChainService?.Dispose();
+            _blockChainService = null;
+            _channel?.Dispose();
+            _channel = null;
+            IsRunning = false;
+            Stopped?.Invoke(this, new(StopReason.None));
+        }
     }
 }
