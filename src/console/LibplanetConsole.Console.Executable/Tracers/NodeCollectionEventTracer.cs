@@ -2,8 +2,6 @@ using System.Collections.Specialized;
 using JSSoft.Terminals;
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 

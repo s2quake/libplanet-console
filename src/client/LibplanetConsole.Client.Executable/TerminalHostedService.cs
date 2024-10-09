@@ -1,7 +1,6 @@
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Client.Executable;
 

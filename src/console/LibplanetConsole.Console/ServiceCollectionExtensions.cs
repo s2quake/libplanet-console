@@ -1,7 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Commands;
-using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
@@ -13,9 +12,11 @@ public static class ServiceCollectionExtensions
     {
         @this.AddSingleton(options);
         @this.AddSingleton(s => new NodeCollection(s, options.Nodes))
-             .AddSingleton<INodeCollection>(s => s.GetRequiredService<NodeCollection>());
+             .AddSingleton<INodeCollection>(s => s.GetRequiredService<NodeCollection>())
+             .AddHostedService(s => s.GetRequiredService<NodeCollection>());
         @this.AddSingleton(s => new ClientCollection(s, options.Clients))
-             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>());
+             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>())
+             .AddHostedService(s => s.GetRequiredService<ClientCollection>());
 
         @this.AddScoped(NodeFactory.Create)
              .AddScoped<INode>(s => s.GetRequiredService<Node>())

@@ -1,14 +1,12 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-// [Dependency(typeof(SeedService))]
 internal sealed class NodeCollection(
     IServiceProvider serviceProvider, NodeOptions[] nodeOptions)
     : IEnumerable<Node>, INodeCollection, IHostedService
@@ -121,8 +119,15 @@ internal sealed class NodeCollection(
     async Task IHostedService.StartAsync(CancellationToken cancellationToken)
     {
         var options = serviceProvider.GetRequiredService<ApplicationOptions>();
-        await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
-        Current = _nodeList.FirstOrDefault();
+        try
+        {
+            await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
+            Current = _nodeList.FirstOrDefault();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while starting nodes.");
+        }
 
         async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
         {

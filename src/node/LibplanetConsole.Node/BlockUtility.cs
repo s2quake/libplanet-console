@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Node;
 

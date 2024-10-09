@@ -12,13 +12,13 @@ internal class ConnectionMonitor<T>(T client, Func<T, CancellationToken, Task> a
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
-        while (await TaskUtility.TryDelay(1, cancellationToken))
+        while (await TaskUtility.TryDelay(Interval, cancellationToken))
         {
             try
             {
                 await action(client, cancellationToken);
             }
-            catch (RpcException)
+            catch (RpcException e)
             {
                 Disconnected?.Invoke(this, EventArgs.Empty);
                 break;

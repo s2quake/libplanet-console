@@ -1,8 +1,8 @@
 #if LIBPLANET_CONSOLE || LIBPLANET_CLIENT
+using Grpc.Core;
 using Grpc.Net.Client;
+using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Node;
-using LibplanetConsole.Node.Grpc;
 using static LibplanetConsole.Node.Grpc.NodeGrpcService;
 
 namespace LibplanetConsole.Node.Grpc;
@@ -10,6 +10,8 @@ namespace LibplanetConsole.Node.Grpc;
 internal sealed class NodeService(GrpcChannel channel)
     : NodeGrpcServiceClient(channel), IDisposable
 {
+    private const int Timeout = 10;
+
     private NodeConnection? _connection;
     private StreamReceiver<GetStartedStreamResponse>? _startedReceiver;
     private StreamReceiver<GetStoppedStreamResponse>? _stoppedReceiver;
@@ -41,6 +43,11 @@ internal sealed class NodeService(GrpcChannel channel)
         {
             throw new InvalidOperationException($"{nameof(NodeService)} is already started.");
         }
+
+        var request = new PingRequest();
+        var callOptions = new CallOptions(
+            cancellationToken: cancellationToken);
+        await PingAsync(request, callOptions);
 
         _connection = new NodeConnection(this);
         _connection.Disconnected += Connection_Disconnected;

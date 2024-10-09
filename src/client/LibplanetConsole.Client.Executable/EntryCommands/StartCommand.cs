@@ -5,7 +5,6 @@ using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Settings;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
@@ -57,6 +56,9 @@ internal sealed class StartCommand : CommandAsyncBase
 
             builder.Services.AddClient(applicationOptions);
             builder.Services.AddApplication(applicationOptions);
+
+            builder.Services.AddGrpc();
+            builder.Services.AddGrpcReflection();
 
             using var app = builder.Build();
 

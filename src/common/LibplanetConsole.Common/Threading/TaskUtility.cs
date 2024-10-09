@@ -15,4 +15,18 @@ public static class TaskUtility
             return false;
         }
     }
+
+    public static async Task<bool> TryDelay(
+        TimeSpan delay, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(delay, cancellationToken);
+            return true;
+        }
+        catch (TaskCanceledException)
+        {
+            return false;
+        }
+    }
 }

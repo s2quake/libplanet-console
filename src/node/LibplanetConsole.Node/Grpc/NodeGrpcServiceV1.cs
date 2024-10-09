@@ -1,13 +1,27 @@
 using Grpc.Core;
 using LibplanetConsole.Grpc;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Grpc;
 
-internal sealed class NodeGrpcServiceV1(
-    IHostApplicationLifetime applicationLifetime, INode node)
-    : NodeGrpcService.NodeGrpcServiceBase
+internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase
 {
+    private readonly IHostApplicationLifetime _applicationLifetime;
+    private readonly INode _node;
+    private readonly ILogger<NodeGrpcServiceV1> _logger;
+
+    public NodeGrpcServiceV1(
+        IHostApplicationLifetime applicationLifetime,
+        INode node,
+        ILogger<NodeGrpcServiceV1> logger)
+    {
+        _applicationLifetime = applicationLifetime;
+        _node = node;
+        _logger = logger;
+        _logger.LogDebug("{GrpcServiceType} is created.", nameof(NodeGrpcServiceV1));
+    }
+
     public override Task<PingResponse> Ping(PingRequest request, ServerCallContext context)
     {
         return Task.FromResult(new PingResponse());
@@ -15,13 +29,13 @@ internal sealed class NodeGrpcServiceV1(
 
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
-        await node.StartAsync(context.CancellationToken);
-        return new StartResponse { NodeInfo = node.Info };
+        await _node.StartAsync(context.CancellationToken);
+        return new StartResponse { NodeInfo = _node.Info };
     }
 
     public async override Task<StopResponse> Stop(StopRequest request, ServerCallContext context)
     {
-        await node.StopAsync(context.CancellationToken);
+        await _node.StopAsync(context.CancellationToken);
         return new StopResponse();
     }
 
@@ -29,7 +43,7 @@ internal sealed class NodeGrpcServiceV1(
     {
         GetInfoResponse Action() => new()
         {
-            NodeInfo = node.Info,
+            NodeInfo = _node.Info,
         };
 
         return Task.Run(Action, context.CancellationToken);
@@ -42,10 +56,10 @@ internal sealed class NodeGrpcServiceV1(
     {
         var streamer = new EventStreamer<GetStartedStreamResponse>(
             responseStream,
-            handler => node.Started += handler,
-            handler => node.Started -= handler,
-            () => new GetStartedStreamResponse { NodeInfo = node.Info });
-        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
+            handler => _node.Started += handler,
+            handler => _node.Started -= handler,
+            () => new GetStartedStreamResponse { NodeInfo = _node.Info });
+        await streamer.RunAsync(_applicationLifetime, context.CancellationToken);
     }
 
     public override async Task GetStoppedStream(
@@ -55,8 +69,8 @@ internal sealed class NodeGrpcServiceV1(
     {
         var streamer = new EventStreamer<GetStoppedStreamResponse>(
             responseStream,
-            handler => node.Stopped += handler,
-            handler => node.Stopped -= handler);
-        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
+            handler => _node.Stopped += handler,
+            handler => _node.Stopped -= handler);
+        await streamer.RunAsync(_applicationLifetime, context.CancellationToken);
     }
 }

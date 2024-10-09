@@ -134,6 +134,7 @@ internal sealed class InitializeCommand : CommandBase
         foreach (var privateKey in privateKeys)
         {
             var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
+            EndPointUtility.NextEndPoint();
             var nodeOptions = new NodeOptions
             {
                 EndPoint = endPoint,

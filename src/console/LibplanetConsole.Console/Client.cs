@@ -5,9 +5,7 @@ using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -68,10 +66,6 @@ internal sealed partial class Client : IClient, IBlockChain
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        if (IsRunning is false)
-        {
-            throw new InvalidOperationException("Client is not running.");
-        }
 
         if (_clientService is null)
         {
@@ -101,6 +95,8 @@ internal sealed partial class Client : IClient, IBlockChain
         _clientService.Stopped += ClientService_Stopped;
         _blockChainService = new BlockChainService(_channel);
         _blockChainService.BlockAppended += BlockChainService_BlockAppended;
+        await _clientService.StartAsync(cancellationToken);
+        await _blockChainService.StartAsync(cancellationToken);
 
         _clientInfo = await GetInfoAsync(cancellationToken);
         IsRunning = _clientInfo.IsRunning;

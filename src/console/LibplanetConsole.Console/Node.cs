@@ -76,10 +76,6 @@ internal sealed partial class Node : INode, IBlockChain
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        if (IsRunning is false)
-        {
-            throw new InvalidOperationException("Node is not running.");
-        }
 
         if (_nodeService is null)
         {
@@ -109,6 +105,8 @@ internal sealed partial class Node : INode, IBlockChain
         _nodeService.Stopped += NodeService_Stopped;
         _blockChainService = new BlockChainService(_channel);
         _blockChainService.BlockAppended += BlockChainService_BlockAppended;
+        await _nodeService.StartAsync(cancellationToken);
+        await _blockChainService.StartAsync(cancellationToken);
 
         _nodeInfo = await GetInfoAsync(cancellationToken);
         IsRunning = _nodeInfo.IsRunning;

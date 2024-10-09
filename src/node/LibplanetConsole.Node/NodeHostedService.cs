@@ -4,22 +4,22 @@ using Microsoft.Extensions.Logging;
 namespace LibplanetConsole.Node;
 
 internal sealed class NodeHostedService(
-    IHostApplicationLifetime applicationLifetime, Node node, ILogger<NodeHostedService> logger)
+    IHostApplicationLifetime applicationLifetime,
+    Node node,
+    ApplicationOptions options,
+    ILogger<NodeHostedService> logger)
     : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        applicationLifetime.ApplicationStarted.Register(async () =>
+        if (options.SeedEndPoint is { } seedEndPoint)
         {
-            logger.LogInformation("Application started.");
-            if (node.SeedEndPoint is { } seedEndPoint)
+            applicationLifetime.ApplicationStarted.Register(async () =>
             {
-                logger.LogDebug("Node auto-starting");
-                node.SeedEndPoint = seedEndPoint;
-                await node.StartAsync(cancellationToken);
-                logger.LogDebug("Node auto-started");
-            }
-        });
+                await StartNodeAsync(seedEndPoint, cancellationToken);
+            });
+        }
+
         return Task.CompletedTask;
     }
 
@@ -27,7 +27,35 @@ internal sealed class NodeHostedService(
     {
         if (node.IsRunning is true)
         {
+            await StopNodeAsync(cancellationToken);
+        }
+    }
+
+    private async Task StartNodeAsync(EndPoint seedEndPoint, CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogDebug("Node auto-starting: {SeedEndPoint}", seedEndPoint);
+            node.SeedEndPoint = seedEndPoint;
+            await node.StartAsync(cancellationToken);
+            logger.LogDebug("Node auto-started: {SeedEndPoint}", seedEndPoint);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while starting the node.");
+        }
+    }
+
+    private async Task StopNodeAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
             await node.StopAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            await node.DisposeAsync();
+            logger.LogError(e, "An error occurred while stopping the node.");
         }
     }
 }

@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security;
 using System.Security.Cryptography;
-using Grpc.Core;
 using Grpc.Net.Client;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
@@ -18,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 
-internal sealed partial class Node : IActionRenderer, INode
+internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 {
     private readonly SecureString _privateKey;
     private readonly string _storePath;

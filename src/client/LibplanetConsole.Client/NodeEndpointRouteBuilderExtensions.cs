@@ -1,4 +1,3 @@
-using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Client.Grpc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
