@@ -21,7 +21,7 @@ internal sealed class TerminalHostedService(
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (options.NoREPL != true)
+        if (options.NoREPL is false)
         {
             applicationLifetime.ApplicationStarted.Register(async () =>
             {

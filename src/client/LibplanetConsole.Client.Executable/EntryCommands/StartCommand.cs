@@ -51,11 +51,11 @@ internal sealed class StartCommand : CommandAsyncBase
             {
                 // Setup a HTTP/2 endpoint without TLS.
                 options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-                options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+                // options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
 
             builder.Services.AddClient(applicationOptions);
-            builder.Services.AddApplication(applicationOptions);
+            builder.Services.AddExecutable(applicationOptions);
 
             builder.Services.AddGrpc();
             builder.Services.AddGrpcReflection();

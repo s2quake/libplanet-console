@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Commands;
+using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
@@ -11,10 +12,13 @@ public static class ServiceCollectionExtensions
         this IServiceCollection @this, ApplicationOptions options)
     {
         @this.AddSingleton(options);
-        @this.AddSingleton(s => new NodeCollection(s, options.Nodes))
+        @this.AddSingleton<SeedService>()
+             .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>())
+             .AddHostedService(s => s.GetRequiredService<SeedService>());
+        @this.AddSingleton<NodeCollection>()
              .AddSingleton<INodeCollection>(s => s.GetRequiredService<NodeCollection>())
              .AddHostedService(s => s.GetRequiredService<NodeCollection>());
-        @this.AddSingleton(s => new ClientCollection(s, options.Clients))
+        @this.AddSingleton<ClientCollection>()
              .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>())
              .AddHostedService(s => s.GetRequiredService<ClientCollection>());
 

@@ -7,10 +7,10 @@ namespace LibplanetConsole.Client.Executable;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(
+    public static IServiceCollection AddExecutable(
         this IServiceCollection @this, ApplicationOptions options)
     {
-        @this.AddLogging(options.LogPath, string.Empty);
+        @this.AddLogging(options.LogPath, options.LogPath);
 
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();

@@ -6,6 +6,7 @@ using LibplanetConsole.Client;
 using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Console.Grpc;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -87,17 +88,27 @@ internal sealed partial class Client : IClient, IBlockChain
             throw new InvalidOperationException("Client is already attached.");
         }
 
-        var address = $"http://{EndPointUtility.ToString(_clientOptions.EndPoint)}";
-        _channel = GrpcChannel.ForAddress(address);
-        _clientService = new ClientService(_channel);
-        _clientService.Disconnected += ClientService_Disconnected;
-        _clientService.Started += ClientService_Started;
-        _clientService.Stopped += ClientService_Stopped;
-        _blockChainService = new BlockChainService(_channel);
-        _blockChainService.BlockAppended += BlockChainService_BlockAppended;
-        await _clientService.StartAsync(cancellationToken);
-        await _blockChainService.StartAsync(cancellationToken);
+        var channel = ClientChannel.CreateChannel(_clientOptions.EndPoint);
+        var clientService = new ClientService(channel);
+        var blockChainService = new BlockChainService(channel);
+        clientService.Started += ClientService_Started;
+        clientService.Stopped += ClientService_Stopped;
+        blockChainService.BlockAppended += BlockChainService_BlockAppended;
+        try
+        {
+            await clientService.StartAsync(cancellationToken);
+            await blockChainService.StartAsync(cancellationToken);
+        }
+        catch
+        {
+            clientService.Dispose();
+            blockChainService.Dispose();
+            throw;
+        }
 
+        _channel = channel;
+        _clientService = clientService;
+        _blockChainService = blockChainService;
         _clientInfo = await GetInfoAsync(cancellationToken);
         IsRunning = _clientInfo.IsRunning;
         IsAttached = true;

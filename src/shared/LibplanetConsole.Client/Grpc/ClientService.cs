@@ -81,9 +81,9 @@ internal sealed class ClientService(GrpcChannel channel)
     }
 
     private static async Task CheckConnectionAsync(
-        ClientService nodeService, CancellationToken cancellationToken)
+        ClientService clientService, CancellationToken cancellationToken)
     {
-        await nodeService.PingAsync(new(), cancellationToken: cancellationToken);
+        await clientService.PingAsync(new(), cancellationToken: cancellationToken);
     }
 
     private void Connection_Disconnected(object? sender, EventArgs e)

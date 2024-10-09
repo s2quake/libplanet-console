@@ -59,12 +59,12 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
                 argumentList.AddRange(extendedArguments);
             }
 
-            if (NewWindow != true)
+            if (NewWindow is false)
             {
                 argumentList.Add("--no-repl");
             }
 
-            if (Detach != true)
+            if (Detach is false)
             {
                 argumentList.Add("--parent");
                 argumentList.Add(Environment.ProcessId.ToString());

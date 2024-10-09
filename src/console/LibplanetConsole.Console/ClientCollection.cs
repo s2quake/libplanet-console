@@ -10,11 +10,13 @@ namespace LibplanetConsole.Console;
 
 [Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
-    IServiceProvider serviceProvider, ClientOptions[] clientOptions)
+    IServiceProvider serviceProvider,
+    ApplicationOptions options,
+    IHostApplicationLifetime applicationLifetime)
     : IEnumerable<Client>, IClientCollection, IHostedService
 {
     private static readonly object LockObject = new();
-    private readonly List<Client> _clientList = new(clientOptions.Length);
+    private readonly List<Client> _clientList = new(options.Clients.Length);
     private readonly ILogger _logger = serviceProvider.GetLogger<ClientCollection>();
     private Client? _current;
 
@@ -122,21 +124,25 @@ internal sealed class ClientCollection(
 
     async Task IHostedService.StartAsync(CancellationToken cancellationToken)
     {
-        var options = serviceProvider.GetRequiredService<ApplicationOptions>();
-        await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
-        Current = _clientList.FirstOrDefault();
-
-        async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
+        applicationLifetime.ApplicationStarted.Register(async () =>
         {
-            var newOptions = new AddNewClientOptions
+            await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
+            Current = _clientList.FirstOrDefault();
+
+            async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
             {
-                ClientOptions = clientOptions[index],
-                NoProcess = options.NoProcess,
-                Detach = options.Detach,
-                NewWindow = options.NewWindow,
-            };
-            await AddNewAsync(newOptions, cancellationToken);
-        }
+                var newOptions = new AddNewClientOptions
+                {
+                    ClientOptions = options.Clients[index],
+                    NoProcess = options.NoProcess,
+                    Detach = options.Detach,
+                    NewWindow = options.NewWindow,
+                };
+                await AddNewAsync(newOptions, cancellationToken);
+            }
+        });
+
+        await Task.CompletedTask;
     }
 
     async Task IHostedService.StopAsync(CancellationToken cancellationToken)

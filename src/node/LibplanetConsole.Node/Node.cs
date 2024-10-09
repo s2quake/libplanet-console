@@ -149,7 +149,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
         }
 
-        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, cancellationToken);
+        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, _logger, cancellationToken);
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
@@ -299,8 +299,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     }
 
     private static async Task<SeedInfo> GetSeedInfoAsync(
-        EndPoint seedEndPoint, CancellationToken cancellationToken)
+        EndPoint seedEndPoint, ILogger logger, CancellationToken cancellationToken)
     {
+        logger.LogDebug("Getting seed info from {SeedEndPoint}", seedEndPoint);
         var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
         var channelOptions = new GrpcChannelOptions
         {
@@ -313,6 +314,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         };
 
         var response = await client.GetSeedAsync(request, cancellationToken: cancellationToken);
+        logger.LogDebug("Got seed info from {SeedEndPoint}", seedEndPoint);
         return response.SeedResult;
     }
 
