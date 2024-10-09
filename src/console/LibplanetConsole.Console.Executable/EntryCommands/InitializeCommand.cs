@@ -29,7 +29,11 @@ internal sealed class InitializeCommand : CommandBase
     [EndPoint]
     public string EndPoint { get; set; } = string.Empty;
 
+#if DEBUG
+    [CommandProperty(InitValue = 1)]
+#else
     [CommandProperty(InitValue = 4)]
+#endif
     [CommandSummary("The number of nodes to create. If omitted, 4 nodes are created.\n" +
                     "Mutually exclusive with '--nodes' option.")]
     [CommandPropertyExclusion(nameof(Nodes))]
@@ -42,7 +46,11 @@ internal sealed class InitializeCommand : CommandBase
     [PrivateKeyArray]
     public string[] Nodes { get; init; } = [];
 
+#if DEBUG
+    [CommandProperty(InitValue = 1)]
+#else
     [CommandProperty(InitValue = 2)]
+#endif
     [CommandSummary("The number of clients to create. If omitted, 2 clients are created.\n" +
                     "Mutually exclusive with '--clients' option.")]
     [CommandPropertyExclusion(nameof(Clients))]

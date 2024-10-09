@@ -14,11 +14,6 @@ internal sealed class BlockChainGrpcServiceV1(
 {
     private static readonly Codec _codec = new();
 
-    public override Task<IsReadyResponse> IsReady(IsReadyRequest request, ServerCallContext context)
-    {
-        return Task.Run(() => new IsReadyResponse { IsReady = client.IsRunning });
-    }
-
     public async override Task<SendTransactionResponse> SendTransaction(
         SendTransactionRequest request, ServerCallContext context)
     {

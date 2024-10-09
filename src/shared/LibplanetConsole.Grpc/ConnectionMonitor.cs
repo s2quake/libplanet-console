@@ -1,3 +1,4 @@
+#if LIBPLANET_CONSOLE || LIBPLANET_CLIENT
 using Grpc.Core;
 using LibplanetConsole.Common.Threading;
 
@@ -9,6 +10,11 @@ internal class ConnectionMonitor<T>(T client, Func<T, CancellationToken, Task> a
     public event EventHandler? Disconnected;
 
     public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(5);
+
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    {
+        await action(client, cancellationToken);
+    }
 
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
@@ -26,3 +32,4 @@ internal class ConnectionMonitor<T>(T client, Func<T, CancellationToken, Task> a
         }
     }
 }
+#endif // LIBPLANET_CONSOLE || LIBPLANET_CLIENT

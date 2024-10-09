@@ -1,10 +1,7 @@
-using Grpc.Core;
 using Grpc.Net.Client;
-using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Client.Grpc;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
@@ -86,7 +83,6 @@ internal sealed partial class Client : IClient
         var channel = NodeChannel.CreateChannel(_nodeEndPoint);
         var nodeService = new NodeService(channel);
         var blockChainService = new BlockChainService(channel);
-        nodeService.Disconnected += NodeService_Disconnected;
         nodeService.Started += (sender, e) => InvokeNodeStartedEvent(e);
         nodeService.Stopped += (sender, e) => InvokeNodeStoppedEvent();
         blockChainService.BlockAppended += (sender, e) => InvokeBlockAppendedEvent(e);
@@ -128,7 +124,6 @@ internal sealed partial class Client : IClient
 
         if (_nodeService is not null)
         {
-            _nodeService.Disconnected -= NodeService_Disconnected;
             await _nodeService.StopAsync(cancellationToken);
             _nodeService = null;
         }

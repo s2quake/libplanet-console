@@ -4,6 +4,7 @@ using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.DependencyInjection;
@@ -97,17 +98,27 @@ internal sealed partial class Node : INode, IBlockChain
             throw new InvalidOperationException("Node is already attached.");
         }
 
-        var address = $"http://{EndPointUtility.ToString(_nodeOptions.EndPoint)}";
-        _channel = GrpcChannel.ForAddress(address);
-        _nodeService = new NodeService(_channel);
-        _nodeService.Disconnected += NodeService_Disconnected;
-        _nodeService.Started += NodeService_Started;
-        _nodeService.Stopped += NodeService_Stopped;
-        _blockChainService = new BlockChainService(_channel);
-        _blockChainService.BlockAppended += BlockChainService_BlockAppended;
-        await _nodeService.StartAsync(cancellationToken);
-        await _blockChainService.StartAsync(cancellationToken);
+        var channel = NodeChannel.CreateChannel(_nodeOptions.EndPoint);
+        var nodeService = new NodeService(channel);
+        var blockChainService = new BlockChainService(channel);
+        nodeService.Started += NodeService_Started;
+        nodeService.Stopped += NodeService_Stopped;
+        blockChainService.BlockAppended += BlockChainService_BlockAppended;
+        try
+        {
+            await nodeService.StartAsync(cancellationToken);
+            await blockChainService.StartAsync(cancellationToken);
+        }
+        catch
+        {
+            nodeService.Dispose();
+            blockChainService.Dispose();
+            throw;
+        }
 
+        _channel = channel;
+        _nodeService = nodeService;
+        _blockChainService = blockChainService;
         _nodeInfo = await GetInfoAsync(cancellationToken);
         IsRunning = _nodeInfo.IsRunning;
         IsAttached = true;
@@ -127,7 +138,6 @@ internal sealed partial class Node : INode, IBlockChain
         {
             _nodeService.Started -= NodeService_Started;
             _nodeService.Stopped -= NodeService_Stopped;
-            _nodeService.Disconnected -= NodeService_Disconnected;
             _nodeService.Dispose();
             _nodeService = null;
         }
@@ -212,7 +222,6 @@ internal sealed partial class Node : INode, IBlockChain
 
             if (_nodeService is not null)
             {
-                _nodeService.Disconnected -= NodeService_Disconnected;
                 _nodeService.Started -= NodeService_Started;
                 _nodeService.Stopped -= NodeService_Stopped;
                 _nodeService.Dispose();
@@ -285,7 +294,6 @@ internal sealed partial class Node : INode, IBlockChain
     {
         if (sender is NodeService nodeService && _nodeService == nodeService)
         {
-            _nodeService.Disconnected -= NodeService_Disconnected;
             _nodeService.Started -= NodeService_Started;
             _nodeService.Stopped -= NodeService_Stopped;
             _nodeService.Dispose();

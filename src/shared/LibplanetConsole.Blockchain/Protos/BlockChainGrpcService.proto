@@ -5,7 +5,6 @@ option csharp_namespace = "LibplanetConsole.Blockchain.Grpc";
 package libplanet.console.blockchain.v1;
 
 service BlockChainGrpcService {
-  rpc IsReady(IsReadyRequest) returns (IsReadyResponse);
   rpc SendTransaction(SendTransactionRequest) returns (SendTransactionResponse);
   rpc GetNextNonce(GetNextNonceRequest) returns (GetNextNonceResponse);
   rpc GetTipHash(GetTipHashRequest) returns (GetTipHashResponse);
@@ -20,13 +19,6 @@ message BlockInformation {
   int64 height = 1;
   string hash = 2;
   string miner = 3;
-}
-
-message IsReadyRequest {
-}
-
-message IsReadyResponse {
-  bool is_ready = 1;
 }
 
 message SendTransactionRequest {

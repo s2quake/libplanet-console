@@ -1,4 +1,5 @@
 using Grpc.Core;
+using LibplanetConsole.Common;
 using LibplanetConsole.Grpc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,12 +9,12 @@ namespace LibplanetConsole.Node.Grpc;
 internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly INode _node;
+    private readonly Node _node;
     private readonly ILogger<NodeGrpcServiceV1> _logger;
 
     public NodeGrpcServiceV1(
         IHostApplicationLifetime applicationLifetime,
-        INode node,
+        Node node,
         ILogger<NodeGrpcServiceV1> logger)
     {
         _applicationLifetime = applicationLifetime;
@@ -29,6 +30,7 @@ internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase
 
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
+        _node.SeedEndPoint = EndPointUtility.Parse(request.SeedEndPoint);
         await _node.StartAsync(context.CancellationToken);
         return new StartResponse { NodeInfo = _node.Info };
     }

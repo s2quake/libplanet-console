@@ -319,7 +319,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private void UpdateNodeInfo()
     {
         var appProtocolVersion = _appProtocolVersion;
-        var nodeInfo = new NodeInfo
+        var nodeInfo = NodeInfo.Empty with
         {
             ProcessId = Environment.ProcessId,
             Address = Address,

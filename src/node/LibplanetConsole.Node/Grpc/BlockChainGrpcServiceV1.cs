@@ -28,11 +28,6 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
         _logger.LogDebug("BlockChainGrpcServiceV1 is created.");
     }
 
-    public override Task<IsReadyResponse> IsReady(IsReadyRequest request, ServerCallContext context)
-    {
-        return Task.Run(() => new IsReadyResponse { IsReady = _node.IsRunning });
-    }
-
     public async override Task<SendTransactionResponse> SendTransaction(
         SendTransactionRequest request, ServerCallContext context)
     {

@@ -10,7 +10,7 @@ namespace LibplanetConsole.Client.Grpc;
 internal sealed class ClientService(GrpcChannel channel)
     : ClientGrpcServiceClient(channel), IDisposable
 {
-    private ClientConnection? _connection;
+    private ConnectionMonitor<ClientService>? _connection;
     private StreamReceiver<GetStartedStreamResponse>? _startedReceiver;
     private StreamReceiver<GetStoppedStreamResponse>? _stoppedReceiver;
     private bool _isDisposed;
@@ -42,7 +42,7 @@ internal sealed class ClientService(GrpcChannel channel)
             throw new InvalidOperationException($"{nameof(ClientService)} is already started.");
         }
 
-        _connection = new ClientConnection(this);
+        _connection = new ConnectionMonitor<ClientService>(this, CheckConnectionAsync);
         _connection.Disconnected += Connection_Disconnected;
         await _connection.StartAsync(cancellationToken);
         _startedReceiver = new(
@@ -80,9 +80,15 @@ internal sealed class ClientService(GrpcChannel channel)
         _connection = null;
     }
 
+    private static async Task CheckConnectionAsync(
+        ClientService nodeService, CancellationToken cancellationToken)
+    {
+        await nodeService.PingAsync(new(), cancellationToken: cancellationToken);
+    }
+
     private void Connection_Disconnected(object? sender, EventArgs e)
     {
-        if (sender is ClientConnection connection && connection == _connection)
+        if (sender is ConnectionMonitor<ClientService> connection && connection == _connection)
         {
             _startedReceiver?.Dispose();
             _startedReceiver = null;

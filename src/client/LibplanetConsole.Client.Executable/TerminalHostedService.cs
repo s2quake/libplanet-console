@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
@@ -8,11 +9,14 @@ internal sealed class TerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
     CommandContext commandContext,
     SystemTerminal terminal,
-    ApplicationOptions options) : IHostedService, IDisposable
+    ApplicationOptions options,
+    ILogger<TerminalHostedService> logger) : IHostedService, IDisposable
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private Task _runningTask = Task.CompletedTask;
     private Task _waitInputTask = Task.CompletedTask;
+    private Task _waitForExitTask = Task.CompletedTask;
+    private int _parentProcessId;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -38,6 +42,12 @@ internal sealed class TerminalHostedService(
                 _cancellationTokenSource.Cancel();
             });
         }
+        else if (options.ParentProcessId != 0 &&
+            Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
+        {
+            _parentProcessId = options.ParentProcessId;
+            _waitForExitTask = WaitForExit(parentProcess);
+        }
         else if (options.ParentProcessId == 0)
         {
             _waitInputTask = WaitInputAsync();
@@ -48,8 +58,7 @@ internal sealed class TerminalHostedService(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _runningTask;
-        await _waitInputTask;
+        await Task.WhenAll(_runningTask, _waitInputTask, _waitForExitTask);
         await terminal.StopAsync(cancellationToken);
     }
 
@@ -75,6 +84,13 @@ internal sealed class TerminalHostedService(
     {
         await Console.Out.WriteLineAsync("Press any key to exit.");
         await Task.Run(() => Console.ReadKey(intercept: true));
+        applicationLifetime.StopApplication();
+    }
+
+    private async Task WaitForExit(Process process)
+    {
+        await process.WaitForExitAsync();
+        logger.LogDebug("Parent process is exited: {ParentProcessId}.", _parentProcessId);
         applicationLifetime.StopApplication();
     }
 }

@@ -1,7 +1,6 @@
 #if LIBPLANET_CONSOLE || LIBPLANET_CLIENT
 using Grpc.Core;
 using Grpc.Net.Client;
-using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Grpc;
 using static LibplanetConsole.Node.Grpc.NodeGrpcService;
 
@@ -10,9 +9,7 @@ namespace LibplanetConsole.Node.Grpc;
 internal sealed class NodeService(GrpcChannel channel)
     : NodeGrpcServiceClient(channel), IDisposable
 {
-    private const int Timeout = 10;
-
-    private NodeConnection? _connection;
+    private ConnectionMonitor<NodeService>? _connection;
     private StreamReceiver<GetStartedStreamResponse>? _startedReceiver;
     private StreamReceiver<GetStoppedStreamResponse>? _stoppedReceiver;
     private bool _isDisposed;
@@ -44,12 +41,7 @@ internal sealed class NodeService(GrpcChannel channel)
             throw new InvalidOperationException($"{nameof(NodeService)} is already started.");
         }
 
-        var request = new PingRequest();
-        var callOptions = new CallOptions(
-            cancellationToken: cancellationToken);
-        await PingAsync(request, callOptions);
-
-        _connection = new NodeConnection(this);
+        _connection = new ConnectionMonitor<NodeService>(this, CheckConnectionAsync);
         _connection.Disconnected += Connection_Disconnected;
         await _connection.StartAsync(cancellationToken);
         _startedReceiver = new(
@@ -87,9 +79,15 @@ internal sealed class NodeService(GrpcChannel channel)
         _connection = null;
     }
 
+    private static async Task CheckConnectionAsync(
+        NodeService nodeService, CancellationToken cancellationToken)
+    {
+        await nodeService.PingAsync(new(), cancellationToken: cancellationToken);
+    }
+
     private void Connection_Disconnected(object? sender, EventArgs e)
     {
-        if (sender is NodeConnection connection && connection == _connection)
+        if (sender is ConnectionMonitor<NodeService> connection && connection == _connection)
         {
             _startedReceiver?.Dispose();
             _startedReceiver = null;
