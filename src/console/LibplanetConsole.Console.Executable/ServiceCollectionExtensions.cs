@@ -8,14 +8,14 @@ namespace LibplanetConsole.Console.Executable;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(
+    public static IServiceCollection AddExecutable(
         this IServiceCollection @this, ApplicationOptions options)
     {
         @this.AddLogging(options.LogPath, options.LibraryLogPath);
 
         @this.AddSingleton<CommandContext>();
         @this.AddSingleton<SystemTerminal>();
-        @this.AddHostedService<TerminalHostedService>();
+        @this.AddHostedService<ExecutableHostedService>();
 
         @this.AddSingleton<HelpCommand>()
              .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());

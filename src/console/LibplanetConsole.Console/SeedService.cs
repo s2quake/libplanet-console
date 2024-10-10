@@ -4,7 +4,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class SeedService : ISeedService, IHostedService
+internal sealed class SeedService : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
@@ -29,7 +29,7 @@ internal sealed class SeedService : ISeedService, IHostedService
         return Task.Run(() => seedInfo, cancellationToken);
     }
 
-    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         _blocksyncSeedNode = new SeedNode(new()
         {
@@ -45,7 +45,7 @@ internal sealed class SeedService : ISeedService, IHostedService
         await _consensusSeedNode.StartAsync(cancellationToken);
     }
 
-    async Task IHostedService.StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (_blocksyncSeedNode is not null)
         {

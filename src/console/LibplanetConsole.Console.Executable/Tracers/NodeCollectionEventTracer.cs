@@ -24,21 +24,20 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
-            => Task.CompletedTask;
+        => Task.CompletedTask;
 
     public Task StopAsync(CancellationToken cancellationToken)
         => Task.CompletedTask;
 
     void IDisposable.Dispose()
     {
+        _nodes.CurrentChanged -= Nodes_CurrentChanged;
+        _nodes.CollectionChanged -= Nodes_CollectionChanged;
         UpdateCurrent(null);
         foreach (var node in _nodes)
         {
             DetachEvent(node);
         }
-
-        _nodes.CurrentChanged -= Nodes_CurrentChanged;
-        _nodes.CollectionChanged -= Nodes_CollectionChanged;
     }
 
     private void UpdateCurrent(INode? node)

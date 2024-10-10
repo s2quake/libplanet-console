@@ -11,9 +11,8 @@ namespace LibplanetConsole.Console;
 [Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
     IServiceProvider serviceProvider,
-    ApplicationOptions options,
-    IHostApplicationLifetime applicationLifetime)
-    : IEnumerable<Client>, IClientCollection, IHostedService
+    ApplicationOptions options)
+    : IEnumerable<Client>, IClientCollection
 {
     private static readonly object LockObject = new();
     private readonly List<Client> _clientList = new(options.Clients.Length);
@@ -122,30 +121,20 @@ internal sealed class ClientCollection(
         return client;
     }
 
-    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        applicationLifetime.ApplicationStarted.Register(async () =>
+        for (var i = 0; i < _clientList.Capacity; i++)
         {
-            await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
-            Current = _clientList.FirstOrDefault();
+            var client = ClientFactory.CreateNew(serviceProvider, options.Clients[i]);
+            InsertClient(client);
+        }
 
-            async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
-            {
-                var newOptions = new AddNewClientOptions
-                {
-                    ClientOptions = options.Clients[index],
-                    NoProcess = options.NoProcess,
-                    Detach = options.Detach,
-                    NewWindow = options.NewWindow,
-                };
-                await AddNewAsync(newOptions, cancellationToken);
-            }
-        });
+        Current = _clientList.FirstOrDefault();
 
         await Task.CompletedTask;
     }
 
-    async Task IHostedService.StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         for (var i = _clientList.Count - 1; i >= 0; i--)
         {
@@ -153,6 +142,44 @@ internal sealed class ClientCollection(
             client.Disposed -= Client_Disposed;
             await ClientFactory.DisposeScopeAsync(client);
             _logger.LogDebug("Disposed a client: {Address}", client.Address);
+        }
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            for (var i = 0; i < _clientList.Count; i++)
+            {
+                var client = _clientList[i];
+                var newOptions = new AddNewClientOptions
+                {
+                    ClientOptions = options.Clients[i],
+                    NoProcess = options.NoProcess,
+                    Detach = options.Detach,
+                    NewWindow = options.NewWindow,
+                };
+                if (options.NoProcess != true)
+                {
+                    await client.StartProcessAsync(newOptions, cancellationToken);
+                }
+
+                if (options.NoProcess != true && options.Detach != true)
+                {
+                    await client.AttachAsync(cancellationToken);
+                }
+
+                if (client.IsAttached is true && newOptions.ClientOptions.NodeEndPoint is null)
+                {
+                    var nodes = serviceProvider.GetRequiredService<NodeCollection>();
+                    var node = nodes.RandomNode();
+                    await client.StartAsync(node, cancellationToken);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while initializing nodes.");
         }
     }
 

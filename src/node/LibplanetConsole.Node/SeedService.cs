@@ -1,10 +1,9 @@
 using LibplanetConsole.Seed;
-using Microsoft.Extensions.Hosting;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
-internal sealed class SeedService(ApplicationOptions options) : ISeedService, IHostedService
+internal sealed class SeedService : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
@@ -29,26 +28,23 @@ internal sealed class SeedService(ApplicationOptions options) : ISeedService, IH
         return Task.Run(() => seedInfo, cancellationToken);
     }
 
-    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (CompareEndPoint(options.SeedEndPoint, options.EndPoint) is true)
+        _blocksyncSeedNode = new SeedNode(new()
         {
-            _blocksyncSeedNode = new SeedNode(new()
-            {
-                PrivateKey = _seedNodePrivateKey,
-                EndPoint = NextEndPoint(),
-            });
-            _consensusSeedNode = new SeedNode(new()
-            {
-                PrivateKey = _seedNodePrivateKey,
-                EndPoint = NextEndPoint(),
-            });
-            await _blocksyncSeedNode.StartAsync(cancellationToken);
-            await _consensusSeedNode.StartAsync(cancellationToken);
-        }
+            PrivateKey = _seedNodePrivateKey,
+            EndPoint = NextEndPoint(),
+        });
+        _consensusSeedNode = new SeedNode(new()
+        {
+            PrivateKey = _seedNodePrivateKey,
+            EndPoint = NextEndPoint(),
+        });
+        await _blocksyncSeedNode.StartAsync(cancellationToken);
+        await _consensusSeedNode.StartAsync(cancellationToken);
     }
 
-    async Task IHostedService.StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (_blocksyncSeedNode is not null)
         {

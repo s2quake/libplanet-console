@@ -1,4 +1,5 @@
 using Grpc.Core;
+using LibplanetConsole.Common;
 using LibplanetConsole.Grpc;
 using Microsoft.Extensions.Hosting;
 
@@ -15,6 +16,7 @@ internal sealed class ClientGrpcServiceV1(
 
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
+        client.NodeEndPoint = EndPointUtility.Parse(request.NodeEndPoint);
         await client.StartAsync(context.CancellationToken);
         return new StartResponse { ClientInfo = client.Info };
     }

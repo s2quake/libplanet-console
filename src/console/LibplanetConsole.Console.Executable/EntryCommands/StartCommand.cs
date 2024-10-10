@@ -49,7 +49,7 @@ internal sealed class StartCommand : CommandAsyncBase
             });
 
             builder.Services.AddConsole(applicationOptions);
-            builder.Services.AddApplication(applicationOptions);
+            builder.Services.AddExecutable(applicationOptions);
 
             builder.Services.AddGrpc();
             builder.Services.AddGrpcReflection();

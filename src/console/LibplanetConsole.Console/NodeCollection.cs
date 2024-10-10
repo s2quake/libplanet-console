@@ -1,16 +1,14 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
 internal sealed class NodeCollection(
     IServiceProvider serviceProvider,
-    ApplicationOptions options,
-    IHostApplicationLifetime applicationLifetime)
-    : IEnumerable<Node>, INodeCollection, IHostedService
+    ApplicationOptions options)
+    : IEnumerable<Node>, INodeCollection
 {
     private static readonly object LockObject = new();
     private readonly List<Node> _nodeList = new(options.Nodes.Length);
@@ -117,36 +115,27 @@ internal sealed class NodeCollection(
         return node;
     }
 
-    async Task IHostedService.StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        applicationLifetime.ApplicationStarted.Register(async () =>
+        try
         {
-            try
+            for (var i = 0; i < _nodeList.Capacity; i++)
             {
-                await Parallel.ForAsync(0, _nodeList.Capacity, cancellationToken, BodyAsync);
-                Current = _nodeList.FirstOrDefault();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "An error occurred while starting nodes.");
+                var node = NodeFactory.CreateNew(serviceProvider, options.Nodes[i]);
+                InsertNode(node);
             }
 
-            async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
-            {
-                var newOptions = new AddNewNodeOptions
-                {
-                    NodeOptions = options.Nodes[index],
-                    NoProcess = options.NoProcess,
-                    Detach = options.Detach,
-                    NewWindow = options.NewWindow,
-                };
-                await AddNewAsync(newOptions, cancellationToken);
-            }
-        });
+            Current = _nodeList.FirstOrDefault();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while starting nodes.");
+        }
+
         await Task.CompletedTask;
     }
 
-    async Task IHostedService.StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         for (var i = _nodeList.Count - 1; i >= 0; i--)
         {
@@ -154,6 +143,43 @@ internal sealed class NodeCollection(
             node.Disposed -= Node_Disposed;
             await NodeFactory.DisposeScopeAsync(node);
             _logger.LogDebug("Disposed a client: {Address}", node.Address);
+        }
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            for (var i = 0; i < _nodeList.Count; i++)
+            {
+                var node = _nodeList[i];
+                var newOptions = new AddNewNodeOptions
+                {
+                    NodeOptions = options.Nodes[i],
+                    NoProcess = options.NoProcess,
+                    Detach = options.Detach,
+                    NewWindow = options.NewWindow,
+                };
+
+                if (newOptions.NoProcess != true)
+                {
+                    await node.StartProcessAsync(newOptions, cancellationToken);
+                }
+
+                if (newOptions.NoProcess != true && newOptions.Detach != true)
+                {
+                    await node.AttachAsync(cancellationToken);
+                }
+
+                if (node.IsAttached is true && newOptions.NodeOptions.SeedEndPoint is null)
+                {
+                    await node.StartAsync(cancellationToken);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while initializing nodes.");
         }
     }
 
