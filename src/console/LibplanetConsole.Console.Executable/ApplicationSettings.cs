@@ -69,13 +69,8 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("The directory path to store log.")]
-    [Path(Type = PathType.File, AllowEmpty = true)]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("The directory path to store log of the library.")]
-    [Path(Type = PathType.File, AllowEmpty = true)]
-    public string LibraryLogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and the client processes will not run.")]
@@ -104,7 +99,6 @@ internal sealed record class ApplicationSettings
         return new ApplicationOptions(endPoint)
         {
             LogPath = GetFullPath(LogPath),
-            LibraryLogPath = GetFullPath(LibraryLogPath),
             Nodes = repository.Nodes,
             Clients = repository.Clients,
             Genesis = genesis,

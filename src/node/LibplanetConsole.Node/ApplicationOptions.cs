@@ -23,8 +23,6 @@ public sealed record class ApplicationOptions
 
     public string LogPath { get; set; } = string.Empty;
 
-    public string LibraryLogPath { get; set; } = string.Empty;
-
     public bool NoREPL { get; init; }
 
     public IActionProvider? ActionProvider { get; init; }

@@ -11,6 +11,13 @@ namespace LibplanetConsole.Console.Executable;
 internal sealed class Application
 {
     private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
+    private readonly LoggingFilter[] _filters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
+    ];
 
     public Application(ApplicationOptions options, object[] instances)
     {
@@ -27,7 +34,7 @@ internal sealed class Application
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
         });
 
-        services.AddLogging(options.LogPath, options.LibraryLogPath);
+        services.AddLogging(options.LogPath, "console.log", _filters);
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
 

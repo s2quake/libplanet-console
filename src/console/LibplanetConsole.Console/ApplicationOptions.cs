@@ -17,8 +17,6 @@ public sealed record class ApplicationOptions
 
     public string LogPath { get; init; } = string.Empty;
 
-    public string LibraryLogPath { get; init; } = string.Empty;
-
     public bool NoProcess { get; init; }
 
     public bool Detach { get; init; }

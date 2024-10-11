@@ -10,6 +10,10 @@ namespace LibplanetConsole.Client.Executable;
 internal sealed class Application
 {
     private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
+    private readonly LoggingFilter[] _filters =
+    [
+        new PrefixFilter("app", "LibplanetConsole."),
+    ];
 
     public Application(ApplicationOptions options, object[] instances)
     {
@@ -25,7 +29,7 @@ internal sealed class Application
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
         });
 
-        services.AddLogging(options.LogPath, options.LogPath);
+        services.AddLogging(options.LogPath, "client.log", _filters);
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();

@@ -113,8 +113,7 @@ internal sealed class InitializeCommand : CommandBase
         var repository = new Repository(endPoint, nodeOptions, clientOptions)
         {
             Genesis = genesis,
-            LogPath = "app.log",
-            LibraryLogPath = "library.log",
+            LogPath = "log",
         };
         var resolver = new RepositoryPathResolver();
         using var writer = new ConditionalTextWriter(Out)
@@ -148,8 +147,7 @@ internal sealed class InitializeCommand : CommandBase
                 EndPoint = endPoint,
                 PrivateKey = privateKey,
                 StorePath = "store",
-                LogPath = "app.log",
-                LibraryLogPath = "library.log",
+                LogPath = "log",
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
             };
@@ -174,7 +172,7 @@ internal sealed class InitializeCommand : CommandBase
             {
                 EndPoint = endPoint,
                 PrivateKey = privateKey,
-                LogPath = "app.log",
+                LogPath = "log",
             };
             clientOptionsList.Add(clientOptions);
             if (prevEndPoint is not null)

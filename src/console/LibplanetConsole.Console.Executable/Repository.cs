@@ -35,8 +35,6 @@ public sealed record class Repository
 
     public string LogPath { get; init; } = string.Empty;
 
-    public string LibraryLogPath { get; init; } = string.Empty;
-
     public string Source { get; private set; } = string.Empty;
 
     public static byte[] CreateGenesis(GenesisOptions genesisOptions)
@@ -128,7 +126,6 @@ public sealed record class Repository
             EndPoint = EndPointUtility.ToString(EndPoint),
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
             LogPath = LogPath,
-            LibraryLogPath = LibraryLogPath,
         };
 
         info.RepositoryPath = repositoryPath;

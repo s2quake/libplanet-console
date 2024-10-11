@@ -58,17 +58,10 @@ internal sealed record class ApplicationSettings
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs.")]
-    [Path(Type = PathType.File, AllowEmpty = true)]
+    [CommandSummary("Indicates the directory path to save logs.")]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
     [DefaultValue("")]
     public string LogPath { get; init; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs for the library. " +
-                    "If omitted, the library logs will be saved in the LogPath.")]
-    [Path(Type = PathType.File, AllowEmpty = true)]
-    [DefaultValue("")]
-    public string LibraryLogPath { get; init; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the node runs without a REPL.")]
@@ -111,7 +104,6 @@ internal sealed record class ApplicationSettings
             SeedEndPoint = GetSeedEndPoint(),
             StorePath = GetFullPath(StorePath),
             LogPath = GetFullPath(LogPath),
-            LibraryLogPath = GetFullPath(LibraryLogPath),
             NoREPL = NoREPL,
             ActionProvider = actionProvider,
         };

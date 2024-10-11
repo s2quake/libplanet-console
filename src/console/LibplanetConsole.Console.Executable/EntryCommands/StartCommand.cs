@@ -30,7 +30,6 @@ internal sealed class StartCommand : CommandAsyncBase
                 Nodes = Repository.LoadNodeOptions(repositoryPath, resolver),
                 Clients = Repository.LoadClientOptions(repositoryPath, resolver),
                 LogPath = applicationSettings.LogPath,
-                LibraryLogPath = applicationSettings.LibraryLogPath,
             };
 
             var application = new Application(applicationOptions, [.. _settingsCollection]);

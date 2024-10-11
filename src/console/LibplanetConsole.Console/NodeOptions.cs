@@ -16,8 +16,6 @@ public sealed record class NodeOptions
 
     public string LogPath { get; init; } = string.Empty;
 
-    public string LibraryLogPath { get; init; } = string.Empty;
-
     public string ActionProviderModulePath { get; init; } = string.Empty;
 
     public string ActionProviderType { get; init; } = string.Empty;
@@ -44,7 +42,6 @@ public sealed record class NodeOptions
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, repositoryPath),
             SeedEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.SeedEndPoint),
             RepositoryPath = repositoryPath,
             ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
@@ -74,9 +71,6 @@ public sealed record class NodeOptions
 
         [DefaultValue("")]
         public string LogPath { get; init; } = string.Empty;
-
-        [DefaultValue("")]
-        public string LibraryLogPath { get; init; } = string.Empty;
 
         [DefaultValue("")]
         public string SeedEndPoint { get; init; } = string.Empty;

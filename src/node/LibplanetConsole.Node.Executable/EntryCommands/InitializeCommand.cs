@@ -43,14 +43,8 @@ internal sealed class InitializeCommand : CommandBase
     [CommandProperty]
     [CommandSummary("The file path to store the application logs." +
                     "If omitted, the 'app.log' file is used.")]
-    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("The file path to store logs other than application logs." +
-                    "If omitted, the 'library.log' file is used.")]
-    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
-    public string LibraryLogPath { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("The file path of the genesis." +
@@ -100,8 +94,7 @@ internal sealed class InitializeCommand : CommandBase
         var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var storePath = Path.Combine(outputPath, StorePath.Fallback("store"));
-        var logPath = Path.Combine(outputPath, LogPath.Fallback("app.log"));
-        var libraryLogPath = Path.Combine(outputPath, LibraryLogPath.Fallback("library.log"));
+        var logPath = Path.Combine(outputPath, LogPath.Fallback("log"));
         var genesisPath = Path.Combine(outputPath, GenesisPath.Fallback("genesis"));
         var repository = new Repository
         {
@@ -109,7 +102,6 @@ internal sealed class InitializeCommand : CommandBase
             PrivateKey = privateKey,
             StorePath = storePath,
             LogPath = logPath,
-            LibraryLogPath = libraryLogPath,
             GenesisPath = genesisPath,
             SeedEndPoint = IsSingleNode is true ? endPoint : null,
             ActionProviderModulePath = ActionProviderModulePath,

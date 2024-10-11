@@ -1,7 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
-using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
@@ -12,6 +11,14 @@ namespace LibplanetConsole.Node.Executable;
 internal sealed class Application
 {
     private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
+    private readonly LoggingFilter[] _filters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
+        new PrefixFilter("libplanet.log", "Libplanet."),
+    ];
 
     public Application(ApplicationOptions options, object[] instances)
     {
@@ -27,7 +34,7 @@ internal sealed class Application
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
         });
 
-        services.AddLogging(options.LogPath, options.LibraryLogPath);
+        services.AddLogging(options.LogPath, "node.log", _filters);
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();

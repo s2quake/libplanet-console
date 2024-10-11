@@ -21,8 +21,6 @@ public sealed record class Repository
 
     public string LogPath { get; init; } = string.Empty;
 
-    public string LibraryLogPath { get; init; } = string.Empty;
-
     public string GenesisPath { get; init; } = string.Empty;
 
     public string ActionProviderModulePath { get; init; } = string.Empty;
@@ -69,7 +67,6 @@ public sealed record class Repository
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
-                LibraryLogPath = GetRelativePathFromDirectory(repositoryPath, LibraryLogPath),
                 SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,

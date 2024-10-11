@@ -1,6 +1,6 @@
 # Libplanet Console
 
-This repository provides a `REPL` environment that enables easy testing of 
+This repository provides a `REPL` environment that enables easy testing of
 libplanet features.
 
 ## Requirements
@@ -27,7 +27,7 @@ dotnet publish
 
 # Creating Repository
 
-Run the following command to create a repository for starting 4 nodes 
+Run the following command to create a repository for starting 4 nodes
 and 2 clients at the specified path.
 
 ```sh
@@ -55,9 +55,9 @@ Create and run a repository for a single node.
 
 ## Settings data
 
-Once the repository is created, the specified path will contain 
-`node-settings.json` and `client-settings.json` files as shown below. 
-Users can configure various values to run nodes and clients 
+Once the repository is created, the specified path will contain
+`node-settings.json` and `client-settings.json` files as shown below.
+Users can configure various values to run nodes and clients
 in different environments.
 
 ```json
@@ -67,9 +67,8 @@ in different environments.
     "endPoint": "localhost:55314",
     "privateKey": "5a3df2ce7fc8b8f7c984f867a34e7d343e974f7b661c83536c0a66685bdbf04a",
     "storePath": "store",
+    "logPath": "log",
     "genesisPath": "genesis",
-    "logPath": "app.log",
-    "libraryLogPath": "library.log"
   }
 }
 ```

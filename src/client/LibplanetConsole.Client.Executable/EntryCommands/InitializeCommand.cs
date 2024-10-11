@@ -47,7 +47,7 @@ internal sealed class InitializeCommand : CommandBase
         var outputPath = Path.GetFullPath(OutputPath);
         var endPoint = EndPointUtility.ParseOrNext(EndPoint);
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        var logPath = Path.Combine(outputPath, LogPath.Fallback("app.log"));
+        var logPath = Path.Combine(outputPath, LogPath.Fallback("log"));
         var repository = new Repository
         {
             EndPoint = endPoint,
