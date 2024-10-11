@@ -3,44 +3,36 @@ using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Client.Executable;
+namespace LibplanetConsole.Node.Executable;
 
-internal sealed class TerminalHostedService(
+internal sealed class SystemTerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
     CommandContext commandContext,
     SystemTerminal terminal,
     ApplicationOptions options,
-    ILogger<TerminalHostedService> logger) : IHostedService, IDisposable
+    ILogger<SystemTerminalHostedService> logger)
+    : IHostedService
 {
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private Task _runningTask = Task.CompletedTask;
     private Task _waitInputTask = Task.CompletedTask;
     private Task _waitForExitTask = Task.CompletedTask;
     private int _parentProcessId;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (options.NoREPL != true)
+        if (options.NoREPL is false)
         {
-            applicationLifetime.ApplicationStarted.Register(async () =>
-            {
-                var sw = new StringWriter();
-                commandContext.Out = sw;
-                await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-                await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
-                await sw.WriteLineAsync();
-                await commandContext.ExecuteAsync(args: [], cancellationToken: default);
-                await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-                commandContext.Out = Console.Out;
-                await sw.WriteLineIfAsync(GetStartupCondition(options), GetStartupMessage());
-                await Console.Out.WriteAsync(sw.ToString());
+            var sw = new StringWriter();
+            commandContext.Out = sw;
+            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
+            await commandContext.ExecuteAsync(["--help"], cancellationToken);
+            await sw.WriteLineAsync();
+            await commandContext.ExecuteAsync(args: [], cancellationToken);
+            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
+            commandContext.Out = Console.Out;
+            await sw.WriteLineIfAsync(GetStartupCondition(options), GetStartupMessage());
+            await Console.Out.WriteAsync(sw.ToString());
 
-                _runningTask = terminal.StartAsync(_cancellationTokenSource.Token);
-            });
-            applicationLifetime.ApplicationStopping.Register(() =>
-            {
-                _cancellationTokenSource.Cancel();
-            });
+            await terminal.StartAsync(cancellationToken);
         }
         else if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
@@ -58,15 +50,13 @@ internal sealed class TerminalHostedService(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_runningTask, _waitInputTask, _waitForExitTask);
+        await Task.WhenAll(_waitInputTask, _waitForExitTask);
         await terminal.StopAsync(cancellationToken);
     }
 
-    void IDisposable.Dispose() => _cancellationTokenSource.Dispose();
-
     private static bool GetStartupCondition(ApplicationOptions options)
     {
-        if (options.NodeEndPoint is not null)
+        if (options.SeedEndPoint is not null)
         {
             return false;
         }

@@ -9,6 +9,8 @@ internal sealed class SeedService : ISeedService
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
 
+    public bool IsRunning => _blocksyncSeedNode is not null && _consensusSeedNode is not null;
+
     public Task<SeedInfo> GetSeedAsync(
         PublicKey publicKey, CancellationToken cancellationToken)
     {
@@ -30,18 +32,20 @@ internal sealed class SeedService : ISeedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _blocksyncSeedNode = new SeedNode(new()
+        var blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = NextEndPoint(),
         });
-        _consensusSeedNode = new SeedNode(new()
+        var consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
             EndPoint = NextEndPoint(),
         });
-        await _blocksyncSeedNode.StartAsync(cancellationToken);
-        await _consensusSeedNode.StartAsync(cancellationToken);
+        await blocksyncSeedNode.StartAsync(cancellationToken);
+        await consensusSeedNode.StartAsync(cancellationToken);
+        _blocksyncSeedNode = blocksyncSeedNode;
+        _consensusSeedNode = consensusSeedNode;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

@@ -13,6 +13,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
@@ -298,9 +299,14 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
-    private static async Task<SeedInfo> GetSeedInfoAsync(
+    private async Task<SeedInfo> GetSeedInfoAsync(
         EndPoint seedEndPoint, ILogger logger, CancellationToken cancellationToken)
     {
+        if (_serviceProvider.GetService<ISeedService>() is { } seedService)
+        {
+            return await seedService.GetSeedAsync(PublicKey, cancellationToken);
+        }
+
         logger.LogDebug("Getting seed info from {SeedEndPoint}", seedEndPoint);
         var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
         var channelOptions = new GrpcChannelOptions

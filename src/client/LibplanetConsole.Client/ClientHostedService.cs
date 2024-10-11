@@ -1,27 +1,17 @@
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
 
-internal sealed class ClientHostedService(
-    IHostApplicationLifetime applicationLifetime,
-    ApplicationOptions options,
-    Client client,
-    ILogger<ClientHostedService> logger)
+internal sealed class ClientHostedService(Client client, ApplicationOptions options)
     : IHostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        applicationLifetime.ApplicationStarted.Register(async () =>
+        if (options.NodeEndPoint is not null)
         {
-            if (options.NodeEndPoint is not null)
-            {
-                logger.LogDebug("Client auto-starting");
-                await client.StartAsync(cancellationToken);
-                logger.LogDebug("Client auto-started");
-            }
-        });
-        return Task.CompletedTask;
+            client.NodeEndPoint = options.NodeEndPoint;
+            await client.StartAsync(cancellationToken);
+        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

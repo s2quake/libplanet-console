@@ -26,26 +26,17 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        // try
-        // {
-        //     var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
-        //     var applicationOptions = _applicationSettings.ToOptions();
-
-        //     serviceCollection.AddConsole(applicationOptions);
-        //     serviceCollection.AddApplication(applicationOptions);
-
-        //     await using var serviceProvider = serviceCollection.BuildServiceProvider();
-        //     var @out = System.Console.Out;
-        //     var application = serviceProvider.GetRequiredService<Application>();
-        //     await @out.WriteLineAsync();
-        //     await application.RunAsync();
-        //     await @out.WriteLineAsync("\u001b0");
-        // }
-        // catch (CommandParsingException e)
-        // {
-        //     e.Print(System.Console.Out);
-        //     Environment.Exit(1);
-        // }
+        try
+        {
+            var applicationOptions = _applicationSettings.ToOptions();
+            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            await application.RunAsync(cancellationToken);
+        }
+        catch (CommandParsingException e)
+        {
+            e.Print(System.Console.Out);
+            Environment.Exit(1);
+        }
     }
 
     private static Dictionary<CommandMemberDescriptor, object> GetDescriptors(object[] options)

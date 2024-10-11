@@ -3,6 +3,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
@@ -15,14 +16,20 @@ public static class ServiceCollectionExtensions
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
         @this.AddSingleton(synchronizationContext);
         @this.AddSingleton(options);
-        @this.AddSingleton<SeedService>()
-             .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
+        if (CompareEndPoint(options.SeedEndPoint, options.EndPoint) is true)
+        {
+            @this.AddSingleton<SeedService>()
+                 .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
+        }
+
         @this.AddSingleton<Node>()
              .AddSingleton<INode>(s => s.GetRequiredService<Node>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
-        @this.AddHostedService<NodeHostedService>();
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
+
+        @this.AddHostedService<SeedHostedService>();
+        @this.AddHostedService<NodeHostedService>();
 
         @this.AddSingleton<ICommand, AddressCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();

@@ -66,7 +66,8 @@
       "program": "${workspaceFolder}/src/node/LibplanetConsole.Node.Executable/bin/Debug/net8.0/libplanet-node.dll",
       "console": "integratedTerminal",
       "args": [
-        "run"
+        "run",
+        "--single-node"
       ]
     },
     {
