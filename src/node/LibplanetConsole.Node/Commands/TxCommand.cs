@@ -16,7 +16,7 @@ internal sealed class TxCommand(INode node, IBlockChain blockChain) : CommandAsy
         {
             Value = Text,
         };
-        await blockChain.AddTransactionAsync([action], cancellationToken);
+        await blockChain.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{node.Address.ToShortString()}: {Text}");
     }
 }

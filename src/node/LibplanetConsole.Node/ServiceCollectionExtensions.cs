@@ -16,8 +16,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton(synchronizationContext);
         @this.AddSingleton(options);
         @this.AddSingleton<SeedService>()
-             .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>())
-             .AddHostedService(s => s.GetRequiredService<SeedService>());
+             .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
         @this.AddSingleton<Node>()
              .AddSingleton<INode>(s => s.GetRequiredService<Node>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());

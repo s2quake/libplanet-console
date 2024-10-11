@@ -1,5 +1,5 @@
 using JSSoft.Terminals;
-using LibplanetConsole.Client;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Executable.Tracers;

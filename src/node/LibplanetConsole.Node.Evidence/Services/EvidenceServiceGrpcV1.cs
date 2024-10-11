@@ -1,5 +1,4 @@
 using Grpc.Core;
-using LibplanetConsole.Evidence;
 using LibplanetConsole.Evidence.Grpc;
 
 namespace LibplanetConsole.Node.Evidence.Services;

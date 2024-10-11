@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Grpc.Core;
+using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Node;
-using LibplanetConsole.Node.Grpc;
 
 namespace LibplanetConsole.Client;
 
@@ -26,6 +26,24 @@ internal sealed partial class Client : IBlockChain
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txData = tx.Serialize();
+        var request = new SendTransactionRequest
+        {
+            TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
+        };
+        var callOptions = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.SendTransactionAsync(request, callOptions);
+        return TxId.FromHex(response.TxId);
+    }
+
+    public async Task<TxId> SendTransactionAsync(
+        byte[] txData, CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
         var request = new SendTransactionRequest
         {
             TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
@@ -128,6 +146,25 @@ internal sealed partial class Client : IBlockChain
             cancellationToken: cancellationToken);
         var response = await _blockChainService.GetStateAsync(request, options);
         return _codec.Decode(response.StateData.ToByteArray());
+    }
+
+    public async Task<byte[]> GetActionAsync(
+        TxId txId, int actionIndex, CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetActionRequest
+        {
+            TxId = txId.ToHex(),
+            ActionIndex = actionIndex,
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetActionAsync(request, options);
+        return response.ActionData.ToByteArray();
     }
 
     public async Task<T> GetActionAsync<T>(

@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using LibplanetConsole.Blockchain;
 
 namespace LibplanetConsole.Node;
 
@@ -6,7 +7,7 @@ public interface IBlockChain
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
-    Task<TxId> AddTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 

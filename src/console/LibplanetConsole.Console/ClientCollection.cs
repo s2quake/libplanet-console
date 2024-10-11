@@ -3,20 +3,21 @@ using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
 [Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
-    IServiceProvider serviceProvider, ClientOptions[] clientOptions)
-    : IEnumerable<Client>, IClientCollection, IApplicationService, IAsyncDisposable
+    IServiceProvider serviceProvider,
+    ApplicationOptions options)
+    : IEnumerable<Client>, IClientCollection
 {
     private static readonly object LockObject = new();
-    private readonly List<Client> _clientList = new(clientOptions.Length);
+    private readonly List<Client> _clientList = new(options.Clients.Length);
     private readonly ILogger _logger = serviceProvider.GetLogger<ClientCollection>();
     private Client? _current;
-    private bool _isDisposed;
 
     public event EventHandler? CurrentChanged;
 
@@ -120,39 +121,65 @@ internal sealed class ClientCollection(
         return client;
     }
 
-    async Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var info = serviceProvider.GetRequiredService<IApplication>().Info;
-        await Parallel.ForAsync(0, _clientList.Capacity, cancellationToken, BodyAsync);
+        for (var i = 0; i < _clientList.Capacity; i++)
+        {
+            var client = ClientFactory.CreateNew(serviceProvider, options.Clients[i]);
+            InsertClient(client);
+        }
+
         Current = _clientList.FirstOrDefault();
 
-        async ValueTask BodyAsync(int index, CancellationToken cancellationToken)
+        await Task.CompletedTask;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        for (var i = _clientList.Count - 1; i >= 0; i--)
         {
-            var options = new AddNewClientOptions
-            {
-                ClientOptions = clientOptions[index],
-                NoProcess = info.NoProcess,
-                Detach = info.Detach,
-                NewWindow = info.NewWindow,
-            };
-            await AddNewAsync(options, cancellationToken);
+            var client = _clientList[i]!;
+            client.Disposed -= Client_Disposed;
+            await ClientFactory.DisposeScopeAsync(client);
+            _logger.LogDebug("Disposed a client: {Address}", client.Address);
         }
     }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        if (_isDisposed is false)
+        try
         {
-            for (var i = _clientList.Count - 1; i >= 0; i--)
+            for (var i = 0; i < _clientList.Count; i++)
             {
-                var client = _clientList[i]!;
-                client.Disposed -= Client_Disposed;
-                await ClientFactory.DisposeScopeAsync(client);
-                _logger.LogDebug("Disposed a client: {Address}", client.Address);
-            }
+                var client = _clientList[i];
+                var newOptions = new AddNewClientOptions
+                {
+                    ClientOptions = options.Clients[i],
+                    NoProcess = options.NoProcess,
+                    Detach = options.Detach,
+                    NewWindow = options.NewWindow,
+                };
+                if (options.NoProcess != true)
+                {
+                    await client.StartProcessAsync(newOptions, cancellationToken);
+                }
 
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
+                if (options.NoProcess != true && options.Detach != true)
+                {
+                    await client.AttachAsync(cancellationToken);
+                }
+
+                if (client.IsAttached is true && newOptions.ClientOptions.NodeEndPoint is null)
+                {
+                    var nodes = serviceProvider.GetRequiredService<NodeCollection>();
+                    var node = nodes.RandomNode();
+                    await client.StartAsync(node, cancellationToken);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while initializing nodes.");
         }
     }
 

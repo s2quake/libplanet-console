@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security;
 using System.Security.Cryptography;
-using Grpc.Core;
 using Grpc.Net.Client;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
@@ -9,6 +8,7 @@ using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 
-internal sealed partial class Node : IActionRenderer, INode
+internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 {
     private readonly SecureString _privateKey;
     private readonly string _storePath;
@@ -139,14 +139,17 @@ internal sealed partial class Node : IActionRenderer, INode
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
+        if (IsRunning is true)
+        {
+            throw new InvalidOperationException("Node is already running.");
+        }
 
         if (_seedEndPoint is null)
         {
             throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
         }
 
-        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, cancellationToken);
+        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, _logger, cancellationToken);
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
@@ -204,9 +207,10 @@ internal sealed partial class Node : IActionRenderer, INode
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         if (_swarm is not null)
         {
@@ -295,8 +299,9 @@ internal sealed partial class Node : IActionRenderer, INode
     }
 
     private static async Task<SeedInfo> GetSeedInfoAsync(
-        EndPoint seedEndPoint, CancellationToken cancellationToken)
+        EndPoint seedEndPoint, ILogger logger, CancellationToken cancellationToken)
     {
+        logger.LogDebug("Getting seed info from {SeedEndPoint}", seedEndPoint);
         var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
         var channelOptions = new GrpcChannelOptions
         {
@@ -309,13 +314,14 @@ internal sealed partial class Node : IActionRenderer, INode
         };
 
         var response = await client.GetSeedAsync(request, cancellationToken: cancellationToken);
+        logger.LogDebug("Got seed info from {SeedEndPoint}", seedEndPoint);
         return response.SeedResult;
     }
 
     private void UpdateNodeInfo()
     {
         var appProtocolVersion = _appProtocolVersion;
-        var nodeInfo = new NodeInfo
+        var nodeInfo = NodeInfo.Empty with
         {
             ProcessId = Environment.ProcessId,
             Address = Address,

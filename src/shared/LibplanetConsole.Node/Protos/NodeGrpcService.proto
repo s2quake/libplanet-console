@@ -14,7 +14,7 @@ service NodeGrpcService {
   rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
 }
 
-message NodeInfo {
+message NodeInformation {
     int32 process_id = 1;
     string app_protocol_version = 2;
     string swarm_end_point = 3;
@@ -36,7 +36,7 @@ message StartRequest {
 }
 
 message StartResponse {
-    NodeInfo node_info = 1;
+    NodeInformation node_info = 1;
 }
 
 message StopRequest {
@@ -49,14 +49,14 @@ message GetInfoRequest {
 }
 
 message GetInfoResponse {
-    NodeInfo node_info = 1;
+    NodeInformation node_info = 1;
 }
 
 message GetStartedStreamRequest {
 }
 
 message GetStartedStreamResponse {
-    NodeInfo node_info = 1;
+    NodeInformation node_info = 1;
 }
 
 message GetStoppedStreamRequest {

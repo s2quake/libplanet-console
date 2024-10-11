@@ -1,12 +1,4 @@
-#if LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Grpc;
-#elif LIBPLANET_NODE
-namespace LibplanetConsole.Node.Grpc;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Grpc;
-#else
-#error "Either LIBPLANET_CONSOLE or LIBPLANET_NODE must be defined."
-#endif
+namespace LibplanetConsole.Grpc;
 
 internal abstract class RunTask : IDisposable
 {
@@ -27,22 +19,20 @@ internal abstract class RunTask : IDisposable
     {
         if (_isRunning is true)
         {
-            throw new InvalidOperationException(
-                $"{GetType().Name} is already running.");
+            throw new InvalidOperationException($"{GetType().Name} is already running.");
         }
 
+        await OnStartAsync(cancellationToken);
         _cancellationTokenSource = new();
         _runningTask = OnRunAsync(_cancellationTokenSource.Token);
         _isRunning = true;
-        await Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (_isRunning is false)
         {
-            throw new InvalidOperationException(
-                $"{GetType().Name} is not running.");
+            throw new InvalidOperationException($"{GetType().Name} is not running.");
         }
 
         if (_cancellationTokenSource is not null)
@@ -53,6 +43,7 @@ internal abstract class RunTask : IDisposable
         }
 
         await _runningTask;
+        await OnStopAsync(cancellationToken);
         _isRunning = false;
     }
 
@@ -66,6 +57,10 @@ internal abstract class RunTask : IDisposable
     }
 
     protected abstract Task OnRunAsync(CancellationToken cancellationToken);
+
+    protected virtual Task OnStartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    protected virtual Task OnStopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     protected virtual void Dispose(bool disposing)
     {

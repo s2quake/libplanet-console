@@ -32,6 +32,4 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
     Task StartAsync(INode node, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
-
-    Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken);
 }

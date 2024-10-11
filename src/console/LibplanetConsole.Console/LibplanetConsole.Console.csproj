@@ -6,13 +6,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Client\**\*.cs" />
-    <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client"/>
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Node\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Client\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Blockchain\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto" GrpcServices="Client"/>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client"/>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Client"/>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Client"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.64.0" />
   </ItemGroup>
 
 </Project>

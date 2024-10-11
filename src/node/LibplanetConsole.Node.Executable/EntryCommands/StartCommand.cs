@@ -4,10 +4,8 @@ using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Node.Explorer;
-using LibplanetConsole.Node.Services;
 using LibplanetConsole.Settings;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -59,7 +57,7 @@ internal sealed class StartCommand : CommandAsyncBase
             {
                 // Setup a HTTP/2 endpoint without TLS.
                 options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-                options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+                // options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
 
             builder.Services.AddNode(applicationOptions);
@@ -67,6 +65,7 @@ internal sealed class StartCommand : CommandAsyncBase
             builder.Services.AddExplorer(builder.Configuration);
 
             builder.Services.AddGrpc();
+            builder.Services.AddGrpcReflection();
 
             using var app = builder.Build();
 
@@ -75,6 +74,7 @@ internal sealed class StartCommand : CommandAsyncBase
             app.MapGet("/", () => "123");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.MapGrpcReflectionService().AllowAnonymous();
 
             var @out = Console.Out;
             await @out.WriteLineAsync();

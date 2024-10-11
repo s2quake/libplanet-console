@@ -3,11 +3,13 @@ using JSSoft.Terminals;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Console.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Provides node-related commands.")]
-public sealed partial class NodeCommand(ApplicationBase application, INodeCollection nodes)
+public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeCollection nodes)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
@@ -38,7 +40,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public async Task DeleteAsync()
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes.GetNodeOrCurrent(address);
         await node.DisposeAsync();
     }
 
@@ -48,8 +50,8 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public void Info()
     {
         var address = Address;
-        var node = application.GetNode(address);
-        var nodeInfo = InfoUtility.GetInfo(serviceProvider: application, obj: node);
+        var node = nodes.GetNodeOrCurrent(address);
+        var nodeInfo = InfoUtility.GetInfo(serviceProvider, obj: node);
         Out.WriteLineAsJson(nodeInfo);
     }
 
@@ -82,7 +84,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes.GetNodeOrCurrent(address);
         await node.AttachAsync(cancellationToken);
     }
 
@@ -92,7 +94,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes.GetNodeOrCurrent(address);
         await node.DetachAsync(cancellationToken);
     }
 
@@ -102,7 +104,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes.GetNodeOrCurrent(address);
         await node.StartAsync(cancellationToken);
     }
 
@@ -112,7 +114,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes.GetNodeOrCurrent(address);
         await node.StopAsync(cancellationToken);
     }
 
@@ -121,7 +123,7 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
                     "If the address is not specified, displays the current node.")]
     public void Current(string address = "")
     {
-        if (address != string.Empty && application.GetNode(address) is { } node)
+        if (address != string.Empty && nodes.GetNodeOrCurrent(address) is { } node)
         {
             nodes.Current = node;
         }
@@ -146,9 +148,10 @@ public sealed partial class NodeCommand(ApplicationBase application, INodeCollec
         CancellationToken cancellationToken)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes.GetNodeOrCurrent(address);
+        var blockChain = node.GetRequiredService<IBlockChain>();
         var action = new StringAction { Value = text };
-        await node.SendTransactionAsync([action], cancellationToken);
+        await blockChain.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{node.Address.ToShortString()}: {text}");
     }
 

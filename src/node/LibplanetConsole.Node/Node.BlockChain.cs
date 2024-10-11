@@ -10,13 +10,14 @@ internal sealed partial class Node : IBlockChain
 {
     private static readonly Codec _codec = new();
 
-    public async Task<TxId> AddTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var blockChain = BlockChain;
@@ -28,17 +29,18 @@ internal sealed partial class Node : IBlockChain
             privateKey: privateKey,
             genesisHash: genesisBlock.Hash,
             actions: new TxActionList(values));
-        await AddTransactionAsync(transaction, cancellationToken);
+        await SendTransactionAsync(transaction, cancellationToken);
         return transaction.Id;
     }
 
-    public async Task AddTransactionAsync(
+    public async Task SendTransactionAsync(
         Transaction transaction, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         _logger.LogDebug("Node adds a transaction: {TxId}", transaction.Id);
         var blockChain = BlockChain;
@@ -72,9 +74,10 @@ internal sealed partial class Node : IBlockChain
     public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         return Task.Run(GetNextNonce, cancellationToken);
 
@@ -89,9 +92,10 @@ internal sealed partial class Node : IBlockChain
     public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         BlockHash GetTipHash()
         {
@@ -109,9 +113,10 @@ internal sealed partial class Node : IBlockChain
         CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         IValue GetStateByBlockHash()
         {
@@ -136,9 +141,10 @@ internal sealed partial class Node : IBlockChain
         CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         IValue GetStateByStateRootHash()
         {
@@ -155,9 +161,10 @@ internal sealed partial class Node : IBlockChain
     public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         BlockHash GetBlockHash()
         {

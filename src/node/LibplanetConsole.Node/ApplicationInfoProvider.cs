@@ -3,8 +3,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node;
 
-internal sealed class ApplicationInfoProvider
-    : InfoProviderBase<IHostApplicationLifetime>
+internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicationLifetime>
 {
     private readonly ApplicationInfo _info;
 

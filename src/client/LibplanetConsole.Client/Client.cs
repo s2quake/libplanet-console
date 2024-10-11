@@ -1,8 +1,10 @@
 using Grpc.Net.Client;
+using LibplanetConsole.Blockchain;
+using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Client.Grpc;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node;
+using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Client;
@@ -33,7 +35,7 @@ internal sealed partial class Client : IClient
 
     public event EventHandler? Started;
 
-    public event EventHandler<StopEventArgs>? Stopped;
+    public event EventHandler? Stopped;
 
     public PublicKey PublicKey { get; }
 
@@ -73,25 +75,33 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("The client is already running.");
         }
 
-        await Task.Delay(1000);
-
-        var address = $"http://{EndPointUtility.ToString(_nodeEndPoint)}";
-        var channelOptions = new GrpcChannelOptions
+        if (_nodeEndPoint is null)
         {
-            ThrowOperationCanceledOnCancellation = true,
-            MaxRetryAttempts = 1,
-        };
-        _channel = GrpcChannel.ForAddress(address, channelOptions);
+            throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");
+        }
+
+        var channel = NodeChannel.CreateChannel(_nodeEndPoint);
+        var nodeService = new NodeService(channel);
+        var blockChainService = new BlockChainService(channel);
+        nodeService.Started += (sender, e) => InvokeNodeStartedEvent(e);
+        nodeService.Stopped += (sender, e) => InvokeNodeStoppedEvent();
+        blockChainService.BlockAppended += (sender, e) => InvokeBlockAppendedEvent(e);
+        try
+        {
+            await nodeService.StartAsync(cancellationToken);
+            await blockChainService.StartAsync(cancellationToken);
+        }
+        catch
+        {
+            nodeService.Dispose();
+            blockChainService.Dispose();
+            throw;
+        }
+
         _cancellationTokenSource = new();
-        _nodeService = new NodeService(_channel);
-        _nodeService.Disconnected += NodeService_Disconnected;
-        _nodeService.Started += (sender, e) => InvokeNodeStartedEvent(e);
-        _nodeService.Stopped += (sender, e) => InvokeNodeStoppedEvent();
-        _blockChainService = new BlockChainService(_channel);
-        _blockChainService.BlockAppended += (sender, e) => InvokeBlockAppendedEvent(e);
-        await Task.WhenAll(
-            _nodeService.StartAsync(cancellationToken),
-            _blockChainService.StartAsync(cancellationToken));
+        _channel = channel;
+        _nodeService = nodeService;
+        _blockChainService = blockChainService;
         _info = _info with { NodeAddress = NodeInfo.Address };
         IsRunning = true;
         _logger.LogDebug(
@@ -114,7 +124,6 @@ internal sealed partial class Client : IClient
 
         if (_nodeService is not null)
         {
-            _nodeService.Disconnected -= NodeService_Disconnected;
             await _nodeService.StopAsync(cancellationToken);
             _nodeService = null;
         }
@@ -133,12 +142,12 @@ internal sealed partial class Client : IClient
         IsRunning = false;
         _info = _info with { NodeAddress = default };
         _logger.LogDebug("Client is stopped: {Address}", Address);
-        Stopped?.Invoke(this, new(StopReason.None));
+        Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    public void InvokeNodeStartedEvent(NodeInfo nodeInfo)
+    public void InvokeNodeStartedEvent(NodeEventArgs e)
     {
-        NodeInfo = nodeInfo;
+        NodeInfo = e.NodeInfo;
         _info = _info with { NodeAddress = NodeInfo.Address };
     }
 
@@ -148,8 +157,8 @@ internal sealed partial class Client : IClient
         _info = _info with { NodeAddress = default };
     }
 
-    public void InvokeBlockAppendedEvent(BlockInfo blockInfo)
-        => BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
+    public void InvokeBlockAppendedEvent(BlockEventArgs e)
+        => BlockAppended?.Invoke(this, e);
 
     public async ValueTask DisposeAsync()
     {
@@ -174,7 +183,7 @@ internal sealed partial class Client : IClient
             _channel?.Dispose();
             _channel = null;
             IsRunning = false;
-            Stopped?.Invoke(this, new(StopReason.None));
+            Stopped?.Invoke(this, EventArgs.Empty);
         }
     }
 }

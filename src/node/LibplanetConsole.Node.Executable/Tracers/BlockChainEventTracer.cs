@@ -1,4 +1,5 @@
 using JSSoft.Terminals;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Executable.Tracers;

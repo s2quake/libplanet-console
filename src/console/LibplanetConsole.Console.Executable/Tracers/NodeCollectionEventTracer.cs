@@ -1,17 +1,18 @@
 using System.Collections.Specialized;
 using JSSoft.Terminals;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplicationService
+internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
 {
-    private readonly INodeCollection _nodes = nodes;
+    private readonly INodeCollection _nodes;
     private INode? _current;
 
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    public NodeCollectionEventTracer(INodeCollection nodes)
     {
+        _nodes = nodes;
         UpdateCurrent(_nodes.Current);
         foreach (var node in _nodes)
         {
@@ -20,20 +21,23 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
 
         _nodes.CurrentChanged += Nodes_CurrentChanged;
         _nodes.CollectionChanged += Nodes_CollectionChanged;
-        return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    void IDisposable.Dispose()
     {
+        _nodes.CurrentChanged -= Nodes_CurrentChanged;
+        _nodes.CollectionChanged -= Nodes_CollectionChanged;
         UpdateCurrent(null);
         foreach (var node in _nodes)
         {
             DetachEvent(node);
         }
-
-        _nodes.CurrentChanged -= Nodes_CurrentChanged;
-        _nodes.CollectionChanged -= Nodes_CollectionChanged;
-        return ValueTask.CompletedTask;
     }
 
     private void UpdateCurrent(INode? node)

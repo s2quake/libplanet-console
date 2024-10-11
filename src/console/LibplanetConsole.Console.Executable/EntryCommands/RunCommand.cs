@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Framework;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -27,26 +26,26 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
-            var applicationOptions = _applicationSettings.ToOptions();
+        // try
+        // {
+        //     var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
+        //     var applicationOptions = _applicationSettings.ToOptions();
 
-            serviceCollection.AddConsole(applicationOptions);
-            serviceCollection.AddApplication(applicationOptions);
+        //     serviceCollection.AddConsole(applicationOptions);
+        //     serviceCollection.AddApplication(applicationOptions);
 
-            await using var serviceProvider = serviceCollection.BuildServiceProvider();
-            var @out = System.Console.Out;
-            var application = serviceProvider.GetRequiredService<Application>();
-            await @out.WriteLineAsync();
-            await application.RunAsync();
-            await @out.WriteLineAsync("\u001b0");
-        }
-        catch (CommandParsingException e)
-        {
-            e.Print(System.Console.Out);
-            Environment.Exit(1);
-        }
+        //     await using var serviceProvider = serviceCollection.BuildServiceProvider();
+        //     var @out = System.Console.Out;
+        //     var application = serviceProvider.GetRequiredService<Application>();
+        //     await @out.WriteLineAsync();
+        //     await application.RunAsync();
+        //     await @out.WriteLineAsync("\u001b0");
+        // }
+        // catch (CommandParsingException e)
+        // {
+        //     e.Print(System.Console.Out);
+        //     Environment.Exit(1);
+        // }
     }
 
     private static Dictionary<CommandMemberDescriptor, object> GetDescriptors(object[] options)
