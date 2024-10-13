@@ -1,6 +1,5 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Seed;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 

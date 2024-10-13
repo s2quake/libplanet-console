@@ -1,7 +1,5 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Seed;
-using Microsoft.Extensions.Hosting;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 

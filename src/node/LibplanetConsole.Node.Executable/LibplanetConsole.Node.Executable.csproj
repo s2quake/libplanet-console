@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.Trace" Version="3.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 

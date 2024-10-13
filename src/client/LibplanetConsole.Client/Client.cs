@@ -1,4 +1,3 @@
-using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;

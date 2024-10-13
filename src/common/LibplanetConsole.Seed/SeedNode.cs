@@ -1,9 +1,7 @@
-﻿using System.Net;
-using Dasync.Collections;
+﻿using Dasync.Collections;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
-using LibplanetConsole.Common;
 using Serilog;
 using static LibplanetConsole.Common.EndPointUtility;
 

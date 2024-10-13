@@ -1,4 +1,3 @@
-using JSSoft.Terminals;
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
 

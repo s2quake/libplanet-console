@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;

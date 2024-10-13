@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
@@ -21,6 +20,13 @@ internal sealed class Application
         new PrefixFilter("libplanet.log", "Libplanet."),
     ];
 
+    private readonly LoggingFilter[] _traceFilters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+    ];
+
     public Application(ApplicationOptions options, object[] instances)
     {
         var port = options.Port;
@@ -39,6 +45,10 @@ internal sealed class Application
         if (options.LogPath != string.Empty)
         {
             services.AddLogging(options.LogPath, "node.log", _filters);
+        }
+        else
+        {
+            services.AddLogging(_traceFilters);
         }
 
         services.AddSingleton<CommandContext>();

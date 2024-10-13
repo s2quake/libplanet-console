@@ -1,7 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
-using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
@@ -11,6 +10,11 @@ internal sealed class Application
 {
     private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
     private readonly LoggingFilter[] _filters =
+    [
+        new PrefixFilter("app", "LibplanetConsole."),
+    ];
+
+    private readonly LoggingFilter[] _traceFilters =
     [
         new PrefixFilter("app", "LibplanetConsole."),
     ];
@@ -33,6 +37,10 @@ internal sealed class Application
         if (options.LogPath != string.Empty)
         {
             services.AddLogging(options.LogPath, "client.log", _filters);
+        }
+        else
+        {
+            services.AddLogging(_traceFilters);
         }
 
         services.AddSingleton<CommandContext>();

@@ -135,7 +135,7 @@
   ],
   "compounds": [
     {
-      "name": "Node and Client",
+      "name": "Node and Client - Start",
       "configurations": [
         "C#: Libplanet Node - Start",
         "C#: Libplanet Client - Start"
