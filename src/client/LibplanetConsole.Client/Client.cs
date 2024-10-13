@@ -1,3 +1,4 @@
+using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;
@@ -30,8 +31,6 @@ internal sealed partial class Client : IClient
         PublicKey = options.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);
     }
-
-    public event EventHandler<BlockEventArgs>? BlockAppended;
 
     public event EventHandler? Started;
 
@@ -85,11 +84,11 @@ internal sealed partial class Client : IClient
         var blockChainService = new BlockChainService(channel);
         nodeService.Started += (sender, e) => InvokeNodeStartedEvent(e);
         nodeService.Stopped += (sender, e) => InvokeNodeStoppedEvent();
-        blockChainService.BlockAppended += (sender, e) => InvokeBlockAppendedEvent(e);
+        blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
-            await nodeService.StartAsync(cancellationToken);
-            await blockChainService.StartAsync(cancellationToken);
+            await nodeService.InitializeAsync(cancellationToken);
+            await blockChainService.InitializeAsync(cancellationToken);
         }
         catch
         {
@@ -102,7 +101,11 @@ internal sealed partial class Client : IClient
         _channel = channel;
         _nodeService = nodeService;
         _blockChainService = blockChainService;
-        _info = _info with { NodeAddress = NodeInfo.Address };
+        _info = _info with
+        {
+            NodeAddress = NodeInfo.Address,
+            Tip = nodeService.Info.Tip,
+        };
         IsRunning = true;
         _logger.LogDebug(
             "Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
@@ -124,13 +127,13 @@ internal sealed partial class Client : IClient
 
         if (_nodeService is not null)
         {
-            await _nodeService.StopAsync(cancellationToken);
+            await _nodeService.ReleaseAsync(cancellationToken);
             _nodeService = null;
         }
 
         if (_blockChainService is not null)
         {
-            await _blockChainService.StopAsync(cancellationToken);
+            await _blockChainService.ReleaseAsync(cancellationToken);
             _blockChainService = null;
         }
 
@@ -140,7 +143,7 @@ internal sealed partial class Client : IClient
         _blockChainService = null;
         _nodeService = null;
         IsRunning = false;
-        _info = _info with { NodeAddress = default };
+        _info = ClientInfo.Empty;
         _logger.LogDebug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
     }
@@ -185,5 +188,14 @@ internal sealed partial class Client : IClient
             IsRunning = false;
             Stopped?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
+    {
+        _info = _info with
+        {
+            Tip = e.BlockInfo,
+        };
+        BlockAppended?.Invoke(this, e);
     }
 }

@@ -11,6 +11,8 @@ internal sealed partial class Node
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
+    public BlockInfo Tip => Info.Tip;
+
     public async Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
     {
         if (_blockChainService is null)

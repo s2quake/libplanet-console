@@ -48,7 +48,7 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
     public override async Task<GetTipHashResponse> GetTipHash(
         GetTipHashRequest request, ServerCallContext context)
     {
-        var blockHash = await _blockChain.GetTipHashAsync(context.CancellationToken);
+        var blockHash = await Task.FromResult(_blockChain.Tip.Hash);
         return new GetTipHashResponse { BlockHash = blockHash.ToString() };
     }
 

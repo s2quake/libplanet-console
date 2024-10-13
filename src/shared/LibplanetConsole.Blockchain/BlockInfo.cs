@@ -14,6 +14,11 @@ public readonly partial record struct BlockInfo
 
     public Address Miner { get; init; }
 
+    public static BlockInfo Empty { get; } = new BlockInfo
+    {
+        Height = -1,
+    };
+
     public static implicit operator BlockInfo(BlockInformation blockInfo)
     {
         return new BlockInfo

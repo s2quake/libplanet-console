@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,10 @@ namespace LibplanetConsole.Node;
 internal sealed partial class Node : IBlockChain
 {
     private static readonly Codec _codec = new();
+
+    public event EventHandler<BlockEventArgs>? BlockAppended;
+
+    public BlockInfo Tip => Info.Tip;
 
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)

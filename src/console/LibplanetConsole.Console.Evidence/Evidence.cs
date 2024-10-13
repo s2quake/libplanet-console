@@ -1,37 +1,68 @@
+using Grpc.Core;
+using Grpc.Net.Client;
 using LibplanetConsole.Evidence;
+using LibplanetConsole.Evidence.Grpc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Evidence;
 
-internal sealed class Evidence(INode node)
-    : INodeContent, IEvidence
-    // , INodeContentService
+internal sealed class Evidence([FromKeyedServices(INode.Key)] INode node)
+    : NodeContentBase("evidence"), IEvidence
 {
-    // private readonly RemoteService<IEvidenceService> _evidenceService = new();
+    private GrpcChannel? _channel;
+    private EvidenceGrpcService.EvidenceGrpcServiceClient? _client;
 
-    INode INodeContent.Node => node;
-
-    string INodeContent.Name => "evidence";
-
-    // IRemoteService INodeContentService.RemoteService => _evidenceService;
-
-    // private IEvidenceService Service => _evidenceService.Service;
-
-    public Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
+    public async Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
     {
-        // return Service.AddEvidenceAsync(cancellationToken);
-        throw new NotImplementedException();
+        if (_client is null)
+        {
+            throw new InvalidOperationException("The channel is not initialized.");
+        }
+
+        var request = new AddEvidenceRequest();
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _client.AddEvidenceAsync(request, callOptions);
+        return response.EvidenceInformation;
     }
 
-    public Task<EvidenceInfo[]> GetEvidenceAsync(long height, CancellationToken cancellationToken)
+    public async Task<EvidenceInfo[]> GetEvidenceAsync(
+        long height, CancellationToken cancellationToken)
     {
-        // return Service.GetEvidenceAsync(height, cancellationToken);
-        throw new NotImplementedException();
+        if (_client is null)
+        {
+            throw new InvalidOperationException("The channel is not initialized.");
+        }
+
+        var request = new GetEvidenceRequest { Height = height };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _client.GetEvidenceAsync(request, callOptions);
+        return [.. response.EvidenceInformations.Select(item => (EvidenceInfo)item)];
     }
 
-    public Task ViolateAsync(CancellationToken cancellationToken)
+    public async Task ViolateAsync(CancellationToken cancellationToken)
     {
-        // return Service.ViolateAsync(cancellationToken);
-        throw new NotImplementedException();
+        if (_client is null)
+        {
+            throw new InvalidOperationException("The channel is not initialized.");
+        }
+
+        var request = new ViolateRequest();
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        await _client.ViolateAsync(request, callOptions);
+    }
+
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    {
+        _channel = EvidenceChannel.CreateChannel(node.EndPoint);
+        _client = new EvidenceGrpcService.EvidenceGrpcServiceClient(_channel);
+        await Task.CompletedTask;
+    }
+
+    protected override async Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        _channel?.Dispose();
+        _channel = null;
+        await Task.CompletedTask;
     }
 
 #if LIBPLANET_DPOS

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Grpc.Core;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Node;
 
@@ -8,6 +9,10 @@ namespace LibplanetConsole.Client;
 internal sealed partial class Client : IBlockChain
 {
     private static readonly Codec _codec = new();
+
+    public event EventHandler<BlockEventArgs>? BlockAppended;
+
+    public BlockInfo Tip => Info.Tip;
 
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)

@@ -1,7 +1,7 @@
 using Grpc.Core;
 using LibplanetConsole.Evidence.Grpc;
 
-namespace LibplanetConsole.Node.Evidence.Services;
+namespace LibplanetConsole.Node.Evidence.Grpc;
 
 internal sealed class EvidenceServiceGrpcV1(Evidence evidence)
     : EvidenceGrpcService.EvidenceGrpcServiceBase
@@ -12,7 +12,7 @@ internal sealed class EvidenceServiceGrpcV1(Evidence evidence)
         var evidenceInfo = await evidence.AddEvidenceAsync(context.CancellationToken);
         return new AddEvidenceResponse
         {
-            EvidenceInfo = evidenceInfo,
+            EvidenceInformation = evidenceInfo,
         };
     }
 
@@ -24,7 +24,7 @@ internal sealed class EvidenceServiceGrpcV1(Evidence evidence)
         var response = new GetEvidenceResponse();
         for (var i = 0; i < evidenceInfos.Length; i++)
         {
-            response.EvidenceInfos.Add(evidenceInfos[i]);
+            response.EvidenceInformations.Add(evidenceInfos[i]);
         }
 
         return response;

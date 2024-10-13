@@ -33,9 +33,8 @@ internal sealed class InitializeCommand : CommandBase
     public string EndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path to store the application logs." +
-                    "If omitted, the 'app.log' file is used.")]
-    [Path(Type = PathType.File, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
+    [CommandSummary("Indicates the file path to save logs.")]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("quiet", 'q')]

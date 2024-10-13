@@ -1,3 +1,4 @@
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Node.Grpc;
 
 namespace LibplanetConsole.Node;
@@ -16,7 +17,7 @@ public readonly record struct NodeInfo
 
     public BlockHash GenesisHash { get; init; }
 
-    public BlockHash TipHash { get; init; }
+    public BlockInfo Tip { get; init; }
 
     public bool IsRunning { get; init; }
 
@@ -26,6 +27,7 @@ public readonly record struct NodeInfo
         AppProtocolVersion = string.Empty,
         SwarmEndPoint = string.Empty,
         ConsensusEndPoint = string.Empty,
+        Tip = BlockInfo.Empty,
     };
 
     public static implicit operator NodeInfo(NodeInformation nodeInfo)
@@ -38,7 +40,12 @@ public readonly record struct NodeInfo
             ConsensusEndPoint = nodeInfo.ConsensusEndPoint,
             Address = new Address(nodeInfo.Address),
             GenesisHash = BlockHash.FromString(nodeInfo.GenesisHash),
-            TipHash = BlockHash.FromString(nodeInfo.TipHash),
+            Tip = new BlockInfo
+            {
+                Height = nodeInfo.TipHeight,
+                Hash = BlockHash.FromString(nodeInfo.TipHash),
+                Miner = new Address(nodeInfo.TipMiner),
+            },
             IsRunning = nodeInfo.IsRunning,
         };
     }
@@ -53,7 +60,9 @@ public readonly record struct NodeInfo
             ConsensusEndPoint = nodeInfo.ConsensusEndPoint,
             Address = nodeInfo.Address.ToHex(),
             GenesisHash = nodeInfo.GenesisHash.ToString(),
-            TipHash = nodeInfo.TipHash.ToString(),
+            TipHash = nodeInfo.Tip.Hash.ToString(),
+            TipHeight = nodeInfo.Tip.Height,
+            TipMiner = nodeInfo.Tip.Miner.ToHex(),
             IsRunning = nodeInfo.IsRunning,
         };
     }

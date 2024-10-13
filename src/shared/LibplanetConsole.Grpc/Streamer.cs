@@ -45,7 +45,7 @@ internal abstract class Streamer<T>(IAsyncStreamWriter<T> streamWriter)
         }
     }
 
-    protected async void WriteValue(T value)
+    protected async Task WriteValueAsync(T value)
     {
         if (_cancellationTokenSource is null)
         {

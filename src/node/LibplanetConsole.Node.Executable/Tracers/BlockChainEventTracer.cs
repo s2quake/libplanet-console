@@ -33,9 +33,10 @@ internal sealed class BlockChainEventTracer : IHostedService, IDisposable
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Height} '{hash.ToShortString()}' " +
-                      $"Appended by '{miner.ToShortString()}'";
-        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
-        _logger.LogInformation(message);
+        _logger.LogInformation(
+            "Block #{TipHeight} '{TipHash}' Appended by '{TipMiner}'",
+            blockInfo.Height,
+            hash.ToShortString(),
+            miner.ToShortString());
     }
 }

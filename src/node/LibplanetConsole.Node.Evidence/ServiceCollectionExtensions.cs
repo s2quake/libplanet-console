@@ -10,7 +10,6 @@ public static class ServiceCollectionExtensions
     {
         @this.AddSingleton<Evidence>()
              .AddSingleton<IEvidence>(s => s.GetRequiredService<Evidence>());
-        // @this.AddSingleton<ILocalService, EvidenceService>();
         @this.AddSingleton<ICommand, EvidenceCommand>();
         return @this;
     }

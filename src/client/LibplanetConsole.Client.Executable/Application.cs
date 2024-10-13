@@ -29,7 +29,10 @@ internal sealed class Application
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
         });
 
-        services.AddLogging(options.LogPath, "client.log", _filters);
+        if (options.LogPath != string.Empty)
+        {
+            services.AddLogging(options.LogPath, "client.log", _filters);
+        }
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();

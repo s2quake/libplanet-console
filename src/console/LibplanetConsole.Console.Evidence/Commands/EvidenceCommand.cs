@@ -15,7 +15,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidence = node.GetRequiredService<IEvidence>();
+        var evidence = node.GetRequiredKeyedService<IEvidence>(INode.Key);
         var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfo);
     }
@@ -25,7 +25,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidence = node.GetRequiredService<IEvidence>();
+        var evidence = node.GetRequiredKeyedService<IEvidence>(INode.Key);
         await evidence.ViolateAsync(cancellationToken);
     }
 
@@ -33,7 +33,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
     public async Task ListAsync(long height = -1, CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidence = node.GetRequiredService<IEvidence>();
+        var evidence = node.GetRequiredKeyedService<IEvidence>(INode.Key);
         var evidenceInfos = await evidence.GetEvidenceAsync(height, cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfos);
     }
@@ -44,7 +44,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         CancellationToken cancellationToken = default)
     {
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
-        var evidence = node.GetService<IEvidenceContent>();
+        var evidence = node.GetRequiredKeyedService<IEvidence>(INode.Key);
         await evidence.UnjailAsync(cancellationToken);
     }
 #endif // LIBPLANET_DPOS

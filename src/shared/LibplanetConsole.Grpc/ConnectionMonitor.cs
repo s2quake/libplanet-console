@@ -24,7 +24,7 @@ internal class ConnectionMonitor<T>(T client, Func<T, CancellationToken, Task> a
             {
                 await action(client, cancellationToken);
             }
-            catch (RpcException e)
+            catch (RpcException)
             {
                 Disconnected?.Invoke(this, EventArgs.Empty);
                 break;

@@ -5,6 +5,8 @@ namespace LibplanetConsole.Console;
 
 public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {
+    const string Key = nameof(IClient);
+
     event EventHandler? Attached;
 
     event EventHandler? Detached;

@@ -1,3 +1,4 @@
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Client.Grpc;
 
 namespace LibplanetConsole.Client;
@@ -10,12 +11,13 @@ public readonly record struct ClientInfo
 
     public BlockHash GenesisHash { get; init; }
 
-    public BlockHash TipHash { get; init; }
+    public BlockInfo Tip { get; init; }
 
     public bool IsRunning { get; init; }
 
     public static ClientInfo Empty { get; } = new ClientInfo
     {
+        Tip = BlockInfo.Empty,
     };
 
     public static implicit operator ClientInfo(ClientInformation clientInfo)
@@ -25,7 +27,12 @@ public readonly record struct ClientInfo
             Address = new Address(clientInfo.Address),
             NodeAddress = new Address(clientInfo.NodeAddress),
             GenesisHash = BlockHash.FromString(clientInfo.GenesisHash),
-            TipHash = BlockHash.FromString(clientInfo.TipHash),
+            Tip = new BlockInfo
+            {
+                Hash = BlockHash.FromString(clientInfo.TipHash),
+                Height = clientInfo.TipHeight,
+                Miner = new Address(clientInfo.TipMiner),
+            },
             IsRunning = clientInfo.IsRunning,
         };
     }
@@ -37,7 +44,9 @@ public readonly record struct ClientInfo
             Address = clientInfo.Address.ToHex(),
             NodeAddress = clientInfo.NodeAddress.ToHex(),
             GenesisHash = clientInfo.GenesisHash.ToString(),
-            TipHash = clientInfo.TipHash.ToString(),
+            TipHash = clientInfo.Tip.Hash.ToString(),
+            TipHeight = clientInfo.Tip.Height,
+            TipMiner = clientInfo.Tip.Miner.ToHex(),
             IsRunning = clientInfo.IsRunning,
         };
     }

@@ -33,7 +33,7 @@ internal sealed class BlockChainGrpcServiceV1(
     public override async Task<GetTipHashResponse> GetTipHash(
         GetTipHashRequest request, ServerCallContext context)
     {
-        var blockHash = await blockChain.GetTipHashAsync(context.CancellationToken);
+        var blockHash = await Task.FromResult(blockChain.Tip.Hash);
         return new GetTipHashResponse { BlockHash = blockHash.ToString() };
     }
 

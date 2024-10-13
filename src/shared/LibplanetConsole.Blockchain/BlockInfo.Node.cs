@@ -8,7 +8,7 @@ namespace LibplanetConsole.Blockchain;
 
 public readonly partial record struct BlockInfo
 {
-    public BlockInfo(BlockChain blockChain, Block block)
+    public BlockInfo(Block block)
     {
         Height = block.Index;
         Hash = block.Hash;

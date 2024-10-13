@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Client.Commands;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.DependencyInjection;

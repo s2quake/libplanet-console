@@ -6,11 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Grpc;
 
-internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase
+internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase, IDisposable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly Node _node;
     private readonly ILogger<NodeGrpcServiceV1> _logger;
+    private bool _isDisposed;
 
     public NodeGrpcServiceV1(
         IHostApplicationLifetime applicationLifetime,
@@ -74,5 +75,14 @@ internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase
             handler => _node.Stopped += handler,
             handler => _node.Stopped -= handler);
         await streamer.RunAsync(_applicationLifetime, context.CancellationToken);
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed is false)
+        {
+            _logger.LogDebug("{GrpcServiceType} is disposed.", nameof(NodeGrpcServiceV1));
+            _isDisposed = true;
+        }
     }
 }

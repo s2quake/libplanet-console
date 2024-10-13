@@ -29,6 +29,7 @@ internal sealed partial class Node : INode, IBlockChain
     private bool _isDisposed;
     private NodeProcess? _process;
     private Task _processTask = Task.CompletedTask;
+    private INodeContent[]? _contents;
 
     public Node(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
@@ -68,7 +69,33 @@ internal sealed partial class Node : INode, IBlockChain
 
     public NodeInfo Info => _nodeInfo;
 
+    public INodeContent[] Contents
+    {
+        get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
+        set => _contents = value;
+    }
+
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
+
+    public object? GetKeyedService(Type serviceType, object? serviceKey)
+    {
+        if (_serviceProvider is IKeyedServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetKeyedService(serviceType, serviceKey);
+        }
+
+        throw new InvalidOperationException("Service provider does not support keyed service.");
+    }
+
+    public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
+    {
+        if (_serviceProvider is IKeyedServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetRequiredKeyedService(serviceType, serviceKey);
+        }
+
+        throw new InvalidOperationException("Service provider does not support keyed service.");
+    }
 
     public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
 
@@ -93,6 +120,7 @@ internal sealed partial class Node : INode, IBlockChain
     public async Task AttachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
+
         if (_channel is not null)
         {
             throw new InvalidOperationException("Node is already attached.");
@@ -106,8 +134,8 @@ internal sealed partial class Node : INode, IBlockChain
         blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
-            await nodeService.StartAsync(cancellationToken);
-            await blockChainService.StartAsync(cancellationToken);
+            await nodeService.InitializeAsync(cancellationToken);
+            await blockChainService.InitializeAsync(cancellationToken);
         }
         catch
         {
@@ -185,6 +213,8 @@ internal sealed partial class Node : INode, IBlockChain
         _consensusEndPoint = EndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
+        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        _logger.LogDebug("Node Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -200,6 +230,9 @@ internal sealed partial class Node : INode, IBlockChain
         {
             throw new InvalidOperationException("Node is not attached.");
         }
+
+        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        _logger.LogDebug("Node Contents are stopped: {Address}", Address);
 
         var request = new StopRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
@@ -286,7 +319,7 @@ internal sealed partial class Node : INode, IBlockChain
 
     private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
     {
-        _nodeInfo = _nodeInfo with { TipHash = e.BlockInfo.Hash };
+        _nodeInfo = _nodeInfo with { Tip = e.BlockInfo };
         BlockAppended?.Invoke(this, e);
     }
 

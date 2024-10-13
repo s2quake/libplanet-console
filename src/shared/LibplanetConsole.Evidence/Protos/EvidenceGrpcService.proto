@@ -12,7 +12,7 @@ service EvidenceGrpcService {
   rpc Violate(ViolateRequest) returns (ViolateResponse);
 }
 
-message EvidenceInfo {
+message EvidenceInformation {
     string type = 1;
     string id = 2;
     string targetAddress = 3;
@@ -27,7 +27,7 @@ message AddEvidenceRequest {
 }
 
 message AddEvidenceResponse {
-  EvidenceInfo evidenceInfo = 1;
+  EvidenceInformation EvidenceInformation = 1;
 }
 
 message GetEvidenceRequest {
@@ -35,7 +35,7 @@ message GetEvidenceRequest {
 }
 
 message GetEvidenceResponse {
-  repeated EvidenceInfo evidenceInfos = 1;
+  repeated EvidenceInformation EvidenceInformations = 1;
 }
 
 message ViolateRequest {

@@ -2,7 +2,9 @@ namespace LibplanetConsole.Console;
 
 public interface INodeContent
 {
-    INode Node { get; }
-
     string Name { get; }
+
+    Task StartAsync(CancellationToken cancellationToken);
+
+    Task StopAsync(CancellationToken cancellationToken);
 }

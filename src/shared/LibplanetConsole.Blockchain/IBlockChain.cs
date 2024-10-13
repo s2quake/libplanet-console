@@ -1,17 +1,22 @@
 using System.Security.Cryptography;
-using LibplanetConsole.Blockchain;
 
-namespace LibplanetConsole.Client;
+namespace LibplanetConsole.Blockchain;
 
 public interface IBlockChain
 {
     event EventHandler<BlockEventArgs>? BlockAppended;
 
+    event EventHandler? Started;
+
+    event EventHandler? Stopped;
+
+    bool IsRunning { get; }
+
+    BlockInfo Tip { get; }
+
     Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
-
-    Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(
         BlockHash? blockHash,

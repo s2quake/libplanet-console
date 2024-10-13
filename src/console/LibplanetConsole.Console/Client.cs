@@ -25,6 +25,7 @@ internal sealed partial class Client : IClient, IBlockChain
     private bool _isDisposed;
     private ClientProcess? _process;
     private Task _processTask = Task.CompletedTask;
+    private IClientContent[]? _contents;
 
     public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
@@ -57,6 +58,12 @@ internal sealed partial class Client : IClient, IBlockChain
     public EndPoint EndPoint => _clientOptions.EndPoint;
 
     public ClientInfo Info => _clientInfo;
+
+    public IClientContent[] Contents
+    {
+        get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
+        set => _contents = value;
+    }
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 
@@ -97,7 +104,7 @@ internal sealed partial class Client : IClient, IBlockChain
         try
         {
             await clientService.StartAsync(cancellationToken);
-            await blockChainService.StartAsync(cancellationToken);
+            await blockChainService.InitializeAsync(cancellationToken);
         }
         catch
         {
@@ -172,6 +179,8 @@ internal sealed partial class Client : IClient, IBlockChain
         _clientInfo = response.ClientInfo;
         IsRunning = true;
         _logger.LogDebug("Client is started: {Address}", Address);
+        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        _logger.LogDebug("Client Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -187,6 +196,9 @@ internal sealed partial class Client : IClient, IBlockChain
         {
             throw new InvalidOperationException("Client is not attached.");
         }
+
+        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        _logger.LogDebug("Client Contents are stopped: {Address}", Address);
 
         var request = new StopRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
@@ -276,7 +288,7 @@ internal sealed partial class Client : IClient, IBlockChain
 
     private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
     {
-        _clientInfo = _clientInfo with { TipHash = e.BlockInfo.Hash };
+        _clientInfo = _clientInfo with { Tip = e.BlockInfo };
         BlockAppended?.Invoke(this, e);
     }
 

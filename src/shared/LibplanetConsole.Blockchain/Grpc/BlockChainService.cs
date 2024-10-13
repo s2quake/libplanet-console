@@ -25,7 +25,7 @@ internal sealed class BlockChainService(GrpcChannel channel)
         }
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (_blockAppendedReceiver is not null)
         {
@@ -38,7 +38,7 @@ internal sealed class BlockChainService(GrpcChannel channel)
         await _blockAppendedReceiver.StartAsync(cancellationToken);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task ReleaseAsync(CancellationToken cancellationToken)
     {
         if (_blockAppendedReceiver is null)
         {

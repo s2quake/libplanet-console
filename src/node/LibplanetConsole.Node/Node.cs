@@ -54,8 +54,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _logger.LogDebug("Node is created: {Address}", Address);
     }
 
-    public event EventHandler<BlockEventArgs>? BlockAppended;
-
     public event EventHandler? Started;
 
     public event EventHandler? Stopped;
@@ -280,10 +278,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
                 }
             }
 
-            var blockChain = _swarm!.BlockChain;
-            var blockInfo = new BlockInfo(blockChain, blockChain.Tip);
             UpdateNodeInfo();
-            BlockAppended?.Invoke(this, new(blockInfo));
+            BlockAppended?.Invoke(this, new(Info.Tip));
         }
     }
 
@@ -341,7 +337,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
                 SwarmEndPoint = EndPointUtility.ToString(SwarmEndPoint),
                 ConsensusEndPoint = EndPointUtility.ToString(ConsensusEndPoint),
                 GenesisHash = BlockChain.Genesis.Hash,
-                TipHash = BlockChain.Tip.Hash,
+                Tip = new BlockInfo(BlockChain.Tip),
                 IsRunning = IsRunning,
             };
         }

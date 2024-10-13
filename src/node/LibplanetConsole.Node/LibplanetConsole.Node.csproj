@@ -22,11 +22,11 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.64.0" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\**\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Blockchain\**\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Grpc\**\*.cs" />
-    <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Node\Protos\*.proto" GrpcServices="Server"/>
-    <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Server"/>
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Node\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Blockchain\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Server"/>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Server"/>
   </ItemGroup>
 
 </Project>

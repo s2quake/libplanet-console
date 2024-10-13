@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
+using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
@@ -34,7 +35,10 @@ internal sealed class Application
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
         });
 
-        services.AddLogging(options.LogPath, "node.log", _filters);
+        if (options.LogPath != string.Empty)
+        {
+            services.AddLogging(options.LogPath, "node.log", _filters);
+        }
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
@@ -46,6 +50,7 @@ internal sealed class Application
 
         services.AddNode(options);
         services.AddExplorer(_builder.Configuration);
+        services.AddEvidence();
 
         services.AddGrpc();
         services.AddGrpcReflection();
@@ -61,6 +66,7 @@ internal sealed class Application
 
         app.UseNode();
         app.UseExplorer();
+        app.UseEvidence();
         app.MapGet("/", () => "Libplanet-Node");
         app.UseAuthentication();
         app.UseAuthorization();

@@ -22,7 +22,9 @@ message NodeInformation {
     string address = 5;
     string genesis_hash = 6;
     string tip_hash = 7;
-    bool is_running = 8;
+    int64 tip_height = 8;
+    string tip_miner = 9;
+    bool is_running = 10;
 }
 
 message PingRequest {

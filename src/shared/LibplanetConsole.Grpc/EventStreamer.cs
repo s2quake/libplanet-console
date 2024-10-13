@@ -11,10 +11,10 @@ internal sealed class EventStreamer<TResponse, TEventArgs>(
 {
     protected async override Task OnRun(CancellationToken cancellationToken)
     {
-        void Handler(object? s, TEventArgs args)
+        async void Handler(object? s, TEventArgs args)
         {
             var value = selector(args);
-            WriteValue(value);
+            await WriteValueAsync(value);
         }
 
         attach(Handler);
@@ -45,10 +45,10 @@ internal sealed class EventStreamer<TResponse>(
 
     protected async override Task OnRun(CancellationToken cancellationToken)
     {
-        void Handler(object? s, EventArgs args)
+        async void Handler(object? s, EventArgs args)
         {
             var value = selector();
-            WriteValue(value);
+            await WriteValueAsync(value);
         }
 
         attach(Handler);

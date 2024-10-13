@@ -83,6 +83,13 @@ dotnet_diagnostic.MEN007.severity = none
 # MEN016: Avoid top-level statements
 dotnet_diagnostic.MEN016.severity = none
 
+[**/obj/**/*.cs]
+# SA1200: Using directives should be placed correctly
+dotnet_diagnostic.SA1200.severity = none
+
+# CS8981: The type name only contains lower-cased ascii characters
+dotnet_diagnostic.CS8981.severity = none
+
 [*.csproj]
 quote_type = double
 

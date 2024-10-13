@@ -20,6 +20,8 @@ internal sealed class NodeService(GrpcChannel channel)
 
     public event EventHandler? Stopped;
 
+    public NodeInfo Info { get; private set; }
+
     public void Dispose()
     {
         if (_isDisposed is false)
@@ -34,7 +36,7 @@ internal sealed class NodeService(GrpcChannel channel)
         }
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (_connection is not null)
         {
@@ -53,9 +55,10 @@ internal sealed class NodeService(GrpcChannel channel)
         await Task.WhenAll(
             _startedReceiver.StartAsync(cancellationToken),
             _stoppedReceiver.StartAsync(cancellationToken));
+        Info = (await GetInfoAsync(new(), cancellationToken: cancellationToken)).NodeInfo;
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task ReleaseAsync(CancellationToken cancellationToken)
     {
         if (_connection is null)
         {
@@ -77,6 +80,66 @@ internal sealed class NodeService(GrpcChannel channel)
         _connection.Disconnected -= Connection_Disconnected;
         await _connection.StopAsync(cancellationToken);
         _connection = null;
+    }
+
+    public override AsyncUnaryCall<StartResponse> StartAsync(
+        StartRequest request, CallOptions options)
+    {
+        if (_startedReceiver is null)
+        {
+            throw new InvalidOperationException($"{nameof(NodeService)} is not initialized.");
+        }
+
+        var call = base.StartAsync(request, options);
+        return new AsyncUnaryCall<StartResponse>(
+            responseAsync: ResponseAsync(),
+            call.ResponseHeadersAsync,
+            call.GetStatus,
+            call.GetTrailers,
+            call.Dispose);
+
+        async Task<StartResponse> ResponseAsync()
+        {
+            await _startedReceiver.StopAsync(default);
+            try
+            {
+                return await call.ResponseAsync;
+            }
+            finally
+            {
+                await _startedReceiver.StartAsync(default);
+            }
+        }
+    }
+
+    public override AsyncUnaryCall<StopResponse> StopAsync(
+        StopRequest request, CallOptions options)
+    {
+        if (_stoppedReceiver is null)
+        {
+            throw new InvalidOperationException($"{nameof(NodeService)} is not initialized.");
+        }
+
+        var call = base.StopAsync(request, options);
+        return new AsyncUnaryCall<StopResponse>(
+            responseAsync: ResponseAsync(),
+            call.ResponseHeadersAsync,
+            call.GetStatus,
+            call.GetTrailers,
+            call.Dispose);
+
+        async Task<StopResponse> ResponseAsync()
+        {
+            await _stoppedReceiver.StopAsync(default);
+            try
+            {
+                return await call.ResponseAsync;
+            }
+            finally
+            {
+                await _stoppedReceiver.StartAsync(default);
+            }
+        }
     }
 
     private static async Task CheckConnectionAsync(

@@ -8,11 +8,14 @@ namespace LibplanetConsole.Console.Executable.Tracers;
 internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
 {
     private readonly INodeCollection _nodes;
+    private readonly ILogger<NodeCollectionEventTracer> _logger;
     private INode? _current;
 
-    public NodeCollectionEventTracer(INodeCollection nodes)
+    public NodeCollectionEventTracer(
+        INodeCollection nodes, ILogger<NodeCollectionEventTracer> logger)
     {
         _nodes = nodes;
+        _logger = logger;
         UpdateCurrent(_nodes.Current);
         foreach (var node in _nodes)
         {
@@ -42,14 +45,14 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
 
     private void UpdateCurrent(INode? node)
     {
-        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain1)
+        if (_current?.GetKeyedService<IBlockChain>(INode.Key) is IBlockChain blockChain1)
         {
             blockChain1.BlockAppended -= BlockChain_BlockAppended;
         }
 
         _current = node;
 
-        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain2)
+        if (_current?.GetKeyedService<IBlockChain>(INode.Key) is IBlockChain blockChain2)
         {
             blockChain2.BlockAppended += BlockChain_BlockAppended;
         }
@@ -105,9 +108,11 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Height} '{hash.ToShortString()}' " +
-                      $"Appended by '{miner.ToShortString()}'";
-        System.Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
+        _logger.LogInformation(
+            "Block #{TipHeight} '{TipHash}' Appended by '{TipMiner}'",
+            blockInfo.Height,
+            hash.ToShortString(),
+            miner.ToShortString());
     }
 
     private void Node_Attached(object? sender, EventArgs e)

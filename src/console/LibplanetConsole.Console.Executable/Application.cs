@@ -34,7 +34,11 @@ internal sealed class Application
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
         });
 
-        services.AddLogging(options.LogPath, "console.log", _filters);
+        if (options.LogPath != string.Empty)
+        {
+            services.AddLogging(options.LogPath, "console.log", _filters);
+        }
+
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
 
@@ -43,8 +47,8 @@ internal sealed class Application
         services.AddSingleton<VersionCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
-        services.AddEvidence();
         services.AddConsole(options);
+        services.AddEvidence();
 
         services.AddGrpc();
         services.AddGrpcReflection();
