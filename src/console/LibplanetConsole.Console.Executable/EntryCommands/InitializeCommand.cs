@@ -14,9 +14,6 @@ namespace LibplanetConsole.Console.Executable.EntryCommands;
 [CommandSummary("Create a new repository to run Libplanet nodes and clients from the console.")]
 internal sealed class InitializeCommand : CommandBase
 {
-    private const int RandomPortSpacing = 10;
-    private readonly List<int> _portList = [];
-
     public InitializeCommand()
         : base("init")
     {
@@ -95,13 +92,13 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
-    [CommandProperty("port-spacing", InitValue = 2)]
-    [CommandSummary("Specifies the spacing between ports. Default is 2. " +
+    [CommandProperty("port-spacing", InitValue = PortGenerator.DefaultSpace)]
+    [CommandSummary("Specifies the spacing between ports. Default is 10. " +
                     "This option is only used when --port-generation-mode is set to " +
                     "'sequential'. If --port-generation-mode is set to 'random', " +
-                    "the value of this option is 5'")]
+                    "the value of this option is 10'")]
     [Category("Network")]
-    [Range(1, 10000)]
+    [Range(10, 10000)]
     public int PortSpacing { get; set; }
 
     [CommandProperty("port-generation-mode")]
@@ -111,11 +108,11 @@ internal sealed class InitializeCommand : CommandBase
 
     protected override void OnExecute()
     {
+        var portGenerator = new PortGenerator(Port);
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
-        var port = Port == 0 ? PortUtility.NextPort() : Port;
-        var nextPort = port;
-        var nodeOptions = GetNodeOptions(ref nextPort);
-        var clientOptions = GetClientOptions(ref nextPort);
+        var port = portGenerator.Current;
+        var nodeOptions = GetNodeOptions(portGenerator);
+        var clientOptions = GetClientOptions(portGenerator);
         var outputPath = Path.GetFullPath(RepositoryPath);
         var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
             ? DateTimeOffset : DateTimeOffset.UtcNow;
@@ -152,45 +149,7 @@ internal sealed class InitializeCommand : CommandBase
         TextWriterExtensions.WriteLineAsJson(writer, info);
     }
 
-    private int NextPort(ref int nextPort)
-    {
-        nextPort = GetPort(nextPort);
-        _portList.Add(nextPort);
-        _portList.Sort();
-        return nextPort;
-
-        int GetPort(int nextPort)
-        {
-            if (PortGenerationMode == PortGenerationMode.Random)
-            {
-                var port = PortUtility.NextPort();
-                while (IsValidRandomPort(port) is false)
-                {
-                    port = PortUtility.NextPort();
-                }
-
-                return port;
-            }
-
-            return nextPort + PortSpacing;
-        }
-    }
-
-    private bool IsValidRandomPort(int randomPort)
-    {
-        for (var i = 0; i < _portList.Count; i++)
-        {
-            var port = _portList[i];
-            if (Math.Abs(port - randomPort) < RandomPortSpacing)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private NodeOptions[] GetNodeOptions(ref int nextPort)
+    private NodeOptions[] GetNodeOptions(PortGenerator portGenerator)
     {
         var privateKeys = GetNodes();
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
@@ -198,7 +157,7 @@ internal sealed class InitializeCommand : CommandBase
         {
             var nodeOptions = new NodeOptions
             {
-                EndPoint = GetLocalHost(NextPort(ref nextPort)),
+                EndPoint = GetLocalHost(portGenerator.Next()),
                 PrivateKey = privateKey,
                 StorePath = "store",
                 LogPath = "log",
@@ -211,7 +170,7 @@ internal sealed class InitializeCommand : CommandBase
         return [.. nodeOptionsList];
     }
 
-    private ClientOptions[] GetClientOptions(ref int nextPort)
+    private ClientOptions[] GetClientOptions(PortGenerator portGenerator)
     {
         var privateKeys = GetClients();
         var clientOptionsList = new List<ClientOptions>(privateKeys.Length);
@@ -219,7 +178,7 @@ internal sealed class InitializeCommand : CommandBase
         {
             var clientOptions = new ClientOptions
             {
-                EndPoint = GetLocalHost(NextPort(ref nextPort)),
+                EndPoint = GetLocalHost(portGenerator.Next()),
                 PrivateKey = privateKey,
                 LogPath = "log",
             };

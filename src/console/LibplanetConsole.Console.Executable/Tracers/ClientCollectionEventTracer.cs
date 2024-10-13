@@ -7,6 +7,7 @@ namespace LibplanetConsole.Console.Executable.Tracers;
 internal sealed class ClientCollectionEventTracer : IHostedService, IDisposable
 {
     private readonly IClientCollection _clients;
+    private bool _isDisposed;
 
     public ClientCollectionEventTracer(IClientCollection clients)
     {
@@ -27,12 +28,16 @@ internal sealed class ClientCollectionEventTracer : IHostedService, IDisposable
 
     void IDisposable.Dispose()
     {
-        foreach (var client in _clients)
+        if (_isDisposed is false)
         {
-            DetachEvent(client);
-        }
+            foreach (var client in _clients)
+            {
+                DetachEvent(client);
+            }
 
-        _clients.CollectionChanged -= Clients_CollectionChanged;
+            _clients.CollectionChanged -= Clients_CollectionChanged;
+            _isDisposed = true;
+        }
     }
 
     private void AttachEvent(IClient client)

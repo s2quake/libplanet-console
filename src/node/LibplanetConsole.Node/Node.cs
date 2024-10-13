@@ -32,10 +32,10 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private readonly byte[] _genesis;
     private readonly AppProtocolVersion _appProtocolVersion = SeedNode.AppProtocolVersion;
     private readonly IActionProvider _actionProvider;
+    private readonly int _blocksyncPort;
+    private readonly int _consensusPort;
 
     private EndPoint? _seedEndPoint;
-    private EndPoint? _blocksyncEndPoint;
-    private EndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
@@ -50,6 +50,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _actionProvider = options.ActionProvider ?? ActionProvider.Default;
         _logger = serviceProvider.GetLogger<Node>();
         _genesis = options.Genesis;
+        _blocksyncPort = options.Port + ApplicationOptions.BlocksyncPortIncrement;
+        _consensusPort = options.Port + ApplicationOptions.ConsensusPortIncrement;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
     }
@@ -57,18 +59,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     public event EventHandler? Started;
 
     public event EventHandler? Stopped;
-
-    public EndPoint SwarmEndPoint
-    {
-        get => _blocksyncEndPoint ?? throw new InvalidOperationException();
-        set => _blocksyncEndPoint = value;
-    }
-
-    public EndPoint ConsensusEndPoint
-    {
-        get => _consensusEndPoint ?? throw new InvalidOperationException();
-        set => _consensusEndPoint = value;
-    }
 
     public string StorePath => _storePath;
 
@@ -152,12 +142,12 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
-        var blocksyncEndPoint = _blocksyncEndPoint ?? EndPointUtility.NextEndPoint();
-        var consensusEndPoint = _consensusEndPoint ?? EndPointUtility.NextEndPoint();
+        var blocksyncPort = _blocksyncPort;
+        var consensusPort = _consensusPort;
         var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
         var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
         var swarmTransport
-            = await CreateTransport(privateKey, blocksyncEndPoint, appProtocolVersion);
+            = await CreateTransport(privateKey, blocksyncPort, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = [blocksyncSeedPeer],
@@ -168,12 +158,12 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
-            endPoint: consensusEndPoint,
+            port: consensusPort,
             appProtocolVersion: appProtocolVersion);
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = [consensusSeedPeer],
-            ConsensusPort = EndPointUtility.GetHostAndPort(consensusEndPoint).Port,
+            ConsensusPort = consensusPort,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
@@ -184,8 +174,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             renderer: this,
             actionProvider: _actionProvider);
 
-        _blocksyncEndPoint = blocksyncEndPoint;
-        _consensusEndPoint = consensusEndPoint;
         _swarm = new Swarm(
             blockChain: blockChain,
             privateKey: privateKey,
@@ -220,8 +208,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             _logger.LogDebug("Node.Swarm is stopped: {Address}", Address);
         }
 
-        _blocksyncEndPoint = null;
-        _consensusEndPoint = null;
         _swarm = null;
         _startTask = Task.CompletedTask;
         IsRunning = false;
@@ -234,9 +220,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     {
         if (_isDisposed is false)
         {
-            _blocksyncEndPoint = null;
-            _consensusEndPoint = null;
-
             if (_swarm is not null)
             {
                 await _swarm.StopAsync(cancellationToken: default);
@@ -284,14 +267,13 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, EndPoint endPoint, AppProtocolVersion appProtocolVersion)
+        PrivateKey privateKey, int port, AppProtocolVersion appProtocolVersion)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,
         };
-        var (host, port) = EndPointUtility.GetHostAndPort(endPoint);
-        var hostOptions = new HostOptions(host, [], port);
+        var hostOptions = new HostOptions("localhost", [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
@@ -328,14 +310,14 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             ProcessId = Environment.ProcessId,
             Address = Address,
             AppProtocolVersion = $"{appProtocolVersion}",
+            BlocksyncPort = _blocksyncPort,
+            ConsensusPort = _consensusPort,
         };
 
         if (IsRunning == true)
         {
             nodeInfo = nodeInfo with
             {
-                SwarmEndPoint = EndPointUtility.ToString(SwarmEndPoint),
-                ConsensusEndPoint = EndPointUtility.ToString(ConsensusEndPoint),
                 GenesisHash = BlockChain.Genesis.Hash,
                 Tip = new BlockInfo(BlockChain.Tip),
                 IsRunning = IsRunning,

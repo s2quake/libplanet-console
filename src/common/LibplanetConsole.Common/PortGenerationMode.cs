@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Console.Executable.EntryCommands;
+namespace LibplanetConsole.Common;
 
 public enum PortGenerationMode
 {

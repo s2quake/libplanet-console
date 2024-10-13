@@ -2,6 +2,9 @@ namespace LibplanetConsole.Console;
 
 public sealed record class ApplicationOptions
 {
+    public const int SeedBlocksyncPortIncrement = 6;
+    public const int SeedConsensusPortIncrement = 7;
+
     public ApplicationOptions(int port)
     {
         Port = port;

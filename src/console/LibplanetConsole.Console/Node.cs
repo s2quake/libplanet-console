@@ -24,8 +24,6 @@ internal sealed partial class Node : INode, IBlockChain
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
-    private EndPoint? _blocksyncEndPoint;
-    private EndPoint? _consensusEndPoint;
     private NodeInfo _nodeInfo;
     private bool _isDisposed;
     private NodeProcess? _process;
@@ -51,12 +49,6 @@ internal sealed partial class Node : INode, IBlockChain
     public event EventHandler? Stopped;
 
     public event EventHandler? Disposed;
-
-    public EndPoint SwarmEndPoint
-        => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
-
-    public EndPoint ConsensusEndPoint
-        => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
 
     public PublicKey PublicKey { get; }
 
@@ -210,8 +202,6 @@ internal sealed partial class Node : INode, IBlockChain
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.StartAsync(request, callOptions);
         _nodeInfo = response.NodeInfo;
-        _blocksyncEndPoint = Parse(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));

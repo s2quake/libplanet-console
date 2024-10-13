@@ -91,10 +91,11 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions()
     {
-        var port = Port == 0 ? PortUtility.NextPort() : Port;
+        var portGenerator = new PortGenerator(Port);
+        var port = portGenerator.Current;
         var endPoint = GetLocalHost(port);
-        var nodeOptions = GetNodeOptions(endPoint, GetNodes());
-        var clientOptions = GetClientOptions(nodeOptions, GetClients());
+        var nodeOptions = GetNodeOptions(endPoint, GetNodes(), portGenerator);
+        var clientOptions = GetClientOptions(nodeOptions, GetClients(), portGenerator);
         var repository = new Repository(port, nodeOptions, clientOptions);
         var genesis = TryGetGenesis(out var g) == true ? g : repository.Genesis;
         return new ApplicationOptions(port)
@@ -130,22 +131,22 @@ internal sealed record class ApplicationSettings
     }
 
     private static NodeOptions[] GetNodeOptions(
-        EndPoint endPoint, PrivateKey[] nodePrivateKeys)
+        EndPoint endPoint, PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
-            EndPoint = NextEndPoint(),
+            EndPoint = GetLocalHost(portGenerator.Next()),
             PrivateKey = key,
             SeedEndPoint = endPoint,
         })];
     }
 
     private static ClientOptions[] GetClientOptions(
-        NodeOptions[] nodeOptions, PrivateKey[] clientPrivateKeys)
+        NodeOptions[] nodeOptions, PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
-            EndPoint = NextEndPoint(),
+            EndPoint = GetLocalHost(portGenerator.Next()),
             NodeEndPoint = Random(nodeOptions).EndPoint,
             PrivateKey = key,
         })];

@@ -10,6 +10,7 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
     private readonly INodeCollection _nodes;
     private readonly ILogger<NodeCollectionEventTracer> _logger;
     private INode? _current;
+    private bool _isDisposed;
 
     public NodeCollectionEventTracer(
         INodeCollection nodes, ILogger<NodeCollectionEventTracer> logger)
@@ -34,12 +35,16 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
 
     void IDisposable.Dispose()
     {
-        _nodes.CurrentChanged -= Nodes_CurrentChanged;
-        _nodes.CollectionChanged -= Nodes_CollectionChanged;
-        UpdateCurrent(null);
-        foreach (var node in _nodes)
+        if (_isDisposed is false)
         {
-            DetachEvent(node);
+            _nodes.CurrentChanged -= Nodes_CurrentChanged;
+            _nodes.CollectionChanged -= Nodes_CollectionChanged;
+            foreach (var node in _nodes)
+            {
+                DetachEvent(node);
+            }
+
+            _isDisposed = true;
         }
     }
 
@@ -64,6 +69,7 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
         node.Detached += Node_Detached;
         node.Started += Node_Started;
         node.Stopped += Node_Stopped;
+        node.Disposed += Node_Disposed;
     }
 
     private void DetachEvent(INode node)
@@ -72,6 +78,7 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
         node.Detached -= Node_Detached;
         node.Started -= Node_Started;
         node.Stopped -= Node_Stopped;
+        node.Disposed += Node_Disposed;
     }
 
     private void Nodes_CurrentChanged(object? sender, EventArgs e)
@@ -152,6 +159,14 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
             var message = $"Node stopped: {node.Address.ToShortString()}";
             var colorType = TerminalColorType.BrightBlue;
             System.Console.Out.WriteColoredLine(message, colorType);
+        }
+    }
+
+    private void Node_Disposed(object? sender, EventArgs e)
+    {
+        if (sender is INode node && node == _current)
+        {
+            _current = null;
         }
     }
 }

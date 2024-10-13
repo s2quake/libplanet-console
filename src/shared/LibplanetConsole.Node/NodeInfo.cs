@@ -9,9 +9,9 @@ public readonly record struct NodeInfo
 
     public string AppProtocolVersion { get; init; }
 
-    public string SwarmEndPoint { get; init; }
+    public int BlocksyncPort { get; init; }
 
-    public string ConsensusEndPoint { get; init; }
+    public int ConsensusPort { get; init; }
 
     public Address Address { get; init; }
 
@@ -25,8 +25,6 @@ public readonly record struct NodeInfo
     {
         ProcessId = -1,
         AppProtocolVersion = string.Empty,
-        SwarmEndPoint = string.Empty,
-        ConsensusEndPoint = string.Empty,
         Tip = BlockInfo.Empty,
     };
 
@@ -36,8 +34,8 @@ public readonly record struct NodeInfo
         {
             ProcessId = nodeInfo.ProcessId,
             AppProtocolVersion = nodeInfo.AppProtocolVersion,
-            SwarmEndPoint = nodeInfo.SwarmEndPoint,
-            ConsensusEndPoint = nodeInfo.ConsensusEndPoint,
+            BlocksyncPort = nodeInfo.BlocksyncPort,
+            ConsensusPort = nodeInfo.ConsensusPort,
             Address = new Address(nodeInfo.Address),
             GenesisHash = BlockHash.FromString(nodeInfo.GenesisHash),
             Tip = new BlockInfo
@@ -56,8 +54,8 @@ public readonly record struct NodeInfo
         {
             ProcessId = nodeInfo.ProcessId,
             AppProtocolVersion = nodeInfo.AppProtocolVersion,
-            SwarmEndPoint = nodeInfo.SwarmEndPoint,
-            ConsensusEndPoint = nodeInfo.ConsensusEndPoint,
+            BlocksyncPort = nodeInfo.BlocksyncPort,
+            ConsensusPort = nodeInfo.ConsensusPort,
             Address = nodeInfo.Address.ToHex(),
             GenesisHash = nodeInfo.GenesisHash.ToString(),
             TipHash = nodeInfo.Tip.Hash.ToString(),
