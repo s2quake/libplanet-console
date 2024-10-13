@@ -1,4 +1,5 @@
 using LibplanetConsole.Common;
+using static LibplanetConsole.Common.EndPointUtility;
 using static LibplanetConsole.Console.ProcessEnvironment;
 
 namespace LibplanetConsole.Console;
@@ -20,9 +21,14 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
             }
             else
             {
+                if (GetHost(clientOptions.EndPoint) is not "localhost")
+                {
+                    throw new InvalidOperationException("EndPoint must be localhost.");
+                }
+
                 argumentList.Add("run");
-                argumentList.Add("--end-point");
-                argumentList.Add(EndPointUtility.ToString(clientOptions.EndPoint));
+                argumentList.Add("--port");
+                argumentList.Add($"{GetPort(clientOptions.EndPoint)}");
                 argumentList.Add("--private-key");
                 argumentList.Add(PrivateKeyUtility.ToString(clientOptions.PrivateKey));
 

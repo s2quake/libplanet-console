@@ -12,7 +12,7 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicatio
     {
          _info = new()
         {
-            EndPoint = options.EndPoint,
+            Port = options.Port,
             LogPath = options.LogPath,
             NoProcess = options.NoProcess,
             Detach = options.Detach,

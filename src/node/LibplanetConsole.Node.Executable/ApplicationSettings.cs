@@ -6,6 +6,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Executable;
 
@@ -13,10 +14,10 @@ namespace LibplanetConsole.Node.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint on which the node will run. " +
-                    "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; init; } = string.Empty;
+    [CommandSummary("Indicates the port on which the node will run. " +
+                    "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; init; }
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the node. " +
@@ -93,12 +94,12 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions()
     {
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
+        var port = Port == 0 ? PortUtility.NextPort() : Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
         var actionProvider = ModuleLoader.LoadActionLoader(
             ActionProviderModulePath, ActionProviderType);
-        return new ApplicationOptions(endPoint, privateKey, genesis)
+        return new ApplicationOptions(port, privateKey, genesis)
         {
             ParentProcessId = ParentProcessId,
             SeedEndPoint = GetSeedEndPoint(),
@@ -115,10 +116,10 @@ internal sealed record class ApplicationSettings
         {
             if (SeedEndPoint != string.Empty)
             {
-                return EndPointUtility.Parse(SeedEndPoint);
+                return Parse(SeedEndPoint);
             }
 
-            return IsSingleNode is true ? endPoint : null;
+            return IsSingleNode is true ? GetLocalHost(port) : null;
         }
     }
 

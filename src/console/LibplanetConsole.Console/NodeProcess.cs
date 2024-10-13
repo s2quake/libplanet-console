@@ -1,4 +1,5 @@
 using LibplanetConsole.Common;
+using static LibplanetConsole.Common.EndPointUtility;
 using static LibplanetConsole.Console.ProcessEnvironment;
 
 namespace LibplanetConsole.Console;
@@ -19,9 +20,14 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
             }
             else
             {
+                if (GetHost(nodeOptions.EndPoint) is not "localhost")
+                {
+                    throw new InvalidOperationException("EndPoint must be localhost.");
+                }
+
                 argumentList.Add("run");
-                argumentList.Add("--end-point");
-                argumentList.Add(EndPointUtility.ToString(nodeOptions.EndPoint));
+                argumentList.Add("--port");
+                argumentList.Add($"{GetPort(nodeOptions.EndPoint)}");
                 argumentList.Add("--private-key");
                 argumentList.Add(PrivateKeyUtility.ToString(nodeOptions.PrivateKey));
 

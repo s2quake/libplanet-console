@@ -13,7 +13,7 @@ internal sealed class ApplicationInfoProvider
     {
         _info = new()
         {
-            EndPoint = options.EndPoint,
+            Port = options.Port,
             NodeEndPoint = options.NodeEndPoint,
             LogPath = options.LogPath,
         };

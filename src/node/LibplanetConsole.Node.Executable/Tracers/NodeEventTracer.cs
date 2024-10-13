@@ -30,14 +30,14 @@ internal sealed class NodeEventTracer : IHostedService, IDisposable
 
     private void Node_Started(object? sender, EventArgs e)
     {
-        var endPoint = _options.EndPoint;
+        var endPoint = _options.Port;
         var message = $"Node has been started.: {endPoint}";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 
     private void Node_Stopped(object? sender, EventArgs e)
     {
-        var endPoint = _options.EndPoint;
+        var endPoint = _options.Port;
         var message = $"Node has been stopped.: {endPoint}";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }

@@ -12,10 +12,10 @@ namespace LibplanetConsole.Client.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint on which the client will run. " +
-                    "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; init; } = string.Empty;
+    [CommandSummary("Indicates the port on which the client will run. " +
+                    "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; init; }
 
     [CommandProperty]
     [CommandSummary("Indicates the private key of the client. " +
@@ -47,9 +47,9 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions()
     {
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
+        var port = Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        return new ApplicationOptions(endPoint, privateKey)
+        return new ApplicationOptions(port, privateKey)
         {
             ParentProcessId = ParentProcessId,
             NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),

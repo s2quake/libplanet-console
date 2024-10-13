@@ -1,3 +1,4 @@
+using LibplanetConsole.Common;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Hosting;
 using static LibplanetConsole.Common.EndPointUtility;
@@ -34,12 +35,12 @@ internal sealed class SeedService : ISeedService
         _blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = NextEndPoint(),
+            Port = PortUtility.NextPort(),
         });
         _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            EndPoint = NextEndPoint(),
+            Port = PortUtility.NextPort(),
         });
         await _blocksyncSeedNode.StartAsync(cancellationToken);
         await _consensusSeedNode.StartAsync(cancellationToken);

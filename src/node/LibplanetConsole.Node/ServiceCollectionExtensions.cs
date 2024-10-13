@@ -14,10 +14,11 @@ public static class ServiceCollectionExtensions
         this IServiceCollection @this, ApplicationOptions options)
     {
         var synchronizationContext = SynchronizationContext.Current ?? new();
+        var localHost = GetLocalHost(options.Port);
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
         @this.AddSingleton(synchronizationContext);
         @this.AddSingleton(options);
-        if (CompareEndPoint(options.SeedEndPoint, options.EndPoint) is true)
+        if (CompareEndPoint(options.SeedEndPoint, localHost) is true)
         {
             @this.AddSingleton<SeedService>()
                  .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());

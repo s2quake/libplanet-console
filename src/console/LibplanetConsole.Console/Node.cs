@@ -9,6 +9,7 @@ using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using static LibplanetConsole.Common.EndPointUtility;
 using NodeInfo = LibplanetConsole.Node.NodeInfo;
 
 namespace LibplanetConsole.Console;
@@ -201,7 +202,7 @@ internal sealed partial class Node : INode, IBlockChain
 
         var applicationOptions = this.GetRequiredService<ApplicationOptions>();
         var seedEndPoint = EndPointUtility.ToString(
-            _nodeOptions.SeedEndPoint ?? applicationOptions.EndPoint);
+            _nodeOptions.SeedEndPoint ?? GetLocalHost(applicationOptions.Port));
         var request = new StartRequest
         {
             SeedEndPoint = seedEndPoint,
@@ -209,8 +210,8 @@ internal sealed partial class Node : INode, IBlockChain
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.StartAsync(request, callOptions);
         _nodeInfo = response.NodeInfo;
-        _blocksyncEndPoint = EndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = EndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
+        _blocksyncEndPoint = Parse(_nodeInfo.SwarmEndPoint);
+        _consensusEndPoint = Parse(_nodeInfo.ConsensusEndPoint);
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));

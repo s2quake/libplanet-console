@@ -2,9 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable;
 
@@ -12,10 +12,10 @@ namespace LibplanetConsole.Console.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("The endpoint of the libplanet-console. " +
-                    "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; init; } = string.Empty;
+    [CommandSummary("The port of the libplanet-console. " +
+                    "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; init; }
 
 #if DEBUG
     [CommandProperty(InitValue = 1)]
@@ -91,12 +91,13 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions()
     {
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
+        var port = Port == 0 ? PortUtility.NextPort() : Port;
+        var endPoint = GetLocalHost(port);
         var nodeOptions = GetNodeOptions(endPoint, GetNodes());
         var clientOptions = GetClientOptions(nodeOptions, GetClients());
-        var repository = new Repository(endPoint, nodeOptions, clientOptions);
+        var repository = new Repository(port, nodeOptions, clientOptions);
         var genesis = TryGetGenesis(out var g) == true ? g : repository.Genesis;
-        return new ApplicationOptions(endPoint)
+        return new ApplicationOptions(port)
         {
             LogPath = GetFullPath(LogPath),
             Nodes = repository.Nodes,
@@ -133,7 +134,7 @@ internal sealed record class ApplicationSettings
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
-            EndPoint = EndPointUtility.NextEndPoint(),
+            EndPoint = NextEndPoint(),
             PrivateKey = key,
             SeedEndPoint = endPoint,
         })];
@@ -144,7 +145,7 @@ internal sealed record class ApplicationSettings
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
-            EndPoint = EndPointUtility.NextEndPoint(),
+            EndPoint = NextEndPoint(),
             NodeEndPoint = Random(nodeOptions).EndPoint,
             PrivateKey = key,
         })];

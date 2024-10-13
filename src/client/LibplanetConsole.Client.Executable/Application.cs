@@ -17,7 +17,7 @@ internal sealed class Application
 
     public Application(ApplicationOptions options, object[] instances)
     {
-        var (_, port) = EndPointUtility.GetHostAndPort(options.EndPoint);
+        var port = options.Port;
         var services = _builder.Services;
         foreach (var instance in instances)
         {
@@ -27,6 +27,7 @@ internal sealed class Application
         _builder.WebHost.ConfigureKestrel(options =>
         {
             options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
         });
 
         if (options.LogPath != string.Empty)

@@ -5,6 +5,7 @@ using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -28,10 +29,10 @@ internal sealed class InitializeCommand : CommandBase
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The endpoint of the node. " +
-                    "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; set; } = string.Empty;
+    [CommandSummary("The port of the node. " +
+                    "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; set; }
 
     [CommandProperty]
     [CommandSummary("The directory path to store the block. " +
@@ -90,19 +91,19 @@ internal sealed class InitializeCommand : CommandBase
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
+        var port = Port == 0 ? PortUtility.NextPort() : Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var storePath = Path.Combine(outputPath, StorePath.Fallback("store"));
         var logPath = Path.Combine(outputPath, LogPath.Fallback("log"));
         var genesisPath = Path.Combine(outputPath, GenesisPath.Fallback("genesis"));
         var repository = new Repository
         {
-            EndPoint = endPoint,
+            Port = port,
             PrivateKey = privateKey,
             StorePath = storePath,
             LogPath = logPath,
             GenesisPath = genesisPath,
-            SeedEndPoint = IsSingleNode is true ? endPoint : null,
+            SeedEndPoint = IsSingleNode is true ? GetLocalHost(port) : null,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
         };

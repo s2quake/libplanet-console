@@ -58,6 +58,14 @@ public static class EndPointUtility
         };
     }
 
+    public static string GetHost(EndPoint endPoint)
+        => GetHostAndPort(endPoint).Host;
+
+    public static int GetPort(EndPoint endPoint)
+        => GetHostAndPort(endPoint).Port;
+
+    public static DnsEndPoint GetLocalHost(int port) => new("localhost", port);
+
     public static string ToString(EndPoint? endPoint)
     {
         if (endPoint is DnsEndPoint dnsEndPoint)

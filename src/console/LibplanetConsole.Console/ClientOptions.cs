@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
@@ -32,10 +33,10 @@ public sealed record class ClientOptions
 
         return new()
         {
-            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
+            EndPoint = GetLocalHost(applicationSettings.Port),
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            NodeEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.NodeEndPoint),
+            NodeEndPoint = ParseOrDefault(applicationSettings.NodeEndPoint),
             RepositoryPath = repositoryPath,
         };
     }
@@ -50,7 +51,7 @@ public sealed record class ClientOptions
 
     private sealed record class ApplicationSettings
     {
-        public string EndPoint { get; init; } = string.Empty;
+        public int Port { get; init; } = 0;
 
         public string PrivateKey { get; init; } = string.Empty;
 

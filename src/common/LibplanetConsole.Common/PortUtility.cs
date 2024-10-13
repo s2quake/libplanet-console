@@ -8,7 +8,7 @@ public static class PortUtility
     private static readonly List<int> UsedPortList = [];
     private static readonly object LockObject = new();
 
-    public static int GetPort()
+    public static int NextPort()
     {
         lock (LockObject)
         {

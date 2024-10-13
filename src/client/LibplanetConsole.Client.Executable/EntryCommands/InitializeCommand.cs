@@ -27,10 +27,10 @@ internal sealed class InitializeCommand : CommandBase
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The endpoint of the client. " +
+    [CommandSummary("The port of the client. " +
                     "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; set; } = string.Empty;
+    [NonNegative]
+    public int Port { get; set; }
 
     [CommandProperty]
     [CommandSummary("Indicates the file path to save logs.")]
@@ -44,12 +44,12 @@ internal sealed class InitializeCommand : CommandBase
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(OutputPath);
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
+        var port = Port == 0 ? PortUtility.NextPort() : Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var logPath = Path.Combine(outputPath, LogPath.Fallback("log"));
         var repository = new Repository
         {
-            EndPoint = endPoint,
+            Port = port,
             PrivateKey = privateKey,
             LogPath = logPath,
         };

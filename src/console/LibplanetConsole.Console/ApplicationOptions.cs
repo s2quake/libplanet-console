@@ -2,12 +2,12 @@ namespace LibplanetConsole.Console;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(EndPoint endPoint)
+    public ApplicationOptions(int port)
     {
-        EndPoint = endPoint;
+        Port = port;
     }
 
-    public EndPoint EndPoint { get; }
+    public int Port { get; }
 
     public NodeOptions[] Nodes { get; init; } = [];
 

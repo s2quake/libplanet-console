@@ -5,6 +5,7 @@ using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using LibplanetConsole.Common;
 using Serilog;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Seed;
 
@@ -30,7 +31,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
     public PeerCollection Peers { get; } = new(seedOptions);
 
     public BoundPeer BoundPeer { get; } = new(
-        seedOptions.PrivateKey.PublicKey, (DnsEndPoint)seedOptions.EndPoint);
+        seedOptions.PrivateKey.PublicKey, GetLocalHost(seedOptions.Port));
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -107,8 +108,8 @@ public sealed class SeedNode(SeedOptions seedOptions)
             AppProtocolVersion = appProtocolVersion,
             TrustedAppProtocolVersionSigners = [],
         };
-        var (host, port) = EndPointUtility.GetHostAndPort(seedOptions.EndPoint);
-        var hostOptions = new HostOptions(host, [], port);
+        var port = seedOptions.Port;
+        var hostOptions = new HostOptions("localhost", [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
