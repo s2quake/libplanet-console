@@ -1,17 +1,22 @@
 using System.Collections.Specialized;
 using JSSoft.Terminals;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplicationService
+internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
 {
-    private readonly INodeCollection _nodes = nodes;
+    private readonly INodeCollection _nodes;
+    private readonly ILogger<NodeCollectionEventTracer> _logger;
     private INode? _current;
+    private bool _isDisposed;
 
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    public NodeCollectionEventTracer(
+        INodeCollection nodes, ILogger<NodeCollectionEventTracer> logger)
     {
+        _nodes = nodes;
+        _logger = logger;
         UpdateCurrent(_nodes.Current);
         foreach (var node in _nodes)
         {
@@ -20,32 +25,39 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
 
         _nodes.CurrentChanged += Nodes_CurrentChanged;
         _nodes.CollectionChanged += Nodes_CollectionChanged;
-        return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
-    {
-        UpdateCurrent(null);
-        foreach (var node in _nodes)
-        {
-            DetachEvent(node);
-        }
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
-        _nodes.CurrentChanged -= Nodes_CurrentChanged;
-        _nodes.CollectionChanged -= Nodes_CollectionChanged;
-        return ValueTask.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    void IDisposable.Dispose()
+    {
+        if (_isDisposed is false)
+        {
+            _nodes.CurrentChanged -= Nodes_CurrentChanged;
+            _nodes.CollectionChanged -= Nodes_CollectionChanged;
+            foreach (var node in _nodes)
+            {
+                DetachEvent(node);
+            }
+
+            _isDisposed = true;
+        }
     }
 
     private void UpdateCurrent(INode? node)
     {
-        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain1)
+        if (_current?.GetKeyedService<IBlockChain>(INode.Key) is IBlockChain blockChain1)
         {
             blockChain1.BlockAppended -= BlockChain_BlockAppended;
         }
 
         _current = node;
 
-        if (_current?.GetService(typeof(IBlockChain)) is IBlockChain blockChain2)
+        if (_current?.GetKeyedService<IBlockChain>(INode.Key) is IBlockChain blockChain2)
         {
             blockChain2.BlockAppended += BlockChain_BlockAppended;
         }
@@ -57,6 +69,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         node.Detached += Node_Detached;
         node.Started += Node_Started;
         node.Stopped += Node_Stopped;
+        node.Disposed += Node_Disposed;
     }
 
     private void DetachEvent(INode node)
@@ -65,6 +78,7 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         node.Detached -= Node_Detached;
         node.Started -= Node_Started;
         node.Stopped -= Node_Stopped;
+        node.Disposed += Node_Disposed;
     }
 
     private void Nodes_CurrentChanged(object? sender, EventArgs e)
@@ -101,9 +115,11 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Height} '{hash.ToShortString()}' " +
-                      $"Appended by '{miner.ToShortString()}'";
-        System.Console.Out.WriteColoredLine(message, TerminalColorType.BrightBlue);
+        _logger.LogInformation(
+            "Block #{TipHeight} '{TipHash}' Appended by '{TipMiner}'",
+            blockInfo.Height,
+            hash.ToShortString(),
+            miner.ToShortString());
     }
 
     private void Node_Attached(object? sender, EventArgs e)
@@ -143,6 +159,14 @@ internal sealed class NodeCollectionEventTracer(INodeCollection nodes) : IApplic
             var message = $"Node stopped: {node.Address.ToShortString()}";
             var colorType = TerminalColorType.BrightBlue;
             System.Console.Out.WriteColoredLine(message, colorType);
+        }
+    }
+
+    private void Node_Disposed(object? sender, EventArgs e)
+    {
+        if (sender is INode node && node == _current)
+        {
+            _current = null;
         }
     }
 }

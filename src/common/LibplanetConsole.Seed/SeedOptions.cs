@@ -1,12 +1,10 @@
-﻿using System.Net;
-
-namespace LibplanetConsole.Seed;
+﻿namespace LibplanetConsole.Seed;
 
 public sealed record class SeedOptions
 {
     public required PrivateKey PrivateKey { get; init; }
 
-    public required EndPoint EndPoint { get; init; }
+    public required int Port { get; init; }
 
     public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromSeconds(5);
 

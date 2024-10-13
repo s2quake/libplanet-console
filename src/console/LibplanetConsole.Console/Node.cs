@@ -1,41 +1,42 @@
+using Grpc.Core;
+using Grpc.Net.Client;
+using LibplanetConsole.Blockchain;
+using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Console.Services;
+using LibplanetConsole.Common.Threading;
+using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Node;
-using LibplanetConsole.Node.Services;
+using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using static LibplanetConsole.Common.EndPointUtility;
+using NodeInfo = LibplanetConsole.Node.NodeInfo;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockChainCallback
+internal sealed partial class Node : INode, IBlockChain
 {
-    private static readonly Codec _codec = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly NodeOptions _nodeOptions;
-    private readonly RemoteService<INodeService, INodeCallback> _remoteService;
-    private readonly RemoteService<IBlockChainService, IBlockChainCallback> _blockChainService;
+    private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _processCancellationTokenSource = new();
-    private RemoteServiceContext? _remoteServiceContext;
-    private EndPoint? _blocksyncEndPoint;
-    private EndPoint? _consensusEndPoint;
-    private Guid _closeToken;
+    private NodeService? _nodeService;
+    private BlockChainService? _blockChainService;
+    private GrpcChannel? _channel;
     private NodeInfo _nodeInfo;
     private bool _isDisposed;
-    private bool _isInProgress;
     private NodeProcess? _process;
     private Task _processTask = Task.CompletedTask;
+    private INodeContent[]? _contents;
 
     public Node(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
         _serviceProvider = serviceProvider;
         _nodeOptions = nodeOptions;
+        _privateKey = nodeOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Node>();
-        _remoteService = new(this);
-        _blockChainService = new(this);
         PublicKey = nodeOptions.PrivateKey.PublicKey;
         _logger.LogDebug("Node is created: {Address}", Address);
     }
@@ -50,17 +51,11 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public event EventHandler? Disposed;
 
-    public EndPoint SwarmEndPoint
-        => _blocksyncEndPoint ?? throw new InvalidOperationException("Peer is not set.");
-
-    public EndPoint ConsensusEndPoint
-        => _consensusEndPoint ?? throw new InvalidOperationException("ConsensusPeer is not set.");
-
     public PublicKey PublicKey { get; }
 
     public Address Address => PublicKey.Address;
 
-    public bool IsAttached => _closeToken != Guid.Empty;
+    public bool IsAttached { get; private set; }
 
     public bool IsRunning { get; private set; }
 
@@ -68,7 +63,33 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
 
     public NodeInfo Info => _nodeInfo;
 
+    public INodeContent[] Contents
+    {
+        get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
+        set => _contents = value;
+    }
+
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
+
+    public object? GetKeyedService(Type serviceType, object? serviceKey)
+    {
+        if (_serviceProvider is IKeyedServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetKeyedService(serviceType, serviceKey);
+        }
+
+        throw new InvalidOperationException("Service provider does not support keyed service.");
+    }
+
+    public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
+    {
+        if (_serviceProvider is IKeyedServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetRequiredKeyedService(serviceType, serviceKey);
+        }
+
+        throw new InvalidOperationException("Service provider does not support keyed service.");
+    }
 
     public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
 
@@ -77,35 +98,52 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
 
-        _nodeInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
+        if (_nodeService is null)
+        {
+            throw new InvalidOperationException("Node is not attached.");
+        }
+
+        var request = new GetInfoRequest();
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _nodeService.GetInfoAsync(request, callOptions);
+        _nodeInfo = response.NodeInfo;
         return _nodeInfo;
     }
 
     public async Task AttachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken != Guid.Empty,
-            message: "Node is already attached.");
 
-        if (_remoteServiceContext is not null)
+        if (_channel is not null)
         {
             throw new InvalidOperationException("Node is already attached.");
         }
 
-        _remoteServiceContext = new RemoteServiceContext(
-            [_remoteService, _blockChainService, .. GetRemoteServices(_serviceProvider)])
+        var channel = NodeChannel.CreateChannel(_nodeOptions.EndPoint);
+        var nodeService = new NodeService(channel);
+        var blockChainService = new BlockChainService(channel);
+        nodeService.Started += NodeService_Started;
+        nodeService.Stopped += NodeService_Stopped;
+        blockChainService.BlockAppended += BlockChainService_BlockAppended;
+        try
         {
-            EndPoint = _nodeOptions.EndPoint,
-        };
-        _remoteServiceContext.Closed += RemoteServiceContext_Closed;
+            await nodeService.InitializeAsync(cancellationToken);
+            await blockChainService.InitializeAsync(cancellationToken);
+        }
+        catch
+        {
+            nodeService.Dispose();
+            blockChainService.Dispose();
+            throw;
+        }
 
-        using var scope = new ProgressScope(this);
-        _closeToken = await _remoteServiceContext.OpenAsync(cancellationToken);
-        _nodeInfo = await _remoteService.Service.GetInfoAsync(cancellationToken);
+        _channel = channel;
+        _nodeService = nodeService;
+        _blockChainService = blockChainService;
+        _nodeInfo = await GetInfoAsync(cancellationToken);
         IsRunning = _nodeInfo.IsRunning;
+        IsAttached = true;
         _logger.LogDebug("Node is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
     }
@@ -113,20 +151,31 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     public async Task DetachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken == Guid.Empty,
-            message: "Node is not attached.");
-
-        if (_remoteServiceContext is null)
+        if (_channel is null)
         {
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        using var scope = new ProgressScope(this);
-        _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-        await _remoteServiceContext.CloseAsync(_closeToken, cancellationToken);
-        _remoteServiceContext = null;
-        _closeToken = Guid.Empty;
+        if (_nodeService is not null)
+        {
+            _nodeService.Started -= NodeService_Started;
+            _nodeService.Stopped -= NodeService_Stopped;
+            _nodeService.Dispose();
+            _nodeService = null;
+        }
+
+        if (_blockChainService is not null)
+        {
+            _blockChainService.BlockAppended -= BlockChainService_BlockAppended;
+            _blockChainService.Dispose();
+            _blockChainService = null;
+        }
+
+        await _channel.ShutdownAsync();
+        _channel.Dispose();
+        _channel = null;
+        IsRunning = false;
+        IsAttached = false;
         _logger.LogDebug("Node is detached: {Address}", Address);
         Detached?.Invoke(this, EventArgs.Empty);
     }
@@ -134,34 +183,52 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken == Guid.Empty,
-            message: "Node is not attached.");
+        if (IsRunning is true)
+        {
+            throw new InvalidOperationException("Node is already running.");
+        }
 
-        using var scope = new ProgressScope(this);
-        var application = this.GetRequiredService<ApplicationBase>();
+        if (_nodeService is null)
+        {
+            throw new InvalidOperationException("Node is not attached.");
+        }
+
+        var applicationOptions = this.GetRequiredService<ApplicationOptions>();
         var seedEndPoint = EndPointUtility.ToString(
-            _nodeOptions.SeedEndPoint ?? application.Info.EndPoint);
-        _nodeInfo = await _remoteService.Service.StartAsync(seedEndPoint, cancellationToken);
-        _blocksyncEndPoint = EndPointUtility.Parse(_nodeInfo.SwarmEndPoint);
-        _consensusEndPoint = EndPointUtility.Parse(_nodeInfo.ConsensusEndPoint);
+            _nodeOptions.SeedEndPoint ?? GetLocalHost(applicationOptions.Port));
+        var request = new StartRequest
+        {
+            SeedEndPoint = seedEndPoint,
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _nodeService.StartAsync(request, callOptions);
+        _nodeInfo = response.NodeInfo;
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
+        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        _logger.LogDebug("Node Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning != true, "Node is not running.");
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: _closeToken == Guid.Empty,
-            message: "Node is not attached.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
-        using var scope = new ProgressScope(this);
-        await _remoteService.Service.StopAsync(cancellationToken);
-        _closeToken = Guid.Empty;
+        if (_nodeService is null)
+        {
+            throw new InvalidOperationException("Node is not attached.");
+        }
+
+        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        _logger.LogDebug("Node Contents are stopped: {Address}", Address);
+
+        var request = new StopRequest();
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        await _nodeService.StopAsync(request, callOptions);
         _nodeInfo = NodeInfo.Empty;
         IsRunning = false;
         _logger.LogDebug("Node is stopped: {Address}", Address);
@@ -174,18 +241,25 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         {
             await _processCancellationTokenSource.CancelAsync();
             _processCancellationTokenSource.Dispose();
-            await _processTask;
+            await TaskUtility.TryWait(_processTask);
             _processTask = Task.CompletedTask;
             _process = null;
 
-            if (_remoteServiceContext is not null)
+            if (_nodeService is not null)
             {
-                _remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-                await _remoteServiceContext.CloseAsync(_closeToken);
-                _remoteServiceContext = null;
+                _nodeService.Started -= NodeService_Started;
+                _nodeService.Stopped -= NodeService_Stopped;
+                _nodeService.Dispose();
+                _nodeService = null;
             }
 
-            _closeToken = Guid.Empty;
+            if (_blockChainService is not null)
+            {
+                _blockChainService.BlockAppended -= BlockChainService_BlockAppended;
+                _blockChainService.Dispose();
+                _blockChainService = null;
+            }
+
             IsRunning = false;
             _isDisposed = true;
             _logger.LogDebug("Node is disposed: {Address}", Address);
@@ -223,62 +297,46 @@ internal sealed partial class Node : INode, IBlockChain, INodeCallback, IBlockCh
         return Task.CompletedTask;
     }
 
-    void INodeCallback.OnStarted(NodeInfo nodeInfo)
+    private void NodeService_Started(object? sender, NodeEventArgs e)
     {
-        if (_isInProgress != true)
-        {
-            _nodeInfo = nodeInfo;
-            IsRunning = true;
-            Started?.Invoke(this, EventArgs.Empty);
-        }
+        _nodeInfo = e.NodeInfo;
+        IsRunning = true;
+        Started?.Invoke(this, EventArgs.Empty);
     }
 
-    void INodeCallback.OnStopped()
+    private void NodeService_Stopped(object? sender, EventArgs e)
     {
-        if (_isInProgress != true)
-        {
-            _nodeInfo = NodeInfo.Empty;
-            IsRunning = false;
-            Stopped?.Invoke(this, EventArgs.Empty);
-        }
+        Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    private static IEnumerable<IRemoteService> GetRemoteServices(
-        IServiceProvider serviceProvider)
+    private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
     {
-        foreach (var item in serviceProvider.GetServices<INodeContentService>())
-        {
-            yield return item.RemoteService;
-        }
+        _nodeInfo = _nodeInfo with { Tip = e.BlockInfo };
+        BlockAppended?.Invoke(this, e);
     }
 
-    private void RemoteServiceContext_Closed(object? sender, EventArgs e)
+    private void NodeService_Disconnected(object? sender, EventArgs e)
     {
-        if (sender is RemoteServiceContext remoteServiceContext)
+        if (sender is NodeService nodeService && _nodeService == nodeService)
         {
-            remoteServiceContext.Closed -= RemoteServiceContext_Closed;
-            _remoteServiceContext = null;
-            if (_isInProgress != true && IsRunning == true)
+            _nodeService.Started -= NodeService_Started;
+            _nodeService.Stopped -= NodeService_Stopped;
+            _nodeService.Dispose();
+            _nodeService = null;
+            if (_blockChainService is not null)
             {
-                _closeToken = Guid.Empty;
-                Detached?.Invoke(this, EventArgs.Empty);
+                _blockChainService.BlockAppended -= BlockChainService_BlockAppended;
+                _blockChainService.Dispose();
+                _blockChainService = null;
             }
-        }
-    }
 
-    private sealed class ProgressScope : IDisposable
-    {
-        private readonly Node _node;
+            if (_channel is not null)
+            {
+                _channel.Dispose();
+                _channel = null;
+            }
 
-        public ProgressScope(Node node)
-        {
-            _node = node;
-            _node._isInProgress = true;
-        }
-
-        public void Dispose()
-        {
-            _node._isInProgress = false;
+            Detached?.Invoke(this, EventArgs.Empty);
         }
     }
 }

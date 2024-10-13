@@ -1,73 +1,89 @@
-using JSSoft.Commands.Extensions;
-using JSSoft.Terminals;
-using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+using JSSoft.Commands;
+using LibplanetConsole.Logging;
+using LibplanetConsole.Node.Evidence;
+using LibplanetConsole.Node.Executable.Commands;
+using LibplanetConsole.Node.Executable.Tracers;
+using LibplanetConsole.Node.Explorer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace LibplanetConsole.Node.Executable;
 
-internal sealed class Application(IServiceProvider serviceProvider, ApplicationOptions options)
-    : ApplicationBase(serviceProvider, options), IApplication
+internal sealed class Application
 {
-    private readonly ApplicationOptions _options = options;
-    private Task _waitInputTask = Task.CompletedTask;
+    private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
+    private readonly LoggingFilter[] _filters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
+        new PrefixFilter("libplanet.log", "Libplanet."),
+    ];
 
-    protected override async Task OnRunAsync(CancellationToken cancellationToken)
+    private readonly LoggingFilter[] _traceFilters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+    ];
+
+    public Application(ApplicationOptions options, object[] instances)
     {
-        if (_options.NoREPL != true)
+        var port = options.Port;
+        var services = _builder.Services;
+        foreach (var instance in instances)
         {
-            var sw = new StringWriter();
-            var commandContext = this.GetRequiredService<CommandContext>();
-            var terminal = this.GetRequiredService<SystemTerminal>();
-            commandContext.Out = sw;
-            await base.OnRunAsync(cancellationToken);
-            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-            await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
-            await sw.WriteLineAsync();
-            await commandContext.ExecuteAsync(args: [], cancellationToken: default);
-            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-            commandContext.Out = Console.Out;
-            await sw.WriteLineIfAsync(GetStartupCondition(_options), GetStartupMessage());
-            await Console.Out.WriteAsync(sw.ToString());
-
-            await terminal.StartAsync(cancellationToken);
+            services.AddSingleton(instance.GetType(), instance);
         }
-        else if (_options.ParentProcessId == 0)
+
+        _builder.WebHost.ConfigureKestrel(options =>
         {
-            await base.OnRunAsync(cancellationToken);
-            _waitInputTask = WaitInputAsync();
+            options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+        });
+
+        if (options.LogPath != string.Empty)
+        {
+            services.AddLogging(options.LogPath, "node.log", _filters);
         }
         else
         {
-            await base.OnRunAsync(cancellationToken);
-        }
-    }
-
-    protected override async ValueTask OnDisposeAsync()
-    {
-        await base.OnDisposeAsync();
-        await _waitInputTask;
-    }
-
-    private static bool GetStartupCondition(ApplicationOptions options)
-    {
-        if (options.SeedEndPoint is not null)
-        {
-            return false;
+            services.AddLogging(_traceFilters);
         }
 
-        return options.ParentProcessId == 0;
+        services.AddSingleton<CommandContext>();
+        services.AddSingleton<SystemTerminal>();
+
+        services.AddSingleton<HelpCommand>()
+                .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
+        services.AddSingleton<VersionCommand>()
+                .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
+
+        services.AddNode(options);
+        services.AddExplorer(_builder.Configuration);
+        services.AddEvidence();
+
+        services.AddGrpc();
+        services.AddGrpcReflection();
+
+        services.AddHostedService<BlockChainEventTracer>();
+        services.AddHostedService<NodeEventTracer>();
+        services.AddHostedService<SystemTerminalHostedService>();
     }
 
-    private static string GetStartupMessage()
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        var startText = TerminalStringBuilder.GetString("start", TerminalColorType.Green);
-        return $"\nType '{startText}' to start the node.";
-    }
+        using var app = _builder.Build();
 
-    private async Task WaitInputAsync()
-    {
-        await Console.Out.WriteLineAsync("Press any key to exit.");
-        await Task.Run(() => Console.ReadKey(intercept: true));
-        Cancel();
+        app.UseNode();
+        app.UseExplorer();
+        app.UseEvidence();
+        app.MapGet("/", () => "Libplanet-Node");
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapGrpcReflectionService().AllowAnonymous();
+
+        await Console.Out.WriteLineAsync();
+        await app.RunAsync(cancellationToken);
     }
 }

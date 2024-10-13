@@ -5,8 +5,7 @@ namespace LibplanetConsole.Node;
 
 public readonly record struct ApplicationInfo
 {
-    [JsonConverter(typeof(EndPointJsonConverter))]
-    public required EndPoint EndPoint { get; init; }
+    public required int Port { get; init; }
 
     [JsonConverter(typeof(EndPointJsonConverter))]
     public required EndPoint? SeedEndPoint { get; init; }

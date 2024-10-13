@@ -11,7 +11,7 @@ public sealed record class Repository
     public const string SettingsFileName = "node-settings.json";
     public const string SettingsSchemaFileName = "node-settings-schema.json";
 
-    public required EndPoint EndPoint { get; init; }
+    public required int Port { get; init; }
 
     public required PrivateKey PrivateKey { get; init; }
 
@@ -20,8 +20,6 @@ public sealed record class Repository
     public string StorePath { get; init; } = string.Empty;
 
     public string LogPath { get; init; } = string.Empty;
-
-    public string LibraryLogPath { get; init; } = string.Empty;
 
     public string GenesisPath { get; init; } = string.Empty;
 
@@ -64,12 +62,11 @@ public sealed record class Repository
             Schema = SettingsSchemaFileName,
             Application = new ApplicationSettings
             {
-                EndPoint = EndPointUtility.ToString(EndPoint),
+                Port = Port,
                 PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
-                LibraryLogPath = GetRelativePathFromDirectory(repositoryPath, LibraryLogPath),
                 SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,

@@ -66,7 +66,30 @@
       "program": "${workspaceFolder}/src/node/LibplanetConsole.Node.Executable/bin/Debug/net8.0/libplanet-node.dll",
       "console": "integratedTerminal",
       "args": [
-        "run"
+        "run",
+        "--single-node"
+      ]
+    },
+    {
+      "name": "C#: Libplanet Client - Initialize",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/client/LibplanetConsole.Client.Executable/bin/Debug/net8.0/libplanet-client.dll",
+      "console": "integratedTerminal",
+      "args": [
+        "init",
+        ".client"
+      ]
+    },
+    {
+      "name": "C#: Libplanet Client - Start",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/client/LibplanetConsole.Client.Executable/bin/Debug/net8.0/libplanet-client.dll",
+      "console": "integratedTerminal",
+      "args": [
+        "start",
+        ".client"
       ]
     },
     {
@@ -112,10 +135,10 @@
   ],
   "compounds": [
     {
-      "name": "Node and Client",
+      "name": "Node and Client - Start",
       "configurations": [
-        "C#: Libplanet Node - Run",
-        "C#: Libplanet Client"
+        "C#: Libplanet Node - Start",
+        "C#: Libplanet Client - Start"
       ]
     }
   ]

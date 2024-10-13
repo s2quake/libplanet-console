@@ -1,23 +1,24 @@
 using System.Collections.Concurrent;
 using System.Security;
 using System.Security.Cryptography;
+using Grpc.Net.Client;
 using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
 using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 
-internal sealed partial class Node : IActionRenderer, INode
+internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 {
     private readonly SecureString _privateKey;
     private readonly string _storePath;
@@ -31,10 +32,10 @@ internal sealed partial class Node : IActionRenderer, INode
     private readonly byte[] _genesis;
     private readonly AppProtocolVersion _appProtocolVersion = SeedNode.AppProtocolVersion;
     private readonly IActionProvider _actionProvider;
+    private readonly int _blocksyncPort;
+    private readonly int _consensusPort;
 
     private EndPoint? _seedEndPoint;
-    private EndPoint? _blocksyncEndPoint;
-    private EndPoint? _consensusEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
     private bool _isDisposed;
@@ -49,27 +50,15 @@ internal sealed partial class Node : IActionRenderer, INode
         _actionProvider = options.ActionProvider ?? ActionProvider.Default;
         _logger = serviceProvider.GetLogger<Node>();
         _genesis = options.Genesis;
+        _blocksyncPort = options.Port + ApplicationOptions.BlocksyncPortIncrement;
+        _consensusPort = options.Port + ApplicationOptions.ConsensusPortIncrement;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
     }
 
-    public event EventHandler<BlockEventArgs>? BlockAppended;
-
     public event EventHandler? Started;
 
     public event EventHandler? Stopped;
-
-    public EndPoint SwarmEndPoint
-    {
-        get => _blocksyncEndPoint ?? throw new InvalidOperationException();
-        set => _blocksyncEndPoint = value;
-    }
-
-    public EndPoint ConsensusEndPoint
-    {
-        get => _consensusEndPoint ?? throw new InvalidOperationException();
-        set => _consensusEndPoint = value;
-    }
 
     public string StorePath => _storePath;
 
@@ -139,23 +128,26 @@ internal sealed partial class Node : IActionRenderer, INode
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(IsRunning == true, "Node is already running.");
+        if (IsRunning is true)
+        {
+            throw new InvalidOperationException("Node is already running.");
+        }
 
         if (_seedEndPoint is null)
         {
             throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
         }
 
-        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, cancellationToken);
+        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, _logger, cancellationToken);
         var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
-        var blocksyncEndPoint = _blocksyncEndPoint ?? EndPointUtility.NextEndPoint();
-        var consensusEndPoint = _consensusEndPoint ?? EndPointUtility.NextEndPoint();
+        var blocksyncPort = _blocksyncPort;
+        var consensusPort = _consensusPort;
         var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
         var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
         var swarmTransport
-            = await CreateTransport(privateKey, blocksyncEndPoint, appProtocolVersion);
+            = await CreateTransport(privateKey, blocksyncPort, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
             StaticPeers = [blocksyncSeedPeer],
@@ -166,12 +158,12 @@ internal sealed partial class Node : IActionRenderer, INode
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
-            endPoint: consensusEndPoint,
+            port: consensusPort,
             appProtocolVersion: appProtocolVersion);
         var consensusReactorOption = new ConsensusReactorOption
         {
             SeedPeers = [consensusSeedPeer],
-            ConsensusPort = EndPointUtility.GetHostAndPort(consensusEndPoint).Port,
+            ConsensusPort = consensusPort,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
@@ -182,8 +174,6 @@ internal sealed partial class Node : IActionRenderer, INode
             renderer: this,
             actionProvider: _actionProvider);
 
-        _blocksyncEndPoint = blocksyncEndPoint;
-        _consensusEndPoint = consensusEndPoint;
         _swarm = new Swarm(
             blockChain: blockChain,
             privateKey: privateKey,
@@ -204,9 +194,10 @@ internal sealed partial class Node : IActionRenderer, INode
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
-        InvalidOperationExceptionUtility.ThrowIf(
-            condition: IsRunning != true,
-            message: "Node is not running.");
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
 
         if (_swarm is not null)
         {
@@ -217,8 +208,6 @@ internal sealed partial class Node : IActionRenderer, INode
             _logger.LogDebug("Node.Swarm is stopped: {Address}", Address);
         }
 
-        _blocksyncEndPoint = null;
-        _consensusEndPoint = null;
         _swarm = null;
         _startTask = Task.CompletedTask;
         IsRunning = false;
@@ -231,9 +220,6 @@ internal sealed partial class Node : IActionRenderer, INode
     {
         if (_isDisposed is false)
         {
-            _blocksyncEndPoint = null;
-            _consensusEndPoint = null;
-
             if (_swarm is not null)
             {
                 await _swarm.StopAsync(cancellationToken: default);
@@ -275,76 +261,65 @@ internal sealed partial class Node : IActionRenderer, INode
                 }
             }
 
-            var blockChain = _swarm!.BlockChain;
-            var blockInfo = new BlockInfo(blockChain, blockChain.Tip);
             UpdateNodeInfo();
-            BlockAppended?.Invoke(this, new(blockInfo));
+            BlockAppended?.Invoke(this, new(Info.Tip));
         }
     }
 
     private static async Task<NetMQTransport> CreateTransport(
-        PrivateKey privateKey, EndPoint endPoint, AppProtocolVersion appProtocolVersion)
+        PrivateKey privateKey, int port, AppProtocolVersion appProtocolVersion)
     {
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,
         };
-        var (host, port) = EndPointUtility.GetHostAndPort(endPoint);
-        var hostOptions = new HostOptions(host, [], port);
+        var hostOptions = new HostOptions("localhost", [], port);
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
-    private static async Task<SeedInfo> GetSeedInfoAsync(
-        EndPoint seedEndPoint, CancellationToken cancellationToken)
+    private async Task<SeedInfo> GetSeedInfoAsync(
+        EndPoint seedEndPoint, ILogger logger, CancellationToken cancellationToken)
     {
-        var remoteService = new RemoteService<ISeedService>();
-        var remoteServiceContext = new RemoteServiceContext([remoteService])
+        if (_serviceProvider.GetService<ISeedService>() is { } seedService)
         {
-            EndPoint = seedEndPoint,
+            return await seedService.GetSeedAsync(PublicKey, cancellationToken);
+        }
+
+        logger.LogDebug("Getting seed info from {SeedEndPoint}", seedEndPoint);
+        var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
+        var channelOptions = new GrpcChannelOptions
+        {
         };
-        var closeToken = await remoteServiceContext.OpenAsync(cancellationToken);
-        var service = remoteService.Service;
-        var privateKey = new PrivateKey();
-        var publicKey = privateKey.PublicKey;
-        try
+        using var channel = GrpcChannel.ForAddress(address, channelOptions);
+        var client = new Seed.Grpc.SeedGrpcService.SeedGrpcServiceClient(channel);
+        var request = new Seed.Grpc.GetSeedRequest
         {
-            for (var i = 0; i < 10; i++)
-            {
-                var seedInfo = await service.GetSeedAsync(publicKey, cancellationToken);
-                if (Equals(seedInfo, SeedInfo.Empty) != true)
-                {
-                    return seedInfo;
-                }
+            PublicKey = new PrivateKey().PublicKey.ToHex(compress: true),
+        };
 
-                await Task.Delay(500, cancellationToken);
-            }
-
-            throw new InvalidOperationException("No seed information is available.");
-        }
-        finally
-        {
-            await remoteServiceContext.CloseAsync(closeToken, cancellationToken);
-        }
+        var response = await client.GetSeedAsync(request, cancellationToken: cancellationToken);
+        logger.LogDebug("Got seed info from {SeedEndPoint}", seedEndPoint);
+        return response.SeedResult;
     }
 
     private void UpdateNodeInfo()
     {
         var appProtocolVersion = _appProtocolVersion;
-        var nodeInfo = new NodeInfo
+        var nodeInfo = NodeInfo.Empty with
         {
             ProcessId = Environment.ProcessId,
             Address = Address,
             AppProtocolVersion = $"{appProtocolVersion}",
+            BlocksyncPort = _blocksyncPort,
+            ConsensusPort = _consensusPort,
         };
 
         if (IsRunning == true)
         {
             nodeInfo = nodeInfo with
             {
-                SwarmEndPoint = EndPointUtility.ToString(SwarmEndPoint),
-                ConsensusEndPoint = EndPointUtility.ToString(ConsensusEndPoint),
                 GenesisHash = BlockChain.Genesis.Hash,
-                TipHash = BlockChain.Tip.Hash,
+                Tip = new BlockInfo(BlockChain.Tip),
                 IsRunning = IsRunning,
             };
         }

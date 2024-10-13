@@ -3,7 +3,6 @@ using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Settings;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
@@ -31,23 +30,14 @@ internal sealed class StartCommand : CommandAsyncBase
         try
         {
             var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            var serviceCollection = new ApplicationServiceCollection(_settingsCollection);
             var applicationSettings = Load(settingsPath) with
             {
                 ParentProcessId = ParentProcessId,
                 NoREPL = NoREPL,
             };
             var applicationOptions = applicationSettings.ToOptions();
-
-            serviceCollection.AddClient(applicationOptions);
-            serviceCollection.AddApplication(applicationOptions);
-
-            await using var serviceProvider = serviceCollection.BuildServiceProvider();
-            var @out = Console.Out;
-            var application = serviceProvider.GetRequiredService<Application>();
-            await @out.WriteLineAsync();
-            await application.RunAsync();
-            await @out.WriteLineAsync("\u001b0");
+            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
         {

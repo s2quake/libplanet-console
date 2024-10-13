@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
@@ -15,8 +16,6 @@ public sealed record class NodeOptions
     public string StorePath { get; init; } = string.Empty;
 
     public string LogPath { get; init; } = string.Empty;
-
-    public string LibraryLogPath { get; init; } = string.Empty;
 
     public string ActionProviderModulePath { get; init; } = string.Empty;
 
@@ -40,12 +39,11 @@ public sealed record class NodeOptions
 
         return new()
         {
-            EndPoint = EndPointUtility.Parse(applicationSettings.EndPoint),
+            EndPoint = GetLocalHost(applicationSettings.Port),
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            LibraryLogPath = Path.GetFullPath(applicationSettings.LibraryLogPath, repositoryPath),
-            SeedEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.SeedEndPoint),
+            SeedEndPoint = ParseOrDefault(applicationSettings.SeedEndPoint),
             RepositoryPath = repositoryPath,
             ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
             ActionProviderType = applicationSettings.ActionProviderType,
@@ -62,7 +60,7 @@ public sealed record class NodeOptions
 
     private sealed record class ApplicationSettings
     {
-        public string EndPoint { get; init; } = string.Empty;
+        public int Port { get; init; } = 0;
 
         public string PrivateKey { get; init; } = string.Empty;
 
@@ -74,9 +72,6 @@ public sealed record class NodeOptions
 
         [DefaultValue("")]
         public string LogPath { get; init; } = string.Empty;
-
-        [DefaultValue("")]
-        public string LibraryLogPath { get; init; } = string.Empty;
 
         [DefaultValue("")]
         public string SeedEndPoint { get; init; } = string.Empty;

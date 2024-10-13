@@ -1,22 +1,30 @@
-using JSSoft.Terminals;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Node.Executable.Tracers;
 
-internal sealed class BlockChainEventTracer(
-    IBlockChain blockChain, ILogger<BlockChainEventTracer> logger)
-    : IApplicationService, IDisposable
+internal sealed class BlockChainEventTracer : IHostedService, IDisposable
 {
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    private readonly IBlockChain _blockChain;
+    private readonly ILogger<BlockChainEventTracer> _logger;
+
+    public BlockChainEventTracer(
+        IBlockChain blockChain, ILogger<BlockChainEventTracer> logger)
     {
-        blockChain.BlockAppended += Node_BlockAppended;
-        return Task.CompletedTask;
+        _blockChain = blockChain;
+        _logger = logger;
+        _blockChain.BlockAppended += Node_BlockAppended;
     }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
     void IDisposable.Dispose()
     {
-        blockChain.BlockAppended -= Node_BlockAppended;
+        _blockChain.BlockAppended -= Node_BlockAppended;
     }
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
@@ -24,9 +32,10 @@ internal sealed class BlockChainEventTracer(
         var blockInfo = e.BlockInfo;
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
-        var message = $"Block #{blockInfo.Height} '{hash.ToShortString()}' " +
-                      $"Appended by '{miner.ToShortString()}'";
-        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
-        logger.LogInformation(message);
+        _logger.LogInformation(
+            "Block #{TipHeight} '{TipHash}' Appended by '{TipMiner}'",
+            blockInfo.Height,
+            hash.ToShortString(),
+            miner.ToShortString());
     }
 }

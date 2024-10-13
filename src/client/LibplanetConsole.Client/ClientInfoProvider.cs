@@ -1,11 +1,12 @@
 using LibplanetConsole.Common;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Client;
 
 internal sealed class ClientInfoProvider(Client client)
-    : InfoProviderBase<ApplicationBase>(nameof(Client))
+    : InfoProviderBase<IHostApplicationLifetime>(nameof(Client))
 {
-    protected override object? GetInfo(ApplicationBase obj)
+    protected override object? GetInfo(IHostApplicationLifetime obj)
     {
         return client.Info;
     }

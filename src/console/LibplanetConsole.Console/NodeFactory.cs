@@ -9,7 +9,7 @@ internal static class NodeFactory
     private static readonly ConcurrentDictionary<IServiceProvider, Descriptor> _valueByKey = [];
     private static readonly ConcurrentDictionary<Node, AsyncServiceScope> _scopeByNode = [];
 
-    public static Node Create(IServiceProvider serviceProvider)
+    public static Node Create(IServiceProvider serviceProvider, object? key)
     {
         if (_valueByKey.Remove(serviceProvider, out var descriptor) is true)
         {
@@ -42,8 +42,10 @@ internal static class NodeFactory
             },
             (k, v) => v);
 
-        var node = serviceScope.ServiceProvider.GetRequiredService<Node>();
-        serviceScope.ServiceProvider.GetServices<INodeContent>();
+        var scopedServiceProvider = serviceScope.ServiceProvider;
+        var key = INode.Key;
+        var node = scopedServiceProvider.GetRequiredKeyedService<Node>(key);
+        node.Contents = [.. scopedServiceProvider.GetKeyedServices<INodeContent>(key)];
         return node;
     }
 

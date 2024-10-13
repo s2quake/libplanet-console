@@ -1,10 +1,13 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Node;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 
-public interface INode : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
+public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, ISigner
 {
+    const string Key = nameof(INode);
+
     event EventHandler? Attached;
 
     event EventHandler? Detached;

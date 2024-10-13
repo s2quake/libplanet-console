@@ -7,7 +7,7 @@ public interface IClient : IVerifier
 {
     event EventHandler? Started;
 
-    event EventHandler<StopEventArgs>? Stopped;
+    event EventHandler? Stopped;
 
     ClientInfo Info { get; }
 
@@ -24,6 +24,4 @@ public interface IClient : IVerifier
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
-
-    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

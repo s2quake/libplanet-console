@@ -1,16 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
     <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Console\LibplanetConsole.Console.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Console.Example\LibplanetConsole.Console.Example.csproj" />
-    <ProjectReference Include="..\LibplanetConsole.Console.Explorer\LibplanetConsole.Console.Explorer.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Console.Evidence\LibplanetConsole.Console.Evidence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.Trace" Version="3.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 

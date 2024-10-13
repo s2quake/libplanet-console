@@ -1,4 +1,5 @@
 using Libplanet.Types.Evidence;
+using LibplanetConsole.Evidence.Grpc;
 
 namespace LibplanetConsole.Evidence;
 
@@ -23,6 +24,31 @@ public readonly record struct EvidenceInfo
             Height = evidence.Height,
             TargetAddress = evidence.TargetAddress,
             Timestamp = evidence.Timestamp,
+        };
+    }
+
+    public static implicit operator EvidenceInfo(EvidenceInformation evidenceInfo)
+    {
+        return new EvidenceInfo
+        {
+            Type = evidenceInfo.Type,
+            Id = evidenceInfo.Id,
+            TargetAddress = new Address(evidenceInfo.TargetAddress),
+            Height = evidenceInfo.Height,
+            Timestamp = evidenceInfo.Timestamp.ToDateTimeOffset(),
+        };
+    }
+
+    public static implicit operator EvidenceInformation(EvidenceInfo evidenceInfo)
+    {
+        return new EvidenceInformation
+        {
+            Type = evidenceInfo.Type,
+            Id = evidenceInfo.Id,
+            TargetAddress = evidenceInfo.TargetAddress.ToHex(),
+            Height = evidenceInfo.Height,
+            Timestamp = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTimeOffset(
+                evidenceInfo.Timestamp),
         };
     }
 }

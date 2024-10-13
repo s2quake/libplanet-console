@@ -1,34 +1,43 @@
 using System.Collections.Specialized;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Console.Executable.Tracers;
 
-internal sealed class ClientCollectionEventTracer(IClientCollection clients) : IApplicationService
+internal sealed class ClientCollectionEventTracer : IHostedService, IDisposable
 {
-    private readonly IClientCollection _clients = clients;
+    private readonly IClientCollection _clients;
+    private bool _isDisposed;
 
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    public ClientCollectionEventTracer(IClientCollection clients)
     {
+        _clients = clients;
         foreach (var client in _clients)
         {
             AttachEvent(client);
         }
 
         _clients.CollectionChanged += Clients_CollectionChanged;
-        return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
-    {
-        foreach (var client in _clients)
-        {
-            DetachEvent(client);
-        }
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
-        _clients.CollectionChanged -= Clients_CollectionChanged;
-        return ValueTask.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    void IDisposable.Dispose()
+    {
+        if (_isDisposed is false)
+        {
+            foreach (var client in _clients)
+            {
+                DetachEvent(client);
+            }
+
+            _clients.CollectionChanged -= Clients_CollectionChanged;
+            _isDisposed = true;
+        }
     }
 
     private void AttachEvent(IClient client)

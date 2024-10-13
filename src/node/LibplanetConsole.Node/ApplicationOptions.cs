@@ -2,14 +2,19 @@ namespace LibplanetConsole.Node;
 
 public sealed record class ApplicationOptions
 {
-    public ApplicationOptions(EndPoint endPoint, PrivateKey privateKey, byte[] genesis)
+    public const int BlocksyncPortIncrement = 4;
+    public const int ConsensusPortIncrement = 5;
+    public const int SeedBlocksyncPortIncrement = 6;
+    public const int SeedConsensusPortIncrement = 7;
+
+    public ApplicationOptions(int port, PrivateKey privateKey, byte[] genesis)
     {
-        EndPoint = endPoint;
+        Port = port;
         PrivateKey = privateKey;
         Genesis = genesis;
     }
 
-    public EndPoint EndPoint { get; }
+    public int Port { get; }
 
     public PrivateKey PrivateKey { get; }
 
@@ -22,8 +27,6 @@ public sealed record class ApplicationOptions
     public string StorePath { get; init; } = string.Empty;
 
     public string LogPath { get; set; } = string.Empty;
-
-    public string LibraryLogPath { get; set; } = string.Empty;
 
     public bool NoREPL { get; init; }
 

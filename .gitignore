@@ -2,6 +2,7 @@ bin/
 obj/
 .data
 .node
+.client
 .store
 .log
 .DS_Store

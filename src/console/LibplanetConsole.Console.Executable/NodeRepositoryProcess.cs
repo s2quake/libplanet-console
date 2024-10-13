@@ -6,7 +6,7 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
 {
     public required PrivateKey PrivateKey { get; init; }
 
-    public required EndPoint EndPoint { get; init; }
+    public required int Port { get; init; }
 
     public string OutputPath { get; set; } = string.Empty;
 
@@ -26,8 +26,8 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
                 OutputPath,
                 "--private-key",
                 PrivateKeyUtility.ToString(PrivateKey),
-                "--end-point",
-                EndPointUtility.ToString(EndPoint),
+                "--port",
+                $"{Port}",
                 "--genesis-path",
                 GenesisPath,
             };

@@ -1,64 +1,75 @@
-using JSSoft.Commands.Extensions;
-using JSSoft.Terminals;
-using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+using JSSoft.Commands;
+using LibplanetConsole.Client.Executable.Commands;
+using LibplanetConsole.Client.Executable.Tracers;
+using LibplanetConsole.Logging;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace LibplanetConsole.Client.Executable;
 
-internal sealed class Application(IServiceProvider serviceProvider, ApplicationOptions options)
-    : ApplicationBase(serviceProvider, options)
+internal sealed class Application
 {
-    private readonly ApplicationOptions _options = options;
-    private Task _waitInputTask = Task.CompletedTask;
+    private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
+    private readonly LoggingFilter[] _filters =
+    [
+        new PrefixFilter("app", "LibplanetConsole."),
+    ];
 
-    protected override async Task OnRunAsync(CancellationToken cancellationToken)
+    private readonly LoggingFilter[] _traceFilters =
+    [
+        new PrefixFilter("app", "LibplanetConsole."),
+    ];
+
+    public Application(ApplicationOptions options, object[] instances)
     {
-        if (_options.NoREPL != true)
+        var port = options.Port;
+        var services = _builder.Services;
+        foreach (var instance in instances)
         {
-            var sw = new StringWriter();
-            var startupCondition = _options.NodeEndPoint is null && _options.ParentProcessId == 0;
-            var commandContext = this.GetRequiredService<CommandContext>();
-            var terminal = this.GetRequiredService<SystemTerminal>();
-            commandContext.Out = sw;
-            await base.OnRunAsync(cancellationToken);
-            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-            await commandContext.ExecuteAsync(["--help"], cancellationToken: default);
-            await sw.WriteLineAsync();
-            await commandContext.ExecuteAsync(args: [], cancellationToken: default);
-            await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-            commandContext.Out = Console.Out;
-            await sw.WriteLineIfAsync(startupCondition, GetStartupMessage());
-            await Console.Out.WriteAsync(sw.ToString());
-
-            await terminal.StartAsync(cancellationToken);
+            services.AddSingleton(instance.GetType(), instance);
         }
-        else if (_options.ParentProcessId == 0)
+
+        _builder.WebHost.ConfigureKestrel(options =>
         {
-            await base.OnRunAsync(cancellationToken);
-            _waitInputTask = WaitInputAsync();
+            options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+        });
+
+        if (options.LogPath != string.Empty)
+        {
+            services.AddLogging(options.LogPath, "client.log", _filters);
         }
         else
         {
-            await base.OnRunAsync(cancellationToken);
+            services.AddLogging(_traceFilters);
         }
+
+        services.AddSingleton<CommandContext>();
+        services.AddSingleton<SystemTerminal>();
+
+        services.AddSingleton<HelpCommand>()
+                .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
+        services.AddSingleton<VersionCommand>()
+                .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
+
+        services.AddClient(options);
+
+        services.AddGrpc();
+        services.AddGrpcReflection();
+
+        services.AddHostedService<BlockChainEventTracer>();
+        services.AddHostedService<ClientEventTracer>();
+        services.AddHostedService<SystemTerminalHostedService>();
     }
 
-    protected override async ValueTask OnDisposeAsync()
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        await base.OnDisposeAsync();
-        await _waitInputTask;
-    }
+        using var app = _builder.Build();
 
-    private static string GetStartupMessage()
-    {
-        var startText = TerminalStringBuilder.GetString("start", TerminalColorType.Green);
-        return $"\nType '{startText} <node-end-point>' to connect to the node.";
-    }
+        app.UseClient();
+        app.MapGet("/", () => "Libplanet-Client");
+        app.MapGrpcReflectionService().AllowAnonymous();
 
-    private async Task WaitInputAsync()
-    {
-        await Console.Out.WriteLineAsync("Press any key to exit.");
-        await Task.Run(() => Console.ReadKey(intercept: true));
-        Cancel();
+        await Console.Out.WriteLineAsync();
+        await app.RunAsync(cancellationToken);
     }
 }

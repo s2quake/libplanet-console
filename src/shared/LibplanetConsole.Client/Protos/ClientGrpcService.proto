@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Client.Grpc";
+
+package libplanet.console.client.v1;
+
+service ClientGrpcService {
+  rpc Ping(PingRequest) returns (PingResponse);
+  rpc Start(StartRequest) returns (StartResponse);
+  rpc Stop(StopRequest) returns (StopResponse);
+  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+
+  rpc GetStartedStream(GetStartedStreamRequest) returns (stream GetStartedStreamResponse);
+  rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
+}
+
+message ClientInformation {
+    string address = 1;
+    string node_address = 2;
+    string genesis_hash = 3;
+    string tip_hash = 4;
+    int64 tip_height = 5;
+    string tip_miner = 6;
+    bool is_running = 7;
+}
+
+message PingRequest {
+}
+
+message PingResponse {
+}
+
+message StartRequest {
+  string node_end_point = 1;
+}
+
+message StartResponse {
+    ClientInformation client_info = 1;
+}
+
+message StopRequest {
+}
+
+message StopResponse {
+}
+
+message GetInfoRequest {
+}
+
+message GetInfoResponse {
+    ClientInformation client_info = 1;
+}
+
+message GetStartedStreamRequest {
+}
+
+message GetStartedStreamResponse {
+    ClientInformation client_info = 1;
+}
+
+message GetStoppedStreamRequest {
+}
+
+message GetStoppedStreamResponse {
+}

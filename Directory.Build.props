@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CommandsDirectory>$(MSBuildThisFileDirectory).submodules\commands\</CommandsDirectory>
-    <CommunicationDirectory>$(MSBuildThisFileDirectory).submodules\communication\</CommunicationDirectory>
     <LibplanetDirectory>$(MSBuildThisFileDirectory).submodules\libplanet\</LibplanetDirectory>
+    <SharedDirectory>$(MSBuildThisFileDirectory)src\shared\</SharedDirectory>
     <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
@@ -36,7 +36,7 @@
     <RootPath Condition="'$(SolutionDir)' != ''">$(SolutionDir)</RootPath>
     <RootPath Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)\</RootPath>
     <LibplanetVersion>5.2.0</LibplanetVersion>
-    <JSSoftCommandsVersion>7.0.0-pr.40</JSSoftCommandsVersion>
+    <JSSoftCommandsVersion>7.0.0-pr.42</JSSoftCommandsVersion>
     <JSSoftCommunicationVersion>2.0.6</JSSoftCommunicationVersion>
     <JSSoftConfigurationsVersion>1.0.0</JSSoftConfigurationsVersion>
     <UseRidGraph>true</UseRidGraph>

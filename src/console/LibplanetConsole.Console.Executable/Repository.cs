@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Node;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable;
 
@@ -13,14 +15,20 @@ public sealed record class Repository
 
     private byte[]? _genesis;
 
-    public Repository(EndPoint endPoint, NodeOptions[] nodes, ClientOptions[] clients)
+    public Repository(int port, NodeOptions[] nodes, ClientOptions[] clients)
     {
-        EndPoint = endPoint;
+        if (port <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(port), port, "Port must be greater than 0.");
+        }
+
+        Port = port;
         Nodes = nodes;
         Clients = clients;
     }
 
-    public EndPoint EndPoint { get; }
+    public int Port { get; }
 
     public NodeOptions[] Nodes { get; } = [];
 
@@ -33,10 +41,6 @@ public sealed record class Repository
     }
 
     public string LogPath { get; init; } = string.Empty;
-
-    public string LibraryLogPath { get; init; } = string.Empty;
-
-    public string Source { get; private set; } = string.Empty;
 
     public static byte[] CreateGenesis(GenesisOptions genesisOptions)
     {
@@ -124,10 +128,9 @@ public sealed record class Repository
         var clientsPath = resolver.GetClientsPath(repositoryPath);
         var applicationSettings = new ApplicationSettings
         {
-            EndPoint = EndPointUtility.ToString(EndPoint),
+            Port = Port,
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
             LogPath = LogPath,
-            LibraryLogPath = LibraryLogPath,
         };
 
         info.RepositoryPath = repositoryPath;
@@ -148,7 +151,7 @@ public sealed record class Repository
             var process = new NodeRepositoryProcess
             {
                 PrivateKey = node.PrivateKey,
-                EndPoint = node.EndPoint,
+                Port = GetPort(node.EndPoint),
                 OutputPath = nodePath,
                 GenesisPath = genesisPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
@@ -168,7 +171,7 @@ public sealed record class Repository
             var process = new ClientRepositoryProcess
             {
                 PrivateKey = client.PrivateKey,
-                EndPoint = client.EndPoint,
+                Port = GetPort(client.EndPoint),
                 OutputPath = clientPath,
             };
             var sb = new StringBuilder();

@@ -2,10 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Node;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable;
 
@@ -13,10 +12,10 @@ namespace LibplanetConsole.Console.Executable;
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
-    [CommandSummary("The endpoint of the libplanet-console. " +
-                    "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; init; } = string.Empty;
+    [CommandSummary("The port of the libplanet-console. " +
+                    "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; init; }
 
 #if DEBUG
     [CommandProperty(InitValue = 1)]
@@ -70,13 +69,8 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty]
     [CommandSummary("The directory path to store log.")]
-    [Path(Type = PathType.File, AllowEmpty = true)]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("The directory path to store log of the library.")]
-    [Path(Type = PathType.File, AllowEmpty = true)]
-    public string LibraryLogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and the client processes will not run.")]
@@ -97,15 +91,16 @@ internal sealed record class ApplicationSettings
 
     public ApplicationOptions ToOptions()
     {
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
-        var nodeOptions = GetNodeOptions(endPoint, GetNodes());
-        var clientOptions = GetClientOptions(nodeOptions, GetClients());
-        var repository = new Repository(endPoint, nodeOptions, clientOptions);
+        var portGenerator = new PortGenerator(Port);
+        var port = portGenerator.Current;
+        var endPoint = GetLocalHost(port);
+        var nodeOptions = GetNodeOptions(endPoint, GetNodes(), portGenerator);
+        var clientOptions = GetClientOptions(nodeOptions, GetClients(), portGenerator);
+        var repository = new Repository(port, nodeOptions, clientOptions);
         var genesis = TryGetGenesis(out var g) == true ? g : repository.Genesis;
-        return new ApplicationOptions(endPoint)
+        return new ApplicationOptions(port)
         {
             LogPath = GetFullPath(LogPath),
-            LibraryLogPath = GetFullPath(LibraryLogPath),
             Nodes = repository.Nodes,
             Clients = repository.Clients,
             Genesis = genesis,
@@ -136,22 +131,22 @@ internal sealed record class ApplicationSettings
     }
 
     private static NodeOptions[] GetNodeOptions(
-        EndPoint endPoint, PrivateKey[] nodePrivateKeys)
+        EndPoint endPoint, PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
-            EndPoint = EndPointUtility.NextEndPoint(),
+            EndPoint = GetLocalHost(portGenerator.Next()),
             PrivateKey = key,
             SeedEndPoint = endPoint,
         })];
     }
 
     private static ClientOptions[] GetClientOptions(
-        NodeOptions[] nodeOptions, PrivateKey[] clientPrivateKeys)
+        NodeOptions[] nodeOptions, PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
-            EndPoint = EndPointUtility.NextEndPoint(),
+            EndPoint = GetLocalHost(portGenerator.Next()),
             NodeEndPoint = Random(nodeOptions).EndPoint,
             PrivateKey = key,
         })];

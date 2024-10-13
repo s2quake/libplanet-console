@@ -1,10 +1,10 @@
 using JSSoft.Commands;
+using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Framework;
 using LibplanetConsole.Node.Commands;
-using LibplanetConsole.Node.Services;
+using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
@@ -13,17 +13,25 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddNode(
         this IServiceCollection @this, ApplicationOptions options)
     {
-        @this.AddSingleton(s => new Node(s, options))
+        var synchronizationContext = SynchronizationContext.Current ?? new();
+        var localHost = GetLocalHost(options.Port);
+        SynchronizationContext.SetSynchronizationContext(synchronizationContext);
+        @this.AddSingleton(synchronizationContext);
+        @this.AddSingleton(options);
+        if (CompareEndPoint(options.SeedEndPoint, localHost) is true)
+        {
+            @this.AddSingleton<SeedService>()
+                 .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
+        }
+
+        @this.AddSingleton<Node>()
              .AddSingleton<INode>(s => s.GetRequiredService<Node>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
-        @this.AddSingleton<NodeContext>();
-        @this.AddSingleton<SeedService>()
-             .AddSingleton<ILocalService>(s => s.GetRequiredService<SeedService>())
-             .AddSingleton<IApplicationService>(s => s.GetRequiredService<SeedService>());
-        @this.AddSingleton<ILocalService, BlockChainService>();
-        @this.AddSingleton<ILocalService, NodeService>();
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
+
+        @this.AddHostedService<SeedHostedService>();
+        @this.AddHostedService<NodeHostedService>();
 
         @this.AddSingleton<ICommand, AddressCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();
@@ -32,6 +40,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StartCommand>();
         @this.AddSingleton<ICommand, StopCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
+
         return @this;
     }
 }

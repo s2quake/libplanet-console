@@ -1,63 +1,38 @@
 namespace LibplanetConsole.Console;
 
-public abstract class NodeContentBase : INodeContent, IDisposable
+public abstract class NodeContentBase(string name) : INodeContent, IDisposable
 {
-    private readonly string _name;
-    private bool _isDisposed;
-
-    protected NodeContentBase(INode node, string name)
-    {
-        _name = name;
-        Node = node;
-        Node.Attached += Node_Attached;
-        Node.Detached += Node_Detached;
-        Node.Started += Node_Started;
-        Node.Stopped += Node_Stopped;
-    }
-
-    protected NodeContentBase(INode node)
-        : this(node, string.Empty)
-    {
-    }
-
-    public INode Node { get; }
+    private readonly string _name = name;
+    private bool disposedValue;
 
     public string Name => _name != string.Empty ? _name : GetType().Name;
 
     void IDisposable.Dispose()
     {
-        if (_isDisposed is false)
+        OnDispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    Task INodeContent.StartAsync(CancellationToken cancellationToken)
+        => OnStartAsync(cancellationToken);
+
+    Task INodeContent.StopAsync(CancellationToken cancellationToken)
+        => OnStopAsync(cancellationToken);
+
+    protected abstract Task OnStartAsync(CancellationToken cancellationToken);
+
+    protected abstract Task OnStopAsync(CancellationToken cancellationToken);
+
+    protected virtual void OnDispose(bool disposing)
+    {
+        if (!disposedValue)
         {
-            Node.Attached -= Node_Attached;
-            Node.Detached -= Node_Detached;
-            Node.Started -= Node_Started;
-            Node.Stopped -= Node_Stopped;
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
+            if (disposing)
+            {
+                // do nothing
+            }
+
+            disposedValue = true;
         }
     }
-
-    protected virtual void OnNodeAttached()
-    {
-    }
-
-    protected virtual void OnNodeDetached()
-    {
-    }
-
-    protected virtual void OnNodeStarted()
-    {
-    }
-
-    protected virtual void OnNodeStopped()
-    {
-    }
-
-    private void Node_Attached(object? sender, EventArgs e) => OnNodeAttached();
-
-    private void Node_Detached(object? sender, EventArgs e) => OnNodeDetached();
-
-    private void Node_Started(object? sender, EventArgs e) => OnNodeStarted();
-
-    private void Node_Stopped(object? sender, EventArgs e) => OnNodeStopped();
 }

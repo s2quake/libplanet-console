@@ -1,50 +1,75 @@
 using System.Security.Cryptography;
-using LibplanetConsole.Node;
-using LibplanetConsole.Node.Services;
+using Grpc.Core;
+using LibplanetConsole.Blockchain;
+using LibplanetConsole.Blockchain.Grpc;
 
 namespace LibplanetConsole.Console;
 
 internal sealed partial class Node
 {
+    private static readonly Codec _codec = new();
+
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
-    public Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
-        => _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
+    public BlockInfo Tip => Info.Tip;
+
+    public async Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetNextNonceRequest
+        {
+            Address = address.ToHex(),
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetNextNonceAsync(request, options);
+        return response.Nonce;
+    }
 
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        var privateKey = _nodeOptions.PrivateKey;
-        var address = privateKey.Address;
-        var nonce = await _blockChainService.Service.GetNextNonceAsync(address, cancellationToken);
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var address = _privateKey.Address;
+        var nonce = await GetNextNonceAsync(address, cancellationToken);
         var genesisHash = _nodeInfo.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
-            privateKey: privateKey,
+            privateKey: _privateKey,
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
-        var txId = await _blockChainService.Service.SendTransactionAsync(
-            transaction: tx.Serialize(),
+        var txData = tx.Serialize();
+        var request = new SendTransactionRequest
+        {
+            TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
+        };
+        var callOptions = new CallOptions(
             cancellationToken: cancellationToken);
-
-        return txId;
+        var response = await _blockChainService.SendTransactionAsync(request, callOptions);
+        return TxId.FromHex(response.TxId);
     }
 
-    public Task<TxId> SendTransactionAsync(
-        Transaction transaction, CancellationToken cancellationToken)
+    public async Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {
-        return _blockChainService.Service.SendTransactionAsync(
-            transaction.Serialize(), cancellationToken);
-    }
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
 
-    void IBlockChainCallback.OnBlockAppended(BlockInfo blockInfo)
-    {
-        _nodeInfo = _nodeInfo with { TipHash = blockInfo.Hash };
-        BlockAppended?.Invoke(this, new BlockEventArgs(blockInfo));
+        var request = new GetTipHashRequest();
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetTipHashAsync(request, options);
+        return BlockHash.FromString(response.BlockHash);
     }
-
-    public Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
-        => _blockChainService.Service.GetTipHashAsync(cancellationToken);
 
     public async Task<IValue> GetStateAsync(
         BlockHash? blockHash,
@@ -52,12 +77,21 @@ internal sealed partial class Node
         Address address,
         CancellationToken cancellationToken)
     {
-        var bytes = await _blockChainService.Service.GetStateAsync(
-            blockHash,
-            accountAddress,
-            address,
-            cancellationToken);
-        return _codec.Decode(bytes);
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetStateRequest
+        {
+            BlockHash = blockHash?.ToString() ?? string.Empty,
+            AccountAddress = accountAddress.ToHex(),
+            Address = address.ToHex(),
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, options);
+        return _codec.Decode(response.StateData.ToByteArray());
     }
 
     public async Task<IValue> GetStateByStateRootHashAsync(
@@ -66,16 +100,39 @@ internal sealed partial class Node
         Address address,
         CancellationToken cancellationToken)
     {
-        var bytes = await _blockChainService.Service.GetStateByStateRootHashAsync(
-            stateRootHash,
-            accountAddress,
-            address,
-            cancellationToken);
-        return _codec.Decode(bytes);
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetStateRequest
+        {
+            StateRootHash = stateRootHash.ToString(),
+            AccountAddress = accountAddress.ToHex(),
+            Address = address.ToHex(),
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, options);
+        return _codec.Decode(response.StateData.ToByteArray());
     }
 
-    public Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
-        => _blockChainService.Service.GetBlockHashAsync(height, cancellationToken);
+    public async Task<BlockHash> GetBlockHashAsync(long height, CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetBlockHashRequest
+        {
+            Height = height,
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetBlockHashAsync(request, options);
+        return BlockHash.FromString(response.BlockHash);
+    }
 
     public async Task<T> GetActionAsync<T>(
         TxId txId,
@@ -83,9 +140,20 @@ internal sealed partial class Node
         CancellationToken cancellationToken)
         where T : IAction
     {
-        var bytes = await _blockChainService.Service.GetActionAsync(
-            txId, actionIndex, cancellationToken);
-        var value = _codec.Decode(bytes);
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetActionRequest
+        {
+            TxId = txId.ToHex(),
+            ActionIndex = actionIndex,
+        };
+        var options = new CallOptions(
+            cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetActionAsync(request, options);
+        var value = _codec.Decode(response.ActionData.ToByteArray());
         if (Activator.CreateInstance(typeof(T)) is T action)
         {
             action.LoadPlainValue(value);

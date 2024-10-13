@@ -1,36 +1,44 @@
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 
-internal sealed class ClientEventTracer(IClient client)
-    : IApplicationService, IDisposable
+internal sealed class ClientEventTracer : IHostedService, IDisposable
 {
-    public Task InitializeAsync(CancellationToken cancellationToken)
+    private readonly ApplicationOptions _options;
+    private readonly IClient _client;
+
+    public ClientEventTracer(ApplicationOptions options, IClient client)
     {
-        client.Started += Client_Started;
-        client.Stopped += Client_Stopped;
-        return Task.CompletedTask;
+        _options = options;
+        _client = client;
+        _client.Started += Client_Started;
+        _client.Stopped += Client_Stopped;
     }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
     void IDisposable.Dispose()
     {
-        client.Started -= Client_Started;
-        client.Stopped -= Client_Stopped;
+        _client.Started -= Client_Started;
+        _client.Stopped -= Client_Stopped;
     }
 
     private void Client_Started(object? sender, EventArgs e)
     {
-        var message = $"Client has been started.";
+        var endPoint = _options.Port;
+        var message = $"BlockChain has been started.: {endPoint}";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
-        Console.Out.WriteLineAsJson(client.Info);
     }
 
-    private void Client_Stopped(object? sender, StopEventArgs e)
+    private void Client_Stopped(object? sender, EventArgs e)
     {
-        var message = $"Client has been stopped: {e.Reason}.";
+        var endPoint = _options.Port;
+        var message = $"BlockChain has been stopped.: {endPoint}";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 }

@@ -5,6 +5,8 @@ namespace LibplanetConsole.Console;
 
 public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
 {
+    const string Key = nameof(IClient);
+
     event EventHandler? Attached;
 
     event EventHandler? Detached;
@@ -32,6 +34,4 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
     Task StartAsync(INode node, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
-
-    Task<TxId> SendTransactionAsync(string text, CancellationToken cancellationToken);
 }

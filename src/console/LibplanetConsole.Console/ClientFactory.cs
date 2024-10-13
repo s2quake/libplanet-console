@@ -9,7 +9,7 @@ internal static class ClientFactory
     private static readonly ConcurrentDictionary<IServiceProvider, Descriptor> _valueByKey = [];
     private static readonly ConcurrentDictionary<Client, AsyncServiceScope> _scopeByClient = [];
 
-    public static Client Create(IServiceProvider serviceProvider)
+    public static Client Create(IServiceProvider serviceProvider, object? key)
     {
         if (_valueByKey.Remove(serviceProvider, out var descriptor) is true)
         {
@@ -42,8 +42,10 @@ internal static class ClientFactory
             },
             (k, v) => v);
 
-        var client = serviceScope.ServiceProvider.GetRequiredService<Client>();
-        serviceScope.ServiceProvider.GetServices<IClientContent>();
+        var scopedServiceProvider = serviceScope.ServiceProvider;
+        var key = IClient.Key;
+        var client = scopedServiceProvider.GetRequiredKeyedService<Client>(key);
+        client.Contents = [.. scopedServiceProvider.GetKeyedServices<IClientContent>(key)];
         return client;
     }
 

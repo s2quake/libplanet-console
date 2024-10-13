@@ -2,7 +2,9 @@ namespace LibplanetConsole.Console;
 
 public interface IClientContent
 {
-    IClient Client { get; }
-
     string Name { get; }
+
+    Task StartAsync(CancellationToken cancellationToken);
+
+    Task StopAsync(CancellationToken cancellationToken);
 }

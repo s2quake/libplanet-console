@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Evidence.Grpc";
+
+package libplanet.console.evidence.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service EvidenceGrpcService {
+  rpc AddEvidence(AddEvidenceRequest) returns (AddEvidenceResponse);
+  rpc GetEvidence(GetEvidenceRequest) returns (GetEvidenceResponse);
+  rpc Violate(ViolateRequest) returns (ViolateResponse);
+}
+
+message EvidenceInformation {
+    string type = 1;
+    string id = 2;
+    string targetAddress = 3;
+    int64 height = 4;
+    google.protobuf.Timestamp timestamp = 5;
+    string genesisHash = 6;
+    string tipHash = 7;
+    bool isRunning = 8;
+}
+
+message AddEvidenceRequest {
+}
+
+message AddEvidenceResponse {
+  EvidenceInformation EvidenceInformation = 1;
+}
+
+message GetEvidenceRequest {
+  int64 height = 1;
+}
+
+message GetEvidenceResponse {
+  repeated EvidenceInformation EvidenceInformations = 1;
+}
+
+message ViolateRequest {
+}
+
+message ViolateResponse {
+}

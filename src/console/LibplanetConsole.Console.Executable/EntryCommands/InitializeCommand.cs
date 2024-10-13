@@ -1,10 +1,13 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Node;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -18,17 +21,20 @@ internal sealed class InitializeCommand : CommandBase
 
     [CommandPropertyRequired]
     [CommandSummary("The directory path used to initialize a repository.")]
-    [Path(
-        Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
+    [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The endpoint of the libplanet-console. " +
-                    "If omitted, a random endpoint is used.")]
-    [EndPoint]
-    public string EndPoint { get; set; } = string.Empty;
+    [CommandSummary("The port of the libplanet-console. " +
+                    "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; set; }
 
+#if DEBUG
+    [CommandProperty(InitValue = 1)]
+#else
     [CommandProperty(InitValue = 4)]
+#endif
     [CommandSummary("The number of nodes to create. If omitted, 4 nodes are created.\n" +
                     "Mutually exclusive with '--nodes' option.")]
     [CommandPropertyExclusion(nameof(Nodes))]
@@ -41,7 +47,11 @@ internal sealed class InitializeCommand : CommandBase
     [PrivateKeyArray]
     public string[] Nodes { get; init; } = [];
 
+#if DEBUG
+    [CommandProperty(InitValue = 1)]
+#else
     [CommandProperty(InitValue = 2)]
+#endif
     [CommandSummary("The number of clients to create. If omitted, 2 clients are created.\n" +
                     "Mutually exclusive with '--clients' option.")]
     [CommandPropertyExclusion(nameof(Clients))]
@@ -82,13 +92,27 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
+    [CommandProperty("port-spacing", InitValue = PortGenerator.DefaultSpace)]
+    [CommandSummary("Specifies the spacing between ports. Default is 10. " +
+                    "This option is only used when --port-generation-mode is set to " +
+                    "'sequential'. If --port-generation-mode is set to 'random', " +
+                    "the value of this option is 10'")]
+    [Category("Network")]
+    [Range(10, 10000)]
+    public int PortSpacing { get; set; }
+
+    [CommandProperty("port-generation-mode")]
+    [CommandSummary("Specifies the mode for generating ports: Random or Sequential.")]
+    [Category("Network")]
+    public PortGenerationMode PortGenerationMode { get; set; } = PortGenerationMode.Sequential;
+
     protected override void OnExecute()
     {
+        var portGenerator = new PortGenerator(Port);
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
-        var endPoint = EndPointUtility.ParseOrNext(EndPoint);
-        var prevEndPoint = EndPoint != string.Empty ? endPoint : null;
-        var nodeOptions = GetNodeOptions(ref prevEndPoint);
-        var clientOptions = GetClientOptions(ref prevEndPoint);
+        var port = portGenerator.Current;
+        var nodeOptions = GetNodeOptions(portGenerator);
+        var clientOptions = GetClientOptions(portGenerator);
         var outputPath = Path.GetFullPath(RepositoryPath);
         var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
             ? DateTimeOffset : DateTimeOffset.UtcNow;
@@ -101,11 +125,10 @@ internal sealed class InitializeCommand : CommandBase
             ActionProviderType = ActionProviderType,
         };
         var genesis = Repository.CreateGenesis(genesisOptions);
-        var repository = new Repository(endPoint, nodeOptions, clientOptions)
+        var repository = new Repository(port, nodeOptions, clientOptions)
         {
             Genesis = genesis,
-            LogPath = "app.log",
-            LibraryLogPath = "library.log",
+            LogPath = "log",
         };
         var resolver = new RepositoryPathResolver();
         using var writer = new ConditionalTextWriter(Out)
@@ -126,51 +149,40 @@ internal sealed class InitializeCommand : CommandBase
         TextWriterExtensions.WriteLineAsJson(writer, info);
     }
 
-    private NodeOptions[] GetNodeOptions(ref EndPoint? prevEndPoint)
+    private NodeOptions[] GetNodeOptions(PortGenerator portGenerator)
     {
         var privateKeys = GetNodes();
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
             var nodeOptions = new NodeOptions
             {
-                EndPoint = endPoint,
+                EndPoint = GetLocalHost(portGenerator.Next()),
                 PrivateKey = privateKey,
                 StorePath = "store",
-                LogPath = "app.log",
-                LibraryLogPath = "library.log",
+                LogPath = "log",
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
             };
             nodeOptionsList.Add(nodeOptions);
-            if (prevEndPoint is not null)
-            {
-                prevEndPoint = endPoint;
-            }
         }
 
         return [.. nodeOptionsList];
     }
 
-    private ClientOptions[] GetClientOptions(ref EndPoint? prevEndPoint)
+    private ClientOptions[] GetClientOptions(PortGenerator portGenerator)
     {
         var privateKeys = GetClients();
         var clientOptionsList = new List<ClientOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
-            var endPoint = prevEndPoint ?? EndPointUtility.NextEndPoint();
             var clientOptions = new ClientOptions
             {
-                EndPoint = endPoint,
+                EndPoint = GetLocalHost(portGenerator.Next()),
                 PrivateKey = privateKey,
-                LogPath = "app.log",
+                LogPath = "log",
             };
             clientOptionsList.Add(clientOptions);
-            if (prevEndPoint is not null)
-            {
-                prevEndPoint = endPoint;
-            }
         }
 
         return [.. clientOptionsList];

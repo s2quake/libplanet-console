@@ -1,33 +1,40 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
 
 namespace LibplanetConsole.Logging;
 
-public static class LoggingExtensions
+internal static class LoggingExtensions
 {
-    public const string AppSourceContext = "LibplanetConsole";
-
     public static IServiceCollection AddLogging(
-        this IServiceCollection @this, string logPath, string libraryLogPath)
+        this IServiceCollection @this, string logPath, string name, params LoggingFilter[] filters)
     {
-        var loggerConfiguration = new LoggerConfiguration();
-        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
-        if (logPath != string.Empty)
+        if (logPath == string.Empty)
         {
-            loggerConfiguration = loggerConfiguration
-                .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => IsApplicationLog(e))
-                    .WriteTo.File(logPath));
+            throw new ArgumentException("Log path must be specified.", nameof(logPath));
         }
 
-        if (libraryLogPath != string.Empty)
+        if (File.Exists(logPath) is true)
         {
+            throw new ArgumentException("Log path must be a directory.", nameof(logPath));
+        }
+
+        if (name == string.Empty)
+        {
+            throw new ArgumentException("Name must be specified.", nameof(name));
+        }
+
+        var loggerConfiguration = new LoggerConfiguration();
+        var logFilename = Path.Combine(logPath, name);
+        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+        loggerConfiguration = loggerConfiguration
+            .WriteTo.Logger(lc => lc.WriteTo.File(logFilename));
+
+        foreach (var filter in filters)
+        {
+            var filename = Path.Combine(logPath, filter.Name);
             loggerConfiguration = loggerConfiguration
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByExcluding(e => IsApplicationLog(e))
-                    .WriteTo.File(libraryLogPath));
+                    .Filter.ByIncludingOnly(filter.Filter)
+                    .WriteTo.File(filename));
         }
 
         Log.Logger = loggerConfiguration.CreateLogger();
@@ -46,23 +53,33 @@ public static class LoggingExtensions
         return @this;
     }
 
-    private static bool IsApplicationLog(LogEvent e)
+    public static IServiceCollection AddLogging(
+        this IServiceCollection @this, params LoggingFilter[] filters)
     {
-        if (e.Properties.TryGetValue("SourceContext", out var propertyValue) is false)
+        var loggerConfiguration = new LoggerConfiguration();
+        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+
+        foreach (var filter in filters)
         {
-            return false;
+            loggerConfiguration = loggerConfiguration
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByIncludingOnly(filter.Filter)
+                    .WriteTo.Trace());
         }
 
-        if (propertyValue is not ScalarValue scalarValue)
+        Log.Logger = loggerConfiguration.CreateLogger();
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
-            return false;
-        }
+            Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
+        };
 
-        if (scalarValue.Value is not string value)
+        @this.AddSingleton<ILoggerFactory, LoggerFactory>();
+        @this.AddLogging(builder =>
         {
-            return false;
-        }
+            builder.ClearProviders();
+            builder.AddSerilog();
+        });
 
-        return value.StartsWith(AppSourceContext);
+        return @this;
     }
 }
