@@ -29,4 +29,17 @@ public static class TaskUtility
             return false;
         }
     }
+
+    public static async Task<bool> TryWait(Task task)
+    {
+        try
+        {
+            await task;
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }

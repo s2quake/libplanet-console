@@ -4,6 +4,7 @@ using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Node;
 using LibplanetConsole.Node.Grpc;
@@ -240,7 +241,7 @@ internal sealed partial class Node : INode, IBlockChain
         {
             await _processCancellationTokenSource.CancelAsync();
             _processCancellationTokenSource.Dispose();
-            await _processTask;
+            await TaskUtility.TryWait(_processTask);
             _processTask = Task.CompletedTask;
             _process = null;
 

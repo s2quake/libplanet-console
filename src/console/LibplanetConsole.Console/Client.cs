@@ -6,6 +6,7 @@ using LibplanetConsole.Client;
 using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Grpc;
 using Microsoft.Extensions.Logging;
 
@@ -215,7 +216,7 @@ internal sealed partial class Client : IClient, IBlockChain
         {
             await _processCancellationTokenSource.CancelAsync();
             _processCancellationTokenSource.Dispose();
-            await _processTask;
+            await TaskUtility.TryWait(_processTask);
             _processTask = Task.CompletedTask;
             _process = null;
 
