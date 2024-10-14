@@ -22,7 +22,7 @@ internal sealed class Evidence([FromKeyedServices(INode.Key)] INode node)
         var request = new AddEvidenceRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _client.AddEvidenceAsync(request, callOptions);
-        return response.EvidenceInformation;
+        return response.EvidenceInfo;
     }
 
     public async Task<EvidenceInfo[]> GetEvidenceAsync(
@@ -36,7 +36,7 @@ internal sealed class Evidence([FromKeyedServices(INode.Key)] INode node)
         var request = new GetEvidenceRequest { Height = height };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _client.GetEvidenceAsync(request, callOptions);
-        return [.. response.EvidenceInformations.Select(item => (EvidenceInfo)item)];
+        return [.. response.EvidenceInfos.Select(item => (EvidenceInfo)item)];
     }
 
     public async Task ViolateAsync(CancellationToken cancellationToken)

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Client : IClient, IBlockChain
+internal sealed partial class Client : IClient
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ClientOptions _clientOptions;

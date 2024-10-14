@@ -11,11 +11,10 @@ using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using static LibplanetConsole.Common.EndPointUtility;
-using NodeInfo = LibplanetConsole.Node.NodeInfo;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Node : INode, IBlockChain
+internal sealed partial class Node : INode
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly NodeOptions _nodeOptions;

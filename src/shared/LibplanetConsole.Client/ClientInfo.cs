@@ -1,5 +1,6 @@
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Client.Grpc;
+using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Client;
 
@@ -20,33 +21,26 @@ public readonly record struct ClientInfo
         Tip = BlockInfo.Empty,
     };
 
-    public static implicit operator ClientInfo(ClientInformation clientInfo)
+    public static implicit operator ClientInfo(ClientInfoProto clientInfo)
     {
         return new ClientInfo
         {
-            Address = new Address(clientInfo.Address),
-            NodeAddress = new Address(clientInfo.NodeAddress),
-            GenesisHash = BlockHash.FromString(clientInfo.GenesisHash),
-            Tip = new BlockInfo
-            {
-                Hash = BlockHash.FromString(clientInfo.TipHash),
-                Height = clientInfo.TipHeight,
-                Miner = new Address(clientInfo.TipMiner),
-            },
+            Address = ToAddress(clientInfo.Address),
+            NodeAddress = ToAddress(clientInfo.NodeAddress),
+            GenesisHash = ToBlockHash(clientInfo.GenesisHash),
+            Tip = clientInfo.Tip,
             IsRunning = clientInfo.IsRunning,
         };
     }
 
-    public static implicit operator ClientInformation(ClientInfo clientInfo)
+    public static implicit operator ClientInfoProto(ClientInfo clientInfo)
     {
-        return new ClientInformation
+        return new ClientInfoProto
         {
-            Address = clientInfo.Address.ToHex(),
-            NodeAddress = clientInfo.NodeAddress.ToHex(),
-            GenesisHash = clientInfo.GenesisHash.ToString(),
-            TipHash = clientInfo.Tip.Hash.ToString(),
-            TipHeight = clientInfo.Tip.Height,
-            TipMiner = clientInfo.Tip.Miner.ToHex(),
+            Address = ToGrpc(clientInfo.Address),
+            NodeAddress = ToGrpc(clientInfo.NodeAddress),
+            GenesisHash = ToGrpc(clientInfo.GenesisHash),
+            Tip = clientInfo.Tip,
             IsRunning = clientInfo.IsRunning,
         };
     }

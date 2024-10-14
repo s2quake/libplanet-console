@@ -4,6 +4,8 @@ option csharp_namespace = "LibplanetConsole.Node.Grpc";
 
 package libplanet.console.node.v1;
 
+import "src/shared/LibplanetConsole.Blockchain/Protos/BlockChainGrpcService.proto";
+
 service NodeGrpcService {
   rpc Ping(PingRequest) returns (PingResponse);
   rpc Start(StartRequest) returns (StartResponse);
@@ -14,17 +16,15 @@ service NodeGrpcService {
   rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
 }
 
-message NodeInformation {
+message NodeInfoProto {
     int32 process_id = 1;
     string app_protocol_version = 2;
     int32 blocksync_port = 3;
     int32 consensus_port = 4;
-    string address = 5;
-    string genesis_hash = 6;
-    string tip_hash = 7;
-    int64 tip_height = 8;
-    string tip_miner = 9;
-    bool is_running = 10;
+    libplanet.console.blockchain.v1.AddressProto address = 5;
+    libplanet.console.blockchain.v1.BlockHashProto genesis_hash = 6;
+    libplanet.console.blockchain.v1.BlockInfoProto tip = 7;
+    bool is_running = 8;
 }
 
 message PingRequest {
@@ -38,7 +38,7 @@ message StartRequest {
 }
 
 message StartResponse {
-    NodeInformation node_info = 1;
+    NodeInfoProto node_info = 1;
 }
 
 message StopRequest {
@@ -51,14 +51,14 @@ message GetInfoRequest {
 }
 
 message GetInfoResponse {
-    NodeInformation node_info = 1;
+    NodeInfoProto node_info = 1;
 }
 
 message GetStartedStreamRequest {
 }
 
 message GetStartedStreamResponse {
-    NodeInformation node_info = 1;
+    NodeInfoProto node_info = 1;
 }
 
 message GetStoppedStreamRequest {

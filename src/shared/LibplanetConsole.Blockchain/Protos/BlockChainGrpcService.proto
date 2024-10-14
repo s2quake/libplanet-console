@@ -15,10 +15,30 @@ service BlockChainGrpcService {
   rpc GetBlockAppendedStream(GetBlockAppendedStreamRequest) returns (stream GetBlockAppendedStreamResponse);
 }
 
-message BlockInformation {
+message AddressProto {
+  bytes bytes = 1;
+}
+
+message PublicKeyProto {
+  bytes bytes = 1;
+}
+
+message BlockHashProto {
+  bytes bytes = 1;
+}
+
+message TxIdProto {
+  bytes bytes = 1;
+}
+
+message HashDigest256Proto {
+  bytes bytes = 1;
+}
+
+message BlockInfoProto {
   int64 height = 1;
-  string hash = 2;
-  string miner = 3;
+  BlockHashProto hash = 2;
+  AddressProto miner = 3;
 }
 
 message SendTransactionRequest {
@@ -26,11 +46,11 @@ message SendTransactionRequest {
 }
 
 message SendTransactionResponse {
-  string tx_id = 1;
+  TxIdProto tx_id = 1;
 }
 
 message GetNextNonceRequest {
-  string address = 1;
+  AddressProto address = 1;
 }
 
 message GetNextNonceResponse {
@@ -41,16 +61,17 @@ message GetTipHashRequest {
 }
 
 message GetTipHashResponse {
-  string block_hash = 1;
+  BlockHashProto block_hash = 1;
 }
 
 message GetStateRequest {
-  oneof hash {
-    string block_hash = 1;
-    string state_root_hash = 2;
+  oneof identifier {
+    int64 height = 1;
+    BlockHashProto block_hash = 2;
+    HashDigest256Proto state_root_hash = 3;
   }
-  string account_address = 3;
-  string address = 4;
+  AddressProto account_address = 4;
+  AddressProto address = 5;
 }
 
 message GetStateResponse {
@@ -62,11 +83,11 @@ message GetBlockHashRequest {
 }
 
 message GetBlockHashResponse {
-  string block_hash = 1;
+  BlockHashProto block_hash = 1;
 }
 
 message GetActionRequest {
-  string tx_id = 1;
+  TxIdProto tx_id = 1;
   int32 action_index = 2;
 }
 
@@ -78,5 +99,5 @@ message GetBlockAppendedStreamRequest {
 }
 
 message GetBlockAppendedStreamResponse {
-  BlockInformation block_info = 1;
+  BlockInfoProto block_info = 1;
 }

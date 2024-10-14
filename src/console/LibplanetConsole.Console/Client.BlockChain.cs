@@ -2,10 +2,11 @@ using System.Security.Cryptography;
 using Grpc.Core;
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Blockchain.Grpc;
+using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Client
+internal sealed partial class Client : IBlockChain
 {
     private static readonly Codec _codec = new();
 
@@ -22,11 +23,10 @@ internal sealed partial class Client
 
         var request = new GetNextNonceRequest
         {
-            Address = address.ToHex(),
+            Address = ToGrpc(address),
         };
-        var options = new CallOptions(
-            cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetNextNonceAsync(request, options);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetNextNonceAsync(request, callOptions);
         return response.Nonce;
     }
 
@@ -51,10 +51,9 @@ internal sealed partial class Client
         {
             TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
         };
-        var callOptions = new CallOptions(
-            cancellationToken: cancellationToken);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _blockChainService.SendTransactionAsync(request, callOptions);
-        return TxId.FromHex(response.TxId);
+        return ToTxId(response.TxId);
     }
 
     public async Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
@@ -65,14 +64,13 @@ internal sealed partial class Client
         }
 
         var request = new GetTipHashRequest();
-        var options = new CallOptions(
-            cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetTipHashAsync(request, options);
-        return BlockHash.FromString(response.BlockHash);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetTipHashAsync(request, callOptions);
+        return ToBlockHash(response.BlockHash);
     }
 
     public async Task<IValue> GetStateAsync(
-        BlockHash? blockHash,
+        long height,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -84,17 +82,38 @@ internal sealed partial class Client
 
         var request = new GetStateRequest
         {
-            BlockHash = blockHash?.ToString() ?? string.Empty,
-            AccountAddress = accountAddress.ToHex(),
-            Address = address.ToHex(),
+            Height = height,
+            AccountAddress = ToGrpc(accountAddress),
+            Address = ToGrpc(address),
         };
-        var options = new CallOptions(
-            cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetStateAsync(request, options);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, callOptions);
         return _codec.Decode(response.StateData.ToByteArray());
     }
 
-    public async Task<IValue> GetStateByStateRootHashAsync(
+    public async Task<IValue> GetStateAsync(
+        BlockHash blockHash,
+        Address accountAddress,
+        Address address,
+        CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetStateRequest
+        {
+            BlockHash = ToGrpc(blockHash),
+            AccountAddress = ToGrpc(accountAddress),
+            Address = ToGrpc(address),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, callOptions);
+        return _codec.Decode(response.StateData.ToByteArray());
+    }
+
+    public async Task<IValue> GetStateAsync(
         HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
@@ -107,13 +126,12 @@ internal sealed partial class Client
 
         var request = new GetStateRequest
         {
-            StateRootHash = stateRootHash.ToString(),
-            AccountAddress = accountAddress.ToHex(),
-            Address = address.ToHex(),
+            StateRootHash = ToGrpc(stateRootHash),
+            AccountAddress = ToGrpc(accountAddress),
+            Address = ToGrpc(address),
         };
-        var options = new CallOptions(
-            cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetStateAsync(request, options);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetStateAsync(request, callOptions);
         return _codec.Decode(response.StateData.ToByteArray());
     }
 
@@ -128,10 +146,9 @@ internal sealed partial class Client
         {
             Height = height,
         };
-        var options = new CallOptions(
-            cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetBlockHashAsync(request, options);
-        return BlockHash.FromString(response.BlockHash);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetBlockHashAsync(request, callOptions);
+        return ToBlockHash(response.BlockHash);
     }
 
     public async Task<T> GetActionAsync<T>(
@@ -145,12 +162,11 @@ internal sealed partial class Client
 
         var request = new GetActionRequest
         {
-            TxId = txId.ToHex(),
+            TxId = ToGrpc(txId),
             ActionIndex = actionIndex,
         };
-        var options = new CallOptions(
-            cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetActionAsync(request, options);
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetActionAsync(request, callOptions);
         var value = _codec.Decode(response.ActionData.ToByteArray());
         if (Activator.CreateInstance(typeof(T)) is T action)
         {

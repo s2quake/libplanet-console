@@ -1,5 +1,6 @@
 using LibplanetConsole.Blockchain;
 using LibplanetConsole.Node.Grpc;
+using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Node;
 
@@ -28,7 +29,7 @@ public readonly record struct NodeInfo
         Tip = BlockInfo.Empty,
     };
 
-    public static implicit operator NodeInfo(NodeInformation nodeInfo)
+    public static implicit operator NodeInfo(NodeInfoProto nodeInfo)
     {
         return new NodeInfo
         {
@@ -36,31 +37,24 @@ public readonly record struct NodeInfo
             AppProtocolVersion = nodeInfo.AppProtocolVersion,
             BlocksyncPort = nodeInfo.BlocksyncPort,
             ConsensusPort = nodeInfo.ConsensusPort,
-            Address = new Address(nodeInfo.Address),
-            GenesisHash = BlockHash.FromString(nodeInfo.GenesisHash),
-            Tip = new BlockInfo
-            {
-                Height = nodeInfo.TipHeight,
-                Hash = BlockHash.FromString(nodeInfo.TipHash),
-                Miner = new Address(nodeInfo.TipMiner),
-            },
+            Address = ToAddress(nodeInfo.Address),
+            GenesisHash = ToBlockHash(nodeInfo.GenesisHash),
+            Tip = nodeInfo.Tip,
             IsRunning = nodeInfo.IsRunning,
         };
     }
 
-    public static implicit operator NodeInformation(NodeInfo nodeInfo)
+    public static implicit operator NodeInfoProto(NodeInfo nodeInfo)
     {
-        return new NodeInformation
+        return new NodeInfoProto
         {
             ProcessId = nodeInfo.ProcessId,
             AppProtocolVersion = nodeInfo.AppProtocolVersion,
             BlocksyncPort = nodeInfo.BlocksyncPort,
             ConsensusPort = nodeInfo.ConsensusPort,
-            Address = nodeInfo.Address.ToHex(),
-            GenesisHash = nodeInfo.GenesisHash.ToString(),
-            TipHash = nodeInfo.Tip.Hash.ToString(),
-            TipHeight = nodeInfo.Tip.Height,
-            TipMiner = nodeInfo.Tip.Miner.ToHex(),
+            Address = ToGrpc(nodeInfo.Address),
+            GenesisHash = ToGrpc(nodeInfo.GenesisHash),
+            Tip = nodeInfo.Tip,
             IsRunning = nodeInfo.IsRunning,
         };
     }

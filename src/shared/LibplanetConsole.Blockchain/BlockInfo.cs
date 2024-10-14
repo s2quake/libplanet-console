@@ -1,4 +1,5 @@
 using LibplanetConsole.Blockchain.Grpc;
+using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Blockchain;
 
@@ -19,23 +20,23 @@ public readonly partial record struct BlockInfo
         Height = -1,
     };
 
-    public static implicit operator BlockInfo(BlockInformation blockInfo)
+    public static implicit operator BlockInfo(BlockInfoProto blockInfo)
     {
         return new BlockInfo
         {
             Height = blockInfo.Height,
-            Hash = BlockHash.FromString(blockInfo.Hash),
-            Miner = new Address(blockInfo.Miner),
+            Hash = ToBlockHash(blockInfo.Hash),
+            Miner = ToAddress(blockInfo.Miner),
         };
     }
 
-    public static implicit operator BlockInformation(BlockInfo blockInfo)
+    public static implicit operator BlockInfoProto(BlockInfo blockInfo)
     {
-        return new BlockInformation
+        return new BlockInfoProto
         {
             Height = blockInfo.Height,
-            Hash = blockInfo.Hash.ToString(),
-            Miner = blockInfo.Miner.ToHex(),
+            Hash = ToGrpc(blockInfo.Hash),
+            Miner = ToGrpc(blockInfo.Miner),
         };
     }
 }

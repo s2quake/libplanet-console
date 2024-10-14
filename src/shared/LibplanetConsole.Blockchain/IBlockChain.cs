@@ -19,12 +19,18 @@ public interface IBlockChain
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(
-        BlockHash? blockHash,
+        long height,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken);
 
-    Task<IValue> GetStateByStateRootHashAsync(
+    Task<IValue> GetStateAsync(
+        BlockHash blockHash,
+        Address accountAddress,
+        Address address,
+        CancellationToken cancellationToken);
+
+    Task<IValue> GetStateAsync(
         HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
