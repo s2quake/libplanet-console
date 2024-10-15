@@ -1,4 +1,4 @@
-using LibplanetConsole.Node.Evidence.Grpc;
+using LibplanetConsole.Node.Evidence.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 

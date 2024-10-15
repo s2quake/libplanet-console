@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
-using LibplanetConsole.Blockchain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

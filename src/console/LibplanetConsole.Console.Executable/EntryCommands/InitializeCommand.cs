@@ -6,7 +6,6 @@ using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Node;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;

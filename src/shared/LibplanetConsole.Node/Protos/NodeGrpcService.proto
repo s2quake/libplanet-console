@@ -1,9 +1,10 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Node.Grpc";
+option csharp_namespace = "LibplanetConsole.Grpc.Node";
 
 package libplanet.console.node.v1;
 
+import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
 import "src/shared/LibplanetConsole.Blockchain/Protos/BlockChainGrpcService.proto";
 
 service NodeGrpcService {
@@ -21,8 +22,8 @@ message NodeInfoProto {
     string app_protocol_version = 2;
     int32 blocksync_port = 3;
     int32 consensus_port = 4;
-    libplanet.console.blockchain.v1.AddressProto address = 5;
-    libplanet.console.blockchain.v1.BlockHashProto genesis_hash = 6;
+    libplanet.console.types.v1.AddressProto address = 5;
+    libplanet.console.types.v1.BlockHashProto genesis_hash = 6;
     libplanet.console.blockchain.v1.BlockInfoProto tip = 7;
     bool is_running = 8;
 }

@@ -9,7 +9,10 @@
     <Compile Include="$(SharedDirectory)LibplanetConsole.Client\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Blockchain\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Both" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Both" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Both">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto" GrpcServices="Server">
       <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
     </Protobuf>

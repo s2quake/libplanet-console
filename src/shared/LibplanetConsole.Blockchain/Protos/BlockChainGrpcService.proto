@@ -1,8 +1,10 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Blockchain.Grpc";
+option csharp_namespace = "LibplanetConsole.Grpc.Blockchain";
 
 package libplanet.console.blockchain.v1;
+
+import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
 
 service BlockChainGrpcService {
   rpc SendTransaction(SendTransactionRequest) returns (SendTransactionResponse);
@@ -15,42 +17,21 @@ service BlockChainGrpcService {
   rpc GetBlockAppendedStream(GetBlockAppendedStreamRequest) returns (stream GetBlockAppendedStreamResponse);
 }
 
-message AddressProto {
-  bytes bytes = 1;
-}
-
-message PublicKeyProto {
-  bytes bytes = 1;
-}
-
-message BlockHashProto {
-  bytes bytes = 1;
-}
-
-message TxIdProto {
-  bytes bytes = 1;
-}
-
-message HashDigest256Proto {
-  bytes bytes = 1;
-}
-
 message BlockInfoProto {
   int64 height = 1;
-  BlockHashProto hash = 2;
-  AddressProto miner = 3;
+  libplanet.console.types.v1.BlockHashProto hash = 2;
+  libplanet.console.types.v1.AddressProto miner = 3;
 }
-
 message SendTransactionRequest {
   bytes transaction_data = 1;
 }
 
 message SendTransactionResponse {
-  TxIdProto tx_id = 1;
+  libplanet.console.types.v1.TxIdProto tx_id = 1;
 }
 
 message GetNextNonceRequest {
-  AddressProto address = 1;
+  libplanet.console.types.v1.AddressProto address = 1;
 }
 
 message GetNextNonceResponse {
@@ -61,17 +42,17 @@ message GetTipHashRequest {
 }
 
 message GetTipHashResponse {
-  BlockHashProto block_hash = 1;
+  libplanet.console.types.v1.BlockHashProto block_hash = 1;
 }
 
 message GetStateRequest {
   oneof identifier {
     int64 height = 1;
-    BlockHashProto block_hash = 2;
-    HashDigest256Proto state_root_hash = 3;
+    libplanet.console.types.v1.BlockHashProto block_hash = 2;
+    libplanet.console.types.v1.HashDigest256Proto state_root_hash = 3;
   }
-  AddressProto account_address = 4;
-  AddressProto address = 5;
+  libplanet.console.types.v1.AddressProto account_address = 4;
+  libplanet.console.types.v1.AddressProto address = 5;
 }
 
 message GetStateResponse {
@@ -83,11 +64,11 @@ message GetBlockHashRequest {
 }
 
 message GetBlockHashResponse {
-  BlockHashProto block_hash = 1;
+  libplanet.console.types.v1.BlockHashProto block_hash = 1;
 }
 
 message GetActionRequest {
-  TxIdProto tx_id = 1;
+  libplanet.console.types.v1.TxIdProto tx_id = 1;
   int32 action_index = 2;
 }
 

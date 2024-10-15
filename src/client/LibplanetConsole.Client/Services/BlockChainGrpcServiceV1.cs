@@ -1,55 +1,39 @@
 using Grpc.Core;
-using LibplanetConsole.Blockchain;
-using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Grpc;
+using LibplanetConsole.Grpc.Blockchain;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
+using static LibplanetConsole.Grpc.TypeUtility;
 
-namespace LibplanetConsole.Node.Grpc;
+namespace LibplanetConsole.Client.Services;
 
-internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChainGrpcServiceBase
+internal sealed class BlockChainGrpcServiceV1(
+    Client client,
+    IBlockChain blockChain,
+    IHostApplicationLifetime applicationLifetime)
+    : BlockChainGrpcService.BlockChainGrpcServiceBase
 {
     private static readonly Codec _codec = new();
-    private readonly Node _node;
-    private readonly IBlockChain _blockChain;
-    private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly ILogger<BlockChainGrpcServiceV1> _logger;
-
-    public BlockChainGrpcServiceV1(
-        Node node,
-        IBlockChain blockChain,
-        IHostApplicationLifetime applicationLifetime,
-        ILogger<BlockChainGrpcServiceV1> logger)
-    {
-        _node = node;
-        _blockChain = blockChain;
-        _applicationLifetime = applicationLifetime;
-        _logger = logger;
-        _logger.LogDebug("BlockChainGrpcServiceV1 is created.");
-    }
 
     public async override Task<SendTransactionResponse> SendTransaction(
         SendTransactionRequest request, ServerCallContext context)
     {
-        _logger.LogDebug("{MethodName} is called.", nameof(SendTransaction));
-        var tx = Transaction.Deserialize(request.TransactionData.ToByteArray());
-        await _node.SendTransactionAsync(tx, context.CancellationToken);
-        return new SendTransactionResponse { TxId = ToGrpc(tx.Id) };
+        var txData = request.TransactionData.ToByteArray();
+        var txId = await client.SendTransactionAsync(txData, context.CancellationToken);
+        return new SendTransactionResponse { TxId = ToGrpc(txId) };
     }
 
     public async override Task<GetNextNonceResponse> GetNextNonce(
         GetNextNonceRequest request, ServerCallContext context)
     {
         var address = ToAddress(request.Address);
-        var nonce = await _blockChain.GetNextNonceAsync(address, context.CancellationToken);
+        var nonce = await blockChain.GetNextNonceAsync(address, context.CancellationToken);
         return new GetNextNonceResponse { Nonce = nonce };
     }
 
     public override async Task<GetTipHashResponse> GetTipHash(
         GetTipHashRequest request, ServerCallContext context)
     {
-        var blockHash = await Task.FromResult(_blockChain.Tip.Hash);
+        var blockHash = await Task.FromResult(blockChain.Tip.Hash);
         return new GetTipHashResponse { BlockHash = ToGrpc(blockHash) };
     }
 
@@ -68,21 +52,21 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
         {
             if (request.IdentifierCase == GetStateRequest.IdentifierOneofCase.Height)
             {
-                return await _blockChain.GetStateAsync(
+                return await blockChain.GetStateAsync(
                     request.Height, accountAddress, address, cancellationToken);
             }
 
             if (request.IdentifierCase == GetStateRequest.IdentifierOneofCase.BlockHash)
             {
                 var blockHash = ToBlockHash(request.BlockHash);
-                return await _blockChain.GetStateAsync(
+                return await blockChain.GetStateAsync(
                     blockHash, accountAddress, address, cancellationToken);
             }
 
             if (request.IdentifierCase == GetStateRequest.IdentifierOneofCase.StateRootHash)
             {
                 var stateRootHash = ToHashDigest256(request.StateRootHash);
-                return await _blockChain.GetStateAsync(
+                return await blockChain.GetStateAsync(
                     stateRootHash, accountAddress, address, cancellationToken);
             }
 
@@ -94,7 +78,7 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
         GetBlockHashRequest request, ServerCallContext context)
     {
         var height = request.Height;
-        var blockHash = await _blockChain.GetBlockHashAsync(height, context.CancellationToken);
+        var blockHash = await blockChain.GetBlockHashAsync(height, context.CancellationToken);
         return new GetBlockHashResponse { BlockHash = ToGrpc(blockHash) };
     }
 
@@ -103,7 +87,7 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
     {
         var txId = ToTxId(request.TxId);
         var actionIndex = request.ActionIndex;
-        var action = await _node.GetActionAsync(txId, actionIndex, context.CancellationToken);
+        var action = await client.GetActionAsync(txId, actionIndex, context.CancellationToken);
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
     }
 
@@ -114,9 +98,9 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
     {
         var streamer = new EventStreamer<GetBlockAppendedStreamResponse, BlockEventArgs>(
             responseStream,
-            attach: handler => _blockChain.BlockAppended += handler,
-            detach: handler => _blockChain.BlockAppended -= handler,
+            attach: handler => blockChain.BlockAppended += handler,
+            detach: handler => blockChain.BlockAppended -= handler,
             selector: e => new GetBlockAppendedStreamResponse { BlockInfo = e.BlockInfo });
-        await streamer.RunAsync(_applicationLifetime, context.CancellationToken);
+        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
     }
 }

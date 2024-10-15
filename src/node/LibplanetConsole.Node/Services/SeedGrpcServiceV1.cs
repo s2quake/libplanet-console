@@ -1,8 +1,8 @@
 using Grpc.Core;
+using LibplanetConsole.Grpc.Seed;
 using LibplanetConsole.Seed;
-using LibplanetConsole.Seed.Grpc;
 
-namespace LibplanetConsole.Node.Grpc;
+namespace LibplanetConsole.Node.Services;
 
 public sealed class SeedGrpcServiceV1(ISeedService seedService)
     : SeedGrpcService.SeedGrpcServiceBase

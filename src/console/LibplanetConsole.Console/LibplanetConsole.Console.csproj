@@ -18,14 +18,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Client"/>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Client">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Both">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto" GrpcServices="Client">
       <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
     </Protobuf>
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Client">
       <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
     </Protobuf>
   </ItemGroup>

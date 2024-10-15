@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 using Grpc.Core;
-using LibplanetConsole.Blockchain;
-using LibplanetConsole.Blockchain.Grpc;
-using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
+using LibplanetConsole.Grpc.Blockchain;
+using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console;
 

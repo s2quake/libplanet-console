@@ -1,9 +1,10 @@
 using Grpc.Core;
 using LibplanetConsole.Common;
 using LibplanetConsole.Grpc;
+using LibplanetConsole.Grpc.Client;
 using Microsoft.Extensions.Hosting;
 
-namespace LibplanetConsole.Client.Grpc;
+namespace LibplanetConsole.Client.Services;
 
 internal sealed class ClientGrpcServiceV1(
     IHostApplicationLifetime applicationLifetime, IClient client)

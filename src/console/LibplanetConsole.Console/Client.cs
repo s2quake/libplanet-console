@@ -1,13 +1,11 @@
 using Grpc.Core;
 using Grpc.Net.Client;
-using LibplanetConsole.Blockchain;
-using LibplanetConsole.Blockchain.Grpc;
-using LibplanetConsole.Client;
-using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Threading;
-using LibplanetConsole.Console.Grpc;
+using LibplanetConsole.Console.Services;
+using LibplanetConsole.Grpc.Blockchain;
+using LibplanetConsole.Grpc.Client;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;

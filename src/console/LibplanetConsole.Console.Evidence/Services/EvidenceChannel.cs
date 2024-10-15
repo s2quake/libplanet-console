@@ -1,7 +1,7 @@
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Evidence.Grpc;
+namespace LibplanetConsole.Evidence.Services;
 
 internal static class EvidenceChannel
 {

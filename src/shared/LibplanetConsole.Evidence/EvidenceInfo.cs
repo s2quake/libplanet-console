@@ -1,5 +1,5 @@
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Evidence.Grpc;
+using LibplanetConsole.Grpc.Evidence;
 
 namespace LibplanetConsole.Evidence;
 

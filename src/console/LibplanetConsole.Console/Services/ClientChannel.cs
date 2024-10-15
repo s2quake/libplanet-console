@@ -3,9 +3,9 @@ using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console.Grpc;
+namespace LibplanetConsole.Console.Services;
 
-internal static class NodeChannel
+internal static class ClientChannel
 {
     private static readonly GrpcChannelOptions _channelOptions = new()
     {
@@ -21,7 +21,7 @@ internal static class NodeChannel
                     {
                         new MethodName
                         {
-                            Service = "libplanet.console.node.v1.NodeGrpcService",
+                            Service = "libplanet.console.client.v1.ClientGrpcService",
                             Method = "Ping",
                         },
                     },

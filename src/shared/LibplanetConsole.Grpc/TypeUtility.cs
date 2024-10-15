@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Google.Protobuf;
 
-namespace LibplanetConsole.Blockchain.Grpc;
+namespace LibplanetConsole.Grpc;
 
 public static class TypeUtility
 {

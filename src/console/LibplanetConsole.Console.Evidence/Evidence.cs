@@ -1,7 +1,8 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Evidence;
-using LibplanetConsole.Evidence.Grpc;
+using LibplanetConsole.Evidence.Services;
+using LibplanetConsole.Grpc.Evidence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Evidence;

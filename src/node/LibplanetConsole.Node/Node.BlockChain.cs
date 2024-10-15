@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;

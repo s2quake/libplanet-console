@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Seed.Grpc";
+option csharp_namespace = "LibplanetConsole.Grpc.Seed";
 
 package libplanet.console.seed.v1;
 
@@ -8,9 +8,9 @@ service SeedGrpcService {
   rpc GetSeed(GetSeedRequest) returns (GetSeedResponse);
 }
 
-message SeedInfo {
-    string blocksyncSeedPeer = 1;
-    string consensusSeedPeer = 2;
+message SeedInfoProto {
+  string blocksyncSeedPeer = 1;
+  string consensusSeedPeer = 2;
 }
 
 message GetSeedRequest {
@@ -18,5 +18,5 @@ message GetSeedRequest {
 }
 
 message GetSeedResponse {
-    SeedInfo seedResult = 1;
+  SeedInfoProto seedResult = 1;
 }

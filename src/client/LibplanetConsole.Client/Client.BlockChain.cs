@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 using Grpc.Core;
-using LibplanetConsole.Blockchain;
-using LibplanetConsole.Node;
-using static LibplanetConsole.Blockchain.Grpc.TypeUtility;
+using LibplanetConsole.Grpc.Blockchain;
+using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Client;
 
@@ -31,7 +30,7 @@ internal sealed partial class Client : IBlockChain
             genesisHash: genesisHash,
             actions: [.. actions.Select(item => item.PlainValue)]);
         var txData = tx.Serialize();
-        var request = new Blockchain.Grpc.SendTransactionRequest
+        var request = new SendTransactionRequest
         {
             TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
         };
@@ -48,7 +47,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.SendTransactionRequest
+        var request = new SendTransactionRequest
         {
             TransactionData = Google.Protobuf.ByteString.CopyFrom(txData),
         };
@@ -64,7 +63,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetBlockHashRequest
+        var request = new GetBlockHashRequest
         {
             Height = height,
         };
@@ -80,7 +79,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetNextNonceRequest
+        var request = new GetNextNonceRequest
         {
             Address = ToGrpc(address),
         };
@@ -96,7 +95,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetTipHashRequest();
+        var request = new GetTipHashRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _blockChainService.GetTipHashAsync(request, callOptions);
         return ToBlockHash(response.BlockHash);
@@ -113,7 +112,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetStateRequest
+        var request = new GetStateRequest
         {
             Height = height,
             AccountAddress = ToGrpc(accountAddress),
@@ -135,7 +134,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetStateRequest
+        var request = new GetStateRequest
         {
             BlockHash = ToGrpc(blockHash),
             AccountAddress = ToGrpc(accountAddress),
@@ -157,7 +156,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetStateRequest
+        var request = new GetStateRequest
         {
             StateRootHash = ToGrpc(stateRootHash),
             AccountAddress = ToGrpc(accountAddress),
@@ -176,7 +175,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetActionRequest
+        var request = new GetActionRequest
         {
             TxId = ToGrpc(txId),
             ActionIndex = actionIndex,
@@ -195,7 +194,7 @@ internal sealed partial class Client : IBlockChain
             throw new InvalidOperationException("BlockChainService is not initialized.");
         }
 
-        var request = new Blockchain.Grpc.GetActionRequest
+        var request = new GetActionRequest
         {
             TxId = ToGrpc(txId),
             ActionIndex = actionIndex,

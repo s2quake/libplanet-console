@@ -1,7 +1,7 @@
 using Grpc.Core;
-using LibplanetConsole.Evidence.Grpc;
+using LibplanetConsole.Grpc.Evidence;
 
-namespace LibplanetConsole.Node.Evidence.Grpc;
+namespace LibplanetConsole.Node.Evidence.Services;
 
 internal sealed class EvidenceServiceGrpcV1(Evidence evidence)
     : EvidenceGrpcService.EvidenceGrpcServiceBase

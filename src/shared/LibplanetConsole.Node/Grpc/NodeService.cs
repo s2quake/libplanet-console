@@ -1,10 +1,14 @@
-#if LIBPLANET_CONSOLE || LIBPLANET_CLIENT
+#if LIBPLANET_CLIENT || LIBPLANET_CONSOLE
 using Grpc.Core;
 using Grpc.Net.Client;
-using LibplanetConsole.Grpc;
-using static LibplanetConsole.Node.Grpc.NodeGrpcService;
+using static LibplanetConsole.Grpc.Node.NodeGrpcService;
+#if LIBPLANET_CLIENT
+using LibplanetConsole.Client;
+#else
+using LibplanetConsole.Console;
+#endif
 
-namespace LibplanetConsole.Node.Grpc;
+namespace LibplanetConsole.Grpc.Node;
 
 internal sealed class NodeService(GrpcChannel channel)
     : NodeGrpcServiceClient(channel), IDisposable
