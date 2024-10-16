@@ -12,6 +12,4 @@ public interface IBankService
         BurnOptions burnOptions, CancellationToken cancellationToken);
 
     Task<BalanceInfo> GetBalanceAsync(Address address, CancellationToken cancellationToken);
-
-    Task<PoolInfo> GetPoolAsync(CancellationToken cancellationToken);
 }

@@ -177,8 +177,4 @@ internal sealed partial class Node : IBlockChain
 
         throw new InvalidOperationException("Action not found.");
     }
-
-    public Task<FungibleAssetValue> GetBalanceAsync(
-        Address address, Currency currency, CancellationToken cancellationToken)
-        => _blockChainService.Service.GetBalanceAsync(address, currency, cancellationToken);
 }

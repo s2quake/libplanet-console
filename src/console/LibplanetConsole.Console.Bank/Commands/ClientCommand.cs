@@ -6,11 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank.Commands;
 
-internal sealed partial class ClientCommand(IApplication application) : CommandMethodBase
+internal sealed partial class ClientCommand(IClientCollection clients) : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
     [CommandSummary("The address of the client. If not specified, the current client is used.")]
-    public static string Address { get; set; } = string.Empty;
+    public static Address Address { get; set; }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
@@ -22,7 +22,7 @@ internal sealed partial class ClientCommand(IApplication application) : CommandM
         CancellationToken cancellationToken)
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients[address];
         var bank = client.GetRequiredService<IBank>();
         var options = new MintOptions
         {
@@ -43,8 +43,8 @@ internal sealed partial class ClientCommand(IApplication application) : CommandM
         decimal amount,
         CancellationToken cancellationToken)
     {
-        var client = application.GetClient(Address);
-        var targetAddressable = application.GetAddressable(targetAddress);
+        var client = clients[Address];
+        var targetAddressable = clients.GetAddressable(targetAddress);
         var bank = client.GetRequiredService<IBank>();
         var options = new TransferOptions
         {
@@ -64,7 +64,7 @@ internal sealed partial class ClientCommand(IApplication application) : CommandM
         decimal amount,
         CancellationToken cancellationToken)
     {
-        var client = application.GetClient(Address);
+        var client = clients[Address];
         var bank = client.GetRequiredService<IBank>();
         var options = new BurnOptions
         {
@@ -81,7 +81,7 @@ internal sealed partial class ClientCommand(IApplication application) : CommandM
     public async Task BalanceAsync(CancellationToken cancellationToken)
     {
         var address = Address;
-        var client = application.GetClient(address);
+        var client = clients[address];
         var bank = client.GetRequiredService<IBank>();
         var balanceInfo = await bank.GetBalanceAsync(client.Address, cancellationToken);
         await Out.WriteLineAsJsonAsync(balanceInfo);

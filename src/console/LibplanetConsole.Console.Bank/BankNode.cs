@@ -1,22 +1,12 @@
 using LibplanetConsole.Bank;
 using LibplanetConsole.Bank.Services;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 
 namespace LibplanetConsole.Console.Bank;
 
-internal sealed class BankNode(INode node)
-    : INodeContent, IBank, INodeContentService
+internal sealed class BankNode(INode node) : NodeContentBase("bank-node"), IBank
 {
-    private readonly RemoteService<IBankService> _bankService = new();
-
-    IRemoteService INodeContentService.RemoteService => _bankService;
-
-    INode INodeContent.Node => node;
-
-    string INodeContent.Name => "Bank";
-
-    private IBankService Service => _bankService.Service;
+    private IBankService Service => throw new NotImplementedException();
 
     Task<BalanceInfo> IBank.MintAsync(
         MintOptions mintOptions, CancellationToken cancellationToken)
@@ -42,8 +32,13 @@ internal sealed class BankNode(INode node)
         return Service.GetBalanceAsync(address, cancellationToken: cancellationToken);
     }
 
-    Task<PoolInfo> IBank.GetPoolAsync(CancellationToken cancellationToken)
+    protected override Task OnStartAsync(CancellationToken cancellationToken)
     {
-        return Service.GetPoolAsync(cancellationToken);
+        throw new NotImplementedException();
+    }
+
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

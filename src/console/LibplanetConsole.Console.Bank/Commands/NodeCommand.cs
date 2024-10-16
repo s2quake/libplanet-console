@@ -6,11 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank.Commands;
 
-internal sealed partial class NodeCommand(IApplication application) : CommandMethodBase
+internal sealed partial class NodeCommand(INodeCollection nodes) : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
     [CommandSummary("The address of the node. If not specified, the current node is used.")]
-    public static string Address { get; set; } = string.Empty;
+    public static Address Address { get; set; }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
@@ -22,7 +22,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
         CancellationToken cancellationToken)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes[address];
         var bank = node.GetRequiredService<IBank>();
         var options = new MintOptions
         {
@@ -43,7 +43,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
         decimal amount,
         CancellationToken cancellationToken)
     {
-        var node = application.GetNode(Address);
+        var node = nodes[Address];
         var targetAddressable = application.GetAddressable(targetAddress);
         var bank = node.GetRequiredService<IBank>();
         var options = new TransferOptions
@@ -64,7 +64,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
         decimal amount,
         CancellationToken cancellationToken)
     {
-        var node = application.GetNode(Address);
+        var node = nodes[Address];
         var bank = node.GetRequiredService<IBank>();
         var options = new BurnOptions
         {
@@ -81,7 +81,7 @@ internal sealed partial class NodeCommand(IApplication application) : CommandMet
     public async Task BalanceAsync(CancellationToken cancellationToken)
     {
         var address = Address;
-        var node = application.GetNode(address);
+        var node = nodes[address];
         var bank = node.GetRequiredService<IBank>();
         var balanceInfo = await bank.GetBalanceAsync(node.Address, cancellationToken);
         await Out.WriteLineAsJsonAsync(balanceInfo);

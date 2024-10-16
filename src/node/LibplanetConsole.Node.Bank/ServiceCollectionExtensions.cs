@@ -1,7 +1,5 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Node.Bank.Commands;
-using LibplanetConsole.Node.Bank.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Bank;
@@ -12,7 +10,7 @@ public static class ServiceCollectionExtensions
     {
         @this.AddSingleton<Bank>()
              .AddSingleton<IBank>(s => s.GetRequiredService<Bank>());
-        @this.AddSingleton<ILocalService, BankService>();
+        // @this.AddSingleton<ILocalService, BankService>();
         @this.AddSingleton<ICommand, BalanceCommand>();
         @this.AddSingleton<BankCommand>()
              .AddSingleton<ICommand>(s => s.GetRequiredService<BankCommand>());
