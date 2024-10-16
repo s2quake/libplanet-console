@@ -8,7 +8,6 @@ using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
-using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -291,8 +290,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         {
         };
         using var channel = GrpcChannel.ForAddress(address, channelOptions);
-        var client = new Seed.Grpc.SeedGrpcService.SeedGrpcServiceClient(channel);
-        var request = new Seed.Grpc.GetSeedRequest
+        var client = new Grpc.Seed.SeedGrpcService.SeedGrpcServiceClient(channel);
+        var request = new Grpc.Seed.GetSeedRequest
         {
             PublicKey = new PrivateKey().PublicKey.ToHex(compress: true),
         };

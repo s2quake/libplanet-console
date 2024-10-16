@@ -1,6 +1,3 @@
-using System.Net.Sockets;
-using LibplanetConsole.Common.DataAnnotations;
-
 namespace LibplanetConsole.Common;
 
 public sealed class PortGenerator

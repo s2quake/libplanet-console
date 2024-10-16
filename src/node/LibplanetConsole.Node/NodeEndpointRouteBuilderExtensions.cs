@@ -1,4 +1,4 @@
-using LibplanetConsole.Node.Grpc;
+using LibplanetConsole.Node.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 

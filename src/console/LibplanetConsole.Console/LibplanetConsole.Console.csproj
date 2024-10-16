@@ -6,19 +6,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.64.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="$(SharedDirectory)LibplanetConsole.Node\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Client\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Blockchain\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto" GrpcServices="Client"/>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client"/>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Client"/>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Client"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
-    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.64.0" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Client">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Both">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto" GrpcServices="Client">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

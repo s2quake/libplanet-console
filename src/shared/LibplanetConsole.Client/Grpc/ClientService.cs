@@ -1,11 +1,11 @@
 #if LIBPLANET_CONSOLE
 using Grpc.Net.Client;
-using LibplanetConsole.Client;
-using LibplanetConsole.Client.Grpc;
+using LibplanetConsole.Console;
 using LibplanetConsole.Grpc;
-using static LibplanetConsole.Client.Grpc.ClientGrpcService;
+using LibplanetConsole.Grpc.Client;
+using static LibplanetConsole.Grpc.Client.ClientGrpcService;
 
-namespace LibplanetConsole.Client.Grpc;
+namespace LibplanetConsole.Grpc.Client;
 
 internal sealed class ClientService(GrpcChannel channel)
     : ClientGrpcServiceClient(channel), IDisposable
@@ -100,4 +100,4 @@ internal sealed class ClientService(GrpcChannel channel)
         }
     }
 }
-#endif // LIBPLANET_CONSOLE || LIBPLANET_CLIENT
+#endif // LIBPLANET_CONSOLE

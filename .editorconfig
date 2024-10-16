@@ -90,6 +90,10 @@ dotnet_diagnostic.SA1200.severity = none
 # CS8981: The type name only contains lower-cased ascii characters
 dotnet_diagnostic.CS8981.severity = none
 
+[**/obj/**/TypesGrpc.cs]
+# SA1518: Use line endings correctly at end of file
+dotnet_diagnostic.SA1518.severity = none
+
 [*.csproj]
 quote_type = double
 
@@ -103,3 +107,7 @@ continuation_indent_size = 2
 
 [stylecop.json]
 max_line_length =
+
+[*.proto]
+indent_size = 2
+continuation_indent_size = 2

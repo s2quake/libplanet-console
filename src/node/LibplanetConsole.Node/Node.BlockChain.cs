@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using LibplanetConsole.Blockchain;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;
@@ -112,7 +111,7 @@ internal sealed partial class Node : IBlockChain
     }
 
     public Task<IValue> GetStateAsync(
-        BlockHash? blockHash,
+        long height,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -126,11 +125,8 @@ internal sealed partial class Node : IBlockChain
         IValue GetStateByBlockHash()
         {
             var blockChain = BlockChain;
-            var block = blockHash is null ? blockChain.Tip : blockChain[blockHash.Value];
-            var isTip = block.Hash.Equals(blockChain.Tip.Hash);
-            var worldState = isTip
-                ? blockChain.GetNextWorldState() ?? blockChain.GetWorldState(block.Hash)
-                : blockChain.GetWorldState(block.Hash);
+            var block = height == -1 ? blockChain.Tip : blockChain[height];
+            var worldState = blockChain.GetWorldState(block.Hash);
             var account = worldState.GetAccountState(accountAddress);
             return account.GetState(address)
                 ?? throw new InvalidOperationException("State not found.");
@@ -139,7 +135,31 @@ internal sealed partial class Node : IBlockChain
         return Task.Run(GetStateByBlockHash, cancellationToken: cancellationToken);
     }
 
-    public Task<IValue> GetStateByStateRootHashAsync(
+    public Task<IValue> GetStateAsync(
+        BlockHash blockHash,
+        Address accountAddress,
+        Address address,
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedExceptionUtility.ThrowIf(_isDisposed, this);
+        if (IsRunning is false)
+        {
+            throw new InvalidOperationException("Node is not running.");
+        }
+
+        IValue GetStateByBlockHash()
+        {
+            var blockChain = BlockChain;
+            var worldState = blockChain.GetWorldState(blockHash);
+            var account = worldState.GetAccountState(accountAddress);
+            return account.GetState(address)
+                ?? throw new InvalidOperationException("State not found.");
+        }
+
+        return Task.Run(GetStateByBlockHash, cancellationToken: cancellationToken);
+    }
+
+    public Task<IValue> GetStateAsync(
         HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,

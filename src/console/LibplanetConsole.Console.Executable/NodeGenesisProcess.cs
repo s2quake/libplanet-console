@@ -1,5 +1,4 @@
 using LibplanetConsole.Common;
-using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Console.Executable;
 

@@ -1,21 +1,18 @@
 using Grpc.Core;
 using Grpc.Net.Client;
-using LibplanetConsole.Blockchain;
-using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Threading;
-using LibplanetConsole.Console.Grpc;
-using LibplanetConsole.Node;
-using LibplanetConsole.Node.Grpc;
+using LibplanetConsole.Console.Services;
+using LibplanetConsole.Grpc.Blockchain;
+using LibplanetConsole.Grpc.Node;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using static LibplanetConsole.Common.EndPointUtility;
-using NodeInfo = LibplanetConsole.Node.NodeInfo;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Node : INode, IBlockChain
+internal sealed partial class Node : INode
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly NodeOptions _nodeOptions;

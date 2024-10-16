@@ -3,7 +3,7 @@ using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Client.Grpc;
+namespace LibplanetConsole.Client.Services;
 
 internal static class NodeChannel
 {

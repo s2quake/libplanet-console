@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
-using LibplanetConsole.Blockchain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -65,7 +64,21 @@ internal sealed class BlockChain : IBlockChain, IDisposable
     }
 
     Task<IValue> IBlockChain.GetStateAsync(
-        BlockHash? blockHash,
+        long height,
+        Address accountAddress,
+        Address address,
+        CancellationToken cancellationToken)
+    {
+        if (IsRunning is false || _blockChain is null)
+        {
+            throw new InvalidOperationException("BlockChain is not running.");
+        }
+
+        return _blockChain.GetStateAsync(height, accountAddress, address, cancellationToken);
+    }
+
+    Task<IValue> IBlockChain.GetStateAsync(
+        BlockHash blockHash,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken)
@@ -78,7 +91,7 @@ internal sealed class BlockChain : IBlockChain, IDisposable
         return _blockChain.GetStateAsync(blockHash, accountAddress, address, cancellationToken);
     }
 
-    Task<IValue> IBlockChain.GetStateByStateRootHashAsync(
+    Task<IValue> IBlockChain.GetStateAsync(
         HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,
@@ -89,7 +102,7 @@ internal sealed class BlockChain : IBlockChain, IDisposable
             throw new InvalidOperationException("BlockChain is not running.");
         }
 
-        return _blockChain.GetStateByStateRootHashAsync(
+        return _blockChain.GetStateAsync(
             stateRootHash, accountAddress, address, cancellationToken);
     }
 

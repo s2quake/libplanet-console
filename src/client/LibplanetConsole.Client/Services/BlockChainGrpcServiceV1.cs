@@ -1,10 +1,10 @@
 using Grpc.Core;
-using LibplanetConsole.Blockchain;
-using LibplanetConsole.Blockchain.Grpc;
 using LibplanetConsole.Grpc;
+using LibplanetConsole.Grpc.Blockchain;
 using Microsoft.Extensions.Hosting;
+using static LibplanetConsole.Grpc.TypeUtility;
 
-namespace LibplanetConsole.Client.Grpc;
+namespace LibplanetConsole.Client.Services;
 
 internal sealed class BlockChainGrpcServiceV1(
     Client client,
@@ -19,13 +19,13 @@ internal sealed class BlockChainGrpcServiceV1(
     {
         var txData = request.TransactionData.ToByteArray();
         var txId = await client.SendTransactionAsync(txData, context.CancellationToken);
-        return new SendTransactionResponse { TxId = txId.ToHex() };
+        return new SendTransactionResponse { TxId = ToGrpc(txId) };
     }
 
     public async override Task<GetNextNonceResponse> GetNextNonce(
         GetNextNonceRequest request, ServerCallContext context)
     {
-        var address = new Address(request.Address);
+        var address = ToAddress(request.Address);
         var nonce = await blockChain.GetNextNonceAsync(address, context.CancellationToken);
         return new GetNextNonceResponse { Nonce = nonce };
     }
@@ -34,20 +34,44 @@ internal sealed class BlockChainGrpcServiceV1(
         GetTipHashRequest request, ServerCallContext context)
     {
         var blockHash = await Task.FromResult(blockChain.Tip.Hash);
-        return new GetTipHashResponse { BlockHash = blockHash.ToString() };
+        return new GetTipHashResponse { BlockHash = ToGrpc(blockHash) };
     }
 
     public override async Task<GetStateResponse> GetState(
         GetStateRequest request, ServerCallContext context)
     {
-        BlockHash? blockHash = request.BlockHash == string.Empty
-            ? null : BlockHash.FromString(request.BlockHash);
-        var accountAddress = new Address(request.AccountAddress);
-        var address = new Address(request.Address);
-        var value = await blockChain.GetStateAsync(
-            blockHash, accountAddress, address, context.CancellationToken);
+        var accountAddress = ToAddress(request.AccountAddress);
+        var address = ToAddress(request.Address);
+        var value = await GetStateAsync(request, context.CancellationToken);
+
         var state = _codec.Encode(value);
         return new GetStateResponse { StateData = Google.Protobuf.ByteString.CopyFrom(state) };
+
+        async Task<IValue> GetStateAsync(
+            GetStateRequest request, CancellationToken cancellationToken)
+        {
+            if (request.IdentifierCase == GetStateRequest.IdentifierOneofCase.Height)
+            {
+                return await blockChain.GetStateAsync(
+                    request.Height, accountAddress, address, cancellationToken);
+            }
+
+            if (request.IdentifierCase == GetStateRequest.IdentifierOneofCase.BlockHash)
+            {
+                var blockHash = ToBlockHash(request.BlockHash);
+                return await blockChain.GetStateAsync(
+                    blockHash, accountAddress, address, cancellationToken);
+            }
+
+            if (request.IdentifierCase == GetStateRequest.IdentifierOneofCase.StateRootHash)
+            {
+                var stateRootHash = ToHashDigest256(request.StateRootHash);
+                return await blockChain.GetStateAsync(
+                    stateRootHash, accountAddress, address, cancellationToken);
+            }
+
+            throw new NotSupportedException("Invalid IdentifierCase");
+        }
     }
 
     public override async Task<GetBlockHashResponse> GetBlockHash(
@@ -55,13 +79,13 @@ internal sealed class BlockChainGrpcServiceV1(
     {
         var height = request.Height;
         var blockHash = await blockChain.GetBlockHashAsync(height, context.CancellationToken);
-        return new GetBlockHashResponse { BlockHash = blockHash.ToString() };
+        return new GetBlockHashResponse { BlockHash = ToGrpc(blockHash) };
     }
 
     public override async Task<GetActionResponse> GetAction(
         GetActionRequest request, ServerCallContext context)
     {
-        var txId = TxId.FromHex(request.TxId);
+        var txId = ToTxId(request.TxId);
         var actionIndex = request.ActionIndex;
         var action = await client.GetActionAsync(txId, actionIndex, context.CancellationToken);
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };

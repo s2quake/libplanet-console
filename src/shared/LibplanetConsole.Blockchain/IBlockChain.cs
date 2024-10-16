@@ -1,6 +1,14 @@
 using System.Security.Cryptography;
 
-namespace LibplanetConsole.Blockchain;
+#if LIBPLANET_NODE
+namespace LibplanetConsole.Node;
+#elif LIBPLANET_CLIENT
+namespace LibplanetConsole.Client;
+#elif LIBPLANET_CONSOLE
+namespace LibplanetConsole.Console;
+#else
+#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
+#endif
 
 public interface IBlockChain
 {
@@ -19,12 +27,18 @@ public interface IBlockChain
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(
-        BlockHash? blockHash,
+        long height,
         Address accountAddress,
         Address address,
         CancellationToken cancellationToken);
 
-    Task<IValue> GetStateByStateRootHashAsync(
+    Task<IValue> GetStateAsync(
+        BlockHash blockHash,
+        Address accountAddress,
+        Address address,
+        CancellationToken cancellationToken);
+
+    Task<IValue> GetStateAsync(
         HashDigest<SHA256> stateRootHash,
         Address accountAddress,
         Address address,

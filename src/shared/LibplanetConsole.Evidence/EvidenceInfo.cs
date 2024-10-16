@@ -1,5 +1,5 @@
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Evidence.Grpc;
+using LibplanetConsole.Grpc.Evidence;
 
 namespace LibplanetConsole.Evidence;
 
@@ -27,7 +27,7 @@ public readonly record struct EvidenceInfo
         };
     }
 
-    public static implicit operator EvidenceInfo(EvidenceInformation evidenceInfo)
+    public static implicit operator EvidenceInfo(EvidenceInfoProto evidenceInfo)
     {
         return new EvidenceInfo
         {
@@ -39,9 +39,9 @@ public readonly record struct EvidenceInfo
         };
     }
 
-    public static implicit operator EvidenceInformation(EvidenceInfo evidenceInfo)
+    public static implicit operator EvidenceInfoProto(EvidenceInfo evidenceInfo)
     {
-        return new EvidenceInformation
+        return new EvidenceInfoProto
         {
             Type = evidenceInfo.Type,
             Id = evidenceInfo.Id,

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using LibplanetConsole.Grpc.Seed;
 using LibplanetConsole.Seed.Converters;
 
 namespace LibplanetConsole.Seed;
@@ -13,16 +14,16 @@ public readonly record struct SeedInfo
     [JsonConverter(typeof(BoundPeerJsonConverter))]
     public BoundPeer ConsensusSeedPeer { get; init; }
 
-    public static implicit operator Grpc.SeedInfo(SeedInfo seedInfo)
+    public static implicit operator SeedInfoProto(SeedInfo seedInfo)
     {
-        return new Grpc.SeedInfo
+        return new SeedInfoProto
         {
             BlocksyncSeedPeer = BoundPeerUtility.ToString(seedInfo.BlocksyncSeedPeer),
             ConsensusSeedPeer = BoundPeerUtility.ToString(seedInfo.ConsensusSeedPeer),
         };
     }
 
-    public static implicit operator SeedInfo(Grpc.SeedInfo seedInfo)
+    public static implicit operator SeedInfo(SeedInfoProto seedInfo)
     {
         return new SeedInfo
         {
