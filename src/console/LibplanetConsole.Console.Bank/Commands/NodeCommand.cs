@@ -38,17 +38,16 @@ internal sealed partial class NodeCommand(INodeCollection nodes) : CommandMethod
     [Category("Bank")]
     public async Task TransferAsync(
         [CommandSummary("The address of the recipient.")]
-        string targetAddress,
+        Address targetAddress,
         [CommandSummary("The amount of NCG to transfer.")]
         decimal amount,
         CancellationToken cancellationToken)
     {
         var node = nodes[Address];
-        var targetAddressable = application.GetAddressable(targetAddress);
         var bank = node.GetRequiredService<IBank>();
         var options = new TransferOptions
         {
-            TargetAddress = targetAddressable.Address,
+            TargetAddress = targetAddress,
             Amount = amount,
         };
         var balanceInfo = await bank.TransferAsync(options, cancellationToken);

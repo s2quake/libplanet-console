@@ -15,6 +15,6 @@ internal sealed class BalanceCommand(INode node, IBank bank, BankCommand bankCom
     {
         var address = node.Address;
         var balanceInfo = await bank.GetBalanceAsync(address, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balanceInfo);
+        // await Out.WriteLineAsJsonAsync(balanceInfo);
     }
 }

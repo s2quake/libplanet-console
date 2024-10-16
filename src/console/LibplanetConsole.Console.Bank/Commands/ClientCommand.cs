@@ -38,17 +38,16 @@ internal sealed partial class ClientCommand(IClientCollection clients) : Command
     [Category("Bank")]
     public async Task TransferAsync(
         [CommandSummary("The address of the recipient.")]
-        string targetAddress,
+        Address targetAddress,
         [CommandSummary("The amount of NCG to transfer.")]
         decimal amount,
         CancellationToken cancellationToken)
     {
         var client = clients[Address];
-        var targetAddressable = clients.GetAddressable(targetAddress);
         var bank = client.GetRequiredService<IBank>();
         var options = new TransferOptions
         {
-            TargetAddress = targetAddressable.Address,
+            TargetAddress = targetAddress,
             Amount = amount,
         };
         var balanceInfo = await bank.TransferAsync(options, cancellationToken);

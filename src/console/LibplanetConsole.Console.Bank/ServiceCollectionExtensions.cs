@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, ClientCommand>();
         // @this.AddSingleton<ICommand, MintCommand>();
         @this.AddSingleton<ICommand, NodeCommand>();
-        @this.AddSingleton<ICommand, PoolCommand>();
+        // @this.AddSingleton<ICommand, PoolCommand>();
         // @this.AddSingleton<ICommand, TransferCommand>();
 
         return @this;

@@ -1,4 +1,3 @@
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Delegation;
 using LibplanetConsole.Delegation.Services;
@@ -6,17 +5,9 @@ using LibplanetConsole.Delegation.Services;
 namespace LibplanetConsole.Console.Delegation;
 
 internal sealed class DelegationClient(IClient client)
-    : IClientContent, IDelegation, IClientContentService
+    : ClientContentBase("delegate-client"), IDelegation
 {
-    private readonly RemoteService<IDelegationService> _delegationService = new();
-
-    IRemoteService IClientContentService.RemoteService => _delegationService;
-
-    IClient IClientContent.Client => client;
-
-    string IClientContent.Name => "delegation";
-
-    private IDelegationService Service => _delegationService.Service;
+    private IDelegationService Service => throw new NotImplementedException();
 
     Task<DelegateeInfo> IDelegation.PromoteAsync(
         PromoteOptions promoteOptions, CancellationToken cancellationToken)
@@ -40,4 +31,14 @@ internal sealed class DelegationClient(IClient client)
     Task<DelegateeInfo> IDelegation.GetValidatorAsync(
         Address nodeAddress, CancellationToken cancellationToken)
         => Service.GetValidatorAsync(nodeAddress, cancellationToken);
+
+    protected override Task OnStartAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }
