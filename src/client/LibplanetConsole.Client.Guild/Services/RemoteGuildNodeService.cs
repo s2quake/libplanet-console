@@ -1,8 +1,8 @@
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Guild.Services;
+// using LibplanetConsole.Common.Services;
+// using LibplanetConsole.Guild.Services;
 
-namespace LibplanetConsole.Client.Guild.Services;
+// namespace LibplanetConsole.Client.Guild.Services;
 
-internal sealed class RemoteGuildService : RemoteService<IGuildService>
-{
-}
+// internal sealed class RemoteGuildService : RemoteService<IGuildService>
+// {
+// }

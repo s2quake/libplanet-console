@@ -1,76 +1,80 @@
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.Services;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Guild;
-using LibplanetConsole.Guild.Services;
 
 namespace LibplanetConsole.Console.Guild;
 
-internal sealed class GuildClient
-    : ClientContentBase, IGuildClientContent, IClientContentService, IDisposable
+internal sealed class GuildClient : ClientContentBase, IGuild
 {
-    private readonly RemoteService<IGuildClientService> _remoteService = new();
-    private readonly IClient _client;
-
-    public GuildClient(IClient client)
-        : base(client)
+    public GuildClient()
+        : base("guild-client")
     {
-        _client = client;
-        _client.Started += Client_Started;
-        _client.Stopped += Client_Stopped;
     }
 
     public GuildInfo Info { get; private set; }
 
-    IRemoteService IClientContentService.RemoteService => _remoteService;
-
-    private IGuildClientService Service => _remoteService.Service;
-
-    public Task BanMemberAsync(BanMemberOptions options, CancellationToken cancellationToken)
-        => Service.BanMemberAsync(options, cancellationToken);
-
-    public Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken)
-        => Service.CreateAsync(options, cancellationToken);
-
-    public Task<Address> DeleteAsync(
-        DeleteGuildOptions options, CancellationToken cancellationToken)
-        => Service.DeleteAsync(options, cancellationToken);
-
-    public Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
-        => Service.RequestJoinAsync(options, cancellationToken);
-
-    public Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
-        => Service.CancelJoinAsync(options, cancellationToken);
-
     public Task AcceptJoinAsync(AcceptJoinOptions options, CancellationToken cancellationToken)
-        => Service.AcceptJoinAsync(options, cancellationToken);
-
-    public Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
-        => Service.RejectJoinAsync(options, cancellationToken);
-
-    public Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)
-        => Service.QuitAsync(options, cancellationToken);
-
-    public Task UnbanMemberAsync(UnbanMemberOptions options, CancellationToken cancellationToken)
-        => Service.UnbanMemberAsync(options, cancellationToken);
-
-    public Task<Address> GetGuildAsync(
-        long height, Address address, CancellationToken cancellationToken)
-        => Service.GetGuildAsync(height, address, cancellationToken);
-
-    public Task<Address[]> GetGuildMembersAsync(
-        long height, Address guildAddress, CancellationToken cancellationToken)
-        => Service.GetGuildMembersAsync(height, guildAddress, cancellationToken);
-
-    void IDisposable.Dispose()
     {
-        _client.Started -= Client_Started;
-        _client.Stopped -= Client_Stopped;
+        throw new NotImplementedException();
     }
 
-    private async void Client_Started(object? sender, EventArgs e)
-        => Info = await Service.GetGuildInfoAsync(default);
+    public Task BanMemberAsync(BanMemberOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 
-    private void Client_Stopped(object? sender, EventArgs e)
-        => Info = default;
+    public Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Address> DeleteAsync(DeleteGuildOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Address> GetGuildAsync(long height, Address address, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Address[]> GetGuildMembersAsync(long height, Address guildAddress, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UnbanMemberAsync(UnbanMemberOptions options, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override Task OnStartAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

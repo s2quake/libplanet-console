@@ -1,10 +1,11 @@
 ﻿using LibplanetConsole.Common;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Client.Guild;
 
-internal sealed class GuildInfoProvider(Guild guildClient)
-    : InfoProviderBase<IApplication>
+internal sealed class GuildInfoProvider(Guild guild)
+    : InfoProviderBase<IHostApplicationLifetime>(nameof(Guild))
 {
-    protected override IEnumerable<(string Name, object? Value)> GetInfos(IApplication obj)
-        => InfoUtility.EnumerateValues(guildClient.Info);
+    protected override object? GetInfo(IHostApplicationLifetime obj)
+        => guild.Info;
 }

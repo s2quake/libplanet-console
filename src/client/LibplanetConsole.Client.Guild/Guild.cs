@@ -11,15 +11,12 @@ internal sealed class Guild : IGuildClient, IDisposable
 {
     private readonly IClient _client;
     private readonly IBlockChain _blockChain;
-    private readonly RemoteGuildService _remoteGuildService;
     private bool _isRunning;
 
-    public Guild(
-        IClient client, IBlockChain blockChain, RemoteGuildService remoteGuildService)
+    public Guild(IClient client, IBlockChain blockChain)
     {
         _client = client;
         _blockChain = blockChain;
-        _remoteGuildService = remoteGuildService;
         _client.Started += Client_Started;
         _client.Stopped += Client_Stopped;
     }
