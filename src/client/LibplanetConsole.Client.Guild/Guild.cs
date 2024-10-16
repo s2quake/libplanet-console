@@ -1,29 +1,25 @@
 using Libplanet.Crypto;
 using LibplanetConsole.Client.Guild.Services;
 using LibplanetConsole.Common;
-using LibplanetConsole.Frameworks;
 using LibplanetConsole.Guild;
 using Nekoyume.Action.Guild;
 using Nekoyume.TypedAddress;
 
 namespace LibplanetConsole.Client.Guild;
 
-[Export(typeof(IGuildClient))]
-[Export]
-internal sealed class GuildClient : IGuildClient, IDisposable
+internal sealed class Guild : IGuildClient, IDisposable
 {
     private readonly IClient _client;
     private readonly IBlockChain _blockChain;
-    private readonly RemoteGuildNodeService _remoteGuildNodeService;
+    private readonly RemoteGuildService _remoteGuildService;
     private bool _isRunning;
 
-    [ImportingConstructor]
-    public GuildClient(
-        IClient client, IBlockChain blockChain, RemoteGuildNodeService remoteGuildNodeService)
+    public Guild(
+        IClient client, IBlockChain blockChain, RemoteGuildService remoteGuildService)
     {
         _client = client;
         _blockChain = blockChain;
-        _remoteGuildNodeService = remoteGuildNodeService;
+        _remoteGuildService = remoteGuildService;
         _client.Started += Client_Started;
         _client.Stopped += Client_Stopped;
     }
@@ -38,12 +34,12 @@ internal sealed class GuildClient : IGuildClient, IDisposable
         {
         };
         await _blockChain.SendTransactionAsync([makeGuild], cancellationToken);
-        var guildAddress = await _remoteGuildNodeService.Service.GetGuildAsync(
+        var guildAddress = await _remoteGuildService.Service.GetGuildAsync(
             long.MaxValue, _client.Address, cancellationToken);
         Info = Info with { Address = guildAddress };
     }
 
-    public async Task<AppAddress> DeleteAsync(
+    public async Task<Address> DeleteAsync(
         DeleteGuildOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
@@ -132,14 +128,13 @@ internal sealed class GuildClient : IGuildClient, IDisposable
         await _blockChain.SendTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
-    public Task<AppAddress> GetGuildAsync(
-        long height, AppAddress address, CancellationToken cancellationToken)
-        => _remoteGuildNodeService.Service.GetGuildAsync(height, address, cancellationToken);
+    public Task<Address> GetGuildAsync(
+        long height, Address address, CancellationToken cancellationToken)
+        => throw new NotImplementedException();
 
-    public Task<AppAddress[]> GetGuildMembersAsync(
-        long height, AppAddress guildAddress, CancellationToken cancellationToken)
-        => _remoteGuildNodeService.Service.GetGuildMembersAsync(
-            height, guildAddress, cancellationToken);
+    public Task<Address[]> GetGuildMembersAsync(
+        long height, Address guildAddress, CancellationToken cancellationToken)
+        => throw new NotImplementedException();
 
     public void Dispose()
     {
@@ -149,7 +144,8 @@ internal sealed class GuildClient : IGuildClient, IDisposable
 
     private async void Client_Started(object? sender, EventArgs e)
     {
-        Info = await _remoteGuildNodeService.Service.GetGuildInfoAsync(default);
+        // Info = await _remoteGuildService.Service.GetGuildInfoAsync(default);
+
         _isRunning = true;
     }
 

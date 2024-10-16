@@ -2,6 +2,7 @@ using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Guild;
+using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Node.Guild.Commands;
 
@@ -37,7 +38,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     [CommandMethod]
     [CommandSummary("Request to join the guild.")]
     public async Task RequestJoinAsync(
-        AppAddress guildAddress, CancellationToken cancellationToken = default)
+        Address guildAddress, CancellationToken cancellationToken = default)
     {
         var options = new RequestJoinOptions
         {
@@ -66,7 +67,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     [CommandMethod]
     [CommandSummary("Request to join the guild.")]
     public async Task AcceptJoinAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken = default)
+        Address memberAddress, CancellationToken cancellationToken = default)
     {
         var options = new AcceptJoinOptions
         {
@@ -81,7 +82,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     [CommandMethod]
     [CommandSummary("Request to join the guild.")]
     public async Task RejectJoinAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken = default)
+        Address memberAddress, CancellationToken cancellationToken = default)
     {
         var options = new RejectJoinOptions
         {
@@ -109,7 +110,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     [CommandMethod]
     [CommandSummary("Ban the member.")]
     public async Task BanMemberAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken)
+        Address memberAddress, CancellationToken cancellationToken)
     {
         var options = new BanMemberOptions
         {
@@ -124,7 +125,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     [CommandMethod]
     [CommandSummary("Unban the member.")]
     public async Task UnbanMemberAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken)
+        Address memberAddress, CancellationToken cancellationToken)
     {
         var options = new UnbanMemberOptions
         {
@@ -139,7 +140,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     [CommandMethod]
     [CommandSummary("List the member.")]
     public async Task ListMembersAsync(
-        AppAddress guildAddress = default, CancellationToken cancellationToken = default)
+        Address guildAddress = default, CancellationToken cancellationToken = default)
     {
         var members = await guild.GetGuildMembersAsync(GetGuildAddress(), cancellationToken);
         var sb = new StringBuilder();
@@ -150,7 +151,7 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
 
         await Out.WriteLineAsync(sb.ToString());
 
-        AppAddress GetGuildAddress()
+        Address GetGuildAddress()
             => guildAddress == default ? guild.Info.Address : guildAddress;
     }
 }

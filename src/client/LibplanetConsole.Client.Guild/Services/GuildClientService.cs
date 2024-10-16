@@ -5,14 +5,13 @@ using LibplanetConsole.Guild.Services;
 
 namespace LibplanetConsole.Client.Guild.Services;
 
-[Export(typeof(ILocalService))]
-internal sealed class GuildClientService(IClient client, GuildClient guildClient)
+internal sealed class GuildClientService(IClient client, Guild guildClient)
     : LocalService<IGuildClientService>, IGuildClientService
 {
     public Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken)
         => guildClient.CreateAsync(options.Verify(client), cancellationToken);
 
-    public Task<AppAddress> DeleteAsync(
+    public Task<Address> DeleteAsync(
         DeleteGuildOptions options, CancellationToken cancellationToken)
         => guildClient.DeleteAsync(options.Verify(client), cancellationToken);
 
@@ -37,14 +36,14 @@ internal sealed class GuildClientService(IClient client, GuildClient guildClient
     public Task UnbanMemberAsync(UnbanMemberOptions options, CancellationToken cancellationToken)
         => guildClient.UnbanMemberAsync(options.Verify(client), cancellationToken);
 
-    public Task<AppAddress> GetGuildAsync(
-        long height, AppAddress address, CancellationToken cancellationToken)
+    public Task<Address> GetGuildAsync(
+        long height, Address address, CancellationToken cancellationToken)
         => guildClient.GetGuildAsync(height, address, cancellationToken);
 
     public Task<GuildInfo> GetGuildInfoAsync(CancellationToken cancellationToken)
         => Task.Run(() => guildClient.Info, cancellationToken);
 
-    public Task<AppAddress[]> GetGuildMembersAsync(
-        long height, AppAddress guildAddress, CancellationToken cancellationToken)
+    public Task<Address[]> GetGuildMembersAsync(
+        long height, Address guildAddress, CancellationToken cancellationToken)
         => guildClient.GetGuildMembersAsync(height, guildAddress, cancellationToken);
 }

@@ -4,5 +4,5 @@ namespace LibplanetConsole.Guild;
 
 public sealed record class AcceptJoinOptions : OptionsBase<AcceptJoinOptions>
 {
-    public required AppAddress MemberAddress { get; init; }
+    public required Address MemberAddress { get; init; }
 }

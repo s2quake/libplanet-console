@@ -15,10 +15,10 @@ public readonly record struct GuildInfo
         }
 
         var guild = new Nekoyume.Model.Guild.Guild(list);
-        Address = (AppAddress)(Address)guild.GuildMasterAddress;
+        Address = (Address)(Address)guild.GuildMasterAddress;
     }
 
-    public AppAddress Address { get; init; }
+    public Address Address { get; init; }
 
     public static bool TryParse(IValue value, [MaybeNullWhen(false)] out GuildInfo guildInfo)
     {

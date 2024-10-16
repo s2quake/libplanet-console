@@ -9,7 +9,7 @@ public interface IGuildClient
 
     Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken);
 
-    Task<AppAddress> DeleteAsync(DeleteGuildOptions options, CancellationToken cancellationToken);
+    Task<Address> DeleteAsync(DeleteGuildOptions options, CancellationToken cancellationToken);
 
     Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken);
 
@@ -25,16 +25,16 @@ public interface IGuildClient
 
     Task UnbanMemberAsync(UnbanMemberOptions options, CancellationToken cancellationToken);
 
-    Task<AppAddress> GetGuildAsync(AppAddress address, CancellationToken cancellationToken)
+    Task<Address> GetGuildAsync(Address address, CancellationToken cancellationToken)
         => GetGuildAsync(long.MaxValue, address, cancellationToken);
 
-    Task<AppAddress> GetGuildAsync(
-        long height, AppAddress address, CancellationToken cancellationToken);
+    Task<Address> GetGuildAsync(
+        long height, Address address, CancellationToken cancellationToken);
 
-    Task<AppAddress[]> GetGuildMembersAsync(
-        AppAddress guildAddress, CancellationToken cancellationToken)
+    Task<Address[]> GetGuildMembersAsync(
+        Address guildAddress, CancellationToken cancellationToken)
         => GetGuildMembersAsync(long.MaxValue, guildAddress, cancellationToken);
 
-    Task<AppAddress[]> GetGuildMembersAsync(
-        long height, AppAddress guildAddress, CancellationToken cancellationToken);
+    Task<Address[]> GetGuildMembersAsync(
+        long height, Address guildAddress, CancellationToken cancellationToken);
 }

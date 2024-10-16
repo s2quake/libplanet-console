@@ -2,12 +2,11 @@ using Libplanet.Crypto;
 using LibplanetConsole.Common;
 using LibplanetConsole.Frameworks;
 using LibplanetConsole.Guild;
-using LibplanetConsole.Nodes;
+using LibplanetConsole.Node;
 using Nekoyume.Action.Guild;
 
 namespace LibplanetConsole.Client.Guild.Tracers;
 
-[Export(typeof(IApplicationService))]
 internal sealed class GuildEventTracer : IApplicationService, IDisposable
 {
     private readonly Dictionary<string, Func<TransactionInfo, ActionInfo, CancellationToken, Task>>
@@ -17,7 +16,6 @@ internal sealed class GuildEventTracer : IApplicationService, IDisposable
     private readonly IBlockChain _blockChain;
     private readonly IGuildClient _guildClient;
 
-    [ImportingConstructor]
     public GuildEventTracer(IClient client, IBlockChain blockChain, IGuildClient guildClient)
     {
         _client = client;
@@ -125,7 +123,7 @@ internal sealed class GuildEventTracer : IApplicationService, IDisposable
             var blockChain = _blockChain;
             var action = await blockChain.GetActionAsync<ApplyGuild>(
                 transactionInfo.Id, actionInfo.Index, cancellationToken);
-            var guildAddress = (AppAddress)(Address)action.GuildAddress;
+            var guildAddress = (Address)(Address)action.GuildAddress;
             var memberAddress = transactionInfo.Signer;
             var message = GuildEventMessage.RequestedJoinMessage(guildAddress, memberAddress);
             await Console.Out.WriteLineAsync(message);
@@ -153,7 +151,7 @@ internal sealed class GuildEventTracer : IApplicationService, IDisposable
                 transactionInfo.Id, actionInfo.Index, cancellationToken);
             var guildAddress = await _guildClient.GetGuildAsync(
                 transactionInfo.Signer, cancellationToken);
-            var memberAddress = (AppAddress)(Address)action.Target;
+            var memberAddress = (Address)(Address)action.Target;
             var message = GuildEventMessage.AcceptedJoinMessage(guildAddress, memberAddress);
             await Console.Out.WriteLineAsync(message);
         }
@@ -169,7 +167,7 @@ internal sealed class GuildEventTracer : IApplicationService, IDisposable
                 transactionInfo.Id, actionInfo.Index, cancellationToken);
             var guildAddress = await _guildClient.GetGuildAsync(
                 transactionInfo.Signer, cancellationToken);
-            var memberAddress = (AppAddress)(Address)action.Target;
+            var memberAddress = (Address)(Address)action.Target;
             var message = GuildEventMessage.RejectedJoinMessage(guildAddress, memberAddress);
             await Console.Out.WriteLineAsync(message);
         }
@@ -185,7 +183,7 @@ internal sealed class GuildEventTracer : IApplicationService, IDisposable
                 transactionInfo.Id, actionInfo.Index, cancellationToken);
             var guildAddress = await _guildClient.GetGuildAsync(
                 transactionInfo.Signer, cancellationToken);
-            var memberAddress = (AppAddress)(Address)action.Target;
+            var memberAddress = (Address)(Address)action.Target;
             var message = GuildEventMessage.BannedMessage(guildAddress, memberAddress);
             await Console.Out.WriteLineAsync(message);
         }
@@ -201,7 +199,7 @@ internal sealed class GuildEventTracer : IApplicationService, IDisposable
                 transactionInfo.Id, actionInfo.Index, cancellationToken);
             var guildAddress = await _guildClient.GetGuildAsync(
                 transactionInfo.Signer, cancellationToken);
-            var memberAddress = (AppAddress)action.Target;
+            var memberAddress = (Address)action.Target;
             var message = GuildEventMessage.UnbannedMessage(guildAddress, memberAddress);
             await Console.Out.WriteLineAsync(message);
         }

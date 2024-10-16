@@ -2,13 +2,12 @@ using System.ComponentModel;
 using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Consoles.Commands;
+using LibplanetConsole.Console.Commands;
 using LibplanetConsole.Guild;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Guild.Commands;
 
-[Export(typeof(ICommand))]
 internal sealed class ClientGuildCommand(
     ClientCommand clientCommand, IApplication application)
     : CommandMethodBase(clientCommand, "guild")
@@ -56,7 +55,7 @@ internal sealed class ClientGuildCommand(
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
     public async Task RequestJoinAsync(
-        AppAddress guildAddress, CancellationToken cancellationToken = default)
+        Address guildAddress, CancellationToken cancellationToken = default)
     {
         var client = application.GetClient(Address);
         var guildClient = client.GetRequiredService<IGuildClientContent>();
@@ -93,7 +92,7 @@ internal sealed class ClientGuildCommand(
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
     public async Task AcceptJoinAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken = default)
+        Address memberAddress, CancellationToken cancellationToken = default)
     {
         var client = application.GetClient(Address);
         var guildClient = client.GetRequiredService<IGuildClientContent>();
@@ -112,7 +111,7 @@ internal sealed class ClientGuildCommand(
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
     public async Task RejectJoinAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken = default)
+        Address memberAddress, CancellationToken cancellationToken = default)
     {
         var client = application.GetClient(Address);
         var guildClient = client.GetRequiredService<IGuildClientContent>();
@@ -148,7 +147,7 @@ internal sealed class ClientGuildCommand(
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
     public async Task BanMemberAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken)
+        Address memberAddress, CancellationToken cancellationToken)
     {
         var client = application.GetClient(Address);
         var guildClient = client.GetRequiredService<IGuildClientContent>();
@@ -167,7 +166,7 @@ internal sealed class ClientGuildCommand(
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
     public async Task UnbanMemberAsync(
-        AppAddress memberAddress, CancellationToken cancellationToken)
+        Address memberAddress, CancellationToken cancellationToken)
     {
         var client = application.GetClient(Address);
         var guildClient = client.GetRequiredService<IGuildClientContent>();
@@ -186,7 +185,7 @@ internal sealed class ClientGuildCommand(
     [CommandMethodProperty(nameof(Address))]
     [Category("Guild")]
     public async Task ListMembersAsync(
-        AppAddress guildAddress = default, CancellationToken cancellationToken = default)
+        Address guildAddress = default, CancellationToken cancellationToken = default)
     {
         var client = application.GetClient(Address);
         var guildClient = client.GetRequiredService<IGuildClientContent>();
@@ -199,7 +198,7 @@ internal sealed class ClientGuildCommand(
 
         await Out.WriteLineAsync(sb.ToString());
 
-        AppAddress GetGuildAddress()
+        Address GetGuildAddress()
             => guildAddress == default ? guildClient.Info.Address : guildAddress;
     }
 }

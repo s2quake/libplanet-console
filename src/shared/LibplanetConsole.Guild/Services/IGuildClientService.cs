@@ -8,7 +8,7 @@
 
 //     Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken);
 
-//     Task<AppAddress> DeleteAsync(DeleteGuildOptions options, CancellationToken cancellationToken);
+//     Task<Address> DeleteAsync(DeleteGuildOptions options, CancellationToken cancellationToken);
 
 //     Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken);
 
@@ -24,9 +24,9 @@
 
 //     Task UnbanMemberAsync(UnbanMemberOptions options, CancellationToken cancellationToken);
 
-//     Task<AppAddress> GetGuildAsync(
-//         long height, AppAddress address, CancellationToken cancellationToken);
+//     Task<Address> GetGuildAsync(
+//         long height, Address address, CancellationToken cancellationToken);
 
-//     Task<AppAddress[]> GetGuildMembersAsync(
-//         long height, AppAddress guildAddress, CancellationToken cancellationToken);
+//     Task<Address[]> GetGuildMembersAsync(
+//         long height, Address guildAddress, CancellationToken cancellationToken);
 // }

@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Node.Delegation.Commands;
-using LibplanetConsole.Node.Delegation.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Delegation;

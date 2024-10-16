@@ -1,6 +1,6 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Services;
-using LibplanetConsole.Consoles.Services;
+using LibplanetConsole.Console.Services;
 using LibplanetConsole.Guild;
 using LibplanetConsole.Guild.Services;
 
@@ -12,7 +12,6 @@ internal sealed class GuildClient
     private readonly RemoteService<IGuildClientService> _remoteService = new();
     private readonly IClient _client;
 
-    [ImportingConstructor]
     public GuildClient(IClient client)
         : base(client)
     {
@@ -33,7 +32,7 @@ internal sealed class GuildClient
     public Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken)
         => Service.CreateAsync(options, cancellationToken);
 
-    public Task<AppAddress> DeleteAsync(
+    public Task<Address> DeleteAsync(
         DeleteGuildOptions options, CancellationToken cancellationToken)
         => Service.DeleteAsync(options, cancellationToken);
 
@@ -55,12 +54,12 @@ internal sealed class GuildClient
     public Task UnbanMemberAsync(UnbanMemberOptions options, CancellationToken cancellationToken)
         => Service.UnbanMemberAsync(options, cancellationToken);
 
-    public Task<AppAddress> GetGuildAsync(
-        long height, AppAddress address, CancellationToken cancellationToken)
+    public Task<Address> GetGuildAsync(
+        long height, Address address, CancellationToken cancellationToken)
         => Service.GetGuildAsync(height, address, cancellationToken);
 
-    public Task<AppAddress[]> GetGuildMembersAsync(
-        long height, AppAddress guildAddress, CancellationToken cancellationToken)
+    public Task<Address[]> GetGuildMembersAsync(
+        long height, Address guildAddress, CancellationToken cancellationToken)
         => Service.GetGuildMembersAsync(height, guildAddress, cancellationToken);
 
     void IDisposable.Dispose()

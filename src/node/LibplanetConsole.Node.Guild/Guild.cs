@@ -21,7 +21,6 @@ internal sealed class Guild : IGuild, IDisposable
     private readonly INode _node;
     private readonly IBlockChain _blockChain;
 
-    [ImportingConstructor]
     public Guild(INode node, IBlockChain blockChain)
     {
         _node = node;
@@ -43,7 +42,7 @@ internal sealed class Guild : IGuild, IDisposable
         Info = GetGuildInfo();
     }
 
-    public async Task<AppAddress> DeleteAsync(
+    public async Task<Address> DeleteAsync(
         DeleteGuildOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
@@ -134,10 +133,10 @@ internal sealed class Guild : IGuild, IDisposable
         await _blockChain.AddTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
-    public Task<AppAddress> GetGuildAsync(
-        long height, AppAddress address, CancellationToken cancellationToken)
+    public Task<Address> GetGuildAsync(
+        long height, Address address, CancellationToken cancellationToken)
     {
-        AppAddress GetGuild()
+        Address GetGuild()
         {
             var blockChain = _node.GetRequiredService<BlockChain>();
             var block = height == long.MaxValue ? blockChain.Tip : blockChain[height];
@@ -145,7 +144,7 @@ internal sealed class Guild : IGuild, IDisposable
             var agentAddress = new AgentAddress((Address)address);
             if (GuildParticipantModule.GetJoinedGuild(worldState, agentAddress) is { } guildAddress)
             {
-                return (AppAddress)(Address)guildAddress;
+                return (Address)(Address)guildAddress;
             }
 
             return default;
@@ -154,10 +153,10 @@ internal sealed class Guild : IGuild, IDisposable
         return Task.Run(GetGuild, cancellationToken);
     }
 
-    public async Task<AppAddress[]> GetGuildMembersAsync(
-        long height, AppAddress guildAddress, CancellationToken cancellationToken)
+    public async Task<Address[]> GetGuildMembersAsync(
+        long height, Address guildAddress, CancellationToken cancellationToken)
     {
-        AppAddress[] GetGuildMembers()
+        Address[] GetGuildMembers()
         {
             var blockChain = _node.GetRequiredService<BlockChain>();
             var block = height == long.MaxValue ? blockChain.Tip : blockChain[height];
@@ -170,7 +169,7 @@ internal sealed class Guild : IGuild, IDisposable
                     new GuildParticipant((List)pair.Value)));
             var filtered = guildParticipants
                 .Where(pair => pair.Item2.GuildAddress == new GuildAddress((Address)guildAddress));
-            return [.. filtered.Select(item => (AppAddress)item.Item1)];
+            return [.. filtered.Select(item => (Address)item.Item1)];
         }
 
         return await Task.Run(GetGuildMembers, cancellationToken);
@@ -201,7 +200,7 @@ internal sealed class Guild : IGuild, IDisposable
         {
             return new()
             {
-                Address = (AppAddress)(Address)guildAddress,
+                Address = (Address)(Address)guildAddress,
             };
         }
 

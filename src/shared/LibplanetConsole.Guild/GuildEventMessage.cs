@@ -5,7 +5,7 @@ namespace LibplanetConsole.Guild;
 
 internal static class GuildEventMessage
 {
-    public static string CreatedMessage(AppAddress guildAddress)
+    public static string CreatedMessage(Address guildAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append($"Guild ");
@@ -17,7 +17,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string DeletedMessage(AppAddress guildAddress)
+    public static string DeletedMessage(Address guildAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append($"Guild ");
@@ -29,7 +29,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string RequestedJoinMessage(AppAddress guildAddress, AppAddress memberAddress)
+    public static string RequestedJoinMessage(Address guildAddress, Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Member ");
@@ -45,7 +45,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string CanceledJoinMessage(AppAddress memberAddress)
+    public static string CanceledJoinMessage(Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Member ");
@@ -57,7 +57,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string AcceptedJoinMessage(AppAddress guildAddress, AppAddress memberAddress)
+    public static string AcceptedJoinMessage(Address guildAddress, Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Guild ");
@@ -73,7 +73,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string RejectedJoinMessage(AppAddress guildAddress, AppAddress memberAddress)
+    public static string RejectedJoinMessage(Address guildAddress, Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Guild ");
@@ -89,7 +89,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string LeftMessage(AppAddress guildAddress, AppAddress memberAddress)
+    public static string LeftMessage(Address guildAddress, Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Member ");
@@ -105,7 +105,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string BannedMessage(AppAddress guildAddress, AppAddress memberAddress)
+    public static string BannedMessage(Address guildAddress, Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Guild ");
@@ -121,7 +121,7 @@ internal static class GuildEventMessage
         return tsb.ToString();
     }
 
-    public static string UnbannedMessage(AppAddress guildAddress, AppAddress memberAddress)
+    public static string UnbannedMessage(Address guildAddress, Address memberAddress)
     {
         var tsb = new TerminalStringBuilder();
         tsb.Append("Guild ");

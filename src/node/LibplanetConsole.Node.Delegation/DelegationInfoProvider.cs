@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using LibplanetConsole.Common;
+using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node.Delegation;
 

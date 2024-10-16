@@ -5,14 +5,13 @@
 
 // namespace LibplanetConsole.Node.Guild.Services;
 
-// [Export(typeof(ILocalService))]
-// internal sealed class GuildNodeService(INode node, GuildNode guild)
+// // internal sealed class GuildService(INode node, Guild guild)
 //         : LocalService<IGuildService>, IGuildService
 // {
 //     public Task CreateAsync(CreateGuildOptions options, CancellationToken cancellationToken)
 //         => guild.CreateAsync(options.Verify(node), cancellationToken);
 
-//     public Task<AppAddress> DeleteAsync(
+//     public Task<Address> DeleteAsync(
 //         DeleteGuildOptions options, CancellationToken cancellationToken)
 //         => guild.DeleteAsync(options.Verify(node), cancellationToken);
 
@@ -40,11 +39,11 @@
 //     public Task<GuildInfo> GetGuildInfoAsync(CancellationToken cancellationToken)
 //         => Task.Run(() => guild.Info, cancellationToken);
 
-//     public Task<AppAddress> GetGuildAsync(
-//         long height, AppAddress address, CancellationToken cancellationToken)
+//     public Task<Address> GetGuildAsync(
+//         long height, Address address, CancellationToken cancellationToken)
 //         => guild.GetGuildAsync(height, address, cancellationToken);
 
-//     public Task<AppAddress[]> GetGuildMembersAsync(
-//         long height, AppAddress guildAddress, CancellationToken cancellationToken)
+//     public Task<Address[]> GetGuildMembersAsync(
+//         long height, Address guildAddress, CancellationToken cancellationToken)
 //         => guild.GetGuildMembersAsync(height, guildAddress, cancellationToken);
 // }

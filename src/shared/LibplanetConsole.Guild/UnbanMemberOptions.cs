@@ -4,5 +4,5 @@ namespace LibplanetConsole.Guild;
 
 public sealed record class UnbanMemberOptions : OptionsBase<UnbanMemberOptions>
 {
-    public required AppAddress MemberAddress { get; init; }
+    public required Address MemberAddress { get; init; }
 }
