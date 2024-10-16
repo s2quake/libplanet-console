@@ -129,7 +129,8 @@ internal sealed partial class Node : IBlockChain
             var worldState = blockChain.GetWorldState(block.Hash);
             var account = worldState.GetAccountState(accountAddress);
             return account.GetState(address)
-                ?? throw new InvalidOperationException("State not found.");
+                ?? throw new InvalidOperationException(
+                    $"Account '{accountAddress}' does not have state '{address}'.");
         }
 
         return Task.Run(GetStateByBlockHash, cancellationToken: cancellationToken);

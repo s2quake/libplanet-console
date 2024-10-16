@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);SA1101;S2328;SA1413;SA1401;MEN002;SA1003;SA1633;SA1309;SA1201;SA1507;SA1208;SA1513;s125;SA1204;CS8625;SYSLIB0051;SA1515;S1135;SA1028;S3442;S4136;S1481</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Node.Bank\LibplanetConsole.Node.Bank.csproj" />
+    <ProjectReference Include="..\..\..\.submodules\lib9c\Lib9c\Lib9c.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Delegation\**\*.cs" />
+  </ItemGroup>
+
+</Project>

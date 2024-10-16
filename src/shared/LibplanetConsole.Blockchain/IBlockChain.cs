@@ -48,4 +48,7 @@ public interface IBlockChain
 
     Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
+
+    Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken);
 }
