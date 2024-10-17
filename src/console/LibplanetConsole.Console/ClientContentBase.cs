@@ -3,7 +3,7 @@ namespace LibplanetConsole.Console;
 public abstract class ClientContentBase(string name) : IClientContent, IDisposable
 {
     private readonly string _name = name;
-    private bool disposedValue;
+    private bool _isDisposed;
 
     public string Name => _name != string.Empty ? _name : GetType().Name;
 
@@ -25,14 +25,14 @@ public abstract class ClientContentBase(string name) : IClientContent, IDisposab
 
     protected virtual void OnDispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!_isDisposed)
         {
             if (disposing)
             {
                 // do nothing
             }
 
-            disposedValue = true;
+            _isDisposed = true;
         }
     }
 }

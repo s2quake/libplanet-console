@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Node;
 
 public abstract class NodeContentBase(string name) : INodeContent, IDisposable
 {

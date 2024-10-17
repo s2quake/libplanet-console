@@ -5,9 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Evidence;
 
-internal sealed class Evidence(INode node) : IEvidence, IAsyncDisposable
+internal sealed class Evidence(INode node) : IEvidence, INodeContent, IAsyncDisposable
 {
     private readonly DuplicateVoteViolator _duplicateVotePerpetrator = new(node);
+
+    public string Name => nameof(Evidence);
 
     public async Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
     {
@@ -84,6 +86,12 @@ internal sealed class Evidence(INode node) : IEvidence, IAsyncDisposable
     {
         await _duplicateVotePerpetrator.DisposeAsync();
     }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    public Task StopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
 #if LIBPLANET_DPOS
     public async Task UnjailAsync(CancellationToken cancellationToken)

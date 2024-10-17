@@ -37,6 +37,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private EndPoint? _seedEndPoint;
     private Swarm? _swarm;
     private Task _startTask = Task.CompletedTask;
+    private INodeContent[]? _contents;
     private bool _isDisposed;
 
     public Node(IServiceProvider serviceProvider, ApplicationOptions options)
@@ -72,6 +73,12 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
 
     public NodeInfo Info { get; private set; } = NodeInfo.Empty;
+
+    public INodeContent[] Contents
+    {
+        get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
+        set => _contents = value;
+    }
 
     public Swarm Swarm => _swarm ?? throw new InvalidOperationException();
 
@@ -187,6 +194,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         IsRunning = true;
         UpdateNodeInfo();
         _logger.LogDebug("Node is started: {Address}", Address);
+        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        _logger.LogDebug("Node Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -197,6 +206,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         {
             throw new InvalidOperationException("Node is not running.");
         }
+
+        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        _logger.LogDebug("Node Contents are stopped: {Address}", Address);
 
         if (_swarm is not null)
         {

@@ -22,7 +22,7 @@ internal sealed partial class Node : INode
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
-    private NodeInfo _nodeInfo;
+    private NodeInfo _info;
     private bool _isDisposed;
     private NodeProcess? _process;
     private Task _processTask = Task.CompletedTask;
@@ -58,7 +58,7 @@ internal sealed partial class Node : INode
 
     public EndPoint EndPoint => _nodeOptions.EndPoint;
 
-    public NodeInfo Info => _nodeInfo;
+    public NodeInfo Info => _info;
 
     public INodeContent[] Contents
     {
@@ -104,8 +104,8 @@ internal sealed partial class Node : INode
         var request = new GetInfoRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.GetInfoAsync(request, callOptions);
-        _nodeInfo = response.NodeInfo;
-        return _nodeInfo;
+        _info = response.NodeInfo;
+        return _info;
     }
 
     public async Task AttachAsync(CancellationToken cancellationToken)
@@ -138,8 +138,8 @@ internal sealed partial class Node : INode
         _channel = channel;
         _nodeService = nodeService;
         _blockChainService = blockChainService;
-        _nodeInfo = await GetInfoAsync(cancellationToken);
-        IsRunning = _nodeInfo.IsRunning;
+        _info = await GetInfoAsync(cancellationToken);
+        IsRunning = _info.IsRunning;
         IsAttached = true;
         _logger.LogDebug("Node is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
@@ -199,7 +199,7 @@ internal sealed partial class Node : INode
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.StartAsync(request, callOptions);
-        _nodeInfo = response.NodeInfo;
+        _info = response.NodeInfo;
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
@@ -226,7 +226,7 @@ internal sealed partial class Node : INode
         var request = new StopRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         await _nodeService.StopAsync(request, callOptions);
-        _nodeInfo = NodeInfo.Empty;
+        _info = NodeInfo.Empty;
         IsRunning = false;
         _logger.LogDebug("Node is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -296,7 +296,7 @@ internal sealed partial class Node : INode
 
     private void NodeService_Started(object? sender, NodeEventArgs e)
     {
-        _nodeInfo = e.NodeInfo;
+        _info = e.NodeInfo;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -308,7 +308,7 @@ internal sealed partial class Node : INode
 
     private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
     {
-        _nodeInfo = _nodeInfo with { Tip = e.BlockInfo };
+        _info = _info with { Tip = e.BlockInfo };
         BlockAppended?.Invoke(this, e);
     }
 

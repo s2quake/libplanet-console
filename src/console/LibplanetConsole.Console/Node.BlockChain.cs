@@ -39,7 +39,7 @@ internal sealed partial class Node : IBlockChain
 
         var address = _privateKey.Address;
         var nonce = await GetNextNonceAsync(address, cancellationToken);
-        var genesisHash = _nodeInfo.GenesisHash;
+        var genesisHash = _info.GenesisHash;
         var tx = Transaction.Create(
             nonce: nonce,
             privateKey: _privateKey,
