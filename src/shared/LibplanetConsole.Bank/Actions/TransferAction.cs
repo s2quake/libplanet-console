@@ -8,8 +8,9 @@ public sealed class TransferAction : ActionBase
 {
     private const string TypeIdentifier = "transfer_action";
 
-    public TransferAction(Address targetAddress, FungibleAssetValue amount)
+    public TransferAction(Address address, Address targetAddress, FungibleAssetValue amount)
     {
+        Address = address;
         TargetAddress = targetAddress;
         Amount = amount;
     }
@@ -18,6 +19,8 @@ public sealed class TransferAction : ActionBase
     {
     }
 
+    public Address Address { get; set; }
+
     public Address TargetAddress { get; set; }
 
     public FungibleAssetValue Amount { get; set; }
@@ -25,14 +28,16 @@ public sealed class TransferAction : ActionBase
     protected override Dictionary OnInitialize(Dictionary values)
     {
         return base.OnInitialize(values)
-            .Add("address", TargetAddress.Bencoded)
+            .Add("address", Address.Bencoded)
+            .Add("target_address", TargetAddress.Bencoded)
             .Add("amount", Amount.Serialize());
     }
 
     protected override void OnLoadPlainValue(Dictionary values)
     {
         base.OnLoadPlainValue(values);
-        TargetAddress = new Address(values["address"]);
+        Address = new Address(values["address"]);
+        TargetAddress = new Address(values["target_address"]);
         Amount = new FungibleAssetValue(values["amount"]);
     }
 

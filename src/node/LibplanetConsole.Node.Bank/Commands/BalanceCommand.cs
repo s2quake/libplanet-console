@@ -1,20 +1,20 @@
-using System.ComponentModel;
-using JSSoft.Commands;
-using LibplanetConsole.Node;
+// using System.ComponentModel;
+// using JSSoft.Commands;
+// using LibplanetConsole.Node;
 
-namespace LibplanetConsole.Node.Bank.Commands;
+// namespace LibplanetConsole.Node.Bank.Commands;
 
-[CommandSummary("Display balance information.")]
-[Category("Bank")]
-internal sealed class BalanceCommand(INode node, IBank bank, BankCommand bankCommand)
-    : CommandAsyncBase(bankCommand)
-{
-    public override bool IsEnabled => node.IsRunning is true;
+// [CommandSummary("Display balance information.")]
+// [Category("Bank")]
+// internal sealed class BalanceCommand(INode node, IBank bank, BankCommand bankCommand)
+//     : CommandAsyncBase(bankCommand)
+// {
+//     public override bool IsEnabled => node.IsRunning is true;
 
-    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
-    {
-        var address = node.Address;
-        var balanceInfo = await bank.GetBalanceAsync(address, cancellationToken);
-        // await Out.WriteLineAsJsonAsync(balanceInfo);
-    }
-}
+//     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
+//     {
+//         var address = node.Address;
+//         var balanceInfo = await bank.GetBalanceAsync(address, cancellationToken);
+//         // await Out.WriteLineAsJsonAsync(balanceInfo);
+//     }
+// }

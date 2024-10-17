@@ -43,6 +43,7 @@ message BurnResponse {
 
 message GetBalanceRequest {
   libplanet.console.types.v1.AddressProto address = 1;
+  libplanet.console.types.v1.CurrencyProto currency = 2;
 }
 
 message GetBalanceResponse {
