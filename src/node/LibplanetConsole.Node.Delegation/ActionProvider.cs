@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Numerics;
 using System.Reflection;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common.Actions;

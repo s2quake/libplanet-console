@@ -1,18 +1,20 @@
-using LibplanetConsole.Bank;
-using LibplanetConsole.Bank.Services;
 
 namespace LibplanetConsole.Console.Bank;
 
-internal interface IBank
+public interface IBank
 {
-    Task<BalanceInfo> MintAsync(
-        MintOptions mintOptions, CancellationToken cancellationToken);
+    Task<FungibleAssetValue> MintAsync(
+        Address address, FungibleAssetValue amount, CancellationToken cancellationToken);
 
-    Task<BalanceInfo> TransferAsync(
-        TransferOptions transferOptions, CancellationToken cancellationToken);
+    Task<FungibleAssetValue> TransferAsync(
+        Address address,
+        Address targetAddress,
+        FungibleAssetValue amount,
+        CancellationToken cancellationToken);
 
-    Task<BalanceInfo> BurnAsync(
-        BurnOptions burnOptions, CancellationToken cancellationToken);
+    Task<FungibleAssetValue> BurnAsync(
+        Address address, FungibleAssetValue amount, CancellationToken cancellationToken);
 
-    Task<BalanceInfo> GetBalanceAsync(Address address, CancellationToken cancellationToken);
+    Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken);
 }

@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Console.Bank.Commands;
 using LibplanetConsole.Console.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,9 +20,9 @@ public static class ServiceCollectionExtensions
 
         // @this.AddSingleton<ICommand, BalanceCommand>();
         // @this.AddSingleton<ICommand, BurnCommand>();
-        @this.AddSingleton<ICommand, ClientCommand>();
+        // @this.AddSingleton<ICommand, ClientCommand>();
         // @this.AddSingleton<ICommand, MintCommand>();
-        @this.AddSingleton<ICommand, NodeCommand>();
+        // @this.AddSingleton<ICommand, NodeCommand>();
         // @this.AddSingleton<ICommand, PoolCommand>();
         // @this.AddSingleton<ICommand, TransferCommand>();
 

@@ -11,9 +11,8 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<Bank>()
              .AddSingleton<INodeContent>(s => s.GetRequiredService<Bank>())
              .AddSingleton<IBank>(s => s.GetRequiredService<Bank>());
-        // @this.AddSingleton<ICommand, BalanceCommand>();
-        // @this.AddSingleton<BankCommand>()
-        //      .AddSingleton<ICommand>(s => s.GetRequiredService<BankCommand>());
+        @this.AddSingleton<ICommand, BankCommand>();
+        // @this.AddSingleton<ICommand, BurnCommand>();
         // @this.AddSingleton<ICommand, BurnCommand>();
         // @this.AddSingleton<ICommand, MintCommand>();
         // @this.AddSingleton<ICommand, PoolCommand>();
