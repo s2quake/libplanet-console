@@ -3,7 +3,7 @@ using LibplanetConsole.Guild;
 
 namespace LibplanetConsole.Client.Guild;
 
-public interface IGuildClient
+public interface IGuild
 {
     GuildInfo Info { get; }
 

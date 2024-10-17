@@ -8,7 +8,7 @@ using Nekoyume.Module;
 
 namespace LibplanetConsole.Node.Bank;
 
-internal sealed class Bank(INode node) : IBank
+internal sealed class Bank(INode node) : NodeContentBase(nameof(Bank)), IBank
 {
     public async Task<BalanceInfo> MintAsync(
         decimal amount, CancellationToken cancellationToken)
@@ -102,4 +102,10 @@ internal sealed class Bank(INode node) : IBank
 
         return Task.Run(Action, cancellationToken);
     }
+
+    protected override Task OnStartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 }

@@ -9,8 +9,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBank(this IServiceCollection @this)
     {
         @this.AddSingleton<Bank>()
+             .AddSingleton<INodeContent>(s => s.GetRequiredService<Bank>())
              .AddSingleton<IBank>(s => s.GetRequiredService<Bank>());
-        // @this.AddSingleton<ILocalService, BankService>();
         @this.AddSingleton<ICommand, BalanceCommand>();
         @this.AddSingleton<BankCommand>()
              .AddSingleton<ICommand>(s => s.GetRequiredService<BankCommand>());

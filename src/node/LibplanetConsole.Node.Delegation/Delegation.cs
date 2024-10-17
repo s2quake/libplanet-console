@@ -8,9 +8,8 @@ using Nekoyume.Model.State;
 
 namespace LibplanetConsole.Node.Delegation;
 
-internal sealed class Delegation(
-    IApplication application, INode node, IBlockChain blockChain)
-    : IDelegation, IApplicationService, IAsyncDisposable
+internal sealed class Delegation(INode node, IBlockChain blockChain)
+    : NodeContentBase(nameof(Delegation)), IDelegation
 {
     private const int Timeout = 10000;
     private Currency? _goldCurrency;
@@ -147,25 +146,13 @@ internal sealed class Delegation(
             throw new InvalidOperationException("Gold currency is not initialized.");
         }
 
-        var stateAddress =
-                DelegationAddress.DelegateeMetadataAddress(_node.Address, Addresses.ValidatorDelegatee);
-        IValue value = await blockChain.GetStateAsync(Addresses.ValidatorDelegateeMetadata, stateAddress, cancellationToken);
-        var metadata = new DelegateeMetadata(_node.Address, Addresses.ValidatorDelegatee, value);
-        return await blockChain.GetBalanceAsync(metadata.RewardDistributorAddress, goldCurrency, cancellationToken);
-    }
+        // var stateAddress =
+        //         DelegationAddress.DelegateeMetadataAddress(_node.Address, Addresses.ValidatorDelegatee);
+        // IValue value = await blockChain.GetStateAsync(Addresses.ValidatorDelegateeMetadata, stateAddress, cancellationToken);
+        // var metadata = new DelegateeMetadata(_node.Address, Addresses.ValidatorDelegatee, value);
+        // return await blockChain.GetBalanceAsync(metadata.RewardDistributorAddress, goldCurrency, cancellationToken);
 
-    Task IApplicationService.InitializeAsync(CancellationToken cancellationToken)
-    {
-        _node.Started += Node_Started;
-        _node.Stopped += Node_Stoped;
-        return Task.CompletedTask;
-    }
-
-    ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        _node.Started -= Node_Started;
-        _node.Stopped -= Node_Stoped;
-        return ValueTask.CompletedTask;
+        throw new NotImplementedException();
     }
 
     private FungibleAssetValue ToGold(double amount)
@@ -180,29 +167,31 @@ internal sealed class Delegation(
 
     private async Task<Currency> GetCurrencyAsync(CancellationToken cancellationToken)
     {
-        if (_goldCurrency is not { } goldCurrency)
-        {
-            var state = await blockChain.GetStateAsync(
-                ReservedAddresses.LegacyAccount, GoldCurrencyState.Address, cancellationToken);
-            goldCurrency = new GoldCurrencyState((Dictionary)state).Currency;
-            _goldCurrency = goldCurrency;
-        }
+        // if (_goldCurrency is not { } goldCurrency)
+        // {
+        //     var state = await blockChain.GetStateAsync(
+        //         ReservedAddresses.LegacyAccount, GoldCurrencyState.Address, cancellationToken);
+        //     goldCurrency = new GoldCurrencyState((Dictionary)state).Currency;
+        //     _goldCurrency = goldCurrency;
+        // }
 
-        return goldCurrency;
+        // return goldCurrency;
+
+        throw new NotImplementedException();
     }
 
-    private async void Node_Started(object? sender, EventArgs e)
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         using var cancellationTokenSource = new CancellationTokenSource(Timeout);
         try
         {
-            _goldCurrency = await GetCurrencyAsync(cancellationTokenSource.Token);
+            // _goldCurrency = await GetCurrencyAsync(cancellationTokenSource.Token);
 
-            var stateAddress =
-                DelegationAddress.DelegateeMetadataAddress(_node.Address, Addresses.ValidatorDelegatee);
-            IValue value = await blockChain.GetStateAsync(Addresses.ValidatorDelegateeMetadata, stateAddress, cancellationTokenSource.Token);
-            var metadata = new DelegateeMetadata(_node.Address, Addresses.ValidatorDelegatee, value);
-            _delegateeInfo = new DelegateeInfo(metadata);
+            // var stateAddress =
+            //     DelegationAddress.DelegateeMetadataAddress(_node.Address, Addresses.ValidatorDelegatee);
+            // IValue value = await blockChain.GetStateAsync(Addresses.ValidatorDelegateeMetadata, stateAddress, cancellationTokenSource.Token);
+            // var metadata = new DelegateeMetadata(_node.Address, Addresses.ValidatorDelegatee, value);
+            // _delegateeInfo = new DelegateeInfo(metadata);
             _startedEvent.Set();
         }
         catch (OperationCanceledException)
@@ -212,11 +201,11 @@ internal sealed class Delegation(
         }
     }
 
-    private void Node_Stoped(object? sender, EventArgs e)
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
     {
         _startedEvent.WaitOne(Timeout);
         _goldCurrency = null;
         _startedEvent.Reset();
+        return Task.CompletedTask;
     }
-
 }

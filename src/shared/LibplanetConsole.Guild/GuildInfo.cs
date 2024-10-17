@@ -9,13 +9,13 @@ public readonly record struct GuildInfo
 {
     public GuildInfo(IValue value)
     {
-        if (value is not List list)
-        {
-            throw new ArgumentException("Invalid value type.", nameof(value));
-        }
+        // if (value is not List list)
+        // {
+        //     throw new ArgumentException("Invalid value type.", nameof(value));
+        // }
 
-        var guild = new Nekoyume.Model.Guild.Guild(list);
-        Address = (Address)(Address)guild.GuildMasterAddress;
+        // var guild = new Nekoyume.Model.Guild.Guild(list);
+        // Address = guild.GuildMasterAddress;
     }
 
     public Address Address { get; init; }

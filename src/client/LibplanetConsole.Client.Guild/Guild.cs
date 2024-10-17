@@ -1,5 +1,4 @@
 using Libplanet.Crypto;
-using LibplanetConsole.Client.Guild.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Guild;
 using Nekoyume.Action.Guild;
@@ -7,13 +6,14 @@ using Nekoyume.TypedAddress;
 
 namespace LibplanetConsole.Client.Guild;
 
-internal sealed class Guild : IGuildClient, IDisposable
+internal sealed class Guild : ClientContentBase, IGuild
 {
     private readonly IClient _client;
     private readonly IBlockChain _blockChain;
     private bool _isRunning;
 
     public Guild(IClient client, IBlockChain blockChain)
+        : base(nameof(Guild))
     {
         _client = client;
         _blockChain = blockChain;
@@ -31,9 +31,9 @@ internal sealed class Guild : IGuildClient, IDisposable
         {
         };
         await _blockChain.SendTransactionAsync([makeGuild], cancellationToken);
-        var guildAddress = await _remoteGuildService.Service.GetGuildAsync(
-            long.MaxValue, _client.Address, cancellationToken);
-        Info = Info with { Address = guildAddress };
+        // var guildAddress = await _remoteGuildService.Service.GetGuildAsync(
+        //     long.MaxValue, _client.Address, cancellationToken);
+        // Info = Info with { Address = guildAddress };
     }
 
     public async Task<Address> DeleteAsync(
@@ -55,7 +55,7 @@ internal sealed class Guild : IGuildClient, IDisposable
     {
         ThrowIfNotRunning();
 
-        var action = new ApplyGuild(new GuildAddress((Address)options.GuildAddress))
+        var action = new ApplyGuild(new GuildAddress(options.GuildAddress))
         {
         };
         await _blockChain.SendTransactionAsync([action], cancellationToken);
@@ -77,7 +77,7 @@ internal sealed class Guild : IGuildClient, IDisposable
     {
         ThrowIfNotRunning();
 
-        var action = new AcceptGuildApplication(new AgentAddress((Address)options.MemberAddress))
+        var action = new AcceptGuildApplication(new AgentAddress(options.MemberAddress))
         {
         };
         await _blockChain.SendTransactionAsync([action], cancellationToken);
@@ -88,7 +88,7 @@ internal sealed class Guild : IGuildClient, IDisposable
     {
         ThrowIfNotRunning();
 
-        var action = new RejectGuildApplication(new AgentAddress((Address)options.MemberAddress))
+        var action = new RejectGuildApplication(new AgentAddress(options.MemberAddress))
         {
         };
         await _blockChain.SendTransactionAsync([action], cancellationToken);
@@ -106,7 +106,7 @@ internal sealed class Guild : IGuildClient, IDisposable
 
     public async Task BanMemberAsync(BanMemberOptions options, CancellationToken cancellationToken)
     {
-        var memberAddress = (Address)options.MemberAddress;
+        var memberAddress = options.MemberAddress;
         var banGuildMember = new BanGuildMember(new(memberAddress))
         {
         };
@@ -118,7 +118,7 @@ internal sealed class Guild : IGuildClient, IDisposable
     {
         ThrowIfNotRunning();
 
-        var memberAddress = (Address)options.MemberAddress;
+        var memberAddress = options.MemberAddress;
         var unbanMemberGuild = new UnbanGuildMember(memberAddress)
         {
         };
@@ -159,4 +159,10 @@ internal sealed class Guild : IGuildClient, IDisposable
             throw new InvalidOperationException("The guild is not running.");
         }
     }
+
+    protected override Task OnStartAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
+
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
+        => Task.CompletedTask;
 }

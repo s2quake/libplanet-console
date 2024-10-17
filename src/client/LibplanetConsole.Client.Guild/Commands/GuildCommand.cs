@@ -6,7 +6,7 @@ using LibplanetConsole.Guild;
 namespace LibplanetConsole.Client.Guild.Commands;
 
 [CommandSummary("Provides commands for the guild service.")]
-internal sealed class GuildCommand(IClient client, IGuildClient guildClient) : CommandMethodBase
+internal sealed class GuildCommand(IClient client, IGuild guildClient) : CommandMethodBase
 {
     [CommandMethod]
     [CommandSummary("Create new guild.")]

@@ -38,7 +38,7 @@ internal sealed class Guild : IGuild, IDisposable
         var makeGuild = new MakeGuild
         {
         };
-        await _blockChain.AddTransactionAsync([makeGuild], cancellationToken);
+        await _blockChain.SendTransactionAsync([makeGuild], cancellationToken);
         Info = GetGuildInfo();
     }
 
@@ -51,7 +51,7 @@ internal sealed class Guild : IGuild, IDisposable
         {
         };
         var guildAddress = Info.Address;
-        await _blockChain.AddTransactionAsync([removeGuild], cancellationToken);
+        await _blockChain.SendTransactionAsync([removeGuild], cancellationToken);
         Info = default;
         return guildAddress;
     }
@@ -61,10 +61,10 @@ internal sealed class Guild : IGuild, IDisposable
     {
         ThrowIfNotRunning();
 
-        var action = new ApplyGuild(new GuildAddress((Address)options.GuildAddress))
+        var action = new ApplyGuild(new GuildAddress(options.GuildAddress))
         {
         };
-        await _blockChain.AddTransactionAsync([action], cancellationToken);
+        await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
     public async Task CancelJoinAsync(
@@ -75,7 +75,7 @@ internal sealed class Guild : IGuild, IDisposable
         var action = new CancelGuildApplication
         {
         };
-        await _blockChain.AddTransactionAsync([action], cancellationToken);
+        await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
     public async Task AcceptJoinAsync(
@@ -83,10 +83,10 @@ internal sealed class Guild : IGuild, IDisposable
     {
         ThrowIfNotRunning();
 
-        var action = new AcceptGuildApplication(new AgentAddress((Address)options.MemberAddress))
+        var action = new AcceptGuildApplication(new AgentAddress(options.MemberAddress))
         {
         };
-        await _blockChain.AddTransactionAsync([action], cancellationToken);
+        await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
     public async Task RejectJoinAsync(
@@ -94,10 +94,10 @@ internal sealed class Guild : IGuild, IDisposable
     {
         ThrowIfNotRunning();
 
-        var action = new RejectGuildApplication(new AgentAddress((Address)options.MemberAddress))
+        var action = new RejectGuildApplication(new AgentAddress(options.MemberAddress))
         {
         };
-        await _blockChain.AddTransactionAsync([action], cancellationToken);
+        await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
     public async Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)
@@ -107,18 +107,18 @@ internal sealed class Guild : IGuild, IDisposable
         var quitGuild = new QuitGuild
         {
         };
-        await _blockChain.AddTransactionAsync([quitGuild], cancellationToken);
+        await _blockChain.SendTransactionAsync([quitGuild], cancellationToken);
     }
 
     public async Task BanMemberAsync(BanMemberOptions options, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
-        var memberAddress = (Address)options.MemberAddress;
+        var memberAddress = options.MemberAddress;
         var banGuildMember = new BanGuildMember(new(memberAddress))
         {
         };
-        await _blockChain.AddTransactionAsync([banGuildMember], cancellationToken);
+        await _blockChain.SendTransactionAsync([banGuildMember], cancellationToken);
     }
 
     public async Task UnbanMemberAsync(
@@ -126,11 +126,11 @@ internal sealed class Guild : IGuild, IDisposable
     {
         ThrowIfNotRunning();
 
-        var memberAddress = (Address)options.MemberAddress;
+        var memberAddress = options.MemberAddress;
         var unbanMemberGuild = new UnbanGuildMember(memberAddress)
         {
         };
-        await _blockChain.AddTransactionAsync([unbanMemberGuild], cancellationToken);
+        await _blockChain.SendTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
     public Task<Address> GetGuildAsync(
@@ -141,11 +141,11 @@ internal sealed class Guild : IGuild, IDisposable
             var blockChain = _node.GetRequiredService<BlockChain>();
             var block = height == long.MaxValue ? blockChain.Tip : blockChain[height];
             var worldState = GetWorldState(blockChain, block);
-            var agentAddress = new AgentAddress((Address)address);
-            if (GuildParticipantModule.GetJoinedGuild(worldState, agentAddress) is { } guildAddress)
-            {
-                return (Address)(Address)guildAddress;
-            }
+            var agentAddress = new AgentAddress(address);
+            // if (GuildParticipantModule.GetJoinedGuild(worldState, agentAddress) is { } guildAddress)
+            // {
+            //     return guildAddress;
+            // }
 
             return default;
         }
@@ -162,14 +162,15 @@ internal sealed class Guild : IGuild, IDisposable
             var block = height == long.MaxValue ? blockChain.Tip : blockChain[height];
             var worldState = GetWorldState(blockChain, block);
             var trie = worldState.GetAccountState(Addresses.GuildParticipant).Trie;
-            IEnumerable<(Address, GuildParticipant)> guildParticipants = trie.IterateValues()
-                .Where(pair => pair.Value is List)
-                .Select(pair => (
-                    new Address(Encoding.UTF8.GetString(Convert.FromHexString(pair.Path.Hex))),
-                    new GuildParticipant((List)pair.Value)));
-            var filtered = guildParticipants
-                .Where(pair => pair.Item2.GuildAddress == new GuildAddress((Address)guildAddress));
-            return [.. filtered.Select(item => (Address)item.Item1)];
+            // IEnumerable<(Address, GuildParticipant)> guildParticipants = trie.IterateValues()
+            //     .Where(pair => pair.Value is List)
+            //     .Select(pair => (
+            //         new Address(Encoding.UTF8.GetString(Convert.FromHexString(pair.Path.Hex))),
+            //         new GuildParticipant((List)pair.Value)));
+            // var filtered = guildParticipants
+            //     .Where(pair => pair.Item2.GuildAddress == new GuildAddress(guildAddress));
+            // return [.. filtered.Select(item => item.Item1)];
+            throw new NotImplementedException();
         }
 
         return await Task.Run(GetGuildMembers, cancellationToken);
@@ -193,16 +194,16 @@ internal sealed class Guild : IGuild, IDisposable
 
     private GuildInfo GetGuildInfo()
     {
-        var blockChain = _node.GetRequiredService<BlockChain>();
-        var worldState = blockChain.GetNextWorldState() ?? blockChain.GetWorldState();
-        var agentAddress = new AgentAddress((Address)_node.Address);
-        if (GuildParticipantModule.GetJoinedGuild(worldState, agentAddress) is { } guildAddress)
-        {
-            return new()
-            {
-                Address = (Address)(Address)guildAddress,
-            };
-        }
+        // var blockChain = _node.GetRequiredService<BlockChain>();
+        // var worldState = blockChain.GetNextWorldState() ?? blockChain.GetWorldState();
+        // var agentAddress = new AgentAddress(_node.Address);
+        // if (GuildParticipantModule.GetJoinedGuild(worldState, agentAddress) is { } guildAddress)
+        // {
+        //     return new()
+        //     {
+        //         Address = guildAddress,
+        //     };
+        // }
 
         return default;
     }
