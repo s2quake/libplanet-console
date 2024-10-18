@@ -5,6 +5,11 @@ public abstract class NodeContentBase(string name) : INodeContent, IDisposable
     private readonly string _name = name;
     private bool _isDisposed;
 
+    protected NodeContentBase()
+        : this(string.Empty)
+    {
+    }
+
     public string Name => _name != string.Empty ? _name : GetType().Name;
 
     void IDisposable.Dispose()

@@ -5,6 +5,11 @@ public abstract class ClientContentBase(string name) : IClientContent, IDisposab
     private readonly string _name = name;
     private bool _isDisposed;
 
+    protected ClientContentBase()
+        : this(string.Empty)
+    {
+    }
+
     public string Name => _name != string.Empty ? _name : GetType().Name;
 
     void IDisposable.Dispose()
