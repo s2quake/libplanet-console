@@ -1,3 +1,4 @@
+using Lib9c;
 using Libplanet.Action.State;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common;
@@ -56,15 +57,18 @@ public sealed class InitializeStates : ActionBase
         foreach (var validator in validators)
         {
             var validatorDelegatee = new ValidatorDelegatee(
-                validator.OperatorAddress, validator.PublicKey, repository.World.GetGoldCurrency(), repository);
-            var delegationFAV = FungibleAssetValue.FromRawValue(
-                    validatorDelegatee.DelegationCurrency, validator.Power);
-
+                validator.OperatorAddress,
+                validator.PublicKey,
+                10,
+                0,
+                repository);
+            var fav = validatorDelegatee.MinSelfDelegation;
+            world = world.MintAsset(context, validator.OperatorAddress, fav);
+            repository.UpdateWorld(world);
             repository.SetValidatorDelegatee(validatorDelegatee);
-            var validatorDelegator = repository.GetValidatorDelegator(validator.OperatorAddress);
-            repository.TransferAsset(
-                GoldCurrencyState.Address, validatorDelegator.DelegationPoolAddress, delegationFAV);
-            validatorDelegator.Delegate(validatorDelegatee, delegationFAV, context.BlockIndex);
+            var validatorDelegator = repository.GetValidatorDelegator(
+                validator.OperatorAddress, validator.OperatorAddress);
+            validatorDelegator.Delegate(validatorDelegatee, fav, context.BlockIndex);
         }
 
         repository.SetAbstainHistory(new());

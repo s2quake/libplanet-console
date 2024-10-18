@@ -1,12 +1,12 @@
+using System.ComponentModel;
 using System.Text;
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 using LibplanetConsole.Guild;
-using LibplanetConsole.Node;
 
 namespace LibplanetConsole.Node.Guild.Commands;
 
 [CommandSummary("Provides commands for the guild service.")]
+[Category(nameof(Guild))]
 internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
 {
     [CommandMethod]
@@ -32,65 +32,6 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
         };
         var guildAddress = await guild.DeleteAsync(options, cancellationToken);
         var message = GuildEventMessage.DeletedMessage(guildAddress);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Request to join the guild.")]
-    public async Task RequestJoinAsync(
-        Address guildAddress, CancellationToken cancellationToken = default)
-    {
-        var options = new RequestJoinOptions
-        {
-            GuildAddress = guildAddress,
-        };
-        var memberAddress = node.Address;
-        var message = GuildEventMessage.RequestedJoinMessage(guildAddress, memberAddress);
-        await guild.RequestJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Cancel the request to join the guild.")]
-    public async Task CancelJoinAsync(
-        CancellationToken cancellationToken = default)
-    {
-        var options = new CancelJoinOptions
-        {
-        };
-        var memberAddress = node.Address;
-        var message = GuildEventMessage.CanceledJoinMessage(memberAddress);
-        await guild.CancelJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Request to join the guild.")]
-    public async Task AcceptJoinAsync(
-        Address memberAddress, CancellationToken cancellationToken = default)
-    {
-        var options = new AcceptJoinOptions
-        {
-            MemberAddress = memberAddress,
-        };
-        var guildAddress = guild.Info.Address;
-        var message = GuildEventMessage.AcceptedJoinMessage(guildAddress, memberAddress);
-        await guild.AcceptJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Request to join the guild.")]
-    public async Task RejectJoinAsync(
-        Address memberAddress, CancellationToken cancellationToken = default)
-    {
-        var options = new RejectJoinOptions
-        {
-            MemberAddress = memberAddress,
-        };
-        var guildAddress = guild.Info.Address;
-        var message = GuildEventMessage.RejectedJoinMessage(guildAddress, memberAddress);
-        await guild.RejectJoinAsync(options, cancellationToken);
         await Out.WriteLineAsync(message);
     }
 

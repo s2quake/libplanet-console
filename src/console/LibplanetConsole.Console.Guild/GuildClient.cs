@@ -13,17 +13,7 @@ internal sealed class GuildClient : ClientContentBase, IGuild
 
     public GuildInfo Info { get; private set; }
 
-    public Task AcceptJoinAsync(AcceptJoinOptions options, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
     public Task BanMemberAsync(BanMemberOptions options, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task CancelJoinAsync(CancelJoinOptions options, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -49,16 +39,6 @@ internal sealed class GuildClient : ClientContentBase, IGuild
     }
 
     public Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task RejectJoinAsync(RejectJoinOptions options, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task RequestJoinAsync(RequestJoinOptions options, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

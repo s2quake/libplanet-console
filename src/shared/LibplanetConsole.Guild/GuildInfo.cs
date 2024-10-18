@@ -1,14 +1,18 @@
 using System.Diagnostics.CodeAnalysis;
 using Bencodex.Types;
+using Libplanet.Action.State;
 using Libplanet.Crypto;
 using LibplanetConsole.Common;
+using Nekoyume;
+using Nekoyume.Model.Guild;
 
 namespace LibplanetConsole.Guild;
 
 public readonly record struct GuildInfo
 {
-    public GuildInfo(IValue value)
+    public GuildInfo(IWorldState worldState, Address address)
     {
+        var account = worldState.GetAccountState(Addresses.Guild);
         // if (value is not List list)
         // {
         //     throw new ArgumentException("Invalid value type.", nameof(value));
@@ -18,19 +22,7 @@ public readonly record struct GuildInfo
         // Address = guild.GuildMasterAddress;
     }
 
-    public Address Address { get; init; }
+    public Address GuildMasterAddress { get; init; }
 
-    public static bool TryParse(IValue value, [MaybeNullWhen(false)] out GuildInfo guildInfo)
-    {
-        try
-        {
-            guildInfo = new GuildInfo(value);
-            return true;
-        }
-        catch
-        {
-            guildInfo = default;
-            return false;
-        }
-    }
+    public Address Address { get; init; }
 }

@@ -1,8 +1,5 @@
-using Libplanet.Crypto;
-using LibplanetConsole.Common;
 using LibplanetConsole.Guild;
 using Nekoyume.Action.Guild;
-using Nekoyume.TypedAddress;
 
 namespace LibplanetConsole.Client.Guild;
 
@@ -31,9 +28,6 @@ internal sealed class Guild : ClientContentBase, IGuild
         {
         };
         await _blockChain.SendTransactionAsync([makeGuild], cancellationToken);
-        // var guildAddress = await _remoteGuildService.Service.GetGuildAsync(
-        //     long.MaxValue, _client.Address, cancellationToken);
-        // Info = Info with { Address = guildAddress };
     }
 
     public async Task<Address> DeleteAsync(
@@ -48,50 +42,6 @@ internal sealed class Guild : ClientContentBase, IGuild
         await _blockChain.SendTransactionAsync([removeGuild], cancellationToken);
         Info = Info with { Address = default, };
         return guildAddress;
-    }
-
-    public async Task RequestJoinAsync(
-        RequestJoinOptions options, CancellationToken cancellationToken)
-    {
-        ThrowIfNotRunning();
-
-        var action = new ApplyGuild(new GuildAddress(options.GuildAddress))
-        {
-        };
-        await _blockChain.SendTransactionAsync([action], cancellationToken);
-    }
-
-    public async Task CancelJoinAsync(
-        CancelJoinOptions options, CancellationToken cancellationToken)
-    {
-        ThrowIfNotRunning();
-
-        var action = new CancelGuildApplication()
-        {
-        };
-        await _blockChain.SendTransactionAsync([action], cancellationToken);
-    }
-
-    public async Task AcceptJoinAsync(
-        AcceptJoinOptions options, CancellationToken cancellationToken)
-    {
-        ThrowIfNotRunning();
-
-        var action = new AcceptGuildApplication(new AgentAddress(options.MemberAddress))
-        {
-        };
-        await _blockChain.SendTransactionAsync([action], cancellationToken);
-    }
-
-    public async Task RejectJoinAsync(
-        RejectJoinOptions options, CancellationToken cancellationToken)
-    {
-        ThrowIfNotRunning();
-
-        var action = new RejectGuildApplication(new AgentAddress(options.MemberAddress))
-        {
-        };
-        await _blockChain.SendTransactionAsync([action], cancellationToken);
     }
 
     public async Task QuitAsync(LeaveGuildOptions options, CancellationToken cancellationToken)

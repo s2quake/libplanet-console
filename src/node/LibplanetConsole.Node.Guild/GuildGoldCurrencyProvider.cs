@@ -1,10 +1,9 @@
 ﻿using Lib9c;
 using LibplanetConsole.Node.Bank;
-using Nekoyume.Module;
 
 namespace LibplanetConsole.Node.Guild;
 
-internal sealed class GuildGoldCurrencyProvider(IBlockChain blockChain) : ICurrencyProvider
+internal sealed class GuildGoldCurrencyProvider : ICurrencyProvider
 {
     public string Name => "gg";
 

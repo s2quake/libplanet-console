@@ -12,11 +12,11 @@ internal sealed class Delegation(INode node, IBlockChain blockChain)
     : NodeContentBase(nameof(Delegation)), IDelegation
 {
     private const int Timeout = 10000;
-    private Currency? _goldCurrency;
     private readonly INode _node = node;
     private readonly IBlockChain blockChain = blockChain;
     private readonly AutoResetEvent _startedEvent = new(false);
     private DelegateeInfo _delegateeInfo;
+    private Currency? _goldCurrency;
 
     public DelegateeInfo Info => _delegateeInfo;
 

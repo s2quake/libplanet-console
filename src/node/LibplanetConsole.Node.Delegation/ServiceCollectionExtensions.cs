@@ -10,15 +10,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDelegation(this IServiceCollection @this)
     {
         @this.AddSingleton<Delegation>()
+             .AddSingleton<INodeContent>(s => s.GetRequiredService<Delegation>())
              .AddSingleton<IDelegation>(s => s.GetRequiredService<Delegation>());
 
         @this.AddSingleton<ICurrencyProvider, CurrencyProvider>();
 
-        @this.AddSingleton<ICommand, ClaimCommand>();
-        @this.AddSingleton<ICommand, DelegateCommand>();
-        @this.AddSingleton<ICommand, RewardPoolCommand>();
-        @this.AddSingleton<ICommand, UndelegateCommand>();
-        @this.AddSingleton<ICommand, ValidatorCommand>();
+        @this.AddSingleton<ICommand, DelegationCommand>();
         return @this;
     }
 }

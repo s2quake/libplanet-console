@@ -35,65 +35,6 @@ internal sealed class GuildCommand(IClient client, IGuild guildClient) : Command
     }
 
     [CommandMethod]
-    [CommandSummary("Request to join the guild.")]
-    public async Task RequestJoinAsync(
-        Address guildAddress, CancellationToken cancellationToken = default)
-    {
-        var options = new RequestJoinOptions
-        {
-            GuildAddress = guildAddress,
-        };
-        var memberAddress = client.Address;
-        var message = GuildEventMessage.RequestedJoinMessage(guildAddress, memberAddress);
-        await guildClient.RequestJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Cancel the request to join the guild.")]
-    public async Task CancelJoinAsync(
-        CancellationToken cancellationToken = default)
-    {
-        var options = new CancelJoinOptions
-        {
-        };
-        var memberAddress = client.Address;
-        var message = GuildEventMessage.CanceledJoinMessage(memberAddress);
-        await guildClient.CancelJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Request to join the guild.")]
-    public async Task AcceptJoinAsync(
-        Address memberAddress, CancellationToken cancellationToken = default)
-    {
-        var options = new AcceptJoinOptions
-        {
-            MemberAddress = memberAddress,
-        };
-        var guildAddress = guildClient.Info.Address;
-        var message = GuildEventMessage.AcceptedJoinMessage(guildAddress, memberAddress);
-        await guildClient.AcceptJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Request to join the guild.")]
-    public async Task RejectJoinAsync(
-        Address memberAddress, CancellationToken cancellationToken = default)
-    {
-        var options = new RejectJoinOptions
-        {
-            MemberAddress = memberAddress,
-        };
-        var guildAddress = guildClient.Info.Address;
-        var message = GuildEventMessage.RejectedJoinMessage(guildAddress, memberAddress);
-        await guildClient.RejectJoinAsync(options, cancellationToken);
-        await Out.WriteLineAsync(message);
-    }
-
-    [CommandMethod]
     [CommandSummary("Leave the guild.")]
     public async Task LeaveAsync(CancellationToken cancellationToken)
     {
