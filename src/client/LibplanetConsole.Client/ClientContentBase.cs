@@ -1,11 +1,11 @@
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Client;
 
-public abstract class NodeContentBase(string name) : INodeContent, IDisposable
+public abstract class ClientContentBase(string name) : IClientContent, IDisposable
 {
     private readonly string _name = name;
     private bool _isDisposed;
 
-    protected NodeContentBase()
+    protected ClientContentBase()
         : this(string.Empty)
     {
     }
@@ -18,10 +18,10 @@ public abstract class NodeContentBase(string name) : INodeContent, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    Task INodeContent.StartAsync(CancellationToken cancellationToken)
+    Task IClientContent.StartAsync(CancellationToken cancellationToken)
         => OnStartAsync(cancellationToken);
 
-    Task INodeContent.StopAsync(CancellationToken cancellationToken)
+    Task IClientContent.StopAsync(CancellationToken cancellationToken)
         => OnStopAsync(cancellationToken);
 
     protected abstract Task OnStartAsync(CancellationToken cancellationToken);

@@ -17,6 +17,7 @@ internal sealed partial class Client : IClient
     private GrpcChannel? _channel;
     private CancellationTokenSource? _cancellationTokenSource;
     private ClientInfo _info;
+    private IClientContent[]? _contents;
 
     public Client(ILogger<Client> logger, ApplicationOptions options)
     {
@@ -40,6 +41,12 @@ internal sealed partial class Client : IClient
     public TextWriter Out { get; set; } = Console.Out;
 
     public ClientInfo Info => _info;
+
+    public IClientContent[] Contents
+    {
+        get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
+        set => _contents = value;
+    }
 
     public NodeInfo NodeInfo { get; private set; }
 
@@ -104,8 +111,9 @@ internal sealed partial class Client : IClient
             Tip = nodeService.Info.Tip,
         };
         IsRunning = true;
-        _logger.LogDebug(
-            "Client is started: {Address} -> {NodeAddress}", Address, NodeInfo.Address);
+        _logger.LogDebug("Client is started: {Address}->{NodeAddress}", Address, NodeInfo.Address);
+        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        _logger.LogDebug("Client Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -115,6 +123,9 @@ internal sealed partial class Client : IClient
         {
             throw new InvalidOperationException("The client is not running.");
         }
+
+        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        _logger.LogDebug("Client Contents are stopped: {Address}", Address);
 
         if (_cancellationTokenSource is not null)
         {
