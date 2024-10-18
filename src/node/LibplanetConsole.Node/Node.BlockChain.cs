@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Libplanet.Action.State;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;
@@ -236,4 +237,6 @@ internal sealed partial class Node : IBlockChain
 
         return Task.Run(GetAction, cancellationToken);
     }
+
+    public IWorldState GetWorldState(BlockHash offset) => BlockChain.GetWorldState(offset);
 }

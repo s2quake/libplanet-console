@@ -1,49 +1,34 @@
-using LibplanetConsole.Bank;
-using LibplanetConsole.Bank.Services;
-using LibplanetConsole.Common.Services;
-using LibplanetConsole.Console.Services;
-
 namespace LibplanetConsole.Console.Bank;
 
-internal sealed class BankNode(INode node)
-    : INodeContent, IBank, INodeContentService
+internal sealed class BankNode(INode node) : NodeContentBase("bank-node"), IBank
 {
-    private readonly RemoteService<IBankService> _bankService = new();
-
-    IRemoteService INodeContentService.RemoteService => _bankService;
-
-    INode INodeContent.Node => node;
-
-    string INodeContent.Name => "Bank";
-
-    private IBankService Service => _bankService.Service;
-
-    Task<BalanceInfo> IBank.MintAsync(
-        MintOptions mintOptions, CancellationToken cancellationToken)
+    public Task<FungibleAssetValue> BurnAsync(Address address, FungibleAssetValue amount, CancellationToken cancellationToken)
     {
-        return Service.MintAsync(mintOptions.Sign(node), cancellationToken);
+        throw new NotImplementedException();
     }
 
-    Task<BalanceInfo> IBank.TransferAsync(
-        TransferOptions transferOptions, CancellationToken cancellationToken)
+    public Task<FungibleAssetValue> GetBalanceAsync(Address address, Currency currency, CancellationToken cancellationToken)
     {
-        return Service.TransferAsync(transferOptions.Sign(node), cancellationToken);
+        throw new NotImplementedException();
     }
 
-    Task<BalanceInfo> IBank.BurnAsync(
-        BurnOptions burnOptions, CancellationToken cancellationToken)
+    public Task<FungibleAssetValue> MintAsync(Address address, FungibleAssetValue amount, CancellationToken cancellationToken)
     {
-        return Service.BurnAsync(burnOptions.Sign(node), cancellationToken);
+        throw new NotImplementedException();
     }
 
-    Task<BalanceInfo> IBank.GetBalanceAsync(
-        Address address, CancellationToken cancellationToken)
+    public Task<FungibleAssetValue> TransferAsync(Address address, Address targetAddress, FungibleAssetValue amount, CancellationToken cancellationToken)
     {
-        return Service.GetBalanceAsync(address, cancellationToken: cancellationToken);
+        throw new NotImplementedException();
     }
 
-    Task<PoolInfo> IBank.GetPoolAsync(CancellationToken cancellationToken)
+    protected override Task OnStartAsync(CancellationToken cancellationToken)
     {
-        return Service.GetPoolAsync(cancellationToken);
+        throw new NotImplementedException();
+    }
+
+    protected override Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,23 +1,65 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.Bank.DataAnnotations;
+using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Bank.Commands;
 
 [CommandSummary("Bank Commands.")]
 [Category("Bank")]
-internal sealed class BankCommand(IBank bank) : CommandMethodBase
+internal sealed class BankCommand(Bank bank) : CommandMethodBase
 {
-    [CommandMethod("init-supply")]
-    public async Task GetInitialSupplyAsync(CancellationToken cancellationToken)
+    [CommandMethod]
+    public async Task MintAsync(
+        Address address,
+        [FungibleAssetValue]
+        string amount,
+        CancellationToken cancellationToken)
     {
-        var amount = await bank.GetInitialSupplyAsync(cancellationToken);
-        await Out.WriteLineAsync($"{amount}");
+        var amountValue = bank.ParseFungibleAssetValue(amount);
+        var balance = await bank.MintAsync(address, amountValue, cancellationToken);
+        await Out.WriteLineAsJsonAsync(balance);
     }
 
-    [CommandMethod("supply")]
-    public async Task GetSupplyAsync(CancellationToken cancellationToken)
+    [CommandMethod]
+    public async Task TransferAsync(
+        Address address,
+        Address targetAddress,
+        [FungibleAssetValue] string amount,
+        CancellationToken cancellationToken)
     {
-        var amount = await bank.GetSupplyAsync(cancellationToken);
-        await Out.WriteLineAsync($"{amount}");
+        var amountValue = bank.ParseFungibleAssetValue(amount);
+        var balance = await bank.TransferAsync(
+            address, targetAddress, amountValue, cancellationToken);
+        await Out.WriteLineAsJsonAsync(balance);
+    }
+
+    [CommandMethod]
+    public async Task BurnAsync(
+        Address address,
+        [FungibleAssetValue]
+        string amount,
+        CancellationToken cancellationToken)
+    {
+        var amountValue = bank.ParseFungibleAssetValue(amount);
+        var balance = await bank.BurnAsync(address, amountValue, cancellationToken);
+        await Out.WriteLineAsJsonAsync(balance);
+    }
+
+    [CommandMethod]
+    public async Task BalanceAsync(
+        Address address, string currency, CancellationToken cancellationToken)
+    {
+        var currencyValue = bank.GetCurrency(currency);
+        var balance = await bank.GetBalanceAsync(address, currencyValue, cancellationToken);
+        await Out.WriteLineAsJsonAsync(balance);
+    }
+
+    [CommandMethod]
+    public async Task CurrencyAsync(CancellationToken cancellationToken)
+    {
+        var currencies = await bank.GetCurrenciesAsync(cancellationToken);
+        var currencyNames = currencies.Select(item => item.Name).ToArray();
+        await Out.WriteLineAsJsonAsync(currencyNames);
     }
 }

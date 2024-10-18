@@ -1,9 +1,12 @@
 using JSSoft.Commands;
 using LibplanetConsole.Logging;
+using LibplanetConsole.Node.Bank;
+using LibplanetConsole.Node.Delegation;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
+using LibplanetConsole.Node.Guild;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace LibplanetConsole.Node.Executable;
@@ -62,6 +65,9 @@ internal sealed class Application
         services.AddNode(options);
         services.AddExplorer(_builder.Configuration);
         services.AddEvidence();
+        services.AddBank();
+        services.AddDelegation();
+        services.AddGuild();
 
         services.AddGrpc();
         services.AddGrpcReflection();
@@ -78,6 +84,7 @@ internal sealed class Application
         app.UseNode();
         app.UseExplorer();
         app.UseEvidence();
+        app.UseBank();
         app.MapGet("/", () => "Libplanet-Node");
         app.UseAuthentication();
         app.UseAuthorization();

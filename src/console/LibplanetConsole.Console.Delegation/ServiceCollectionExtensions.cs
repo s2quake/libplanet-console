@@ -12,16 +12,16 @@ public static class ServiceCollectionExtensions
     {
         @this.AddScoped<DelegationNode>()
              .AddScoped<IDelegation>(s => s.GetRequiredService<DelegationNode>())
-             .AddScoped<INodeContent>(s => s.GetRequiredService<DelegationNode>())
-             .AddScoped<INodeContentService>(s => s.GetRequiredService<DelegationNode>());
+             .AddScoped<INodeContent>(s => s.GetRequiredService<DelegationNode>());
+            //  .AddScoped<INodeContentService>(s => s.GetRequiredService<DelegationNode>());
         @this.AddScoped<DelegationClient>()
              .AddScoped<IDelegation>(s => s.GetRequiredService<DelegationClient>())
-             .AddScoped<IClientContent>(s => s.GetRequiredService<DelegationClient>())
-             .AddScoped<IClientContentService>(s => s.GetRequiredService<DelegationClient>());
+             .AddScoped<IClientContent>(s => s.GetRequiredService<DelegationClient>());
+            //  .AddScoped<IClientContentService>(s => s.GetRequiredService<DelegationClient>());
 
-        @this.AddSingleton<ICommand, DelegateCommand>();
-        @this.AddSingleton<ICommand, PromoteCommand>();
-        @this.AddSingleton<ICommand, UndelegateCommand>();
+        // @this.AddSingleton<ICommand, DelegateCommand>();
+        // @this.AddSingleton<ICommand, PromoteCommand>();
+        // @this.AddSingleton<ICommand, UndelegateCommand>();
         @this.AddSingleton<ICommand, ValidatorCommand>();
 
         return @this;

@@ -2,11 +2,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
-    <ProjectReference Include="..\..\..\.submodules\lib9c\Lib9c\Lib9c.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Bank\**\*.cs" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Bank\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Bank\Protos\*.proto" GrpcServices="Server">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

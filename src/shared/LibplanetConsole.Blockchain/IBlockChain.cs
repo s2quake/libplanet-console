@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Libplanet.Action.State;
 
 #if LIBPLANET_NODE
 namespace LibplanetConsole.Node;
@@ -49,6 +50,9 @@ public interface IBlockChain
     Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
 
-    Task<FungibleAssetValue> GetBalanceAsync(
-        Address address, Currency currency, CancellationToken cancellationToken);
+#if LIBPLANET_NODE
+    IWorldState GetWorldState() => GetWorldState(Tip.Hash);
+
+    IWorldState GetWorldState(BlockHash offset);
+#endif // LIBPLANET_NODE
 }
