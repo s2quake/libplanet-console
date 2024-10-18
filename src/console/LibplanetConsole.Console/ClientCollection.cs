@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-[Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
     IServiceProvider serviceProvider,
     ApplicationOptions options)

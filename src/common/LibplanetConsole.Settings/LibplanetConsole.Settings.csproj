@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="NJsonSchema" Version="11.0.2" >
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.2" >
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="JsonSchema.Net" Version="7.2.3" />
+    <PackageReference Include="JsonSchema.Net.Generation" Version="4.5.1" />
   </ItemGroup>
 
   <ItemGroup>

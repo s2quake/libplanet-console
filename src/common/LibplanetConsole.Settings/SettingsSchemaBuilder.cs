@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
-using Namotion.Reflection;
-using NJsonSchema;
-using NJsonSchema.Generation;
+using System.Text.Json.Serialization;
+using Json.Schema;
+using Json.Schema.Generation;
 
 namespace LibplanetConsole.Settings;
 
@@ -40,57 +40,65 @@ public class SettingsSchemaBuilder
 
     public string Build()
     {
-        var schema = new JsonSchema();
-        var optionsSchema = new JsonSchema
-        {
-            Type = JsonObjectType.Object,
-        };
+        JsonSchemaBuilder schemaBuilder = new JsonSchemaBuilder();
 
-        schema.AllOf.Add(optionsSchema);
+
+
+        // schema.AllOf.Add(optionsSchema);
         foreach (var (name, type) in _typeByName)
         {
             var settingsName = NamingPolicy.ConvertName(name);
-            var settings = new SystemTextJsonSchemaGeneratorSettings
-            {
-                FlattenInheritanceHierarchy = true,
-                SerializerOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = NamingPolicy,
-                    DictionaryKeyPolicy = NamingPolicy,
-                },
-            };
-            var schemaGenerator = new SettingsSchemaGenerator(this, settings);
-            var typeSchema = schemaGenerator.Generate(type);
-            schema.Definitions[settingsName] = typeSchema;
-            optionsSchema.Properties.Add(settingsName, new JsonSchemaProperty()
-            {
-                Description = GetDescription(type),
-                Reference = typeSchema,
-            });
+            // var settings = new SystemTextJsonSchemaGeneratorSettings
+            // {
+            //     FlattenInheritanceHierarchy = true,
+            //     SerializerOptions = new JsonSerializerOptions
+            //     {
+            //         PropertyNamingPolicy = NamingPolicy,
+            //         DictionaryKeyPolicy = NamingPolicy,
+            //     },
+            // };
+            // var schemaGenerator = new SettingsSchemaGenerator(this, settings);
+            // var typeSchema = schemaGenerator.Generate(type);
+            // schema.Definitions[settingsName] = typeSchema;
+            // optionsSchema.Properties.Add(settingsName, new JsonSchemaProperty()
+            // {
+            //     Description = GetDescription(type),
+            //     Reference = typeSchema,
+            // });
+            var schema = schemaBuilder.FromType(type).Build();
+            schemaBuilder.AdditionalItems(schema);
         }
 
-        foreach (var name in _requiredNameList)
+        // foreach (var name in _requiredNameList)
+        // {
+        //     var settingsName = NamingPolicy.ConvertName(name);
+        //     optionsSchema.RequiredProperties.Add(settingsName);
+        // }
+
+        JsonSerializerOptions SerializerOptions = new()
         {
-            var settingsName = NamingPolicy.ConvertName(name);
-            optionsSchema.RequiredProperties.Add(settingsName);
-        }
-
-        return schema.ToJson();
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        };
+        return JsonSerializer.Serialize(schemaBuilder.Build(), SerializerOptions);
     }
 
-    internal virtual string GetDescription(ContextualType contextualType)
-        => GetDescription(contextualType.Context);
+    // internal virtual string GetDescription(ContextualType contextualType)
+    //     => GetDescription(contextualType.Context);
 
     protected virtual string GetDescription(ICustomAttributeProvider customAttributeProvider)
     {
-        var attriutes = customAttributeProvider.GetCustomAttributes(
-            typeof(DescriptionAttribute), inherit: true);
-        var attriute = attriutes.FirstOrDefault();
-        if (attriute is DescriptionAttribute descriptionAttribute)
-        {
-            return descriptionAttribute.Description;
-        }
+        // var attriutes = customAttributeProvider.GetCustomAttributes(
+        //     typeof(DescriptionAttribute), inherit: true);
+        // var attriute = attriutes.FirstOrDefault();
+        // if (attriute is DescriptionAttribute descriptionAttribute)
+        // {
+        //     return descriptionAttribute.Description;
+        // }
 
-        return $"'{customAttributeProvider}' does not have a description.";
+        // return $"'{customAttributeProvider}' does not have a description.";
+
+        return string.Empty;
     }
 }
