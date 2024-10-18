@@ -65,8 +65,9 @@ public class SettingsSchemaBuilder
             //     Description = GetDescription(type),
             //     Reference = typeSchema,
             // });
+
             var schema = schemaBuilder.FromType(type).Build();
-            schemaBuilder.AdditionalItems(schema);
+            schemaBuilder.AdditionalProperties(schema);
         }
 
         // foreach (var name in _requiredNameList)
