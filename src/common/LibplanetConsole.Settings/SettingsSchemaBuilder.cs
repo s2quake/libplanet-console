@@ -43,7 +43,6 @@ public class SettingsSchemaBuilder
         JsonSchemaBuilder schemaBuilder = new JsonSchemaBuilder();
 
 
-
         // schema.AllOf.Add(optionsSchema);
         foreach (var (name, type) in _typeByName)
         {
@@ -66,15 +65,22 @@ public class SettingsSchemaBuilder
             //     Reference = typeSchema,
             // });
 
-            var schema = schemaBuilder.FromType(type).Build();
-            schemaBuilder.AdditionalProperties(schema);
+            var configuration = new SchemaGeneratorConfiguration();
+            {
+
+            }
+
+            var schema = new JsonSchemaBuilder().FromType(type).Build();
+            schema.Keywords
+            schemaBuilder.Definitions((settingsName, schema));
+            // schemaBuilder.AllOf(schema);
         }
 
-        // foreach (var name in _requiredNameList)
-        // {
-        //     var settingsName = NamingPolicy.ConvertName(name);
-        //     optionsSchema.RequiredProperties.Add(settingsName);
-        // }
+        foreach (var name in _requiredNameList)
+        {
+            var settingsName = NamingPolicy.ConvertName(name);
+            schemaBuilder.Required(settingsName);
+        }
 
         JsonSerializerOptions SerializerOptions = new()
         {
