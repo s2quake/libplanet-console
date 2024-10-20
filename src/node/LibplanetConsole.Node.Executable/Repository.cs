@@ -1,4 +1,5 @@
 using System.Dynamic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Framework;
@@ -11,6 +12,10 @@ public sealed record class Repository
 {
     public const string SettingsFileName = "appsettings.json";
     public const string SettingsSchemaFileName = "appsettings-schema.json";
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+    };
 
     public required int Port { get; init; }
 

@@ -11,7 +11,7 @@ namespace LibplanetConsole.Options;
 
 public class OptionsSchemaBuilder
 {
-    internal static readonly JsonNamingPolicy NamingPolicy = JsonNamingPolicy.CamelCase;
+    // internal static readonly JsonNamingPolicy NamingPolicy = JsonNamingPolicy.CamelCase;
     private readonly Dictionary<string, Type> _typeByName = [];
     private readonly List<string> _requiredNameList = [];
 
@@ -85,14 +85,15 @@ public class OptionsSchemaBuilder
         schema.AllOf.Add(optionsSchema);
         foreach (var (name, type) in _typeByName)
         {
-            var settingsName = NamingPolicy.ConvertName(name);
+            // var settingsName = NamingPolicy.ConvertName(name);
+            var settingsName = name;
             var settings = new SystemTextJsonSchemaGeneratorSettings
             {
                 FlattenInheritanceHierarchy = true,
                 SerializerOptions = new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = NamingPolicy,
-                    DictionaryKeyPolicy = NamingPolicy,
+                    // PropertyNamingPolicy = NamingPolicy,
+                    // DictionaryKeyPolicy = NamingPolicy,
                 },
             };
             var schemaGenerator = new OptionsSchemaGenerator(this, settings);
@@ -107,7 +108,8 @@ public class OptionsSchemaBuilder
 
         foreach (var name in _requiredNameList)
         {
-            var settingsName = NamingPolicy.ConvertName(name);
+            // var settingsName = NamingPolicy.ConvertName(name);
+            var settingsName = name;
             optionsSchema.RequiredProperties.Add(settingsName);
         }
 

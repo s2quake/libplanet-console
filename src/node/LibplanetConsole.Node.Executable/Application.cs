@@ -4,6 +4,7 @@ using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace LibplanetConsole.Node.Executable;
@@ -27,29 +28,40 @@ internal sealed class Application
             s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
     ];
 
-    public Application(ApplicationOptions options)
+    public Application()
     {
-        var port = options.Port;
+
+    }
+
+    public Application(string repositoryPath)
+    {
+        // var port = options.Port;
         var services = _builder.Services;
-        foreach (var instance in instances)
-        {
-            services.AddSingleton(instance.GetType(), instance);
-        }
+        var configuration = _builder.Configuration;
 
-        _builder.WebHost.ConfigureKestrel(options =>
+        var options = new WebApplicationOptions
         {
-            options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
-        });
+            ContentRootPath = repositoryPath,
+        };
 
-        if (options.LogPath != string.Empty)
-        {
-            services.AddLogging(options.LogPath, "node.log", _filters);
-        }
-        else
-        {
-            services.AddLogging(_traceFilters);
-        }
+        _builder = WebApplication.CreateBuilder(options);
+
+
+        // _builder.WebHost.ConfigureKestrel(options =>
+        // {
+        //     options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+        //     options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+        // });
+
+        // if (options.LogPath != string.Empty)
+        // {
+        //     services.AddLogging(options.LogPath, "node.log", _filters);
+        // }
+        // else
+        // {
+        //     services.AddLogging(_traceFilters);
+        // }
+
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
@@ -59,7 +71,7 @@ internal sealed class Application
         services.AddSingleton<VersionCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
-        services.AddNode(options);
+        services.AddNode(configuration);
         services.AddExplorer(_builder.Configuration);
         services.AddEvidence();
 
@@ -70,6 +82,8 @@ internal sealed class Application
         services.AddHostedService<NodeEventTracer>();
         services.AddHostedService<SystemTerminalHostedService>();
     }
+
+    public IServiceCollection Services => _builder.Services;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {

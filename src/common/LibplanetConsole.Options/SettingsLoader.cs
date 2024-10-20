@@ -21,7 +21,7 @@ public static class SettingsLoader
 
         var jso = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = OptionsSchemaBuilder.NamingPolicy,
+            // PropertyNamingPolicy = OptionsSchemaBuilder.NamingPolicy,
         };
         var directory = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings path.", nameof(settingsPath));
@@ -30,7 +30,8 @@ public static class SettingsLoader
         {
             var settingsName = item.Key;
             var settings = item.Value;
-            var jsonName = OptionsSchemaBuilder.NamingPolicy.ConvertName(settingsName);
+            // var jsonName = OptionsSchemaBuilder.NamingPolicy.ConvertName(settingsName);
+            var jsonName = settingsName;
             if (obj.TryGetValue(jsonName, out var value) is true)
             {
                 Load(settings, value, jso);

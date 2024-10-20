@@ -3,11 +3,12 @@ using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
 using LibplanetConsole.Options;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
 [CommandSummary("Start the Libplanet node with settings.")]
-internal sealed class StartCommand : CommandAsyncBase
+internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
     private readonly ApplicationSettingsCollection _settingsCollection = new();
 
@@ -34,14 +35,15 @@ internal sealed class StartCommand : CommandAsyncBase
     {
         try
         {
-            var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            var applicationSettings = Load(settingsPath) with
-            {
-                ParentProcessId = ParentProcessId,
-                NoREPL = NoREPL,
-            };
-            var applicationOptions = applicationSettings.ToOptions();
-            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            // var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
+            // var applicationSettings = Load(settingsPath) with
+            // {
+            //     ParentProcessId = ParentProcessId,
+            //     NoREPL = NoREPL,
+            // };
+            // var applicationOptions = applicationSettings.ToOptions();
+            var application = new Application(RepositoryPath);
+            application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
@@ -49,6 +51,11 @@ internal sealed class StartCommand : CommandAsyncBase
             e.Print(Console.Out);
             Environment.Exit(1);
         }
+    }
+
+    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
+    {
+        throw new NotImplementedException();
     }
 
     private ApplicationSettings Load(string settingsPath)
