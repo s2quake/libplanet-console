@@ -6,6 +6,7 @@ using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Configuration.Json;
 
 namespace LibplanetConsole.Node.Executable;
 
