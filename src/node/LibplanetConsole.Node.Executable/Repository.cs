@@ -2,14 +2,15 @@ using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Options;
 using static LibplanetConsole.Common.PathUtility;
 
 namespace LibplanetConsole.Node.Executable;
 
 public sealed record class Repository
 {
-    public const string SettingsFileName = "node-settings.json";
-    public const string SettingsSchemaFileName = "node-settings-schema.json";
+    public const string SettingsFileName = "appsettings.json";
+    public const string SettingsSchemaFileName = "appsettings-schema.json";
 
     public required int Port { get; init; }
 
@@ -51,7 +52,7 @@ public sealed record class Repository
         var privateKey = PrivateKey;
         var settingsPath = Path.Combine(repositoryPath, SettingsFileName);
         var schemaPath = Path.Combine(repositoryPath, SettingsSchemaFileName);
-        var schemaBuilder = new ApplicationSettingsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var schema = schemaBuilder.Build();
 
         EnsureDirectory(repositoryPath);

@@ -1,4 +1,4 @@
-namespace LibplanetConsole.Framework;
+namespace LibplanetConsole.Common;
 
 public static class DependencyUtility
 {

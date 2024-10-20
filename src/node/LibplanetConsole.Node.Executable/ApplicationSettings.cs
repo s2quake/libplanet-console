@@ -97,16 +97,19 @@ internal sealed record class ApplicationSettings
         var port = Port == 0 ? PortUtility.NextPort() : Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
-        var actionProvider = ModuleLoader.LoadActionLoader(
-            ActionProviderModulePath, ActionProviderType);
-        return new ApplicationOptions(port, privateKey, genesis)
+        return new ApplicationOptions()
         {
+            Port = port,
+            PrivateKey = privateKey,
+            GenesisPath = GenesisPath,
+            Genesis = Genesis,
             ParentProcessId = ParentProcessId,
             SeedEndPoint = GetSeedEndPoint(),
             StorePath = GetFullPath(StorePath),
             LogPath = GetFullPath(LogPath),
             NoREPL = NoREPL,
-            ActionProvider = actionProvider,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         };
 
         static string GetFullPath(string path)

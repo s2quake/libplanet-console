@@ -98,8 +98,9 @@ internal sealed record class ApplicationSettings
         var clientOptions = GetClientOptions(nodeOptions, GetClients(), portGenerator);
         var repository = new Repository(port, nodeOptions, clientOptions);
         var genesis = TryGetGenesis(out var g) == true ? g : repository.Genesis;
-        return new ApplicationOptions(port)
+        return new ApplicationOptions()
         {
+            Port = port,
             LogPath = GetFullPath(LogPath),
             Nodes = repository.Nodes,
             Clients = repository.Clients,

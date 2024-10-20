@@ -1,7 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Settings;
+using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -23,14 +23,18 @@ internal sealed class StartCommand : CommandAsyncBase
             var repositoryPath = Path.GetFullPath(RepositoryPath);
             var settingsPath = resolver.GetSettingsPath(repositoryPath);
             var applicationSettings = Load(settingsPath);
-            var applicationOptions = applicationSettings.ToOptions() with
-            {
-                Nodes = Repository.LoadNodeOptions(repositoryPath, resolver),
-                Clients = Repository.LoadClientOptions(repositoryPath, resolver),
-                LogPath = applicationSettings.LogPath,
-            };
+            // var configurationBuilder = new ConfigurationBinder()
+            //     .SetBasePath(Directory.GetCurrentDirectory())
+            //     .AddJsonFile(configFilePath, optional: false, reloadOnChange: true)
+            //     .Build();
+            // var applicationOptions = applicationSettings.ToOptions() with
+            // {
+            //     Nodes = Repository.LoadNodeOptions(repositoryPath, resolver),
+            //     Clients = Repository.LoadClientOptions(repositoryPath, resolver),
+            //     LogPath = applicationSettings.LogPath,
+            // };
 
-            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            var application = new Application();
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)

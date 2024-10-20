@@ -8,19 +8,19 @@ public class RepositoryPathResolver
         => Path.Combine(repositoryPath, "genesis");
 
     public virtual string GetSettingsSchemaPath(string repositoryPath)
-        => Path.Combine(repositoryPath, "settings-schema.json");
+        => Path.Combine(repositoryPath, "appsettings-schema.json");
 
     public virtual string GetSettingsPath(string repositoryPath)
-        => Path.Combine(repositoryPath, "settings.json");
+        => Path.Combine(repositoryPath, "appsettings.json");
 
     public virtual string GetNodesPath(string repositoryPath)
         => Path.Combine(repositoryPath, "nodes");
 
     public virtual string GetNodeSettingsSchemaPath(string nodesPath)
-        => Path.Combine(nodesPath, "node-settings-schema.json");
+        => Path.Combine(nodesPath, "appsettings-schema.json");
 
     public virtual string GetNodeSettingsPath(string nodePath, PrivateKey privateKey)
-        => Path.Combine(nodePath, "node-settings.json");
+        => Path.Combine(nodePath, "appsettings.json");
 
     public virtual string GetNodePath(string nodesPath, PrivateKey privateKey)
         => Path.Combine(nodesPath, PrivateKeyUtility.ToString(privateKey));
@@ -35,10 +35,10 @@ public class RepositoryPathResolver
         => Path.Combine(repositoryPath, "clients");
 
     public virtual string GetClientSettingsSchemaPath(string clientsPath)
-        => Path.Combine(clientsPath, "client-settings-schema.json");
+        => Path.Combine(clientsPath, "appsettings-schema.json");
 
     public virtual string GetClientSettingsPath(string clientPath, PrivateKey privateKey)
-        => Path.Combine(clientPath, "client-settings.json");
+        => Path.Combine(clientPath, "appsettings.json");
 
     public virtual string GetClientPath(string clientsPath, PrivateKey privateKey)
         => Path.Combine(clientsPath, PrivateKeyUtility.ToString(privateKey));

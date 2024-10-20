@@ -19,29 +19,30 @@ internal sealed class Application
         new PrefixFilter("app", "LibplanetConsole."),
     ];
 
-    public Application(ApplicationOptions options, object[] instances)
+    public Application()
     {
-        var port = options.Port;
+        // var port = options.Port;
         var services = _builder.Services;
-        foreach (var instance in instances)
-        {
-            services.AddSingleton(instance.GetType(), instance);
-        }
+        var configuration = _builder.Configuration;
+        // foreach (var instance in instances)
+        // {
+        //     services.AddSingleton(instance.GetType(), instance);
+        // }
 
         _builder.WebHost.ConfigureKestrel(options =>
         {
-            options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+            // options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+            // options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
         });
 
-        if (options.LogPath != string.Empty)
-        {
-            services.AddLogging(options.LogPath, "client.log", _filters);
-        }
-        else
-        {
-            services.AddLogging(_traceFilters);
-        }
+        // if (options.LogPath != string.Empty)
+        // {
+        //     services.AddLogging(options.LogPath, "client.log", _filters);
+        // }
+        // else
+        // {
+        //     services.AddLogging(_traceFilters);
+        // }
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
@@ -51,7 +52,7 @@ internal sealed class Application
         services.AddSingleton<VersionCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
-        services.AddClient(options);
+        services.AddClient(configuration);
 
         services.AddGrpc();
         services.AddGrpcReflection();

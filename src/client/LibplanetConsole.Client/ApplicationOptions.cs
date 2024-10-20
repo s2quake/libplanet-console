@@ -1,16 +1,12 @@
+using LibplanetConsole.Options;
+
 namespace LibplanetConsole.Client;
 
-public sealed record class ApplicationOptions
+public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
 {
-    public ApplicationOptions(int port, PrivateKey privateKey)
-    {
-        Port = port;
-        PrivateKey = privateKey;
-    }
+    public required int Port { get; init; }
 
-    public int Port { get; }
-
-    public PrivateKey PrivateKey { get; }
+    public required PrivateKey PrivateKey { get; init; }
 
     public int ParentProcessId { get; init; }
 

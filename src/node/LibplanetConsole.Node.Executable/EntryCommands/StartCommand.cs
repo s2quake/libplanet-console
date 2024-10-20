@@ -2,7 +2,7 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Settings;
+using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 

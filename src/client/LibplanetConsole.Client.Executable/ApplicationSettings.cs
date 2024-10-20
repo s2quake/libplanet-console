@@ -8,7 +8,6 @@ using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable;
 
-[ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
@@ -49,8 +48,10 @@ internal sealed record class ApplicationSettings
     {
         var port = Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        return new ApplicationOptions(port, privateKey)
+        return new ApplicationOptions()
         {
+            Port = port,
+            PrivateKey = privateKey,
             ParentProcessId = ParentProcessId,
             NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),
             LogPath = GetFullPath(LogPath),

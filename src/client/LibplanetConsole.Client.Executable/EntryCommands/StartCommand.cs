@@ -2,14 +2,14 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Framework;
-using LibplanetConsole.Settings;
+using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
 [CommandSummary("Start the Libplanet client with settings.")]
 internal sealed class StartCommand : CommandAsyncBase
 {
-    private static readonly ApplicationSettingsCollection _settingsCollection = new();
+    // private static readonly ApplicationSettingsCollection _settingsCollection = new();
 
     [CommandPropertyRequired]
     [CommandSummary("The path of the repository.")]
@@ -29,14 +29,14 @@ internal sealed class StartCommand : CommandAsyncBase
     {
         try
         {
-            var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            var applicationSettings = Load(settingsPath) with
-            {
-                ParentProcessId = ParentProcessId,
-                NoREPL = NoREPL,
-            };
-            var applicationOptions = applicationSettings.ToOptions();
-            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            // var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
+            // var applicationSettings = Load(settingsPath) with
+            // {
+            //     ParentProcessId = ParentProcessId,
+            //     NoREPL = NoREPL,
+            // };
+            // var applicationOptions = applicationSettings.ToOptions();
+            var application = new Application();
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
@@ -46,9 +46,9 @@ internal sealed class StartCommand : CommandAsyncBase
         }
     }
 
-    private static ApplicationSettings Load(string settingsPath)
-    {
-        SettingsLoader.Load(settingsPath, _settingsCollection.ToDictionary());
-        return _settingsCollection.Peek<ApplicationSettings>();
-    }
+    // private static ApplicationSettings Load(string settingsPath)
+    // {
+    //     SettingsLoader.Load(settingsPath, _settingsCollection.ToDictionary());
+    //     return _settingsCollection.Peek<ApplicationSettings>();
+    // }
 }

@@ -47,9 +47,10 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _privateKey = options.PrivateKey.ToSecureString();
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
-        _actionProvider = options.ActionProvider ?? ActionProvider.Default;
+        _actionProvider = ModuleLoader.LoadActionLoader(
+            options.ActionProviderModulePath, options.ActionProviderType);
         _logger = serviceProvider.GetLogger<Node>();
-        _genesis = options.Genesis;
+        _genesis = options.GetGenesis();
         _blocksyncPort = options.Port + ApplicationOptions.BlocksyncPortIncrement;
         _consensusPort = options.Port + ApplicationOptions.ConsensusPortIncrement;
         UpdateNodeInfo();

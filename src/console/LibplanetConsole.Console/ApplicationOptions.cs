@@ -1,16 +1,13 @@
+using LibplanetConsole.Options;
+
 namespace LibplanetConsole.Console;
 
-public sealed record class ApplicationOptions
+public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
 {
     public const int SeedBlocksyncPortIncrement = 6;
     public const int SeedConsensusPortIncrement = 7;
 
-    public ApplicationOptions(int port)
-    {
-        Port = port;
-    }
-
-    public int Port { get; }
+    public required int Port { get; init; }
 
     public NodeOptions[] Nodes { get; init; } = [];
 

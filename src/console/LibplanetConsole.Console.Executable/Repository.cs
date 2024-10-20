@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Framework;
+using LibplanetConsole.Options;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable;
@@ -198,7 +199,7 @@ public sealed record class Repository
 
     private static void SaveSettingsSchema(string schemaPath)
     {
-        var schemaBuilder = new ApplicationSettingsSchemaBuilder();
+        var schemaBuilder = new OptionsSchemaBuilder();
         var schema = schemaBuilder.Build();
         File.WriteAllLines(schemaPath, [schema]);
     }

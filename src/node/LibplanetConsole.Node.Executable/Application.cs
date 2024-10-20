@@ -27,7 +27,7 @@ internal sealed class Application
             s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
     ];
 
-    public Application(ApplicationOptions options, object[] instances)
+    public Application(ApplicationOptions options)
     {
         var port = options.Port;
         var services = _builder.Services;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using JSSoft.Commands;
-using LibplanetConsole.Settings;
+using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Framework;
 
