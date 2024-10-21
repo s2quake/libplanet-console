@@ -1,44 +1,29 @@
 using JSSoft.Commands;
-using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Configuration.Json;
 
 namespace LibplanetConsole.Node.Executable;
 
 internal sealed class Application
 {
-    private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
-
+    private readonly WebApplicationBuilder _builder;
 
     public Application()
+        : this(Create(null))
     {
-
     }
 
     public Application(string repositoryPath)
+        : this(Create(repositoryPath))
     {
-        // var port = options.Port;
-        var options = new WebApplicationOptions
-        {
-            ContentRootPath = repositoryPath,
-        };
-        var builder = WebApplication.CreateBuilder(options);
+    }
+
+    private Application(WebApplicationBuilder builder)
+    {
         var services = builder.Services;
         var configuration = builder.Configuration;
-
-        // _builder.WebHost.ConfigureKestrel(options =>
-        // {
-        //     options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-        //     options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
-        // });
-
-
-
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
@@ -49,7 +34,7 @@ internal sealed class Application
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
         services.AddNode(configuration);
-        services.AddExplorer(_builder.Configuration);
+        services.AddExplorer(configuration);
         services.AddEvidence();
 
         services.AddGrpc();
@@ -79,4 +64,13 @@ internal sealed class Application
         await app.RunAsync(cancellationToken);
     }
 
+    private static WebApplicationBuilder Create(string? repositoryPath)
+    {
+        var options = new WebApplicationOptions
+        {
+            ContentRootPath = repositoryPath,
+        };
+
+        return WebApplication.CreateBuilder(options);
+    }
 }

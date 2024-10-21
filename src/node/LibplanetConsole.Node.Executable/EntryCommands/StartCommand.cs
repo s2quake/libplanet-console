@@ -1,8 +1,6 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Options;
 using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
@@ -10,8 +8,6 @@ namespace LibplanetConsole.Node.Executable.EntryCommands;
 [CommandSummary("Start the Libplanet node with settings.")]
 internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
-    private readonly ApplicationSettingsCollection _settingsCollection = new();
-
     [CommandPropertyRequired]
     [CommandSummary("The path of the repository.")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
@@ -31,17 +27,16 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
                     "Instead, it waits for the user to start it manually.")]
     public bool ManualStart { get; init; } = false;
 
+    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
+    {
+        options.ParentProcessId = ParentProcessId;
+        options.NoREPL = NoREPL;
+    }
+
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         try
         {
-            // var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            // var applicationSettings = Load(settingsPath) with
-            // {
-            //     ParentProcessId = ParentProcessId,
-            //     NoREPL = NoREPL,
-            // };
-            // var applicationOptions = applicationSettings.ToOptions();
             var application = new Application(RepositoryPath);
             application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
@@ -51,16 +46,5 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             e.Print(Console.Out);
             Environment.Exit(1);
         }
-    }
-
-    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
-    {
-        throw new NotImplementedException();
-    }
-
-    private ApplicationSettings Load(string settingsPath)
-    {
-        SettingsLoader.Load(settingsPath, _settingsCollection.ToDictionary());
-        return _settingsCollection.Peek<ApplicationSettings>();
     }
 }

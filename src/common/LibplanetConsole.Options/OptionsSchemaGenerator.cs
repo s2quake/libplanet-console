@@ -34,6 +34,17 @@ internal sealed class OptionsSchemaGenerator(
         schema.Description ??= schemaBuilder.GetDescription(contextualType);
     }
 
+    public override void Generate<TSchemaType>(
+        TSchemaType schema, ContextualType contextualType, JsonSchemaResolver schemaResolver)
+    {
+        base.Generate(schema, contextualType, schemaResolver);
+        if (contextualType.Name == "PrivateKey"
+            || contextualType.Name == "EndPoint")
+        {
+            schema.Type = JsonObjectType.String;
+        }
+    }
+
     protected override void GenerateEnum(JsonSchema schema, JsonTypeDescription typeDescription)
     {
         var contextualType = typeDescription.ContextualType;
@@ -52,17 +63,6 @@ internal sealed class OptionsSchemaGenerator(
         {
             schema.Description = (schema.Description + "\n\n" +
                 string.Join("\n", schema.EnumerationNames)).Trim();
-        }
-    }
-
-    public override void Generate<TSchemaType>(
-        TSchemaType schema, ContextualType contextualType, JsonSchemaResolver schemaResolver)
-    {
-        base.Generate(schema, contextualType, schemaResolver);
-        if (contextualType.Name == "PrivateKey"
-            || contextualType.Name == "EndPoint")
-        {
-            schema.Type = JsonObjectType.String;
         }
     }
 }

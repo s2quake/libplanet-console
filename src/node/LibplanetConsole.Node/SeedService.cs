@@ -1,10 +1,14 @@
 using LibplanetConsole.Seed;
+using Microsoft.Extensions.Options;
+using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
-internal sealed class SeedService(ApplicationOptions options) : ISeedService
+internal sealed class SeedService(IOptions<ApplicationOptions> options) : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
+    private readonly ApplicationOptions _options = options.Value;
+    private readonly bool _isEnabled = GetEnabled(options);
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
 
@@ -31,15 +35,20 @@ internal sealed class SeedService(ApplicationOptions options) : ISeedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        if (_isEnabled is false)
+        {
+            throw new InvalidOperationException("SeedService is disabled.");
+        }
+
         var blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            Port = options.Port + ApplicationOptions.SeedBlocksyncPortIncrement,
+            Port = _options.Port + ApplicationOptions.SeedBlocksyncPortIncrement,
         });
         var consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            Port = options.Port + ApplicationOptions.SeedConsensusPortIncrement,
+            Port = _options.Port + ApplicationOptions.SeedConsensusPortIncrement,
         });
         await blocksyncSeedNode.StartAsync(cancellationToken);
         await consensusSeedNode.StartAsync(cancellationToken);
@@ -49,6 +58,11 @@ internal sealed class SeedService(ApplicationOptions options) : ISeedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        if (_isEnabled is false)
+        {
+            throw new InvalidOperationException("SeedService is disabled.");
+        }
+
         if (_blocksyncSeedNode is not null)
         {
             await _blocksyncSeedNode.StopAsync(cancellationToken: default);
@@ -60,5 +74,12 @@ internal sealed class SeedService(ApplicationOptions options) : ISeedService
             await _consensusSeedNode.StopAsync(cancellationToken: default);
             _consensusSeedNode = null;
         }
+    }
+
+    private static bool GetEnabled(IOptions<ApplicationOptions> options)
+    {
+        var value = options.Value;
+        var localHost = GetLocalHost(value.Port);
+        return CompareEndPoint(value.SeedEndPoint, localHost);
     }
 }

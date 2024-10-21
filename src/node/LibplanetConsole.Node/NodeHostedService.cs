@@ -1,16 +1,19 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;
 
 internal sealed class NodeHostedService(
-    IServiceProvider serviceProvider, Node node, ApplicationOptions options)
+    IServiceProvider serviceProvider, Node node, IOptions<ApplicationOptions> options)
     : IHostedService
 {
+    private readonly ApplicationOptions _options = options.Value;
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         node.Contents = [.. serviceProvider.GetServices<INodeContent>()];
-        if (options.SeedEndPoint is { } seedEndPoint)
+        if (_options.SeedEndPoint is { } seedEndPoint)
         {
             node.SeedEndPoint = seedEndPoint;
             await node.StartAsync(cancellationToken);

@@ -92,25 +92,21 @@ internal sealed record class ApplicationSettings
     [DefaultValue("")]
     public string ActionProviderType { get; set; } = string.Empty;
 
-    public ApplicationOptions ToOptions()
+    public void ToOptions(ApplicationOptions options)
     {
         var port = Port == 0 ? PortUtility.NextPort() : Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
-        return new ApplicationOptions()
-        {
-            Port = port,
-            PrivateKey = privateKey,
-            GenesisPath = GenesisPath,
-            Genesis = Genesis,
-            ParentProcessId = ParentProcessId,
-            SeedEndPoint = GetSeedEndPoint(),
-            StorePath = GetFullPath(StorePath),
-            LogPath = GetFullPath(LogPath),
-            NoREPL = NoREPL,
-            ActionProviderModulePath = ActionProviderModulePath,
-            ActionProviderType = ActionProviderType,
-        };
+        options.Port = port;
+        options.PrivateKey = privateKey;
+        options.GenesisPath = GenesisPath;
+        options.Genesis = Genesis;
+        options.ParentProcessId = ParentProcessId;
+        options.SeedEndPoint = GetSeedEndPoint();
+        options.StorePath = GetFullPath(StorePath);
+        options.LogPath = GetFullPath(LogPath);
+        options.NoREPL = NoREPL;
+        options.ActionProviderModulePath = ActionProviderModulePath;
+        options.ActionProviderType = ActionProviderType;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
@@ -124,36 +120,5 @@ internal sealed record class ApplicationSettings
 
             return IsSingleNode is true ? GetLocalHost(port) : null;
         }
-    }
-
-    private static byte[] CreateGenesis(PrivateKey privateKey)
-    {
-        var genesisOptions = new GenesisOptions
-        {
-            GenesisKey = privateKey,
-            Validators = [privateKey.PublicKey],
-            Timestamp = DateTimeOffset.UtcNow,
-        };
-        var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
-        return BlockUtility.SerializeBlock(genesisBlock);
-    }
-
-    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
-    {
-        if (GenesisPath != string.Empty)
-        {
-            var lines = File.ReadAllLines(GenesisPath);
-            genesis = ByteUtil.ParseHex(lines[0]);
-            return true;
-        }
-
-        if (Genesis != string.Empty)
-        {
-            genesis = ByteUtil.ParseHex(Genesis);
-            return true;
-        }
-
-        genesis = null!;
-        return false;
     }
 }

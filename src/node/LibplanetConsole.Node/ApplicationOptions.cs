@@ -16,11 +16,11 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
     public const int SeedBlocksyncPortIncrement = 6;
     public const int SeedConsensusPortIncrement = 7;
 
-    public required int Port { get; init; }
+    public int Port { get; set; }
 
     [PrivateKey]
     [JsonConverter(typeof(PrivateKeyJsonConverter))]
-    public required PrivateKey PrivateKey { get; init; }
+    public PrivateKey PrivateKey { get; set; } = new PrivateKey();
 
     public string GenesisPath { get; set; } = string.Empty;
 
@@ -28,18 +28,18 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
     public string Genesis { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public int ParentProcessId { get; init; }
+    public int ParentProcessId { get; set; }
 
     [EndPoint]
     [JsonConverter(typeof(EndPointJsonConverter))]
-    public EndPoint? SeedEndPoint { get; init; }
+    public EndPoint? SeedEndPoint { get; set; }
 
-    public string StorePath { get; init; } = string.Empty;
+    public string StorePath { get; set; } = string.Empty;
 
     public string LogPath { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public bool NoREPL { get; init; }
+    public bool NoREPL { get; set; }
 
     public string ActionProviderModulePath { get; set; } = string.Empty;
 

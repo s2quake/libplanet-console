@@ -2,6 +2,7 @@ using System.Diagnostics;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable;
 
@@ -9,17 +10,18 @@ internal sealed class SystemTerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
     CommandContext commandContext,
     SystemTerminal terminal,
-    ApplicationOptions options,
+    IOptions<ApplicationOptions> options,
     ILogger<SystemTerminalHostedService> logger)
     : IHostedService
 {
+    private readonly ApplicationOptions _options = options.Value;
     private Task _waitInputTask = Task.CompletedTask;
     private Task _waitForExitTask = Task.CompletedTask;
     private int _parentProcessId;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (options.NoREPL is false)
+        if (_options.NoREPL is false)
         {
             var sw = new StringWriter();
             commandContext.Out = sw;
@@ -29,18 +31,18 @@ internal sealed class SystemTerminalHostedService(
             await commandContext.ExecuteAsync(args: [], cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
-            await sw.WriteLineIfAsync(GetStartupCondition(options), GetStartupMessage());
+            await sw.WriteLineIfAsync(GetStartupCondition(_options), GetStartupMessage());
             await Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
         }
-        else if (options.ParentProcessId != 0 &&
-            Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
+        else if (_options.ParentProcessId != 0 &&
+            Process.GetProcessById(_options.ParentProcessId) is { } parentProcess)
         {
-            _parentProcessId = options.ParentProcessId;
+            _parentProcessId = _options.ParentProcessId;
             _waitForExitTask = WaitForExit(parentProcess);
         }
-        else if (options.ParentProcessId == 0)
+        else if (_options.ParentProcessId == 0)
         {
             _waitInputTask = WaitInputAsync();
         }

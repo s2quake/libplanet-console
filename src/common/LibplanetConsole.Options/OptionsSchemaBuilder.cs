@@ -86,6 +86,10 @@ public class OptionsSchemaBuilder
         };
 
         schema.Definitions["appsettings"] = originSchema;
+        schema.AllOf.Add(new JsonSchema
+        {
+            Reference = originSchema,
+        });
         schema.AllOf.Add(optionsSchema);
         foreach (var (name, type) in _typeByName)
         {

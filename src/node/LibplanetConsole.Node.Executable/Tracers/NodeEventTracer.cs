@@ -1,5 +1,6 @@
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.Tracers;
 
@@ -8,9 +9,9 @@ internal sealed class NodeEventTracer : IHostedService, IDisposable
     private readonly ApplicationOptions _options;
     private readonly INode _node;
 
-    public NodeEventTracer(ApplicationOptions options, INode node)
+    public NodeEventTracer(INode node, IOptions<ApplicationOptions> options)
     {
-        _options = options;
+        _options = options.Value;
         _node = node;
         _node.Started += Node_Started;
         _node.Stopped += Node_Stopped;

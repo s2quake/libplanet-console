@@ -14,6 +14,7 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;
 
@@ -25,6 +26,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         = SynchronizationContext.Current!;
 
     private readonly IServiceProvider _serviceProvider;
+    private readonly ApplicationOptions _options;
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
     private readonly ILogger _logger;
@@ -40,19 +42,20 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private INodeContent[]? _contents;
     private bool _isDisposed;
 
-    public Node(IServiceProvider serviceProvider, ApplicationOptions options)
+    public Node(IServiceProvider serviceProvider, IOptions<ApplicationOptions> options)
     {
         _serviceProvider = serviceProvider;
-        _seedEndPoint = options.SeedEndPoint;
-        _privateKey = options.PrivateKey.ToSecureString();
-        _storePath = options.StorePath;
-        PublicKey = options.PrivateKey.PublicKey;
+        _options = options.Value;
+        _seedEndPoint = _options.SeedEndPoint;
+        _privateKey = _options.PrivateKey.ToSecureString();
+        _storePath = _options.StorePath;
+        PublicKey = _options.PrivateKey.PublicKey;
         _actionProvider = ModuleLoader.LoadActionLoader(
-            options.ActionProviderModulePath, options.ActionProviderType);
+            _options.ActionProviderModulePath, _options.ActionProviderType);
         _logger = serviceProvider.GetLogger<Node>();
-        _genesis = options.GetGenesis();
-        _blocksyncPort = options.Port + ApplicationOptions.BlocksyncPortIncrement;
-        _consensusPort = options.Port + ApplicationOptions.ConsensusPortIncrement;
+        _genesis = _options.GetGenesis();
+        _blocksyncPort = _options.Port + ApplicationOptions.BlocksyncPortIncrement;
+        _consensusPort = _options.Port + ApplicationOptions.ConsensusPortIncrement;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
     }
