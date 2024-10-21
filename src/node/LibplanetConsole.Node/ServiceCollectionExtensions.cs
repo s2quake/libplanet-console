@@ -1,5 +1,6 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Configuration;
@@ -10,10 +11,28 @@ namespace LibplanetConsole.Node;
 
 public static class ServiceCollectionExtensions
 {
+    private static readonly LoggingFilter[] _filters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
+        new PrefixFilter("libplanet.log", "Libplanet."),
+    ];
+
+    private static readonly LoggingFilter[] _traceFilters =
+    [
+        new SourceContextFilter(
+            "app.log",
+            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
+    ];
+
     public static IServiceCollection AddNode(
         this IServiceCollection @this, IConfiguration configuration)
     {
         var synchronizationContext = SynchronizationContext.Current ?? new();
+        var logPath = GetLogPath(configuration);
+        // var logPath = GetLogPath(configuration);
 
         // var localHost = GetLocalHost(options.Port);
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
@@ -22,6 +41,15 @@ public static class ServiceCollectionExtensions
                 .Bind(configuration.GetSection("Application"));
 
         @this.AddSingleton(synchronizationContext);
+
+        if (logPath != string.Empty)
+        {
+            @this.AddLogging(logPath, "node.log", _filters);
+        }
+        else
+        {
+            @this.AddLogging(_traceFilters);
+        }
         // @this.AddSingleton(options);
         // if (CompareEndPoint(options.SeedEndPoint, localHost) is true)
         // {
@@ -49,7 +77,6 @@ public static class ServiceCollectionExtensions
         return @this;
     }
 
-    public static bool IsOptionsEnabled(
-        this IConfiguration configuration, string name)
-        => configuration.GetValue<bool>($"{name}:IsEnabled");
+    private static string GetLogPath(IConfiguration configuration)
+        => configuration.GetValue<string>($"{ApplicationOptions.Position}:LogPath") ?? string.Empty;
 }

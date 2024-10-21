@@ -13,21 +13,7 @@ namespace LibplanetConsole.Node.Executable;
 internal sealed class Application
 {
     private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
-    private readonly LoggingFilter[] _filters =
-    [
-        new SourceContextFilter(
-            "app.log",
-            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
-        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
-        new PrefixFilter("libplanet.log", "Libplanet."),
-    ];
 
-    private readonly LoggingFilter[] _traceFilters =
-    [
-        new SourceContextFilter(
-            "app.log",
-            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
-    ];
 
     public Application()
     {
@@ -37,16 +23,13 @@ internal sealed class Application
     public Application(string repositoryPath)
     {
         // var port = options.Port;
-        var services = _builder.Services;
-        var configuration = _builder.Configuration;
-
         var options = new WebApplicationOptions
         {
             ContentRootPath = repositoryPath,
         };
-
-        _builder = WebApplication.CreateBuilder(options);
-
+        var builder = WebApplication.CreateBuilder(options);
+        var services = builder.Services;
+        var configuration = builder.Configuration;
 
         // _builder.WebHost.ConfigureKestrel(options =>
         // {
@@ -54,14 +37,7 @@ internal sealed class Application
         //     options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
         // });
 
-        // if (options.LogPath != string.Empty)
-        // {
-        //     services.AddLogging(options.LogPath, "node.log", _filters);
-        // }
-        // else
-        // {
-        //     services.AddLogging(_traceFilters);
-        // }
+
 
 
         services.AddSingleton<CommandContext>();
@@ -82,6 +58,7 @@ internal sealed class Application
         services.AddHostedService<BlockChainEventTracer>();
         services.AddHostedService<NodeEventTracer>();
         services.AddHostedService<SystemTerminalHostedService>();
+        _builder = builder;
     }
 
     public IServiceCollection Services => _builder.Services;
@@ -101,4 +78,5 @@ internal sealed class Application
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);
     }
+
 }

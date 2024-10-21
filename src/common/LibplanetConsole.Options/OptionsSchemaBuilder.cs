@@ -11,7 +11,10 @@ namespace LibplanetConsole.Options;
 
 public class OptionsSchemaBuilder
 {
-    // internal static readonly JsonNamingPolicy NamingPolicy = JsonNamingPolicy.CamelCase;
+#pragma warning disable S1075 // URIs should not be hardcoded
+    public const string BaseSchemaUrl = "https://json.schemastore.org/appsettings.json";
+#pragma warning restore S1075 // URIs should not be hardcoded
+
     private readonly Dictionary<string, Type> _typeByName = [];
     private readonly List<string> _requiredNameList = [];
 
@@ -23,7 +26,6 @@ public class OptionsSchemaBuilder
                     where IsOptionsType(type) == true
                     select type;
         var types = query.Distinct().ToArray();
-        // _settingsList = [.. types.Select(Activator.CreateInstance)];
         var schemaBuilder = new OptionsSchemaBuilder();
         foreach (var type in types)
         {
@@ -76,24 +78,23 @@ public class OptionsSchemaBuilder
 
     public string Build()
     {
+        var originSchema = JsonSchema.FromUrlAsync(BaseSchemaUrl, default).GetAwaiter().GetResult();
         var schema = new JsonSchema();
         var optionsSchema = new JsonSchema
         {
             Type = JsonObjectType.Object,
         };
 
+        schema.Definitions["appsettings"] = originSchema;
         schema.AllOf.Add(optionsSchema);
         foreach (var (name, type) in _typeByName)
         {
-            // var settingsName = NamingPolicy.ConvertName(name);
             var settingsName = name;
             var settings = new SystemTextJsonSchemaGeneratorSettings
             {
                 FlattenInheritanceHierarchy = true,
                 SerializerOptions = new JsonSerializerOptions
                 {
-                    // PropertyNamingPolicy = NamingPolicy,
-                    // DictionaryKeyPolicy = NamingPolicy,
                 },
             };
             var schemaGenerator = new OptionsSchemaGenerator(this, settings);
@@ -108,7 +109,6 @@ public class OptionsSchemaBuilder
 
         foreach (var name in _requiredNameList)
         {
-            // var settingsName = NamingPolicy.ConvertName(name);
             var settingsName = name;
             optionsSchema.RequiredProperties.Add(settingsName);
         }

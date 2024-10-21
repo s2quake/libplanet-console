@@ -10,6 +10,7 @@ namespace LibplanetConsole.Node;
 [Options]
 public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
 {
+    public const string Position = "Application";
     public const int BlocksyncPortIncrement = 4;
     public const int ConsensusPortIncrement = 5;
     public const int SeedBlocksyncPortIncrement = 6;
