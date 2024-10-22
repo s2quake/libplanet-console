@@ -23,7 +23,7 @@ internal sealed partial class Node : IBlockChain
             throw new InvalidOperationException("Node is not running.");
         }
 
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var privateKey = _privateKey;
         var blockChain = BlockChain;
         var genesisBlock = blockChain.Genesis;
         var nonce = blockChain.GetNextTxNonce(privateKey.Address);

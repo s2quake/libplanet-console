@@ -1,8 +1,6 @@
 using System.Dynamic;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
-using LibplanetConsole.Framework;
 using LibplanetConsole.Options;
 using static LibplanetConsole.Common.PathUtility;
 
@@ -12,10 +10,6 @@ public sealed record class Repository
 {
     public const string SettingsFileName = "appsettings.json";
     public const string SettingsSchemaFileName = "appsettings-schema.json";
-    private static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        WriteIndented = true,
-    };
 
     public required int Port { get; init; }
 
@@ -54,7 +48,6 @@ public sealed record class Repository
                 $"'{repositoryPath}' is not a directory.", nameof(repositoryPath));
         }
 
-        var privateKey = PrivateKey;
         var settingsPath = Path.Combine(repositoryPath, SettingsFileName);
         var schemaPath = Path.Combine(repositoryPath, SettingsSchemaFileName);
         var schemaBuilder = OptionsSchemaBuilder.Create();
@@ -66,10 +59,10 @@ public sealed record class Repository
         var settings = new Settings
         {
             Schema = SettingsSchemaFileName,
-            Application = new ApplicationSettings
+            Application = new ApplicationOptions
             {
                 Port = Port,
-                PrivateKey = PrivateKeyUtility.ToString(privateKey),
+                PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
@@ -94,6 +87,6 @@ public sealed record class Repository
         [JsonPropertyName("$schema")]
         public required string Schema { get; init; } = string.Empty;
 
-        public required ApplicationSettings Application { get; init; }
+        public required ApplicationOptions Application { get; init; }
     }
 }

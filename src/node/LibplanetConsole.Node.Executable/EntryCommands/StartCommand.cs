@@ -29,8 +29,23 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
-        options.ParentProcessId = ParentProcessId;
-        options.NoREPL = NoREPL;
+        var directory = RepositoryPath;
+        var oldDirectory = Directory.GetCurrentDirectory();
+        try
+        {
+            Directory.SetCurrentDirectory(directory);
+            options.GenesisPath = GetFullPath(options.GenesisPath);
+            options.StorePath = GetFullPath(options.StorePath);
+            options.LogPath = GetFullPath(options.LogPath);
+            options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
+            options.ParentProcessId = ParentProcessId;
+            options.NoREPL = NoREPL;
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(oldDirectory);
+        }
+
     }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
@@ -38,6 +53,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
         try
         {
             var application = new Application(RepositoryPath);
+            application.ConfigureServices();
             application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
@@ -46,5 +62,15 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             e.Print(Console.Out);
             Environment.Exit(1);
         }
+    }
+
+    private static string GetFullPath(string path)
+    {
+        if (path != string.Empty && Path.IsPathRooted(path) is false)
+        {
+            return Path.GetFullPath(path);
+        }
+
+        return path;
     }
 }

@@ -1,5 +1,6 @@
 #pragma warning disable SA1402 // File may only contain a single type
 using System.ComponentModel.DataAnnotations;
+using System.Windows.Markup;
 using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Common.DataAnnotations;
@@ -12,6 +13,16 @@ public sealed class PrivateKeyAttribute : RegularExpressionAttribute
     public PrivateKeyAttribute()
         : base($"^{RegularExpression}$")
     {
+    }
+
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value is PrivateKey)
+        {
+            return ValidationResult.Success;
+        }
+
+        return base.IsValid(value, validationContext);
     }
 }
 

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
@@ -94,10 +93,8 @@ internal sealed record class ApplicationSettings
 
     public void ToOptions(ApplicationOptions options)
     {
-        var port = Port == 0 ? PortUtility.NextPort() : Port;
-        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        options.Port = port;
-        options.PrivateKey = privateKey;
+        options.Port = Port;
+        options.PrivateKey = PrivateKey;
         options.GenesisPath = GenesisPath;
         options.Genesis = Genesis;
         options.ParentProcessId = ParentProcessId;
@@ -111,14 +108,19 @@ internal sealed record class ApplicationSettings
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
 
-        EndPoint? GetSeedEndPoint()
+        string GetSeedEndPoint()
         {
             if (SeedEndPoint != string.Empty)
             {
-                return Parse(SeedEndPoint);
+                return SeedEndPoint;
             }
 
-            return IsSingleNode is true ? GetLocalHost(port) : null;
+            if (IsSingleNode is true)
+            {
+                return EndPointUtility.ToString(GetLocalHost(Port));
+            }
+
+            return string.Empty;
         }
     }
 }

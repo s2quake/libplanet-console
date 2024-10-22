@@ -20,13 +20,12 @@ namespace LibplanetConsole.Node;
 
 internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 {
-    private readonly SecureString _privateKey;
+    private readonly PrivateKey _privateKey;
     private readonly string _storePath;
     private readonly SynchronizationContext _synchronizationContext
         = SynchronizationContext.Current!;
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly ApplicationOptions _options;
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
     private readonly ILogger _logger;
@@ -42,20 +41,19 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private INodeContent[]? _contents;
     private bool _isDisposed;
 
-    public Node(IServiceProvider serviceProvider, IOptions<ApplicationOptions> options)
+    public Node(IServiceProvider serviceProvider, IApplicationOptions options)
     {
         _serviceProvider = serviceProvider;
-        _options = options.Value;
-        _seedEndPoint = _options.SeedEndPoint;
-        _privateKey = _options.PrivateKey.ToSecureString();
-        _storePath = _options.StorePath;
-        PublicKey = _options.PrivateKey.PublicKey;
+        _seedEndPoint = options.SeedEndPoint;
+        _privateKey = options.PrivateKey;
+        _storePath = options.StorePath;
+        PublicKey = options.PrivateKey.PublicKey;
         _actionProvider = ModuleLoader.LoadActionLoader(
-            _options.ActionProviderModulePath, _options.ActionProviderType);
+            options.ActionProviderModulePath, options.ActionProviderType);
         _logger = serviceProvider.GetLogger<Node>();
-        _genesis = _options.GetGenesis();
-        _blocksyncPort = _options.Port + ApplicationOptions.BlocksyncPortIncrement;
-        _consensusPort = _options.Port + ApplicationOptions.ConsensusPortIncrement;
+        _genesis = options.Genesis;
+        _blocksyncPort = options.Port + ApplicationOptions.BlocksyncPortIncrement;
+        _consensusPort = options.Port + ApplicationOptions.ConsensusPortIncrement;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
     }
@@ -133,7 +131,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 
     public bool Verify(object obj, byte[] signature) => PublicKey.Verify(obj, signature);
 
-    public byte[] Sign(object obj) => PrivateKeyUtility.FromSecureString(_privateKey).Sign(obj);
+    public byte[] Sign(object obj) => _privateKey.Sign(obj);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -149,7 +147,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         }
 
         var seedInfo = await GetSeedInfoAsync(_seedEndPoint, _logger, cancellationToken);
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var privateKey = _privateKey;
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
         var blocksyncPort = _blocksyncPort;

@@ -10,7 +10,7 @@ internal sealed class SeedHostedService(IServiceProvider serviceProvider)
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_seedService is not null)
+        if (_seedService is { IsEnabled: true })
         {
             await _seedService.StartAsync(cancellationToken);
         }

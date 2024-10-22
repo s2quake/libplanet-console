@@ -1,14 +1,13 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using LibplanetConsole.Common.Converters;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Node;
 
 [Options]
-public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
+public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IApplicationOptions
 {
     public const string Position = "Application";
     public const int BlocksyncPortIncrement = 4;
@@ -16,23 +15,32 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
     public const int SeedBlocksyncPortIncrement = 6;
     public const int SeedConsensusPortIncrement = 7;
 
+    private PrivateKey? _privateKey;
+    private EndPoint? _seedEndPoint;
+    private byte[]? _genesis;
+
     public int Port { get; set; }
 
     [PrivateKey]
-    [JsonConverter(typeof(PrivateKeyJsonConverter))]
-    public PrivateKey PrivateKey { get; set; } = new PrivateKey();
+    public string PrivateKey { get; set; } = string.Empty;
+
+    PrivateKey IApplicationOptions.PrivateKey => ActualPrivateKey;
 
     public string GenesisPath { get; set; } = string.Empty;
 
     [JsonIgnore]
     public string Genesis { get; set; } = string.Empty;
 
+    byte[] IApplicationOptions.Genesis => _genesis ??= GetGenesis();
+
     [JsonIgnore]
     public int ParentProcessId { get; set; }
 
     [EndPoint]
-    [JsonConverter(typeof(EndPointJsonConverter))]
-    public EndPoint? SeedEndPoint { get; set; }
+    public string SeedEndPoint { get; set; } = string.Empty;
+
+    EndPoint? IApplicationOptions.SeedEndPoint
+        => _seedEndPoint ??= EndPointUtility.ParseOrDefault(SeedEndPoint);
 
     public string StorePath { get; set; } = string.Empty;
 
@@ -44,6 +52,9 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     public string ActionProviderType { get; set; } = string.Empty;
+
+    private PrivateKey ActualPrivateKey
+        => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 
     public bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
     {
@@ -66,7 +77,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>
 
     public byte[] GetGenesis()
     {
-        return TryGetGenesis(out var g) == true ? g : CreateGenesis(PrivateKey);
+        return TryGetGenesis(out var g) == true ? g : CreateGenesis(ActualPrivateKey);
     }
 
     private static byte[] CreateGenesis(PrivateKey privateKey)

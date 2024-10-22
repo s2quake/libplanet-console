@@ -1,55 +1,28 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
 public static class ServiceCollectionExtensions
 {
-    private static readonly LoggingFilter[] _filters =
-    [
-        new SourceContextFilter(
-            "app.log",
-            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
-        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
-        new PrefixFilter("libplanet.log", "Libplanet."),
-    ];
-
-    private static readonly LoggingFilter[] _traceFilters =
-    [
-        new SourceContextFilter(
-            "app.log",
-            s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
-    ];
-
     public static IServiceCollection AddNode(
         this IServiceCollection @this, IConfiguration configuration)
     {
         var synchronizationContext = SynchronizationContext.Current ?? new();
-        var logPath = GetLogPath(configuration);
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
 
         @this.AddOptions<ApplicationOptions>()
-            .Bind(configuration.GetSection("Application"));
+            .Bind(configuration.GetSection(ApplicationOptions.Position))
+            .ValidateDataAnnotations();
+        @this.AddSingleton<IApplicationOptions>(
+            s => s.GetRequiredService<IOptions<ApplicationOptions>>().Value);
 
         @this.AddSingleton(synchronizationContext);
-
-        if (logPath != string.Empty)
-        {
-            @this.AddLogging(logPath, "node.log", _filters);
-        }
-        else
-        {
-            @this.AddLogging(_traceFilters);
-        }
-
         @this.AddSingleton<SeedService>()
              .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
         @this.AddSingleton<Node>()
@@ -71,7 +44,4 @@ public static class ServiceCollectionExtensions
 
         return @this;
     }
-
-    private static string GetLogPath(IConfiguration configuration)
-        => configuration.GetValue<string>($"{ApplicationOptions.Position}:LogPath") ?? string.Empty;
 }
