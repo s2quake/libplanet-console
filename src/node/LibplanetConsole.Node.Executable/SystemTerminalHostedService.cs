@@ -16,6 +16,7 @@ internal sealed class SystemTerminalHostedService(
     private Task _waitInputTask = Task.CompletedTask;
     private Task _waitForExitTask = Task.CompletedTask;
     private int _parentProcessId;
+    private bool _isRunning;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -33,6 +34,7 @@ internal sealed class SystemTerminalHostedService(
             await Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
+            _isRunning = true;
         }
         else if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
@@ -51,7 +53,10 @@ internal sealed class SystemTerminalHostedService(
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(_waitInputTask, _waitForExitTask);
-        await terminal.StopAsync(cancellationToken);
+        if (_isRunning is true)
+        {
+            await terminal.StopAsync(cancellationToken);
+        }
     }
 
     private static bool GetStartupCondition(IApplicationOptions options)
