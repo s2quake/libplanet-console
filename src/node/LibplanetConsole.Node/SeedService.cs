@@ -1,5 +1,4 @@
 using LibplanetConsole.Seed;
-using Microsoft.Extensions.Options;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;

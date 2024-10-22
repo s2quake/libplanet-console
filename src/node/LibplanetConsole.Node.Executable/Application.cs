@@ -40,17 +40,10 @@ internal sealed class Application
 
     private Application(WebApplicationBuilder builder)
     {
-        _builder = builder;
-    }
+        var services = builder.Services;
+        var configuration = builder.Configuration;
 
-    public IServiceCollection Services => _builder.Services;
-
-    public void ConfigureServices()
-    {
-        var services = _builder.Services;
-        var configuration = _builder.Configuration;
-
-        _builder.ListenNode(configuration);
+        builder.ListenNode(configuration);
 
         services.AddLogging(builder =>
         {
@@ -89,7 +82,10 @@ internal sealed class Application
                 LoggerUtility.CreateLogger(_traceFilters);
             }
         });
+        _builder = builder;
     }
+
+    public IServiceCollection Services => _builder.Services;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {

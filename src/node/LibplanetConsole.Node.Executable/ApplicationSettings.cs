@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -26,7 +25,6 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
-    [JsonIgnore]
     [Category]
     public int ParentProcessId { get; init; }
 
@@ -54,7 +52,6 @@ internal sealed record class ApplicationSettings
     [CommandPropertyExclusion(nameof(GenesisPath))]
     [CommandSummary("Indicates a hexadecimal genesis string. If omitted, a random genesis block " +
                     "is used.\nMutually exclusive with '--genesis-path' option.")]
-    [JsonIgnore]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -65,14 +62,12 @@ internal sealed record class ApplicationSettings
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the node runs without a REPL.")]
-    [JsonIgnore]
     public bool NoREPL { get; init; }
 
     [CommandPropertySwitch("single-node")]
     [CommandPropertyExclusion(nameof(SeedEndPoint))]
     [CommandSummary("If set, the node runs as a single node.\n" +
                     "Mutually exclusive with '--seed-endpoint' option.")]
-    [JsonIgnore]
     public bool IsSingleNode { get; set; }
 
     [CommandProperty("module-path")]

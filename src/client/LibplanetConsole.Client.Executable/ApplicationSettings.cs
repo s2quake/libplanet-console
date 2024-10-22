@@ -4,7 +4,6 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable;
 

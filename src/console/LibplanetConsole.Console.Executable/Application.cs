@@ -3,7 +3,6 @@ using LibplanetConsole.Console.Evidence;
 using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
 using LibplanetConsole.Logging;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace LibplanetConsole.Console.Executable;
 

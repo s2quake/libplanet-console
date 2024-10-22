@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
-using LibplanetConsole.Framework;
 using LibplanetConsole.Options;
 using static LibplanetConsole.Common.EndPointUtility;
 

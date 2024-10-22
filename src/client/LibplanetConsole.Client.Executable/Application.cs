@@ -2,7 +2,6 @@ using JSSoft.Commands;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Logging;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace LibplanetConsole.Client.Executable;
 

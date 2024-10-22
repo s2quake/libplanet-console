@@ -1,8 +1,6 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 

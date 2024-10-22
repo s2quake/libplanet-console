@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Security;
 using System.Security.Cryptography;
 using Grpc.Net.Client;
 using Libplanet.Blockchain;
@@ -14,7 +13,6 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;
 

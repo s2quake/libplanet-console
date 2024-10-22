@@ -1,7 +1,6 @@
 using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
-using LibplanetConsole.Framework;
 using LibplanetConsole.Options;
 using static LibplanetConsole.Common.PathUtility;
 

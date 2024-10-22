@@ -53,7 +53,6 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
         try
         {
             var application = new Application(RepositoryPath);
-            application.ConfigureServices();
             application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
