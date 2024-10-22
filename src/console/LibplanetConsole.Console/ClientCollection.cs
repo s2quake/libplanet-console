@@ -8,7 +8,7 @@ namespace LibplanetConsole.Console;
 
 internal sealed class ClientCollection(
     IServiceProvider serviceProvider,
-    ApplicationOptions options)
+    IApplicationOptions options)
     : IEnumerable<Client>, IClientCollection
 {
     private static readonly object LockObject = new();

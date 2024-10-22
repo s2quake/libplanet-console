@@ -10,13 +10,11 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
     private readonly ApplicationSettingsCollection _settingsCollection = new();
     private readonly Dictionary<CommandMemberDescriptor, object> _descriptorByInstance;
     private readonly CommandMemberDescriptorCollection _descriptors;
-    private readonly ApplicationSettings _applicationSettings;
 
     public RunCommand()
     {
         _descriptorByInstance = GetDescriptors([.. _settingsCollection]);
         _descriptors = new(GetType(), _descriptorByInstance.Keys);
-        _applicationSettings = _settingsCollection.Peek<ApplicationSettings>();
     }
 
     CommandMemberDescriptorCollection ICustomCommandDescriptor.Members => _descriptors;
@@ -28,7 +26,6 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
     {
         try
         {
-            // var applicationOptions = _applicationSettings.ToOptions();
             var application = new Application();
             await application.RunAsync(cancellationToken);
         }

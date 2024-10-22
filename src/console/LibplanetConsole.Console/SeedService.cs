@@ -2,7 +2,7 @@ using LibplanetConsole.Seed;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class SeedService(ApplicationOptions options) : ISeedService
+internal sealed class SeedService(IApplicationOptions options) : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;

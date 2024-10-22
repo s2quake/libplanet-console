@@ -30,7 +30,6 @@ public static class SettingsLoader
         {
             var settingsName = item.Key;
             var settings = item.Value;
-            // var jsonName = OptionsSchemaBuilder.NamingPolicy.ConvertName(settingsName);
             var jsonName = settingsName;
             if (obj.TryGetValue(jsonName, out var value) is true)
             {

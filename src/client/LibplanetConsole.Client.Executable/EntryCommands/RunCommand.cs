@@ -1,10 +1,12 @@
 using JSSoft.Commands;
 using LibplanetConsole.Framework;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
 [CommandSummary("Run the Libplanet client.")]
-internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
+internal sealed class RunCommand
+    : CommandAsyncBase, ICustomCommandDescriptor, IConfigureOptions<ApplicationOptions>
 {
     private readonly ApplicationSettingsCollection _settingsCollection = new();
     private readonly Dictionary<CommandMemberDescriptor, object> _descriptorByInstance;
@@ -22,6 +24,11 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
 
     object ICustomCommandDescriptor.GetMemberOwner(CommandMemberDescriptor memberDescriptor)
         => _descriptorByInstance[memberDescriptor];
+
+    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
+    {
+        _applicationSettings.ToOptions(options);
+    }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {

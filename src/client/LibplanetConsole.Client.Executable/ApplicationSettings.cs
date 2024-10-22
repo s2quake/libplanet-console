@@ -42,19 +42,16 @@ internal sealed record class ApplicationSettings
     [CommandSummary("If set, the client runs without REPL.")]
     public bool NoREPL { get; init; }
 
-    public ApplicationOptions ToOptions()
+    public void ToOptions(ApplicationOptions options)
     {
         var port = Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        return new ApplicationOptions()
-        {
-            Port = port,
-            PrivateKey = PrivateKeyUtility.ToString(privateKey),
-            ParentProcessId = ParentProcessId,
-            NodeEndPoint = NodeEndPoint,
-            LogPath = GetFullPath(LogPath),
-            NoREPL = NoREPL,
-        };
+        options.Port = port;
+        options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
+        options.ParentProcessId = ParentProcessId;
+        options.NodeEndPoint = NodeEndPoint;
+        options.LogPath = GetFullPath(LogPath);
+        options.NoREPL = NoREPL;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;

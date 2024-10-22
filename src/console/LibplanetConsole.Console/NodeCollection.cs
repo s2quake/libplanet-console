@@ -7,7 +7,7 @@ namespace LibplanetConsole.Console;
 
 internal sealed class NodeCollection(
     IServiceProvider serviceProvider,
-    ApplicationOptions options)
+    IApplicationOptions options)
     : IEnumerable<Node>, INodeCollection
 {
     private static readonly object LockObject = new();

@@ -190,7 +190,7 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        var applicationOptions = this.GetRequiredService<ApplicationOptions>();
+        var applicationOptions = this.GetRequiredService<IApplicationOptions>();
         var seedEndPoint = EndPointUtility.ToString(
             _nodeOptions.SeedEndPoint ?? GetLocalHost(applicationOptions.Port));
         var request = new StartRequest

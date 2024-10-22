@@ -125,7 +125,7 @@ public sealed record class Repository
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
         var nodesPath = resolver.GetNodesPath(repositoryPath);
         var clientsPath = resolver.GetClientsPath(repositoryPath);
-        var applicationSettings = new ApplicationSettings
+        var applicationOptions = new ApplicationOptions
         {
             Port = Port,
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
@@ -138,7 +138,7 @@ public sealed record class Repository
         info.GenesisPath = genesisPath;
         SaveSettingsSchema(schemaPath);
         info.SchemaPath = schemaPath;
-        SaveSettings(schemaPath, settingsPath, applicationSettings);
+        SaveSettings(schemaPath, settingsPath, applicationOptions);
         info.SettingsPath = settingsPath;
 
         info.Nodes = new List<ExpandoObject>(Nodes.Length);
@@ -211,13 +211,13 @@ public sealed record class Repository
     }
 
     private static void SaveSettings(
-        string schemaPath, string settingsPath, ApplicationSettings applicationSettings)
+        string schemaPath, string settingsPath, ApplicationOptions applicationOptions)
     {
         var schemaRelativePath = PathUtility.GetRelativePath(settingsPath, schemaPath);
         var settings = new Settings
         {
             Schema = schemaRelativePath,
-            Application = applicationSettings,
+            Application = applicationOptions,
         };
         var json = JsonUtility.SerializeSchema(settings);
         File.WriteAllLines(settingsPath, [json]);
@@ -228,6 +228,6 @@ public sealed record class Repository
         [JsonPropertyName("$schema")]
         public required string Schema { get; init; } = string.Empty;
 
-        public required ApplicationSettings Application { get; init; }
+        public required ApplicationOptions Application { get; init; }
     }
 }
