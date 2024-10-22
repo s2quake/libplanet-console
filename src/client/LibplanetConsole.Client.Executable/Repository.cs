@@ -75,7 +75,7 @@ public sealed record class Repository
         var settings = new Settings
         {
             Schema = SettingsSchemaFileName,
-            Application = new ApplicationSettings
+            Application = new ApplicationOptions
             {
                 Port = Port,
                 PrivateKey = PrivateKeyUtility.ToString(privateKey),
@@ -99,6 +99,6 @@ public sealed record class Repository
         [JsonPropertyName("$schema")]
         public required string Schema { get; init; } = string.Empty;
 
-        public required ApplicationSettings Application { get; init; }
+        public required ApplicationOptions Application { get; init; }
     }
 }

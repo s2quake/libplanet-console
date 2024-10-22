@@ -2,7 +2,6 @@ using System.Diagnostics;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable;
 
@@ -10,18 +9,17 @@ internal sealed class SystemTerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
     CommandContext commandContext,
     SystemTerminal terminal,
-    IOptions<ApplicationOptions> options,
+    IApplicationOptions options,
     ILogger<SystemTerminalHostedService> logger)
     : IHostedService
 {
-    private readonly ApplicationOptions _options = options.Value;
     private Task _waitInputTask = Task.CompletedTask;
     private Task _waitForExitTask = Task.CompletedTask;
     private int _parentProcessId;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_options.NoREPL is false)
+        if (options.NoREPL is false)
         {
             var sw = new StringWriter();
             commandContext.Out = sw;
@@ -31,18 +29,18 @@ internal sealed class SystemTerminalHostedService(
             await commandContext.ExecuteAsync(args: [], cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
             commandContext.Out = Console.Out;
-            await sw.WriteLineIfAsync(GetStartupCondition(_options), GetStartupMessage());
+            await sw.WriteLineIfAsync(GetStartupCondition(options), GetStartupMessage());
             await Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
         }
-        else if (_options.ParentProcessId != 0 &&
-            Process.GetProcessById(_options.ParentProcessId) is { } parentProcess)
+        else if (options.ParentProcessId != 0 &&
+            Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
-            _parentProcessId = _options.ParentProcessId;
+            _parentProcessId = options.ParentProcessId;
             _waitForExitTask = WaitForExit(parentProcess);
         }
-        else if (_options.ParentProcessId == 0)
+        else if (options.ParentProcessId == 0)
         {
             _waitInputTask = WaitInputAsync();
         }
@@ -56,7 +54,7 @@ internal sealed class SystemTerminalHostedService(
         await terminal.StopAsync(cancellationToken);
     }
 
-    private static bool GetStartupCondition(ApplicationOptions options)
+    private static bool GetStartupCondition(IApplicationOptions options)
     {
         if (options.SeedEndPoint is not null)
         {

@@ -1,12 +1,13 @@
 using System.ComponentModel;
-using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Client.Executable;
 
+[ApplicationSettings(IsRequired = true)]
 internal sealed record class ApplicationSettings
 {
     [CommandProperty]
@@ -23,7 +24,6 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
-    [JsonIgnore]
     [Category]
     public int ParentProcessId { get; init; }
 
@@ -40,7 +40,6 @@ internal sealed record class ApplicationSettings
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the client runs without REPL.")]
-    [JsonIgnore]
     public bool NoREPL { get; init; }
 
     public ApplicationOptions ToOptions()
@@ -50,9 +49,9 @@ internal sealed record class ApplicationSettings
         return new ApplicationOptions()
         {
             Port = port,
-            PrivateKey = privateKey,
+            PrivateKey = PrivateKeyUtility.ToString(privateKey),
             ParentProcessId = ParentProcessId,
-            NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),
+            NodeEndPoint = NodeEndPoint,
             LogPath = GetFullPath(LogPath),
             NoREPL = NoREPL,
         };

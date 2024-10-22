@@ -45,7 +45,6 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
         {
             Directory.SetCurrentDirectory(oldDirectory);
         }
-
     }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

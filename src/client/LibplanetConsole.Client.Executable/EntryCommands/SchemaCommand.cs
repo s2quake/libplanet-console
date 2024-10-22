@@ -11,7 +11,7 @@ internal sealed class SchemaCommand : CommandBase
 {
     protected override void OnExecute()
     {
-        var schemaBuilder = new OptionsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var json = schemaBuilder.Build();
         var colorizedString = JsonUtility.ToColorizedString(json);
         Out.WriteLine(colorizedString);

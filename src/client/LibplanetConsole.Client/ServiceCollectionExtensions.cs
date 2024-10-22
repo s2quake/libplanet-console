@@ -3,6 +3,7 @@ using LibplanetConsole.Client.Commands;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Client;
 
@@ -13,9 +14,14 @@ public static class ServiceCollectionExtensions
     {
         var synchronizationContext = SynchronizationContext.Current ?? new();
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
-        @this.AddSingleton(synchronizationContext);
-        // @this.AddSingleton(options);
 
+        @this.AddOptions<ApplicationOptions>()
+            .Bind(configuration.GetSection(ApplicationOptions.Position))
+            .ValidateDataAnnotations();
+        @this.AddSingleton<IApplicationOptions>(
+            s => s.GetRequiredService<IOptions<ApplicationOptions>>().Value);
+
+        @this.AddSingleton(synchronizationContext);
         @this.AddSingleton<Client>()
              .AddSingleton<IClient>(s => s.GetRequiredService<Client>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Client>());

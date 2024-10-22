@@ -27,7 +27,6 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
     {
         try
         {
-            // var applicationOptions = _applicationSettings.ToOptions();
             var application = new Application();
             await application.RunAsync(cancellationToken);
         }

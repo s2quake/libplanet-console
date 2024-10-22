@@ -9,7 +9,7 @@ internal sealed class SystemTerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
     CommandContext commandContext,
     SystemTerminal terminal,
-    ApplicationOptions options,
+    IApplicationOptions options,
     ILogger<SystemTerminalHostedService> logger) : IHostedService
 {
     private Task _waitInputTask = Task.CompletedTask;
@@ -53,7 +53,7 @@ internal sealed class SystemTerminalHostedService(
         await terminal.StopAsync(cancellationToken);
     }
 
-    private static bool GetStartupCondition(ApplicationOptions options)
+    private static bool GetStartupCondition(IApplicationOptions options)
     {
         if (options.NodeEndPoint is not null)
         {

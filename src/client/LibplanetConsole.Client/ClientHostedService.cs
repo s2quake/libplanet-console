@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 namespace LibplanetConsole.Client;
 
 internal sealed class ClientHostedService(
-    IServiceProvider serviceProvider, Client client, ApplicationOptions options)
+    IServiceProvider serviceProvider, Client client, IApplicationOptions options)
     : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
