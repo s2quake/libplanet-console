@@ -88,7 +88,6 @@ internal sealed record class ApplicationSettings
 
     public void ToOptions(ApplicationOptions options)
     {
-        options.Port = Port;
         options.PrivateKey = PrivateKey;
         options.GenesisPath = GenesisPath;
         options.Genesis = Genesis;

@@ -2,8 +2,6 @@ namespace LibplanetConsole.Node;
 
 public interface IApplicationOptions
 {
-    int Port { get; }
-
     PrivateKey PrivateKey { get; }
 
     byte[] Genesis { get; }

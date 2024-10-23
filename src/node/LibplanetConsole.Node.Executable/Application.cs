@@ -45,8 +45,6 @@ internal sealed class Application
         var services = builder.Services;
         var configuration = builder.Configuration;
 
-        builder.ListenNode(configuration);
-
         services.AddLogging(builder =>
         {
             builder.ClearProviders();

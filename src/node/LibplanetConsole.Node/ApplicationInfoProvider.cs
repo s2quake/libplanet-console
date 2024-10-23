@@ -12,7 +12,6 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicatio
     {
         _info = new()
         {
-            Port = options.Port,
             SeedEndPoint = options.SeedEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,

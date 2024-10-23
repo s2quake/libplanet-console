@@ -2,6 +2,7 @@ using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Options;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using static LibplanetConsole.Common.PathUtility;
 
 namespace LibplanetConsole.Node.Executable;
@@ -61,7 +62,6 @@ public sealed record class Repository
             Schema = SettingsSchemaFileName,
             Application = new ApplicationOptions
             {
-                Port = Port,
                 PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
@@ -69,6 +69,22 @@ public sealed record class Repository
                 SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
+            },
+            Kestrel = new
+            {
+                Endpoints = new
+                {
+                    Http1 = new
+                    {
+                        Url = $"http://localhost:{Port}",
+                        Protocols = "Http1",
+                    },
+                    Http1AndHttp2 = new
+                    {
+                        Url = $"http://localhost:{Port + 1}",
+                        Protocols = "Http1AndHttp2",
+                    },
+                },
             },
         };
 
@@ -88,5 +104,7 @@ public sealed record class Repository
         public required string Schema { get; init; } = string.Empty;
 
         public required ApplicationOptions Application { get; init; }
+
+        public required dynamic Kestrel { get; init; }
     }
 }

@@ -19,8 +19,6 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     private EndPoint? _seedEndPoint;
     private byte[]? _genesis;
 
-    public int Port { get; set; }
-
     [PrivateKey]
     public string PrivateKey { get; set; } = string.Empty;
 

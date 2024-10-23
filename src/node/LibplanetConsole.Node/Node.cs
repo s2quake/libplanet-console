@@ -11,8 +11,10 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;
 
@@ -39,7 +41,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private INodeContent[]? _contents;
     private bool _isDisposed;
 
-    public Node(IServiceProvider serviceProvider, IApplicationOptions options)
+    public Node(IServiceProvider serviceProvider, IApplicationOptions options, IOptions<NodeOptions> nodeOptions)
     {
         _serviceProvider = serviceProvider;
         _seedEndPoint = options.SeedEndPoint;
@@ -50,8 +52,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             options.ActionProviderModulePath, options.ActionProviderType);
         _logger = serviceProvider.GetLogger<Node>();
         _genesis = options.Genesis;
-        _blocksyncPort = options.Port + ApplicationOptions.BlocksyncPortIncrement;
-        _consensusPort = options.Port + ApplicationOptions.ConsensusPortIncrement;
+        _blocksyncPort = nodeOptions.Value.BlocksyncPort;
+        _consensusPort = nodeOptions.Value.ConsensusPort;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
     }
@@ -144,14 +146,16 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             throw new InvalidOperationException($"{nameof(SeedEndPoint)} is not initialized.");
         }
 
-        var seedInfo = await GetSeedInfoAsync(_seedEndPoint, _logger, cancellationToken);
+        // var seedInfo = await GetSeedInfoAsync(_seedEndPoint, _logger, cancellationToken);
         var privateKey = _privateKey;
         var appProtocolVersion = _appProtocolVersion;
         var storePath = _storePath;
         var blocksyncPort = _blocksyncPort;
         var consensusPort = _consensusPort;
-        var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
-        var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
+        // var blocksyncSeedPeer = seedInfo.BlocksyncSeedPeer;
+        // var consensusSeedPeer = seedInfo.ConsensusSeedPeer;
+        var blocksyncSeedPeer = new BoundPeer(privateKey.PublicKey, new DnsEndPoint("localhost", _blocksyncPort));
+        var consensusSeedPeer = new BoundPeer(privateKey.PublicKey, new DnsEndPoint("localhost", _blocksyncPort));
         var swarmTransport
             = await CreateTransport(privateKey, blocksyncPort, appProtocolVersion);
         var swarmOptions = new SwarmOptions
@@ -168,7 +172,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             appProtocolVersion: appProtocolVersion);
         var consensusReactorOption = new ConsensusReactorOption
         {
-            SeedPeers = [consensusSeedPeer],
+            SeedPeers = [],
             ConsensusPort = consensusPort,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),

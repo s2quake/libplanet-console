@@ -1,9 +1,13 @@
+using LibplanetConsole.Common;
 using LibplanetConsole.Seed;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node;
 
-internal sealed class SeedService(IApplicationOptions options) : ISeedService
+internal sealed class SeedService(IApplicationOptions options, IServer server) : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
@@ -11,7 +15,7 @@ internal sealed class SeedService(IApplicationOptions options) : ISeedService
 
     public bool IsRunning => _blocksyncSeedNode is not null && _consensusSeedNode is not null;
 
-    public bool IsEnabled { get; } = GetEnabled(options);
+    public bool IsEnabled { get; } = GetEnabled(server);
 
     public Task<SeedInfo> GetSeedAsync(
         PublicKey publicKey, CancellationToken cancellationToken)
@@ -42,12 +46,12 @@ internal sealed class SeedService(IApplicationOptions options) : ISeedService
         var blocksyncSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            Port = options.Port + ApplicationOptions.SeedBlocksyncPortIncrement,
+            Port = PortUtility.NextPort(),
         });
         var consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
-            Port = options.Port + ApplicationOptions.SeedConsensusPortIncrement,
+            Port = PortUtility.NextPort(),
         });
         await blocksyncSeedNode.StartAsync(cancellationToken);
         await consensusSeedNode.StartAsync(cancellationToken);
@@ -75,9 +79,10 @@ internal sealed class SeedService(IApplicationOptions options) : ISeedService
         }
     }
 
-    private static bool GetEnabled(IApplicationOptions options)
+    private static bool GetEnabled(IServer server)
     {
-        var localHost = GetLocalHost(options.Port);
-        return CompareEndPoint(options.SeedEndPoint, localHost);
+        return false;
+        // var localHost = GetLocalHost(options.Port);
+        // return CompareEndPoint(options.SeedEndPoint, localHost);
     }
 }
