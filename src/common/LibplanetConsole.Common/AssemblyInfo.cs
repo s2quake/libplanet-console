@@ -1,3 +1,5 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("libplanet-console")]
+[assembly: InternalsVisibleTo("LibplanetConsole.Node")]
+[assembly: InternalsVisibleTo("LibplanetConsole.Client")]
+[assembly: InternalsVisibleTo("LibplanetConsole.Console")]

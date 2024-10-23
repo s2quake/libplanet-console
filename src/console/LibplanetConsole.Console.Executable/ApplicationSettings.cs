@@ -89,7 +89,7 @@ internal sealed record class ApplicationSettings
     [CommandPropertyExclusion(nameof(NewWindow))]
     public bool Detach { get; set; }
 
-    public ApplicationOptions ToOptions()
+    public void ToOptions(ApplicationOptions options)
     {
         var portGenerator = new PortGenerator(Port);
         var port = portGenerator.Current;
@@ -97,17 +97,15 @@ internal sealed record class ApplicationSettings
         var nodeOptions = GetNodeOptions(endPoint, GetNodes(), portGenerator);
         var clientOptions = GetClientOptions(nodeOptions, GetClients(), portGenerator);
         var repository = new Repository(port, nodeOptions, clientOptions);
-        var genesis = TryGetGenesis(out var g) == true ? g : repository.Genesis;
-        return new ApplicationOptions(port)
-        {
-            LogPath = GetFullPath(LogPath),
-            Nodes = repository.Nodes,
-            Clients = repository.Clients,
-            Genesis = genesis,
-            NoProcess = NoProcess,
-            NewWindow = NewWindow,
-            Detach = Detach,
-        };
+        options.Port = port;
+        options.LogPath = GetFullPath(LogPath);
+        options.Nodes = repository.Nodes;
+        options.Clients = repository.Clients;
+        options.Genesis = Genesis;
+        options.GenesisPath = GenesisPath;
+        options.NoProcess = NoProcess;
+        options.NewWindow = NewWindow;
+        options.Detach = Detach;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
@@ -173,24 +171,5 @@ internal sealed record class ApplicationSettings
         }
 
         return [.. Enumerable.Range(0, ClientCount).Select(item => new PrivateKey())];
-    }
-
-    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
-    {
-        if (GenesisPath != string.Empty)
-        {
-            var lines = File.ReadAllLines(GenesisPath);
-            genesis = ByteUtil.ParseHex(lines[0]);
-            return true;
-        }
-
-        if (Genesis != string.Empty)
-        {
-            genesis = ByteUtil.ParseHex(Genesis);
-            return true;
-        }
-
-        genesis = null!;
-        return false;
     }
 }

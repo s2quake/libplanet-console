@@ -1,15 +1,16 @@
 using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
-using LibplanetConsole.Framework;
+using LibplanetConsole.Options;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using static LibplanetConsole.Common.PathUtility;
 
 namespace LibplanetConsole.Node.Executable;
 
 public sealed record class Repository
 {
-    public const string SettingsFileName = "node-settings.json";
-    public const string SettingsSchemaFileName = "node-settings-schema.json";
+    public const string SettingsFileName = "appsettings.json";
+    public const string SettingsSchemaFileName = "appsettings-schema.json";
 
     public required int Port { get; init; }
 
@@ -48,10 +49,9 @@ public sealed record class Repository
                 $"'{repositoryPath}' is not a directory.", nameof(repositoryPath));
         }
 
-        var privateKey = PrivateKey;
         var settingsPath = Path.Combine(repositoryPath, SettingsFileName);
         var schemaPath = Path.Combine(repositoryPath, SettingsSchemaFileName);
-        var schemaBuilder = new ApplicationSettingsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var schema = schemaBuilder.Build();
 
         EnsureDirectory(repositoryPath);
@@ -60,16 +60,31 @@ public sealed record class Repository
         var settings = new Settings
         {
             Schema = SettingsSchemaFileName,
-            Application = new ApplicationSettings
+            Application = new ApplicationOptions
             {
-                Port = Port,
-                PrivateKey = PrivateKeyUtility.ToString(privateKey),
+                PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
                 SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
+            },
+            Kestrel = new
+            {
+                Endpoints = new
+                {
+                    Http1 = new
+                    {
+                        Url = $"http://localhost:{Port}",
+                        Protocols = "Http2",
+                    },
+                    Http1AndHttp2 = new
+                    {
+                        Url = $"http://localhost:{Port + 1}",
+                        Protocols = "Http1AndHttp2",
+                    },
+                },
             },
         };
 
@@ -88,6 +103,8 @@ public sealed record class Repository
         [JsonPropertyName("$schema")]
         public required string Schema { get; init; } = string.Empty;
 
-        public required ApplicationSettings Application { get; init; }
+        public required ApplicationOptions Application { get; init; }
+
+        public required dynamic Kestrel { get; init; }
     }
 }

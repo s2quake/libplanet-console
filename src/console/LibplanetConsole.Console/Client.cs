@@ -102,7 +102,7 @@ internal sealed partial class Client : IClient
         blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
-            await clientService.StartAsync(cancellationToken);
+            await clientService.InitializeAsync(cancellationToken);
             await blockChainService.InitializeAsync(cancellationToken);
         }
         catch

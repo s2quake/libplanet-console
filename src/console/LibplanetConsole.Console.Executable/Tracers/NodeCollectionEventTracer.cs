@@ -77,7 +77,7 @@ internal sealed class NodeCollectionEventTracer : IHostedService, IDisposable
         node.Detached -= Node_Detached;
         node.Started -= Node_Started;
         node.Stopped -= Node_Stopped;
-        node.Disposed += Node_Disposed;
+        node.Disposed -= Node_Disposed;
     }
 
     private void Nodes_CurrentChanged(object? sender, EventArgs e)

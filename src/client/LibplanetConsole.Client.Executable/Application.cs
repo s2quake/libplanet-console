@@ -2,13 +2,12 @@ using JSSoft.Commands;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Logging;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Serilog;
 
 namespace LibplanetConsole.Client.Executable;
 
 internal sealed class Application
 {
-    private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
     private readonly LoggingFilter[] _filters =
     [
         new PrefixFilter("app", "LibplanetConsole."),
@@ -19,29 +18,28 @@ internal sealed class Application
         new PrefixFilter("app", "LibplanetConsole."),
     ];
 
-    public Application(ApplicationOptions options, object[] instances)
+    private readonly WebApplicationBuilder _builder;
+
+    public Application()
+        : this(Create(null))
     {
-        var port = options.Port;
-        var services = _builder.Services;
-        foreach (var instance in instances)
-        {
-            services.AddSingleton(instance.GetType(), instance);
-        }
+    }
 
-        _builder.WebHost.ConfigureKestrel(options =>
+    public Application(string repositoryPath)
+        : this(Create(repositoryPath))
+    {
+    }
+
+    private Application(WebApplicationBuilder builder)
+    {
+        var services = builder.Services;
+        var configuration = builder.Configuration;
+
+        services.AddLogging(builder =>
         {
-            options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+            builder.ClearProviders();
+            builder.AddSerilog();
         });
-
-        if (options.LogPath != string.Empty)
-        {
-            services.AddLogging(options.LogPath, "client.log", _filters);
-        }
-        else
-        {
-            services.AddLogging(_traceFilters);
-        }
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
@@ -51,15 +49,34 @@ internal sealed class Application
         services.AddSingleton<VersionCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
-        services.AddClient(options);
+        services.AddClient(configuration);
 
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
         services.AddGrpcReflection();
 
+        services.AddSingleton<IClientContent, ClientEventTracer>();
         services.AddHostedService<BlockChainEventTracer>();
-        services.AddHostedService<ClientEventTracer>();
         services.AddHostedService<SystemTerminalHostedService>();
+
+        services.PostConfigure<ApplicationOptions>(options =>
+       {
+           var logPath = options.LogPath;
+           if (logPath != string.Empty)
+           {
+               LoggerUtility.CreateLogger(logPath, "client.log", _filters);
+           }
+           else
+           {
+               LoggerUtility.CreateLogger(_traceFilters);
+           }
+       });
+        _builder = builder;
     }
+
+    public IServiceCollection Services => _builder.Services;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
@@ -71,5 +88,15 @@ internal sealed class Application
 
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);
+    }
+
+    private static WebApplicationBuilder Create(string? repositoryPath)
+    {
+        var options = new WebApplicationOptions
+        {
+            ContentRootPath = repositoryPath,
+        };
+
+        return WebApplication.CreateBuilder(options);
     }
 }

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
-namespace LibplanetConsole.Settings;
+namespace LibplanetConsole.Options;
 
 public static class SettingsLoader
 {
@@ -21,7 +21,7 @@ public static class SettingsLoader
 
         var jso = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = SettingsSchemaBuilder.NamingPolicy,
+            // PropertyNamingPolicy = OptionsSchemaBuilder.NamingPolicy,
         };
         var directory = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings path.", nameof(settingsPath));
@@ -30,7 +30,7 @@ public static class SettingsLoader
         {
             var settingsName = item.Key;
             var settings = item.Value;
-            var jsonName = SettingsSchemaBuilder.NamingPolicy.ConvertName(settingsName);
+            var jsonName = settingsName;
             if (obj.TryGetValue(jsonName, out var value) is true)
             {
                 Load(settings, value, jso);

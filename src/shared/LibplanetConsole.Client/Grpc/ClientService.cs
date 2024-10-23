@@ -1,8 +1,7 @@
 #if LIBPLANET_CONSOLE
+using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Console;
-using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Client;
 using static LibplanetConsole.Grpc.Client.ClientGrpcService;
 
 namespace LibplanetConsole.Grpc.Client;
@@ -35,7 +34,7 @@ internal sealed class ClientService(GrpcChannel channel)
         }
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (_connection is not null)
         {
@@ -56,7 +55,7 @@ internal sealed class ClientService(GrpcChannel channel)
             _stoppedReceiver.StartAsync(cancellationToken));
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task ReleaseAsync(CancellationToken cancellationToken)
     {
         if (_connection is null)
         {
@@ -78,6 +77,66 @@ internal sealed class ClientService(GrpcChannel channel)
         _connection.Disconnected -= Connection_Disconnected;
         await _connection.StopAsync(cancellationToken);
         _connection = null;
+    }
+
+    public override AsyncUnaryCall<StartResponse> StartAsync(
+        StartRequest request, CallOptions options)
+    {
+        if (_startedReceiver is null)
+        {
+            throw new InvalidOperationException($"{nameof(ClientService)} is not initialized.");
+        }
+
+        var call = base.StartAsync(request, options);
+        return new AsyncUnaryCall<StartResponse>(
+            responseAsync: ResponseAsync(),
+            call.ResponseHeadersAsync,
+            call.GetStatus,
+            call.GetTrailers,
+            call.Dispose);
+
+        async Task<StartResponse> ResponseAsync()
+        {
+            await _startedReceiver.StopAsync(default);
+            try
+            {
+                return await call.ResponseAsync;
+            }
+            finally
+            {
+                await _startedReceiver.StartAsync(default);
+            }
+        }
+    }
+
+    public override AsyncUnaryCall<StopResponse> StopAsync(
+        StopRequest request, CallOptions options)
+    {
+        if (_stoppedReceiver is null)
+        {
+            throw new InvalidOperationException($"{nameof(ClientService)} is not initialized.");
+        }
+
+        var call = base.StopAsync(request, options);
+        return new AsyncUnaryCall<StopResponse>(
+            responseAsync: ResponseAsync(),
+            call.ResponseHeadersAsync,
+            call.GetStatus,
+            call.GetTrailers,
+            call.Dispose);
+
+        async Task<StopResponse> ResponseAsync()
+        {
+            await _stoppedReceiver.StopAsync(default);
+            try
+            {
+                return await call.ResponseAsync;
+            }
+            finally
+            {
+                await _stoppedReceiver.StartAsync(default);
+            }
+        }
     }
 
     private static async Task CheckConnectionAsync(

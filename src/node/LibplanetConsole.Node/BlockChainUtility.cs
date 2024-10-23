@@ -59,7 +59,7 @@ internal static class BlockChainUtility
             renderers: renderers);
     }
 
-    private static (IStore Store, IStateStore StateStore) GetStore(string storePath)
+    public static (IStore Store, IStateStore StateStore) GetStore(string storePath)
     {
         if (storePath != string.Empty)
         {

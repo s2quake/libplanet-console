@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -25,7 +24,6 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
-    [JsonIgnore]
     [Category]
     public int ParentProcessId { get; init; }
 
@@ -42,20 +40,18 @@ internal sealed record class ApplicationSettings
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the client runs without REPL.")]
-    [JsonIgnore]
     public bool NoREPL { get; init; }
 
-    public ApplicationOptions ToOptions()
+    public void ToOptions(ApplicationOptions options)
     {
         var port = Port;
         var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        return new ApplicationOptions(port, privateKey)
-        {
-            ParentProcessId = ParentProcessId,
-            NodeEndPoint = EndPointUtility.ParseOrDefault(NodeEndPoint),
-            LogPath = GetFullPath(LogPath),
-            NoREPL = NoREPL,
-        };
+        options.Port = port;
+        options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
+        options.ParentProcessId = ParentProcessId;
+        options.NodeEndPoint = NodeEndPoint;
+        options.LogPath = GetFullPath(LogPath);
+        options.NoREPL = NoREPL;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;

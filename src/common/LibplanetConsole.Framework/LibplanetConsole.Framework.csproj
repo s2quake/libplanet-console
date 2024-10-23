@@ -4,8 +4,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-    <PackageReference Include="NJsonSchema" Version="11.0.2" />
-    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.2" />
   </ItemGroup>
 
   <!-- $(CommandsDirectory) exists. -->
@@ -21,6 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LibplanetConsole.Settings\LibplanetConsole.Settings.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Options\LibplanetConsole.Options.csproj" />
   </ItemGroup>
 </Project>

@@ -103,7 +103,6 @@ internal sealed class InitializeCommand : CommandBase
             StorePath = storePath,
             LogPath = logPath,
             GenesisPath = genesisPath,
-            SeedEndPoint = IsSingleNode is true ? GetLocalHost(port) : null,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
         };

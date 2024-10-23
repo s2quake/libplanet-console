@@ -19,7 +19,7 @@ internal sealed partial class Client : IClient
     private ClientInfo _info;
     private IClientContent[]? _contents;
 
-    public Client(ILogger<Client> logger, ApplicationOptions options)
+    public Client(ILogger<Client> logger, IApplicationOptions options)
     {
         _logger = logger;
         _privateKey = options.PrivateKey;

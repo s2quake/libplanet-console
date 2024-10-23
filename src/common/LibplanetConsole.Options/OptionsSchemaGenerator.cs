@@ -4,10 +4,10 @@ using Namotion.Reflection;
 using NJsonSchema;
 using NJsonSchema.Generation;
 
-namespace LibplanetConsole.Settings;
+namespace LibplanetConsole.Options;
 
-internal sealed class SettingsSchemaGenerator(
-    SettingsSchemaBuilder schemaBuilder, JsonSchemaGeneratorSettings settings)
+internal sealed class OptionsSchemaGenerator(
+    OptionsSchemaBuilder schemaBuilder, JsonSchemaGeneratorSettings settings)
     : JsonSchemaGenerator(settings)
 {
     public override void ApplyDataAnnotations(
@@ -32,6 +32,17 @@ internal sealed class SettingsSchemaGenerator(
         }
 
         schema.Description ??= schemaBuilder.GetDescription(contextualType);
+    }
+
+    public override void Generate<TSchemaType>(
+        TSchemaType schema, ContextualType contextualType, JsonSchemaResolver schemaResolver)
+    {
+        base.Generate(schema, contextualType, schemaResolver);
+        if (contextualType.Name == "PrivateKey"
+            || contextualType.Name == "EndPoint")
+        {
+            schema.Type = JsonObjectType.String;
+        }
     }
 
     protected override void GenerateEnum(JsonSchema schema, JsonTypeDescription typeDescription)

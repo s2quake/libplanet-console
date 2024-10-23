@@ -1,6 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -27,7 +25,6 @@ internal sealed record class ApplicationSettings
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console.")]
-    [JsonIgnore]
     [Category]
     public int ParentProcessId { get; init; }
 
@@ -55,7 +52,6 @@ internal sealed record class ApplicationSettings
     [CommandPropertyExclusion(nameof(GenesisPath))]
     [CommandSummary("Indicates a hexadecimal genesis string. If omitted, a random genesis block " +
                     "is used.\nMutually exclusive with '--genesis-path' option.")]
-    [JsonIgnore]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -66,14 +62,12 @@ internal sealed record class ApplicationSettings
 
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the node runs without a REPL.")]
-    [JsonIgnore]
     public bool NoREPL { get; init; }
 
     [CommandPropertySwitch("single-node")]
     [CommandPropertyExclusion(nameof(SeedEndPoint))]
     [CommandSummary("If set, the node runs as a single node.\n" +
                     "Mutually exclusive with '--seed-endpoint' option.")]
-    [JsonIgnore]
     public bool IsSingleNode { get; set; }
 
     [CommandProperty("module-path")]
@@ -92,65 +86,35 @@ internal sealed record class ApplicationSettings
     [DefaultValue("")]
     public string ActionProviderType { get; set; } = string.Empty;
 
-    public ApplicationOptions ToOptions()
+    public void ToOptions(ApplicationOptions options)
     {
-        var port = Port == 0 ? PortUtility.NextPort() : Port;
-        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
-        var genesis = TryGetGenesis(out var g) == true ? g : CreateGenesis(privateKey);
-        var actionProvider = ModuleLoader.LoadActionLoader(
-            ActionProviderModulePath, ActionProviderType);
-        return new ApplicationOptions(port, privateKey, genesis)
-        {
-            ParentProcessId = ParentProcessId,
-            SeedEndPoint = GetSeedEndPoint(),
-            StorePath = GetFullPath(StorePath),
-            LogPath = GetFullPath(LogPath),
-            NoREPL = NoREPL,
-            ActionProvider = actionProvider,
-        };
+        options.PrivateKey = PrivateKey;
+        options.GenesisPath = GenesisPath;
+        options.Genesis = Genesis;
+        options.ParentProcessId = ParentProcessId;
+        options.SeedEndPoint = GetSeedEndPoint();
+        options.StorePath = GetFullPath(StorePath);
+        options.LogPath = GetFullPath(LogPath);
+        options.NoREPL = NoREPL;
+        options.ActionProviderModulePath = ActionProviderModulePath;
+        options.ActionProviderType = ActionProviderType;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
 
-        EndPoint? GetSeedEndPoint()
+        string GetSeedEndPoint()
         {
             if (SeedEndPoint != string.Empty)
             {
-                return Parse(SeedEndPoint);
+                return SeedEndPoint;
             }
 
-            return IsSingleNode is true ? GetLocalHost(port) : null;
+            if (IsSingleNode is true)
+            {
+                return EndPointUtility.ToString(GetLocalHost(Port));
+            }
+
+            return string.Empty;
         }
-    }
-
-    private static byte[] CreateGenesis(PrivateKey privateKey)
-    {
-        var genesisOptions = new GenesisOptions
-        {
-            GenesisKey = privateKey,
-            Validators = [privateKey.PublicKey],
-            Timestamp = DateTimeOffset.UtcNow,
-        };
-        var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
-        return BlockUtility.SerializeBlock(genesisBlock);
-    }
-
-    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
-    {
-        if (GenesisPath != string.Empty)
-        {
-            var lines = File.ReadAllLines(GenesisPath);
-            genesis = ByteUtil.ParseHex(lines[0]);
-            return true;
-        }
-
-        if (Genesis != string.Empty)
-        {
-            genesis = ByteUtil.ParseHex(Genesis);
-            return true;
-        }
-
-        genesis = null!;
-        return false;
     }
 }

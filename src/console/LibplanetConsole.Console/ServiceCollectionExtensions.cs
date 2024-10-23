@@ -2,19 +2,27 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Commands;
 using LibplanetConsole.Seed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Console;
 
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddConsole(
-        this IServiceCollection @this, ApplicationOptions options)
+        this IServiceCollection @this, IConfiguration configuration)
     {
         var synchronizationContext = SynchronizationContext.Current ?? new();
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
+
+        @this.AddOptions<ApplicationOptions>()
+            .Bind(configuration.GetSection(ApplicationOptions.Position))
+            .ValidateDataAnnotations();
+        @this.AddSingleton<IApplicationOptions>(
+            s => s.GetRequiredService<IOptions<ApplicationOptions>>().Value);
+
         @this.AddSingleton(synchronizationContext);
-        @this.AddSingleton(options);
         @this.AddSingleton<SeedService>()
              .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
         @this.AddSingleton<NodeCollection>()

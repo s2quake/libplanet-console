@@ -1,16 +1,13 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Settings;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
 [CommandSummary("Start the Libplanet node with settings.")]
-internal sealed class StartCommand : CommandAsyncBase
+internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
-    private readonly ApplicationSettingsCollection _settingsCollection = new();
-
     [CommandPropertyRequired]
     [CommandSummary("The path of the repository.")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
@@ -25,23 +22,32 @@ internal sealed class StartCommand : CommandAsyncBase
     [CommandSummary("If set, the REPL is not started.")]
     public bool NoREPL { get; init; }
 
-    [CommandPropertySwitch("manual-start", 'm')]
-    [CommandSummary("If set, the node does not start automatically. " +
-                    "Instead, it waits for the user to start it manually.")]
-    public bool ManualStart { get; init; } = false;
+    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
+    {
+        var directory = RepositoryPath;
+        var oldDirectory = Directory.GetCurrentDirectory();
+        try
+        {
+            Directory.SetCurrentDirectory(directory);
+            options.GenesisPath = GetFullPath(options.GenesisPath);
+            options.StorePath = GetFullPath(options.StorePath);
+            options.LogPath = GetFullPath(options.LogPath);
+            options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
+            options.ParentProcessId = ParentProcessId;
+            options.NoREPL = NoREPL;
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(oldDirectory);
+        }
+    }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var settingsPath = Path.Combine(RepositoryPath, Repository.SettingsFileName);
-            var applicationSettings = Load(settingsPath) with
-            {
-                ParentProcessId = ParentProcessId,
-                NoREPL = NoREPL,
-            };
-            var applicationOptions = applicationSettings.ToOptions();
-            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            var application = new Application(RepositoryPath);
+            application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
@@ -51,9 +57,13 @@ internal sealed class StartCommand : CommandAsyncBase
         }
     }
 
-    private ApplicationSettings Load(string settingsPath)
+    private static string GetFullPath(string path)
     {
-        SettingsLoader.Load(settingsPath, _settingsCollection.ToDictionary());
-        return _settingsCollection.Peek<ApplicationSettings>();
+        if (path != string.Empty && Path.IsPathRooted(path) is false)
+        {
+            return Path.GetFullPath(path);
+        }
+
+        return path;
     }
 }

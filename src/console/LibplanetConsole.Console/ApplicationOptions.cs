@@ -1,28 +1,58 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+using LibplanetConsole.Options;
+
 namespace LibplanetConsole.Console;
 
-public sealed record class ApplicationOptions
+[Options]
+public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IApplicationOptions
 {
+    public const string Position = "Application";
     public const int SeedBlocksyncPortIncrement = 6;
     public const int SeedConsensusPortIncrement = 7;
 
-    public ApplicationOptions(int port)
+    private byte[]? _genesis;
+
+    public int Port { get; set; }
+
+    [JsonIgnore]
+    public NodeOptions[] Nodes { get; set; } = [];
+
+    [JsonIgnore]
+    public ClientOptions[] Clients { get; set; } = [];
+
+    public string GenesisPath { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public string Genesis { get; set; } = string.Empty;
+
+    public string LogPath { get; set; } = string.Empty;
+
+    public bool NoProcess { get; set; }
+
+    public bool Detach { get; set; }
+
+    public bool NewWindow { get; set; }
+
+    byte[] IApplicationOptions.Genesis
+        => _genesis ??= TryGetGenesis(out var v) ? v : [];
+
+    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
     {
-        Port = port;
+        if (GenesisPath != string.Empty)
+        {
+            var lines = File.ReadAllLines(GenesisPath);
+            genesis = ByteUtil.ParseHex(lines[0]);
+            return true;
+        }
+
+        if (Genesis != string.Empty)
+        {
+            genesis = ByteUtil.ParseHex(Genesis);
+            return true;
+        }
+
+        genesis = null!;
+        return false;
     }
-
-    public int Port { get; }
-
-    public NodeOptions[] Nodes { get; init; } = [];
-
-    public ClientOptions[] Clients { get; init; } = [];
-
-    public byte[] Genesis { get; init; } = [];
-
-    public string LogPath { get; init; } = string.Empty;
-
-    public bool NoProcess { get; init; }
-
-    public bool Detach { get; init; }
-
-    public bool NewWindow { get; init; }
 }

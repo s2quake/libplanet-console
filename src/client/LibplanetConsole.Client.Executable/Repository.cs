@@ -1,15 +1,15 @@
 using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
-using LibplanetConsole.Framework;
+using LibplanetConsole.Options;
 using static LibplanetConsole.Common.PathUtility;
 
 namespace LibplanetConsole.Client.Executable;
 
 public sealed record class Repository
 {
-    public const string SettingsFileName = "client-settings.json";
-    public const string SettingsSchemaFileName = "client-settings-schema.json";
+    public const string SettingsFileName = "appsettings.json";
+    public const string SettingsSchemaFileName = "appsettings-schema.json";
 
     public required int Port { get; init; }
 
@@ -18,29 +18,6 @@ public sealed record class Repository
     public EndPoint? NodeEndPoint { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
-
-    public static Repository Load(string settingsPath)
-    {
-        if (Path.IsPathRooted(settingsPath) is false)
-        {
-            throw new ArgumentException(
-                $"'{settingsPath}' must be an absolute path.", nameof(settingsPath));
-        }
-
-        var directoryName = Path.GetDirectoryName(settingsPath)
-            ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
-        var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.DeserializeSchema<Settings>(json);
-        var applicationSettings = settings.Application;
-
-        return new()
-        {
-            Port = applicationSettings.Port,
-            PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
-            LogPath = Path.GetFullPath(applicationSettings.LogPath, directoryName),
-            NodeEndPoint = EndPointUtility.ParseOrDefault(applicationSettings.NodeEndPoint),
-        };
-    }
 
     public dynamic Save(string repositoryPath)
     {
@@ -66,7 +43,7 @@ public sealed record class Repository
         var privateKey = PrivateKey;
         var settingsPath = Path.Combine(repositoryPath, SettingsFileName);
         var schemaPath = Path.Combine(repositoryPath, SettingsSchemaFileName);
-        var schemaBuilder = new ApplicationSettingsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var schema = schemaBuilder.Build();
 
         EnsureDirectory(repositoryPath);
@@ -75,12 +52,27 @@ public sealed record class Repository
         var settings = new Settings
         {
             Schema = SettingsSchemaFileName,
-            Application = new ApplicationSettings
+            Application = new ApplicationOptions
             {
-                Port = Port,
                 PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
                 NodeEndPoint = EndPointUtility.ToString(NodeEndPoint),
+            },
+            Kestrel = new
+            {
+                Endpoints = new
+                {
+                    Http1 = new
+                    {
+                        Url = $"http://localhost:{Port}",
+                        Protocols = "Http2",
+                    },
+                    Http1AndHttp2 = new
+                    {
+                        Url = $"http://localhost:{Port + 1}",
+                        Protocols = "Http1AndHttp2",
+                    },
+                },
             },
         };
 
@@ -99,6 +91,8 @@ public sealed record class Repository
         [JsonPropertyName("$schema")]
         public required string Schema { get; init; } = string.Empty;
 
-        public required ApplicationSettings Application { get; init; }
+        public required ApplicationOptions Application { get; init; }
+
+        public required dynamic Kestrel { get; init; }
     }
 }

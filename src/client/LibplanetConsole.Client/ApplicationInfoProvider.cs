@@ -8,7 +8,7 @@ internal sealed class ApplicationInfoProvider
 {
     private readonly ApplicationInfo _info;
 
-    public ApplicationInfoProvider(ApplicationOptions options)
+    public ApplicationInfoProvider(IApplicationOptions options)
         : base("Application")
     {
         _info = new()

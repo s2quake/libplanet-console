@@ -1,36 +1,42 @@
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Framework;
-using LibplanetConsole.Settings;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
 [CommandSummary("Run the libplanet-console using the given repository path.")]
-internal sealed class StartCommand : CommandAsyncBase
+internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
-    private static readonly ApplicationSettingsCollection _settingsCollection = new();
-
     [CommandPropertyRequired]
     [CommandSummary("The path of the repository.")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
     public string RepositoryPath { get; set; } = string.Empty;
 
+    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
+    {
+        var repositoryPath = Path.GetFullPath(RepositoryPath);
+        var oldDirectory = Directory.GetCurrentDirectory();
+        var resolver = new RepositoryPathResolver();
+        try
+        {
+            Directory.SetCurrentDirectory(repositoryPath);
+            options.Nodes = Repository.LoadNodeOptions(repositoryPath, resolver);
+            options.Clients = Repository.LoadClientOptions(repositoryPath, resolver);
+            options.LogPath = GetFullPath(options.LogPath);
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(oldDirectory);
+        }
+    }
+
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var resolver = new RepositoryPathResolver();
-            var repositoryPath = Path.GetFullPath(RepositoryPath);
-            var settingsPath = resolver.GetSettingsPath(repositoryPath);
-            var applicationSettings = Load(settingsPath);
-            var applicationOptions = applicationSettings.ToOptions() with
-            {
-                Nodes = Repository.LoadNodeOptions(repositoryPath, resolver),
-                Clients = Repository.LoadClientOptions(repositoryPath, resolver),
-                LogPath = applicationSettings.LogPath,
-            };
-
-            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            var application = new Application(RepositoryPath);
+            application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
@@ -40,9 +46,13 @@ internal sealed class StartCommand : CommandAsyncBase
         }
     }
 
-    private static ApplicationSettings Load(string settingsPath)
+    private static string GetFullPath(string path)
     {
-        SettingsLoader.Load(settingsPath, _settingsCollection.ToDictionary());
-        return _settingsCollection.Peek<ApplicationSettings>();
+        if (path != string.Empty && Path.IsPathRooted(path) is false)
+        {
+            return Path.GetFullPath(path);
+        }
+
+        return path;
     }
 }

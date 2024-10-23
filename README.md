@@ -56,13 +56,13 @@ Create and run a repository for a single node.
 ## Settings data
 
 Once the repository is created, the specified path will contain
-`node-settings.json` and `client-settings.json` files as shown below.
+`appsettings.json` and `appsettings.json` files as shown below.
 Users can configure various values to run nodes and clients
 in different environments.
 
 ```json
 {
-  "$schema": "node-settings-schema.json",
+  "$schema": "appsettings-schema.json",
   "application": {
     "port": "55314",
     "privateKey": "5a3df2ce7fc8b8f7c984f867a34e7d343e974f7b661c83536c0a66685bdbf04a",

@@ -1,17 +1,54 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using Namotion.Reflection;
 using NJsonSchema;
 using NJsonSchema.Generation;
 
-namespace LibplanetConsole.Settings;
+namespace LibplanetConsole.Options;
 
-public class SettingsSchemaBuilder
+public class OptionsSchemaBuilder
 {
-    internal static readonly JsonNamingPolicy NamingPolicy = JsonNamingPolicy.CamelCase;
+#pragma warning disable S1075 // URIs should not be hardcoded
+    public const string BaseSchemaUrl = "https://json.schemastore.org/appsettings.json";
+#pragma warning restore S1075 // URIs should not be hardcoded
+
     private readonly Dictionary<string, Type> _typeByName = [];
     private readonly List<string> _requiredNameList = [];
+
+    public static OptionsSchemaBuilder Create()
+    {
+        var assemblies = GetAssemblies(Assembly.GetEntryAssembly()!);
+        var query = from assembly in assemblies
+                    from type in assembly.GetTypes()
+                    where IsOptionsType(type) == true
+                    select type;
+        var types = query.Distinct().ToArray();
+        var schemaBuilder = new OptionsSchemaBuilder();
+        foreach (var type in types)
+        {
+            var settingsType = type;
+            var attributeType = typeof(OptionsAttribute);
+            var attribute = Attribute.GetCustomAttribute(settingsType, attributeType);
+            if (attribute is not OptionsAttribute settingsAttribute)
+            {
+                throw new UnreachableException("The attribute is not found.");
+            }
+
+            var settingsName = settingsAttribute.GetSettingsName(settingsType);
+            schemaBuilder.Add(settingsName, settingsType);
+            if (settingsAttribute.IsRequired)
+            {
+                schemaBuilder.AddRequired(settingsName);
+            }
+        }
+
+        return schemaBuilder;
+
+        static bool IsOptionsType(Type type)
+            => Attribute.IsDefined(type, typeof(OptionsAttribute)) is true;
+    }
 
     public void Add(string name, Type type)
     {
@@ -40,26 +77,30 @@ public class SettingsSchemaBuilder
 
     public string Build()
     {
+        var originSchema = JsonSchema.FromUrlAsync(BaseSchemaUrl, default).GetAwaiter().GetResult();
         var schema = new JsonSchema();
         var optionsSchema = new JsonSchema
         {
             Type = JsonObjectType.Object,
         };
 
+        schema.Definitions["appsettings"] = originSchema;
+        schema.AllOf.Add(new JsonSchema
+        {
+            Reference = originSchema,
+        });
         schema.AllOf.Add(optionsSchema);
         foreach (var (name, type) in _typeByName)
         {
-            var settingsName = NamingPolicy.ConvertName(name);
+            var settingsName = name;
             var settings = new SystemTextJsonSchemaGeneratorSettings
             {
                 FlattenInheritanceHierarchy = true,
                 SerializerOptions = new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = NamingPolicy,
-                    DictionaryKeyPolicy = NamingPolicy,
                 },
             };
-            var schemaGenerator = new SettingsSchemaGenerator(this, settings);
+            var schemaGenerator = new OptionsSchemaGenerator(this, settings);
             var typeSchema = schemaGenerator.Generate(type);
             schema.Definitions[settingsName] = typeSchema;
             optionsSchema.Properties.Add(settingsName, new JsonSchemaProperty()
@@ -71,7 +112,7 @@ public class SettingsSchemaBuilder
 
         foreach (var name in _requiredNameList)
         {
-            var settingsName = NamingPolicy.ConvertName(name);
+            var settingsName = name;
             optionsSchema.RequiredProperties.Add(settingsName);
         }
 
@@ -92,5 +133,17 @@ public class SettingsSchemaBuilder
         }
 
         return $"'{customAttributeProvider}' does not have a description.";
+    }
+
+    private static IEnumerable<Assembly> GetAssemblies(Assembly assembly)
+    {
+        var directory = Path.GetDirectoryName(assembly.Location)!;
+        var files = Directory.GetFiles(directory, "LibplanetConsole.*.dll");
+        string[] paths =
+        [
+            assembly.Location,
+            .. files,
+        ];
+        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
     }
 }

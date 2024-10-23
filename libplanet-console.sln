@@ -45,7 +45,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Console.Ev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Console.Tests", "test\LibplanetConsole.Console.Tests\LibplanetConsole.Console.Tests.csproj", "{27DE2BC6-4EBC-4905-AC2F-1DF839CBF4A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Settings", "src\common\LibplanetConsole.Settings\LibplanetConsole.Settings.csproj", "{9CB83BAC-B52F-4C48-A8F6-197D3DF3DE04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Options", "src\common\LibplanetConsole.Options\LibplanetConsole.Options.csproj", "{9CB83BAC-B52F-4C48-A8F6-197D3DF3DE04}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.DataAnnotations", "src\common\LibplanetConsole.DataAnnotations\LibplanetConsole.DataAnnotations.csproj", "{684C2DD3-9260-4CEB-B835-1DA76EBD24D5}"
 EndProject
