@@ -160,11 +160,11 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             = await CreateTransport(privateKey, blocksyncPort, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = [blocksyncSeedPeer],
-            BootstrapOptions = new()
-            {
-                SeedPeers = [blocksyncSeedPeer],
-            },
+            StaticPeers = [],
+            // BootstrapOptions = new()
+            // {
+            //     SeedPeers = [blocksyncSeedPeer],
+            // },
         };
         var consensusTransport = await CreateTransport(
             privateKey: privateKey,
@@ -193,8 +193,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             consensusOption: consensusReactorOption);
         _startTask = _swarm.StartAsync(cancellationToken: default);
         _logger.LogDebug("Node.Swarm is starting: {Address}", Address);
-        await _swarm.BootstrapAsync(cancellationToken: default);
-        _logger.LogDebug("Node.Swarm is bootstrapped: {Address}", Address);
+        // await _swarm.BootstrapAsync(cancellationToken: default);
+        // _logger.LogDebug("Node.Swarm is bootstrapped: {Address}", Address);
         IsRunning = true;
         UpdateNodeInfo();
         _logger.LogDebug("Node is started: {Address}", Address);
