@@ -1,10 +1,14 @@
+using System.Text.Json.Serialization;
+
 namespace LibplanetConsole.Options;
 
 public abstract class OptionsBase<T>
     where T : OptionsBase<T>
 {
+    [JsonIgnore]
     public bool IsConfigured { get; internal set; }
 
+    [JsonIgnore]
     public bool IsValidated { get; internal set; }
 
     public T Verify()

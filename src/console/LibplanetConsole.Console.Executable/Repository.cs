@@ -198,7 +198,7 @@ public sealed record class Repository
 
     private static void SaveSettingsSchema(string schemaPath)
     {
-        var schemaBuilder = new OptionsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var schema = schemaBuilder.Build();
         File.WriteAllLines(schemaPath, [schema]);
     }
