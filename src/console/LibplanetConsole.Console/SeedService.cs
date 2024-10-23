@@ -8,6 +8,8 @@ internal sealed class SeedService(IApplicationOptions options) : ISeedService
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
 
+    bool ISeedService.IsEnabled => true;
+
     public Task<SeedInfo> GetSeedAsync(
         PublicKey publicKey, CancellationToken cancellationToken)
     {

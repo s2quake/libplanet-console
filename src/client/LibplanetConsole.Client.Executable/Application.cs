@@ -53,7 +53,10 @@ internal sealed class Application
 
         services.AddClient(configuration);
 
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
         services.AddGrpcReflection();
 
         services.AddSingleton<IClientContent, ClientEventTracer>();

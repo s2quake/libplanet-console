@@ -1,3 +1,5 @@
+using Grpc.Core;
+using Grpc.Core.Interceptors;
 using JSSoft.Commands;
 using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Evidence;
@@ -63,7 +65,10 @@ internal sealed class Application
         services.AddExplorer(configuration);
         services.AddEvidence();
 
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
         services.AddGrpcReflection();
 
         services.AddHostedService<BlockChainEventTracer>();

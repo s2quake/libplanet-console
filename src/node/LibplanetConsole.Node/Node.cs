@@ -291,7 +291,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private async Task<SeedInfo> GetSeedInfoAsync(
         EndPoint seedEndPoint, ILogger logger, CancellationToken cancellationToken)
     {
-        if (_serviceProvider.GetService<ISeedService>() is { } seedService)
+        if (_serviceProvider.GetService<ISeedService>() is { IsEnabled: true } seedService)
         {
             return await seedService.GetSeedAsync(PublicKey, cancellationToken);
         }

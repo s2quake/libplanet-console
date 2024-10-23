@@ -58,7 +58,10 @@ internal sealed class Application
         services.AddConsole(configuration);
         services.AddEvidence();
 
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
         services.AddGrpcReflection();
 
         services.AddHostedService<ClientCollectionEventTracer>();
