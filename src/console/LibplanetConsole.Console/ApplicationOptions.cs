@@ -33,24 +33,21 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public bool NewWindow { get; set; }
 
     byte[] IApplicationOptions.Genesis
-        => _genesis ??= TryGetGenesis(out var v) ? v : [];
+        => _genesis ??= GetGenesis();
 
-    private bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
+    private byte[] GetGenesis()
     {
         if (GenesisPath != string.Empty)
         {
             var lines = File.ReadAllLines(GenesisPath);
-            genesis = ByteUtil.ParseHex(lines[0]);
-            return true;
+            return ByteUtil.ParseHex(lines[0]);
         }
 
         if (Genesis != string.Empty)
         {
-            genesis = ByteUtil.ParseHex(Genesis);
-            return true;
+            return ByteUtil.ParseHex(Genesis);
         }
 
-        genesis = null!;
-        return false;
+        throw new NotSupportedException("Genesis is not set.");
     }
 }

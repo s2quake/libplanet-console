@@ -35,15 +35,16 @@ internal sealed class SystemTerminalHostedService(
             await terminal.StartAsync(cancellationToken);
             _isRunning = true;
         }
-        else if (options.ParentProcessId != 0 &&
+        else
+        {
+            _waitInputTask = WaitInputAsync();
+        }
+
+        if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcessId = options.ParentProcessId;
             _waitForExitTask = WaitForExit(parentProcess);
-        }
-        else if (options.ParentProcessId == 0)
-        {
-            _waitInputTask = WaitInputAsync();
         }
 
         await Task.CompletedTask;

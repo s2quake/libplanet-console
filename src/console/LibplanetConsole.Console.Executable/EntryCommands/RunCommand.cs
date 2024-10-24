@@ -19,7 +19,7 @@ internal sealed class RunCommand
     public int Port { get; init; }
 
 #if DEBUG
-    [CommandProperty(InitValue = 1)]
+    [CommandProperty(InitValue = 2)]
 #else
     [CommandProperty(InitValue = 4)]
 #endif
@@ -89,18 +89,24 @@ internal sealed class RunCommand
     {
         var portGenerator = new PortGenerator(Port);
         var port = portGenerator.Current;
-        var endPoint = GetLocalHost(port);
-        var nodeOptions = GetNodeOptions(endPoint, GetNodes(), portGenerator);
-        var clientOptions = GetClientOptions(nodeOptions, GetClients(), portGenerator);
+        var nodeOptions = GetNodeOptions(GetNodes(), portGenerator);
+        var clientOptions = GetClientOptions(GetClients(), portGenerator);
         var repository = new Repository(port, nodeOptions, clientOptions);
         options.LogPath = GetFullPath(LogPath);
         options.Nodes = repository.Nodes;
         options.Clients = repository.Clients;
         options.Genesis = Genesis;
-        options.GenesisPath = GenesisPath;
+        options.GenesisPath = GetFullPath(GenesisPath);
         options.NoProcess = NoProcess;
         options.NewWindow = NewWindow;
         options.Detach = Detach;
+
+        if (options.Genesis == string.Empty && options.GenesisPath == string.Empty)
+        {
+            var genesis = repository.CreateGenesis(
+                genesisKey: new PrivateKey(), DateTimeOffset.UtcNow);
+            options.Genesis = ByteUtil.Hex(genesis);
+        }
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
@@ -130,28 +136,23 @@ internal sealed class RunCommand
     }
 
     private static NodeOptions[] GetNodeOptions(
-        EndPoint endPoint, PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
+        PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
     {
         return [.. nodePrivateKeys.Select(key => new NodeOptions
         {
             EndPoint = GetLocalHost(portGenerator.Next()),
             PrivateKey = key,
-            SeedEndPoint = endPoint,
         })];
     }
 
     private static ClientOptions[] GetClientOptions(
-        NodeOptions[] nodeOptions, PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
+        PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
     {
         return [.. clientPrivateKeys.Select(key => new ClientOptions
         {
             EndPoint = GetLocalHost(portGenerator.Next()),
-            NodeEndPoint = Random(nodeOptions).EndPoint,
             PrivateKey = key,
         })];
-
-        static NodeOptions Random(NodeOptions[] nodeOptions)
-            => nodeOptions[System.Random.Shared.Next(nodeOptions.Length)];
     }
 
     private PrivateKey[] GetNodes()

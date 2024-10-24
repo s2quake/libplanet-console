@@ -192,14 +192,10 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        if (_nodeOptions.SeedEndPoint is null)
-        {
-            throw new InvalidOperationException("SeedEndPoint is not set.");
-        }
-
+        var seedEndPoint = GetSeedEndPoint();
         var request = new StartRequest
         {
-            SeedEndPoint = EndPointUtility.ToString(_nodeOptions.SeedEndPoint),
+            SeedEndPoint = EndPointUtility.ToString(seedEndPoint),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.StartAsync(request, callOptions);
@@ -339,5 +335,21 @@ internal sealed partial class Node : INode
 
             Detached?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private EndPoint GetSeedEndPoint()
+    {
+        if (_nodeOptions.SeedEndPoint is { } seedEndPoint)
+        {
+            return seedEndPoint;
+        }
+
+        var server = _serviceProvider.GetRequiredService<IServer>();
+        var addressesFeature = server.Features.Get<IServerAddressesFeature>()
+            ?? throw new InvalidOperationException("ServerAddressesFeature is not available.");
+        var address = addressesFeature.Addresses.First();
+        var url = new Uri(address);
+
+        return new DnsEndPoint(url.Host, url.Port);
     }
 }
