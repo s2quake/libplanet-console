@@ -2,7 +2,7 @@ using LibplanetConsole.Common;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
-namespace LibplanetConsole.Node.Executable;
+namespace LibplanetConsole.Client.Executable;
 
 internal sealed class ServerInfoProvider(IServer server)
     : InfoProviderBase<IHostApplicationLifetime>("Server")

@@ -120,6 +120,7 @@ internal sealed class RunCommand
                 options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
             services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
+            await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
         {

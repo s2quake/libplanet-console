@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
+using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using Serilog;
 
@@ -33,6 +34,7 @@ internal sealed class Application
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
+        services.AddSingleton<IInfoProvider, ServerInfoProvider>();
 
         services.AddSingleton<HelpCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());

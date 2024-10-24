@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Console.Evidence;
 using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
@@ -37,6 +38,7 @@ internal sealed class Application
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
+        services.AddSingleton<IInfoProvider, ServerInfoProvider>();
 
         services.AddSingleton<HelpCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
