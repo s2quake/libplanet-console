@@ -2,8 +2,6 @@ namespace LibplanetConsole.Client;
 
 public interface IApplicationOptions
 {
-    int Port { get; }
-
     PrivateKey PrivateKey { get; }
 
     int ParentProcessId { get; }

@@ -6,6 +6,8 @@ using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Blockchain;
 using LibplanetConsole.Grpc.Node;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using static LibplanetConsole.Common.EndPointUtility;
@@ -190,12 +192,14 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        var applicationOptions = this.GetRequiredService<IApplicationOptions>();
-        var seedEndPoint = EndPointUtility.ToString(
-            _nodeOptions.SeedEndPoint ?? GetLocalHost(applicationOptions.Port));
+        if (_nodeOptions.SeedEndPoint is null)
+        {
+            throw new InvalidOperationException("SeedEndPoint is not set.");
+        }
+
         var request = new StartRequest
         {
-            SeedEndPoint = seedEndPoint,
+            SeedEndPoint = EndPointUtility.ToString(_nodeOptions.SeedEndPoint),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.StartAsync(request, callOptions);

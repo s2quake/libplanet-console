@@ -127,9 +127,24 @@ public sealed record class Repository
         var clientsPath = resolver.GetClientsPath(repositoryPath);
         var applicationOptions = new ApplicationOptions
         {
-            Port = Port,
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
             LogPath = LogPath,
+        };
+        var kestrelOptions = new
+        {
+            Endpoints = new
+            {
+                Http1 = new
+                {
+                    Url = $"http://localhost:{Port}",
+                    Protocols = "Http2",
+                },
+                Http1AndHttp2 = new
+                {
+                    Url = $"http://localhost:{Port + 1}",
+                    Protocols = "Http1AndHttp2",
+                },
+            },
         };
 
         info.RepositoryPath = repositoryPath;
@@ -138,7 +153,7 @@ public sealed record class Repository
         info.GenesisPath = genesisPath;
         SaveSettingsSchema(schemaPath);
         info.SchemaPath = schemaPath;
-        SaveSettings(schemaPath, settingsPath, applicationOptions);
+        SaveSettings(schemaPath, settingsPath, applicationOptions, kestrelOptions);
         info.SettingsPath = settingsPath;
 
         info.Nodes = new List<ExpandoObject>(Nodes.Length);
@@ -151,6 +166,7 @@ public sealed record class Repository
             {
                 PrivateKey = node.PrivateKey,
                 Port = GetPort(node.EndPoint),
+                SeedEndPoint = EndPointUtility.ToString(node.SeedEndPoint),
                 OutputPath = nodePath,
                 GenesisPath = genesisPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
@@ -211,13 +227,17 @@ public sealed record class Repository
     }
 
     private static void SaveSettings(
-        string schemaPath, string settingsPath, ApplicationOptions applicationOptions)
+        string schemaPath,
+        string settingsPath,
+        ApplicationOptions applicationOptions,
+        dynamic kestrelOptions)
     {
         var schemaRelativePath = PathUtility.GetRelativePath(settingsPath, schemaPath);
         var settings = new Settings
         {
             Schema = schemaRelativePath,
             Application = applicationOptions,
+            Kestrel = kestrelOptions,
         };
         var json = JsonUtility.SerializeSchema(settings);
         File.WriteAllLines(settingsPath, [json]);
@@ -229,5 +249,7 @@ public sealed record class Repository
         public required string Schema { get; init; } = string.Empty;
 
         public required ApplicationOptions Application { get; init; }
+
+        public required dynamic Kestrel { get; init; }
     }
 }

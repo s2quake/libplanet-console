@@ -13,8 +13,6 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     private byte[]? _genesis;
 
-    public int Port { get; set; }
-
     [JsonIgnore]
     public NodeOptions[] Nodes { get; set; } = [];
 

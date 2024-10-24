@@ -47,6 +47,10 @@ internal sealed class InitializeCommand : CommandBase
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
+    [EndPoint]
+    public string SeedEndPoint { get; set; } = string.Empty;
+
+    [CommandProperty]
     [CommandSummary("The file path of the genesis." +
                     "If omitted, the 'genesis' file is used.")]
     [Path(Type = PathType.File, AllowEmpty = true)]
@@ -102,6 +106,7 @@ internal sealed class InitializeCommand : CommandBase
             PrivateKey = privateKey,
             StorePath = storePath,
             LogPath = logPath,
+            SeedEndPoint = ParseOrDefault(SeedEndPoint),
             GenesisPath = genesisPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,

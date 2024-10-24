@@ -3,20 +3,18 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Executable.Tracers;
 
-internal sealed class ClientEventTracer(IApplicationOptions options) : ClientContentBase
+internal sealed class ClientEventTracer : ClientContentBase
 {
     protected override Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var endPoint = options.Port;
-        var message = $"BlockChain has been started.: {endPoint}";
+        var message = $"BlockChain has been started.";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
         return Task.CompletedTask;
     }
 
     protected override Task OnStopAsync(CancellationToken cancellationToken)
     {
-        var endPoint = options.Port;
-        var message = $"BlockChain has been stopped.: {endPoint}";
+        var message = $"BlockChain has been stopped.";
         Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
         return Task.CompletedTask;
     }

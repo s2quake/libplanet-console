@@ -97,7 +97,6 @@ internal sealed record class ApplicationSettings
         var nodeOptions = GetNodeOptions(endPoint, GetNodes(), portGenerator);
         var clientOptions = GetClientOptions(nodeOptions, GetClients(), portGenerator);
         var repository = new Repository(port, nodeOptions, clientOptions);
-        options.Port = port;
         options.LogPath = GetFullPath(LogPath);
         options.Nodes = repository.Nodes;
         options.Clients = repository.Clients;
