@@ -20,17 +20,7 @@ internal sealed class Application
 
     private readonly WebApplicationBuilder _builder;
 
-    public Application()
-        : this(Create(null))
-    {
-    }
-
-    public Application(string repositoryPath)
-        : this(Create(repositoryPath))
-    {
-    }
-
-    private Application(WebApplicationBuilder builder)
+    public Application(WebApplicationBuilder builder)
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
@@ -88,15 +78,5 @@ internal sealed class Application
 
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);
-    }
-
-    private static WebApplicationBuilder Create(string? repositoryPath)
-    {
-        var options = new WebApplicationOptions
-        {
-            ContentRootPath = repositoryPath,
-        };
-
-        return WebApplication.CreateBuilder(options);
     }
 }

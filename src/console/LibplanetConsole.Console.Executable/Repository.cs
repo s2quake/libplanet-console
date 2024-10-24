@@ -166,7 +166,6 @@ public sealed record class Repository
             {
                 PrivateKey = node.PrivateKey,
                 Port = GetPort(node.EndPoint),
-                SeedEndPoint = EndPointUtility.ToString(node.SeedEndPoint),
                 OutputPath = nodePath,
                 GenesisPath = genesisPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,

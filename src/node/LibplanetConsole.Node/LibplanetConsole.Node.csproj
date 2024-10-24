@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Seed\LibplanetConsole.Seed.csproj" />
-    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Options\LibplanetConsole.Options.csproj" />
   </ItemGroup>
 
   <ItemGroup>

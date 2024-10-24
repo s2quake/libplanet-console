@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
+    <ProjectReference Include="..\..\common\LibplanetConsole.Options\LibplanetConsole.Options.csproj" />
   </ItemGroup>
 
   <ItemGroup>
