@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
@@ -272,11 +271,17 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node process is already running.");
         }
 
+        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
         var nodeOptions = _nodeOptions;
         var process = new NodeProcess(this, nodeOptions)
         {
             Detach = options.Detach,
             NewWindow = options.NewWindow,
+            ExtendedArguments =
+            {
+                "--genesis",
+                ByteUtil.Hex(applicationOptions.Genesis),
+            },
         };
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, _processCancellationTokenSource.Token);
