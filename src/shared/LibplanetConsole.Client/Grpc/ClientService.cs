@@ -10,8 +10,7 @@ internal sealed class ClientService(GrpcChannel channel)
     : ClientGrpcServiceClient(channel), IDisposable
 {
     private ConnectionMonitor<ClientService>? _connection;
-    private StreamReceiver<GetStartedStreamResponse>? _startedReceiver;
-    private StreamReceiver<GetStoppedStreamResponse>? _stoppedReceiver;
+    private StreamReceiver<GetEventStreamResponse>? _eventReceiver;
     private bool _isDisposed;
 
     public event EventHandler? Disconnected;
@@ -24,10 +23,8 @@ internal sealed class ClientService(GrpcChannel channel)
     {
         if (_isDisposed is false)
         {
-            _startedReceiver?.Dispose();
-            _startedReceiver = null;
-            _stoppedReceiver?.Dispose();
-            _stoppedReceiver = null;
+            _eventReceiver?.Dispose();
+            _eventReceiver = null;
             _connection?.Dispose();
             _connection = null;
             _isDisposed = true;
@@ -44,15 +41,9 @@ internal sealed class ClientService(GrpcChannel channel)
         _connection = new ConnectionMonitor<ClientService>(this, CheckConnectionAsync);
         _connection.Disconnected += Connection_Disconnected;
         await _connection.StartAsync(cancellationToken);
-        _startedReceiver = new(
-            GetStartedStream(new(), cancellationToken: cancellationToken),
-            (response) => Started?.Invoke(this, new(response.ClientInfo)));
-        _stoppedReceiver = new(
-            GetStoppedStream(new(), cancellationToken: cancellationToken),
-            (response) => Stopped?.Invoke(this, EventArgs.Empty));
-        await Task.WhenAll(
-            _startedReceiver.StartAsync(cancellationToken),
-            _stoppedReceiver.StartAsync(cancellationToken));
+        _eventReceiver = new(
+            GetEventStream(new(), cancellationToken: cancellationToken), InvokeEvent);
+        await _eventReceiver.StartAsync(cancellationToken);
     }
 
     public async Task ReleaseAsync(CancellationToken cancellationToken)
@@ -62,16 +53,10 @@ internal sealed class ClientService(GrpcChannel channel)
             throw new InvalidOperationException($"{nameof(ClientService)} is not started.");
         }
 
-        if (_startedReceiver is not null)
+        if (_eventReceiver is not null)
         {
-            await _startedReceiver.StopAsync(cancellationToken);
-            _startedReceiver = null;
-        }
-
-        if (_stoppedReceiver is not null)
-        {
-            await _stoppedReceiver.StopAsync(cancellationToken);
-            _stoppedReceiver = null;
+            await _eventReceiver.StopAsync(cancellationToken);
+            _eventReceiver = null;
         }
 
         _connection.Disconnected -= Connection_Disconnected;
@@ -82,7 +67,7 @@ internal sealed class ClientService(GrpcChannel channel)
     public override AsyncUnaryCall<StartResponse> StartAsync(
         StartRequest request, CallOptions options)
     {
-        if (_startedReceiver is null)
+        if (_eventReceiver is null)
         {
             throw new InvalidOperationException($"{nameof(ClientService)} is not initialized.");
         }
@@ -97,14 +82,14 @@ internal sealed class ClientService(GrpcChannel channel)
 
         async Task<StartResponse> ResponseAsync()
         {
-            await _startedReceiver.StopAsync(default);
+            await _eventReceiver.StopAsync(default);
             try
             {
                 return await call.ResponseAsync;
             }
             finally
             {
-                await _startedReceiver.StartAsync(default);
+                await _eventReceiver.StartAsync(default);
             }
         }
     }
@@ -112,7 +97,7 @@ internal sealed class ClientService(GrpcChannel channel)
     public override AsyncUnaryCall<StopResponse> StopAsync(
         StopRequest request, CallOptions options)
     {
-        if (_stoppedReceiver is null)
+        if (_eventReceiver is null)
         {
             throw new InvalidOperationException($"{nameof(ClientService)} is not initialized.");
         }
@@ -127,14 +112,14 @@ internal sealed class ClientService(GrpcChannel channel)
 
         async Task<StopResponse> ResponseAsync()
         {
-            await _stoppedReceiver.StopAsync(default);
+            await _eventReceiver.StopAsync(default);
             try
             {
                 return await call.ResponseAsync;
             }
             finally
             {
-                await _stoppedReceiver.StartAsync(default);
+                await _eventReceiver.StartAsync(default);
             }
         }
     }
@@ -149,13 +134,24 @@ internal sealed class ClientService(GrpcChannel channel)
     {
         if (sender is ConnectionMonitor<ClientService> connection && connection == _connection)
         {
-            _startedReceiver?.Dispose();
-            _startedReceiver = null;
-            _stoppedReceiver?.Dispose();
-            _stoppedReceiver = null;
+            _eventReceiver?.Dispose();
+            _eventReceiver = null;
             _connection.Dispose();
             _connection = null;
             Disconnected?.Invoke(this, e);
+        }
+    }
+
+    private void InvokeEvent(GetEventStreamResponse response)
+    {
+        switch (response.EventCase)
+        {
+            case GetEventStreamResponse.EventOneofCase.Started:
+                Started?.Invoke(this, new ClientEventArgs(response.Started.ClientInfo));
+                break;
+            case GetEventStreamResponse.EventOneofCase.Stopped:
+                Stopped?.Invoke(this, EventArgs.Empty);
+                break;
         }
     }
 }

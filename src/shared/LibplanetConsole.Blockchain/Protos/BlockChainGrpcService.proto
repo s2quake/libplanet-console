@@ -14,7 +14,7 @@ service BlockChainGrpcService {
   rpc GetBlockHash(GetBlockHashRequest) returns (GetBlockHashResponse);
   rpc GetAction(GetActionRequest) returns (GetActionResponse);
 
-  rpc GetBlockAppendedStream(GetBlockAppendedStreamRequest) returns (stream GetBlockAppendedStreamResponse);
+  rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
 
 message BlockInfoProto {
@@ -76,9 +76,15 @@ message GetActionResponse {
   bytes action_data = 1;
 }
 
-message GetBlockAppendedStreamRequest {
+message BlockAppendedEvent {
+  BlockInfoProto block_info = 1;
 }
 
-message GetBlockAppendedStreamResponse {
-  BlockInfoProto block_info = 1;
+message GetEventStreamRequest {
+}
+
+message GetEventStreamResponse {
+  oneof event {
+    BlockAppendedEvent block_appended = 1;
+  }
 }

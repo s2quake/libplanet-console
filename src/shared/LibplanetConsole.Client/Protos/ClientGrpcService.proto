@@ -13,8 +13,7 @@ service ClientGrpcService {
   rpc Stop(StopRequest) returns (StopResponse);
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
 
-  rpc GetStartedStream(GetStartedStreamRequest) returns (stream GetStartedStreamResponse);
-  rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
+  rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
 
 message ClientInfoProto {
@@ -52,15 +51,19 @@ message GetInfoResponse {
   ClientInfoProto client_info = 1;
 }
 
-message GetStartedStreamRequest {
-}
-
-message GetStartedStreamResponse {
+message StartedEvent {
   ClientInfoProto client_info = 1;
 }
 
-message GetStoppedStreamRequest {
+message StoppedEvent {
 }
 
-message GetStoppedStreamResponse {
+message GetEventStreamRequest {
+}
+
+message GetEventStreamResponse {
+  oneof event {
+    StartedEvent started = 1;
+    StoppedEvent stopped = 2;
+  }
 }

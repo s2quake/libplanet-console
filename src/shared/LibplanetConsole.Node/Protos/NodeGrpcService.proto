@@ -13,19 +13,18 @@ service NodeGrpcService {
   rpc Stop(StopRequest) returns (StopResponse);
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
 
-  rpc GetStartedStream(GetStartedStreamRequest) returns (stream GetStartedStreamResponse);
-  rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
+  rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
 
 message NodeInfoProto {
-    int32 process_id = 1;
-    string app_protocol_version = 2;
-    int32 blocksync_port = 3;
-    int32 consensus_port = 4;
-    libplanet.console.types.v1.AddressProto address = 5;
-    libplanet.console.types.v1.BlockHashProto genesis_hash = 6;
-    libplanet.console.blockchain.v1.BlockInfoProto tip = 7;
-    bool is_running = 8;
+  int32 process_id = 1;
+  string app_protocol_version = 2;
+  int32 blocksync_port = 3;
+  int32 consensus_port = 4;
+  libplanet.console.types.v1.AddressProto address = 5;
+  libplanet.console.types.v1.BlockHashProto genesis_hash = 6;
+  libplanet.console.blockchain.v1.BlockInfoProto tip = 7;
+  bool is_running = 8;
 }
 
 message PingRequest {
@@ -39,7 +38,7 @@ message StartRequest {
 }
 
 message StartResponse {
-    NodeInfoProto node_info = 1;
+  NodeInfoProto node_info = 1;
 }
 
 message StopRequest {
@@ -52,18 +51,22 @@ message GetInfoRequest {
 }
 
 message GetInfoResponse {
-    NodeInfoProto node_info = 1;
+  NodeInfoProto node_info = 1;
 }
 
-message GetStartedStreamRequest {
+message StartedEvent {
+  NodeInfoProto node_info = 1;
 }
 
-message GetStartedStreamResponse {
-    NodeInfoProto node_info = 1;
+message StoppedEvent {
 }
 
-message GetStoppedStreamRequest {
+message GetEventStreamRequest {
 }
 
-message GetStoppedStreamResponse {
+message GetEventStreamResponse {
+  oneof event {
+    StartedEvent started = 1;
+    StoppedEvent stopped = 2;
+  }
 }
