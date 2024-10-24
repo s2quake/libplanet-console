@@ -7,6 +7,8 @@ using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
+using Libplanet.Store;
+using Libplanet.Store.Trie;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
@@ -35,6 +37,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 
     private EndPoint? _seedEndPoint;
     private Swarm? _swarm;
+    private IKeyValueStore? _keyValueStore;
+    private IStore? _store;
+    private IStateStore? _stateStore;
     private Task _startTask = Task.CompletedTask;
     private INodeContent[]? _contents;
     private bool _isDisposed;
@@ -170,12 +175,17 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             TargetBlockInterval = TimeSpan.FromSeconds(2),
             ContextTimeoutOptions = new(),
         };
+        var (keyValueStore, store, stateStore) = BlockChainUtility.GetStore(storePath);
         var blockChain = BlockChainUtility.CreateBlockChain(
             genesisBlock: BlockUtility.DeserializeBlock(_genesis),
-            storePath: storePath,
+            store,
+            stateStore,
             renderer: this,
             actionProvider: _actionProvider);
 
+        _keyValueStore = keyValueStore;
+        _store = store;
+        _stateStore = stateStore;
         _swarm = new Swarm(
             blockChain: blockChain,
             privateKey: privateKey,
@@ -220,6 +230,13 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         }
 
         _swarm = null;
+
+        _keyValueStore?.Dispose();
+        _keyValueStore = null;
+        _store?.Dispose();
+        _store = null;
+        _stateStore?.Dispose();
+        _stateStore = null;
         _startTask = Task.CompletedTask;
         IsRunning = false;
         UpdateNodeInfo();
