@@ -123,6 +123,7 @@ internal sealed partial class Node : INode
         var blockChainService = new BlockChainService(channel);
         nodeService.Started += NodeService_Started;
         nodeService.Stopped += NodeService_Stopped;
+        nodeService.Disconnected += NodeService_Disconnected;
         blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
@@ -158,6 +159,7 @@ internal sealed partial class Node : INode
         {
             _nodeService.Started -= NodeService_Started;
             _nodeService.Stopped -= NodeService_Stopped;
+            _nodeService.Disconnected -= NodeService_Disconnected;
             _nodeService.Dispose();
             _nodeService = null;
         }
@@ -245,6 +247,7 @@ internal sealed partial class Node : INode
             {
                 _nodeService.Started -= NodeService_Started;
                 _nodeService.Stopped -= NodeService_Stopped;
+                _nodeService.Disconnected -= NodeService_Disconnected;
                 _nodeService.Dispose();
                 _nodeService = null;
             }
@@ -323,6 +326,7 @@ internal sealed partial class Node : INode
         {
             _nodeService.Started -= NodeService_Started;
             _nodeService.Stopped -= NodeService_Stopped;
+            _nodeService.Disconnected -= NodeService_Disconnected;
             _nodeService.Dispose();
             _nodeService = null;
             if (_blockChainService is not null)

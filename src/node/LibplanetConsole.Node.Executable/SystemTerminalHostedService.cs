@@ -2,6 +2,7 @@ using System.Diagnostics;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Common.Threading;
 
 namespace LibplanetConsole.Node.Executable;
 
@@ -53,7 +54,7 @@ internal sealed class SystemTerminalHostedService(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_waitInputTask, _waitForExitTask);
+        await TaskUtility.TryWaitAll(_waitInputTask, _waitForExitTask);
         if (_isRunning is true)
         {
             await terminal.StopAsync(cancellationToken);
@@ -73,14 +74,18 @@ internal sealed class SystemTerminalHostedService(
 
     private async Task WaitInputAsync()
     {
+        using var cancellationTokenSource = new CancellationTokenSource();
+        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
         await Console.Out.WriteLineAsync("Press any key to exit.");
-        await Task.Run(() => Console.ReadKey(intercept: true));
+        await Task.Run(() => Console.ReadKey(intercept: true), cancellationTokenSource.Token);
         applicationLifetime.StopApplication();
     }
 
     private async Task WaitForExit(Process process)
     {
-        await process.WaitForExitAsync();
+        using var cancellationTokenSource = new CancellationTokenSource();
+        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
+        await process.WaitForExitAsync(cancellationTokenSource.Token);
         logger.LogDebug("Parent process is exited: {ParentProcessId}.", _parentProcessId);
         applicationLifetime.StopApplication();
     }

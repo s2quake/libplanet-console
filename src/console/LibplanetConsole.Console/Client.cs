@@ -99,6 +99,7 @@ internal sealed partial class Client : IClient
         var blockChainService = new BlockChainService(channel);
         clientService.Started += ClientService_Started;
         clientService.Stopped += ClientService_Stopped;
+        clientService.Disconnected += ClientService_Disconnected;
         blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
@@ -220,9 +221,9 @@ internal sealed partial class Client : IClient
 
             if (_clientService is not null)
             {
-                _clientService.Disconnected -= ClientService_Disconnected;
                 _clientService.Started -= ClientService_Started;
                 _clientService.Stopped -= ClientService_Stopped;
+                _clientService.Disconnected -= ClientService_Disconnected;
                 _clientService.Dispose();
                 _clientService = null;
             }
@@ -295,9 +296,9 @@ internal sealed partial class Client : IClient
     {
         if (sender is ClientService clientService && _clientService == clientService)
         {
-            _clientService.Disconnected -= ClientService_Disconnected;
             _clientService.Started -= ClientService_Started;
             _clientService.Stopped -= ClientService_Stopped;
+            _clientService.Disconnected -= ClientService_Disconnected;
             _clientService.Dispose();
             _clientService = null;
             if (_blockChainService is not null)

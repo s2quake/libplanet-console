@@ -42,4 +42,17 @@ public static class TaskUtility
             return false;
         }
     }
+
+    public static async Task<bool> TryWaitAll(params Task[] tasks)
+    {
+        try
+        {
+            await Task.WhenAll(tasks);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }
