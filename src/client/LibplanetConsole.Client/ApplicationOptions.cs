@@ -1,22 +1,37 @@
+using System.Text.Json.Serialization;
+using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.Options;
+
 namespace LibplanetConsole.Client;
 
-public sealed record class ApplicationOptions
+[Options]
+public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IApplicationOptions
 {
-    public ApplicationOptions(int port, PrivateKey privateKey)
-    {
-        Port = port;
-        PrivateKey = privateKey;
-    }
+    public const string Position = "Application";
 
-    public int Port { get; }
+    private PrivateKey? _privateKey;
+    private EndPoint? _nodeEndPoint;
 
-    public PrivateKey PrivateKey { get; }
+    public int Port { get; set; }
 
-    public int ParentProcessId { get; init; }
+    [PrivateKey]
+    public string PrivateKey { get; set; } = string.Empty;
 
-    public EndPoint? NodeEndPoint { get; init; }
+    PrivateKey IApplicationOptions.PrivateKey
+        => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 
-    public string LogPath { get; init; } = string.Empty;
+    [JsonIgnore]
+    public int ParentProcessId { get; set; }
 
-    public bool NoREPL { get; init; }
+    [EndPoint]
+    public string NodeEndPoint { get; set; } = string.Empty;
+
+    EndPoint? IApplicationOptions.NodeEndPoint
+        => _nodeEndPoint ??= EndPointUtility.ParseOrDefault(NodeEndPoint);
+
+    public string LogPath { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public bool NoREPL { get; set; }
 }

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Common.Threading;
 
 namespace LibplanetConsole.Client.Executable;
 
@@ -9,12 +10,13 @@ internal sealed class SystemTerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
     CommandContext commandContext,
     SystemTerminal terminal,
-    ApplicationOptions options,
+    IApplicationOptions options,
     ILogger<SystemTerminalHostedService> logger) : IHostedService
 {
     private Task _waitInputTask = Task.CompletedTask;
     private Task _waitForExitTask = Task.CompletedTask;
     private int _parentProcessId;
+    private bool _isRunning;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -32,16 +34,18 @@ internal sealed class SystemTerminalHostedService(
             await Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
+            _isRunning = true;
         }
-        else if (options.ParentProcessId != 0 &&
+        else
+        {
+            _waitInputTask = WaitInputAsync();
+        }
+
+        if (options.ParentProcessId != 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcessId = options.ParentProcessId;
             _waitForExitTask = WaitForExit(parentProcess);
-        }
-        else if (options.ParentProcessId == 0)
-        {
-            _waitInputTask = WaitInputAsync();
         }
 
         await Task.CompletedTask;
@@ -49,11 +53,14 @@ internal sealed class SystemTerminalHostedService(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_waitInputTask, _waitForExitTask);
-        await terminal.StopAsync(cancellationToken);
+        await TaskUtility.TryWaitAll(_waitInputTask, _waitForExitTask);
+        if (_isRunning is true)
+        {
+            await terminal.StopAsync(cancellationToken);
+        }
     }
 
-    private static bool GetStartupCondition(ApplicationOptions options)
+    private static bool GetStartupCondition(IApplicationOptions options)
     {
         if (options.NodeEndPoint is not null)
         {
@@ -71,14 +78,18 @@ internal sealed class SystemTerminalHostedService(
 
     private async Task WaitInputAsync()
     {
+        using var cancellationTokenSource = new CancellationTokenSource();
+        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
         await Console.Out.WriteLineAsync("Press any key to exit.");
-        await Task.Run(() => Console.ReadKey(intercept: true));
+        await Task.Run(() => Console.ReadKey(intercept: true), cancellationTokenSource.Token);
         applicationLifetime.StopApplication();
     }
 
     private async Task WaitForExit(Process process)
     {
-        await process.WaitForExitAsync();
+        using var cancellationTokenSource = new CancellationTokenSource();
+        applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
+        await process.WaitForExitAsync(cancellationTokenSource.Token);
         logger.LogDebug("Parent process is exited: {ParentProcessId}.", _parentProcessId);
         applicationLifetime.StopApplication();
     }

@@ -7,12 +7,11 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicatio
 {
     private readonly ApplicationInfo _info;
 
-    public ApplicationInfoProvider(ApplicationOptions options)
+    public ApplicationInfoProvider(IApplicationOptions options)
         : base("Application")
     {
         _info = new()
         {
-            Port = options.Port,
             SeedEndPoint = options.SeedEndPoint,
             StorePath = options.StorePath,
             LogPath = options.LogPath,

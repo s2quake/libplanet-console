@@ -1,16 +1,14 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-[Dependency(typeof(NodeCollection))]
 internal sealed class ClientCollection(
     IServiceProvider serviceProvider,
-    ApplicationOptions options)
+    IApplicationOptions options)
     : IEnumerable<Client>, IClientCollection
 {
     private static readonly object LockObject = new();

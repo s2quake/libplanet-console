@@ -1,6 +1,8 @@
+using LibplanetConsole.Common.Threading;
+
 namespace LibplanetConsole.Grpc;
 
-internal abstract class RunTask : IDisposable
+internal abstract class RunTaskBase : IDisposable
 {
     private bool _isRunning;
     private bool _disposedValue;
@@ -8,6 +10,8 @@ internal abstract class RunTask : IDisposable
     private Task _runningTask = Task.CompletedTask;
 
     public bool IsRunning => _isRunning;
+
+    public string Name { get; set; } = string.Empty;
 
     public void Dispose()
     {
@@ -42,18 +46,35 @@ internal abstract class RunTask : IDisposable
             _cancellationTokenSource = null;
         }
 
-        await _runningTask;
+        await TaskUtility.TryWait(_runningTask);
         await OnStopAsync(cancellationToken);
         _isRunning = false;
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
-        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+        if (_cancellationTokenSource is not null)
+        {
+            throw new InvalidOperationException($"{GetType().Name} is already running.");
+        }
+
+        _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken);
-        await StartAsync(cancellationTokenSource.Token);
-        await _runningTask;
-        await StopAsync(cancellationTokenSource.Token);
+        try
+        {
+            await OnStartAsync(_cancellationTokenSource.Token);
+            _runningTask = OnRunAsync(_cancellationTokenSource.Token);
+            _isRunning = true;
+            await _runningTask;
+            await TaskUtility.TryWait(_runningTask);
+            await OnStopAsync(_cancellationTokenSource.Token);
+        }
+        finally
+        {
+            _isRunning = false;
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
     }
 
     protected abstract Task OnRunAsync(CancellationToken cancellationToken);
@@ -70,6 +91,7 @@ internal abstract class RunTask : IDisposable
             {
                 _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;
+                TaskUtility.TryWait(_runningTask).Wait();
             }
 
             _disposedValue = true;

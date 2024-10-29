@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Framework;
+using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -11,7 +11,7 @@ internal sealed class SchemaCommand : CommandBase
 {
     protected override void OnExecute()
     {
-        var schemaBuilder = new ApplicationSettingsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var json = schemaBuilder.Build();
         var colorizedString = JsonUtility.ToColorizedString(json);
         Out.WriteLine(colorizedString);

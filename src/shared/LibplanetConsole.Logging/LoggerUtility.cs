@@ -2,10 +2,10 @@ using Serilog;
 
 namespace LibplanetConsole.Logging;
 
-internal static class LoggingExtensions
+internal static class LoggerUtility
 {
-    public static IServiceCollection AddLogging(
-        this IServiceCollection @this, string logPath, string name, params LoggingFilter[] filters)
+    public static void CreateLogger(
+        string logPath, string name, params LoggingFilter[] filters)
     {
         if (logPath == string.Empty)
         {
@@ -42,19 +42,9 @@ internal static class LoggingExtensions
         {
             Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
         };
-
-        @this.AddSingleton<ILoggerFactory, LoggerFactory>();
-        @this.AddLogging(builder =>
-        {
-            builder.ClearProviders();
-            builder.AddSerilog();
-        });
-
-        return @this;
     }
 
-    public static IServiceCollection AddLogging(
-        this IServiceCollection @this, params LoggingFilter[] filters)
+    public static void CreateLogger(params LoggingFilter[] filters)
     {
         var loggerConfiguration = new LoggerConfiguration();
         loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
@@ -72,14 +62,5 @@ internal static class LoggingExtensions
         {
             Log.Logger.Fatal(e.ExceptionObject as Exception, "Unhandled exception occurred.");
         };
-
-        @this.AddSingleton<ILoggerFactory, LoggerFactory>();
-        @this.AddLogging(builder =>
-        {
-            builder.ClearProviders();
-            builder.AddSerilog();
-        });
-
-        return @this;
     }
 }

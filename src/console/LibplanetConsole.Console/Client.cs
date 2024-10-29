@@ -99,10 +99,11 @@ internal sealed partial class Client : IClient
         var blockChainService = new BlockChainService(channel);
         clientService.Started += ClientService_Started;
         clientService.Stopped += ClientService_Stopped;
+        clientService.Disconnected += ClientService_Disconnected;
         blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
-            await clientService.StartAsync(cancellationToken);
+            await clientService.InitializeAsync(cancellationToken);
             await blockChainService.InitializeAsync(cancellationToken);
         }
         catch
@@ -220,9 +221,9 @@ internal sealed partial class Client : IClient
 
             if (_clientService is not null)
             {
-                _clientService.Disconnected -= ClientService_Disconnected;
                 _clientService.Started -= ClientService_Started;
                 _clientService.Stopped -= ClientService_Stopped;
+                _clientService.Disconnected -= ClientService_Disconnected;
                 _clientService.Dispose();
                 _clientService = null;
             }
@@ -295,9 +296,9 @@ internal sealed partial class Client : IClient
     {
         if (sender is ClientService clientService && _clientService == clientService)
         {
-            _clientService.Disconnected -= ClientService_Disconnected;
             _clientService.Started -= ClientService_Started;
             _clientService.Stopped -= ClientService_Stopped;
+            _clientService.Disconnected -= ClientService_Disconnected;
             _clientService.Dispose();
             _clientService = null;
             if (_blockChainService is not null)
@@ -313,6 +314,13 @@ internal sealed partial class Client : IClient
                 _channel = null;
             }
 
+            if (IsRunning is true)
+            {
+                IsRunning = false;
+                Stopped?.Invoke(this, EventArgs.Empty);
+            }
+
+            IsAttached = false;
             Detached?.Invoke(this, EventArgs.Empty);
         }
     }

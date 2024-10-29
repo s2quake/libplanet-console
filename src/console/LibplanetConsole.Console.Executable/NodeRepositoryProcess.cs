@@ -8,6 +8,8 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
 
     public required int Port { get; init; }
 
+    public string SeedEndPoint { get; init; } = string.Empty;
+
     public string OutputPath { get; set; } = string.Empty;
 
     public string GenesisPath { get; set; } = string.Empty;
@@ -31,6 +33,12 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
                 "--genesis-path",
                 GenesisPath,
             };
+            if (SeedEndPoint != string.Empty)
+            {
+                argumentList.Add("--seed-end-point");
+                argumentList.Add(SeedEndPoint);
+            }
+
             if (ActionProviderModulePath != string.Empty)
             {
                 argumentList.Add("--module-path");

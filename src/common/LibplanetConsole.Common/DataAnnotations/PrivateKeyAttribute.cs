@@ -13,6 +13,16 @@ public sealed class PrivateKeyAttribute : RegularExpressionAttribute
         : base($"^{RegularExpression}$")
     {
     }
+
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value is PrivateKey)
+        {
+            return ValidationResult.Success;
+        }
+
+        return base.IsValid(value, validationContext);
+    }
 }
 
 [AttributeUsage(AttributeTargets.Property)]

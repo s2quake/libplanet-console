@@ -1,11 +1,11 @@
 using System.Text.RegularExpressions;
 
-namespace LibplanetConsole.Framework;
+namespace LibplanetConsole.Options;
 
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class ApplicationSettingsAttribute(string name) : Attribute
+public sealed class OptionsAttribute(string name) : Attribute
 {
-    public ApplicationSettingsAttribute()
+    public OptionsAttribute()
         : this(string.Empty)
     {
     }
@@ -21,6 +21,6 @@ public sealed class ApplicationSettingsAttribute(string name) : Attribute
             return Name;
         }
 
-        return Regex.Replace(type.Name, @"(Settings|Options)$", string.Empty);
+        return Regex.Replace(type.Name, @"(Options)$", string.Empty);
     }
 }

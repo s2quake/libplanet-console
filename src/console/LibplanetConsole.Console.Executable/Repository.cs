@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
-using LibplanetConsole.Framework;
+using LibplanetConsole.Options;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable;
@@ -96,6 +96,20 @@ public sealed record class Repository
         }
     }
 
+    public byte[] CreateGenesis(
+        PrivateKey genesisKey,
+        DateTimeOffset dateTimeOffset)
+    {
+        var genesisOptions = new GenesisOptions
+        {
+            GenesisKey = genesisKey,
+            Validators = Nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
+            Timestamp = dateTimeOffset,
+        };
+
+        return CreateGenesis(genesisOptions);
+    }
+
     public dynamic Save(string repositoryPath, RepositoryPathResolver resolver)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
@@ -125,11 +139,26 @@ public sealed record class Repository
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
         var nodesPath = resolver.GetNodesPath(repositoryPath);
         var clientsPath = resolver.GetClientsPath(repositoryPath);
-        var applicationSettings = new ApplicationSettings
+        var applicationOptions = new ApplicationOptions
         {
-            Port = Port,
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
             LogPath = LogPath,
+        };
+        var kestrelOptions = new
+        {
+            Endpoints = new
+            {
+                Http1 = new
+                {
+                    Url = $"http://localhost:{Port}",
+                    Protocols = "Http2",
+                },
+                Http1AndHttp2 = new
+                {
+                    Url = $"http://localhost:{Port + 1}",
+                    Protocols = "Http1AndHttp2",
+                },
+            },
         };
 
         info.RepositoryPath = repositoryPath;
@@ -138,7 +167,7 @@ public sealed record class Repository
         info.GenesisPath = genesisPath;
         SaveSettingsSchema(schemaPath);
         info.SchemaPath = schemaPath;
-        SaveSettings(schemaPath, settingsPath, applicationSettings);
+        SaveSettings(schemaPath, settingsPath, applicationOptions, kestrelOptions);
         info.SettingsPath = settingsPath;
 
         info.Nodes = new List<ExpandoObject>(Nodes.Length);
@@ -198,7 +227,7 @@ public sealed record class Repository
 
     private static void SaveSettingsSchema(string schemaPath)
     {
-        var schemaBuilder = new ApplicationSettingsSchemaBuilder();
+        var schemaBuilder = OptionsSchemaBuilder.Create();
         var schema = schemaBuilder.Build();
         File.WriteAllLines(schemaPath, [schema]);
     }
@@ -211,13 +240,17 @@ public sealed record class Repository
     }
 
     private static void SaveSettings(
-        string schemaPath, string settingsPath, ApplicationSettings applicationSettings)
+        string schemaPath,
+        string settingsPath,
+        ApplicationOptions applicationOptions,
+        dynamic kestrelOptions)
     {
         var schemaRelativePath = PathUtility.GetRelativePath(settingsPath, schemaPath);
         var settings = new Settings
         {
             Schema = schemaRelativePath,
-            Application = applicationSettings,
+            Application = applicationOptions,
+            Kestrel = kestrelOptions,
         };
         var json = JsonUtility.SerializeSchema(settings);
         File.WriteAllLines(settingsPath, [json]);
@@ -228,6 +261,8 @@ public sealed record class Repository
         [JsonPropertyName("$schema")]
         public required string Schema { get; init; } = string.Empty;
 
-        public required ApplicationSettings Application { get; init; }
+        public required ApplicationOptions Application { get; init; }
+
+        public required dynamic Kestrel { get; init; }
     }
 }

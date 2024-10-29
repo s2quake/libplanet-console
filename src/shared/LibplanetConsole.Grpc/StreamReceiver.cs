@@ -1,14 +1,19 @@
-#pragma warning disable SA1402 // File may only contain a single type
 using Grpc.Core;
 
 namespace LibplanetConsole.Grpc;
 
 internal sealed class StreamReceiver<TResponse>(
-    AsyncServerStreamingCall<TResponse> streamingCall,
-    Action<TResponse> action) : RunTask
+    Func<AsyncServerStreamingCall<TResponse>> streamingCallFunc,
+    Action<TResponse> action)
+    : RunTaskBase
 {
+    public event EventHandler? Aborted;
+
+    public event EventHandler? Completed;
+
     protected override async Task OnRunAsync(CancellationToken cancellationToken)
     {
+        var streamingCall = streamingCallFunc();
         try
         {
             while (await streamingCall.ResponseStream.MoveNext(cancellationToken))
@@ -16,14 +21,12 @@ internal sealed class StreamReceiver<TResponse>(
                 var response = streamingCall.ResponseStream.Current;
                 action.Invoke(response);
             }
+
+            Completed?.Invoke(this, EventArgs.Empty);
         }
-        catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
+        catch (Exception)
         {
-            // Ignore
-        }
-        catch (OperationCanceledException)
-        {
-            // Ignore
+            Aborted?.Invoke(this, EventArgs.Empty);
         }
     }
 }

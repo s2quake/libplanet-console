@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Reflection;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common.Actions;
-using LibplanetConsole.Framework;
 
 namespace LibplanetConsole.Node;
 
@@ -38,8 +37,20 @@ internal sealed class ActionProvider : IActionProvider
     public IActionLoader GetActionLoader()
     {
         var executingAssembly = Assembly.GetExecutingAssembly();
-        var assemblies = ApplicationServiceCollection.GetAssemblies(executingAssembly);
+        var assemblies = GetAssemblies(executingAssembly);
         var actionLoaders = assemblies.Select(item => new AssemblyActionLoader(item)).ToArray();
         return new AggregateTypedActionLoader(actionLoaders);
+    }
+
+    private static IEnumerable<Assembly> GetAssemblies(Assembly assembly)
+    {
+        var directory = Path.GetDirectoryName(assembly.Location)!;
+        var files = Directory.GetFiles(directory, "LibplanetConsole.*.dll");
+        string[] paths =
+        [
+            assembly.Location,
+            .. files,
+        ];
+        return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
     }
 }

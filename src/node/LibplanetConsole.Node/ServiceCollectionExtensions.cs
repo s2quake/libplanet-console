@@ -2,34 +2,33 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node.Commands;
 using LibplanetConsole.Seed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using static LibplanetConsole.Common.EndPointUtility;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;
 
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddNode(
-        this IServiceCollection @this, ApplicationOptions options)
+        this IServiceCollection @this, IConfiguration configuration)
     {
         var synchronizationContext = SynchronizationContext.Current ?? new();
-        var localHost = GetLocalHost(options.Port);
         SynchronizationContext.SetSynchronizationContext(synchronizationContext);
-        @this.AddSingleton(synchronizationContext);
-        @this.AddSingleton(options);
-        if (CompareEndPoint(options.SeedEndPoint, localHost) is true)
-        {
-            @this.AddSingleton<SeedService>()
-                 .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
-        }
 
+        @this.AddOptions<ApplicationOptions>()
+            .Bind(configuration.GetSection(ApplicationOptions.Position))
+            .ValidateDataAnnotations();
+        @this.AddSingleton<IApplicationOptions>(
+            s => s.GetRequiredService<IOptions<ApplicationOptions>>().Value);
+
+        @this.AddSingleton(synchronizationContext);
         @this.AddSingleton<Node>()
              .AddSingleton<INode>(s => s.GetRequiredService<Node>())
              .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
 
-        @this.AddHostedService<SeedHostedService>();
         @this.AddHostedService<NodeHostedService>();
 
         @this.AddSingleton<ICommand, AddressCommand>();

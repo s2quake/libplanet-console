@@ -38,28 +38,39 @@ internal sealed class ClientGrpcServiceV1(
         return Task.Run(Action, context.CancellationToken);
     }
 
-    public override async Task GetStartedStream(
-        GetStartedStreamRequest request,
-        IServerStreamWriter<GetStartedStreamResponse> responseStream,
+    public override async Task GetEventStream(
+        GetEventStreamRequest request,
+        IServerStreamWriter<GetEventStreamResponse> responseStream,
         ServerCallContext context)
     {
-        var streamer = new EventStreamer<GetStartedStreamResponse>(
-            responseStream,
-            handler => client.Started += handler,
-            handler => client.Started -= handler,
-            () => new GetStartedStreamResponse { ClientInfo = client.Info });
-        await streamer.RunAsync(applicationLifetime, context.CancellationToken);
-    }
+        var streamer = new EventStreamer<GetEventStreamResponse>(responseStream)
+        {
+            Items =
+            {
+                new EventItem<GetEventStreamResponse>
+                {
+                    Attach = handler => client.Started += handler,
+                    Detach = handler => client.Started -= handler,
+                    Selector = () => new GetEventStreamResponse
+                    {
+                        Started = new StartedEvent
+                        {
+                            ClientInfo = client.Info,
+                        },
+                    },
+                },
+                new EventItem<GetEventStreamResponse>
+                {
+                    Attach = handler => client.Stopped += handler,
+                    Detach = handler => client.Stopped -= handler,
+                    Selector = () => new GetEventStreamResponse
+                    {
+                        Stopped = new StoppedEvent(),
+                    },
+                },
+            },
+        };
 
-    public override async Task GetStoppedStream(
-        GetStoppedStreamRequest request,
-        IServerStreamWriter<GetStoppedStreamResponse> responseStream,
-        ServerCallContext context)
-    {
-        var streamer = new EventStreamer<GetStoppedStreamResponse>(
-            responseStream,
-            handler => client.Stopped += handler,
-            handler => client.Stopped -= handler);
         await streamer.RunAsync(applicationLifetime, context.CancellationToken);
     }
 }

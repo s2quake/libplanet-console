@@ -110,7 +110,7 @@ internal sealed class InitializeCommand : CommandBase
         var portGenerator = new PortGenerator(Port);
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
         var port = portGenerator.Current;
-        var nodeOptions = GetNodeOptions(portGenerator);
+        var nodeOptions = GetNodeOptions(portGenerator, port);
         var clientOptions = GetClientOptions(portGenerator);
         var outputPath = Path.GetFullPath(RepositoryPath);
         var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
@@ -148,7 +148,7 @@ internal sealed class InitializeCommand : CommandBase
         TextWriterExtensions.WriteLineAsJson(writer, info);
     }
 
-    private NodeOptions[] GetNodeOptions(PortGenerator portGenerator)
+    private NodeOptions[] GetNodeOptions(PortGenerator portGenerator, int port)
     {
         var privateKeys = GetNodes();
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
@@ -160,6 +160,7 @@ internal sealed class InitializeCommand : CommandBase
                 PrivateKey = privateKey,
                 StorePath = "store",
                 LogPath = "log",
+                SeedEndPoint = GetLocalHost(port),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
             };

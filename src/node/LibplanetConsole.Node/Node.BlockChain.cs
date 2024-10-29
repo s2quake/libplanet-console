@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +22,7 @@ internal sealed partial class Node : IBlockChain
             throw new InvalidOperationException("Node is not running.");
         }
 
-        var privateKey = PrivateKeyUtility.FromSecureString(_privateKey);
+        var privateKey = _privateKey;
         var blockChain = BlockChain;
         var genesisBlock = blockChain.Genesis;
         var nonce = blockChain.GetNextTxNonce(privateKey.Address);

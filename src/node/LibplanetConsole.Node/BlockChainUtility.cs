@@ -12,12 +12,11 @@ internal static class BlockChainUtility
 {
     public static BlockChain CreateBlockChain(
         Block genesisBlock,
-        string storePath,
+        IStore store,
+        IStateStore stateStore,
         IRenderer renderer,
         IActionProvider actionProvider)
     {
-        var isNew = storePath == string.Empty || Directory.Exists(storePath) != true;
-        var (store, stateStore) = GetStore(storePath);
         var actionLoader = actionProvider.GetActionLoader();
         var policyActionsRegistry = new PolicyActionsRegistry(
             beginBlockActions: actionProvider.BeginBlockActions,
@@ -35,7 +34,7 @@ internal static class BlockChainUtility
         var stagePolicy = new VolatileStagePolicy();
         var blockChainStates = new BlockChainStates(store, stateStore);
         var renderers = new IRenderer[] { renderer };
-        if (isNew == true)
+        if (store.GetCanonicalChainId() is null)
         {
             return BlockChain.Create(
                 policy: policy,
@@ -59,7 +58,8 @@ internal static class BlockChainUtility
             renderers: renderers);
     }
 
-    private static (IStore Store, IStateStore StateStore) GetStore(string storePath)
+    public static (IKeyValueStore KeyValueStore, IStore Store, IStateStore StateStore)
+        GetStore(string storePath)
     {
         if (storePath != string.Empty)
         {
@@ -68,14 +68,14 @@ internal static class BlockChainUtility
             var keyValueStore = new RocksDBKeyValueStore(dataPath1);
             var stateStore = new TrieStateStore(keyValueStore);
             var store = new RocksDBStore(dataPath2);
-            return (store, stateStore);
+            return (keyValueStore, store, stateStore);
         }
         else
         {
             var keyValueStore = new MemoryKeyValueStore();
             var stateStore = new TrieStateStore(keyValueStore);
             var store = new MemoryStore();
-            return (store, stateStore);
+            return (keyValueStore, store, stateStore);
         }
     }
 }

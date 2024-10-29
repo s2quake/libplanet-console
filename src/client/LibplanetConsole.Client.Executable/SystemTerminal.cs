@@ -26,7 +26,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
         _blockChain.BlockAppended += BlockChain_BlockAppended;
         _blockChain.Started += BlockChain_Started;
         _blockChain.Stopped += BlockChain_Stopped;
-        UpdatePrompt(_blockChain.Tip);
+        UpdateTip(_blockChain.Tip);
         applicationLifetime.ApplicationStopping.Register(() => Prompt = "\u001b0");
     }
 
@@ -75,16 +75,23 @@ internal sealed class SystemTerminal : SystemTerminalBase
     }
 
     private void BlockChain_BlockAppended(object? sender, BlockEventArgs e)
-        => _synchronizationContext.Post(_ => UpdatePrompt(e.BlockInfo), null);
+        => _synchronizationContext.Post(_ => UpdateTip(e.BlockInfo), null);
 
     private void BlockChain_Started(object? sender, EventArgs e)
-        => _synchronizationContext.Post(_ => UpdatePrompt(_blockChain.Tip), null);
+        => _synchronizationContext.Post(_ => UpdateTip(_blockChain.Tip), null);
 
     private void BlockChain_Stopped(object? sender, EventArgs e)
-        => _synchronizationContext.Post(_ => UpdatePrompt(_blockChain.Tip), null);
+        => _synchronizationContext.Post(_ => UpdateTip(_blockChain.Tip), null);
 
-    private void UpdatePrompt(BlockInfo tip)
+    private void UpdateTip(BlockInfo tip)
     {
+        _tip = tip;
+        UpdatePrompt();
+    }
+
+    private void UpdatePrompt()
+    {
+        var tip = _tip;
         if (tip.Height == -1)
         {
             Prompt = PromptText;
@@ -98,7 +105,5 @@ internal sealed class SystemTerminal : SystemTerminalBase
             sb.Append($"{tip.Miner.ToShortString()}");
             Prompt = $"[{sb}] {PromptText}";
         }
-
-        _tip = tip;
     }
 }

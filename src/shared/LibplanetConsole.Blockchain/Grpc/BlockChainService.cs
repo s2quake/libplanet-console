@@ -13,7 +13,7 @@ namespace LibplanetConsole.Grpc.Blockchain;
 internal sealed class BlockChainService(GrpcChannel channel)
     : BlockChainGrpcServiceClient(channel), IDisposable
 {
-    private StreamReceiver<GetBlockAppendedStreamResponse>? _blockAppendedReceiver;
+    private StreamReceiver<GetEventStreamResponse>? _eventReceiver;
     private bool _isDisposed;
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
@@ -22,34 +22,42 @@ internal sealed class BlockChainService(GrpcChannel channel)
     {
         if (_isDisposed is false)
         {
-            _blockAppendedReceiver?.Dispose();
-            _blockAppendedReceiver = null;
+            _eventReceiver?.Dispose();
+            _eventReceiver = null;
             _isDisposed = true;
         }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        if (_blockAppendedReceiver is not null)
+        if (_eventReceiver is not null)
         {
             throw new InvalidOperationException($"{nameof(BlockChainService)} is already started.");
         }
 
-        _blockAppendedReceiver = new(
-            GetBlockAppendedStream(new(), cancellationToken: cancellationToken),
-            (response) => BlockAppended?.Invoke(this, new(response.BlockInfo)));
-        await _blockAppendedReceiver.StartAsync(cancellationToken);
+        _eventReceiver = new(() => GetEventStream(new(), default), InvokeEvent);
+        await _eventReceiver.StartAsync(cancellationToken);
     }
 
     public async Task ReleaseAsync(CancellationToken cancellationToken)
     {
-        if (_blockAppendedReceiver is null)
+        if (_eventReceiver is null)
         {
             throw new InvalidOperationException($"{nameof(BlockChainService)} is not started.");
         }
 
-        await _blockAppendedReceiver.StopAsync(cancellationToken);
-        _blockAppendedReceiver = null;
+        await _eventReceiver.StopAsync(cancellationToken);
+        _eventReceiver = null;
+    }
+
+    private void InvokeEvent(GetEventStreamResponse response)
+    {
+        switch (response.EventCase)
+        {
+            case GetEventStreamResponse.EventOneofCase.BlockAppended:
+                BlockAppended?.Invoke(this, new BlockEventArgs(response.BlockAppended.BlockInfo));
+                break;
+        }
     }
 }
 #endif // LIBPLANET_CONSOLE || LIBPLANET_CLIENT

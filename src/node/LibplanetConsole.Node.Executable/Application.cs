@@ -1,17 +1,19 @@
+using Grpc.Core;
+using Grpc.Core.Interceptors;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Serilog;
 
 namespace LibplanetConsole.Node.Executable;
 
 internal sealed class Application
 {
-    private readonly WebApplicationBuilder _builder = WebApplication.CreateBuilder();
-    private readonly LoggingFilter[] _filters =
+    private static readonly LoggingFilter[] _filters =
     [
         new SourceContextFilter(
             "app.log",
@@ -20,56 +22,67 @@ internal sealed class Application
         new PrefixFilter("libplanet.log", "Libplanet."),
     ];
 
-    private readonly LoggingFilter[] _traceFilters =
+    private static readonly LoggingFilter[] _traceFilters =
     [
         new SourceContextFilter(
             "app.log",
             s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
     ];
 
-    public Application(ApplicationOptions options, object[] instances)
+    private readonly WebApplicationBuilder _builder;
+
+    public Application(WebApplicationBuilder builder)
     {
-        var port = options.Port;
-        var services = _builder.Services;
-        foreach (var instance in instances)
-        {
-            services.AddSingleton(instance.GetType(), instance);
-        }
+        var services = builder.Services;
+        var configuration = builder.Configuration;
 
-        _builder.WebHost.ConfigureKestrel(options =>
+        services.AddLogging(builder =>
         {
-            options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-            options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+            builder.ClearProviders();
+            builder.AddSerilog();
         });
-
-        if (options.LogPath != string.Empty)
-        {
-            services.AddLogging(options.LogPath, "node.log", _filters);
-        }
-        else
-        {
-            services.AddLogging(_traceFilters);
-        }
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
+        services.AddSingleton<IInfoProvider, ServerInfoProvider>();
 
         services.AddSingleton<HelpCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
         services.AddSingleton<VersionCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
-        services.AddNode(options);
-        services.AddExplorer(_builder.Configuration);
+        services.AddNode(configuration);
+        services.AddExplorer(configuration);
         services.AddEvidence();
 
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
         services.AddGrpcReflection();
 
         services.AddHostedService<BlockChainEventTracer>();
         services.AddHostedService<NodeEventTracer>();
         services.AddHostedService<SystemTerminalHostedService>();
+
+        services.PostConfigure<ApplicationOptions>(options =>
+        {
+            var logPath = options.LogPath;
+            if (logPath != string.Empty)
+            {
+                LoggerUtility.CreateLogger(logPath, "node.log", _filters);
+            }
+            else
+            {
+                LoggerUtility.CreateLogger(_traceFilters);
+            }
+        });
+        _builder = builder;
     }
+
+    public IServiceCollection Services => _builder.Services;
+
+    public WebApplicationBuilder Builder => _builder;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {

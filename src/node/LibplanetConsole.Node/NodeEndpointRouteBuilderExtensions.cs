@@ -9,7 +9,6 @@ public static class NodeEndpointRouteBuilderExtensions
     public static IEndpointRouteBuilder UseNode(this IEndpointRouteBuilder @this)
     {
         @this.MapGrpcService<NodeGrpcServiceV1>();
-        @this.MapGrpcService<SeedGrpcServiceV1>();
         @this.MapGrpcService<BlockChainGrpcServiceV1>();
 
         return @this;

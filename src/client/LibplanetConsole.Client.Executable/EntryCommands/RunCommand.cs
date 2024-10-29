@@ -1,34 +1,78 @@
+using System.ComponentModel;
 using JSSoft.Commands;
-using LibplanetConsole.Framework;
+using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.DataAnnotations;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
 [CommandSummary("Run the Libplanet client.")]
-internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
+internal sealed class RunCommand
+    : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
-    private readonly ApplicationSettingsCollection _settingsCollection = new();
-    private readonly Dictionary<CommandMemberDescriptor, object> _descriptorByInstance;
-    private readonly CommandMemberDescriptorCollection _descriptors;
-    private readonly ApplicationSettings _applicationSettings;
+    [CommandProperty]
+    [CommandSummary("Indicates the port on which the client will run. " +
+                        "If omitted, a random port is used.")]
+    [NonNegative]
+    public int Port { get; init; }
 
-    public RunCommand()
+    [CommandProperty]
+    [CommandSummary("Indicates the private key of the client. " +
+                    "If omitted, a random private key is used.")]
+    [PrivateKey]
+    public string PrivateKey { get; init; } = string.Empty;
+
+    [CommandProperty("parent")]
+    [CommandSummary("Reserved option used by libplanet-console.")]
+    [Category]
+    public int ParentProcessId { get; init; }
+
+    [CommandProperty]
+    [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    [EndPoint]
+    public string NodeEndPoint { get; init; } = string.Empty;
+
+    [CommandProperty]
+    [CommandSummary("Indicates the file path to save logs.")]
+    [Path(Type = PathType.Directory, AllowEmpty = true)]
+    [DefaultValue("")]
+    public string LogPath { get; set; } = string.Empty;
+
+    [CommandPropertySwitch("no-repl")]
+    [CommandSummary("If set, the client runs without REPL.")]
+    public bool NoREPL { get; init; }
+
+    void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
-        _descriptorByInstance = GetDescriptors([.. _settingsCollection]);
-        _descriptors = new(GetType(), _descriptorByInstance.Keys);
-        _applicationSettings = _settingsCollection.Peek<ApplicationSettings>();
+        var port = Port;
+        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
+        options.Port = port;
+        options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
+        options.ParentProcessId = ParentProcessId;
+        options.NodeEndPoint = NodeEndPoint;
+        options.LogPath = GetFullPath(LogPath);
+        options.NoREPL = NoREPL;
+
+        static string GetFullPath(string path)
+            => path != string.Empty ? Path.GetFullPath(path) : path;
     }
-
-    CommandMemberDescriptorCollection ICustomCommandDescriptor.Members => _descriptors;
-
-    object ICustomCommandDescriptor.GetMemberOwner(CommandMemberDescriptor memberDescriptor)
-        => _descriptorByInstance[memberDescriptor];
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var applicationOptions = _applicationSettings.ToOptions();
-            var application = new Application(applicationOptions, [.. _settingsCollection]);
+            var builder = WebApplication.CreateBuilder();
+            var services = builder.Services;
+            var application = new Application(builder);
+            var port = Port is 0 ? PortUtility.NextPort() : Port;
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
+                options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+            });
+            services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
@@ -36,19 +80,5 @@ internal sealed class RunCommand : CommandAsyncBase, ICustomCommandDescriptor
             e.Print(Console.Out);
             Environment.Exit(1);
         }
-    }
-
-    private static Dictionary<CommandMemberDescriptor, object> GetDescriptors(object[] options)
-    {
-        var itemList = new List<KeyValuePair<CommandMemberDescriptor, object>>();
-        for (var i = 0; i < options.Length; i++)
-        {
-            var option = options[i];
-            var descriptors = CommandDescriptor.GetMemberDescriptors(option)
-                .Select(item => KeyValuePair.Create(item, option));
-            itemList.AddRange(descriptors);
-        }
-
-        return new(itemList);
     }
 }

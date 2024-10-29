@@ -6,9 +6,10 @@ using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Blockchain;
 using LibplanetConsole.Grpc.Node;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
@@ -122,6 +123,7 @@ internal sealed partial class Node : INode
         var blockChainService = new BlockChainService(channel);
         nodeService.Started += NodeService_Started;
         nodeService.Stopped += NodeService_Stopped;
+        nodeService.Disconnected += NodeService_Disconnected;
         blockChainService.BlockAppended += BlockChainService_BlockAppended;
         try
         {
@@ -157,6 +159,7 @@ internal sealed partial class Node : INode
         {
             _nodeService.Started -= NodeService_Started;
             _nodeService.Stopped -= NodeService_Stopped;
+            _nodeService.Disconnected -= NodeService_Disconnected;
             _nodeService.Dispose();
             _nodeService = null;
         }
@@ -190,12 +193,10 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        var applicationOptions = this.GetRequiredService<ApplicationOptions>();
-        var seedEndPoint = EndPointUtility.ToString(
-            _nodeOptions.SeedEndPoint ?? GetLocalHost(applicationOptions.Port));
+        var seedEndPoint = GetSeedEndPoint();
         var request = new StartRequest
         {
-            SeedEndPoint = seedEndPoint,
+            SeedEndPoint = EndPointUtility.ToString(seedEndPoint),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _nodeService.StartAsync(request, callOptions);
@@ -246,6 +247,7 @@ internal sealed partial class Node : INode
             {
                 _nodeService.Started -= NodeService_Started;
                 _nodeService.Stopped -= NodeService_Stopped;
+                _nodeService.Disconnected -= NodeService_Disconnected;
                 _nodeService.Dispose();
                 _nodeService = null;
             }
@@ -272,6 +274,7 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node process is already running.");
         }
 
+        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
         var nodeOptions = _nodeOptions;
         var process = new NodeProcess(this, nodeOptions)
         {
@@ -280,6 +283,12 @@ internal sealed partial class Node : INode
         };
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, _processCancellationTokenSource.Token);
+        if (nodeOptions.RepositoryPath == string.Empty)
+        {
+            process.ExtendedArguments.Add("--genesis");
+            process.ExtendedArguments.Add(ByteUtil.Hex(applicationOptions.Genesis));
+        }
+
         _logger.LogDebug(process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
             .ContinueWith(
@@ -318,6 +327,7 @@ internal sealed partial class Node : INode
         {
             _nodeService.Started -= NodeService_Started;
             _nodeService.Stopped -= NodeService_Stopped;
+            _nodeService.Disconnected -= NodeService_Disconnected;
             _nodeService.Dispose();
             _nodeService = null;
             if (_blockChainService is not null)
@@ -333,7 +343,30 @@ internal sealed partial class Node : INode
                 _channel = null;
             }
 
+            if (IsRunning is true)
+            {
+                IsRunning = false;
+                Stopped?.Invoke(this, EventArgs.Empty);
+            }
+
+            IsAttached = false;
             Detached?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private EndPoint GetSeedEndPoint()
+    {
+        if (_nodeOptions.SeedEndPoint is { } seedEndPoint)
+        {
+            return seedEndPoint;
+        }
+
+        var server = _serviceProvider.GetRequiredService<IServer>();
+        var addressesFeature = server.Features.Get<IServerAddressesFeature>()
+            ?? throw new InvalidOperationException("ServerAddressesFeature is not available.");
+        var address = addressesFeature.Addresses.First();
+        var url = new Uri(address);
+
+        return new DnsEndPoint(url.Host, url.Port);
     }
 }
