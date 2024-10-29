@@ -22,8 +22,8 @@ public class RunTaskTest
         using var runTask = new RunTask();
         var task = runTask.RunAsync(default);
         await Assert.ThrowsAsync<InvalidOperationException>(() => runTask.RunAsync(default));
-        await TaskUtility.TryWait(task);
         Assert.True(runTask.IsRunning);
+        await TaskUtility.TryWait(task);
     }
 
     [Fact(Timeout = 3000)]
