@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
-    <ProjectReference Include="..\..\common\LibplanetConsole.Framework\LibplanetConsole.Framework.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Console\LibplanetConsole.Console.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Console.Evidence\LibplanetConsole.Console.Evidence.csproj" />
   </ItemGroup>

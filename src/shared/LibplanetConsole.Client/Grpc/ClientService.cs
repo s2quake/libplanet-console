@@ -9,9 +9,7 @@ namespace LibplanetConsole.Grpc.Client;
 internal sealed class ClientService(GrpcChannel channel)
     : ClientGrpcServiceClient(channel), IDisposable
 {
-    private ConnectionMonitor<ClientService>? _connection;
-    private StreamReceiver<GetStartedStreamResponse>? _startedReceiver;
-    private StreamReceiver<GetStoppedStreamResponse>? _stoppedReceiver;
+    private StreamReceiver<GetEventStreamResponse>? _eventReceiver;
     private bool _isDisposed;
 
     public event EventHandler? Disconnected;
@@ -20,69 +18,51 @@ internal sealed class ClientService(GrpcChannel channel)
 
     public event EventHandler? Stopped;
 
+    public ClientInfo Info { get; private set; }
+
     public void Dispose()
     {
         if (_isDisposed is false)
         {
-            _startedReceiver?.Dispose();
-            _startedReceiver = null;
-            _stoppedReceiver?.Dispose();
-            _stoppedReceiver = null;
-            _connection?.Dispose();
-            _connection = null;
+            _eventReceiver?.Dispose();
+            _eventReceiver = null;
             _isDisposed = true;
         }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        if (_connection is not null)
+        if (_eventReceiver is not null)
         {
             throw new InvalidOperationException($"{nameof(ClientService)} is already started.");
         }
 
-        _connection = new ConnectionMonitor<ClientService>(this, CheckConnectionAsync);
-        _connection.Disconnected += Connection_Disconnected;
-        await _connection.StartAsync(cancellationToken);
-        _startedReceiver = new(
-            GetStartedStream(new(), cancellationToken: cancellationToken),
-            (response) => Started?.Invoke(this, new(response.ClientInfo)));
-        _stoppedReceiver = new(
-            GetStoppedStream(new(), cancellationToken: cancellationToken),
-            (response) => Stopped?.Invoke(this, EventArgs.Empty));
-        await Task.WhenAll(
-            _startedReceiver.StartAsync(cancellationToken),
-            _stoppedReceiver.StartAsync(cancellationToken));
+        await PingAsync(new(), cancellationToken: cancellationToken);
+        _eventReceiver = new(() => GetEventStream(new(), default), InvokeEvent)
+        {
+            Name = "ClientService",
+        };
+        await _eventReceiver.StartAsync(cancellationToken);
+        _eventReceiver.Aborted += EventReceiver_Aborted;
+        _eventReceiver.Completed += EventReceiver_Completed;
+        Info = (await GetInfoAsync(new(), cancellationToken: cancellationToken)).ClientInfo;
     }
 
     public async Task ReleaseAsync(CancellationToken cancellationToken)
     {
-        if (_connection is null)
+        if (_eventReceiver is not null)
         {
-            throw new InvalidOperationException($"{nameof(ClientService)} is not started.");
+            _eventReceiver.Aborted -= EventReceiver_Aborted;
+            _eventReceiver.Completed -= EventReceiver_Completed;
+            await _eventReceiver.StopAsync(cancellationToken);
+            _eventReceiver = null;
         }
-
-        if (_startedReceiver is not null)
-        {
-            await _startedReceiver.StopAsync(cancellationToken);
-            _startedReceiver = null;
-        }
-
-        if (_stoppedReceiver is not null)
-        {
-            await _stoppedReceiver.StopAsync(cancellationToken);
-            _stoppedReceiver = null;
-        }
-
-        _connection.Disconnected -= Connection_Disconnected;
-        await _connection.StopAsync(cancellationToken);
-        _connection = null;
     }
 
     public override AsyncUnaryCall<StartResponse> StartAsync(
         StartRequest request, CallOptions options)
     {
-        if (_startedReceiver is null)
+        if (_eventReceiver is null)
         {
             throw new InvalidOperationException($"{nameof(ClientService)} is not initialized.");
         }
@@ -97,14 +77,18 @@ internal sealed class ClientService(GrpcChannel channel)
 
         async Task<StartResponse> ResponseAsync()
         {
-            await _startedReceiver.StopAsync(default);
+            _eventReceiver.Aborted -= EventReceiver_Aborted;
+            _eventReceiver.Completed -= EventReceiver_Completed;
+            await _eventReceiver.StopAsync(default);
             try
             {
                 return await call.ResponseAsync;
             }
             finally
             {
-                await _startedReceiver.StartAsync(default);
+                await _eventReceiver.StartAsync(default);
+                _eventReceiver.Aborted += EventReceiver_Aborted;
+                _eventReceiver.Completed += EventReceiver_Completed;
             }
         }
     }
@@ -112,7 +96,7 @@ internal sealed class ClientService(GrpcChannel channel)
     public override AsyncUnaryCall<StopResponse> StopAsync(
         StopRequest request, CallOptions options)
     {
-        if (_stoppedReceiver is null)
+        if (_eventReceiver is null)
         {
             throw new InvalidOperationException($"{nameof(ClientService)} is not initialized.");
         }
@@ -127,35 +111,52 @@ internal sealed class ClientService(GrpcChannel channel)
 
         async Task<StopResponse> ResponseAsync()
         {
-            await _stoppedReceiver.StopAsync(default);
+            _eventReceiver.Aborted -= EventReceiver_Aborted;
+            _eventReceiver.Completed -= EventReceiver_Completed;
+            await _eventReceiver.StopAsync(default);
             try
             {
                 return await call.ResponseAsync;
             }
             finally
             {
-                await _stoppedReceiver.StartAsync(default);
+                await _eventReceiver.StartAsync(default);
+                _eventReceiver.Aborted += EventReceiver_Aborted;
+                _eventReceiver.Completed += EventReceiver_Completed;
             }
         }
     }
 
-    private static async Task CheckConnectionAsync(
-        ClientService clientService, CancellationToken cancellationToken)
+    private async void EventReceiver_Completed(object? sender, EventArgs e)
     {
-        await clientService.PingAsync(new(), cancellationToken: cancellationToken);
+        await Task.Run(() =>
+        {
+            _eventReceiver?.Dispose();
+            _eventReceiver = null;
+            Disconnected?.Invoke(this, e);
+        });
     }
 
-    private void Connection_Disconnected(object? sender, EventArgs e)
+    private async void EventReceiver_Aborted(object? sender, EventArgs e)
     {
-        if (sender is ConnectionMonitor<ClientService> connection && connection == _connection)
+        await Task.Run(() =>
         {
-            _startedReceiver?.Dispose();
-            _startedReceiver = null;
-            _stoppedReceiver?.Dispose();
-            _stoppedReceiver = null;
-            _connection.Dispose();
-            _connection = null;
+            _eventReceiver?.Dispose();
+            _eventReceiver = null;
             Disconnected?.Invoke(this, e);
+        });
+    }
+
+    private void InvokeEvent(GetEventStreamResponse response)
+    {
+        switch (response.EventCase)
+        {
+            case GetEventStreamResponse.EventOneofCase.Started:
+                Started?.Invoke(this, new ClientEventArgs(response.Started.ClientInfo));
+                break;
+            case GetEventStreamResponse.EventOneofCase.Stopped:
+                Stopped?.Invoke(this, EventArgs.Empty);
+                break;
         }
     }
 }

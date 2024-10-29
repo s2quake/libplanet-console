@@ -1,69 +1,42 @@
-#pragma warning disable SA1402 // File may only contain a single type
 using Grpc.Core;
 
 namespace LibplanetConsole.Grpc;
 
-internal sealed class EventStreamer<TResponse, TEventArgs>(
-    IAsyncStreamWriter<TResponse> streamWriter,
-    Action<EventHandler<TEventArgs>> attach,
-    Action<EventHandler<TEventArgs>> detach,
-    Func<TEventArgs, TResponse> selector) : Streamer<TResponse>(streamWriter)
+internal sealed class EventStreamer<TResponse>(IAsyncStreamWriter<TResponse> streamWriter)
+    : Streamer<TResponse>(streamWriter)
 {
+    public IList<IEventItem<TResponse>> Items { get; } = [];
+
     protected async override Task OnRun(CancellationToken cancellationToken)
     {
-        async void Handler(object? s, TEventArgs args)
+        var handlers = new EventHandler[Items.Count];
+        for (var i = 0; i < Items.Count; i++)
         {
-            var value = selector(args);
-            await WriteValueAsync(value);
+            var item = Items[i];
+
+            var handler = new EventHandler(Handler);
+            item.Attach(Handler);
+            handlers[i] = handler;
+
+            async void Handler(object? s, EventArgs args)
+            {
+                var value = item.GetResponse(args);
+                await WriteValueAsync(value);
+            }
         }
 
-        attach(Handler);
         try
         {
             await base.OnRun(cancellationToken);
         }
         finally
         {
-            detach(Handler);
+            for (var i = 0; i < Items.Count; i++)
+            {
+                var item = Items[i];
+                var handler = handlers[i];
+                item.Detach(handler);
+            }
         }
     }
-}
-
-internal sealed class EventStreamer<TResponse>(
-    IAsyncStreamWriter<TResponse> streamWriter,
-    Action<EventHandler> attach,
-    Action<EventHandler> detach,
-    Func<TResponse> selector) : Streamer<TResponse>(streamWriter)
-{
-    public EventStreamer(
-        IAsyncStreamWriter<TResponse> streamWriter,
-        Action<EventHandler> attach,
-        Action<EventHandler> detach)
-        : this(streamWriter, attach, detach, CreateInstanceBinder)
-    {
-    }
-
-    protected async override Task OnRun(CancellationToken cancellationToken)
-    {
-        async void Handler(object? s, EventArgs args)
-        {
-            var value = selector();
-            await WriteValueAsync(value);
-        }
-
-        attach(Handler);
-        try
-        {
-            await base.OnRun(cancellationToken);
-        }
-        finally
-        {
-            detach(Handler);
-        }
-    }
-
-    private static TResponse CreateInstanceBinder()
-        => Activator.CreateInstance<TResponse>()
-            ?? throw new InvalidOperationException(
-                "Failed to create an instance of TResponse.");
 }

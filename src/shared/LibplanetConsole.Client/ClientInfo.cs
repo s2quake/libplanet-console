@@ -13,9 +13,7 @@ public readonly record struct ClientInfo
 {
     public Address Address { get; init; }
 
-    public Address NodeAddress { get; init; }
-
-    public BlockHash GenesisHash { get; init; }
+    public NodeInfo NodeInfo { get; init; }
 
     public BlockInfo Tip { get; init; }
 
@@ -31,8 +29,7 @@ public readonly record struct ClientInfo
         return new ClientInfo
         {
             Address = ToAddress(clientInfo.Address),
-            NodeAddress = ToAddress(clientInfo.NodeAddress),
-            GenesisHash = ToBlockHash(clientInfo.GenesisHash),
+            NodeInfo = clientInfo.NodeInfo,
             Tip = clientInfo.Tip,
             IsRunning = clientInfo.IsRunning,
         };
@@ -43,8 +40,7 @@ public readonly record struct ClientInfo
         return new ClientInfoProto
         {
             Address = ToGrpc(clientInfo.Address),
-            NodeAddress = ToGrpc(clientInfo.NodeAddress),
-            GenesisHash = ToGrpc(clientInfo.GenesisHash),
+            NodeInfo = clientInfo.NodeInfo,
             Tip = clientInfo.Tip,
             IsRunning = clientInfo.IsRunning,
         };

@@ -30,6 +30,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
         {
             Directory.SetCurrentDirectory(directory);
             options.GenesisPath = GetFullPath(options.GenesisPath);
+            Console.WriteLine(options.GenesisPath);
             options.StorePath = GetFullPath(options.StorePath);
             options.LogPath = GetFullPath(options.LogPath);
             options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
@@ -46,8 +47,13 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
     {
         try
         {
-            var application = new Application(RepositoryPath);
-            application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
+            var builder = WebApplication.CreateBuilder(options: new()
+            {
+                ContentRootPath = RepositoryPath,
+            });
+            var services = builder.Services;
+            var application = new Application(builder);
+            services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)

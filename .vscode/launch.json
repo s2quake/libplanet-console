@@ -67,7 +67,9 @@
       "console": "integratedTerminal",
       "args": [
         "run",
-        "--single-node"
+        "--single-node",
+        "--port",
+        "4000"
       ]
     },
     {
@@ -93,7 +95,7 @@
       ]
     },
     {
-      "name": "C#: Libplanet Client",
+      "name": "C#: Libplanet Client - Run",
       "type": "coreclr",
       "request": "launch",
       "program": "${workspaceFolder}/src/client/LibplanetConsole.Client.Executable/bin/Debug/net8.0/libplanet-client.dll",
@@ -101,7 +103,7 @@
       "args": [
         "run",
         "--node-end-point",
-        "localhost:51087"
+        "localhost:4000"
       ]
     },
     {
@@ -139,6 +141,13 @@
       "configurations": [
         "C#: Libplanet Node - Start",
         "C#: Libplanet Client - Start"
+      ]
+    },
+    {
+      "name": "Node and Client - Run",
+      "configurations": [
+        "C#: Libplanet Node - Run",
+        "C#: Libplanet Client - Run"
       ]
     }
   ]

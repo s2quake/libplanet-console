@@ -1,6 +1,7 @@
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using JSSoft.Commands;
+using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
@@ -30,17 +31,7 @@ internal sealed class Application
 
     private readonly WebApplicationBuilder _builder;
 
-    public Application()
-        : this(Create(null))
-    {
-    }
-
-    public Application(string repositoryPath)
-        : this(Create(repositoryPath))
-    {
-    }
-
-    private Application(WebApplicationBuilder builder)
+    public Application(WebApplicationBuilder builder)
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
@@ -53,6 +44,7 @@ internal sealed class Application
 
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
+        services.AddSingleton<IInfoProvider, ServerInfoProvider>();
 
         services.AddSingleton<HelpCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
@@ -90,6 +82,8 @@ internal sealed class Application
 
     public IServiceCollection Services => _builder.Services;
 
+    public WebApplicationBuilder Builder => _builder;
+
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         using var app = _builder.Build();
@@ -104,15 +98,5 @@ internal sealed class Application
 
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);
-    }
-
-    private static WebApplicationBuilder Create(string? repositoryPath)
-    {
-        var options = new WebApplicationOptions
-        {
-            ContentRootPath = repositoryPath,
-        };
-
-        return WebApplication.CreateBuilder(options);
     }
 }

@@ -184,6 +184,7 @@ public abstract class ProcessBase
         startInfo.UseShellExecute = IsWindows is true && NewWindow is true;
         startInfo.RedirectStandardOutput = NewWindow is not true;
         startInfo.RedirectStandardError = NewWindow is not true;
+        startInfo.RedirectStandardInput = true;
         startInfo.WorkingDirectory = WorkingDirectory.Fallback(Directory.GetCurrentDirectory());
         return startInfo;
     }

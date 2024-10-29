@@ -43,8 +43,13 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
     {
         try
         {
-            var application = new Application(RepositoryPath);
-            application.Services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
+            var builder = WebApplication.CreateBuilder(options: new()
+            {
+                ContentRootPath = RepositoryPath,
+            });
+            var services = builder.Services;
+            var application = new Application(builder);
+            services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)

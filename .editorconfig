@@ -16,7 +16,7 @@ indent_size = 4
 indent_size = 2
 continuation_indent_size = 2
 
-[*.{csproj,xml}]
+[*.{csproj,xml,props,targets}]
 indent_size = 2
 quote_type = double
 

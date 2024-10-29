@@ -64,11 +64,22 @@ in different environments.
 {
   "$schema": "appsettings-schema.json",
   "application": {
-    "port": "55314",
     "privateKey": "5a3df2ce7fc8b8f7c984f867a34e7d343e974f7b661c83536c0a66685bdbf04a",
     "storePath": "store",
     "logPath": "log",
     "genesisPath": "genesis",
+  },
+  "Kestrel": {
+    "Endpoints": {
+      "Http1": {
+        "Url": "http://localhost:57888",
+        "Protocols": "Http2"
+      },
+      "Http1AndHttp2": {
+        "Url": "http://localhost:57889",
+        "Protocols": "Http1AndHttp2"
+      }
+    }
   }
 }
 ```

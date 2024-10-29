@@ -106,16 +106,30 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
     }
 
-    public override async Task GetBlockAppendedStream(
-        GetBlockAppendedStreamRequest request,
-        IServerStreamWriter<GetBlockAppendedStreamResponse> responseStream,
+    public override async Task GetEventStream(
+        GetEventStreamRequest request,
+        IServerStreamWriter<GetEventStreamResponse> responseStream,
         ServerCallContext context)
     {
-        var streamer = new EventStreamer<GetBlockAppendedStreamResponse, BlockEventArgs>(
-            responseStream,
-            attach: handler => _blockChain.BlockAppended += handler,
-            detach: handler => _blockChain.BlockAppended -= handler,
-            selector: e => new GetBlockAppendedStreamResponse { BlockInfo = e.BlockInfo });
+        var streamer = new EventStreamer<GetEventStreamResponse>(responseStream)
+        {
+            Items =
+            {
+                new EventItem<GetEventStreamResponse, BlockEventArgs>
+                {
+                    Attach = handler => _blockChain.BlockAppended += handler,
+                    Detach = handler => _blockChain.BlockAppended -= handler,
+                    Selector = (e) => new GetEventStreamResponse
+                    {
+                        BlockAppended = new()
+                        {
+                            BlockInfo = e.BlockInfo,
+                        },
+                    },
+                },
+            },
+        };
+
         await streamer.RunAsync(_applicationLifetime, context.CancellationToken);
     }
 }

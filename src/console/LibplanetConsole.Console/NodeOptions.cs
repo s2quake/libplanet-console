@@ -1,6 +1,12 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using LibplanetConsole.Common;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Configuration;
+using Namotion.Reflection;
 using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
@@ -33,13 +39,23 @@ public sealed record class NodeOptions
 
         var repositoryPath = Path.GetDirectoryName(settingsPath)
             ?? throw new ArgumentException("Invalid settings file path.", nameof(settingsPath));
-        var json = File.ReadAllText(settingsPath);
-        var settings = JsonUtility.DeserializeSchema<Settings>(json);
-        var applicationSettings = settings.Application;
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Path.GetDirectoryName(settingsPath)!)
+            .AddJsonFile(settingsPath, optional: false, reloadOnChange: true)
+            .Build();
+        var urls = GetUrls(configuration);
+        if (urls.Length == 0)
+        {
+            throw new ArgumentException("At least one endpoint is required.");
+        }
+
+        var url = new Uri(urls[0]);
+        var applicationSettings = new ApplicationSettings();
+        configuration.Bind("Application", applicationSettings);
 
         return new()
         {
-            EndPoint = GetLocalHost(applicationSettings.Port),
+            EndPoint = new DnsEndPoint(url.Host, url.Port),
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
@@ -50,18 +66,24 @@ public sealed record class NodeOptions
         };
     }
 
-    private sealed record class Settings
+    private static string[] GetUrls(IConfiguration configuration)
     {
-        [JsonPropertyName("$schema")]
-        public required string Schema { get; init; } = string.Empty;
+        var kestrelSection = configuration.GetSection("Kestrel");
+        var endpointsSection = kestrelSection.GetSection("Endpoints");
 
-        public ApplicationSettings Application { get; init; } = new();
+        var urlList = new List<string>();
+        foreach (var item in endpointsSection.GetChildren())
+        {
+            var urlSection = item.GetSection("Url");
+            var url = urlSection.Value ?? throw new UnreachableException("Url is required.");
+            urlList.Add(url);
+        }
+
+        return [.. urlList];
     }
 
     private sealed record class ApplicationSettings
     {
-        public int Port { get; init; } = 0;
-
         public string PrivateKey { get; init; } = string.Empty;
 
         [DefaultValue("")]

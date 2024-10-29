@@ -5,6 +5,7 @@ option csharp_namespace = "LibplanetConsole.Grpc.Client";
 package libplanet.console.client.v1;
 
 import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
+import "src/shared/LibplanetConsole.Node/Protos/NodeGrpcService.proto";
 import "src/shared/LibplanetConsole.Blockchain/Protos/BlockChainGrpcService.proto";
 
 service ClientGrpcService {
@@ -13,15 +14,13 @@ service ClientGrpcService {
   rpc Stop(StopRequest) returns (StopResponse);
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
 
-  rpc GetStartedStream(GetStartedStreamRequest) returns (stream GetStartedStreamResponse);
-  rpc GetStoppedStream(GetStoppedStreamRequest) returns (stream GetStoppedStreamResponse);
+  rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
 
 message ClientInfoProto {
   libplanet.console.types.v1.AddressProto address = 1;
-  libplanet.console.types.v1.AddressProto node_address = 2;
-  libplanet.console.types.v1.BlockHashProto genesis_hash = 3;
-  libplanet.console.blockchain.v1.BlockInfoProto tip = 4;
+  libplanet.console.node.v1.NodeInfoProto node_info = 2;
+  libplanet.console.blockchain.v1.BlockInfoProto tip = 3;
   bool is_running = 5;
 }
 
@@ -52,15 +51,19 @@ message GetInfoResponse {
   ClientInfoProto client_info = 1;
 }
 
-message GetStartedStreamRequest {
-}
-
-message GetStartedStreamResponse {
+message StartedEvent {
   ClientInfoProto client_info = 1;
 }
 
-message GetStoppedStreamRequest {
+message StoppedEvent {
 }
 
-message GetStoppedStreamResponse {
+message GetEventStreamRequest {
+}
+
+message GetEventStreamResponse {
+  oneof event {
+    StartedEvent started = 1;
+    StoppedEvent stopped = 2;
+  }
 }

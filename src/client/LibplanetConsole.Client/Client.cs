@@ -107,7 +107,7 @@ internal sealed partial class Client : IClient
         _blockChainService = blockChainService;
         _info = _info with
         {
-            NodeAddress = NodeInfo.Address,
+            NodeInfo = nodeService.Info,
             Tip = nodeService.Info.Tip,
         };
         IsRunning = true;
@@ -159,13 +159,13 @@ internal sealed partial class Client : IClient
     public void InvokeNodeStartedEvent(NodeEventArgs e)
     {
         NodeInfo = e.NodeInfo;
-        _info = _info with { NodeAddress = NodeInfo.Address };
+        _info = _info with { NodeInfo = e.NodeInfo };
     }
 
     public void InvokeNodeStoppedEvent()
     {
         NodeInfo = NodeInfo.Empty;
-        _info = _info with { NodeAddress = default };
+        _info = _info with { NodeInfo = default };
     }
 
     public void InvokeBlockAppendedEvent(BlockEventArgs e)

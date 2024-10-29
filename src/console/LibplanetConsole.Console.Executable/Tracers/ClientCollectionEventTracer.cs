@@ -30,12 +30,12 @@ internal sealed class ClientCollectionEventTracer : IHostedService, IDisposable
     {
         if (_isDisposed is false)
         {
+            _clients.CollectionChanged -= Clients_CollectionChanged;
             foreach (var client in _clients)
             {
                 DetachEvent(client);
             }
 
-            _clients.CollectionChanged -= Clients_CollectionChanged;
             _isDisposed = true;
         }
     }

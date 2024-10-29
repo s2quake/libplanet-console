@@ -96,6 +96,20 @@ public sealed record class Repository
         }
     }
 
+    public byte[] CreateGenesis(
+        PrivateKey genesisKey,
+        DateTimeOffset dateTimeOffset)
+    {
+        var genesisOptions = new GenesisOptions
+        {
+            GenesisKey = genesisKey,
+            Validators = Nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
+            Timestamp = dateTimeOffset,
+        };
+
+        return CreateGenesis(genesisOptions);
+    }
+
     public dynamic Save(string repositoryPath, RepositoryPathResolver resolver)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
@@ -166,7 +180,6 @@ public sealed record class Repository
             {
                 PrivateKey = node.PrivateKey,
                 Port = GetPort(node.EndPoint),
-                SeedEndPoint = EndPointUtility.ToString(node.SeedEndPoint),
                 OutputPath = nodePath,
                 GenesisPath = genesisPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
