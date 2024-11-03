@@ -30,7 +30,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
     private readonly ILogger _logger;
     private readonly byte[] _genesis;
-    private readonly AppProtocolVersion _appProtocolVersion = SeedNode.AppProtocolVersion;
+    private readonly AppProtocolVersion _appProtocolVersion;
     private readonly IActionProvider _actionProvider;
     private readonly int _blocksyncPort;
     private readonly int _consensusPort;
@@ -58,6 +58,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             options.ActionProviderModulePath, options.ActionProviderType);
         _logger = serviceProvider.GetLogger<Node>();
         _genesis = options.Genesis;
+        _appProtocolVersion = options.AppProtocolVersion;
         _blocksyncPort = nodeOptions.Value.BlocksyncPort;
         _consensusPort = nodeOptions.Value.ConsensusPort;
         UpdateNodeInfo();

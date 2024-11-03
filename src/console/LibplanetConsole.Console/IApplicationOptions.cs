@@ -1,3 +1,5 @@
+using Libplanet.Net;
+
 namespace LibplanetConsole.Console;
 
 public interface IApplicationOptions
@@ -7,6 +9,8 @@ public interface IApplicationOptions
     ClientOptions[] Clients { get; }
 
     byte[] Genesis { get; }
+
+    AppProtocolVersion AppProtocolVersion { get; }
 
     string LogPath { get; }
 

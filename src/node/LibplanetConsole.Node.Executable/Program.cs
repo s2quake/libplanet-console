@@ -11,6 +11,7 @@ var commands = new ICommand[]
     new KeyCommand(),
     new GenesisCommand(),
     new SchemaCommand(),
+    new AppProtocolVersionCommand(),
 };
 var commandContext = new EntryCommandContext(commands);
 await commandContext.ExecuteAsync(args);

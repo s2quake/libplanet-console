@@ -30,7 +30,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
         {
             Directory.SetCurrentDirectory(directory);
             options.GenesisPath = GetFullPath(options.GenesisPath);
-            Console.WriteLine(options.GenesisPath);
+            options.AppProtocolVersionPath = GetFullPath(options.AppProtocolVersionPath);
             options.StorePath = GetFullPath(options.StorePath);
             options.LogPath = GetFullPath(options.LogPath);
             options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);

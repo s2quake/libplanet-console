@@ -9,12 +9,6 @@ namespace LibplanetConsole.Seed;
 
 public sealed class SeedNode(SeedOptions seedOptions)
 {
-    public static readonly PrivateKey AppProtocolKey
-        = new("2a15e7deaac09ce631e1faa184efadb175b6b90989cf1faed9dfc321ad1db5ac");
-
-    public static readonly AppProtocolVersion AppProtocolVersion
-        = AppProtocolVersion.Sign(AppProtocolKey, 1);
-
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
     private ITransport? _transport;
@@ -100,7 +94,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
     private static async Task<NetMQTransport> CreateTransport(SeedOptions seedOptions)
     {
         var privateKey = seedOptions.PrivateKey;
-        var appProtocolVersion = AppProtocolVersion;
+        var appProtocolVersion = seedOptions.AppProtocolVersion;
         var appProtocolVersionOptions = new AppProtocolVersionOptions
         {
             AppProtocolVersion = appProtocolVersion,

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
@@ -47,14 +48,19 @@ internal sealed class InitializeCommand : CommandBase
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("Indicates the EndPoint of the seed node to connect to.")]
     [EndPoint]
     public string SeedEndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path of the genesis." +
-                    "If omitted, the 'genesis' file is used.")]
+    [CommandSummary("The file path of the genesis.")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     public string GenesisPath { get; set; } = string.Empty;
+
+    [CommandProperty("apv-path")]
+    [CommandSummary("The file path of the app protocol version.")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
+    public string AppProtocolVersionPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("single-node")]
     [CommandSummary("If set, the repository is created in a format suitable for a single node.")]
@@ -100,6 +106,8 @@ internal sealed class InitializeCommand : CommandBase
         var storePath = Path.Combine(outputPath, StorePath.Fallback("store"));
         var logPath = Path.Combine(outputPath, LogPath.Fallback("log"));
         var genesisPath = Path.Combine(outputPath, GenesisPath.Fallback("genesis"));
+        var appProtocolVersionPath = Path.Combine(
+            outputPath, AppProtocolVersionPath.Fallback("appProtocolVersion"));
         var repository = new Repository
         {
             Port = port,
@@ -108,6 +116,7 @@ internal sealed class InitializeCommand : CommandBase
             LogPath = logPath,
             SeedEndPoint = ParseOrDefault(SeedEndPoint),
             GenesisPath = genesisPath,
+            AppProtocolVersionPath = appProtocolVersionPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
         };

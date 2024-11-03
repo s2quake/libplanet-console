@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
@@ -85,6 +87,19 @@ internal sealed class RunCommand
     [CommandPropertyExclusion(nameof(NewWindow))]
     public bool Detach { get; set; }
 
+    [CommandProperty("apv-path")]
+    [CommandPropertyExclusion(nameof(AppProtocolVersion))]
+    [CommandSummary("Indicates the file path to load the AppProtocolVersion.\n" +
+                    "Mutually exclusive with '--apv' option.")]
+    [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
+    public string AppProtocolVersionPath { get; init; } = string.Empty;
+
+    [CommandProperty("apv")]
+    [CommandSummary("Indicates the AppProtocolVersion.\n" +
+                    "Mutually exclusive with '--apv-path' option.")]
+    [CommandPropertyExclusion(nameof(AppProtocolVersionPath))]
+    public string AppProtocolVersion { get; init; } = string.Empty;
+
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
         var portGenerator = new PortGenerator(Port);
@@ -97,6 +112,8 @@ internal sealed class RunCommand
         options.Clients = repository.Clients;
         options.Genesis = Genesis;
         options.GenesisPath = GetFullPath(GenesisPath);
+        options.AppProtocolVersion = AppProtocolVersion;
+        options.AppProtocolVersionPath = GetFullPath(AppProtocolVersionPath);
         options.NoProcess = NoProcess;
         options.NewWindow = NewWindow;
         options.Detach = Detach;
@@ -106,6 +123,13 @@ internal sealed class RunCommand
             var genesis = repository.CreateGenesis(
                 genesisKey: new PrivateKey(), DateTimeOffset.UtcNow);
             options.Genesis = ByteUtil.Hex(genesis);
+        }
+
+        if (options.AppProtocolVersion == string.Empty &&
+            options.AppProtocolVersionPath == string.Empty)
+        {
+            options.AppProtocolVersion
+                = Libplanet.Net.AppProtocolVersion.Sign(new(), 1).Token;
         }
 
         static string GetFullPath(string path)

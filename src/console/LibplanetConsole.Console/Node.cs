@@ -287,6 +287,8 @@ internal sealed partial class Node : INode
         {
             process.ExtendedArguments.Add("--genesis");
             process.ExtendedArguments.Add(ByteUtil.Hex(applicationOptions.Genesis));
+            process.ExtendedArguments.Add("--apv");
+            process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
         }
 
         _logger.LogDebug(process.ToString());

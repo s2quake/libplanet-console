@@ -12,7 +12,9 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
 
     public string OutputPath { get; set; } = string.Empty;
 
-    public string GenesisPath { get; set; } = string.Empty;
+    public required string GenesisPath { get; set; } = string.Empty;
+
+    public required string AppProtocolVersionPath { get; set; } = string.Empty;
 
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
@@ -22,6 +24,16 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
     {
         get
         {
+            if (GenesisPath == string.Empty)
+            {
+                throw new InvalidOperationException("GenesisPath must be set.");
+            }
+
+            if (AppProtocolVersionPath == string.Empty)
+            {
+                throw new InvalidOperationException("AppProtocolVersionPath must be set.");
+            }
+
             var argumentList = new List<string>
             {
                 "init",
@@ -32,6 +44,8 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
                 $"{Port}",
                 "--genesis-path",
                 GenesisPath,
+                "--apv-path",
+                AppProtocolVersionPath,
             };
             if (SeedEndPoint != string.Empty)
             {

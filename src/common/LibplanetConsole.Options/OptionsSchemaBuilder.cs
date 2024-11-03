@@ -13,6 +13,7 @@ public class OptionsSchemaBuilder
 #pragma warning disable S1075 // URIs should not be hardcoded
     public const string BaseSchemaUrl = "https://json.schemastore.org/appsettings.json";
 #pragma warning restore S1075 // URIs should not be hardcoded
+    private const int Timeout = 10000;
 
     private readonly Dictionary<string, Type> _typeByName = [];
     private readonly List<string> _requiredNameList = [];
@@ -77,7 +78,9 @@ public class OptionsSchemaBuilder
 
     public string Build()
     {
-        var originSchema = JsonSchema.FromUrlAsync(BaseSchemaUrl, default).GetAwaiter().GetResult();
+        using var cancellationTokenSource = new CancellationTokenSource(millisecondsDelay: Timeout);
+        var task = JsonSchema.FromUrlAsync(BaseSchemaUrl, cancellationTokenSource.Token);
+        var originSchema = task.GetAwaiter().GetResult();
         var schema = new JsonSchema();
         var optionsSchema = new JsonSchema
         {
