@@ -105,6 +105,23 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Network")]
     public PortGenerationMode PortGenerationMode { get; set; } = PortGenerationMode.Sequential;
 
+    [CommandProperty("apv-private-key")]
+    [CommandSummary("The private key of the signer of the AppProtocolVersion. If omitted, " +
+                    "a random private key is used.")]
+    [PrivateKey]
+    [Category("AppProtocolVersion")]
+    public string APVPrivateKey { get; set; } = string.Empty;
+
+    [CommandProperty("apv-version", InitValue = 1)]
+    [CommandSummary("The version number of the AppProtocolVersion. Default is 1.")]
+    [Category("AppProtocolVersion")]
+    public int APVVersion { get; set; }
+
+    [CommandProperty("apv-extra")]
+    [CommandSummary("The extra data to be included in the AppProtocolVersion.")]
+    [Category("AppProtocolVersion")]
+    public string APVExtra { get; set; } = string.Empty;
+
     protected override void OnExecute()
     {
         var portGenerator = new PortGenerator(Port);
@@ -123,10 +140,12 @@ internal sealed class InitializeCommand : CommandBase
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
         };
-        var genesis = Repository.CreateGenesis(genesisOptions);
+        var apvPrivateKey = PrivateKeyUtility.ParseOrRandom(APVPrivateKey);
         var repository = new Repository(port, nodeOptions, clientOptions)
         {
-            Genesis = genesis,
+            Genesis = Repository.CreateGenesis(genesisOptions),
+            AppProtocolVersion = Repository.CreateAppProtocolVersion(
+                apvPrivateKey, APVVersion, APVExtra),
             LogPath = "log",
         };
         var resolver = new RepositoryPathResolver();
@@ -143,6 +162,12 @@ internal sealed class InitializeCommand : CommandBase
             Timestamp = dateTimeOffset,
             ActionProviderModulePath,
             ActionProviderType,
+        };
+        info.AppProtocolVersionArguments = new
+        {
+            PrivateKey = PrivateKeyUtility.ToString(apvPrivateKey),
+            Version = APVVersion,
+            Extra = APVExtra,
         };
 
         TextWriterExtensions.WriteLineAsJson(writer, info);

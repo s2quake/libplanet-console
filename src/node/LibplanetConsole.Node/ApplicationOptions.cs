@@ -1,5 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Options;
@@ -18,6 +18,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     private PrivateKey? _privateKey;
     private EndPoint? _seedEndPoint;
     private byte[]? _genesis;
+    private AppProtocolVersion? _appProtocolVersion;
 
     [PrivateKey]
     public string PrivateKey { get; set; } = string.Empty;
@@ -29,7 +30,16 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [JsonIgnore]
     public string Genesis { get; set; } = string.Empty;
 
+    public string AppProtocolVersionPath { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    [AppProtocolVersion]
+    public string AppProtocolVersion { get; set; } = string.Empty;
+
     byte[] IApplicationOptions.Genesis => _genesis ??= GetGenesis();
+
+    AppProtocolVersion IApplicationOptions.AppProtocolVersion
+        => _appProtocolVersion ??= GetAppProtocolVersion();
 
     [JsonIgnore]
     public int ParentProcessId { get; set; }
@@ -54,32 +64,20 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     private PrivateKey ActualPrivateKey
         => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 
-    public bool TryGetGenesis([MaybeNullWhen(false)] out byte[] genesis)
+    private byte[] GetGenesis()
     {
         if (GenesisPath != string.Empty)
         {
             var lines = File.ReadAllLines(GenesisPath);
-            genesis = ByteUtil.ParseHex(lines[0]);
-            return true;
+            return ByteUtil.ParseHex(lines[0]);
         }
 
         if (Genesis != string.Empty)
         {
-            genesis = ByteUtil.ParseHex(Genesis);
-            return true;
+            return ByteUtil.ParseHex(Genesis);
         }
 
-        genesis = null!;
-        return false;
-    }
-
-    public byte[] GetGenesis()
-    {
-        return TryGetGenesis(out var g) == true ? g : CreateGenesis(ActualPrivateKey);
-    }
-
-    private static byte[] CreateGenesis(PrivateKey privateKey)
-    {
+        var privateKey = ActualPrivateKey;
         var genesisOptions = new GenesisOptions
         {
             GenesisKey = privateKey,
@@ -88,5 +86,22 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
         };
         var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
         return BlockUtility.SerializeBlock(genesisBlock);
+    }
+
+    private AppProtocolVersion GetAppProtocolVersion()
+    {
+        if (AppProtocolVersionPath != string.Empty)
+        {
+            var lines = File.ReadAllLines(AppProtocolVersionPath);
+            return Libplanet.Net.AppProtocolVersion.FromToken(lines[0]);
+        }
+
+        if (AppProtocolVersion != string.Empty)
+        {
+            return Libplanet.Net.AppProtocolVersion.FromToken(AppProtocolVersion);
+        }
+
+        var privateKey = new PrivateKey();
+        return Libplanet.Net.AppProtocolVersion.Sign(privateKey, 1);
     }
 }

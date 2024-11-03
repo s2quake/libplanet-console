@@ -2,7 +2,6 @@ using System.Dynamic;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Options;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using static LibplanetConsole.Common.PathUtility;
 
 namespace LibplanetConsole.Node.Executable;
@@ -23,6 +22,8 @@ public sealed record class Repository
     public string LogPath { get; init; } = string.Empty;
 
     public string GenesisPath { get; init; } = string.Empty;
+
+    public string AppProtocolVersionPath { get; init; } = string.Empty;
 
     public string ActionProviderModulePath { get; init; } = string.Empty;
 
@@ -64,6 +65,8 @@ public sealed record class Repository
             {
                 PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
                 GenesisPath = GetRelativePathFromDirectory(repositoryPath, GenesisPath),
+                AppProtocolVersionPath = GetRelativePathFromDirectory(
+                    repositoryPath, AppProtocolVersionPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
                 SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),

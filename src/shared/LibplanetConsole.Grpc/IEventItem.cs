@@ -1,5 +1,3 @@
-using Grpc.Core;
-
 namespace LibplanetConsole.Grpc;
 
 internal interface IEventItem<out TResponse>

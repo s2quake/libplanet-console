@@ -3,7 +3,7 @@ using LibplanetConsole.Seed;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class SeedService : ISeedService
+internal sealed class SeedService(IApplicationOptions options) : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
@@ -36,11 +36,13 @@ internal sealed class SeedService : ISeedService
         {
             PrivateKey = _seedNodePrivateKey,
             Port = PortUtility.NextPort(),
+            AppProtocolVersion = options.AppProtocolVersion,
         });
         _consensusSeedNode = new SeedNode(new()
         {
             PrivateKey = _seedNodePrivateKey,
             Port = PortUtility.NextPort(),
+            AppProtocolVersion = options.AppProtocolVersion,
         });
         await _blocksyncSeedNode.StartAsync(cancellationToken);
         await _consensusSeedNode.StartAsync(cancellationToken);

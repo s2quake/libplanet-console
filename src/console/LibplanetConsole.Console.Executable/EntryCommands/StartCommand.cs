@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.Extensions.Options;
 
@@ -23,6 +22,8 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             Directory.SetCurrentDirectory(repositoryPath);
             options.Nodes = Repository.LoadNodeOptions(repositoryPath, resolver);
             options.Clients = Repository.LoadClientOptions(repositoryPath, resolver);
+            options.GenesisPath = GetFullPath(options.GenesisPath);
+            options.AppProtocolVersionPath = GetFullPath(options.AppProtocolVersionPath);
             options.LogPath = GetFullPath(options.LogPath);
         }
         finally

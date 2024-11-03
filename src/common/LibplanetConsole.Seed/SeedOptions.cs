@@ -6,6 +6,8 @@ public sealed record class SeedOptions
 
     public required int Port { get; init; }
 
+    public required AppProtocolVersion AppProtocolVersion { get; init; }
+
     public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromSeconds(5);
 
     public TimeSpan PeerLifetime { get; init; } = TimeSpan.FromSeconds(120);

@@ -7,6 +7,9 @@ public class RepositoryPathResolver
     public virtual string GetGenesisPath(string repositoryPath)
         => Path.Combine(repositoryPath, "genesis");
 
+    public virtual string GetAppProtocolVersionPath(string repositoryPath)
+        => Path.Combine(repositoryPath, "apvProtocolVersion");
+
     public virtual string GetSettingsSchemaPath(string repositoryPath)
         => Path.Combine(repositoryPath, "appsettings-schema.json");
 

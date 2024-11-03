@@ -1,6 +1,7 @@
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Options;
@@ -13,6 +14,7 @@ public sealed record class Repository
     private const int DefaultTimeout = 10000;
 
     private byte[]? _genesis;
+    private AppProtocolVersion? _appProtocolVersion;
 
     public Repository(int port, NodeOptions[] nodes, ClientOptions[] clients)
     {
@@ -39,6 +41,12 @@ public sealed record class Repository
         init => _genesis = value;
     }
 
+    public AppProtocolVersion AppProtocolVersion
+    {
+        get => _appProtocolVersion ??= CreateAppProtocolVersion(new(), 1, string.Empty);
+        init => _appProtocolVersion = value;
+    }
+
     public string LogPath { get; init; } = string.Empty;
 
     public static byte[] CreateGenesis(GenesisOptions genesisOptions)
@@ -50,6 +58,20 @@ public sealed record class Repository
 
         var genesis = genesisProcess.RunWithResult();
         return ByteUtil.ParseHex(genesis);
+    }
+
+    public static AppProtocolVersion CreateAppProtocolVersion(
+        PrivateKey privateKey, int version, string extra)
+    {
+        var process = new NodeAppProtocolVersionProcess
+        {
+            PrivateKey = privateKey,
+            Version = version,
+            Extra = extra,
+        };
+
+        var token = process.RunWithResult();
+        return AppProtocolVersion.FromToken(token);
     }
 
     public static NodeOptions[] LoadNodeOptions(
@@ -137,11 +159,14 @@ public sealed record class Repository
         var settingsPath = resolver.GetSettingsPath(repositoryPath);
         var schemaPath = resolver.GetSettingsSchemaPath(repositoryPath);
         var genesisPath = resolver.GetGenesisPath(repositoryPath);
+        var appProtocolVersionPath = resolver.GetAppProtocolVersionPath(repositoryPath);
         var nodesPath = resolver.GetNodesPath(repositoryPath);
         var clientsPath = resolver.GetClientsPath(repositoryPath);
         var applicationOptions = new ApplicationOptions
         {
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
+            AppProtocolVersionPath = PathUtility.GetRelativePath(
+                settingsPath, appProtocolVersionPath),
             LogPath = LogPath,
         };
         var kestrelOptions = new
@@ -165,6 +190,8 @@ public sealed record class Repository
 
         SaveGenesis(genesisPath);
         info.GenesisPath = genesisPath;
+        SaveAppProtocolVersion(appProtocolVersionPath);
+        info.AppProtocolVersionPath = appProtocolVersionPath;
         SaveSettingsSchema(schemaPath);
         info.SchemaPath = schemaPath;
         SaveSettings(schemaPath, settingsPath, applicationOptions, kestrelOptions);
@@ -182,6 +209,7 @@ public sealed record class Repository
                 Port = GetPort(node.EndPoint),
                 OutputPath = nodePath,
                 GenesisPath = genesisPath,
+                AppProtocolVersionPath = appProtocolVersionPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
                 ActionProviderType = node.ActionProviderType,
             };
@@ -237,6 +265,13 @@ public sealed record class Repository
         var genesis = Genesis;
         var hex = ByteUtil.Hex(genesis);
         File.WriteAllLines(genesisPath, [hex]);
+    }
+
+    private void SaveAppProtocolVersion(string appProtocolVersionPath)
+    {
+        var appProtocolVersion = AppProtocolVersion;
+        var hex = appProtocolVersion.Token;
+        File.WriteAllLines(appProtocolVersionPath, [hex]);
     }
 
     private static void SaveSettings(

@@ -1,3 +1,5 @@
+using Libplanet.Net;
+
 namespace LibplanetConsole.Node;
 
 public interface IApplicationOptions
@@ -5,6 +7,8 @@ public interface IApplicationOptions
     PrivateKey PrivateKey { get; }
 
     byte[] Genesis { get; }
+
+    AppProtocolVersion AppProtocolVersion { get; }
 
     int ParentProcessId { get; }
 

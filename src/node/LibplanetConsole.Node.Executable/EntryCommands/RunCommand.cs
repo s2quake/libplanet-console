@@ -1,11 +1,11 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -56,6 +56,19 @@ internal sealed class RunCommand
                     "is used.\nMutually exclusive with '--genesis-path' option.")]
     public string Genesis { get; init; } = string.Empty;
 
+    [CommandProperty("apv-path")]
+    [CommandPropertyExclusion(nameof(AppProtocolVersion))]
+    [CommandSummary("Indicates the file path to load the AppProtocolVersion.\n" +
+                    "Mutually exclusive with '--apv' option.")]
+    [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
+    public string AppProtocolVersionPath { get; init; } = string.Empty;
+
+    [CommandProperty("apv")]
+    [CommandPropertyExclusion(nameof(AppProtocolVersionPath))]
+    [CommandSummary("Indicates the AppProtocolVersion.\n" +
+                    "Mutually exclusive with '--apv-path' option.")]
+    public string AppProtocolVersion { get; init; } = string.Empty;
+
     [CommandProperty]
     [CommandSummary("Indicates the directory path to save logs.")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
@@ -91,8 +104,10 @@ internal sealed class RunCommand
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
         options.PrivateKey = PrivateKey;
-        options.GenesisPath = GenesisPath;
+        options.GenesisPath = GetFullPath(GenesisPath);
         options.Genesis = Genesis;
+        options.AppProtocolVersionPath = GetFullPath(AppProtocolVersionPath);
+        options.AppProtocolVersion = AppProtocolVersion;
         options.ParentProcessId = ParentProcessId;
         options.SeedEndPoint = SeedEndPoint;
         options.StorePath = GetFullPath(StorePath);

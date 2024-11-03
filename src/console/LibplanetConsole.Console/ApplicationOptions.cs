@@ -1,5 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Libplanet.Net;
 using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Console;
@@ -12,6 +12,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public const int SeedConsensusPortIncrement = 7;
 
     private byte[]? _genesis;
+    private AppProtocolVersion? _appProtocolVersion;
 
     [JsonIgnore]
     public NodeOptions[] Nodes { get; set; } = [];
@@ -24,6 +25,11 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [JsonIgnore]
     public string Genesis { get; set; } = string.Empty;
 
+    public string AppProtocolVersionPath { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public string AppProtocolVersion { get; set; } = string.Empty;
+
     public string LogPath { get; set; } = string.Empty;
 
     public bool NoProcess { get; set; }
@@ -32,8 +38,10 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     public bool NewWindow { get; set; }
 
-    byte[] IApplicationOptions.Genesis
-        => _genesis ??= GetGenesis();
+    byte[] IApplicationOptions.Genesis => _genesis ??= GetGenesis();
+
+    AppProtocolVersion IApplicationOptions.AppProtocolVersion
+        => _appProtocolVersion ??= GetAppProtocolVersion();
 
     private byte[] GetGenesis()
     {
@@ -49,5 +57,21 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
         }
 
         throw new NotSupportedException("Genesis is not set.");
+    }
+
+    private AppProtocolVersion GetAppProtocolVersion()
+    {
+        if (AppProtocolVersionPath != string.Empty)
+        {
+            var lines = File.ReadAllLines(AppProtocolVersionPath);
+            return Libplanet.Net.AppProtocolVersion.FromToken(lines[0]);
+        }
+
+        if (AppProtocolVersion != string.Empty)
+        {
+            return Libplanet.Net.AppProtocolVersion.FromToken(AppProtocolVersion);
+        }
+
+        throw new NotSupportedException("AppProtocolVersion is not set.");
     }
 }
