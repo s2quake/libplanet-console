@@ -124,8 +124,17 @@ internal sealed class InitializeCommand : CommandAsyncBase
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var progress = new CommandProgress();
+        using var writer = new ConditionalTextWriter(Out)
+        {
+            Condition = Quiet is false,
+        };
+        var info = await ExecuteAsync(cancellationToken);
+        await TextWriterExtensions.WriteLineAsJsonAsync(writer, info, cancellationToken);
+    }
 
+    private async Task<dynamic> ExecuteAsync(CancellationToken cancellationToken)
+    {
+        using var progress = new CommandProgress();
         var portGenerator = new PortGenerator(Port);
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
         var port = portGenerator.Current;
@@ -151,10 +160,6 @@ internal sealed class InitializeCommand : CommandAsyncBase
             LogPath = "log",
         };
         var resolver = new RepositoryPathResolver();
-        using var writer = new ConditionalTextWriter(Out)
-        {
-            Condition = Quiet is false,
-        };
         dynamic info = await repository.SaveAsync(
             outputPath, resolver, cancellationToken, progress);
         info.GenesisArguments = new
@@ -173,8 +178,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
             Extra = APVExtra,
         };
 
-        progress.Dispose();
-        await TextWriterExtensions.WriteLineAsJsonAsync(writer, info, cancellationToken);
+        return info;
     }
 
     private NodeOptions[] GetNodeOptions(PortGenerator portGenerator, int port)
