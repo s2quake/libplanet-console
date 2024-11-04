@@ -66,8 +66,9 @@ public static class JsonUtility
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.Start();
+            var s = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
-            return process.StandardOutput.ReadToEnd();
+            return s;
         }
 
         return json;
@@ -87,8 +88,9 @@ public static class JsonUtility
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.Start();
+            var s = await process.StandardOutput.ReadToEndAsync(cancellationToken);
             await process.WaitForExitAsync(cancellationToken);
-            return await process.StandardOutput.ReadToEndAsync(cancellationToken);
+            return s;
         }
 
         return json;
