@@ -16,7 +16,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     public async Task NewAsync(CancellationToken cancellationToken)
     {
         var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
-        await Out.WriteLineAsJsonAsync(evidenceInfo);
+        await Out.WriteLineAsJsonAsync(evidenceInfo, cancellationToken);
     }
 
     [CommandMethod]
@@ -36,7 +36,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
         var evidenceInfos = isPending == true ?
             await evidence.GetPendingEvidenceAsync(cancellationToken) :
             await evidence.GetEvidenceAsync(height, cancellationToken);
-        await Out.WriteLineAsJsonAsync(evidenceInfos);
+        await Out.WriteLineAsJsonAsync(evidenceInfos, cancellationToken);
     }
 
     [CommandMethod]
@@ -48,7 +48,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
         var evidenceInfo = isPending == true ?
             await evidence.GetPendingEvidenceAsync(evidenceId, cancellationToken) :
             await evidence.GetEvidenceAsync(evidenceId, cancellationToken);
-        await Out.WriteLineAsJsonAsync(evidenceInfo);
+        await Out.WriteLineAsJsonAsync(evidenceInfo, cancellationToken);
     }
 
 #if LIBPLANET_DPOS

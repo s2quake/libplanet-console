@@ -17,7 +17,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
         var evidence = node.GetRequiredKeyedService<IEvidence>(INode.Key);
         var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
-        await Out.WriteLineAsJsonAsync(evidenceInfo);
+        await Out.WriteLineAsJsonAsync(evidenceInfo, cancellationToken);
     }
 
     [CommandMethod]
@@ -35,7 +35,7 @@ internal sealed class EvidenceCommand(INodeCollection nodes)
         var node = nodes.Current ?? throw new InvalidOperationException("No node is selected.");
         var evidence = node.GetRequiredKeyedService<IEvidence>(INode.Key);
         var evidenceInfos = await evidence.GetEvidenceAsync(height, cancellationToken);
-        await Out.WriteLineAsJsonAsync(evidenceInfos);
+        await Out.WriteLineAsJsonAsync(evidenceInfos, cancellationToken);
     }
 
 #if LIBPLANET_DPOS

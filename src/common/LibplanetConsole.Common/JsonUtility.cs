@@ -38,6 +38,18 @@ public static class JsonUtility
         return json;
     }
 
+    public static async Task<string> SerializeAsync(
+        object value, bool isColorized, CancellationToken cancellationToken)
+    {
+        var json = Serialize(value);
+        if (isColorized == true)
+        {
+            return await ToColorizedStringAsync(json, cancellationToken);
+        }
+
+        return json;
+    }
+
     public static string SerializeSchema(object value)
         => JsonSerializer.Serialize(value, SchemaSerializerOptions);
 
@@ -54,8 +66,31 @@ public static class JsonUtility
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.Start();
+            var s = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
-            return process.StandardOutput.ReadToEnd();
+            return s;
+        }
+
+        return json;
+    }
+
+    public static async Task<string> ToColorizedStringAsync(
+        string json, CancellationToken cancellationToken)
+    {
+        if (IsJQSupported == true)
+        {
+            using var tempFile = TempFile.WriteAllText(json);
+            var process = new Process();
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.FileName = $"jq";
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.Arguments = $". -C \"{tempFile.FileName}\"";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.Start();
+            var s = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            return s;
         }
 
         return json;

@@ -75,7 +75,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
         };
         var node = await nodes.AddNewAsync(options, cancellationToken);
         var nodeInfo = node.Info;
-        await Out.WriteLineAsJsonAsync(nodeInfo);
+        await Out.WriteLineAsJsonAsync(nodeInfo, cancellationToken);
     }
 
     [CommandMethod]

@@ -11,7 +11,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
 [CommandSummary("Create a new repository to run Libplanet nodes and clients from the console.")]
-internal sealed class InitializeCommand : CommandBase
+internal sealed class InitializeCommand : CommandAsyncBase
 {
     public InitializeCommand()
         : base("init")
@@ -122,8 +122,19 @@ internal sealed class InitializeCommand : CommandBase
     [Category("AppProtocolVersion")]
     public string APVExtra { get; set; } = string.Empty;
 
-    protected override void OnExecute()
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
+        using var writer = new ConditionalTextWriter(Out)
+        {
+            Condition = Quiet is false,
+        };
+        var info = await ExecuteAsync(cancellationToken);
+        await TextWriterExtensions.WriteLineAsJsonAsync(writer, info, cancellationToken);
+    }
+
+    private async Task<dynamic> ExecuteAsync(CancellationToken cancellationToken)
+    {
+        using var progress = new CommandProgress();
         var portGenerator = new PortGenerator(Port);
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
         var port = portGenerator.Current;
@@ -149,11 +160,8 @@ internal sealed class InitializeCommand : CommandBase
             LogPath = "log",
         };
         var resolver = new RepositoryPathResolver();
-        using var writer = new ConditionalTextWriter(Out)
-        {
-            Condition = Quiet is false,
-        };
-        dynamic info = repository.Save(outputPath, resolver);
+        dynamic info = await repository.SaveAsync(
+            outputPath, resolver, cancellationToken, progress);
         info.GenesisArguments = new
         {
             GenesisKey = PrivateKeyUtility.ToString(genesisKey),
@@ -170,7 +178,7 @@ internal sealed class InitializeCommand : CommandBase
             Extra = APVExtra,
         };
 
-        TextWriterExtensions.WriteLineAsJson(writer, info);
+        return info;
     }
 
     private NodeOptions[] GetNodeOptions(PortGenerator portGenerator, int port)
