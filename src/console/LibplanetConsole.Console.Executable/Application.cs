@@ -44,6 +44,10 @@ internal sealed class Application
                 .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
         services.AddSingleton<VersionCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
+        services.AddSingleton<ICommand, NewNodeCommand>();
+        services.AddSingleton<ICommand, DeleteNodeCommand>();
+        services.AddSingleton<ICommand, NewClientCommand>();
+        services.AddSingleton<ICommand, DeleteClientCommand>();
 
         services.AddConsole(configuration);
         services.AddEvidence();
@@ -70,10 +74,13 @@ internal sealed class Application
                 LoggerUtility.CreateLogger(_traceFilters);
             }
         });
+        services.AddSingleton(this);
         _builder = builder;
     }
 
     public IServiceCollection Services => _builder.Services;
+
+    public string RepositoryPath { get; set; } = string.Empty;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {

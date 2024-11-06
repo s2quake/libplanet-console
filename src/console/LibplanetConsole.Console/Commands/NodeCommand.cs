@@ -35,16 +35,6 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Deletes a node of the specified address.\n" +
-                    "If the address is not specified, the current node is used.")]
-    public async Task DeleteAsync()
-    {
-        var address = Address;
-        var node = nodes.GetNodeOrCurrent(address);
-        await node.DisposeAsync();
-    }
-
-    [CommandMethod]
     [CommandSummary("Displays the node information of the specified address.\n" +
                     "If the address is not specified, the current node is used.")]
     public void Info()
@@ -53,29 +43,6 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
         var node = nodes.GetNodeOrCurrent(address);
         var nodeInfo = InfoUtility.GetInfo(serviceProvider, obj: node);
         Out.WriteLineAsJson(nodeInfo);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Creates a new node.")]
-    [CommandMethodStaticProperty(typeof(NewProperties))]
-    public async Task NewAsync(
-        string privateKey = "", CancellationToken cancellationToken = default)
-    {
-        var nodeOptions = new NodeOptions
-        {
-            EndPoint = EndPointUtility.NextEndPoint(),
-            PrivateKey = PrivateKeyUtility.ParseOrRandom(privateKey),
-        };
-        var options = new AddNewNodeOptions
-        {
-            NodeOptions = nodeOptions,
-            NoProcess = NewProperties.NoProcess,
-            Detach = NewProperties.Detach,
-            NewWindow = NewProperties.NewWindow,
-        };
-        var node = await nodes.AddNewAsync(options, cancellationToken);
-        var nodeInfo = node.Info;
-        await Out.WriteLineAsJsonAsync(nodeInfo, cancellationToken);
     }
 
     [CommandMethod]
@@ -186,24 +153,5 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     {
         var infos = nodes.Select(node => node.Info).ToArray();
         Out.WriteLineAsJson(infos);
-    }
-
-    private static class NewProperties
-    {
-        [CommandPropertySwitch]
-        [CommandSummary("The node is created but process is not executed.")]
-        public static bool NoProcess { get; set; }
-
-        [CommandPropertySwitch]
-        [CommandSummary("The node is started in a new window.\n" +
-                        "This option cannot be used with --no-process option.")]
-        [CommandPropertyExclusion(nameof(NoProcess))]
-        public static bool Detach { get; set; }
-
-        [CommandPropertySwitch]
-        [CommandSummary("The node is started in a new window.\n" +
-                        "This option cannot be used with --no-process option.")]
-        [CommandPropertyExclusion(nameof(NoProcess))]
-        public static bool NewWindow { get; set; }
     }
 }

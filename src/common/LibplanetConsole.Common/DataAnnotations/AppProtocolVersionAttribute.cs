@@ -24,9 +24,10 @@ public sealed class AppProtocolVersionAttribute : RegularExpressionAttribute
             $"(?<version>{VersionPattern})",
             $"(?<address>{AddressPattern})",
             $"(?<signature>{Base64Pattern})",
-            $"(?<extra>{Base64Pattern})",
         };
+        var pattern1 = string.Join('/', items);
+        var pattern2 = $"(?:/(?<extra>{Base64Pattern})){{0,1}}";
 
-        return string.Join('/', items);
+        return pattern1 + pattern2;
     }
 }

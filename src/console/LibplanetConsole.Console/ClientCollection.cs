@@ -97,6 +97,8 @@ internal sealed class ClientCollection(
         AddNewClientOptions options, CancellationToken cancellationToken)
     {
         var client = ClientFactory.CreateNew(serviceProvider, options.ClientOptions);
+        InsertClient(client);
+
         if (options.NoProcess != true)
         {
             await client.StartProcessAsync(options, cancellationToken);
@@ -114,7 +116,6 @@ internal sealed class ClientCollection(
             await client.StartAsync(node, cancellationToken);
         }
 
-        InsertClient(client);
         return client;
     }
 

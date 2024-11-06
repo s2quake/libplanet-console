@@ -1,9 +1,11 @@
 using System.Dynamic;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using JSSoft.Commands;
 using Libplanet.Net;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Progresses;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Options;
@@ -52,6 +54,10 @@ public sealed record class Repository
 
     public string LogPath { get; init; } = string.Empty;
 
+    public string ActionProviderModulePath { get; set; } = string.Empty;
+
+    public string ActionProviderType { get; set; } = string.Empty;
+
     public static byte[] CreateGenesis(GenesisOptions genesisOptions)
     {
         var genesisProcess = new NodeGenesisProcess
@@ -88,14 +94,20 @@ public sealed record class Repository
 
         var nodesPath = resolver.GetNodesPath(repositoryPath);
         return Directory.GetDirectories(nodesPath)
+            .Where(IsValidNodePath)
             .Select(LoadNodeOptions)
             .ToArray();
 
         NodeOptions LoadNodeOptions(string nodePath)
         {
-            var privateKey = new PrivateKey(Path.GetFileName(nodePath));
-            var settingsPath = resolver.GetNodeSettingsPath(nodePath, privateKey);
+            var settingsPath = resolver.GetNodeSettingsPath(nodePath);
             return NodeOptions.Load(settingsPath);
+        }
+
+        static bool IsValidNodePath(string path)
+        {
+            var name = Path.GetFileName(path);
+            return Regex.IsMatch(name, $"^{AddressAttribute.RegularExpression}$");
         }
     }
 
@@ -115,8 +127,7 @@ public sealed record class Repository
 
         ClientOptions LoadClientOptions(string clientPath)
         {
-            var privateKey = new PrivateKey(Path.GetFileName(clientPath));
-            var settingsPath = resolver.GetClientSettingsPath(clientPath, privateKey);
+            var settingsPath = resolver.GetClientSettingsPath(clientPath);
             return ClientOptions.Load(settingsPath);
         }
     }
@@ -175,6 +186,8 @@ public sealed record class Repository
             AppProtocolVersionPath = PathUtility.GetRelativePath(
                 settingsPath, appProtocolVersionPath),
             LogPath = LogPath,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         };
         var kestrelOptions = new
         {
@@ -215,11 +228,12 @@ public sealed record class Repository
         {
             stepProgress.Next($"Initializing node {i}...");
             var node = Nodes[i];
+            var nodeAddress = node.PrivateKey.Address;
             var process = new NodeRepositoryProcess
             {
                 PrivateKey = node.PrivateKey,
                 Port = GetPort(node.EndPoint),
-                OutputPath = resolver.GetNodePath(nodesPath, node.PrivateKey),
+                OutputPath = resolver.GetNodePath(nodesPath, nodeAddress),
                 GenesisPath = resolver.GetGenesisPath(repositoryPath),
                 AppProtocolVersionPath = appProtocolVersionPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
@@ -241,11 +255,12 @@ public sealed record class Repository
         {
             stepProgress.Next($"Initializing client {i}...");
             var client = Clients[i];
+            var privateKey = client.PrivateKey;
             var process = new ClientRepositoryProcess
             {
-                PrivateKey = client.PrivateKey,
+                PrivateKey = privateKey,
                 Port = GetPort(client.EndPoint),
-                OutputPath = resolver.GetClientPath(clientsPath, client.PrivateKey),
+                OutputPath = resolver.GetClientPath(clientsPath, privateKey.Address),
             };
             var sb = new StringBuilder();
             using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);

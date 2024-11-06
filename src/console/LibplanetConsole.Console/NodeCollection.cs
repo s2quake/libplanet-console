@@ -96,6 +96,8 @@ internal sealed class NodeCollection(
         AddNewNodeOptions options, CancellationToken cancellationToken)
     {
         var node = NodeFactory.CreateNew(serviceProvider, options.NodeOptions);
+        InsertNode(node);
+
         if (options.NoProcess != true)
         {
             await node.StartProcessAsync(options, cancellationToken);
@@ -111,7 +113,6 @@ internal sealed class NodeCollection(
             await node.StartAsync(cancellationToken);
         }
 
-        InsertNode(node);
         return node;
     }
 

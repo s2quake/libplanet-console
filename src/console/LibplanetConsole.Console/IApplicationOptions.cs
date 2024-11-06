@@ -19,4 +19,8 @@ public interface IApplicationOptions
     bool Detach { get; }
 
     bool NewWindow { get; }
+
+    string ActionProviderModulePath { get; }
+
+    string ActionProviderType { get; }
 }

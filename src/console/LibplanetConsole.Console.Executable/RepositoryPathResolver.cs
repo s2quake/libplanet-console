@@ -19,33 +19,39 @@ public class RepositoryPathResolver
     public virtual string GetNodesPath(string repositoryPath)
         => Path.Combine(repositoryPath, "nodes");
 
+    public virtual string GetNodesTrashPath(string repositoryPath)
+        => Path.Combine(repositoryPath, "nodes.trash");
+
     public virtual string GetNodeSettingsSchemaPath(string nodesPath)
         => Path.Combine(nodesPath, "appsettings-schema.json");
 
-    public virtual string GetNodeSettingsPath(string nodePath, PrivateKey privateKey)
+    public virtual string GetNodeSettingsPath(string nodePath)
         => Path.Combine(nodePath, "appsettings.json");
 
-    public virtual string GetNodePath(string nodesPath, PrivateKey privateKey)
-        => Path.Combine(nodesPath, PrivateKeyUtility.ToString(privateKey));
+    public virtual string GetNodePath(string nodesPath, Address address)
+        => Path.Combine(nodesPath, address.ToString());
 
-    public virtual string GetNodeStorePath(string nodePath, PrivateKey privateKey)
+    public virtual string GetNodeStorePath(string nodePath)
         => Path.Combine(nodePath, "store");
 
-    public virtual string GetNodeLogPath(string nodePath, PrivateKey privateKey)
+    public virtual string GetNodeLogPath(string nodePath)
         => Path.Combine(nodePath, "log");
 
     public virtual string GetClientsPath(string repositoryPath)
         => Path.Combine(repositoryPath, "clients");
 
+    public virtual string GetClientsTrashPath(string repositoryPath)
+        => Path.Combine(repositoryPath, "clients.trash");
+
     public virtual string GetClientSettingsSchemaPath(string clientsPath)
         => Path.Combine(clientsPath, "appsettings-schema.json");
 
-    public virtual string GetClientSettingsPath(string clientPath, PrivateKey privateKey)
+    public virtual string GetClientSettingsPath(string clientPath)
         => Path.Combine(clientPath, "appsettings.json");
 
-    public virtual string GetClientPath(string clientsPath, PrivateKey privateKey)
-        => Path.Combine(clientsPath, PrivateKeyUtility.ToString(privateKey));
+    public virtual string GetClientPath(string clientsPath, Address address)
+        => Path.Combine(clientsPath, address.ToString());
 
-    public virtual string GetClientLogPath(string clientPath, PrivateKey privateKey)
+    public virtual string GetClientLogPath(string clientPath)
         => Path.Combine(clientPath, "log");
 }

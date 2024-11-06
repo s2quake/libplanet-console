@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.Extensions.Options;
+using Namotion.Reflection;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -25,6 +26,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             options.GenesisPath = GetFullPath(options.GenesisPath);
             options.AppProtocolVersionPath = GetFullPath(options.AppProtocolVersionPath);
             options.LogPath = GetFullPath(options.LogPath);
+            options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
         }
         finally
         {
@@ -41,7 +43,10 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
                 ContentRootPath = RepositoryPath,
             });
             var services = builder.Services;
-            var application = new Application(builder);
+            var application = new Application(builder)
+            {
+                RepositoryPath = RepositoryPath,
+            };
             services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
             await application.RunAsync(cancellationToken);
         }

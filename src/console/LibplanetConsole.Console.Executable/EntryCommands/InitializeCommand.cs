@@ -158,6 +158,8 @@ internal sealed class InitializeCommand : CommandAsyncBase
             AppProtocolVersion = Repository.CreateAppProtocolVersion(
                 apvPrivateKey, APVVersion, APVExtra),
             LogPath = "log",
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         };
         var resolver = new RepositoryPathResolver();
         dynamic info = await repository.SaveAsync(
