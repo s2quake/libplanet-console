@@ -67,6 +67,7 @@ internal sealed class RunCommand
     [CommandPropertyExclusion(nameof(AppProtocolVersionPath))]
     [CommandSummary("Indicates the AppProtocolVersion.\n" +
                     "Mutually exclusive with '--apv-path' option.")]
+    [AppProtocolVersion]
     public string AppProtocolVersion { get; init; } = string.Empty;
 
     [CommandProperty]

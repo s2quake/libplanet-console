@@ -38,6 +38,10 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     public bool NewWindow { get; set; }
 
+    public string ActionProviderModulePath { get; set; } = string.Empty;
+
+    public string ActionProviderType { get; set; } = string.Empty;
+
     byte[] IApplicationOptions.Genesis => _genesis ??= GetGenesis();
 
     AppProtocolVersion IApplicationOptions.AppProtocolVersion

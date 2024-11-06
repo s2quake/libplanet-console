@@ -66,7 +66,7 @@ internal sealed partial class Client : IClient
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 
-    public override string ToString() => $"{Address.ToShortString()}: {EndPoint}";
+    public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
 
     public byte[] Sign(object obj) => _clientOptions.PrivateKey.Sign(obj);
 

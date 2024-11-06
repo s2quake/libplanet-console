@@ -48,40 +48,6 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Creates a new client.")]
-    [CommandMethodStaticProperty(typeof(NewProperties))]
-    public async Task NewAsync(
-        string privateKey = "", CancellationToken cancellationToken = default)
-    {
-        var clientOptions = new ClientOptions
-        {
-            EndPoint = EndPointUtility.NextEndPoint(),
-            PrivateKey = PrivateKeyUtility.ParseOrRandom(privateKey),
-        };
-        var options = new AddNewClientOptions
-        {
-            ClientOptions = clientOptions,
-            NoProcess = NewProperties.NoProcess,
-            Detach = NewProperties.Detach,
-            NewWindow = NewProperties.NewWindow,
-        };
-        var client = await clients.AddNewAsync(options, cancellationToken);
-        var clientInfo = client.Info;
-        await Out.WriteLineAsJsonAsync(clientInfo, cancellationToken);
-    }
-
-    [CommandMethod]
-    [CommandSummary("Deletes a client of the specified address.\n" +
-                    "If the address is not specified, current client is used.")]
-    [CommandMethodProperty(nameof(Address))]
-    public async Task DeleteAsync()
-    {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
-        await client.DisposeAsync();
-    }
-
-    [CommandMethod]
     [CommandSummary("Attach to the client which is already running.\n" +
                     "If the address is not specified, current client is used.")]
     [CommandMethodProperty(nameof(Address))]
@@ -175,24 +141,5 @@ public sealed partial class ClientCommand(
         }
 
         return TerminalColorType.BrightBlack;
-    }
-
-    private static class NewProperties
-    {
-        [CommandPropertySwitch]
-        [CommandSummary("The client is created but process is not executed.")]
-        public static bool NoProcess { get; set; }
-
-        [CommandPropertySwitch]
-        [CommandSummary("The client is started in a new window.\n" +
-                        "This option cannot be used with --no-process option.")]
-        [CommandPropertyExclusion(nameof(NoProcess))]
-        public static bool Detach { get; set; }
-
-        [CommandPropertySwitch]
-        [CommandSummary("The client is started in a new window.\n" +
-                        "This option cannot be used with --no-process option.")]
-        [CommandPropertyExclusion(nameof(NoProcess))]
-        public static bool NewWindow { get; set; }
     }
 }
