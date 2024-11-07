@@ -5,10 +5,6 @@ namespace LibplanetConsole.Node;
 
 public static partial class BlockUtility
 {
-    private static readonly Codec _codec = new();
-    private static readonly HashDigest<SHA256> _emptyRootHash
-         = HashDigest<SHA256>.DeriveFrom(_codec.Encode(Null.Value));
-
     public static Block CreateGenesisBlock(
         GenesisOptions genesisOptions)
     {
@@ -66,7 +62,7 @@ public static partial class BlockUtility
             evidence: []);
 
         PreEvaluationBlock preEval = content.Propose();
-        stateRootHash ??= _emptyRootHash;
+        stateRootHash ??= HashDigest<SHA256>.DeriveFrom(_codec.Encode(Null.Value));
         return preEval.Sign(privateKey, (HashDigest<SHA256>)stateRootHash);
     }
 }

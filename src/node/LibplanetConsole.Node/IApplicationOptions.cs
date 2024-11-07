@@ -6,7 +6,7 @@ public interface IApplicationOptions
 {
     PrivateKey PrivateKey { get; }
 
-    byte[] Genesis { get; }
+    Block GenesisBlock { get; }
 
     AppProtocolVersion AppProtocolVersion { get; }
 
