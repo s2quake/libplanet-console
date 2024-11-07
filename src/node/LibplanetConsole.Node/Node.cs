@@ -29,7 +29,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private readonly ConcurrentDictionary<TxId, ManualResetEvent> _eventByTxId = [];
     private readonly ConcurrentDictionary<IValue, Exception> _exceptionByAction = [];
     private readonly ILogger _logger;
-    private readonly byte[] _genesis;
+    private readonly Block _genesisBlock;
     private readonly AppProtocolVersion _appProtocolVersion;
     private readonly IActionProvider _actionProvider;
     private readonly int _blocksyncPort;
@@ -57,7 +57,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _actionProvider = ModuleLoader.LoadActionLoader(
             options.ActionProviderModulePath, options.ActionProviderType);
         _logger = serviceProvider.GetLogger<Node>();
-        _genesis = options.Genesis;
+        _genesisBlock = options.GenesisBlock;
         _appProtocolVersion = options.AppProtocolVersion;
         _blocksyncPort = nodeOptions.Value.BlocksyncPort;
         _consensusPort = nodeOptions.Value.ConsensusPort;
@@ -178,7 +178,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         };
         var (keyValueStore, store, stateStore) = BlockChainUtility.GetStore(storePath);
         var blockChain = BlockChainUtility.CreateBlockChain(
-            genesisBlock: BlockUtility.DeserializeBlock(_genesis),
+            genesisBlock: _genesisBlock,
             store,
             stateStore,
             renderer: this,

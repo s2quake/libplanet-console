@@ -17,7 +17,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     private PrivateKey? _privateKey;
     private EndPoint? _seedEndPoint;
-    private byte[]? _genesis;
+    private Block? _genesisBlock;
     private AppProtocolVersion? _appProtocolVersion;
 
     [PrivateKey]
@@ -36,7 +36,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [AppProtocolVersion]
     public string AppProtocolVersion { get; set; } = string.Empty;
 
-    byte[] IApplicationOptions.Genesis => _genesis ??= GetGenesis();
+    Block IApplicationOptions.GenesisBlock => _genesisBlock ??= GetGenesisBlock();
 
     AppProtocolVersion IApplicationOptions.AppProtocolVersion
         => _appProtocolVersion ??= GetAppProtocolVersion();
@@ -64,17 +64,17 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     private PrivateKey ActualPrivateKey
         => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 
-    private byte[] GetGenesis()
+    private Block GetGenesisBlock()
     {
         if (GenesisPath != string.Empty)
         {
             var lines = File.ReadAllLines(GenesisPath);
-            return ByteUtil.ParseHex(lines[0]);
+            return BlockUtility.DeserializeBlock(ByteUtil.ParseHex(lines[0]));
         }
 
         if (Genesis != string.Empty)
         {
-            return ByteUtil.ParseHex(Genesis);
+            return BlockUtility.DeserializeBlock(ByteUtil.ParseHex(Genesis));
         }
 
         var privateKey = ActualPrivateKey;
@@ -84,8 +84,8 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
             Validators = [privateKey.PublicKey],
             Timestamp = DateTimeOffset.UtcNow,
         };
-        var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
-        return BlockUtility.SerializeBlock(genesisBlock);
+
+        return BlockUtility.CreateGenesisBlock(genesisOptions);
     }
 
     private AppProtocolVersion GetAppProtocolVersion()

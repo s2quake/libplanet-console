@@ -286,7 +286,7 @@ internal sealed partial class Node : INode
         if (nodeOptions.RepositoryPath == string.Empty)
         {
             process.ExtendedArguments.Add("--genesis");
-            process.ExtendedArguments.Add(ByteUtil.Hex(applicationOptions.Genesis));
+            process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
             process.ExtendedArguments.Add("--apv");
             process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
         }

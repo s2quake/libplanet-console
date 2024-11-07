@@ -13,6 +13,8 @@ namespace LibplanetConsole.Node.Executable.EntryCommands;
 [CommandSummary("Create a new repository to run the node")]
 internal sealed class InitializeCommand : CommandBase
 {
+    private static readonly Codec _codec = new();
+
     public InitializeCommand()
         : base("init")
     {
@@ -98,6 +100,29 @@ internal sealed class InitializeCommand : CommandBase
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
+    [CommandProperty("apv-private-key")]
+    [CommandSummary("The private key of the signer of the AppProtocolVersion. If omitted, " +
+                    "a random private key is used.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [PrivateKey]
+    [Category("AppProtocolVersion")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    public string APVPrivateKey { get; set; } = string.Empty;
+
+    [CommandProperty("apv-version", InitValue = 1)]
+    [CommandSummary("The version number of the AppProtocolVersion. Default is 1.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [Category("AppProtocolVersion")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    public int APVVersion { get; set; }
+
+    [CommandProperty("apv-extra")]
+    [CommandSummary("The extra data to be included in the AppProtocolVersion.\n" +
+                    "Requires the '--single-node' option to be set.")]
+    [Category("AppProtocolVersion")]
+    [CommandPropertyDependency(nameof(IsSingleNode))]
+    public string APVExtra { get; set; } = string.Empty;
+
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
@@ -152,6 +177,21 @@ internal sealed class InitializeCommand : CommandBase
                 genesisOptions.ActionProviderType,
             };
             info.Genesis = genesisString;
+
+            var apvPrivateKey = PrivateKeyUtility.ParseOrRandom(APVPrivateKey);
+            var apvVersion = APVVersion;
+            var apvExtra = APVExtra != string.Empty
+                ? _codec.Decode(ByteUtil.ParseHex(APVExtra)) : null;
+            var appProtocolVersion = AppProtocolVersion.Sign(apvPrivateKey, apvVersion, apvExtra);
+            File.WriteAllLines(appProtocolVersionPath, [appProtocolVersion.Token]);
+
+            info.AppProtocolVersionArguments = new
+            {
+                PrivateKey = PrivateKeyUtility.ToString(privateKey),
+                Version = apvVersion,
+                Extra = APVExtra,
+            };
+            info.AppProtocolVersion = appProtocolVersion.Token;
         }
 
         TextWriterExtensions.WriteLineAsJson(writer, info);

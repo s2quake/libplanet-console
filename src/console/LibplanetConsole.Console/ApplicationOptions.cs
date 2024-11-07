@@ -11,7 +11,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public const int SeedBlocksyncPortIncrement = 6;
     public const int SeedConsensusPortIncrement = 7;
 
-    private byte[]? _genesis;
+    private Block? _genesisBlock;
     private AppProtocolVersion? _appProtocolVersion;
 
     [JsonIgnore]
@@ -42,22 +42,21 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     public string ActionProviderType { get; set; } = string.Empty;
 
-    byte[] IApplicationOptions.Genesis => _genesis ??= GetGenesis();
+    Block IApplicationOptions.GenesisBlock => _genesisBlock ??= GetGenesisBlock();
 
     AppProtocolVersion IApplicationOptions.AppProtocolVersion
         => _appProtocolVersion ??= GetAppProtocolVersion();
 
-    private byte[] GetGenesis()
+    private Block GetGenesisBlock()
     {
         if (GenesisPath != string.Empty)
         {
-            var lines = File.ReadAllLines(GenesisPath);
-            return ByteUtil.ParseHex(lines[0]);
+            return BlockUtility.LoadGenesisBlock(GenesisPath);
         }
 
         if (Genesis != string.Empty)
         {
-            return ByteUtil.ParseHex(Genesis);
+            return BlockUtility.DeserializeBlock(ByteUtil.ParseHex(Genesis));
         }
 
         throw new NotSupportedException("Genesis is not set.");
