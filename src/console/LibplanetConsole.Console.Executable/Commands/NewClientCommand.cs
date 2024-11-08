@@ -26,17 +26,17 @@ internal sealed class NewClientCommand(
     public int Port { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The client is created but process is not executed.")]
+    [CommandSummary("The client instance is created, but not actually started.")]
     public bool NoProcess { get; set; }
 
-    [CommandPropertySwitch]
-    [CommandSummary("The client is started in a new window.\n" +
+    [CommandSummary("The console does not attach to the target process after the client process " +
+                    "is started.\n" +
                     "This option cannot be used with --no-process option.")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool Detach { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The client is started in a new window.\n" +
+    [CommandSummary("The client process is started in a new window.\n" +
                     "This option cannot be used with --no-process option.")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool NewWindow { get; set; }
@@ -56,6 +56,9 @@ internal sealed class NewClientCommand(
         var addNewOptions = new AddNewClientOptions
         {
             ClientOptions = clientOptions,
+            ProcessOptions = NoProcess is false
+                ? new ProcessOptions { Detach = Detach, NewWindow = NewWindow, }
+                : null,
         };
         await clients.AddNewAsync(addNewOptions, cancellationToken);
     }

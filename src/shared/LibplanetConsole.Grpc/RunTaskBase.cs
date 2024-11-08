@@ -91,7 +91,6 @@ internal abstract class RunTaskBase : IDisposable
             {
                 _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;
-                TaskUtility.TryWait(_runningTask).Wait();
             }
 
             _disposedValue = true;

@@ -22,6 +22,7 @@ public readonly record struct ClientInfo
     public static ClientInfo Empty { get; } = new ClientInfo
     {
         Tip = BlockInfo.Empty,
+        NodeInfo = NodeInfo.Empty,
     };
 
     public static implicit operator ClientInfo(ClientInfoProto clientInfo)

@@ -26,6 +26,7 @@ internal static class NodeFactory
     {
         if (_scopeByNode.Remove(node, out var serviceScope) is true)
         {
+            await node.DisposeAsync();
             await serviceScope.DisposeAsync();
         }
     }

@@ -93,24 +93,13 @@ internal sealed class NodeCollection(
     }
 
     public async Task<Node> AddNewAsync(
-        AddNewNodeOptions options, CancellationToken cancellationToken)
+        AddNewNodeOptions newOptions, CancellationToken cancellationToken)
     {
-        var node = NodeFactory.CreateNew(serviceProvider, options.NodeOptions);
+        var node = NodeFactory.CreateNew(serviceProvider, newOptions.NodeOptions);
         InsertNode(node);
-
-        if (options.NoProcess != true)
+        if (newOptions.ProcessOptions is { } processOptions)
         {
-            await node.StartProcessAsync(options, cancellationToken);
-        }
-
-        if (options.NoProcess != true && options.Detach != true)
-        {
-            await node.AttachAsync(cancellationToken);
-        }
-
-        if (node.IsAttached is true && options.NodeOptions.SeedEndPoint is null)
-        {
-            await node.StartAsync(cancellationToken);
+            await node.StartProcessAsync(processOptions, cancellationToken);
         }
 
         return node;
@@ -149,44 +138,26 @@ internal sealed class NodeCollection(
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        try
+        for (var i = 0; i < _nodeList.Count; i++)
         {
-            for (var i = 0; i < _nodeList.Count; i++)
+            try
             {
                 var node = _nodeList[i];
-                var newOptions = new AddNewNodeOptions
+                if (options.ProcessOptions is { } processOptions)
                 {
-                    NodeOptions = options.Nodes[i],
-                    NoProcess = options.NoProcess,
-                    Detach = options.Detach,
-                    NewWindow = options.NewWindow,
-                };
-
-                if (newOptions.NoProcess != true)
-                {
-                    await node.StartProcessAsync(newOptions, cancellationToken);
-                }
-
-                if (newOptions.NoProcess != true && newOptions.Detach != true)
-                {
-                    await node.AttachAsync(cancellationToken);
-                }
-
-                if (node.IsAttached is true && newOptions.NodeOptions.SeedEndPoint is null)
-                {
-                    await node.StartAsync(cancellationToken);
+                    await node.StartProcessAsync(processOptions, cancellationToken);
                 }
             }
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error occurred while initializing nodes.");
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An error occurred while initializing node.");
+            }
         }
     }
 
     async Task<INode> INodeCollection.AddNewAsync(
-        AddNewNodeOptions options, CancellationToken cancellationToken)
-        => await AddNewAsync(options, cancellationToken);
+        AddNewNodeOptions newOptions, CancellationToken cancellationToken)
+        => await AddNewAsync(newOptions, cancellationToken);
 
     bool INodeCollection.Contains(INode item) => item switch
     {

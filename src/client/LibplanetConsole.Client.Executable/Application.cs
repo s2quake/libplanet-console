@@ -11,12 +11,12 @@ internal sealed class Application
 {
     private readonly LoggingFilter[] _filters =
     [
-        new PrefixFilter("app", "LibplanetConsole."),
+        new PrefixFilter("app.log", "LibplanetConsole."),
     ];
 
     private readonly LoggingFilter[] _traceFilters =
     [
-        new PrefixFilter("app", "LibplanetConsole."),
+        new PrefixFilter("app.log", "LibplanetConsole."),
     ];
 
     private readonly WebApplicationBuilder _builder;

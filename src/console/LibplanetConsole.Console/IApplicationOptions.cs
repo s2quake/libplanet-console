@@ -14,11 +14,7 @@ public interface IApplicationOptions
 
     string LogPath { get; }
 
-    bool NoProcess { get; }
-
-    bool Detach { get; }
-
-    bool NewWindow { get; }
+    ProcessOptions? ProcessOptions { get; }
 
     string ActionProviderModulePath { get; }
 

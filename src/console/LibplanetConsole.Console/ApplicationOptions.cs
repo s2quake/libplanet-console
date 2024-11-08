@@ -47,6 +47,9 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     AppProtocolVersion IApplicationOptions.AppProtocolVersion
         => _appProtocolVersion ??= GetAppProtocolVersion();
 
+    ProcessOptions? IApplicationOptions.ProcessOptions
+        => NoProcess ? null : new ProcessOptions { Detach = Detach, NewWindow = NewWindow, };
+
     private Block GetGenesisBlock()
     {
         if (GenesisPath != string.Empty)

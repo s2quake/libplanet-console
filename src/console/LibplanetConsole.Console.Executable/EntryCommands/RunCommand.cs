@@ -1,7 +1,5 @@
-using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
-using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
@@ -71,7 +69,7 @@ internal sealed class RunCommand
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
-    [CommandSummary("If set, the node and the client processes will not run.")]
+    [CommandSummary("If set, the node and client instances are created but not actually started.")]
     public bool NoProcess { get; set; }
 
     [CommandPropertySwitch]
@@ -81,10 +79,10 @@ internal sealed class RunCommand
     public bool NewWindow { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("If set, the node and the client processes are detached from the console.\n" +
-                    "This option cannot be used with --no-process option.\n" +
-                    "And this option is only available if the --new-window option is set.")]
-    [CommandPropertyExclusion(nameof(NewWindow))]
+    [CommandSummary("If set, the console does not attach to the target process after starting " +
+                    "the node and client processes\n" +
+                    "This option cannot be used with --no-process option.")]
+    [CommandPropertyExclusion(nameof(NoProcess))]
     public bool Detach { get; set; }
 
     [CommandProperty("apv-path")]

@@ -19,13 +19,13 @@ internal sealed partial class Node : INode
     private readonly NodeOptions _nodeOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
-    private readonly CancellationTokenSource _processCancellationTokenSource = new();
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
     private NodeInfo _info;
     private bool _isDisposed;
     private NodeProcess? _process;
+    private CancellationTokenSource? _processCancellationTokenSource;
     private Task _processTask = Task.CompletedTask;
     private INodeContent[]? _contents;
 
@@ -56,6 +56,8 @@ internal sealed partial class Node : INode
     public bool IsAttached { get; private set; }
 
     public bool IsRunning { get; private set; }
+
+    public int ProcessId => _process?.Id ?? -1;
 
     public EndPoint EndPoint => _nodeOptions.EndPoint;
 
@@ -150,6 +152,7 @@ internal sealed partial class Node : INode
     public async Task DetachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
+
         if (_channel is null)
         {
             throw new InvalidOperationException("Node is not attached.");
@@ -237,8 +240,13 @@ internal sealed partial class Node : INode
     {
         if (_isDisposed is false)
         {
-            await _processCancellationTokenSource.CancelAsync();
-            _processCancellationTokenSource.Dispose();
+            if (_processCancellationTokenSource is not null)
+            {
+                await _processCancellationTokenSource.CancelAsync();
+                _processCancellationTokenSource.Dispose();
+                _processCancellationTokenSource = null;
+            }
+
             await TaskUtility.TryWait(_processTask);
             _processTask = Task.CompletedTask;
             _process = null;
@@ -267,7 +275,7 @@ internal sealed partial class Node : INode
         }
     }
 
-    public Task StartProcessAsync(AddNewNodeOptions options, CancellationToken cancellationToken)
+    public async Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken)
     {
         if (_process is not null)
         {
@@ -281,8 +289,9 @@ internal sealed partial class Node : INode
             Detach = options.Detach,
             NewWindow = options.NewWindow,
         };
+        var processCancellationTokenSource = new CancellationTokenSource();
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, _processCancellationTokenSource.Token);
+            cancellationToken, processCancellationTokenSource.Token);
         if (nodeOptions.RepositoryPath == string.Empty)
         {
             process.ExtendedArguments.Add("--genesis");
@@ -291,18 +300,49 @@ internal sealed partial class Node : INode
             process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
         }
 
-        _logger.LogDebug(process.ToString());
+        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
             .ContinueWith(
                 task =>
                 {
                     _processTask = Task.CompletedTask;
                     _process = null;
+                    _processCancellationTokenSource?.Dispose();
+                    _processCancellationTokenSource = null;
                     cancellationTokenSource.Dispose();
                 },
                 cancellationToken);
         _process = process;
-        return Task.CompletedTask;
+        _processCancellationTokenSource = processCancellationTokenSource;
+
+        if (options.Detach is false)
+        {
+            await AttachAsync(cancellationToken);
+        }
+
+        if (IsAttached is true && _nodeOptions.SeedEndPoint is null)
+        {
+            await StartAsync(cancellationToken);
+        }
+    }
+
+    public async Task StopProcessAsync(CancellationToken cancellationToken)
+    {
+        if (_process is null)
+        {
+            throw new InvalidOperationException("Node process is not running.");
+        }
+
+        if (_processCancellationTokenSource is not null)
+        {
+            await _processCancellationTokenSource.CancelAsync();
+            _processCancellationTokenSource.Dispose();
+            _processCancellationTokenSource = null;
+        }
+
+        await TaskUtility.TryWait(_processTask);
+        _processTask = Task.CompletedTask;
+        _process = null;
     }
 
     private void NodeService_Started(object? sender, NodeEventArgs e)

@@ -26,6 +26,7 @@ internal static class ClientFactory
     {
         if (_scopeByClient.Remove(client, out var serviceScope) is true)
         {
+            await client.DisposeAsync();
             await serviceScope.DisposeAsync();
         }
     }
