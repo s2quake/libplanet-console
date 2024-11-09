@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
@@ -28,6 +29,7 @@ internal sealed partial class Node : INode
     private CancellationTokenSource? _processCancellationTokenSource;
     private Task _processTask = Task.CompletedTask;
     private INodeContent[]? _contents;
+    private string? _commandLine;
 
     public Node(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
@@ -282,23 +284,10 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node process is already running.");
         }
 
-        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
-        var nodeOptions = _nodeOptions;
-        var process = new NodeProcess(this, nodeOptions)
-        {
-            Detach = options.Detach,
-            NewWindow = options.NewWindow,
-        };
+        var process = CreateProcess(options);
         var processCancellationTokenSource = new CancellationTokenSource();
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, processCancellationTokenSource.Token);
-        if (nodeOptions.RepositoryPath == string.Empty)
-        {
-            process.ExtendedArguments.Add("--genesis");
-            process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
-            process.ExtendedArguments.Add("--apv");
-            process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
-        }
 
         _logger.LogDebug("Commands: {CommandLine}", process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
@@ -343,6 +332,17 @@ internal sealed partial class Node : INode
         await TaskUtility.TryWait(_processTask);
         _processTask = Task.CompletedTask;
         _process = null;
+    }
+
+    public string GetCommandLine()
+    {
+        if (_commandLine is null)
+        {
+            var process = CreateProcess(ProcessOptions.Default);
+            _commandLine = process.GetCommandLine();
+        }
+
+        return _commandLine ?? throw new UnreachableException("Process is not created.");
     }
 
     private void NodeService_Started(object? sender, NodeEventArgs e)
@@ -410,5 +410,26 @@ internal sealed partial class Node : INode
         var url = new Uri(address);
 
         return new DnsEndPoint(url.Host, url.Port);
+    }
+
+    private NodeProcess CreateProcess(ProcessOptions options)
+    {
+        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
+        var nodeOptions = _nodeOptions;
+        var process = new NodeProcess(this, nodeOptions)
+        {
+            Detach = options.Detach,
+            NewWindow = options.NewWindow,
+        };
+
+        if (nodeOptions.RepositoryPath == string.Empty)
+        {
+            process.ExtendedArguments.Add("--genesis");
+            process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
+            process.ExtendedArguments.Add("--apv");
+            process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
+        }
+
+        return process;
     }
 }

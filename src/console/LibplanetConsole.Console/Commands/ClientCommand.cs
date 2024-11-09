@@ -133,6 +133,14 @@ public sealed partial class ClientCommand(
         await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
     }
 
+    [CommandMethod("command")]
+    public void GetCommandLine()
+    {
+        var address = Address;
+        var client = clients.GetClientOrCurrent(address);
+        Out.WriteLine(client.GetCommandLine());
+    }
+
     private static TerminalColorType? GetForeground(IClient client, bool isCurrent)
     {
         if (client.IsRunning == true)

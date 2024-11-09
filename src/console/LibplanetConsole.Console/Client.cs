@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
@@ -26,6 +27,7 @@ internal sealed partial class Client : IClient
     private CancellationTokenSource? _processCancellationTokenSource;
     private Task _processTask = Task.CompletedTask;
     private IClientContent[]? _contents;
+    private string? _commandLine;
 
     public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
@@ -281,12 +283,7 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("Client process is already running.");
         }
 
-        var clientOptions = _clientOptions;
-        var process = new ClientProcess(this, clientOptions)
-        {
-            Detach = options.Detach,
-            NewWindow = options.NewWindow,
-        };
+        var process = CreateProcess(options);
         var processCancellationTokenSource = new CancellationTokenSource();
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, processCancellationTokenSource.Token);
@@ -335,6 +332,17 @@ internal sealed partial class Client : IClient
         await TaskUtility.TryWait(_processTask);
         _processTask = Task.CompletedTask;
         _process = null;
+    }
+
+    public string GetCommandLine()
+    {
+        if (_commandLine is null)
+        {
+            var process = CreateProcess(ProcessOptions.Default);
+            _commandLine = process.GetCommandLine();
+        }
+
+        return _commandLine ?? throw new UnreachableException("Process is not created.");
     }
 
     private void ClientService_Started(object? sender, ClientEventArgs e)
@@ -386,5 +394,17 @@ internal sealed partial class Client : IClient
             IsAttached = false;
             Detached?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private ClientProcess CreateProcess(ProcessOptions options)
+    {
+        var clientOptions = _clientOptions;
+        var process = new ClientProcess(this, clientOptions)
+        {
+            Detach = options.Detach,
+            NewWindow = options.NewWindow,
+        };
+
+        return process;
     }
 }

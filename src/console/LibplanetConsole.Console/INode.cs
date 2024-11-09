@@ -40,4 +40,6 @@ public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, 
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    string GetCommandLine();
 }

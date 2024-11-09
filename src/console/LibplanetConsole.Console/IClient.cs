@@ -40,4 +40,6 @@ public interface IClient : IAddressable, IAsyncDisposable, IKeyedServiceProvider
     Task StartAsync(INode node, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    string GetCommandLine();
 }
