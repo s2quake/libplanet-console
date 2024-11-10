@@ -17,6 +17,8 @@ public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, 
 
     event EventHandler? Disposed;
 
+    int ProcessId { get; }
+
     bool IsAttached { get; }
 
     bool IsRunning { get; }
@@ -27,6 +29,10 @@ public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, 
 
     PublicKey PublicKey { get; }
 
+    Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken);
+
+    Task StopProcessAsync(CancellationToken cancellationToken);
+
     Task AttachAsync(CancellationToken cancellationToken);
 
     Task DetachAsync(CancellationToken cancellationToken);
@@ -34,4 +40,6 @@ public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, 
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    string GetCommandLine();
 }

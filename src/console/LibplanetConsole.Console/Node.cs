@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
@@ -19,15 +20,16 @@ internal sealed partial class Node : INode
     private readonly NodeOptions _nodeOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
-    private readonly CancellationTokenSource _processCancellationTokenSource = new();
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
     private NodeInfo _info;
     private bool _isDisposed;
     private NodeProcess? _process;
+    private CancellationTokenSource? _processCancellationTokenSource;
     private Task _processTask = Task.CompletedTask;
     private INodeContent[]? _contents;
+    private string? _commandLine;
 
     public Node(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
@@ -56,6 +58,8 @@ internal sealed partial class Node : INode
     public bool IsAttached { get; private set; }
 
     public bool IsRunning { get; private set; }
+
+    public int ProcessId => _process?.Id ?? -1;
 
     public EndPoint EndPoint => _nodeOptions.EndPoint;
 
@@ -150,6 +154,7 @@ internal sealed partial class Node : INode
     public async Task DetachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
+
         if (_channel is null)
         {
             throw new InvalidOperationException("Node is not attached.");
@@ -237,8 +242,13 @@ internal sealed partial class Node : INode
     {
         if (_isDisposed is false)
         {
-            await _processCancellationTokenSource.CancelAsync();
-            _processCancellationTokenSource.Dispose();
+            if (_processCancellationTokenSource is not null)
+            {
+                await _processCancellationTokenSource.CancelAsync();
+                _processCancellationTokenSource.Dispose();
+                _processCancellationTokenSource = null;
+            }
+
             await TaskUtility.TryWait(_processTask);
             _processTask = Task.CompletedTask;
             _process = null;
@@ -267,42 +277,72 @@ internal sealed partial class Node : INode
         }
     }
 
-    public Task StartProcessAsync(AddNewNodeOptions options, CancellationToken cancellationToken)
+    public async Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken)
     {
         if (_process is not null)
         {
             throw new InvalidOperationException("Node process is already running.");
         }
 
-        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
-        var nodeOptions = _nodeOptions;
-        var process = new NodeProcess(this, nodeOptions)
-        {
-            Detach = options.Detach,
-            NewWindow = options.NewWindow,
-        };
+        var process = CreateProcess(options);
+        var processCancellationTokenSource = new CancellationTokenSource();
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, _processCancellationTokenSource.Token);
-        if (nodeOptions.RepositoryPath == string.Empty)
-        {
-            process.ExtendedArguments.Add("--genesis");
-            process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
-            process.ExtendedArguments.Add("--apv");
-            process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
-        }
+            cancellationToken, processCancellationTokenSource.Token);
 
-        _logger.LogDebug(process.ToString());
+        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
             .ContinueWith(
                 task =>
                 {
                     _processTask = Task.CompletedTask;
                     _process = null;
+                    _processCancellationTokenSource?.Dispose();
+                    _processCancellationTokenSource = null;
                     cancellationTokenSource.Dispose();
                 },
                 cancellationToken);
         _process = process;
-        return Task.CompletedTask;
+        _processCancellationTokenSource = processCancellationTokenSource;
+
+        if (options.Detach is false)
+        {
+            await AttachAsync(cancellationToken);
+        }
+
+        if (IsAttached is true && _nodeOptions.SeedEndPoint is null)
+        {
+            await StartAsync(cancellationToken);
+        }
+    }
+
+    public async Task StopProcessAsync(CancellationToken cancellationToken)
+    {
+        if (_process is null)
+        {
+            throw new InvalidOperationException("Node process is not running.");
+        }
+
+        if (_processCancellationTokenSource is not null)
+        {
+            await _processCancellationTokenSource.CancelAsync();
+            _processCancellationTokenSource.Dispose();
+            _processCancellationTokenSource = null;
+        }
+
+        await TaskUtility.TryWait(_processTask);
+        _processTask = Task.CompletedTask;
+        _process = null;
+    }
+
+    public string GetCommandLine()
+    {
+        if (_commandLine is null)
+        {
+            var process = CreateProcess(ProcessOptions.Default);
+            _commandLine = process.GetCommandLine();
+        }
+
+        return _commandLine ?? throw new UnreachableException("Process is not created.");
     }
 
     private void NodeService_Started(object? sender, NodeEventArgs e)
@@ -370,5 +410,26 @@ internal sealed partial class Node : INode
         var url = new Uri(address);
 
         return new DnsEndPoint(url.Host, url.Port);
+    }
+
+    private NodeProcess CreateProcess(ProcessOptions options)
+    {
+        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
+        var nodeOptions = _nodeOptions;
+        var process = new NodeProcess(this, nodeOptions)
+        {
+            Detach = options.Detach,
+            NewWindow = options.NewWindow,
+        };
+
+        if (nodeOptions.RepositoryPath == string.Empty)
+        {
+            process.ExtendedArguments.Add("--genesis");
+            process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
+            process.ExtendedArguments.Add("--apv");
+            process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
+        }
+
+        return process;
     }
 }

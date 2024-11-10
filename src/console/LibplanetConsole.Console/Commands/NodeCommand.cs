@@ -122,6 +122,14 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
         await Out.WriteLineAsync($"{node.Address.ToShortString()}: {text}");
     }
 
+    [CommandMethod("command")]
+    public void GetCommandLine()
+    {
+        var address = Address;
+        var node = nodes.GetNodeOrCurrent(address);
+        Out.WriteLine(node.GetCommandLine());
+    }
+
     private static TerminalColorType? GetForeground(INode node, bool isCurrent)
     {
         if (node.IsRunning == true)

@@ -1,5 +1,6 @@
 using Grpc.Net.Client;
 using LibplanetConsole.Client.Services;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Grpc.Blockchain;
 using LibplanetConsole.Grpc.Node;
@@ -25,9 +26,10 @@ internal sealed partial class Client : IClient
         _privateKey = options.PrivateKey;
         _logger.LogDebug("Client is creating...: {Address}", options.PrivateKey.Address);
         _nodeEndPoint = options.NodeEndPoint;
-        _info = new() { Address = options.PrivateKey.Address };
+        _info = ClientInfo.Empty with { Address = options.PrivateKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);
+        _logger.LogDebug(JsonUtility.Serialize(Info));
     }
 
     public event EventHandler? Started;
@@ -101,6 +103,8 @@ internal sealed partial class Client : IClient
             throw;
         }
 
+        _logger.LogDebug(JsonUtility.Serialize(nodeService.Info));
+
         _cancellationTokenSource = new();
         _channel = channel;
         _nodeService = nodeService;
@@ -110,6 +114,7 @@ internal sealed partial class Client : IClient
             NodeInfo = nodeService.Info,
             Tip = nodeService.Info.Tip,
         };
+        _logger.LogDebug(JsonUtility.Serialize(_info));
         IsRunning = true;
         _logger.LogDebug("Client is started: {Address}->{NodeAddress}", Address, NodeInfo.Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));

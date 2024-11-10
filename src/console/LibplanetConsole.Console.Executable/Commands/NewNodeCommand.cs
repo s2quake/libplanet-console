@@ -27,17 +27,18 @@ internal sealed class NewNodeCommand(
     public int Port { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node is created but process is not executed.")]
+    [CommandSummary("The node instance is created, but not actually started.")]
     public bool NoProcess { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node is started in a new window.\n" +
+    [CommandSummary("The console does not attach to the target process after the node process " +
+                    "is started.\n" +
                     "This option cannot be used with --no-process option.")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool Detach { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node is started in a new window.\n" +
+    [CommandSummary("The node process is started in a new window.\n" +
                     "This option cannot be used with --no-process option.")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool NewWindow { get; set; }
@@ -59,6 +60,9 @@ internal sealed class NewNodeCommand(
         var addNewOptions = new AddNewNodeOptions
         {
             NodeOptions = nodeOptions,
+            ProcessOptions = NoProcess is false
+                ? new ProcessOptions { Detach = Detach, NewWindow = NewWindow, }
+                : null,
         };
         await nodes.AddNewAsync(addNewOptions, cancellationToken);
     }
@@ -84,6 +88,7 @@ internal sealed class NewNodeCommand(
                 ActionProviderType = options.ActionProviderType,
             };
             await process.RunAsync(cancellationToken);
+
             return NodeOptions.Load(nodeSettingsPath);
         }
         finally

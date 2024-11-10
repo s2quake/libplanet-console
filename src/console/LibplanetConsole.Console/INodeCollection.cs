@@ -22,5 +22,5 @@ public interface INodeCollection : IEnumerable<INode>, INotifyCollectionChanged
 
     int IndexOf(Address address);
 
-    Task<INode> AddNewAsync(AddNewNodeOptions options, CancellationToken cancellationToken);
+    Task<INode> AddNewAsync(AddNewNodeOptions newOptions, CancellationToken cancellationToken);
 }

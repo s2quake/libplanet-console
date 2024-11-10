@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
@@ -6,6 +7,7 @@ using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Blockchain;
 using LibplanetConsole.Grpc.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -16,15 +18,16 @@ internal sealed partial class Client : IClient
     private readonly ClientOptions _clientOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
-    private readonly CancellationTokenSource _processCancellationTokenSource = new();
     private ClientService? _clientService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
-    private ClientInfo _clientInfo;
+    private ClientInfo _info;
     private bool _isDisposed;
     private ClientProcess? _process;
+    private CancellationTokenSource? _processCancellationTokenSource;
     private Task _processTask = Task.CompletedTask;
     private IClientContent[]? _contents;
+    private string? _commandLine;
 
     public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
@@ -54,9 +57,11 @@ internal sealed partial class Client : IClient
 
     public bool IsRunning { get; private set; }
 
+    public int ProcessId => _process?.Id ?? -1;
+
     public EndPoint EndPoint => _clientOptions.EndPoint;
 
-    public ClientInfo Info => _clientInfo;
+    public ClientInfo Info => _info;
 
     public IClientContent[] Contents
     {
@@ -65,6 +70,26 @@ internal sealed partial class Client : IClient
     }
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
+
+    public object? GetKeyedService(Type serviceType, object? serviceKey)
+    {
+        if (_serviceProvider is IKeyedServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetKeyedService(serviceType, serviceKey);
+        }
+
+        throw new InvalidOperationException("Service provider does not support keyed service.");
+    }
+
+    public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
+    {
+        if (_serviceProvider is IKeyedServiceProvider serviceProvider)
+        {
+            return serviceProvider.GetRequiredKeyedService(serviceType, serviceKey);
+        }
+
+        throw new InvalidOperationException("Service provider does not support keyed service.");
+    }
 
     public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
 
@@ -82,13 +107,14 @@ internal sealed partial class Client : IClient
         var request = new GetInfoRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _clientService.GetInfoAsync(request, callOptions);
-        _clientInfo = response.ClientInfo;
-        return _clientInfo;
+        _info = response.ClientInfo;
+        return _info;
     }
 
     public async Task AttachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
+
         if (_channel is not null)
         {
             throw new InvalidOperationException("Client is already attached.");
@@ -116,8 +142,8 @@ internal sealed partial class Client : IClient
         _channel = channel;
         _clientService = clientService;
         _blockChainService = blockChainService;
-        _clientInfo = await GetInfoAsync(cancellationToken);
-        IsRunning = _clientInfo.IsRunning;
+        _info = await GetInfoAsync(cancellationToken);
+        IsRunning = _info.IsRunning;
         IsAttached = true;
         _logger.LogDebug("Client is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
@@ -176,7 +202,7 @@ internal sealed partial class Client : IClient
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _clientService.StartAsync(request, callOptions);
-        _clientInfo = response.ClientInfo;
+        _info = response.ClientInfo;
         IsRunning = true;
         _logger.LogDebug("Client is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
@@ -203,7 +229,7 @@ internal sealed partial class Client : IClient
         var request = new StopRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         await _clientService.StopAsync(request, callOptions);
-        _clientInfo = ClientInfo.Empty;
+        _info = ClientInfo.Empty;
         IsRunning = false;
         _logger.LogDebug("Client is stopped: {Address}", Address);
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -213,8 +239,13 @@ internal sealed partial class Client : IClient
     {
         if (_isDisposed is false)
         {
-            await _processCancellationTokenSource.CancelAsync();
-            _processCancellationTokenSource.Dispose();
+            if (_processCancellationTokenSource is not null)
+            {
+                await _processCancellationTokenSource.CancelAsync();
+                _processCancellationTokenSource.Dispose();
+                _processCancellationTokenSource = null;
+            }
+
             await TaskUtility.TryWait(_processTask);
             _processTask = Task.CompletedTask;
             _process = null;
@@ -245,38 +276,78 @@ internal sealed partial class Client : IClient
 
     public ClientProcess CreateProcess() => new(this, _clientOptions);
 
-    public Task StartProcessAsync(AddNewClientOptions options, CancellationToken cancellationToken)
+    public async Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken)
     {
         if (_process is not null)
         {
             throw new InvalidOperationException("Client process is already running.");
         }
 
-        var clientOptions = _clientOptions;
-        var process = new ClientProcess(this, clientOptions)
-        {
-            Detach = options.Detach,
-            NewWindow = options.NewWindow,
-        };
+        var process = CreateProcess(options);
+        var processCancellationTokenSource = new CancellationTokenSource();
         var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, _processCancellationTokenSource.Token);
-        _logger.LogDebug(process.ToString());
+            cancellationToken, processCancellationTokenSource.Token);
+        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
         _processTask = process.RunAsync(cancellationTokenSource.Token)
             .ContinueWith(
                 task =>
                 {
                     _processTask = Task.CompletedTask;
                     _process = null;
+                    _processCancellationTokenSource?.Dispose();
+                    _processCancellationTokenSource = null;
                     cancellationTokenSource.Dispose();
                 },
                 cancellationToken);
         _process = process;
-        return Task.CompletedTask;
+        _processCancellationTokenSource = processCancellationTokenSource;
+
+        if (options.Detach is false)
+        {
+            await AttachAsync(cancellationToken);
+        }
+
+        if (IsAttached is true && _clientOptions.NodeEndPoint is null)
+        {
+            var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
+            var node = nodes.RandomNode();
+            await StartAsync(node, cancellationToken);
+        }
+    }
+
+    public async Task StopProcessAsync(CancellationToken cancellationToken)
+    {
+        if (_process is null)
+        {
+            throw new InvalidOperationException("Node process is not running.");
+        }
+
+        if (_processCancellationTokenSource is not null)
+        {
+            await _processCancellationTokenSource.CancelAsync();
+            _processCancellationTokenSource.Dispose();
+            _processCancellationTokenSource = null;
+        }
+
+        await TaskUtility.TryWait(_processTask);
+        _processTask = Task.CompletedTask;
+        _process = null;
+    }
+
+    public string GetCommandLine()
+    {
+        if (_commandLine is null)
+        {
+            var process = CreateProcess(ProcessOptions.Default);
+            _commandLine = process.GetCommandLine();
+        }
+
+        return _commandLine ?? throw new UnreachableException("Process is not created.");
     }
 
     private void ClientService_Started(object? sender, ClientEventArgs e)
     {
-        _clientInfo = e.ClientInfo;
+        _info = e.ClientInfo;
         IsRunning = true;
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -288,7 +359,7 @@ internal sealed partial class Client : IClient
 
     private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
     {
-        _clientInfo = _clientInfo with { Tip = e.BlockInfo };
+        _info = _info with { Tip = e.BlockInfo };
         BlockAppended?.Invoke(this, e);
     }
 
@@ -323,5 +394,17 @@ internal sealed partial class Client : IClient
             IsAttached = false;
             Detached?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private ClientProcess CreateProcess(ProcessOptions options)
+    {
+        var clientOptions = _clientOptions;
+        var process = new ClientProcess(this, clientOptions)
+        {
+            Detach = options.Detach,
+            NewWindow = options.NewWindow,
+        };
+
+        return process;
     }
 }

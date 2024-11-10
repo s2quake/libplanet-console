@@ -52,17 +52,19 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _serviceProvider = serviceProvider;
         _seedEndPoint = options.SeedEndPoint;
         _privateKey = options.PrivateKey;
+        _logger = serviceProvider.GetLogger<Node>();
+        _logger.LogDebug("Node is creating...: {Address}", options.PrivateKey.Address);
         _storePath = options.StorePath;
         PublicKey = options.PrivateKey.PublicKey;
         _actionProvider = ModuleLoader.LoadActionLoader(
             options.ActionProviderModulePath, options.ActionProviderType);
-        _logger = serviceProvider.GetLogger<Node>();
         _genesisBlock = options.GenesisBlock;
         _appProtocolVersion = options.AppProtocolVersion;
         _blocksyncPort = nodeOptions.Value.BlocksyncPort;
         _consensusPort = nodeOptions.Value.ConsensusPort;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
+        _logger.LogDebug(JsonUtility.Serialize(Info));
     }
 
     public event EventHandler? Started;
@@ -202,8 +204,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             _logger.LogDebug("Node.Swarm is bootstrapped: {Address}", Address);
         }
 
-        IsRunning = true;
         UpdateNodeInfo();
+        _logger.LogDebug(JsonUtility.Serialize(Info));
+        IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
         _logger.LogDebug("Node Contents are started: {Address}", Address);
@@ -339,7 +342,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         {
             ProcessId = Environment.ProcessId,
             Address = Address,
-            AppProtocolVersion = $"{appProtocolVersion}",
+            AppProtocolVersion = appProtocolVersion.Token,
             BlocksyncPort = _blocksyncPort,
             ConsensusPort = _consensusPort,
         };

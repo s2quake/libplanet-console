@@ -1,8 +1,9 @@
 using LibplanetConsole.Common;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 
-public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISigner
+public interface IClient : IAddressable, IAsyncDisposable, IKeyedServiceProvider, ISigner
 {
     const string Key = nameof(IClient);
 
@@ -16,6 +17,8 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     event EventHandler? Disposed;
 
+    int ProcessId { get; }
+
     bool IsAttached { get; }
 
     bool IsRunning { get; }
@@ -26,6 +29,10 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
 
     PublicKey PublicKey { get; }
 
+    Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken);
+
+    Task StopProcessAsync(CancellationToken cancellationToken);
+
     Task AttachAsync(CancellationToken cancellationToken);
 
     Task DetachAsync(CancellationToken cancellationToken);
@@ -33,4 +40,6 @@ public interface IClient : IAddressable, IAsyncDisposable, IServiceProvider, ISi
     Task StartAsync(INode node, CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    string GetCommandLine();
 }

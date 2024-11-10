@@ -16,7 +16,6 @@ internal sealed class Application
         new SourceContextFilter(
             "app.log",
             s => s.StartsWith("LibplanetConsole.") && !s.StartsWith("LibplanetConsole.Seed.")),
-        new PrefixFilter("seed.log", "LibplanetConsole.Seed."),
         new PrefixFilter("libplanet.log", "Libplanet."),
     ];
 

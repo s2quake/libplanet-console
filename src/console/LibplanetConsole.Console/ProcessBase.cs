@@ -155,8 +155,8 @@ public abstract class ProcessBase
 
     public string GetCommandLine()
     {
-        var filename = FileName;
-        var arguments = CommandUtility.Join(Arguments);
+        var filename = GetFileName();
+        var arguments = GetArguments(GetProcessStartInfo());
         var items = new string[] { filename, arguments };
         return string.Join(" ", items.Where(item => item != string.Empty));
     }
