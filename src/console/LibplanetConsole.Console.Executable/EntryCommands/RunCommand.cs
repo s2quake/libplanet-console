@@ -20,7 +20,7 @@ internal sealed class RunCommand
     public int Port { get; init; }
 
 #if DEBUG
-    [CommandProperty(InitValue = 2)]
+    [CommandProperty(InitValue = 1)]
 #else
     [CommandProperty(InitValue = 4)]
 #endif
