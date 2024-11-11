@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Libplanet.Action.State;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 
@@ -123,12 +124,23 @@ internal sealed partial class Node : IBlockChain
 
         IValue GetStateByBlockHash()
         {
-            var blockChain = BlockChain;
-            var block = height == -1 ? blockChain.Tip : blockChain[height];
-            var worldState = blockChain.GetWorldState(block.Hash);
+            var worldState = GetWorldState();
             var account = worldState.GetAccountState(accountAddress);
             return account.GetState(address)
-                ?? throw new InvalidOperationException("State not found.");
+                ?? throw new InvalidOperationException(
+                    $"Account '{accountAddress}' does not have state '{address}'.");
+        }
+
+        IWorldState GetWorldState()
+        {
+            var blockChain = BlockChain;
+            if (height == -1 && blockChain.GetNextWorldState() is { } nextState)
+            {
+                return nextState;
+            }
+
+            var block = height == -1 ? blockChain.Tip : blockChain[height];
+            return blockChain.GetWorldState(block.Hash);
         }
 
         return Task.Run(GetStateByBlockHash, cancellationToken: cancellationToken);
@@ -234,4 +246,12 @@ internal sealed partial class Node : IBlockChain
 
         return Task.Run(GetAction, cancellationToken);
     }
+
+    public IWorldState GetWorldState() => BlockChain.GetNextWorldState()
+        ?? BlockChain.GetWorldState(BlockChain.Tip.Hash);
+
+    public IWorldState GetWorldState(BlockHash offset) => BlockChain.GetWorldState(offset);
+
+    public IWorldState GetWorldState(long height)
+        => BlockChain.GetWorldState(BlockChain[height].Hash);
 }

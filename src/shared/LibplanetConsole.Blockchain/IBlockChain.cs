@@ -48,4 +48,12 @@ public interface IBlockChain
 
     Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
+
+#if LIBPLANET_NODE
+    Libplanet.Action.State.IWorldState GetWorldState();
+
+    Libplanet.Action.State.IWorldState GetWorldState(BlockHash offset);
+
+    Libplanet.Action.State.IWorldState GetWorldState(long height);
+#endif // LIBPLANET_NODE
 }
