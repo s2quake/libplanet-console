@@ -9,6 +9,8 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
 {
     public bool Detach { get; set; }
 
+    public IList<string> ExtendedArguments { get; set; } = [];
+
     public override string[] Arguments
     {
         get
@@ -57,6 +59,11 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
             {
                 argumentList.Add("--parent");
                 argumentList.Add(Environment.ProcessId.ToString());
+            }
+
+            if (ExtendedArguments.Count > 0)
+            {
+                argumentList.AddRange(ExtendedArguments);
             }
 
             return [.. argumentList];

@@ -405,6 +405,18 @@ internal sealed partial class Client : IClient
             NewWindow = options.NewWindow,
         };
 
+        if (clientOptions.RepositoryPath == string.Empty)
+        {
+            var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
+            if (applicationOptions.LogPath != string.Empty)
+            {
+                var clientLogPath = Path.Combine(
+                    applicationOptions.LogPath, "clients", Address.ToString());
+                process.ExtendedArguments.Add("--log-path");
+                process.ExtendedArguments.Add(clientLogPath);
+            }
+        }
+
         return process;
     }
 }

@@ -414,7 +414,6 @@ internal sealed partial class Node : INode
 
     private NodeProcess CreateProcess(ProcessOptions options)
     {
-        var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
         var nodeOptions = _nodeOptions;
         var process = new NodeProcess(this, nodeOptions)
         {
@@ -424,10 +423,19 @@ internal sealed partial class Node : INode
 
         if (nodeOptions.RepositoryPath == string.Empty)
         {
+            var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
             process.ExtendedArguments.Add("--genesis");
             process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
             process.ExtendedArguments.Add("--apv");
             process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
+
+            if (applicationOptions.LogPath != string.Empty)
+            {
+                var nodeLogPath = Path.Combine(
+                    applicationOptions.LogPath, "nodes", Address.ToString());
+                process.ExtendedArguments.Add("--log-path");
+                process.ExtendedArguments.Add(nodeLogPath);
+            }
         }
 
         return process;
