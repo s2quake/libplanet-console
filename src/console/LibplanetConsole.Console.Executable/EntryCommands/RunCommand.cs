@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
@@ -63,6 +64,18 @@ internal sealed class RunCommand
                     "is used.\nMutually exclusive with '--genesis-path' option.")]
     public string Genesis { get; init; } = string.Empty;
 
+    [CommandProperty("module-path")]
+    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+                    "the IActionProvider.")]
+    [Category("Genesis")]
+    public string ActionProviderModulePath { get; set; } = string.Empty;
+
+    [CommandProperty("module-type")]
+    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
+    [Category("Genesis")]
+    public string ActionProviderType { get; set; } = string.Empty;
+
     [CommandProperty]
     [CommandSummary("The directory path to store log.")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
@@ -110,6 +123,8 @@ internal sealed class RunCommand
         options.Clients = repository.Clients;
         options.Genesis = Genesis;
         options.GenesisPath = GetFullPath(GenesisPath);
+        options.ActionProviderModulePath = ActionProviderModulePath;
+        options.ActionProviderType = ActionProviderType;
         options.AppProtocolVersion = AppProtocolVersion;
         options.AppProtocolVersionPath = GetFullPath(AppProtocolVersionPath);
         options.NoProcess = NoProcess;
