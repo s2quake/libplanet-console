@@ -274,8 +274,6 @@ internal sealed partial class Client : IClient
         }
     }
 
-    public ClientProcess CreateProcess() => new(this, _clientOptions);
-
     public async Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken)
     {
         if (_process is not null)
@@ -399,7 +397,7 @@ internal sealed partial class Client : IClient
     private ClientProcess CreateProcess(ProcessOptions options)
     {
         var clientOptions = _clientOptions;
-        var process = new ClientProcess(this, clientOptions)
+        var process = new ClientProcess(clientOptions)
         {
             Detach = options.Detach,
             NewWindow = options.NewWindow,

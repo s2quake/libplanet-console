@@ -415,7 +415,7 @@ internal sealed partial class Node : INode
     private NodeProcess CreateProcess(ProcessOptions options)
     {
         var nodeOptions = _nodeOptions;
-        var process = new NodeProcess(this, nodeOptions)
+        var process = new NodeProcess(nodeOptions)
         {
             Detach = options.Detach,
             NewWindow = options.NewWindow,
