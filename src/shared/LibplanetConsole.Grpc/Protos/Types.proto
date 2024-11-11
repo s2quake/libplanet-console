@@ -23,3 +23,11 @@ message TxIdProto {
 message HashDigest256Proto {
   bytes bytes = 1;
 }
+
+message FungibleAssetValueProto {
+  bytes bytes = 1;
+}
+
+message CurrencyProto {
+  bytes bytes = 1;
+}
