@@ -263,25 +263,6 @@ internal static class ProcessEnvironment
         }
     }
 
-    public static ImmutableArray<string> GetArguments(
-            IEnumerable<IProcessArgumentProvider> argumentProviders, object obj)
-    {
-        var query = from argumentProvider in argumentProviders
-                    where argumentProvider.CanSupport(obj.GetType())
-                    from arguments in argumentProvider.GetArguments(obj)
-                    select arguments;
-
-        return [.. query];
-    }
-
-    public static ImmutableArray<string> GetArguments(
-        IServiceProvider serviceProvider, object obj)
-    {
-        var argumentProviders
-            = serviceProvider.GetRequiredService<IEnumerable<IProcessArgumentProvider>>();
-        return GetArguments(argumentProviders, obj);
-    }
-
     private static string GetDotnetPath()
     {
         var processStartInfo = new ProcessStartInfo();

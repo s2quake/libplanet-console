@@ -1,13 +1,14 @@
 using LibplanetConsole.Common;
 using static LibplanetConsole.Common.EndPointUtility;
-using static LibplanetConsole.Console.ProcessEnvironment;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
+internal sealed class ClientProcess(ClientOptions clientOptions)
     : ClientProcessBase
 {
     public bool Detach { get; set; }
+
+    public IList<string> ExtendedArguments { get; set; } = [];
 
     public override string[] Arguments
     {
@@ -43,9 +44,6 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
                     argumentList.Add("--node-end-point");
                     argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
                 }
-
-                var extendedArguments = GetArguments(serviceProvider: client, obj: client);
-                argumentList.AddRange(extendedArguments);
             }
 
             if (NewWindow != true)
@@ -57,6 +55,11 @@ internal sealed class ClientProcess(Client client, ClientOptions clientOptions)
             {
                 argumentList.Add("--parent");
                 argumentList.Add(Environment.ProcessId.ToString());
+            }
+
+            if (ExtendedArguments.Count > 0)
+            {
+                argumentList.AddRange(ExtendedArguments);
             }
 
             return [.. argumentList];

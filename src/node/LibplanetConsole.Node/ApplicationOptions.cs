@@ -83,6 +83,8 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
             GenesisKey = privateKey,
             Validators = [privateKey.PublicKey],
             Timestamp = DateTimeOffset.UtcNow,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         };
 
         return BlockUtility.CreateGenesisBlock(genesisOptions);

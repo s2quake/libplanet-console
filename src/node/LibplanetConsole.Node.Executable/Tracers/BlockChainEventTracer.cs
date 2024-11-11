@@ -32,7 +32,7 @@ internal sealed class BlockChainEventTracer : IHostedService, IDisposable
         var hash = blockInfo.Hash;
         var miner = blockInfo.Miner;
         _logger.LogInformation(
-            "Block #{TipHeight} '{TipHash}' Appended by '{TipMiner}'",
+            "Block #{TipHeight} {TipHash} Appended by {TipMiner}",
             blockInfo.Height,
             hash.ToShortString(),
             miner.ToShortString());

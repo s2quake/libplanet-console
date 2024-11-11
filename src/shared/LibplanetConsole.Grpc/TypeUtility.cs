@@ -5,6 +5,8 @@ namespace LibplanetConsole.Grpc;
 
 public static class TypeUtility
 {
+    private static readonly Codec _codec = new();
+
     public static AddressProto ToGrpc(Address address)
         => new() { Bytes = ByteString.CopyFrom([.. address.ByteArray]) };
 
@@ -19,6 +21,12 @@ public static class TypeUtility
 
     public static HashDigest256Proto ToGrpc(HashDigest<SHA256> hashDigest)
         => new() { Bytes = ByteString.CopyFrom(hashDigest.ToByteArray()) };
+
+    public static FungibleAssetValueProto ToGrpc(FungibleAssetValue value)
+        => new() { Bytes = ByteString.CopyFrom(_codec.Encode(value.Serialize())) };
+
+    public static CurrencyProto ToGrpc(Currency currency)
+        => new() { Bytes = ByteString.CopyFrom(_codec.Encode(currency.Serialize())) };
 
     public static ByteString ToGrpc(byte[] bytes)
         => ByteString.CopyFrom(bytes);
@@ -40,4 +48,10 @@ public static class TypeUtility
 
     public static byte[] ToByteArray(ByteString byteString)
         => byteString.ToByteArray();
+
+    public static FungibleAssetValue ToFungibleAssetValue(FungibleAssetValueProto value)
+        => new(_codec.Decode(value.Bytes.ToByteArray()));
+
+    public static Currency ToCurrency(CurrencyProto currency)
+        => new(_codec.Decode(currency.Bytes.ToByteArray()));
 }

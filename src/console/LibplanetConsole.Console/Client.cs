@@ -274,8 +274,6 @@ internal sealed partial class Client : IClient
         }
     }
 
-    public ClientProcess CreateProcess() => new(this, _clientOptions);
-
     public async Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken)
     {
         if (_process is not null)
@@ -399,11 +397,23 @@ internal sealed partial class Client : IClient
     private ClientProcess CreateProcess(ProcessOptions options)
     {
         var clientOptions = _clientOptions;
-        var process = new ClientProcess(this, clientOptions)
+        var process = new ClientProcess(clientOptions)
         {
             Detach = options.Detach,
             NewWindow = options.NewWindow,
         };
+
+        if (clientOptions.RepositoryPath == string.Empty)
+        {
+            var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
+            if (applicationOptions.LogPath != string.Empty)
+            {
+                var clientLogPath = Path.Combine(
+                    applicationOptions.LogPath, "clients", Address.ToString());
+                process.ExtendedArguments.Add("--log-path");
+                process.ExtendedArguments.Add(clientLogPath);
+            }
+        }
 
         return process;
     }

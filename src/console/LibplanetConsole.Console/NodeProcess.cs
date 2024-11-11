@@ -1,10 +1,9 @@
 using LibplanetConsole.Common;
 using static LibplanetConsole.Common.EndPointUtility;
-using static LibplanetConsole.Console.ProcessEnvironment;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProcessBase
+internal sealed class NodeProcess(NodeOptions nodeOptions) : NodeProcessBase
 {
     public bool Detach { get; set; }
 
@@ -62,9 +61,6 @@ internal sealed class NodeProcess(Node node, NodeOptions nodeOptions) : NodeProc
                     argumentList.Add("--module-type");
                     argumentList.Add(nodeOptions.ActionProviderType);
                 }
-
-                var extendedArguments = GetArguments(serviceProvider: node, obj: node);
-                argumentList.AddRange(extendedArguments);
             }
 
             if (NewWindow is false)
