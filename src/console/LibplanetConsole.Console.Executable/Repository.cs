@@ -141,6 +141,8 @@ public sealed record class Repository
             GenesisKey = genesisKey,
             Validators = Nodes.Select(item => item.PrivateKey.PublicKey).ToArray(),
             Timestamp = dateTimeOffset,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         };
 
         return CreateGenesis(genesisOptions);

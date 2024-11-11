@@ -117,7 +117,11 @@ internal sealed class RunCommand
         var port = portGenerator.Current;
         var nodeOptions = GetNodeOptions(GetNodes(), portGenerator);
         var clientOptions = GetClientOptions(GetClients(), portGenerator);
-        var repository = new Repository(port, nodeOptions, clientOptions);
+        var repository = new Repository(port, nodeOptions, clientOptions)
+        {
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
+        };
         options.LogPath = GetFullPath(LogPath);
         options.Nodes = repository.Nodes;
         options.Clients = repository.Clients;
@@ -172,16 +176,6 @@ internal sealed class RunCommand
         }
     }
 
-    private static NodeOptions[] GetNodeOptions(
-        PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
-    {
-        return [.. nodePrivateKeys.Select(key => new NodeOptions
-        {
-            EndPoint = GetLocalHost(portGenerator.Next()),
-            PrivateKey = key,
-        })];
-    }
-
     private static ClientOptions[] GetClientOptions(
         PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
     {
@@ -189,6 +183,18 @@ internal sealed class RunCommand
         {
             EndPoint = GetLocalHost(portGenerator.Next()),
             PrivateKey = key,
+        })];
+    }
+
+    private NodeOptions[] GetNodeOptions(
+        PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
+    {
+        return [.. nodePrivateKeys.Select(key => new NodeOptions
+        {
+            EndPoint = GetLocalHost(portGenerator.Next()),
+            PrivateKey = key,
+            ActionProviderModulePath = ActionProviderModulePath,
+            ActionProviderType = ActionProviderType,
         })];
     }
 
