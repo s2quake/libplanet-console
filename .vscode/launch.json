@@ -33,7 +33,9 @@
       "program": "${workspaceFolder}/src/console/LibplanetConsole.Console.Executable/bin/Debug/net8.0/libplanet-console.dll",
       "console": "integratedTerminal",
       "args": [
-        "run"
+        "run",
+        "--log-path",
+        ".log"
       ]
     },
     {

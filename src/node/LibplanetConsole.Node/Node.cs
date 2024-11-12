@@ -160,7 +160,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             = await CreateTransport(privateKey, blocksyncPort, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
-            StaticPeers = blocksyncSeedPeer is null ? [] : [blocksyncSeedPeer],
+            // StaticPeers = blocksyncSeedPeer is null ? [] : [blocksyncSeedPeer],
             BootstrapOptions = new()
             {
                 SeedPeers = blocksyncSeedPeer is null ? [] : [blocksyncSeedPeer],
@@ -314,7 +314,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     {
         if (_seedEndPoint is { } seedEndPoint)
         {
-            logger.LogDebug("Getting seed info from {SeedEndPoint}", seedEndPoint);
+            logger.LogDebug(
+                "Getting seed info from {SeedEndPoint}", EndPointUtility.ToString(seedEndPoint));
             var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
             var channelOptions = new GrpcChannelOptions
             {
@@ -328,7 +329,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 
             var response = await client.GetSeedAsync(request, cancellationToken: cancellationToken);
             var seedInfo = (SeedInfo)response.SeedResult;
-            logger.LogDebug("Got seed info from {SeedEndPoint}", seedEndPoint);
+            logger.LogDebug(JsonUtility.Serialize(seedInfo));
             return (seedInfo.BlocksyncSeedPeer, seedInfo.ConsensusSeedPeer);
         }
 

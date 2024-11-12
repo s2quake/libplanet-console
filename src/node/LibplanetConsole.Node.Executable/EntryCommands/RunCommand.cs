@@ -40,7 +40,6 @@ internal sealed class RunCommand
     [CommandSummary("The directory path to store data." +
                     "If omitted, the data is stored in memory.")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
-    [DefaultValue("")]
     public string StorePath { get; init; } = string.Empty;
 
     [CommandProperty]
@@ -73,7 +72,6 @@ internal sealed class RunCommand
     [CommandProperty]
     [CommandSummary("Indicates the directory path to save logs.")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
-    [DefaultValue("")]
     public string LogPath { get; init; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
@@ -88,18 +86,12 @@ internal sealed class RunCommand
 
     [CommandProperty("module-path")]
     [CommandSummary("Indicates the path or the name of the assembly that provides " +
-                    "the IActionProvider.\n" +
-                    "Requires the '--single-node' option to be set.")]
-    [CommandPropertyDependency(nameof(IsSingleNode))]
-    [DefaultValue("")]
+                    "the IActionProvider.")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Indicates the type name of the IActionProvider.")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
-    [CommandPropertyDependency(nameof(IsSingleNode))]
-    [DefaultValue("")]
     public string ActionProviderType { get; set; } = string.Empty;
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)

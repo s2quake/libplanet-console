@@ -237,7 +237,7 @@ public abstract class ProcessBase
     private ProcessStartInfo GetProcessStartInfoOnMacOS()
     {
         var filename = GetFileName();
-        var arguments = CommandUtility.Join(GetArguments());
+        var arguments = CommandUtility.Join(GetArguments()).Replace("\"", "\\\"");
         var script = $"tell application \"Terminal\"\n" +
                      $"  do script \"{filename} {arguments}; exit\"\n" +
                      $"  activate\n" +
