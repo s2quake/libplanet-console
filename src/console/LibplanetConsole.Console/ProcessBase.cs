@@ -238,18 +238,20 @@ public abstract class ProcessBase
     {
         var filename = GetFileName();
         var arguments = CommandUtility.Join(GetArguments()).Replace("\"", "\\\"");
-        var script = $"tell application \"Terminal\"\n" +
-                     $"  do script \"{filename} {arguments}; exit\"\n" +
-                     $"  activate\n" +
-                     $"end tell\n";
-        var tempFile = TempFile.WriteAllText(script);
 
         return new ProcessStartInfo
         {
             FileName = "/usr/bin/osascript",
             ArgumentList =
             {
-                tempFile.FileName,
+                "-e",
+                "tell application \"Terminal\"",
+                "-e",
+                $"  do script \"{filename} {arguments}; exit\"",
+                "-e",
+                $"activate",
+                "-e",
+                $"end tell",
             },
         };
     }
