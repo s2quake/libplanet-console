@@ -184,7 +184,7 @@ public abstract class ProcessBase
         startInfo.UseShellExecute = IsWindows is true && NewWindow is true;
         startInfo.RedirectStandardOutput = NewWindow is not true;
         startInfo.RedirectStandardError = NewWindow is not true;
-        startInfo.RedirectStandardInput = true;
+        startInfo.RedirectStandardInput = NewWindow is not true;
         startInfo.WorkingDirectory = WorkingDirectory.Fallback(Directory.GetCurrentDirectory());
         return startInfo;
     }
@@ -259,11 +259,10 @@ public abstract class ProcessBase
     private ProcessStartInfo GetProcessStartInfoOnWindows()
     {
         var filename = $"\"{GetFileName()}\"";
-        var arguments = CommandUtility.Join(GetArguments());
-        var tempFile = TempFile.WriteAllText($"& {filename} {arguments}");
+        var arguments = CommandUtility.Join(GetArguments()).Replace("\"", "`\"");
         var scriptList = new List<string>
         {
-            $"Invoke-Expression $(Get-Content {tempFile})",
+            $"Invoke-Expression '& {filename} {arguments}'",
             "Write-Host -NoNewLine 'Press any key to exit.'",
             "$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')",
         };
