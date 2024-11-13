@@ -35,7 +35,8 @@
       "args": [
         "run",
         "--log-path",
-        ".log"
+        ".log",
+        "--new-window"
       ]
     },
     {
