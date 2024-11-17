@@ -12,6 +12,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
     private readonly CommandContext _commandContext;
     private readonly IBlockChain _blockChain;
     private BlockInfo _tip;
+    private bool _isEnded;
 
     public SystemTerminal(
         IHostApplicationLifetime applicationLifetime,
@@ -27,7 +28,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
         _blockChain.Started += BlockChain_Started;
         _blockChain.Stopped += BlockChain_Stopped;
         UpdateTip(_blockChain.Tip);
-        applicationLifetime.ApplicationStopping.Register(() => Prompt = "\u001b0");
+        applicationLifetime.ApplicationStopping.Register(() => _isEnded = true);
     }
 
     protected override void OnDispose()
@@ -85,8 +86,11 @@ internal sealed class SystemTerminal : SystemTerminalBase
 
     private void UpdateTip(BlockInfo tip)
     {
-        _tip = tip;
-        UpdatePrompt();
+        if (_isEnded is false)
+        {
+            _tip = tip;
+            UpdatePrompt();
+        }
     }
 
     private void UpdatePrompt()

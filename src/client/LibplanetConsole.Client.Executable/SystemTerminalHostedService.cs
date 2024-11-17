@@ -8,20 +8,22 @@ namespace LibplanetConsole.Client.Executable;
 
 internal sealed class SystemTerminalHostedService(
     IHostApplicationLifetime applicationLifetime,
-    CommandContext commandContext,
-    SystemTerminal terminal,
+    IServiceProvider serviceProvider,
     IApplicationOptions options,
-    ILogger<SystemTerminalHostedService> logger) : IHostedService
+    ILogger<SystemTerminalHostedService> logger)
+    : IHostedService
 {
     private Task _waitInputTask = Task.CompletedTask;
     private Task _waitForExitTask = Task.CompletedTask;
     private int _parentProcessId;
-    private bool _isRunning;
+    private SystemTerminal? _terminal;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (options.NoREPL != true)
+        if (options.NoREPL is false)
         {
+            var terminal = serviceProvider.GetRequiredService<SystemTerminal>();
+            var commandContext = serviceProvider.GetRequiredService<CommandContext>();
             var sw = new StringWriter();
             commandContext.Out = sw;
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
@@ -34,14 +36,14 @@ internal sealed class SystemTerminalHostedService(
             await Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
-            _isRunning = true;
+            _terminal = terminal;
         }
         else
         {
             _waitInputTask = WaitInputAsync();
         }
 
-        if (options.ParentProcessId != 0 &&
+        if (options.ParentProcessId is not 0 &&
             Process.GetProcessById(options.ParentProcessId) is { } parentProcess)
         {
             _parentProcessId = options.ParentProcessId;
@@ -54,9 +56,9 @@ internal sealed class SystemTerminalHostedService(
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await TaskUtility.TryWaitAll(_waitInputTask, _waitForExitTask);
-        if (_isRunning is true)
+        if (_terminal is not null)
         {
-            await terminal.StopAsync(cancellationToken);
+            await _terminal.StopAsync(cancellationToken);
         }
     }
 
