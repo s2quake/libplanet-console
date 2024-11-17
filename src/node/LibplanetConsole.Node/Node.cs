@@ -160,7 +160,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             = await CreateTransport(privateKey, blocksyncPort, appProtocolVersion);
         var swarmOptions = new SwarmOptions
         {
-            // StaticPeers = blocksyncSeedPeer is null ? [] : [blocksyncSeedPeer],
             BootstrapOptions = new()
             {
                 SeedPeers = blocksyncSeedPeer is null ? [] : [blocksyncSeedPeer],

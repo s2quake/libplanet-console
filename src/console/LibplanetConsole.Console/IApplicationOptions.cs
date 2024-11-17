@@ -19,4 +19,8 @@ public interface IApplicationOptions
     string ActionProviderModulePath { get; }
 
     string ActionProviderType { get; }
+
+    int BlocksyncPort { get; }
+
+    int ConsensusPort { get; }
 }

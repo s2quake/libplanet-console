@@ -32,18 +32,22 @@ internal sealed class SeedService(IApplicationOptions options) : ISeedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _blocksyncSeedNode = new SeedNode(new()
-        {
-            PrivateKey = _seedNodePrivateKey,
-            Port = PortUtility.NextPort(),
-            AppProtocolVersion = options.AppProtocolVersion,
-        });
-        _consensusSeedNode = new SeedNode(new()
-        {
-            PrivateKey = _seedNodePrivateKey,
-            Port = PortUtility.NextPort(),
-            AppProtocolVersion = options.AppProtocolVersion,
-        });
+        _blocksyncSeedNode = new SeedNode(
+            "Blocksync",
+            new()
+            {
+                PrivateKey = _seedNodePrivateKey,
+                Port = options.BlocksyncPort is 0 ? PortUtility.NextPort() : options.BlocksyncPort,
+                AppProtocolVersion = options.AppProtocolVersion,
+            });
+        _consensusSeedNode = new SeedNode(
+            "Consensus",
+            new()
+            {
+                PrivateKey = _seedNodePrivateKey,
+                Port = options.ConsensusPort is 0 ? PortUtility.NextPort() : options.ConsensusPort,
+                AppProtocolVersion = options.AppProtocolVersion,
+            });
         await _blocksyncSeedNode.StartAsync(cancellationToken);
         await _consensusSeedNode.StartAsync(cancellationToken);
     }

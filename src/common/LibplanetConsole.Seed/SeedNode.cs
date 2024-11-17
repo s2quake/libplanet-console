@@ -1,5 +1,4 @@
-﻿using Dasync.Collections;
-using Libplanet.Net.Messages;
+﻿using Libplanet.Net.Messages;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using Serilog;
@@ -7,7 +6,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Seed;
 
-public sealed class SeedNode(SeedOptions seedOptions)
+public sealed class SeedNode(string name, SeedOptions seedOptions)
 {
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
@@ -16,11 +15,13 @@ public sealed class SeedNode(SeedOptions seedOptions)
     private Task _task = Task.CompletedTask;
     private Task _refreshTask = Task.CompletedTask;
 
+    public string Name { get; } = name;
+
     public ILogger Logger => _logger;
 
     public bool IsRunning { get; private set; }
 
-    public PeerCollection Peers { get; } = new(seedOptions);
+    public PeerCollection Peers { get; } = new(name, seedOptions);
 
     public BoundPeer BoundPeer { get; } = new(
         seedOptions.PrivateKey.PublicKey, GetLocalHost(seedOptions.Port));
@@ -38,8 +39,9 @@ public sealed class SeedNode(SeedOptions seedOptions)
         _transport.ProcessMessageHandler.Register(ReceiveMessageAsync);
         _task = _transport.StartAsync(_cancellationTokenSource.Token);
         await _transport.WaitForRunningAsync();
-        _refreshTask = RefreshContinuouslyAsync(_cancellationTokenSource.Token);
+        _refreshTask = RefreshContinuouslyAsync(_transport, _cancellationTokenSource.Token);
         IsRunning = true;
+        _logger.Information("[{Name}] SeedNode is started: {BoundPeer}", Name, BoundPeer);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -68,6 +70,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
         _refreshTask = Task.CompletedTask;
         _task = Task.CompletedTask;
         IsRunning = false;
+        _logger.Information("[{Name}] SeedNode is stopped", Name);
     }
 
     public async ValueTask DisposeAsync()
@@ -105,7 +108,8 @@ public sealed class SeedNode(SeedOptions seedOptions)
         return await NetMQTransport.Create(privateKey, appProtocolVersionOptions, hostOptions);
     }
 
-    private async Task RefreshContinuouslyAsync(CancellationToken cancellationToken)
+    private async Task RefreshContinuouslyAsync(
+        ITransport transport, CancellationToken cancellationToken)
     {
         var interval = seedOptions.RefreshInterval;
         var peers = Peers;
@@ -114,7 +118,7 @@ public sealed class SeedNode(SeedOptions seedOptions)
             try
             {
                 await Task.Delay(interval, cancellationToken);
-                await peers.RefreshAsync(cancellationToken);
+                await peers.RefreshAsync(transport, cancellationToken);
             }
             catch (TaskCanceledException)
             {
@@ -134,32 +138,36 @@ public sealed class SeedNode(SeedOptions seedOptions)
         var cancellationToken = _cancellationTokenSource.Token;
         var transport = _transport;
         var peers = Peers;
+        var id = messageIdentity is not null ? new Guid(messageIdentity) : Guid.Empty;
+        var boundPeer = message.Remote;
+
+        peers.AddOrUpdate(boundPeer);
 
         switch (message.Content)
         {
             case FindNeighborsMsg:
-                var alivePeers = peers.Where(item => item.IsAlive)
-                                      .Select(item => item.BoundPeer)
-                                      .ToArray();
+                var alivePeers = peers.GetAlivePeers();
                 var neighborsMsg = new NeighborsMsg(alivePeers);
-                await transport.ReplyMessageAsync(
-                    neighborsMsg,
-                    messageIdentity,
-                    cancellationToken: cancellationToken);
+                await transport.ReplyMessageAsync(neighborsMsg, messageIdentity, cancellationToken);
+                _logger.Debug(
+                    "[{Name}] Response {Msg}: {Peer} {Id} {AlivePeers} ",
+                    Name,
+                    nameof(NeighborsMsg),
+                    boundPeer,
+                    id,
+                    alivePeers.Length);
                 break;
 
             default:
                 var pongMsg = new PongMsg();
-                await transport.ReplyMessageAsync(
-                    content: pongMsg,
-                    identity: messageIdentity,
-                    cancellationToken: cancellationToken);
+                await transport.ReplyMessageAsync(pongMsg, messageIdentity, cancellationToken);
+                _logger.Debug(
+                    "[{Name}] Response {Msg}: {Peer} {Id}",
+                    Name,
+                    nameof(PongMsg),
+                    boundPeer,
+                    id);
                 break;
-        }
-
-        if (message.Remote is BoundPeer boundPeer)
-        {
-            peers.AddOrUpdate(boundPeer, transport);
         }
     }
 }

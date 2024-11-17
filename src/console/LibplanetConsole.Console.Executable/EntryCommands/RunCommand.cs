@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
@@ -135,6 +134,8 @@ internal sealed class RunCommand
         options.NoProcess = NoProcess;
         options.NewWindow = NewWindow;
         options.Detach = Detach;
+        options.BlocksyncPort = port + 4;
+        options.ConsensusPort = port + 5;
 
         if (options.Genesis == string.Empty && options.GenesisPath == string.Empty)
         {
