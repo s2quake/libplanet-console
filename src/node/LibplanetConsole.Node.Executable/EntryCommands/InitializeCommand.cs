@@ -123,6 +123,16 @@ internal sealed class InitializeCommand : CommandBase
     [CommandPropertyDependency(nameof(IsSingleNode))]
     public string APVExtra { get; set; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("Specifies the port for the blocksync of the node. If omitted, " +
+                    "a random port is used.")]
+    public int BlocksyncPort { get; set; }
+
+    [CommandProperty]
+    [CommandSummary("Specifies the port for the consensus of the node. If omitted, " +
+                    "a random port is used.")]
+    public int ConsensusPort { get; set; }
+
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
@@ -133,6 +143,8 @@ internal sealed class InitializeCommand : CommandBase
         var genesisPath = Path.Combine(outputPath, GenesisPath.Fallback("genesis"));
         var appProtocolVersionPath = Path.Combine(
             outputPath, AppProtocolVersionPath.Fallback("appProtocolVersion"));
+        var blocksyncPort = BlocksyncPort is 0 ? PortUtility.NextPort() : BlocksyncPort;
+        var consensusPort = ConsensusPort is 0 ? PortUtility.NextPort() : ConsensusPort;
         var repository = new Repository
         {
             Port = port,
@@ -144,6 +156,8 @@ internal sealed class InitializeCommand : CommandBase
             AppProtocolVersionPath = appProtocolVersionPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
+            BlocksyncPort = blocksyncPort,
+            ConsensusPort = consensusPort,
         };
         dynamic info = repository.Save(outputPath);
         using var writer = new ConditionalTextWriter(Out)

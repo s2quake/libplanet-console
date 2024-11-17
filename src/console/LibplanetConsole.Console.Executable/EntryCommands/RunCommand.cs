@@ -199,25 +199,37 @@ internal sealed class RunCommand
     private static ClientOptions[] GetClientOptions(
         PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
     {
-        var portGroup = portGenerator.Next();
-        return [.. clientPrivateKeys.Select(key => new ClientOptions
+        return [.. clientPrivateKeys.Select(CreateClientOptions)];
+
+        ClientOptions CreateClientOptions(PrivateKey privateKey)
         {
-            EndPoint = GetLocalHost(portGroup[0]),
-            PrivateKey = key,
-        })];
+            var ports = portGenerator.Next();
+            return new ClientOptions
+            {
+                EndPoint = GetLocalHost(ports[0]),
+                PrivateKey = privateKey,
+            };
+        }
     }
 
     private NodeOptions[] GetNodeOptions(
         PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
     {
-        var portGroup = portGenerator.Next();
-        return [.. nodePrivateKeys.Select(key => new NodeOptions
+        return [.. nodePrivateKeys.Select(CreateNodeOptions)];
+
+        NodeOptions CreateNodeOptions(PrivateKey privateKey)
         {
-            EndPoint = GetLocalHost(portGroup[0]),
-            PrivateKey = key,
-            ActionProviderModulePath = ActionProviderModulePath,
-            ActionProviderType = ActionProviderType,
-        })];
+            var ports = portGenerator.Next();
+            return new NodeOptions
+            {
+                EndPoint = GetLocalHost(ports[0]),
+                PrivateKey = privateKey,
+                ActionProviderModulePath = ActionProviderModulePath,
+                ActionProviderType = ActionProviderType,
+                BlocksyncPort = ports[4],
+                ConsensusPort = ports[5],
+            };
+        }
     }
 
     private PrivateKey[] GetNodes()

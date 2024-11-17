@@ -29,6 +29,10 @@ public sealed record class Repository
 
     public string ActionProviderType { get; init; } = string.Empty;
 
+    public int BlocksyncPort { get; set; }
+
+    public int ConsensusPort { get; set; }
+
     public dynamic Save(string repositoryPath)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
@@ -72,6 +76,8 @@ public sealed record class Repository
                 SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
+                BlocksyncPort = BlocksyncPort,
+                ConsensusPort = ConsensusPort,
             },
             Kestrel = new
             {

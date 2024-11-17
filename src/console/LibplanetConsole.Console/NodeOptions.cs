@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using LibplanetConsole.Common;
 using Microsoft.Extensions.Configuration;
 using static LibplanetConsole.Common.EndPointUtility;
 
@@ -20,6 +21,10 @@ public sealed record class NodeOptions
     public string ActionProviderModulePath { get; init; } = string.Empty;
 
     public string ActionProviderType { get; init; } = string.Empty;
+
+    public int BlocksyncPort { get; init; }
+
+    public int ConsensusPort { get; init; }
 
     internal string RepositoryPath { get; private set; } = string.Empty;
 
@@ -57,6 +62,12 @@ public sealed record class NodeOptions
             RepositoryPath = repositoryPath,
             ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
             ActionProviderType = applicationSettings.ActionProviderType,
+            BlocksyncPort = applicationSettings.BlocksyncPort == 0
+                ? PortUtility.NextPort()
+                : applicationSettings.BlocksyncPort,
+            ConsensusPort = applicationSettings.ConsensusPort == 0
+                ? PortUtility.NextPort()
+                : applicationSettings.ConsensusPort,
         };
     }
 
@@ -97,5 +108,11 @@ public sealed record class NodeOptions
 
         [DefaultValue("")]
         public string ActionProviderType { get; init; } = string.Empty;
+
+        [DefaultValue(0)]
+        public int BlocksyncPort { get; init; } = 0;
+
+        [DefaultValue(0)]
+        public int ConsensusPort { get; init; } = 0;
     }
 }

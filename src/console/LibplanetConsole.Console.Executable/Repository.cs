@@ -29,7 +29,7 @@ public sealed record class Repository
         Clients = clients;
     }
 
-    public int Port => _ports[0];
+    public int Port { get; set; }
 
     public NodeOptions[] Nodes { get; } = [];
 
@@ -52,6 +52,10 @@ public sealed record class Repository
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     public string ActionProviderType { get; set; } = string.Empty;
+
+    public int BlocksyncPort { get; set; }
+
+    public int ConsensusPort { get; set; }
 
     public static byte[] CreateGenesis(GenesisOptions genesisOptions)
     {
@@ -177,6 +181,10 @@ public sealed record class Repository
         var appProtocolVersionPath = resolver.GetAppProtocolVersionPath(repositoryPath);
         var nodesPath = resolver.GetNodesPath(repositoryPath);
         var clientsPath = resolver.GetClientsPath(repositoryPath);
+        var port0 = Port is not 0 ? Port : _ports[0];
+        var port1 = Port is not 0 ? Port + 1 : _ports[1];
+        var blocksyncPort = BlocksyncPort is not 0 ? BlocksyncPort : _ports[4];
+        var consensusPort = ConsensusPort is not 0 ? ConsensusPort : _ports[5];
         var applicationOptions = new ApplicationOptions
         {
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
@@ -185,8 +193,8 @@ public sealed record class Repository
             LogPath = LogPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
-            BlocksyncPort = _ports[4],
-            ConsensusPort = _ports[5],
+            BlocksyncPort = blocksyncPort,
+            ConsensusPort = consensusPort,
         };
         var kestrelOptions = new
         {
@@ -194,12 +202,12 @@ public sealed record class Repository
             {
                 Http1 = new
                 {
-                    Url = $"http://localhost:{_ports[0]}",
+                    Url = $"http://localhost:{port0}",
                     Protocols = "Http2",
                 },
                 Http1AndHttp2 = new
                 {
-                    Url = $"http://localhost:{_ports[1]}",
+                    Url = $"http://localhost:{port1}",
                     Protocols = "Http1AndHttp2",
                 },
             },

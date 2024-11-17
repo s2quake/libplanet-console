@@ -46,8 +46,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 
     public Node(
         IServiceProvider serviceProvider,
-        IApplicationOptions options,
-        IOptions<NodeOptions> nodeOptions)
+        IApplicationOptions options)
     {
         _serviceProvider = serviceProvider;
         _seedEndPoint = options.SeedEndPoint;
@@ -60,8 +59,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             options.ActionProviderModulePath, options.ActionProviderType);
         _genesisBlock = options.GenesisBlock;
         _appProtocolVersion = options.AppProtocolVersion;
-        _blocksyncPort = nodeOptions.Value.BlocksyncPort;
-        _consensusPort = nodeOptions.Value.ConsensusPort;
+        _blocksyncPort = options.BlocksyncPort;
+        _consensusPort = options.ConsensusPort;
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
         _logger.LogDebug(JsonUtility.Serialize(Info));
