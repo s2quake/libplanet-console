@@ -18,23 +18,18 @@ public sealed record class Repository
     private const int DefaultTimeout = 10000;
     private const int BlinkOfAnEye = 300;
 
+    private readonly PortGroup _ports;
     private byte[]? _genesis;
     private AppProtocolVersion? _appProtocolVersion;
 
-    public Repository(int port, NodeOptions[] nodes, ClientOptions[] clients)
+    public Repository(PortGroup ports, NodeOptions[] nodes, ClientOptions[] clients)
     {
-        if (port <= 0)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(port), port, "Port must be greater than 0.");
-        }
-
-        Port = port;
+        _ports = ports;
         Nodes = nodes;
         Clients = clients;
     }
 
-    public int Port { get; }
+    public int Port => _ports[0];
 
     public NodeOptions[] Nodes { get; } = [];
 
@@ -190,6 +185,8 @@ public sealed record class Repository
             LogPath = LogPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
+            BlocksyncPort = _ports[4],
+            ConsensusPort = _ports[5],
         };
         var kestrelOptions = new
         {
@@ -197,12 +194,12 @@ public sealed record class Repository
             {
                 Http1 = new
                 {
-                    Url = $"http://localhost:{Port}",
+                    Url = $"http://localhost:{_ports[0]}",
                     Protocols = "Http2",
                 },
                 Http1AndHttp2 = new
                 {
-                    Url = $"http://localhost:{Port + 1}",
+                    Url = $"http://localhost:{_ports[1]}",
                     Protocols = "Http1AndHttp2",
                 },
             },

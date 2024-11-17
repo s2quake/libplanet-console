@@ -4,40 +4,41 @@ namespace LibplanetConsole.Common;
 
 public static class PortUtility
 {
-    private static readonly List<int> ReservedPortList = [];
-    private static readonly List<int> UsedPortList = [];
+    private const int TryCount = 10;
+    private static readonly List<int> PortList = [];
     private static readonly object LockObject = new();
 
     public static int NextPort()
     {
         lock (LockObject)
         {
-            if (ReservedPortList.Count == 0)
+            for (var i = 0; i < TryCount; i++)
             {
-                var v = GetRandomPort();
-                while (ReservedPortList.Contains(v) == true || UsedPortList.Contains(v) == true)
+                var port = GetRandomPort();
+                if (PortList.Contains(port) is false)
                 {
-                    v = GetRandomPort();
+                    PortList.Add(port);
+                    return port;
                 }
-
-                ReservedPortList.Add(v);
             }
 
-            var port = ReservedPortList[0];
-            ReservedPortList.Remove(port);
-            UsedPortList.Add(port);
+            throw new InvalidOperationException("Failed to find an available port.");
+        }
+    }
+
+    public static int ReservePort(int port)
+    {
+        lock (LockObject)
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            listener.Stop();
+            PortList.Add(port);
             return port;
         }
     }
 
-    public static void ReleasePort(int port)
-    {
-        lock (LockObject)
-        {
-            ReservedPortList.Add(port);
-            UsedPortList.Remove(port);
-        }
-    }
+    public static bool ContainsPort(int port) => PortList.Contains(port);
 
     private static int GetRandomPort()
     {
