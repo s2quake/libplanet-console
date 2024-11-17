@@ -61,6 +61,10 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     public string ActionProviderType { get; set; } = string.Empty;
 
+    public int BlocksyncPort { get; set; }
+
+    public int ConsensusPort { get; set; }
+
     private PrivateKey ActualPrivateKey
         => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 

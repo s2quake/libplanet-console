@@ -18,23 +18,18 @@ public sealed record class Repository
     private const int DefaultTimeout = 10000;
     private const int BlinkOfAnEye = 300;
 
+    private readonly PortGroup _ports;
     private byte[]? _genesis;
     private AppProtocolVersion? _appProtocolVersion;
 
-    public Repository(int port, NodeOptions[] nodes, ClientOptions[] clients)
+    public Repository(PortGroup ports, NodeOptions[] nodes, ClientOptions[] clients)
     {
-        if (port <= 0)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(port), port, "Port must be greater than 0.");
-        }
-
-        Port = port;
+        _ports = ports;
         Nodes = nodes;
         Clients = clients;
     }
 
-    public int Port { get; }
+    public int Port { get; set; }
 
     public NodeOptions[] Nodes { get; } = [];
 
@@ -57,6 +52,10 @@ public sealed record class Repository
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     public string ActionProviderType { get; set; } = string.Empty;
+
+    public int BlocksyncPort { get; set; }
+
+    public int ConsensusPort { get; set; }
 
     public static byte[] CreateGenesis(GenesisOptions genesisOptions)
     {
@@ -182,6 +181,10 @@ public sealed record class Repository
         var appProtocolVersionPath = resolver.GetAppProtocolVersionPath(repositoryPath);
         var nodesPath = resolver.GetNodesPath(repositoryPath);
         var clientsPath = resolver.GetClientsPath(repositoryPath);
+        var port0 = Port is not 0 ? Port : _ports[0];
+        var port1 = Port is not 0 ? Port + 1 : _ports[1];
+        var blocksyncPort = BlocksyncPort is not 0 ? BlocksyncPort : _ports[4];
+        var consensusPort = ConsensusPort is not 0 ? ConsensusPort : _ports[5];
         var applicationOptions = new ApplicationOptions
         {
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
@@ -190,6 +193,8 @@ public sealed record class Repository
             LogPath = LogPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
+            BlocksyncPort = blocksyncPort,
+            ConsensusPort = consensusPort,
         };
         var kestrelOptions = new
         {
@@ -197,12 +202,12 @@ public sealed record class Repository
             {
                 Http1 = new
                 {
-                    Url = $"http://localhost:{Port}",
+                    Url = $"http://localhost:{port0}",
                     Protocols = "Http2",
                 },
                 Http1AndHttp2 = new
                 {
-                    Url = $"http://localhost:{Port + 1}",
+                    Url = $"http://localhost:{port1}",
                     Protocols = "Http1AndHttp2",
                 },
             },

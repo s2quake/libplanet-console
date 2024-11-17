@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.DataAnnotations;
@@ -14,6 +13,10 @@ namespace LibplanetConsole.Console.Executable.EntryCommands;
 internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
+    private Application? _application;
+    private PortGenerator? _portGenerator;
+    private PortGroup? _ports;
+
     [CommandProperty]
     [CommandSummary("The port of the libplanet-console. " +
                     "If omitted, a random port is used.")]
@@ -114,11 +117,12 @@ internal sealed class RunCommand
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
-        var portGenerator = new PortGenerator(Port);
-        var port = portGenerator.Current;
+        var portGenerator = _portGenerator
+            ?? throw new InvalidOperationException("PortGenerator is not initialized.");
+        var ports = _ports ?? throw new InvalidOperationException("PortGroup is not initialized.");
         var nodeOptions = GetNodeOptions(GetNodes(), portGenerator);
         var clientOptions = GetClientOptions(GetClients(), portGenerator);
-        var repository = new Repository(port, nodeOptions, clientOptions)
+        var repository = new Repository(ports, nodeOptions, clientOptions)
         {
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
@@ -135,6 +139,8 @@ internal sealed class RunCommand
         options.NoProcess = NoProcess;
         options.NewWindow = NewWindow;
         options.Detach = Detach;
+        options.BlocksyncPort = ports[4];
+        options.ConsensusPort = ports[5];
 
         if (options.Genesis == string.Empty && options.GenesisPath == string.Empty)
         {
@@ -156,47 +162,74 @@ internal sealed class RunCommand
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
+        if (_application is not null)
+        {
+            throw new InvalidOperationException("The application is already running.");
+        }
+
         try
         {
             var builder = WebApplication.CreateBuilder();
             var services = builder.Services;
             var application = new Application(builder);
-            var port = Port is 0 ? PortUtility.NextPort() : Port;
+            var portGenerator = new PortGenerator(Port);
+            var ports = portGenerator.Next();
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
-                options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+                options.ListenLocalhost(ports[0], o => o.Protocols = HttpProtocols.Http2);
+                options.ListenLocalhost(ports[1], o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
             services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
-            await application.RunAsync(cancellationToken);
+            _ports = ports;
+            _portGenerator = portGenerator;
+            _application = application;
+            await _application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
         {
             e.Print(System.Console.Out);
             Environment.Exit(1);
         }
+        finally
+        {
+            _application = null;
+        }
     }
 
     private static ClientOptions[] GetClientOptions(
         PrivateKey[] clientPrivateKeys, PortGenerator portGenerator)
     {
-        return [.. clientPrivateKeys.Select(key => new ClientOptions
+        return [.. clientPrivateKeys.Select(CreateClientOptions)];
+
+        ClientOptions CreateClientOptions(PrivateKey privateKey)
         {
-            EndPoint = GetLocalHost(portGenerator.Next()),
-            PrivateKey = key,
-        })];
+            var ports = portGenerator.Next();
+            return new ClientOptions
+            {
+                EndPoint = GetLocalHost(ports[0]),
+                PrivateKey = privateKey,
+            };
+        }
     }
 
     private NodeOptions[] GetNodeOptions(
         PrivateKey[] nodePrivateKeys, PortGenerator portGenerator)
     {
-        return [.. nodePrivateKeys.Select(key => new NodeOptions
+        return [.. nodePrivateKeys.Select(CreateNodeOptions)];
+
+        NodeOptions CreateNodeOptions(PrivateKey privateKey)
         {
-            EndPoint = GetLocalHost(portGenerator.Next()),
-            PrivateKey = key,
-            ActionProviderModulePath = ActionProviderModulePath,
-            ActionProviderType = ActionProviderType,
-        })];
+            var ports = portGenerator.Next();
+            return new NodeOptions
+            {
+                EndPoint = GetLocalHost(ports[0]),
+                PrivateKey = privateKey,
+                ActionProviderModulePath = ActionProviderModulePath,
+                ActionProviderType = ActionProviderType,
+                BlocksyncPort = ports[4],
+                ConsensusPort = ports[5],
+            };
+        }
     }
 
     private PrivateKey[] GetNodes()

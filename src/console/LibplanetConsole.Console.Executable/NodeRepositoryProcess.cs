@@ -20,6 +20,10 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
 
     public string ActionProviderType { get; set; } = string.Empty;
 
+    public int BlocksyncPort { get; set; }
+
+    public int ConsensusPort { get; set; }
+
     public override string[] Arguments
     {
         get
@@ -63,6 +67,18 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
             {
                 argumentList.Add("--module-type");
                 argumentList.Add(ActionProviderType);
+            }
+
+            if (BlocksyncPort is not 0)
+            {
+                argumentList.Add("--blocksync-port");
+                argumentList.Add($"{BlocksyncPort}");
+            }
+
+            if (ConsensusPort is not 0)
+            {
+                argumentList.Add("--consensus-port");
+                argumentList.Add($"{ConsensusPort}");
             }
 
             return [.. argumentList];

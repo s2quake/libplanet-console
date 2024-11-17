@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -91,20 +90,6 @@ internal sealed class InitializeCommand : CommandAsyncBase
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
-    [CommandProperty("port-spacing", InitValue = PortGenerator.DefaultSpace)]
-    [CommandSummary("Specifies the spacing between ports. Default is 10. " +
-                    "This option is only used when --port-generation-mode is set to " +
-                    "'sequential'. If --port-generation-mode is set to 'random', " +
-                    "the value of this option is 10'")]
-    [Category("Network")]
-    [Range(10, 10000)]
-    public int PortSpacing { get; set; }
-
-    [CommandProperty("port-generation-mode")]
-    [CommandSummary("Specifies the mode for generating ports: Random or Sequential.")]
-    [Category("Network")]
-    public PortGenerationMode PortGenerationMode { get; set; } = PortGenerationMode.Sequential;
-
     [CommandProperty("apv-private-key")]
     [CommandSummary("The private key of the signer of the AppProtocolVersion. If omitted, " +
                     "a random private key is used.")]
@@ -122,6 +107,18 @@ internal sealed class InitializeCommand : CommandAsyncBase
     [Category("AppProtocolVersion")]
     public string APVExtra { get; set; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("Specifies the port for the blocksync of the node. If omitted, " +
+                    "a random port is used.")]
+    [Category("Seed")]
+    public int BlocksyncPort { get; set; }
+
+    [CommandProperty]
+    [CommandSummary("Specifies the port for the consensus of the node. If omitted, " +
+                    "a random port is used.")]
+    [Category("Seed")]
+    public int ConsensusPort { get; set; }
+
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
         using var writer = new ConditionalTextWriter(Out)
@@ -137,8 +134,8 @@ internal sealed class InitializeCommand : CommandAsyncBase
         using var progress = new CommandProgress();
         var portGenerator = new PortGenerator(Port);
         var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
-        var port = portGenerator.Current;
-        var nodeOptions = GetNodeOptions(portGenerator, port);
+        var ports = portGenerator.Next();
+        var nodeOptions = GetNodeOptions(portGenerator, ports);
         var clientOptions = GetClientOptions(portGenerator);
         var outputPath = Path.GetFullPath(RepositoryPath);
         var dateTimeOffset = DateTimeOffset != DateTimeOffset.MinValue
@@ -152,14 +149,17 @@ internal sealed class InitializeCommand : CommandAsyncBase
             ActionProviderType = ActionProviderType,
         };
         var apvPrivateKey = PrivateKeyUtility.ParseOrRandom(APVPrivateKey);
-        var repository = new Repository(port, nodeOptions, clientOptions)
+        var repository = new Repository(ports, nodeOptions, clientOptions)
         {
+            Port = Port,
             Genesis = Repository.CreateGenesis(genesisOptions),
             AppProtocolVersion = Repository.CreateAppProtocolVersion(
                 apvPrivateKey, APVVersion, APVExtra),
             LogPath = "log",
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
+            BlocksyncPort = BlocksyncPort,
+            ConsensusPort = ConsensusPort,
         };
         var resolver = new RepositoryPathResolver();
         dynamic info = await repository.SaveAsync(
@@ -183,21 +183,24 @@ internal sealed class InitializeCommand : CommandAsyncBase
         return info;
     }
 
-    private NodeOptions[] GetNodeOptions(PortGenerator portGenerator, int port)
+    private NodeOptions[] GetNodeOptions(PortGenerator portGenerator, PortGroup consolePorts)
     {
         var privateKeys = GetNodes();
         var nodeOptionsList = new List<NodeOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
+            var ports = portGenerator.Next();
             var nodeOptions = new NodeOptions
             {
-                EndPoint = GetLocalHost(portGenerator.Next()),
+                EndPoint = GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
                 StorePath = "store",
                 LogPath = "log",
-                SeedEndPoint = GetLocalHost(port),
+                SeedEndPoint = GetLocalHost(consolePorts[0]),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
+                BlocksyncPort = ports[4],
+                ConsensusPort = ports[5],
             };
             nodeOptionsList.Add(nodeOptions);
         }
@@ -211,9 +214,10 @@ internal sealed class InitializeCommand : CommandAsyncBase
         var clientOptionsList = new List<ClientOptions>(privateKeys.Length);
         foreach (var privateKey in privateKeys)
         {
+            var ports = portGenerator.Next();
             var clientOptions = new ClientOptions
             {
-                EndPoint = GetLocalHost(portGenerator.Next()),
+                EndPoint = GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
                 LogPath = "log",
             };

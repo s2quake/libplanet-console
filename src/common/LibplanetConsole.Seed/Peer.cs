@@ -1,16 +1,16 @@
 ﻿using System.Diagnostics;
 using Libplanet.Net.Messages;
 using Libplanet.Net.Transports;
+using Serilog;
 
 namespace LibplanetConsole.Seed;
 
 public sealed class Peer
 {
-    private readonly ITransport _transport;
+    private readonly ILogger _logger = Log.ForContext<SeedNode>();
 
-    internal Peer(ITransport transport, BoundPeer appPeer)
+    internal Peer(BoundPeer appPeer)
     {
-        _transport = transport;
         BoundPeer = appPeer;
     }
 
@@ -34,17 +34,15 @@ public sealed class Peer
         LifeTime = LastUpdated + LifeTimeSpan;
     }
 
-    internal async Task<bool> PingAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    internal async Task<bool> PingAsync(
+        ITransport transport, TimeSpan timeout, CancellationToken cancellationToken)
     {
         try
         {
             var pingMsg = new PingMsg();
             var stopwatch = Stopwatch.StartNew();
-            var replyMessage = await _transport.SendMessageAsync(
-                BoundPeer,
-                pingMsg,
-                timeout,
-                cancellationToken);
+            var replyMessage = await transport.SendMessageAsync(
+                BoundPeer, pingMsg, timeout, cancellationToken);
             var latency = Stopwatch.GetElapsedTime(stopwatch.ElapsedTicks);
 
             if (replyMessage.Content is PongMsg)
@@ -53,9 +51,9 @@ public sealed class Peer
                 return true;
             }
         }
-        catch
+        catch (Exception e)
         {
-            // Ignore
+            _logger.Error(e, "Failed to ping a peer: {BoundPeer}", BoundPeer);
         }
 
         Latency = TimeSpan.MinValue;

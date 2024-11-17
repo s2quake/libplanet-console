@@ -24,7 +24,7 @@ internal static class LoggerUtility
 
         var loggerConfiguration = new LoggerConfiguration();
         var logFilename = Path.Combine(logPath, name);
-        loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+        loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose();
         loggerConfiguration = loggerConfiguration
             .WriteTo.Logger(lc => lc.WriteTo.File(logFilename));
 
