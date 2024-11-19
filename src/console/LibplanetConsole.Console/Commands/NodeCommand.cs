@@ -10,7 +10,7 @@ namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Provides node-related commands.")]
 public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeCollection nodes)
-    : CommandMethodBase
+    : CommandMethodBase, IExecutable
 {
     [CommandPropertyRequired(DefaultValue = "")]
     [CommandSummary("The address of the client. If not specified, the current client is used.")]
@@ -35,8 +35,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the node information of the specified address.\n" +
-                    "If the address is not specified, the current node is used.")]
+    [CommandSummary("Displays the node information of the specified address.")]
     public void Info()
     {
         var address = Address;
@@ -46,8 +45,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Attach to the node which is already running.\n" +
-                    "If the address is not specified, the current node is used.")]
+    [CommandSummary("Attach to the node which is already running")]
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -56,8 +54,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Detach from the node\n" +
-                    "If the address is not specified, the current node is used.")]
+    [CommandSummary("Detach from the node")]
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -66,8 +63,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Starts a node of the specified address.\n" +
-                    "If the address is not specified, the current node is used.")]
+    [CommandSummary("Starts a node of the specified address.")]
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -76,8 +72,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Stops a node of the specified address.\n" +
-                    "If the address is not specified, the current node is used.")]
+    [CommandSummary("Stops a node of the specified address.")]
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -86,8 +81,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Selects a node of the specified address.\n" +
-                    "If the address is not specified, displays the current node.")]
+    [CommandSummary("Selects a node of the specified address.")]
     public void Current(string address = "")
     {
         if (address != string.Empty && nodes.GetNodeOrCurrent(address) is { } node)
@@ -107,8 +101,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Sends a transaction to store a simple string.\n" +
-                    "If the address is not specified, the current node is used.")]
+    [CommandSummary("Sends a transaction to store a simple string.")]
     public async Task TxAsync(
         [CommandSummary("The text to send.")]
         string text,
@@ -123,11 +116,20 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod("command")]
+    [CommandSummary("Gets the command line of the specified node.")]
     public void GetCommandLine()
     {
         var address = Address;
         var node = nodes.GetNodeOrCurrent(address);
         Out.WriteLine(node.GetCommandLine());
+    }
+
+    void IExecutable.Execute()
+    {
+        if (Context.HelpCommand is HelpCommandBase helpCommand)
+        {
+            helpCommand.PrintHelp(this);
+        }
     }
 
     private static TerminalColorType? GetForeground(INode node, bool isCurrent)
