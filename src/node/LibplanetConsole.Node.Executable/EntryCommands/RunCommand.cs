@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
-[CommandSummary("Run the Libplanet console.")]
+[CommandSummary("Runs the libplanet-console")]
 internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
@@ -26,18 +26,18 @@ internal sealed class RunCommand
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
-    [CommandSummary("Reserved option used by libplanet-console.")]
+    [CommandSummary("Reserved option used by libplanet-console")]
     [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the seed node to connect to.")]
+    [CommandSummary("Indicates the EndPoint of the seed node to connect to")]
     [CommandPropertyExclusion(nameof(IsSingleNode))]
     [EndPoint]
     public string SeedEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The directory path to store data." +
+    [CommandSummary("The directory path to store data" +
                     "If omitted, the data is stored in memory.")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string StorePath { get; init; } = string.Empty;
@@ -70,12 +70,12 @@ internal sealed class RunCommand
     public string AppProtocolVersion { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the directory path to save logs.")]
+    [CommandSummary("Indicates the directory path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; init; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
-    [CommandSummary("If set, the node runs without a REPL.")]
+    [CommandSummary("If set, the application starts without REPL")]
     public bool NoREPL { get; init; }
 
     [CommandPropertySwitch("single-node")]
@@ -90,7 +90,7 @@ internal sealed class RunCommand
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandSummary("Indicates the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     public string ActionProviderType { get; set; } = string.Empty;
 

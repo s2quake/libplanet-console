@@ -8,7 +8,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
-[CommandSummary("Run the Libplanet console.")]
+[CommandSummary("Run the Libplanet console")]
 [CommandExample("run --end-point localhost:5000 --node-count 4 --client-count 2")]
 internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
@@ -75,18 +75,18 @@ internal sealed class RunCommand
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandSummary("Indicates the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The directory path to store log.")]
+    [CommandSummary("The directory path to store log")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
-    [CommandSummary("If set, the node and client instances are created but not actually started.")]
+    [CommandSummary("If set, the node and client instances are created but not actually started")]
     public bool NoProcess { get; set; }
 
     [CommandPropertySwitch]

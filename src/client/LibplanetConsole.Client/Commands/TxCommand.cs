@@ -4,10 +4,11 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Commands;
 
-[CommandSummary("Sends a transaction to store simple string.")]
+[CommandSummary("Sends a transaction using a simple string")]
 internal sealed class TxCommand(IClient client, IBlockChain blockChain) : CommandAsyncBase
 {
     [CommandPropertyRequired]
+    [CommandSummary("The text to send")]
     public string Text { get; set; } = string.Empty;
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

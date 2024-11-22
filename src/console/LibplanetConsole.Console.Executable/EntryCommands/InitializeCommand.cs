@@ -9,7 +9,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
-[CommandSummary("Create a new repository to run Libplanet nodes and clients from the console.")]
+[CommandSummary("Creates a new repository to run libplanet nodes and clients via the console")]
 internal sealed class InitializeCommand : CommandAsyncBase
 {
     public InitializeCommand()
@@ -18,7 +18,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path used to initialize a repository.")]
+    [CommandSummary("The directory path used to initialize a repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string RepositoryPath { get; set; } = string.Empty;
 
@@ -63,7 +63,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
     public string[] Clients { get; init; } = [];
 
     [CommandPropertySwitch("quiet", 'q')]
-    [CommandSummary("If set, the command does not output any information.")]
+    [CommandSummary("If set, the command does not output any information")]
     public bool Quiet { get; set; }
 
     [CommandProperty]
@@ -85,7 +85,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandSummary("Indicates the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
@@ -98,12 +98,12 @@ internal sealed class InitializeCommand : CommandAsyncBase
     public string APVPrivateKey { get; set; } = string.Empty;
 
     [CommandProperty("apv-version", InitValue = 1)]
-    [CommandSummary("The version number of the AppProtocolVersion. Default is 1.")]
+    [CommandSummary("The version number of the AppProtocolVersion. Default is 1")]
     [Category("AppProtocolVersion")]
     public int APVVersion { get; set; }
 
     [CommandProperty("apv-extra")]
-    [CommandSummary("The extra data to be included in the AppProtocolVersion.")]
+    [CommandSummary("The extra data to be included in the AppProtocolVersion")]
     [Category("AppProtocolVersion")]
     public string APVExtra { get; set; } = string.Empty;
 

@@ -2,7 +2,7 @@ using JSSoft.Commands;
 
 namespace LibplanetConsole.Console.Executable;
 
-[CommandSummary("Run nodes and clients or provide related tools.")]
+[CommandSummary("Run nodes and clients or provide related tools")]
 internal sealed class EntryCommandContext(params ICommand[] commands)
     : CommandContextBase(commands)
 {

@@ -8,13 +8,13 @@ using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
-[CommandSummary("Run the Libplanet client.")]
+[CommandSummary("Runs the libplanet-client")]
 internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
     [CommandProperty]
     [CommandSummary("Indicates the port on which the client will run. " +
-                        "If omitted, a random port is used.")]
+                    "If omitted, a random port is used.")]
     [NonNegative]
     public int Port { get; init; }
 
@@ -25,23 +25,23 @@ internal sealed class RunCommand
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty("parent")]
-    [CommandSummary("Reserved option used by libplanet-console.")]
+    [CommandSummary("Reserved option used by libplanet-console")]
     [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the node to connect to.")]
+    [CommandSummary("Indicates the EndPoint of the node to connect to")]
     [EndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs.")]
+    [CommandSummary("Indicates the file path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     [DefaultValue("")]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("no-repl")]
-    [CommandSummary("If set, the client runs without REPL.")]
+    [CommandSummary("If set, the application starts without REPL")]
     public bool NoREPL { get; init; }
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)

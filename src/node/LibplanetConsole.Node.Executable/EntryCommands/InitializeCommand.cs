@@ -10,7 +10,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
-[CommandSummary("Create a new repository to run the node")]
+[CommandSummary("Creates a repository to run the libplanet-node")]
 internal sealed class InitializeCommand : CommandBase
 {
     private static readonly Codec _codec = new();
@@ -21,7 +21,7 @@ internal sealed class InitializeCommand : CommandBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path used to initialize a repository.")]
+    [CommandSummary("The directory path used to initialize a repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string RepositoryPath { get; set; } = string.Empty;
 
@@ -45,27 +45,27 @@ internal sealed class InitializeCommand : CommandBase
     public string StorePath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs.")]
+    [CommandSummary("Indicates the file path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the seed node to connect to.")]
+    [CommandSummary("Indicates the EndPoint of the seed node to connect to")]
     [EndPoint]
     public string SeedEndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path of the genesis.")]
+    [CommandSummary("The file path of the genesis")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     public string GenesisPath { get; set; } = string.Empty;
 
     [CommandProperty("apv-path")]
-    [CommandSummary("The file path of the app protocol version.")]
+    [CommandSummary("The file path of the app protocol version")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     public string AppProtocolVersionPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("single-node")]
-    [CommandSummary("If set, the repository is created in a format suitable for a single node.")]
+    [CommandSummary("If set, the repository is created in a format suitable for a single node")]
     public bool IsSingleNode { get; set; }
 
     [CommandProperty]
@@ -85,7 +85,7 @@ internal sealed class InitializeCommand : CommandBase
     public DateTimeOffset DateTimeOffset { get; set; }
 
     [CommandPropertySwitch("quiet", 'q')]
-    [CommandSummary("If set, the command does not output any information.")]
+    [CommandSummary("If set, the command does not output any information")]
     public bool Quiet { get; set; }
 
     [CommandProperty("module-path")]
@@ -95,7 +95,7 @@ internal sealed class InitializeCommand : CommandBase
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandSummary("Indicates the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;

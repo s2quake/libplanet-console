@@ -6,7 +6,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 
-[CommandSummary("Creates a new node.")]
+[CommandSummary("Creates a new node")]
 internal sealed class NewNodeCommand(
     NodeCommand nodeCommand,
     Application application,
@@ -27,7 +27,7 @@ internal sealed class NewNodeCommand(
     public int Port { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node instance is created, but not actually started.")]
+    [CommandSummary("The node instance is created, but not actually started")]
     public bool NoProcess { get; set; }
 
     [CommandPropertySwitch]

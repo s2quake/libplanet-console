@@ -3,14 +3,15 @@ using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands.Nodes;
 
-[CommandSummary("Start node process.")]
+[CommandSummary("Start node process")]
 internal sealed class StartNodeProcessCommand(
     NodeProcessCommand processCommand,
     INodeCollection nodes)
     : CommandAsyncBase(processCommand, "start")
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The address of the node. If not specified, the current node is used.")]
+    [CommandPropertyCompletion(nameof(GetNodeAddresses))]
+    [CommandSummary("The address of the node. If not specified, the current node is used")]
     public string Address { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
@@ -19,7 +20,7 @@ internal sealed class StartNodeProcessCommand(
     public bool Detach { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node process is started in a new window.")]
+    [CommandSummary("The node process is started in a new window")]
     public bool NewWindow { get; set; }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
@@ -33,4 +34,7 @@ internal sealed class StartNodeProcessCommand(
         };
         await node.StartProcessAsync(options, cancellationToken);
     }
+
+    private string[] GetNodeAddresses()
+        => nodes.Select(node => node.Address.ToString()).ToArray();
 }

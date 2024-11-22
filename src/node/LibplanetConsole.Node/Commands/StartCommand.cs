@@ -2,7 +2,7 @@ using JSSoft.Commands;
 
 namespace LibplanetConsole.Node.Commands;
 
-[CommandSummary("Start node.")]
+[CommandSummary("Starts the node")]
 internal sealed class StartCommand(Node node) : CommandAsyncBase
 {
     public override bool IsEnabled => node.IsRunning is false;

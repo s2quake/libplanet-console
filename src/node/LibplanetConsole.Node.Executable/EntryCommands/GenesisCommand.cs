@@ -7,7 +7,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
-[CommandSummary("Creates a genesis.")]
+[CommandSummary("Creates a genesis")]
 [CommandExample("genesis --validators \"key1,key2,...\" --timestamp \"2021-01-01T00:00:00Z\"")]
 [Category("Tools")]
 public sealed class GenesisCommand : CommandBase
@@ -27,7 +27,7 @@ public sealed class GenesisCommand : CommandBase
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Validators))]
-    [CommandSummary("The number of validators to create. mutually exclusive with '--validators'.")]
+    [CommandSummary("The number of validators to create. mutually exclusive with '--validators'")]
     [NonNegative]
     public int ValidatorCount { get; set; }
 
@@ -46,7 +46,7 @@ public sealed class GenesisCommand : CommandBase
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandSummary("Indicates the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     public string ActionProviderType { get; set; } = string.Empty;
 

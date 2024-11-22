@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node.Commands;
 
-[CommandSummary("Print node application information.")]
+[CommandSummary("Prints the information of the node application")]
 internal sealed class InfoCommand(
     IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime)
     : CommandBase

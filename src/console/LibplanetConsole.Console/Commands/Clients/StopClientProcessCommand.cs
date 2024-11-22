@@ -3,14 +3,15 @@ using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands.Clients;
 
-[CommandSummary("Stop client process.")]
+[CommandSummary("Stop client process")]
 internal sealed class StopClientProcessCommand(
     ClientProcessCommand processCommand,
     IClientCollection clients)
     : CommandAsyncBase(processCommand, "stop")
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The address of the client. If not specified, the current client is used.")]
+    [CommandPropertyCompletion(nameof(GetClientAddresses))]
+    [CommandSummary("The address of the client. If not specified, the current client is used")]
     public string Address { get; set; } = string.Empty;
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
@@ -19,4 +20,7 @@ internal sealed class StopClientProcessCommand(
         var client = clients.GetClientOrCurrent(address);
         await client.StopProcessAsync(cancellationToken);
     }
+
+    private string[] GetClientAddresses()
+        => clients.Select(client => client.Address.ToString()).ToArray();
 }

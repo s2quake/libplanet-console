@@ -3,14 +3,15 @@ using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands.Clients;
 
-[CommandSummary("Start client process.")]
+[CommandSummary("Start client process")]
 internal sealed class StartClientProcessCommand(
     ClientProcessCommand processCommand,
     IClientCollection clients)
     : CommandAsyncBase(processCommand, "start")
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The address of the client. If not specified, the current client is used.")]
+    [CommandPropertyCompletion(nameof(GetClientAddresses))]
+    [CommandSummary("The address of the client. If not specified, the current client is used")]
     public string Address { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
@@ -19,7 +20,7 @@ internal sealed class StartClientProcessCommand(
     public bool Detach { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The client process is started in a new window.")]
+    [CommandSummary("The client process is started in a new window")]
     public bool NewWindow { get; set; }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
@@ -33,4 +34,7 @@ internal sealed class StartClientProcessCommand(
         };
         await client.StartProcessAsync(options, cancellationToken);
     }
+
+    private string[] GetClientAddresses()
+        => clients.Select(client => client.Address.ToString()).ToArray();
 }

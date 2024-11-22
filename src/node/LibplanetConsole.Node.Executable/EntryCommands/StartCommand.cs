@@ -5,21 +5,21 @@ using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
-[CommandSummary("Start the Libplanet node with settings.")]
+[CommandSummary("Starts the libplanet-node using the settings")]
 internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
     [CommandPropertyRequired]
-    [CommandSummary("The path of the repository.")]
+    [CommandSummary("The path of the repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
     public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty("parent")]
-    [CommandSummary("Reserved option used by libplanet-console.")]
+    [CommandSummary("Reserved option used by libplanet-console")]
     [Category]
     public int ParentProcessId { get; init; }
 
     [CommandPropertySwitch("no-repl")]
-    [CommandSummary("If set, the REPL is not started.")]
+    [CommandSummary("If set, the application starts without REPL")]
     public bool NoREPL { get; init; }
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)

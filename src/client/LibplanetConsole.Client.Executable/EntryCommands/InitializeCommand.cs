@@ -7,7 +7,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
-[CommandSummary("Create a repository to run a libplanet-client")]
+[CommandSummary("Creates a repository to run the libplanet-client")]
 internal sealed class InitializeCommand : CommandBase
 {
     public InitializeCommand()
@@ -16,7 +16,7 @@ internal sealed class InitializeCommand : CommandBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path to create repository.")]
+    [CommandSummary("The directory path to create repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string OutputPath { get; set; } = string.Empty;
 
@@ -33,12 +33,12 @@ internal sealed class InitializeCommand : CommandBase
     public int Port { get; set; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs.")]
+    [CommandSummary("Indicates the file path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch("quiet", 'q')]
-    [CommandSummary("If set, the command does not output any information.")]
+    [CommandSummary("If set, the command does not output any information")]
     public bool Quiet { get; set; }
 
     protected override void OnExecute()

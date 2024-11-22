@@ -6,7 +6,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 
-[CommandSummary("Creates a new client.")]
+[CommandSummary("Creates a new client")]
 internal sealed class NewClientCommand(
     ClientCommand clientCommand,
     Application application,
@@ -26,7 +26,7 @@ internal sealed class NewClientCommand(
     public int Port { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The client instance is created, but not actually started.")]
+    [CommandSummary("The client instance is created, but not actually started")]
     public bool NoProcess { get; set; }
 
     [CommandSummary("The console does not attach to the target process after the client process " +

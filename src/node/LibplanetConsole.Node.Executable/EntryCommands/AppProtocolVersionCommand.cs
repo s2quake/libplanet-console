@@ -6,7 +6,7 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
-[CommandSummary("Create AppProtocolVersion.")]
+[CommandSummary("Create AppProtocolVersion")]
 internal sealed class AppProtocolVersionCommand : CommandBase
 {
     private static readonly Codec _codec = new();
@@ -17,20 +17,20 @@ internal sealed class AppProtocolVersionCommand : CommandBase
     }
 
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The private key of the signer. If omitted, a random private key is used.")]
+    [CommandSummary("The private key of the signer. If omitted, a random private key is used")]
     [PrivateKey]
     public string PrivateKey { get; set; } = string.Empty;
 
     [CommandPropertyRequired(DefaultValue = 1)]
-    [CommandSummary("The version number. Default is 1.")]
+    [CommandSummary("The version number. Default is 1")]
     public int Version { get; set; }
 
     [CommandProperty]
-    [CommandSummary("The extra data to be included in the AppProtocolVersion.")]
+    [CommandSummary("The extra data to be included in the AppProtocolVersion")]
     public string Extra { get; set; } = string.Empty;
 
     [CommandPropertySwitch("raw")]
-    [CommandSummary("If set, only the AppProtocolVersion is displayed.")]
+    [CommandSummary("If set, only the AppProtocolVersion is displayed")]
     public bool IsRaw { get; set; }
 
     protected override void OnExecute()

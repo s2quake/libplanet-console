@@ -8,21 +8,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
-[CommandSummary("Provides node-related commands.")]
+[CommandSummary("Provides node-related commands")]
 public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeCollection nodes)
     : CommandMethodBase, IExecutable
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The address of the client. If not specified, the current client is used.")]
+    [CommandSummary("The address of the client. If not specified, the current client is used")]
+    [CommandPropertyCompletion(nameof(GetNodeAddresses))]
     public static string Address { get; set; } = string.Empty;
 
     [CommandPropertySwitch("detail")]
-    [CommandSummary("Displays the detailed information.")]
+    [CommandSummary("Displays the detailed information")]
     public static bool IsDetailed { get; set; }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(IsDetailed))]
-    [CommandSummary("Displays the list of nodes.")]
+    [CommandSummary("Displays the list of nodes")]
     public void List()
     {
         GetListAction(IsDetailed).Invoke();
@@ -35,7 +36,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the node information of the specified address.")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Displays the node information of the specified address")]
     public void Info()
     {
         var address = Address;
@@ -45,7 +47,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Attach to the node which is already running")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Attaches to the node which is already running")]
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -54,7 +57,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Detach from the node")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Detaches from the node")]
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -63,7 +67,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Starts a node of the specified address.")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Starts a node of the specified address")]
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -72,7 +77,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Stops a node of the specified address.")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Stops a node of the specified address")]
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -81,9 +87,10 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
-    [CommandSummary("Selects a node of the specified address.")]
-    public void Current(string address = "")
+    [CommandSummary("Gets or sets the current node")]
+    public void Current()
     {
+        var address = Address;
         if (address != string.Empty && nodes.GetNodeOrCurrent(address) is { } node)
         {
             nodes.Current = node;
@@ -101,9 +108,9 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Sends a transaction to store a simple string.")]
+    [CommandSummary("Sends a transaction using a simple string")]
     public async Task TxAsync(
-        [CommandSummary("The text to send.")]
+        [CommandSummary("The text to send")]
         string text,
         CancellationToken cancellationToken)
     {
@@ -116,7 +123,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod("command")]
-    [CommandSummary("Gets the command line of the specified node.")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Gets the command line to start a node")]
     public void GetCommandLine()
     {
         var address = Address;
@@ -164,4 +172,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
         var infos = nodes.Select(node => node.Info).ToArray();
         Out.WriteLineAsJson(infos);
     }
+
+    private string[] GetNodeAddresses()
+        => nodes.Select(node => node.Address.ToString()).ToArray();
 }

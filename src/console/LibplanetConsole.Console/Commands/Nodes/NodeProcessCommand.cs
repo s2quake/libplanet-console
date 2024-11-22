@@ -1,9 +1,8 @@
 using JSSoft.Commands;
-using JSSoft.Commands.Extensions;
 
 namespace LibplanetConsole.Console.Commands.Nodes;
 
-[CommandSummary("Provides commands for node processes.")]
+[CommandSummary("Provides commands for the node process")]
 internal sealed class NodeProcessCommand(NodeCommand nodeCommand)
     : CommandMethodBase(nodeCommand, "process"), IExecutable
 {

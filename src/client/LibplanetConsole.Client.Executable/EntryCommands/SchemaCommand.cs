@@ -5,7 +5,7 @@ using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Client.Executable.EntryCommands;
 
-[CommandSummary("Creates a schema of the application settings.")]
+[CommandSummary("Creates a schema of the application settings")]
 [Category("Tools")]
 internal sealed class SchemaCommand : CommandBase
 {

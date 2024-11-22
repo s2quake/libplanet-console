@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Client.Commands;
 
-[CommandSummary("Print client application information.")]
+[CommandSummary("Prints the information of the client application")]
 internal sealed class InfoCommand(
     IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime)
     : CommandBase
