@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Common.IO;
 using static LibplanetConsole.Console.ProcessEnvironment;
 
 namespace LibplanetConsole.Console;
