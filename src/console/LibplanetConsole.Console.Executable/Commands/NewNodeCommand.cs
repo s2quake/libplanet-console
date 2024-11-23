@@ -6,7 +6,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 
-[CommandSummary("Creates a new node.")]
+[CommandSummary("Creates a new node")]
 internal sealed class NewNodeCommand(
     NodeCommand nodeCommand,
     Application application,
@@ -15,31 +15,27 @@ internal sealed class NewNodeCommand(
     : CommandAsyncBase(nodeCommand, "new")
 {
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the node. " +
-                    "If omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the node")]
     [PrivateKey]
     public string PrivateKey { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The port of the node. " +
-                    "If omitted, a random endpoint is used.")]
+    [CommandSummary("Specifies the port of the node")]
     [NonNegative]
     public int Port { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node instance is created, but not actually started.")]
+    [CommandSummary("If set, the node process will not start")]
     public bool NoProcess { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The console does not attach to the target process after the node process " +
-                    "is started.\n" +
-                    "This option cannot be used with --no-process option.")]
+    [CommandSummary("If set, the console does not attach to the target process after " +
+                    "starting the node process")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool Detach { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The node process is started in a new window.\n" +
-                    "This option cannot be used with --no-process option.")]
+    [CommandSummary("If set, the node process starts in a new window")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool NewWindow { get; set; }
 

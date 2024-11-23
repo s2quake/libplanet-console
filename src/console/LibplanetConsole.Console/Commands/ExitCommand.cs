@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Console.Commands;
 
-[CommandSummary("Exit the application.")]
+[CommandSummary("Exits the application")]
 internal sealed class ExitCommand(IHostApplicationLifetime applicationLifetime)
     : CommandAsyncBase
 {

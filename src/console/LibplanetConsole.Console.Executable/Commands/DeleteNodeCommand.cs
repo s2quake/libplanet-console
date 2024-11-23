@@ -4,13 +4,13 @@ using LibplanetConsole.Console.Commands;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 
-[CommandSummary("Deletes a node of the specified address.")]
+[CommandSummary("Deletes a node")]
 internal sealed class DeleteNodeCommand(
     NodeCommand nodeCommand, Application application, INodeCollection nodes)
     : CommandAsyncBase(nodeCommand, "delete")
 {
     [CommandPropertyRequired]
-    [CommandSummary("The address of the node.")]
+    [CommandSummary("Specifies the address of the node")]
     public Address Address { get; set; }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

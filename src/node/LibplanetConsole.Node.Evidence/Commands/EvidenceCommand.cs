@@ -4,7 +4,7 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Evidence.Commands;
 
-[CommandSummary("Provides evidence-related commands.")]
+[CommandSummary("Provides evidence-related commands")]
 [Category("Evidence")]
 internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     : CommandMethodBase
@@ -12,7 +12,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     public override bool IsEnabled => node.IsRunning is true;
 
     [CommandMethod]
-    [CommandSummary("Adds a new evidence.")]
+    [CommandSummary("Adds a new evidence")]
     public async Task NewAsync(CancellationToken cancellationToken)
     {
         var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
@@ -20,7 +20,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     }
 
     [CommandMethod]
-    [CommandSummary("Raises a infraction.")]
+    [CommandSummary("Raises a infraction")]
     public async Task RaiseAsync(CancellationToken cancellationToken)
     {
         await evidence.ViolateAsync(cancellationToken);
@@ -28,7 +28,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
 
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(ListProperties))]
-    [CommandSummary("Gets the evidence list.")]
+    [CommandSummary("Gets the evidence list")]
     public async Task ListAsync(CancellationToken cancellationToken = default)
     {
         var height = ListProperties.Height;
@@ -41,7 +41,7 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
 
     [CommandMethod]
     [CommandMethodStaticProperty(typeof(GetProperties))]
-    [CommandSummary("Gets the evidence.")]
+    [CommandSummary("Gets the evidence")]
     public async Task GetAsync(string evidenceId, CancellationToken cancellationToken)
     {
         var isPending = GetProperties.IsPending;
@@ -62,20 +62,20 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     public static class ListProperties
     {
         [CommandPropertyRequired(DefaultValue = -1)]
-        [CommandSummary("The height of the block to get the evidence. default is the tip.")]
+        [CommandSummary("Specifies the height of the block to get the evidence. " +
+                        "Default is the tip")]
         public static long Height { get; set; }
 
         [CommandPropertySwitch("pending", 'p')]
         [CommandPropertyExclusion(nameof(Height))]
-        [CommandSummary("Indicates whether to get pending evidence. " +
-                        "if true, the height is ignored.")]
+        [CommandSummary("Specifies whether to get pending evidence.")]
         public static bool IsPending { get; set; }
     }
 
     public static class GetProperties
     {
         [CommandPropertySwitch("pending", 'p')]
-        [CommandSummary("Indicates whether to get pending evidence.")]
+        [CommandSummary("Specifies whether to get pending evidence")]
         public static bool IsPending { get; set; }
     }
 }

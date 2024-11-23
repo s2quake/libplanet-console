@@ -8,17 +8,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
-[CommandSummary("Provides client-related commands.")]
+[CommandSummary("Provides client-related commands")]
 public sealed partial class ClientCommand(
     IServiceProvider serviceProvider, IClientCollection clients)
     : CommandMethodBase
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The address of the client. If not specified, the current client is used.")]
+    [CommandPropertyCompletion(nameof(GetClientAddresses))]
+    [CommandSummary("Specifies the address of the client.")]
     public static string Address { get; set; } = string.Empty;
 
     [CommandMethod]
-    [CommandSummary("Displays the list of clients.")]
+    [CommandSummary("Displays the list of clients")]
     public void List()
     {
         var tsb = new TerminalStringBuilder();
@@ -37,8 +38,8 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the client information of the specified address.\n" +
-                    "If the address is not specified, the current client is used.")]
+    [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Displays a client information")]
     public void Info()
     {
         var address = Address;
@@ -48,8 +49,7 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Attach to the client which is already running.\n" +
-                    "If the address is not specified, current client is used.")]
+    [CommandSummary("Attaches the client instance to the client process")]
     [CommandMethodProperty(nameof(Address))]
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
@@ -59,9 +59,8 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Detach from the client.\n" +
-                    "If the address is not specified, current client is used.")]
     [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Detaches the client instance from the client process")]
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
         var address = Address;
@@ -70,9 +69,8 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Starts a client of the specified address.\n" +
-                    "If the address is not specified, current client is used.")]
     [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Starts the client")]
     public async Task StartAsync(
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
@@ -84,9 +82,8 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Stops a client of the specified address.\n" +
-                    "If the address is not specified, current client is used.")]
     [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Stops the client")]
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         var address = Address;
@@ -95,8 +92,7 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandSummary("Selects a client of the specified address.\n" +
-                    "If the address is not specified, displays the current client.")]
+    [CommandSummary("Gets or sets the current client")]
     [CommandMethodProperty(nameof(Address))]
     public void Current()
     {
@@ -112,16 +108,15 @@ public sealed partial class ClientCommand(
         }
         else
         {
-            Out.WriteLine("No client is selected.");
+            Out.WriteLine("No client is selected");
         }
     }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Sends a transaction to store a simple string.\n" +
-                    "If the address is not specified, current client is used.")]
+    [CommandSummary("Sends a transaction using a string")]
     public async Task TxAsync(
-        [CommandSummary("The text to send.")]
+        [CommandSummary("Specifies the text to send")]
         string text,
         CancellationToken cancellationToken)
     {
@@ -134,6 +129,7 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod("command")]
+    [CommandSummary("Gets the command line to start a client")]
     public void GetCommandLine()
     {
         var address = Address;
@@ -150,4 +146,7 @@ public sealed partial class ClientCommand(
 
         return TerminalColorType.BrightBlack;
     }
+
+    private string[] GetClientAddresses()
+        => clients.Select(client => client.Address.ToString()).ToArray();
 }

@@ -4,13 +4,13 @@ using LibplanetConsole.Console.Commands;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 
-[CommandSummary("Deletes a client of the specified address.")]
+[CommandSummary("Deletes a client")]
 internal sealed class DeleteClientCommand(
     ClientCommand clientCommand, Application application, IClientCollection clients)
     : CommandAsyncBase(clientCommand, "delete")
 {
     [CommandPropertyRequired]
-    [CommandSummary("The address of the client.")]
+    [CommandSummary("Specifies the address of the client")]
     public Address Address { get; set; }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

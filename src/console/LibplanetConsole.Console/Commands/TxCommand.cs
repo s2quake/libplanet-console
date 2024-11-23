@@ -5,13 +5,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
-[CommandSummary("Sends a transaction using a simple string.")]
+[CommandSummary("Sends a transaction using a string")]
 internal sealed class TxCommand(INodeCollection nodes, IClientCollection clients) : CommandAsyncBase
 {
     [CommandPropertyRequired]
+    [CommandSummary("Specifies the address of the node or client")]
     public string Address { get; set; } = string.Empty;
 
     [CommandPropertyRequired]
+    [CommandSummary("Specifies the text to send")]
     public string Text { get; set; } = string.Empty;
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

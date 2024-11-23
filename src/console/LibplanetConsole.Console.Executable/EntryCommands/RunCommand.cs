@@ -8,7 +8,7 @@ using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
-[CommandSummary("Run the Libplanet console.")]
+[CommandSummary("Runs the libplanet-console")]
 [CommandExample("run --end-point localhost:5000 --node-count 4 --client-count 2")]
 internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
@@ -18,8 +18,7 @@ internal sealed class RunCommand
     private PortGroup? _ports;
 
     [CommandProperty]
-    [CommandSummary("The port of the libplanet-console. " +
-                    "If omitted, a random port is used.")]
+    [CommandSummary("Specifies the port of the libplanet-console")]
     [NonNegative]
     public int Port { get; init; }
 
@@ -28,14 +27,12 @@ internal sealed class RunCommand
 #else
     [CommandProperty(InitValue = 4)]
 #endif
-    [CommandSummary("The number of nodes to run. If omitted, 4 nodes are run.\n" +
-                    "Mutually exclusive with '--nodes' option.")]
+    [CommandSummary("Specifies the number of nodes to run")]
     [CommandPropertyExclusion(nameof(Nodes))]
     public int NodeCount { get; init; }
 
     [CommandProperty]
-    [CommandSummary("The private keys of the nodes to run. ex) --nodes \"key1,key2,...\"\n" +
-                    "Mutually exclusive with '--node-count' option.")]
+    [CommandSummary("Specifies the private keys of the nodes to run")]
     [CommandPropertyExclusion(nameof(NodeCount))]
     public string[] Nodes { get; init; } = [];
 
@@ -44,74 +41,66 @@ internal sealed class RunCommand
 #else
     [CommandProperty(InitValue = 2)]
 #endif
-    [CommandSummary("The number of clients to run. If omitted, 2 clients are run.\n" +
-                    "Mutually exclusive with '--clients' option.")]
+    [CommandSummary("Specifies the number of clients to run. Default is 2")]
     [CommandPropertyExclusion(nameof(Clients))]
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to run. ex) --clients \"key1,key2,...\"\n" +
-                    "Mutually exclusive with '--client-count' option.")]
+    [CommandSummary("Specifies the private keys of the clients to run")]
     [CommandPropertyExclusion(nameof(ClientCount))]
     public string[] Clients { get; init; } = [];
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Genesis))]
-    [CommandSummary("Indicates the file path to load the genesis block.\n" +
-                    "Mutually exclusive with '--genesis' option.")]
+    [CommandSummary("Specifies the file path to load the genesis block")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string GenesisPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(GenesisPath))]
-    [CommandSummary("Indicates a hexadecimal genesis string. If omitted, a random genesis block " +
-                    "is used.\nMutually exclusive with '--genesis-path' option.")]
+    [CommandSummary("Specifies a hexadecimal genesis string")]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty("module-path")]
-    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+    [CommandSummary("Specifies the path or the name of the assembly that provides " +
                     "the IActionProvider.")]
     [Category("Genesis")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider.")]
+    [CommandSummary("Specifies the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The directory path to store log.")]
+    [CommandSummary("Specifies the directory path to store log")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandPropertySwitch]
-    [CommandSummary("If set, the node and client instances are created but not actually started.")]
+    [CommandSummary("If set, the node and client processes will not start.")]
     public bool NoProcess { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary($"If set, the node and the client processes start in a new window.\n" +
-                    $"This option cannot be used with --no-process option.")]
+    [CommandSummary("If set, the node and client processes start in a new window")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool NewWindow { get; set; }
 
     [CommandPropertySwitch]
     [CommandSummary("If set, the console does not attach to the target process after starting " +
-                    "the node and client processes\n" +
-                    "This option cannot be used with --no-process option.")]
+                    "the node and client processes")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool Detach { get; set; }
 
     [CommandProperty("apv-path")]
     [CommandPropertyExclusion(nameof(AppProtocolVersion))]
-    [CommandSummary("Indicates the file path to load the AppProtocolVersion.\n" +
-                    "Mutually exclusive with '--apv' option.")]
+    [CommandSummary("Specifies the file path to load the AppProtocolVersion")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string AppProtocolVersionPath { get; init; } = string.Empty;
 
     [CommandProperty("apv")]
-    [CommandSummary("Indicates the AppProtocolVersion.\n" +
-                    "Mutually exclusive with '--apv-path' option.")]
+    [CommandSummary("Specifies the AppProtocolVersion")]
     [CommandPropertyExclusion(nameof(AppProtocolVersionPath))]
     public string AppProtocolVersion { get; init; } = string.Empty;
 

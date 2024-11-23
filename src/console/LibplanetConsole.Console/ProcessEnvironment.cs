@@ -1,9 +1,7 @@
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.DependencyInjection;
 using static System.Runtime.InteropServices.RuntimeInformation;
 
 namespace LibplanetConsole.Console;

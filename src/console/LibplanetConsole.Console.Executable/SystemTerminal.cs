@@ -11,6 +11,7 @@ internal sealed class SystemTerminal : SystemTerminalBase
     private readonly SynchronizationContext _synchronizationContext;
     private readonly CommandContext _commandContext;
     private readonly IBlockChain _blockChain;
+    private readonly ILogger<SystemTerminal> _logger;
     private BlockInfo _tip;
     private bool _isEnded;
 
@@ -18,11 +19,13 @@ internal sealed class SystemTerminal : SystemTerminalBase
         IHostApplicationLifetime applicationLifetime,
         CommandContext commandContext,
         IBlockChain blockChain,
-        SynchronizationContext synchronizationContext)
+        SynchronizationContext synchronizationContext,
+        ILogger<SystemTerminal> logger)
     {
         _synchronizationContext = synchronizationContext;
         _commandContext = commandContext;
         _commandContext.Owner = applicationLifetime;
+        _logger = logger;
         _blockChain = blockChain;
         _blockChain.BlockAppended += BlockChain_BlockAppended;
         _blockChain.Started += BlockChain_Started;
@@ -67,7 +70,19 @@ internal sealed class SystemTerminal : SystemTerminalBase
         => _commandContext.GetCompletion(items, find);
 
     protected override Task OnExecuteAsync(string command, CancellationToken cancellationToken)
-        => _commandContext.ExecuteAsync(command, cancellationToken);
+    {
+        _logger.LogDebug("Executing command: {Command}", command);
+        return _commandContext.ExecuteAsync(command, cancellationToken);
+    }
+
+    protected override void OnExecuted(Exception? exception)
+    {
+        base.OnExecuted(exception);
+        if (exception is not null)
+        {
+            _logger.LogError(exception, "An error occurred while executing a command.");
+        }
+    }
 
     protected override void OnInitialize(TextWriter @out, TextWriter error)
     {

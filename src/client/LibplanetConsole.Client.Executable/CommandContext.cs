@@ -4,7 +4,7 @@ using LibplanetConsole.Client.Executable.Commands;
 
 namespace LibplanetConsole.Client.Executable;
 
-[CommandSummary("Provides a prompt for input and execution of commands.")]
+[CommandSummary("Provides a prompt to input and execute commands")]
 [CommandDescription("REPL for libplanet client.")]
 internal class CommandContext(
     IEnumerable<ICommand> commands,

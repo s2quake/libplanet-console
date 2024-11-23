@@ -14,7 +14,6 @@ using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;
 
@@ -344,13 +343,13 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             AppProtocolVersion = appProtocolVersion.Token,
             BlocksyncPort = _blocksyncPort,
             ConsensusPort = _consensusPort,
+            GenesisHash = _genesisBlock.Hash,
         };
 
         if (IsRunning == true)
         {
             nodeInfo = nodeInfo with
             {
-                GenesisHash = BlockChain.Genesis.Hash,
                 Tip = new BlockInfo(BlockChain.Tip),
                 IsRunning = IsRunning,
             };

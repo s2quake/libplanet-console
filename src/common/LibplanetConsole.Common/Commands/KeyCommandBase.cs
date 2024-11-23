@@ -3,13 +3,13 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Common.Commands;
 
-[CommandSummary("Provides Key-related commands.")]
+[CommandSummary("Provides key-related commands")]
 public abstract class KeyCommandBase : CommandMethodBase
 {
     [CommandMethod]
-    [CommandSummary("Generates a new private key.")]
+    [CommandSummary("Generates a new private key")]
     public void New(
-        [CommandSummary("The number of private keys to generate.")]
+        [CommandSummary("Specifies the number of private keys to generate")]
         int count = 1)
     {
         if (count < 1)
@@ -32,9 +32,9 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the public key from the given private key.")]
+    [CommandSummary("Displays the corresponding public key for the given private key")]
     public void Public(
-        [CommandSummary("Indicates the private key that corresponds to the public key.")]
+        [CommandSummary("Speicifies the private key")]
         string privateKey)
     {
         var key = new PrivateKey(privateKey);
@@ -46,9 +46,9 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    [CommandSummary("Displays the public key from the given private or public key")]
+    [CommandSummary("Displays the address corresponding to the given private or public key")]
     public void Address(
-        [CommandSummary("Indicates the private or public key that corresponds to the address.")]
+        [CommandSummary("Speicifies the private key or public key")]
         string key)
     {
         var info = new
@@ -59,11 +59,11 @@ public abstract class KeyCommandBase : CommandMethodBase
     }
 
     [CommandMethod]
-    [CommandSummary("Derives a new address from the given address and keyword.")]
+    [CommandSummary("Derives a new address from the provided address and keyword")]
     public void Derive(
-        [CommandSummary("The address.")]
+        [CommandSummary("Speicifies the address")]
         string address,
-        [CommandSummary("The keyword.")]
+        [CommandSummary("Speicifies the keyword")]
         string keyword)
     {
         var info = new

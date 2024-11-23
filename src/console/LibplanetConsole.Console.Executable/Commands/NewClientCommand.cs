@@ -6,7 +6,7 @@ using LibplanetConsole.DataAnnotations;
 
 namespace LibplanetConsole.Console.Executable.Commands;
 
-[CommandSummary("Creates a new client.")]
+[CommandSummary("Creates a new client")]
 internal sealed class NewClientCommand(
     ClientCommand clientCommand,
     Application application,
@@ -14,30 +14,26 @@ internal sealed class NewClientCommand(
     : CommandAsyncBase(clientCommand, "new")
 {
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the client. " +
-                    "If omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the client")]
     [PrivateKey]
     public string PrivateKey { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The port of the client. " +
-                    "If omitted, a random endpoint is used.")]
+    [CommandSummary("Specifies the port of the client")]
     [NonNegative]
     public int Port { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The client instance is created, but not actually started.")]
+    [CommandSummary("If set, the client process will not start")]
     public bool NoProcess { get; set; }
 
-    [CommandSummary("The console does not attach to the target process after the client process " +
-                    "is started.\n" +
-                    "This option cannot be used with --no-process option.")]
+    [CommandSummary("If set, the console does not attach to the target process after " +
+                    "starting the client process")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool Detach { get; set; }
 
     [CommandPropertySwitch]
-    [CommandSummary("The client process is started in a new window.\n" +
-                    "This option cannot be used with --no-process option.")]
+    [CommandSummary("If set, the client process starts in a new window")]
     [CommandPropertyExclusion(nameof(NoProcess))]
     public bool NewWindow { get; set; }
 
