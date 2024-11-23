@@ -13,12 +13,12 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     : CommandMethodBase, IExecutable
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("The address of the client. If not specified, the current client is used")]
+    [CommandSummary("Specifies the address of the client")]
     [CommandPropertyCompletion(nameof(GetNodeAddresses))]
     public static string Address { get; set; } = string.Empty;
 
     [CommandPropertySwitch("detail")]
-    [CommandSummary("Displays the detailed information")]
+    [CommandSummary("If set, detailed information is displayed")]
     public static bool IsDetailed { get; set; }
 
     [CommandMethod]
@@ -108,9 +108,9 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Sends a transaction using a simple string")]
+    [CommandSummary("Sends a transaction using a string")]
     public async Task TxAsync(
-        [CommandSummary("The text to send")]
+        [CommandSummary("Specifies the text to send")]
         string text,
         CancellationToken cancellationToken)
     {

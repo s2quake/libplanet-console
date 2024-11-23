@@ -9,7 +9,7 @@ public abstract class KeyCommandBase : CommandMethodBase
     [CommandMethod]
     [CommandSummary("Generates a new private key")]
     public void New(
-        [CommandSummary("The number of private keys to generate")]
+        [CommandSummary("Specifies the number of private keys to generate")]
         int count = 1)
     {
         if (count < 1)

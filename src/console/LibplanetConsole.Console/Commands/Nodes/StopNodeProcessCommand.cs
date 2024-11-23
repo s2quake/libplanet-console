@@ -3,7 +3,7 @@ using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands.Nodes;
 
-[CommandSummary("Stop node process")]
+[CommandSummary("Stops the node process")]
 internal sealed class StopNodeProcessCommand(
     NodeProcessCommand processCommand,
     INodeCollection nodes)
@@ -11,7 +11,7 @@ internal sealed class StopNodeProcessCommand(
 {
     [CommandPropertyRequired(DefaultValue = "")]
     [CommandPropertyCompletion(nameof(GetNodeAddresses))]
-    [CommandSummary("The address of the node. If not specified, the current node is used")]
+    [CommandSummary("Specifies the address of the node")]
     public string Address { get; set; } = string.Empty;
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

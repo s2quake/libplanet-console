@@ -18,13 +18,12 @@ internal sealed class InitializeCommand : CommandAsyncBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path used to initialize a repository")]
+    [CommandSummary("Specifies the directory path used to initialize a repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The port of the libplanet-console. " +
-                    "If omitted, a random port is used.")]
+    [CommandSummary("Specifies the port of the libplanet-console")]
     [NonNegative]
     public int Port { get; set; }
 
@@ -33,14 +32,12 @@ internal sealed class InitializeCommand : CommandAsyncBase
 #else
     [CommandProperty(InitValue = 4)]
 #endif
-    [CommandSummary("The number of nodes to create. If omitted, 4 nodes are created.\n" +
-                    "Mutually exclusive with '--nodes' option.")]
+    [CommandSummary("Specifies the number of nodes to create. Default is 4")]
     [CommandPropertyExclusion(nameof(Nodes))]
     public int NodeCount { get; init; }
 
     [CommandProperty]
-    [CommandSummary("The private keys of the nodes to create. ex) --nodes \"key1,key2,...\"\n" +
-                    "Mutually exclusive with '--node-count' option.")]
+    [CommandSummary("Specifies the private keys of the nodes to create")]
     [CommandPropertyExclusion(nameof(NodeCount))]
     [PrivateKeyArray]
     public string[] Nodes { get; init; } = [];
@@ -50,72 +47,66 @@ internal sealed class InitializeCommand : CommandAsyncBase
 #else
     [CommandProperty(InitValue = 2)]
 #endif
-    [CommandSummary("The number of clients to create. If omitted, 2 clients are created.\n" +
-                    "Mutually exclusive with '--clients' option.")]
+    [CommandSummary("Specifies the number of clients to create. Default is 2")]
     [CommandPropertyExclusion(nameof(Clients))]
     public int ClientCount { get; init; }
 
     [CommandProperty(InitValue = new string[] { })]
-    [CommandSummary("The private keys of the clients to create. ex) --clients \"key1,key2,...\"\n" +
-                    "Mutually exclusive with '--client-count' option.")]
+    [CommandSummary("Specifies the private keys of the clients to create")]
     [CommandPropertyExclusion(nameof(ClientCount))]
     [PrivateKeyArray]
     public string[] Clients { get; init; } = [];
 
     [CommandPropertySwitch("quiet", 'q')]
-    [CommandSummary("If set, the command does not output any information")]
+    [CommandSummary("If set, the command will not output any information")]
     public bool Quiet { get; set; }
 
     [CommandProperty]
-    [CommandSummary("The private key of the genesis block. " +
-                    "if omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the genesis block")]
     [PrivateKey]
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty("timestamp")]
-    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
+    [CommandSummary("Specifies the timestamp of the genesis block")]
     [Category("Genesis")]
     public DateTimeOffset DateTimeOffset { get; set; }
 
     [CommandProperty("module-path")]
-    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+    [CommandSummary("Specifies the path or the name of the assembly that provides " +
                     "the IActionProvider.")]
     [Category("Genesis")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider")]
+    [CommandSummary("Specifies the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
     [CommandProperty("apv-private-key")]
-    [CommandSummary("The private key of the signer of the AppProtocolVersion. If omitted, " +
-                    "a random private key is used.")]
+    [CommandSummary("Specifies the private key of the signer of the AppProtocolVersion")]
     [PrivateKey]
     [Category("AppProtocolVersion")]
     public string APVPrivateKey { get; set; } = string.Empty;
 
     [CommandProperty("apv-version", InitValue = 1)]
-    [CommandSummary("The version number of the AppProtocolVersion. Default is 1")]
+    [CommandSummary("Specifies the version number of the AppProtocolVersion. Default is 1")]
     [Category("AppProtocolVersion")]
     public int APVVersion { get; set; }
 
     [CommandProperty("apv-extra")]
-    [CommandSummary("The extra data to be included in the AppProtocolVersion")]
+    [CommandSummary("Specifies the extra data to be included in the AppProtocolVersion")]
     [Category("AppProtocolVersion")]
     public string APVExtra { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Specifies the port for the blocksync of the node. If omitted, " +
-                    "a random port is used.")]
+    [CommandSummary("Specifies the port for the blocksync of the node")]
     [Category("Seed")]
     public int BlocksyncPort { get; set; }
 
     [CommandProperty]
-    [CommandSummary("Specifies the port for the consensus of the node. If omitted, " +
-                    "a random port is used.")]
+    [CommandSummary("Specifies the port for the consensus of the node")]
     [Category("Seed")]
     public int ConsensusPort { get; set; }
 

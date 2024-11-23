@@ -14,14 +14,12 @@ internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
     [CommandProperty]
-    [CommandSummary("Indicates the port on which the node will run. " +
-                    "If omitted, a random port is used.")]
+    [CommandSummary("Specifies the port on which the node will run")]
     [NonNegative]
     public int Port { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the node. " +
-                    "If omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the node")]
     [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
@@ -31,46 +29,41 @@ internal sealed class RunCommand
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the seed node to connect to")]
+    [CommandSummary("Specifies the EndPoint of the seed node to connect to")]
     [CommandPropertyExclusion(nameof(IsSingleNode))]
     [EndPoint]
     public string SeedEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The directory path to store data" +
-                    "If omitted, the data is stored in memory.")]
+    [CommandSummary("Specifies the directory path to store data")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string StorePath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Genesis))]
-    [CommandSummary("Indicates the file path to load the genesis block.\n" +
-                    "Mutually exclusive with '--genesis' option.")]
+    [CommandSummary("Specifies the file path to load the genesis block")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string GenesisPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(GenesisPath))]
-    [CommandSummary("Indicates a hexadecimal genesis string. If omitted, a random genesis block " +
-                    "is used.\nMutually exclusive with '--genesis-path' option.")]
+    [CommandSummary("Specifies a hexadecimal genesis string")]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty("apv-path")]
     [CommandPropertyExclusion(nameof(AppProtocolVersion))]
-    [CommandSummary("Indicates the file path to load the AppProtocolVersion.\n" +
-                    "Mutually exclusive with '--apv' option.")]
+    [CommandSummary("Specifies the file path to load the AppProtocolVersion")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string AppProtocolVersionPath { get; init; } = string.Empty;
 
     [CommandProperty("apv")]
     [CommandPropertyExclusion(nameof(AppProtocolVersionPath))]
-    [CommandSummary("Indicates the AppProtocolVersion.\n" +
-                    "Mutually exclusive with '--apv-path' option.")]
+    [CommandSummary("Specifies the AppProtocolVersion")]
     [AppProtocolVersion]
     public string AppProtocolVersion { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the directory path to save logs")]
+    [CommandSummary("Specifies the directory path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; init; } = string.Empty;
 
@@ -80,17 +73,16 @@ internal sealed class RunCommand
 
     [CommandPropertySwitch("single-node")]
     [CommandPropertyExclusion(nameof(SeedEndPoint))]
-    [CommandSummary("If set, the node runs as a single node.\n" +
-                    "Mutually exclusive with '--seed-endpoint' option.")]
+    [CommandSummary("If set, the node runs as a single node")]
     public bool IsSingleNode { get; set; }
 
     [CommandProperty("module-path")]
-    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+    [CommandSummary("Specifies the path or the name of the assembly that provides " +
                     "the IActionProvider.")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider")]
+    [CommandSummary("Specifies the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     public string ActionProviderType { get; set; } = string.Empty;
 

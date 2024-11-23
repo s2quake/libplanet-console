@@ -13,40 +13,37 @@ namespace LibplanetConsole.Node.Executable.EntryCommands;
 public sealed class GenesisCommand : CommandBase
 {
     [CommandProperty]
-    [CommandSummary("The private key of the genesis block. " +
-                    "if omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the genesis block")]
     [PrivateKey]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(ValidatorCount))]
-    [CommandSummary("The public keys of the validators. mutually exclusive with " +
-                    "'--validator-count'.")]
+    [CommandSummary("Specifies Tthe public keys of the validators")]
     [PublicKeyArray]
     public string[] Validators { get; set; } = [];
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Validators))]
-    [CommandSummary("The number of validators to create. mutually exclusive with '--validators'")]
+    [CommandSummary("Specifies the number of validators to create")]
     [NonNegative]
     public int ValidatorCount { get; set; }
 
     [CommandProperty("timestamp")]
-    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"")]
+    [CommandSummary("Specifies the timestamp of the genesis block")]
     public DateTimeOffset DateTimeOffset { get; set; }
 
     [CommandPropertySwitch("raw")]
-    [CommandSummary("If set, this option suppresses the arguments used to create " +
-                    "the genesis block.")]
+    [CommandSummary("If set, only the genesis is displayed")]
     public bool IsRaw { get; set; }
 
     [CommandProperty("module-path")]
-    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+    [CommandSummary("Specifies the path or the name of the assembly that provides " +
                     "the IActionProvider.")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider")]
+    [CommandSummary("Specifies the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     public string ActionProviderType { get; set; } = string.Empty;
 

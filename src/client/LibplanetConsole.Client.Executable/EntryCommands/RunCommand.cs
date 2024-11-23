@@ -13,14 +13,12 @@ internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
     [CommandProperty]
-    [CommandSummary("Indicates the port on which the client will run. " +
-                    "If omitted, a random port is used.")]
+    [CommandSummary("Specifies the port on which the client will run.")]
     [NonNegative]
     public int Port { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the client. " +
-                    "If omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the client.")]
     [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
@@ -30,12 +28,12 @@ internal sealed class RunCommand
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the node to connect to")]
+    [CommandSummary("Specifies the end-point of the node to connect to")]
     [EndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs")]
+    [CommandSummary("Specifies the file path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     [DefaultValue("")]
     public string LogPath { get; set; } = string.Empty;

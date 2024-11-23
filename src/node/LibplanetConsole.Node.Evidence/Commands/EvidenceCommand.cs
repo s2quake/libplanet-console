@@ -62,20 +62,20 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     public static class ListProperties
     {
         [CommandPropertyRequired(DefaultValue = -1)]
-        [CommandSummary("The height of the block to get the evidence. default is the tip")]
+        [CommandSummary("Specifies the height of the block to get the evidence. " +
+                        "Default is the tip")]
         public static long Height { get; set; }
 
         [CommandPropertySwitch("pending", 'p')]
         [CommandPropertyExclusion(nameof(Height))]
-        [CommandSummary("Indicates whether to get pending evidence. " +
-                        "if true, the height is ignored.")]
+        [CommandSummary("Specifies whether to get pending evidence.")]
         public static bool IsPending { get; set; }
     }
 
     public static class GetProperties
     {
         [CommandPropertySwitch("pending", 'p')]
-        [CommandSummary("Indicates whether to get pending evidence")]
+        [CommandSummary("Specifies whether to get pending evidence")]
         public static bool IsPending { get; set; }
     }
 }

@@ -15,7 +15,7 @@ public sealed partial class ClientCommand(
 {
     [CommandPropertyRequired(DefaultValue = "")]
     [CommandPropertyCompletion(nameof(GetClientAddresses))]
-    [CommandSummary("The address of the client. If not specified, the current client is used")]
+    [CommandSummary("Specifies the address of the client.")]
     public static string Address { get; set; } = string.Empty;
 
     [CommandMethod]
@@ -114,9 +114,9 @@ public sealed partial class ClientCommand(
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Sends a transaction using a simple string")]
+    [CommandSummary("Sends a transaction using a string")]
     public async Task TxAsync(
-        [CommandSummary("The text to send")]
+        [CommandSummary("Specifies the text to send")]
         string text,
         CancellationToken cancellationToken)
     {

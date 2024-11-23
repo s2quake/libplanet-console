@@ -8,7 +8,7 @@ namespace LibplanetConsole.Console.Executable.EntryCommands;
 internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
     [CommandPropertyRequired]
-    [CommandSummary("The path of the repository")]
+    [CommandSummary("Specifies the path of the repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.Exist)]
     public string RepositoryPath { get; set; } = string.Empty;
 

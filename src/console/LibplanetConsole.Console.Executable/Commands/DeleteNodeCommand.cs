@@ -10,7 +10,7 @@ internal sealed class DeleteNodeCommand(
     : CommandAsyncBase(nodeCommand, "delete")
 {
     [CommandPropertyRequired]
-    [CommandSummary("The address of the node")]
+    [CommandSummary("Specifies the address of the node")]
     public Address Address { get; set; }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

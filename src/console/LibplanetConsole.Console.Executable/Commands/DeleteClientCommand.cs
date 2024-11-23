@@ -10,7 +10,7 @@ internal sealed class DeleteClientCommand(
     : CommandAsyncBase(clientCommand, "delete")
 {
     [CommandPropertyRequired]
-    [CommandSummary("The address of the client")]
+    [CommandSummary("Specifies the address of the client")]
     public Address Address { get; set; }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

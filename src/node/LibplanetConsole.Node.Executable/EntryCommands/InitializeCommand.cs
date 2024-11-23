@@ -21,46 +21,43 @@ internal sealed class InitializeCommand : CommandBase
     }
 
     [CommandPropertyRequired]
-    [CommandSummary("The directory path used to initialize a repository")]
+    [CommandSummary("Specifies the directory path used to initialize a repository")]
     [Path(Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty)]
     public string RepositoryPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the private key of the node. " +
-                    "If omitted, a random private key is used.")]
+    [CommandSummary("Specifies the private key of the node")]
     [PrivateKey]
     public string PrivateKey { get; init; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The port of the node. " +
-                    "If omitted, a random port is used.")]
+    [CommandSummary("Specifies the port of the node")]
     [NonNegative]
     public int Port { get; set; }
 
     [CommandProperty]
-    [CommandSummary("The directory path to store the block. " +
-                    "If omitted, the 'store' directory is used.")]
+    [CommandSummary("Specifies the directory path to store the block")]
     [Path(
         Type = PathType.Directory, ExistsType = PathExistsType.NotExistOrEmpty, AllowEmpty = true)]
     public string StorePath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the file path to save logs")]
+    [CommandSummary("Specifies the file path to save logs")]
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Indicates the EndPoint of the seed node to connect to")]
+    [CommandSummary("Specifies the EndPoint of the seed node to connect to")]
     [EndPoint]
     public string SeedEndPoint { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("The file path of the genesis")]
+    [CommandSummary("Specifies the file path of the genesis")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     public string GenesisPath { get; set; } = string.Empty;
 
     [CommandProperty("apv-path")]
-    [CommandSummary("The file path of the app protocol version")]
+    [CommandSummary("Specifies the file path of the app protocol version")]
     [Path(Type = PathType.File, AllowEmpty = true)]
     public string AppProtocolVersionPath { get; set; } = string.Empty;
 
@@ -69,17 +66,14 @@ internal sealed class InitializeCommand : CommandBase
     public bool IsSingleNode { get; set; }
 
     [CommandProperty]
-    [CommandSummary("The private key of the genesis block. " +
-                    "if omitted, a random private key is used.\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Specifies the private key of the genesis block")]
     [CommandPropertyDependency(nameof(IsSingleNode))]
     [PrivateKey]
     [Category("Genesis")]
     public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty("timestamp")]
-    [CommandSummary("The timestamp of the genesis block. ex) \"2021-01-01T00:00:00Z\"\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Specifies the timestamp of the genesis block")]
     [Category("Genesis")]
     [CommandPropertyDependency(nameof(IsSingleNode))]
     public DateTimeOffset DateTimeOffset { get; set; }
@@ -89,48 +83,42 @@ internal sealed class InitializeCommand : CommandBase
     public bool Quiet { get; set; }
 
     [CommandProperty("module-path")]
-    [CommandSummary("Indicates the path or the name of the assembly that provides " +
+    [CommandSummary("Specifies the path or the name of the assembly that provides " +
                     "the IActionProvider")]
     [Category("Genesis")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     [CommandProperty("module-type")]
-    [CommandSummary("Indicates the type name of the IActionProvider")]
+    [CommandSummary("Specifies the type name of the IActionProvider")]
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     [Category("Genesis")]
     public string ActionProviderType { get; set; } = string.Empty;
 
     [CommandProperty("apv-private-key")]
-    [CommandSummary("The private key of the signer of the AppProtocolVersion. If omitted, " +
-                    "a random private key is used.\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Specifies the private key of the signer of the AppProtocolVersion")]
     [PrivateKey]
     [Category("AppProtocolVersion")]
     [CommandPropertyDependency(nameof(IsSingleNode))]
     public string APVPrivateKey { get; set; } = string.Empty;
 
     [CommandProperty("apv-version", InitValue = 1)]
-    [CommandSummary("The version number of the AppProtocolVersion. Default is 1.\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Specifies the version number of the AppProtocolVersion. Default is 1")]
     [Category("AppProtocolVersion")]
     [CommandPropertyDependency(nameof(IsSingleNode))]
     public int APVVersion { get; set; }
 
     [CommandProperty("apv-extra")]
-    [CommandSummary("The extra data to be included in the AppProtocolVersion.\n" +
-                    "Requires the '--single-node' option to be set.")]
+    [CommandSummary("Specifies the extra data to be included in the AppProtocolVersion")]
     [Category("AppProtocolVersion")]
     [CommandPropertyDependency(nameof(IsSingleNode))]
     public string APVExtra { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Specifies the port for the blocksync of the node. If omitted, " +
-                    "a random port is used.")]
+    [CommandSummary("Specifies the port for the blocksync of the node")]
     public int BlocksyncPort { get; set; }
 
     [CommandProperty]
-    [CommandSummary("Specifies the port for the consensus of the node. If omitted, " +
-                    "a random port is used.")]
+    [CommandSummary("Specifies the port for the consensus of the node")]
     public int ConsensusPort { get; set; }
 
     protected override void OnExecute()
