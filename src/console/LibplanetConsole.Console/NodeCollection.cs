@@ -105,6 +105,19 @@ internal sealed class NodeCollection(
         return node;
     }
 
+    public async Task AttachAsync(
+        AttachOptions options, CancellationToken cancellationToken)
+    {
+        var node = this[options.Address];
+        if (node.IsAttached is true)
+        {
+            throw new InvalidOperationException("The node is already attached.");
+        }
+
+        node.EndPoint = options.EndPoint;
+        await node.AttachAsync(cancellationToken);
+    }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         try

@@ -17,9 +17,9 @@ namespace LibplanetConsole.Console;
 internal sealed partial class Node : INode
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly NodeOptions _nodeOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
+    private readonly CriticalSection _criticalSection = new("Process");
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
@@ -34,7 +34,7 @@ internal sealed partial class Node : INode
     public Node(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
         _serviceProvider = serviceProvider;
-        _nodeOptions = nodeOptions;
+        Options = nodeOptions;
         _privateKey = nodeOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Node>();
         PublicKey = nodeOptions.PrivateKey.PublicKey;
@@ -61,7 +61,21 @@ internal sealed partial class Node : INode
 
     public int ProcessId => _process?.Id ?? -1;
 
-    public EndPoint EndPoint => _nodeOptions.EndPoint;
+    public NodeOptions Options { get; private set; }
+
+    public EndPoint EndPoint
+    {
+        get => Options.EndPoint;
+        set
+        {
+            if (IsAttached is true)
+            {
+                throw new InvalidOperationException("Node is attached.");
+            }
+
+            Options = Options with { EndPoint = value };
+        }
+    }
 
     public NodeInfo Info => _info;
 
@@ -95,7 +109,7 @@ internal sealed partial class Node : INode
 
     public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
 
-    public byte[] Sign(object obj) => _nodeOptions.PrivateKey.Sign(obj);
+    public byte[] Sign(object obj) => Options.PrivateKey.Sign(obj);
 
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -117,12 +131,13 @@ internal sealed partial class Node : INode
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        if (_channel is not null)
+        if (IsAttached is true)
         {
             throw new InvalidOperationException("Node is already attached.");
         }
 
-        var channel = NodeChannel.CreateChannel(_nodeOptions.EndPoint);
+        using var scope = _criticalSection.Scope();
+        var channel = NodeChannel.CreateChannel(Options.EndPoint);
         var nodeService = new NodeService(channel);
         var blockChainService = new BlockChainService(channel);
         nodeService.Started += NodeService_Started;
@@ -284,32 +299,36 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node process is already running.");
         }
 
-        var process = CreateProcess(options);
-        var processCancellationTokenSource = new CancellationTokenSource();
-        var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, processCancellationTokenSource.Token);
+        if (true)
+        {
+            using var scope = _criticalSection.Scope();
+            var process = CreateProcess(options);
+            var processCancellationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken, processCancellationTokenSource.Token);
 
-        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
-        _processTask = process.RunAsync(cancellationTokenSource.Token)
-            .ContinueWith(
-                task =>
-                {
-                    _processTask = Task.CompletedTask;
-                    _process = null;
-                    _processCancellationTokenSource?.Dispose();
-                    _processCancellationTokenSource = null;
-                    cancellationTokenSource.Dispose();
-                },
-                cancellationToken);
-        _process = process;
-        _processCancellationTokenSource = processCancellationTokenSource;
+            _logger.LogDebug("Commands: {CommandLine}", process.ToString());
+            _processTask = process.RunAsync(cancellationTokenSource.Token)
+                .ContinueWith(
+                    task =>
+                    {
+                        _processTask = Task.CompletedTask;
+                        _process = null;
+                        _processCancellationTokenSource?.Dispose();
+                        _processCancellationTokenSource = null;
+                        cancellationTokenSource.Dispose();
+                    },
+                    cancellationToken);
+            _process = process;
+            _processCancellationTokenSource = processCancellationTokenSource;
+        }
 
         if (options.Detach is false)
         {
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && _nodeOptions.SeedEndPoint is null)
+        if (IsAttached is true && Options.SeedEndPoint is null)
         {
             await StartAsync(cancellationToken);
         }
@@ -329,6 +348,7 @@ internal sealed partial class Node : INode
             _processCancellationTokenSource = null;
         }
 
+        using var scope = _criticalSection.Scope();
         await TaskUtility.TryWait(_processTask);
         _processTask = Task.CompletedTask;
         _process = null;
@@ -398,7 +418,7 @@ internal sealed partial class Node : INode
 
     private EndPoint GetSeedEndPoint()
     {
-        if (_nodeOptions.SeedEndPoint is { } seedEndPoint)
+        if (Options.SeedEndPoint is { } seedEndPoint)
         {
             return seedEndPoint;
         }
@@ -414,7 +434,7 @@ internal sealed partial class Node : INode
 
     private NodeProcess CreateProcess(ProcessOptions options)
     {
-        var nodeOptions = _nodeOptions;
+        var nodeOptions = Options;
         var process = new NodeProcess(nodeOptions)
         {
             Detach = options.Detach,

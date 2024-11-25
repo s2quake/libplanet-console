@@ -5,19 +5,21 @@ namespace LibplanetConsole.Console;
 
 internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicationLifetime>
 {
-    private readonly ApplicationInfo _info;
-
-    public ApplicationInfoProvider(ApplicationOptions options)
+    public ApplicationInfoProvider(IApplicationOptions options)
         : base("Application")
     {
-         _info = new()
+        Info = new()
         {
             LogPath = options.LogPath,
+            GenesisHash = options.GenesisBlock.Hash.ToString(),
+            AppProtocolVersion = options.AppProtocolVersion.Token,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
             NewWindow = options.NewWindow,
         };
     }
 
-    protected override object? GetInfo(IHostApplicationLifetime obj) => _info;
+    public ApplicationInfo Info { get; }
+
+    protected override object? GetInfo(IHostApplicationLifetime obj) => Info;
 }

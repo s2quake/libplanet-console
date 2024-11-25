@@ -23,7 +23,7 @@ public interface IClient : IAddressable, IAsyncDisposable, IKeyedServiceProvider
 
     bool IsRunning { get; }
 
-    EndPoint EndPoint { get; }
+    EndPoint EndPoint { get; set; }
 
     ClientInfo Info { get; }
 

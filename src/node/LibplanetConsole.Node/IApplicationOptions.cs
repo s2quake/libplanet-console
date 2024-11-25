@@ -20,6 +20,8 @@ public interface IApplicationOptions
 
     bool NoREPL { get; }
 
+    bool IsSingleNode { get; }
+
     string ActionProviderModulePath { get; }
 
     string ActionProviderType { get; }

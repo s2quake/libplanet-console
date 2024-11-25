@@ -33,6 +33,8 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>());
         @this.AddSingleton<BlockChain>()
             .AddSingleton<IBlockChain>(s => s.GetRequiredService<BlockChain>());
+        @this.AddSingleton<ApplicationInfoProvider>()
+            .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
 
         @this.AddHostedService<ConsoleHostedService>();
 
@@ -48,7 +50,9 @@ public static class ServiceCollectionExtensions
                 IClient.Key, (s, k) => s.GetRequiredKeyedService<Client>(k));
 
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
+        @this.AddSingleton<IInfoProvider, NodeApplicationProvider>();
         @this.AddSingleton<IInfoProvider, ClientInfoProvider>();
+        @this.AddSingleton<IInfoProvider, ClientApplicationProvider>();
 
         @this.AddSingleton<ICommand, ExitCommand>();
         @this.AddSingleton<ICommand, InfoCommand>();

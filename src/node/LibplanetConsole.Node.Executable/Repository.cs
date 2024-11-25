@@ -33,6 +33,8 @@ public sealed record class Repository
 
     public int ConsensusPort { get; set; }
 
+    public bool IsSingleNode { get; set; }
+
     public dynamic Save(string repositoryPath)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
@@ -78,6 +80,7 @@ public sealed record class Repository
                 ActionProviderType = ActionProviderType,
                 BlocksyncPort = BlocksyncPort,
                 ConsensusPort = ConsensusPort,
+                IsSingleNode = IsSingleNode,
             },
             Kestrel = new
             {

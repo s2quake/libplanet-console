@@ -146,6 +146,7 @@ internal sealed class InitializeCommand : CommandBase
             ActionProviderType = ActionProviderType,
             BlocksyncPort = blocksyncPort,
             ConsensusPort = consensusPort,
+            IsSingleNode = IsSingleNode,
         };
         dynamic info = repository.Save(outputPath);
         using var writer = new ConditionalTextWriter(Out)

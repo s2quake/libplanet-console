@@ -15,9 +15,9 @@ namespace LibplanetConsole.Console;
 internal sealed partial class Client : IClient
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ClientOptions _clientOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
+    private readonly CriticalSection _criticalSection = new("Process");
     private ClientService? _clientService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
@@ -32,8 +32,8 @@ internal sealed partial class Client : IClient
     public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
         _serviceProvider = serviceProvider;
+        Options = clientOptions;
         _privateKey = clientOptions.PrivateKey;
-        _clientOptions = clientOptions;
         _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);
@@ -59,7 +59,21 @@ internal sealed partial class Client : IClient
 
     public int ProcessId => _process?.Id ?? -1;
 
-    public EndPoint EndPoint => _clientOptions.EndPoint;
+    public ClientOptions Options { get; private set; }
+
+    public EndPoint EndPoint
+    {
+        get => Options.EndPoint;
+        set
+        {
+            if (IsAttached is true)
+            {
+                throw new InvalidOperationException("Client is attached.");
+            }
+
+            Options = Options with { EndPoint = value };
+        }
+    }
 
     public ClientInfo Info => _info;
 
@@ -93,7 +107,7 @@ internal sealed partial class Client : IClient
 
     public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
 
-    public byte[] Sign(object obj) => _clientOptions.PrivateKey.Sign(obj);
+    public byte[] Sign(object obj) => Options.PrivateKey.Sign(obj);
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -120,7 +134,8 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("Client is already attached.");
         }
 
-        var channel = ClientChannel.CreateChannel(_clientOptions.EndPoint);
+        using var scope = _criticalSection.Scope();
+        var channel = ClientChannel.CreateChannel(Options.EndPoint);
         var clientService = new ClientService(channel);
         var blockChainService = new BlockChainService(channel);
         clientService.Started += ClientService_Started;
@@ -281,31 +296,35 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("Client process is already running.");
         }
 
-        var process = CreateProcess(options);
-        var processCancellationTokenSource = new CancellationTokenSource();
-        var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, processCancellationTokenSource.Token);
-        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
-        _processTask = process.RunAsync(cancellationTokenSource.Token)
-            .ContinueWith(
-                task =>
-                {
-                    _processTask = Task.CompletedTask;
-                    _process = null;
-                    _processCancellationTokenSource?.Dispose();
-                    _processCancellationTokenSource = null;
-                    cancellationTokenSource.Dispose();
-                },
-                cancellationToken);
-        _process = process;
-        _processCancellationTokenSource = processCancellationTokenSource;
+        if (true)
+        {
+            using var scope = _criticalSection.Scope();
+            var process = CreateProcess(options);
+            var processCancellationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken, processCancellationTokenSource.Token);
+            _logger.LogDebug("Commands: {CommandLine}", process.ToString());
+            _processTask = process.RunAsync(cancellationTokenSource.Token)
+                .ContinueWith(
+                    task =>
+                    {
+                        _processTask = Task.CompletedTask;
+                        _process = null;
+                        _processCancellationTokenSource?.Dispose();
+                        _processCancellationTokenSource = null;
+                        cancellationTokenSource.Dispose();
+                    },
+                    cancellationToken);
+            _process = process;
+            _processCancellationTokenSource = processCancellationTokenSource;
+        }
 
         if (options.Detach is false)
         {
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && _clientOptions.NodeEndPoint is null)
+        if (IsAttached is true && Options.NodeEndPoint is null)
         {
             var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
             var node = nodes.RandomNode();
@@ -327,6 +346,7 @@ internal sealed partial class Client : IClient
             _processCancellationTokenSource = null;
         }
 
+        using var scope = _criticalSection.Scope();
         await TaskUtility.TryWait(_processTask);
         _processTask = Task.CompletedTask;
         _process = null;
@@ -396,7 +416,7 @@ internal sealed partial class Client : IClient
 
     private ClientProcess CreateProcess(ProcessOptions options)
     {
-        var clientOptions = _clientOptions;
+        var clientOptions = Options;
         var process = new ClientProcess(clientOptions)
         {
             Detach = options.Detach,

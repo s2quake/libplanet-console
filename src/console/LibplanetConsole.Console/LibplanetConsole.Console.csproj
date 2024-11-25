@@ -30,6 +30,9 @@
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client">
       <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
     </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Console\Protos\*.proto" GrpcServices="Server">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

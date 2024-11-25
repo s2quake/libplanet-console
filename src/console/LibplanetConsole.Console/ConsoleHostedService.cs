@@ -1,3 +1,4 @@
+using LibplanetConsole.Common;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -8,6 +9,7 @@ internal sealed class ConsoleHostedService(
     NodeCollection nodes,
     ClientCollection clients,
     IHostApplicationLifetime applicationLifetime,
+    ApplicationInfoProvider applicationInfoProvider,
     ILogger<ConsoleHostedService> logger)
     : IHostedService
 {
@@ -42,6 +44,7 @@ internal sealed class ConsoleHostedService(
         _cancellationTokenSource = new();
         try
         {
+            logger.LogDebug(JsonUtility.Serialize(applicationInfoProvider.Info));
             await nodes.InitializeAsync(_cancellationTokenSource.Token);
             await clients.InitializeAsync(_cancellationTokenSource.Token);
         }

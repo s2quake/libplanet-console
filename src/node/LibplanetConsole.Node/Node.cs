@@ -201,9 +201,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             _logger.LogDebug("Node.Swarm is bootstrapped: {Address}", Address);
         }
 
+        IsRunning = true;
         UpdateNodeInfo();
         _logger.LogDebug(JsonUtility.Serialize(Info));
-        IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
         _logger.LogDebug("Node Contents are started: {Address}", Address);
@@ -341,8 +341,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             ProcessId = Environment.ProcessId,
             Address = Address,
             AppProtocolVersion = appProtocolVersion.Token,
-            BlocksyncPort = _blocksyncPort,
-            ConsensusPort = _consensusPort,
             GenesisHash = _genesisBlock.Hash,
         };
 

@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Grpc.Console";
+
+package libplanet.console.console.v1;
+
+import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
+
+service ConsoleGrpcService {
+  rpc GetNodeSettings(GetNodeSettingsRequest) returns (GetNodeSettingsResponse);
+  rpc GetClientSettings(GetClientSettingsRequest) returns (GetClientSettingsResponse);
+  rpc AttachNode(AttachNodeRequest) returns (AttachNodeResponse);
+  rpc AttachClient(AttachClientRequest) returns (AttachClientResponse);
+}
+
+message GetNodeSettingsRequest {
+}
+
+message GetNodeSettingsResponse {
+  bytes genesis = 1;
+  string app_protocol_version = 2;
+  int32 process_id = 3;
+  string seed_end_point = 4;
+}
+
+message GetClientSettingsRequest {
+}
+
+message GetClientSettingsResponse {
+  int32 process_id = 1;
+  string node_end_point = 2;
+}
+
+message AttachNodeRequest {
+  int32 process_id = 1;
+  libplanet.console.types.v1.AddressProto address = 2;
+  string end_point = 3;
+}
+
+message AttachNodeResponse {
+
+}
+
+message AttachClientRequest {
+  int32 process_id = 1;
+  libplanet.console.types.v1.AddressProto address = 2;
+  string end_point = 3;
+}
+
+message AttachClientResponse {
+}

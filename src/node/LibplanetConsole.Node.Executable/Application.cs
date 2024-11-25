@@ -79,8 +79,6 @@ internal sealed class Application
 
     public IServiceCollection Services => _builder.Services;
 
-    public WebApplicationBuilder Builder => _builder;
-
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         using var app = _builder.Build();
@@ -89,8 +87,6 @@ internal sealed class Application
         app.UseExplorer();
         app.UseEvidence();
         app.MapGet("/", () => "Libplanet-Node");
-        app.UseAuthentication();
-        app.UseAuthorization();
         app.MapGrpcReflectionService().AllowAnonymous();
 
         await Console.Out.WriteLineAsync();

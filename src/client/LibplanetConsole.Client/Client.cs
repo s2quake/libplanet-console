@@ -109,13 +109,14 @@ internal sealed partial class Client : IClient
         _channel = channel;
         _nodeService = nodeService;
         _blockChainService = blockChainService;
+        IsRunning = true;
         _info = _info with
         {
-            NodeInfo = nodeService.Info,
+            GenesisHash = nodeService.Info.GenesisHash,
             Tip = nodeService.Info.Tip,
+            IsRunning = IsRunning,
         };
         _logger.LogDebug(JsonUtility.Serialize(_info));
-        IsRunning = true;
         _logger.LogDebug("Client is started: {Address}->{NodeAddress}", Address, NodeInfo.Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
         _logger.LogDebug("Client Contents are started: {Address}", Address);
@@ -164,13 +165,11 @@ internal sealed partial class Client : IClient
     public void InvokeNodeStartedEvent(NodeEventArgs e)
     {
         NodeInfo = e.NodeInfo;
-        _info = _info with { NodeInfo = e.NodeInfo };
     }
 
     public void InvokeNodeStoppedEvent()
     {
         NodeInfo = NodeInfo.Empty;
-        _info = _info with { NodeInfo = default };
     }
 
     public void InvokeBlockAppendedEvent(BlockEventArgs e)

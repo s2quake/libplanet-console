@@ -19,11 +19,9 @@ service NodeGrpcService {
 message NodeInfoProto {
   int32 process_id = 1;
   string app_protocol_version = 2;
-  int32 blocksync_port = 3;
-  int32 consensus_port = 4;
-  libplanet.console.types.v1.AddressProto address = 5;
-  libplanet.console.types.v1.BlockHashProto genesis_hash = 6;
-  libplanet.console.blockchain.v1.BlockInfoProto tip = 7;
+  libplanet.console.types.v1.AddressProto address = 3;
+  libplanet.console.types.v1.BlockHashProto genesis_hash = 4;
+  libplanet.console.blockchain.v1.BlockInfoProto tip = 5;
   bool is_running = 8;
 }
 
