@@ -15,10 +15,11 @@ public static class InfoUtility
                     let value = infoProvider.GetInfo(obj)
                     orderby name
                     select new KeyValuePair<string, object?>(name, value);
+        var items = query.ToArray();
         var builder = ImmutableDictionary.CreateBuilder<string, object?>();
-        foreach (var info in query)
+        foreach (var item in items)
         {
-            builder.Add(info.Key, info.Value);
+            builder.Add(item.Key, item.Value);
         }
 
         return builder.ToImmutableDictionary();

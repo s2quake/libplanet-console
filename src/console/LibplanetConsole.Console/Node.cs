@@ -20,7 +20,6 @@ internal sealed partial class Node : INode
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
     private readonly CriticalSection _criticalSection = new("Process");
-    private NodeOptions _nodeOptions;
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
@@ -35,7 +34,7 @@ internal sealed partial class Node : INode
     public Node(IServiceProvider serviceProvider, NodeOptions nodeOptions)
     {
         _serviceProvider = serviceProvider;
-        _nodeOptions = nodeOptions;
+        Options = nodeOptions;
         _privateKey = nodeOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Node>();
         PublicKey = nodeOptions.PrivateKey.PublicKey;
@@ -62,9 +61,11 @@ internal sealed partial class Node : INode
 
     public int ProcessId => _process?.Id ?? -1;
 
+    public NodeOptions Options { get; private set; }
+
     public EndPoint EndPoint
     {
-        get => _nodeOptions.EndPoint;
+        get => Options.EndPoint;
         set
         {
             if (IsAttached is true)
@@ -72,7 +73,7 @@ internal sealed partial class Node : INode
                 throw new InvalidOperationException("Node is attached.");
             }
 
-            _nodeOptions = _nodeOptions with { EndPoint = value };
+            Options = Options with { EndPoint = value };
         }
     }
 
@@ -108,7 +109,7 @@ internal sealed partial class Node : INode
 
     public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
 
-    public byte[] Sign(object obj) => _nodeOptions.PrivateKey.Sign(obj);
+    public byte[] Sign(object obj) => Options.PrivateKey.Sign(obj);
 
     public async Task<NodeInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -136,7 +137,7 @@ internal sealed partial class Node : INode
         }
 
         using var scope = _criticalSection.Scope();
-        var channel = NodeChannel.CreateChannel(_nodeOptions.EndPoint);
+        var channel = NodeChannel.CreateChannel(Options.EndPoint);
         var nodeService = new NodeService(channel);
         var blockChainService = new BlockChainService(channel);
         nodeService.Started += NodeService_Started;
@@ -327,7 +328,7 @@ internal sealed partial class Node : INode
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && _nodeOptions.SeedEndPoint is null)
+        if (IsAttached is true && Options.SeedEndPoint is null)
         {
             await StartAsync(cancellationToken);
         }
@@ -417,7 +418,7 @@ internal sealed partial class Node : INode
 
     private EndPoint GetSeedEndPoint()
     {
-        if (_nodeOptions.SeedEndPoint is { } seedEndPoint)
+        if (Options.SeedEndPoint is { } seedEndPoint)
         {
             return seedEndPoint;
         }
@@ -433,7 +434,7 @@ internal sealed partial class Node : INode
 
     private NodeProcess CreateProcess(ProcessOptions options)
     {
-        var nodeOptions = _nodeOptions;
+        var nodeOptions = Options;
         var process = new NodeProcess(nodeOptions)
         {
             Detach = options.Detach,

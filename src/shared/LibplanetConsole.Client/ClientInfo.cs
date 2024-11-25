@@ -13,7 +13,7 @@ public readonly record struct ClientInfo
 {
     public Address Address { get; init; }
 
-    public NodeInfo NodeInfo { get; init; }
+    public BlockHash GenesisHash { get; init; }
 
     public BlockInfo Tip { get; init; }
 
@@ -22,7 +22,6 @@ public readonly record struct ClientInfo
     public static ClientInfo Empty { get; } = new ClientInfo
     {
         Tip = BlockInfo.Empty,
-        NodeInfo = NodeInfo.Empty,
     };
 
     public static implicit operator ClientInfo(ClientInfoProto clientInfo)
@@ -30,7 +29,6 @@ public readonly record struct ClientInfo
         return new ClientInfo
         {
             Address = ToAddress(clientInfo.Address),
-            NodeInfo = clientInfo.NodeInfo,
             Tip = clientInfo.Tip,
             IsRunning = clientInfo.IsRunning,
         };
@@ -41,7 +39,6 @@ public readonly record struct ClientInfo
         return new ClientInfoProto
         {
             Address = ToGrpc(clientInfo.Address),
-            NodeInfo = clientInfo.NodeInfo,
             Tip = clientInfo.Tip,
             IsRunning = clientInfo.IsRunning,
         };

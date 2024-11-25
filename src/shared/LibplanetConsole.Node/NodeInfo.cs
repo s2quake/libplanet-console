@@ -17,10 +17,6 @@ public readonly record struct NodeInfo
 
     public string AppProtocolVersion { get; init; }
 
-    public int BlocksyncPort { get; init; }
-
-    public int ConsensusPort { get; init; }
-
     public Address Address { get; init; }
 
     public BlockHash GenesisHash { get; init; }
@@ -42,8 +38,6 @@ public readonly record struct NodeInfo
         {
             ProcessId = nodeInfo.ProcessId,
             AppProtocolVersion = nodeInfo.AppProtocolVersion,
-            BlocksyncPort = nodeInfo.BlocksyncPort,
-            ConsensusPort = nodeInfo.ConsensusPort,
             Address = ToAddress(nodeInfo.Address),
             GenesisHash = ToBlockHash(nodeInfo.GenesisHash),
             Tip = nodeInfo.Tip,
@@ -57,8 +51,6 @@ public readonly record struct NodeInfo
         {
             ProcessId = nodeInfo.ProcessId,
             AppProtocolVersion = nodeInfo.AppProtocolVersion,
-            BlocksyncPort = nodeInfo.BlocksyncPort,
-            ConsensusPort = nodeInfo.ConsensusPort,
             Address = ToGrpc(nodeInfo.Address),
             GenesisHash = ToGrpc(nodeInfo.GenesisHash),
             Tip = nodeInfo.Tip,

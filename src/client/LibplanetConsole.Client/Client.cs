@@ -111,7 +111,7 @@ internal sealed partial class Client : IClient
         _blockChainService = blockChainService;
         _info = _info with
         {
-            NodeInfo = nodeService.Info,
+            GenesisHash = nodeService.Info.GenesisHash,
             Tip = nodeService.Info.Tip,
         };
         _logger.LogDebug(JsonUtility.Serialize(_info));
@@ -164,13 +164,11 @@ internal sealed partial class Client : IClient
     public void InvokeNodeStartedEvent(NodeEventArgs e)
     {
         NodeInfo = e.NodeInfo;
-        _info = _info with { NodeInfo = e.NodeInfo };
     }
 
     public void InvokeNodeStoppedEvent()
     {
         NodeInfo = NodeInfo.Empty;
-        _info = _info with { NodeInfo = default };
     }
 
     public void InvokeBlockAppendedEvent(BlockEventArgs e)

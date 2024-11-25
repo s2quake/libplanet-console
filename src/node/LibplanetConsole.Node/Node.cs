@@ -341,8 +341,6 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             ProcessId = Environment.ProcessId,
             Address = Address,
             AppProtocolVersion = appProtocolVersion.Token,
-            BlocksyncPort = _blocksyncPort,
-            ConsensusPort = _consensusPort,
             GenesisHash = _genesisBlock.Hash,
         };
 

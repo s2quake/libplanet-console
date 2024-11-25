@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Both" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Both">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

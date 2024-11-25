@@ -18,7 +18,6 @@ internal sealed partial class Client : IClient
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
     private readonly CriticalSection _criticalSection = new("Process");
-    private ClientOptions _clientOptions;
     private ClientService? _clientService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
@@ -33,7 +32,7 @@ internal sealed partial class Client : IClient
     public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
         _serviceProvider = serviceProvider;
-        _clientOptions = clientOptions;
+        Options = clientOptions;
         _privateKey = clientOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
@@ -60,9 +59,11 @@ internal sealed partial class Client : IClient
 
     public int ProcessId => _process?.Id ?? -1;
 
+    public ClientOptions Options { get; private set; }
+
     public EndPoint EndPoint
     {
-        get => _clientOptions.EndPoint;
+        get => Options.EndPoint;
         set
         {
             if (IsAttached is true)
@@ -70,7 +71,7 @@ internal sealed partial class Client : IClient
                 throw new InvalidOperationException("Client is attached.");
             }
 
-            _clientOptions = _clientOptions with { EndPoint = value };
+            Options = Options with { EndPoint = value };
         }
     }
 
@@ -106,7 +107,7 @@ internal sealed partial class Client : IClient
 
     public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
 
-    public byte[] Sign(object obj) => _clientOptions.PrivateKey.Sign(obj);
+    public byte[] Sign(object obj) => Options.PrivateKey.Sign(obj);
 
     public async Task<ClientInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
@@ -134,7 +135,7 @@ internal sealed partial class Client : IClient
         }
 
         using var scope = _criticalSection.Scope();
-        var channel = ClientChannel.CreateChannel(_clientOptions.EndPoint);
+        var channel = ClientChannel.CreateChannel(Options.EndPoint);
         var clientService = new ClientService(channel);
         var blockChainService = new BlockChainService(channel);
         clientService.Started += ClientService_Started;
@@ -323,7 +324,7 @@ internal sealed partial class Client : IClient
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && _clientOptions.NodeEndPoint is null)
+        if (IsAttached is true && Options.NodeEndPoint is null)
         {
             var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
             var node = nodes.RandomNode();
@@ -415,7 +416,7 @@ internal sealed partial class Client : IClient
 
     private ClientProcess CreateProcess(ProcessOptions options)
     {
-        var clientOptions = _clientOptions;
+        var clientOptions = Options;
         var process = new ClientProcess(clientOptions)
         {
             Detach = options.Detach,
