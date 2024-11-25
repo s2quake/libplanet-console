@@ -23,7 +23,7 @@ public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, 
 
     bool IsRunning { get; }
 
-    EndPoint EndPoint { get; }
+    EndPoint EndPoint { get; set; }
 
     NodeInfo Info { get; }
 

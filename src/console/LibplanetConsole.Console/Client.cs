@@ -15,9 +15,10 @@ namespace LibplanetConsole.Console;
 internal sealed partial class Client : IClient
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ClientOptions _clientOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
+    private readonly CriticalSection _criticalSection = new("Process");
+    private ClientOptions _clientOptions;
     private ClientService? _clientService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
@@ -32,8 +33,8 @@ internal sealed partial class Client : IClient
     public Client(IServiceProvider serviceProvider, ClientOptions clientOptions)
     {
         _serviceProvider = serviceProvider;
-        _privateKey = clientOptions.PrivateKey;
         _clientOptions = clientOptions;
+        _privateKey = clientOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);
@@ -59,7 +60,19 @@ internal sealed partial class Client : IClient
 
     public int ProcessId => _process?.Id ?? -1;
 
-    public EndPoint EndPoint => _clientOptions.EndPoint;
+    public EndPoint EndPoint
+    {
+        get => _clientOptions.EndPoint;
+        set
+        {
+            if (IsAttached is true)
+            {
+                throw new InvalidOperationException("Client is attached.");
+            }
+
+            _clientOptions = _clientOptions with { EndPoint = value };
+        }
+    }
 
     public ClientInfo Info => _info;
 
@@ -120,6 +133,7 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("Client is already attached.");
         }
 
+        using var scope = _criticalSection.Scope();
         var channel = ClientChannel.CreateChannel(_clientOptions.EndPoint);
         var clientService = new ClientService(channel);
         var blockChainService = new BlockChainService(channel);
@@ -281,24 +295,28 @@ internal sealed partial class Client : IClient
             throw new InvalidOperationException("Client process is already running.");
         }
 
-        var process = CreateProcess(options);
-        var processCancellationTokenSource = new CancellationTokenSource();
-        var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, processCancellationTokenSource.Token);
-        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
-        _processTask = process.RunAsync(cancellationTokenSource.Token)
-            .ContinueWith(
-                task =>
-                {
-                    _processTask = Task.CompletedTask;
-                    _process = null;
-                    _processCancellationTokenSource?.Dispose();
-                    _processCancellationTokenSource = null;
-                    cancellationTokenSource.Dispose();
-                },
-                cancellationToken);
-        _process = process;
-        _processCancellationTokenSource = processCancellationTokenSource;
+        if (true)
+        {
+            using var scope = _criticalSection.Scope();
+            var process = CreateProcess(options);
+            var processCancellationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken, processCancellationTokenSource.Token);
+            _logger.LogDebug("Commands: {CommandLine}", process.ToString());
+            _processTask = process.RunAsync(cancellationTokenSource.Token)
+                .ContinueWith(
+                    task =>
+                    {
+                        _processTask = Task.CompletedTask;
+                        _process = null;
+                        _processCancellationTokenSource?.Dispose();
+                        _processCancellationTokenSource = null;
+                        cancellationTokenSource.Dispose();
+                    },
+                    cancellationToken);
+            _process = process;
+            _processCancellationTokenSource = processCancellationTokenSource;
+        }
 
         if (options.Detach is false)
         {
@@ -327,6 +345,7 @@ internal sealed partial class Client : IClient
             _processCancellationTokenSource = null;
         }
 
+        using var scope = _criticalSection.Scope();
         await TaskUtility.TryWait(_processTask);
         _processTask = Task.CompletedTask;
         _process = null;

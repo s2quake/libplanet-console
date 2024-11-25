@@ -9,6 +9,7 @@ public static class NodeEndpointRouteBuilderExtensions
     public static IEndpointRouteBuilder UseConsole(this IEndpointRouteBuilder @this)
     {
         @this.MapGrpcService<SeedGrpcServiceV1>();
+        @this.MapGrpcService<ConsoleGrpcServiceV1>();
 
         return @this;
     }

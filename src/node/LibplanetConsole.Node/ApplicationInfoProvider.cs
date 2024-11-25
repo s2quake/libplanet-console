@@ -16,6 +16,7 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicatio
             StorePath = options.StorePath,
             LogPath = options.LogPath,
             ParentProcessId = options.ParentProcessId,
+            IsSingleNode = options.IsSingleNode,
         };
     }
 

@@ -17,9 +17,10 @@ namespace LibplanetConsole.Console;
 internal sealed partial class Node : INode
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly NodeOptions _nodeOptions;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
+    private readonly CriticalSection _criticalSection = new("Process");
+    private NodeOptions _nodeOptions;
     private NodeService? _nodeService;
     private BlockChainService? _blockChainService;
     private GrpcChannel? _channel;
@@ -61,7 +62,19 @@ internal sealed partial class Node : INode
 
     public int ProcessId => _process?.Id ?? -1;
 
-    public EndPoint EndPoint => _nodeOptions.EndPoint;
+    public EndPoint EndPoint
+    {
+        get => _nodeOptions.EndPoint;
+        set
+        {
+            if (IsAttached is true)
+            {
+                throw new InvalidOperationException("Node is attached.");
+            }
+
+            _nodeOptions = _nodeOptions with { EndPoint = value };
+        }
+    }
 
     public NodeInfo Info => _info;
 
@@ -117,11 +130,12 @@ internal sealed partial class Node : INode
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        if (_channel is not null)
+        if (IsAttached is true)
         {
             throw new InvalidOperationException("Node is already attached.");
         }
 
+        using var scope = _criticalSection.Scope();
         var channel = NodeChannel.CreateChannel(_nodeOptions.EndPoint);
         var nodeService = new NodeService(channel);
         var blockChainService = new BlockChainService(channel);
@@ -284,25 +298,29 @@ internal sealed partial class Node : INode
             throw new InvalidOperationException("Node process is already running.");
         }
 
-        var process = CreateProcess(options);
-        var processCancellationTokenSource = new CancellationTokenSource();
-        var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, processCancellationTokenSource.Token);
+        if (true)
+        {
+            using var scope = _criticalSection.Scope();
+            var process = CreateProcess(options);
+            var processCancellationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken, processCancellationTokenSource.Token);
 
-        _logger.LogDebug("Commands: {CommandLine}", process.ToString());
-        _processTask = process.RunAsync(cancellationTokenSource.Token)
-            .ContinueWith(
-                task =>
-                {
-                    _processTask = Task.CompletedTask;
-                    _process = null;
-                    _processCancellationTokenSource?.Dispose();
-                    _processCancellationTokenSource = null;
-                    cancellationTokenSource.Dispose();
-                },
-                cancellationToken);
-        _process = process;
-        _processCancellationTokenSource = processCancellationTokenSource;
+            _logger.LogDebug("Commands: {CommandLine}", process.ToString());
+            _processTask = process.RunAsync(cancellationTokenSource.Token)
+                .ContinueWith(
+                    task =>
+                    {
+                        _processTask = Task.CompletedTask;
+                        _process = null;
+                        _processCancellationTokenSource?.Dispose();
+                        _processCancellationTokenSource = null;
+                        cancellationTokenSource.Dispose();
+                    },
+                    cancellationToken);
+            _process = process;
+            _processCancellationTokenSource = processCancellationTokenSource;
+        }
 
         if (options.Detach is false)
         {
@@ -329,6 +347,7 @@ internal sealed partial class Node : INode
             _processCancellationTokenSource = null;
         }
 
+        using var scope = _criticalSection.Scope();
         await TaskUtility.TryWait(_processTask);
         _processTask = Task.CompletedTask;
         _process = null;

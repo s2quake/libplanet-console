@@ -57,6 +57,8 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [JsonIgnore]
     public bool NoREPL { get; set; }
 
+    public bool IsSingleNode { get; set; }
+
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     public string ActionProviderType { get; set; } = string.Empty;

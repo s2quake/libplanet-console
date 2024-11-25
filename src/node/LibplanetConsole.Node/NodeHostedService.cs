@@ -10,9 +10,9 @@ internal sealed class NodeHostedService(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         node.Contents = [.. serviceProvider.GetServices<INodeContent>()];
-        node.SeedEndPoint = options.SeedEndPoint;
-        if (options.ParentProcessId is 0)
+        if (options.SeedEndPoint is not null || options.IsSingleNode is true)
         {
+            node.SeedEndPoint = options.SeedEndPoint;
             await node.StartAsync(cancellationToken);
         }
     }

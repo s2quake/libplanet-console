@@ -13,10 +13,19 @@
     <PackageReference Include="Serilog.Sinks.File" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="3.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.64.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Logging\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Console\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Console\Protos\*.proto" GrpcServices="Client">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />

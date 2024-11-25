@@ -24,11 +24,13 @@ internal sealed class RunCommand
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console")]
+    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
     [CommandSummary("Specifies the end-point of the node to connect to")]
+    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [EndPoint]
     public string NodeEndPoint { get; init; } = string.Empty;
 
@@ -41,6 +43,11 @@ internal sealed class RunCommand
     [CommandPropertySwitch("no-repl")]
     [CommandSummary("If set, the application starts without REPL")]
     public bool NoREPL { get; init; }
+
+    [CommandProperty]
+    [CommandSummary("Specifies the end-point of the console to connect to.")]
+    [EndPoint]
+    public string ConsoleEndPoint { get; init; } = string.Empty;
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
@@ -65,12 +72,20 @@ internal sealed class RunCommand
             var services = builder.Services;
             var application = new Application(builder);
             var port = Port is 0 ? PortUtility.NextPort() : Port;
+            var consoleEndPoint = EndPointUtility.ParseOrDefault(ConsoleEndPoint);
             builder.WebHost.ConfigureKestrel(options =>
             {
                 options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
                 options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
             services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
+            if (consoleEndPoint is not null)
+            {
+                services.AddHostedService<ConsoleHostedService>(s => new(s, port, consoleEndPoint));
+                services.AddSingleton<IConfigureOptions<ApplicationOptions>>(
+                    _ => new ConsoleConfigureOptions(consoleEndPoint));
+            }
+
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)

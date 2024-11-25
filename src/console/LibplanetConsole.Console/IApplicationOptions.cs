@@ -23,4 +23,10 @@ public interface IApplicationOptions
     int BlocksyncPort { get; }
 
     int ConsensusPort { get; }
+
+    bool NoProcess { get; }
+
+    bool Detach { get; }
+
+    bool NewWindow { get; }
 }

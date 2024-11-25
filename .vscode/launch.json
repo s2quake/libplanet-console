@@ -41,6 +41,25 @@
       ]
     },
     {
+      "name": "C#: Libplanet Console - Concurrent Run",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/console/LibplanetConsole.Console.Executable/bin/Debug/net8.0/libplanet-console.dll",
+      "console": "integratedTerminal",
+      "args": [
+        "run",
+        "--log-path",
+        ".log",
+        "--port",
+        "4000",
+        "--nodes",
+        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819",
+        "--clients",
+        "9cb1c6d0b19d8481bc5be6b50206e834232e13cc25cd7798a927f7bb1b6c1bc0",
+        "--no-process"
+      ]
+    },
+    {
       "name": "C#: Libplanet Node - Initialize",
       "type": "coreclr",
       "request": "launch",
@@ -77,6 +96,24 @@
       ]
     },
     {
+      "name": "C#: Libplanet Node - Concurrent Run",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/node/LibplanetConsole.Node.Executable/bin/Debug/net8.0/libplanet-node.dll",
+      "console": "integratedTerminal",
+      "args": [
+        "run",
+        "--log-path",
+        ".log/node",
+        "--port",
+        "4010",
+        "--private-key",
+        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819",
+        "--console-end-point",
+        "localhost:4000"
+      ]
+    },
+    {
       "name": "C#: Libplanet Client - Initialize",
       "type": "coreclr",
       "request": "launch",
@@ -110,8 +147,34 @@
         "localhost:4000"
       ]
     },
+    {
+      "name": "C#: Libplanet Client - Concurrent Run",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/client/LibplanetConsole.Client.Executable/bin/Debug/net8.0/libplanet-client.dll",
+      "console": "integratedTerminal",
+      "args": [
+        "run",
+        "--log-path",
+        ".log/client",
+        "--port",
+        "4020",
+        "--private-key",
+        "9cb1c6d0b19d8481bc5be6b50206e834232e13cc25cd7798a927f7bb1b6c1bc0",
+        "--console-end-point",
+        "localhost:4000"
+      ]
+    },
   ],
   "compounds": [
+    {
+      "name": "Console - Concurrent Run",
+      "configurations": [
+        "C#: Libplanet Console - Concurrent Run",
+        "C#: Libplanet Node - Concurrent Run",
+        "C#: Libplanet Client - Concurrent Run"
+      ]
+    },
     {
       "name": "Node and Client - Start",
       "configurations": [
