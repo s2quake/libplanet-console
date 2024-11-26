@@ -42,6 +42,8 @@ internal sealed class Application
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
         services.AddClient(configuration);
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
 
         services.AddGrpc(options =>
         {
@@ -77,6 +79,8 @@ internal sealed class Application
         app.UseClient();
         app.MapGet("/", () => "Libplanet-Client");
         app.MapGrpcReflectionService().AllowAnonymous();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);

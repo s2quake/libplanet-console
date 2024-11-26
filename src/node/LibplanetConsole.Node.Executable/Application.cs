@@ -51,6 +51,8 @@ internal sealed class Application
         services.AddNode(configuration);
         services.AddExplorer(configuration);
         services.AddEvidence();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
 
         services.AddGrpc(options =>
         {
@@ -88,6 +90,8 @@ internal sealed class Application
         app.UseEvidence();
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);

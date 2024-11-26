@@ -51,6 +51,8 @@ internal sealed class Application
 
         services.AddConsole(configuration);
         services.AddEvidence();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
 
         services.AddGrpc(options =>
         {
@@ -89,6 +91,8 @@ internal sealed class Application
         app.UseConsole();
         app.MapGet("/", () => "Libplanet-Console");
         app.MapGrpcReflectionService().AllowAnonymous();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         await System.Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);
