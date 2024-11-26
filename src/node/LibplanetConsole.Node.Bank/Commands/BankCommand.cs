@@ -2,12 +2,13 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Bank.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
+using Nekoyume.Model.State;
 
 namespace LibplanetConsole.Node.Bank.Commands;
 
 [CommandSummary("Bank Commands.")]
 [Category("Bank")]
-internal sealed class BankCommand(Bank bank) : CommandMethodBase
+internal sealed class BankCommand(Bank bank, INode node) : CommandMethodBase
 {
     [CommandMethod]
     public async Task MintAsync(
@@ -61,5 +62,17 @@ internal sealed class BankCommand(Bank bank) : CommandMethodBase
         var currencies = await bank.GetCurrenciesAsync(cancellationToken);
         var currencyNames = currencies.Select(item => item.Name).ToArray();
         await Out.WriteLineAsJsonAsync(currencyNames, cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task StealAsync(
+        [FungibleAssetValue] string amount, CancellationToken cancellationToken)
+    {
+        var address = GoldCurrencyState.Address;
+        var targetAddress = node.Address;
+        var amountValue = bank.ParseFungibleAssetValue(amount);
+        var balance = await bank.TransferAsync(
+            address, targetAddress, amountValue, cancellationToken);
+        await Out.WriteLineAsJsonAsync(balance, cancellationToken);
     }
 }

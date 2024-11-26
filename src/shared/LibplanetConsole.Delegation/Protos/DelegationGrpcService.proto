@@ -11,6 +11,13 @@ service DelegationGrpcService {
   rpc Promote(PromoteRequest) returns (PromoteResponse);
 }
 
+message ValidatorInfoProto {
+  string power = 1;
+  string total_share = 2;
+  bool is_jailed = 3;
+  int64 jailed_until = 4;
+}
+
 message StakeRequest {
   int64 amount = 1;
 }

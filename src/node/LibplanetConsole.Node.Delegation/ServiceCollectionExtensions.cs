@@ -8,11 +8,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDelegation(this IServiceCollection @this)
     {
-        @this.AddSingleton<Delegation>()
-             .AddSingleton<INodeContent>(s => s.GetRequiredService<Delegation>())
-             .AddSingleton<IDelegation>(s => s.GetRequiredService<Delegation>());
+        @this.AddSingleton<Validator>()
+             .AddSingleton<INodeContent>(s => s.GetRequiredService<Validator>())
+             .AddSingleton<IValidator>(s => s.GetRequiredService<Validator>());
 
-        @this.AddSingleton<ICommand, DelegationCommand>();
+        @this.AddSingleton<ICommand, ValidatorCommand>();
         return @this;
     }
 }

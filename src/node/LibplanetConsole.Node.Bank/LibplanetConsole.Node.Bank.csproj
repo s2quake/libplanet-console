@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
+    <ProjectReference Include="..\..\..\.submodules\lib9c\Lib9c\Lib9c.csproj" />
   </ItemGroup>
 
   <ItemGroup>

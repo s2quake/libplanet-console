@@ -1,15 +1,15 @@
+using System.Numerics;
 using Lib9c;
 using Libplanet.Action.State;
 using LibplanetConsole.Node.Delegation.Actions;
-using Nekoyume;
-using Nekoyume.Action;
 using Nekoyume.Action.ValidatorDelegation;
 using Nekoyume.Model.State;
+using Nekoyume.ValidatorDelegation;
 
 namespace LibplanetConsole.Node.Delegation;
 
-internal sealed class Delegation(INode node, IBlockChain blockChain)
-    : NodeContentBase(nameof(Delegation)), IDelegation
+internal sealed class Validator(INode node, IBlockChain blockChain)
+    : NodeContentBase(nameof(Validator)), IValidator
 {
     private Currency? _goldCurrency;
 
@@ -28,6 +28,41 @@ internal sealed class Delegation(INode node, IBlockChain blockChain)
         var fav = Currencies.GuildGold * amount;
         var promoteValidator = new PromoteValidator(publicKey, fav);
         await blockChain.SendTransactionAsync([promoteValidator], cancellationToken);
+    }
+
+    public async Task UnjailAsync(CancellationToken cancellationToken)
+    {
+        var unjailValidator = new UnjailValidator();
+        await blockChain.SendTransactionAsync([unjailValidator], cancellationToken);
+    }
+
+    public async Task DelegateAsync(FungibleAssetValue amount, CancellationToken cancellationToken)
+    {
+        var delegateAction = new DelegateValidator(amount);
+        await node.SendTransactionAsync([delegateAction], cancellationToken);
+    }
+
+    public async Task UndelegateAsync(BigInteger share, CancellationToken cancellationToken)
+    {
+        var undelegateAction = new UndelegateValidator(share);
+        await node.SendTransactionAsync([undelegateAction], cancellationToken);
+    }
+
+    public Task<ValidatorInfo> GetInfoAsync(CancellationToken cancellationToken)
+    {
+        var worldState = blockChain.GetWorldState();
+        var world = new World(worldState);
+        var repository = new ValidatorRepository(world, new DummayActionContext());
+        var delegatee = repository.GetValidatorDelegatee(node.Address);
+        var info = new ValidatorInfo
+        {
+            Power = delegatee.Power.ToString("N0"),
+            TotalShare = delegatee.TotalShares.ToString("N0"),
+            IsJailed = delegatee.Jailed,
+            JailedUntil = delegatee.JailedUntil,
+        };
+
+        return Task.FromResult(info);
     }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)

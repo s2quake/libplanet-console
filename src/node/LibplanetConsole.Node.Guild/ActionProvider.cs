@@ -53,7 +53,7 @@ internal sealed class ActionProvider : IActionProvider
     public IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
-            .Select(item => new Validator(item, DefaultPower))
+            .Select((item, i) => new Validator(item, i == 0 ? DefaultPower * 1000 : DefaultPower * 10))
             .ToArray();
         var action = new InitializeWorld
         {
