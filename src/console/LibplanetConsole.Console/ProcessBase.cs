@@ -260,7 +260,7 @@ public abstract class ProcessBase
     private ProcessStartInfo GetProcessStartInfoOnWindows()
     {
         var filename = $"\"{GetFileName()}\"";
-        var arguments = CommandUtility.Join(GetArguments()).Replace("\"", "`\"");
+        var arguments = CommandUtility.Join(GetArguments());
         var scriptList = new List<string>
         {
             $"Invoke-Expression '& {filename} {arguments}'",
