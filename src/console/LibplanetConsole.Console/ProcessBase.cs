@@ -243,13 +243,15 @@ public abstract class ProcessBase
             FileName = "/usr/bin/osascript",
             ArgumentList =
             {
-                "-e",
-                "tell application \"Terminal\"",
-                "-e",
+                $"-e",
+                $"tell application \"Terminal\"",
+                $"-e",
+                $"  activate",
+                $"-e",
+                $"  delay 1",
+                $"-e",
                 $"  do script \"{filename} {arguments}; exit\"",
-                "-e",
-                $"activate",
-                "-e",
+                $"-e",
                 $"end tell",
             },
         };
