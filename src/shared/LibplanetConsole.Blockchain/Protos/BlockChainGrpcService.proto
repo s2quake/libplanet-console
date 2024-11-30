@@ -4,8 +4,6 @@ option csharp_namespace = "LibplanetConsole.Grpc.Blockchain";
 
 package libplanet.console.blockchain.v1;
 
-import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
-
 service BlockChainGrpcService {
   rpc SendTransaction(SendTransactionRequest) returns (SendTransactionResponse);
   rpc GetNextNonce(GetNextNonceRequest) returns (GetNextNonceResponse);
@@ -19,19 +17,19 @@ service BlockChainGrpcService {
 
 message BlockInfoProto {
   int64 height = 1;
-  libplanet.console.types.v1.BlockHashProto hash = 2;
-  libplanet.console.types.v1.AddressProto miner = 3;
+  string hash = 2;
+  string miner = 3;
 }
 message SendTransactionRequest {
   bytes transaction_data = 1;
 }
 
 message SendTransactionResponse {
-  libplanet.console.types.v1.TxIdProto tx_id = 1;
+  string tx_id = 1;
 }
 
 message GetNextNonceRequest {
-  libplanet.console.types.v1.AddressProto address = 1;
+  string address = 1;
 }
 
 message GetNextNonceResponse {
@@ -42,17 +40,17 @@ message GetTipHashRequest {
 }
 
 message GetTipHashResponse {
-  libplanet.console.types.v1.BlockHashProto block_hash = 1;
+  string block_hash = 1;
 }
 
 message GetStateRequest {
   oneof identifier {
     int64 height = 1;
-    libplanet.console.types.v1.BlockHashProto block_hash = 2;
-    libplanet.console.types.v1.HashDigest256Proto state_root_hash = 3;
+    string block_hash = 2;
+    string state_root_hash = 3;
   }
-  libplanet.console.types.v1.AddressProto account_address = 4;
-  libplanet.console.types.v1.AddressProto address = 5;
+  string account_address = 4;
+  string address = 5;
 }
 
 message GetStateResponse {
@@ -64,11 +62,11 @@ message GetBlockHashRequest {
 }
 
 message GetBlockHashResponse {
-  libplanet.console.types.v1.BlockHashProto block_hash = 1;
+  string block_hash = 1;
 }
 
 message GetActionRequest {
-  libplanet.console.types.v1.TxIdProto tx_id = 1;
+  string tx_id = 1;
   int32 action_index = 2;
 }
 

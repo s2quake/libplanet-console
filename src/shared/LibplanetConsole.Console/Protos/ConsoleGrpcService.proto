@@ -4,8 +4,6 @@ option csharp_namespace = "LibplanetConsole.Grpc.Console";
 
 package libplanet.console.console.v1;
 
-import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
-
 service ConsoleGrpcService {
   rpc GetNodeSettings(GetNodeSettingsRequest) returns (GetNodeSettingsResponse);
   rpc GetClientSettings(GetClientSettingsRequest) returns (GetClientSettingsResponse);
@@ -33,7 +31,7 @@ message GetClientSettingsResponse {
 
 message AttachNodeRequest {
   int32 process_id = 1;
-  libplanet.console.types.v1.AddressProto address = 2;
+  string address = 2;
   string end_point = 3;
 }
 
@@ -43,7 +41,7 @@ message AttachNodeResponse {
 
 message AttachClientRequest {
   int32 process_id = 1;
-  libplanet.console.types.v1.AddressProto address = 2;
+  string address = 2;
   string end_point = 3;
 }
 
