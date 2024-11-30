@@ -5,53 +5,28 @@ namespace LibplanetConsole.Grpc;
 
 public static class TypeUtility
 {
-    private static readonly Codec _codec = new();
+    public static string ToGrpc(Address address) => address.ToHex();
 
-    public static AddressProto ToGrpc(Address address)
-        => new() { Bytes = ByteString.CopyFrom([.. address.ByteArray]) };
+    public static string ToGrpc(BlockHash blockHash) => blockHash.ToString();
 
-    public static BlockHashProto ToGrpc(BlockHash blockHash)
-        => new() { Bytes = ByteString.CopyFrom([.. blockHash.ByteArray]) };
+    public static string ToGrpc(TxId txId) => txId.ToHex();
 
-    public static TxIdProto ToGrpc(TxId txId)
-        => new() { Bytes = ByteString.CopyFrom(txId.ToByteArray()) };
+    public static string ToGrpc(PublicKey publicKey) => publicKey.ToHex(compress: false);
 
-    public static PublicKeyProto ToGrpc(PublicKey publicKey)
-        => new() { Bytes = ByteString.CopyFrom(publicKey.Format(compress: false)) };
+    public static string ToGrpc(HashDigest<SHA256> hashDigest) => hashDigest.ToString();
 
-    public static HashDigest256Proto ToGrpc(HashDigest<SHA256> hashDigest)
-        => new() { Bytes = ByteString.CopyFrom(hashDigest.ToByteArray()) };
+    public static ByteString ToGrpc(byte[] bytes) => ByteString.CopyFrom(bytes);
 
-    public static FungibleAssetValueProto ToGrpc(FungibleAssetValue value)
-        => new() { Bytes = ByteString.CopyFrom(_codec.Encode(value.Serialize())) };
+    public static Address ToAddress(string address) => new(address);
 
-    public static CurrencyProto ToGrpc(Currency currency)
-        => new() { Bytes = ByteString.CopyFrom(_codec.Encode(currency.Serialize())) };
+    public static BlockHash ToBlockHash(string blockHash) => BlockHash.FromString(blockHash);
 
-    public static ByteString ToGrpc(byte[] bytes)
-        => ByteString.CopyFrom(bytes);
+    public static TxId ToTxId(string txId) => TxId.FromHex(txId);
 
-    public static Address ToAddress(AddressProto address)
-        => new(address.Bytes.ToByteArray());
+    public static PublicKey ToPublicKey(string publicKey) => PublicKey.FromHex(publicKey);
 
-    public static BlockHash ToBlockHash(BlockHashProto blockHash)
-        => new(blockHash.Bytes.ToByteArray());
+    public static HashDigest<SHA256> ToHashDigest256(string hashDigest)
+        => HashDigest<SHA256>.FromString(hashDigest);
 
-    public static TxId ToTxId(TxIdProto txId)
-        => new(txId.Bytes.ToByteArray());
-
-    public static PublicKey ToPublicKey(PublicKeyProto publicKey)
-        => new(publicKey.Bytes.ToByteArray());
-
-    public static HashDigest<SHA256> ToHashDigest256(HashDigest256Proto hashDigest)
-        => new(hashDigest.Bytes.ToByteArray());
-
-    public static byte[] ToByteArray(ByteString byteString)
-        => byteString.ToByteArray();
-
-    public static FungibleAssetValue ToFungibleAssetValue(FungibleAssetValueProto value)
-        => new(_codec.Decode(value.Bytes.ToByteArray()));
-
-    public static Currency ToCurrency(CurrencyProto currency)
-        => new(_codec.Decode(currency.Bytes.ToByteArray()));
+    public static byte[] ToByteArray(ByteString byteString) => byteString.ToByteArray();
 }
