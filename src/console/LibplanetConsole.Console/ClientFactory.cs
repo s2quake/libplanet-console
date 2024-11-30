@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using LibplanetConsole.Common;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
@@ -46,8 +47,14 @@ internal static class ClientFactory
         var scopedServiceProvider = serviceScope.ServiceProvider;
         var key = IClient.Key;
         var client = scopedServiceProvider.GetRequiredKeyedService<Client>(key);
-        client.Contents = [.. scopedServiceProvider.GetKeyedServices<IClientContent>(key)];
+        client.Contents = GetClientContents(scopedServiceProvider, key);
         return client;
+    }
+
+    private static IClientContent[] GetClientContents(IServiceProvider serviceProvider, string key)
+    {
+        var contents = serviceProvider.GetKeyedServices<IClientContent>(key);
+        return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 
     private sealed record class Descriptor

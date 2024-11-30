@@ -7,6 +7,8 @@ public abstract class NodeContentBase(string name) : INodeContent, IDisposable
 
     public string Name => _name != string.Empty ? _name : GetType().Name;
 
+    public virtual IEnumerable<INodeContent> Dependencies => [];
+
     void IDisposable.Dispose()
     {
         OnDispose(disposing: true);

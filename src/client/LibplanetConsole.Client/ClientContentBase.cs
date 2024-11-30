@@ -12,6 +12,8 @@ public abstract class ClientContentBase(string name) : IClientContent, IDisposab
 
     public string Name => _name != string.Empty ? _name : GetType().Name;
 
+    public virtual IEnumerable<IClientContent> Dependencies => [];
+
     void IDisposable.Dispose()
     {
         OnDispose(disposing: true);
