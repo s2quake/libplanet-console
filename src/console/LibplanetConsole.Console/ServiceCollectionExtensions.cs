@@ -28,12 +28,14 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<SeedService>()
             .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
         @this.AddSingleton<NodeCollection>()
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<NodeCollection>())
             .AddSingleton<INodeCollection>(s => s.GetRequiredService<NodeCollection>());
         @this.AddSingleton<ClientCollection>()
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<ClientCollection>())
             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>());
-        @this.AddSingleton<BlockChain>()
-            .AddSingleton<IBlockChain>(s => s.GetRequiredService<BlockChain>())
-            .AddSingleton<IConsole>(s => s.GetRequiredService<BlockChain>());
+        @this.AddSingleton<ConsoleHost>()
+            .AddSingleton<IBlockChain>(s => s.GetRequiredService<ConsoleHost>())
+            .AddSingleton<IConsole>(s => s.GetRequiredService<ConsoleHost>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
 
