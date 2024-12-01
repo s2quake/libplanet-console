@@ -11,6 +11,8 @@ internal sealed class Evidence(INode node) : IEvidence, INodeContent, IAsyncDisp
 
     public string Name => nameof(Evidence);
 
+    public IEnumerable<INodeContent> Dependencies => [];
+
     public async Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
     {
         var blockChain = node.GetRequiredService<BlockChain>();

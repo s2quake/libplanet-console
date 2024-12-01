@@ -1,3 +1,4 @@
+using LibplanetConsole.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -9,7 +10,7 @@ internal sealed class ClientHostedService(
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        client.Contents = [.. serviceProvider.GetServices<IClientContent>()];
+        client.Contents = GetClientContents(serviceProvider);
         if (options.NodeEndPoint is not null)
         {
             client.NodeEndPoint = options.NodeEndPoint;
@@ -23,5 +24,11 @@ internal sealed class ClientHostedService(
         {
             await client.StopAsync(cancellationToken);
         }
+    }
+
+    private static IClientContent[] GetClientContents(IServiceProvider serviceProvider)
+    {
+        var contents = serviceProvider.GetServices<IClientContent>();
+        return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 }
