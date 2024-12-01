@@ -1,4 +1,3 @@
-using System.Collections.Specialized;
 using LibplanetConsole.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 
@@ -27,7 +26,8 @@ internal sealed partial class ConsoleHost : IConsole, IDisposable
         _privateKey = options.PrivateKey;
         _genesisHash = options.GenesisBlock.Hash;
         _logger = logger;
-        _nodes.CollectionChanged += Nodes_CollectionChanged;
+        _node = _nodes.Current;
+        _nodes.CurrentChanged += Nodes_CurrentChanged;
     }
 
     public event EventHandler? Started;
@@ -129,79 +129,29 @@ internal sealed partial class ConsoleHost : IConsole, IDisposable
     {
         if (_isDisposed is false)
         {
-            _nodes.CollectionChanged -= Nodes_CollectionChanged;
+            _nodes.CurrentChanged -= Nodes_CurrentChanged;
             _isDisposed = true;
         }
     }
 
-    private void Nodes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void Nodes_CurrentChanged(object? sender, EventArgs e)
     {
-        switch (e.Action)
+        if (_node is not null)
         {
-            case NotifyCollectionChangedAction.Add:
-                if (e.NewItems is not null)
-                {
-                    foreach (Node node in e.NewItems)
-                    {
-                        node.BlockAppended += Node_BlockAppended;
-                        node.Started += Node_Started;
-                        node.Stopped += Node_Stopped;
-                    }
-                }
+            _node.BlockAppended -= Node_BlockAppended;
+        }
 
-                break;
-            case NotifyCollectionChangedAction.Remove:
-                if (e.OldItems is not null)
-                {
-                    foreach (Node node in e.OldItems)
-                    {
-                        node.BlockAppended -= Node_BlockAppended;
-                        node.Started -= Node_Started;
-                        node.Stopped -= Node_Stopped;
-                    }
-                }
+        _node = _nodes.Current;
 
-                break;
+        if (_node is not null)
+        {
+            _node.BlockAppended += Node_BlockAppended;
         }
     }
 
     private void Node_BlockAppended(object? sender, BlockEventArgs e)
     {
-        if (e.BlockInfo.Height > Tip.Height)
-        {
-            Tip = e.BlockInfo;
-            BlockAppended?.Invoke(sender, e);
-        }
-    }
-
-    private void Node_Started(object? sender, EventArgs e)
-    {
-        _node = GetRandomNode();
-    }
-
-    private void Node_Stopped(object? sender, EventArgs e)
-    {
-        _node = GetRandomNode();
-    }
-
-    private Node? GetRandomNode()
-    {
-        var nodeList = new List<Node>(_nodes.Count);
-        for (var i = 0; i < _nodes.Count; i++)
-        {
-            var node = _nodes[i];
-            if (node.IsRunning is true)
-            {
-                nodeList.Add(node);
-            }
-        }
-
-        if (nodeList.Count is 0)
-        {
-            return null;
-        }
-
-        var index = Random.Shared.Next(nodeList.Count);
-        return nodeList[index];
+        Tip = e.BlockInfo;
+        BlockAppended?.Invoke(sender, e);
     }
 }
