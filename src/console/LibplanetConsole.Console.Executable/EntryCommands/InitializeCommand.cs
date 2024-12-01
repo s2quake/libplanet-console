@@ -27,6 +27,11 @@ internal sealed class InitializeCommand : CommandAsyncBase
     [NonNegative]
     public int Port { get; set; }
 
+    [CommandProperty]
+    [CommandSummary("Specifies the private key of the genesis")]
+    [PrivateKey]
+    public string PrivateKey { get; set; } = string.Empty;
+
 #if DEBUG
     [CommandProperty(InitValue = 1)]
 #else
@@ -60,12 +65,6 @@ internal sealed class InitializeCommand : CommandAsyncBase
     [CommandPropertySwitch("quiet", 'q')]
     [CommandSummary("If set, the command will not output any information")]
     public bool Quiet { get; set; }
-
-    [CommandProperty]
-    [CommandSummary("Specifies the private key of the genesis block")]
-    [PrivateKey]
-    [Category("Genesis")]
-    public string GenesisKey { get; set; } = string.Empty;
 
     [CommandProperty("timestamp")]
     [CommandSummary("Specifies the timestamp of the genesis block")]
@@ -124,7 +123,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
     {
         using var progress = new CommandProgress();
         var portGenerator = new PortGenerator(Port);
-        var genesisKey = PrivateKeyUtility.ParseOrRandom(GenesisKey);
+        var genesisKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var ports = portGenerator.Next();
         var nodeOptions = GetNodeOptions(portGenerator, ports);
         var clientOptions = GetClientOptions(portGenerator);
@@ -142,6 +141,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
         var apvPrivateKey = PrivateKeyUtility.ParseOrRandom(APVPrivateKey);
         var repository = new Repository(ports, nodeOptions, clientOptions)
         {
+            PrivateKey = genesisKey,
             Port = Port,
             Genesis = Repository.CreateGenesis(genesisOptions),
             AppProtocolVersion = Repository.CreateAppProtocolVersion(

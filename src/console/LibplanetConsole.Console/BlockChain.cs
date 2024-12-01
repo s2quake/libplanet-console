@@ -5,16 +5,21 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-internal sealed class BlockChain : IBlockChain, IDisposable
+internal sealed class BlockChain : IBlockChain, IDisposable, IConsole
 {
-    private readonly INodeCollection _nodes;
+    private readonly NodeCollection _nodes;
+    private readonly PrivateKey _privateKey;
+    private readonly BlockHash _genesisHash;
     private readonly ILogger<BlockChain> _logger;
     private IBlockChain? _blockChain;
+    private Node? _node;
     private bool _isDisposed;
 
-    public BlockChain(NodeCollection nodes, ILogger<BlockChain> logger)
+    public BlockChain(NodeCollection nodes, IApplicationOptions options, ILogger<BlockChain> logger)
     {
         _nodes = nodes;
+        _privateKey = options.PrivateKey;
+        _genesisHash = options.GenesisBlock.Hash;
         _logger = logger;
         UpdateCurrent(_nodes.Current);
         _nodes.CurrentChanged += Nodes_CurrentChanged;
@@ -41,15 +46,26 @@ internal sealed class BlockChain : IBlockChain, IDisposable
         }
     }
 
-    Task<TxId> IBlockChain.SendTransactionAsync(
+    public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        if (IsRunning is false || _blockChain is null)
+        if (IsRunning is false || _blockChain is null || _node is null)
         {
             throw new InvalidOperationException("BlockChain is not running.");
         }
 
-        return _blockChain.SendTransactionAsync(actions, cancellationToken);
+        var privateKey = _privateKey;
+        var genesisHash = _genesisHash;
+        var nonce = await _blockChain.GetNextNonceAsync(privateKey.Address, cancellationToken);
+        var values = actions.Select(item => item.PlainValue).ToArray();
+        var transaction = Transaction.Create(
+            nonce: nonce,
+            privateKey: privateKey,
+            genesisHash: genesisHash,
+            actions: new TxActionList(values));
+
+        await _node.SendTransactionAsync(transaction, cancellationToken);
+        return transaction.Id;
     }
 
     Task<long> IBlockChain.GetNextNonceAsync(
@@ -128,7 +144,7 @@ internal sealed class BlockChain : IBlockChain, IDisposable
         return _blockChain.GetActionAsync<T>(txId, actionIndex, cancellationToken);
     }
 
-    private void UpdateCurrent(INode? node)
+    private void UpdateCurrent(Node? node)
     {
         if (_blockChain is not null)
         {
@@ -144,6 +160,7 @@ internal sealed class BlockChain : IBlockChain, IDisposable
             }
         }
 
+        _node = node;
         _blockChain = node?.GetKeyedService<IBlockChain>(INode.Key);
 
         if (_blockChain is not null)

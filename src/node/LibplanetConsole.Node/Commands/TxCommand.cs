@@ -5,7 +5,7 @@ using LibplanetConsole.Common.Extensions;
 namespace LibplanetConsole.Node.Commands;
 
 [CommandSummary("Sends a transaction using a string")]
-internal sealed class TxCommand(INode node, IBlockChain blockChain) : CommandAsyncBase
+internal sealed class TxCommand(INode node) : CommandAsyncBase
 {
     [CommandPropertyRequired]
     [CommandSummary("Specifies the text to send")]
@@ -17,7 +17,7 @@ internal sealed class TxCommand(INode node, IBlockChain blockChain) : CommandAsy
         {
             Value = Text,
         };
-        await blockChain.SendTransactionAsync([action], cancellationToken);
+        await node.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{node.Address.ToShortString()}: {Text}");
     }
 }

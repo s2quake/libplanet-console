@@ -32,7 +32,8 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ClientCollection>()
             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>());
         @this.AddSingleton<BlockChain>()
-            .AddSingleton<IBlockChain>(s => s.GetRequiredService<BlockChain>());
+            .AddSingleton<IBlockChain>(s => s.GetRequiredService<BlockChain>())
+            .AddSingleton<IConsole>(s => s.GetRequiredService<BlockChain>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
 

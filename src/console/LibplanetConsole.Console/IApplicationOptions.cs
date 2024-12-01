@@ -4,6 +4,8 @@ namespace LibplanetConsole.Console;
 
 public interface IApplicationOptions
 {
+    PrivateKey PrivateKey { get; }
+
     NodeOptions[] Nodes { get; }
 
     ClientOptions[] Clients { get; }

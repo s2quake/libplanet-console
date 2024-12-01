@@ -22,8 +22,6 @@ public interface IBlockChain
 
     BlockInfo Tip { get; }
 
-    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
-
     Task<long> GetNextNonceAsync(Address address, CancellationToken cancellationToken);
 
     Task<IValue> GetStateAsync(

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
@@ -21,6 +22,11 @@ internal sealed class RunCommand
     [CommandSummary("Specifies the port of the libplanet-console")]
     [NonNegative]
     public int Port { get; init; }
+
+    [CommandProperty]
+    [CommandSummary("Specifies the private key for the genesis")]
+    [PrivateKey]
+    public string PrivateKey { get; init; } = string.Empty;
 
 #if DEBUG
     [CommandProperty(InitValue = 1)]
@@ -111,11 +117,14 @@ internal sealed class RunCommand
         var ports = _ports ?? throw new InvalidOperationException("PortGroup is not initialized.");
         var nodeOptions = GetNodeOptions(GetNodes(), portGenerator);
         var clientOptions = GetClientOptions(GetClients(), portGenerator);
+        var privateKey = PrivateKeyUtility.ParseOrRandom(PrivateKey);
         var repository = new Repository(ports, nodeOptions, clientOptions)
         {
+            PrivateKey = privateKey,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
         };
+        options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
         options.LogPath = GetFullPath(LogPath);
         options.Nodes = repository.Nodes;
         options.Clients = repository.Clients;
@@ -134,7 +143,7 @@ internal sealed class RunCommand
         if (options.Genesis == string.Empty && options.GenesisPath == string.Empty)
         {
             var genesis = repository.CreateGenesis(
-                genesisKey: new PrivateKey(), DateTimeOffset.UtcNow);
+                genesisKey: privateKey, DateTimeOffset.UtcNow);
             options.Genesis = ByteUtil.Hex(genesis);
         }
 

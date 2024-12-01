@@ -29,6 +29,8 @@ public sealed record class Repository
         Clients = clients;
     }
 
+    public required PrivateKey PrivateKey { get; init; }
+
     public int Port { get; set; }
 
     public NodeOptions[] Nodes { get; } = [];
@@ -187,6 +189,7 @@ public sealed record class Repository
         var consensusPort = ConsensusPort is not 0 ? ConsensusPort : _ports[5];
         var applicationOptions = new ApplicationOptions
         {
+            PrivateKey = PrivateKeyUtility.ToString(PrivateKey),
             GenesisPath = PathUtility.GetRelativePath(settingsPath, genesisPath),
             AppProtocolVersionPath = PathUtility.GetRelativePath(
                 settingsPath, appProtocolVersionPath),

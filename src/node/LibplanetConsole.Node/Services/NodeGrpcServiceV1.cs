@@ -15,9 +15,7 @@ internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase, I
     private bool _isDisposed;
 
     public NodeGrpcServiceV1(
-        IHostApplicationLifetime applicationLifetime,
-        Node node,
-        ILogger<NodeGrpcServiceV1> logger)
+        IHostApplicationLifetime applicationLifetime, Node node, ILogger<NodeGrpcServiceV1> logger)
     {
         _applicationLifetime = applicationLifetime;
         _node = node;
