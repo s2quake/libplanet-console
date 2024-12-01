@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using Libplanet.Net;
+using LibplanetConsole.Common;
+using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Console;
@@ -11,8 +13,14 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public const int SeedBlocksyncPortIncrement = 6;
     public const int SeedConsensusPortIncrement = 7;
 
+    private PrivateKey? _privateKey;
     private Block? _genesisBlock;
     private AppProtocolVersion? _appProtocolVersion;
+
+    [PrivateKey]
+    public string PrivateKey { get; set; } = string.Empty;
+
+    PrivateKey IApplicationOptions.PrivateKey => ActualPrivateKey;
 
     [JsonIgnore]
     public NodeOptions[] Nodes { get; set; } = [];
@@ -53,6 +61,9 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     ProcessOptions? IApplicationOptions.ProcessOptions
         => NoProcess ? null : new ProcessOptions { Detach = Detach, NewWindow = NewWindow, };
+
+    private PrivateKey ActualPrivateKey
+            => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 
     private Block GetGenesisBlock()
     {

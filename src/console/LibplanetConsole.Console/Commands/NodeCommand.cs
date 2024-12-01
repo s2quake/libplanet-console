@@ -116,9 +116,8 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     {
         var address = Address;
         var node = nodes.GetNodeOrCurrent(address);
-        var blockChain = node.GetRequiredService<IBlockChain>();
         var action = new StringAction { Value = text };
-        await blockChain.SendTransactionAsync([action], cancellationToken);
+        await node.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{node.Address.ToShortString()}: {text}");
     }
 

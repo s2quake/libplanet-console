@@ -55,6 +55,22 @@ internal sealed partial class Node : IBlockChain
         return ToTxId(response.TxId);
     }
 
+    public async Task SendTransactionAsync(
+        Transaction transaction, CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new SendTransactionRequest
+        {
+            TransactionData = ToGrpc(transaction.Serialize()),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        await _blockChainService.SendTransactionAsync(request, callOptions);
+    }
+
     public async Task<BlockHash> GetTipHashAsync(CancellationToken cancellationToken)
     {
         if (_blockChainService is null)

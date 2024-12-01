@@ -9,12 +9,13 @@ public static partial class BlockUtility
         GenesisOptions genesisOptions)
     {
         var genesisKey = genesisOptions.GenesisKey;
+        var genesisAddress = genesisKey.Address;
         var validators = genesisOptions.Validators;
         var timestamp = genesisOptions.Timestamp;
         var actionLoaderProvider = ModuleLoader.LoadActionLoader(
             genesisOptions.ActionProviderModulePath,
             genesisOptions.ActionProviderType);
-        var actions = actionLoaderProvider.GetGenesisActions(genesisKey, validators);
+        var actions = actionLoaderProvider.GetGenesisActions(genesisAddress, validators);
         var genesisBlock = CreateGenesisBlock(genesisKey, timestamp, actions);
 
         return genesisBlock;

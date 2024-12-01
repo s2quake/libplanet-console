@@ -42,4 +42,6 @@ public interface INode : IAddressable, IAsyncDisposable, IKeyedServiceProvider, 
     Task StopAsync(CancellationToken cancellationToken);
 
     string GetCommandLine();
+
+    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }

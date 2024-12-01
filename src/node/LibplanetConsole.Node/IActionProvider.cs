@@ -12,7 +12,7 @@ public interface IActionProvider
 
     ImmutableArray<IAction> EndTxActions { get; }
 
-    IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys);
+    IAction[] GetGenesisActions(Address genesisAddress, PublicKey[] validatorKeys);
 
     IActionLoader GetActionLoader();
 }

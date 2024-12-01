@@ -122,9 +122,8 @@ public sealed partial class ClientCommand(
     {
         var address = Address;
         var client = clients.GetClientOrCurrent(address);
-        var blockChain = client.GetRequiredService<IBlockChain>();
         var action = new StringAction { Value = text };
-        await blockChain.SendTransactionAsync([action], cancellationToken);
+        await client.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
     }
 

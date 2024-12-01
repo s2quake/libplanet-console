@@ -22,16 +22,14 @@ internal sealed class TxCommand(INodeCollection nodes, IClientCollection clients
         var text = Text;
         if (addressable is INode node)
         {
-            var blockChain = node.GetRequiredService<IBlockChain>();
             var action = new StringAction { Value = text };
-            await blockChain.SendTransactionAsync([action], cancellationToken);
+            await node.SendTransactionAsync([action], cancellationToken);
             await Out.WriteLineAsync($"{node.Address.ToShortString()}: {text}");
         }
         else if (addressable is IClient client)
         {
-            var blockChain = client.GetRequiredService<IBlockChain>();
             var action = new StringAction { Value = text };
-            await blockChain.SendTransactionAsync([action], cancellationToken);
+            await client.SendTransactionAsync([action], cancellationToken);
             await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
         }
         else

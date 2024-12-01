@@ -23,4 +23,6 @@ public interface IClient : IVerifier
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
+
+    Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
 }
