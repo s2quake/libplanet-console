@@ -8,7 +8,7 @@ namespace LibplanetConsole.Console;
 internal sealed class ClientCollection(
     IServiceProvider serviceProvider,
     IApplicationOptions options)
-    : IEnumerable<Client>, IClientCollection
+    : ConsoleContentBase("clients"), IEnumerable<Client>, IClientCollection
 {
     private static readonly object LockObject = new();
     private readonly List<Client> _clientList = new(options.Clients.Length);
@@ -119,37 +119,6 @@ internal sealed class ClientCollection(
         await client.AttachAsync(cancellationToken);
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            for (var i = 0; i < _clientList.Capacity; i++)
-            {
-                var client = ClientFactory.CreateNew(serviceProvider, options.Clients[i]);
-                InsertClient(client);
-            }
-
-            Current = _clientList.FirstOrDefault();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error occurred while starting clients.");
-        }
-
-        await Task.CompletedTask;
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        for (var i = _clientList.Count - 1; i >= 0; i--)
-        {
-            var client = _clientList[i]!;
-            client.Disposed -= Client_Disposed;
-            await ClientFactory.DisposeScopeAsync(client);
-            _logger.LogDebug("Disposed a client: {Address}", client.Address);
-        }
-    }
-
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         for (var i = 0; i < _clientList.Count; i++)
@@ -193,6 +162,37 @@ internal sealed class ClientCollection(
 
     IEnumerator IEnumerable.GetEnumerator()
         => _clientList.GetEnumerator();
+
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            for (var i = 0; i < _clientList.Capacity; i++)
+            {
+                var client = ClientFactory.CreateNew(serviceProvider, options.Clients[i]);
+                InsertClient(client);
+            }
+
+            Current = _clientList.FirstOrDefault();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while starting clients.");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    protected override async Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        for (var i = _clientList.Count - 1; i >= 0; i--)
+        {
+            var client = _clientList[i]!;
+            client.Disposed -= Client_Disposed;
+            await ClientFactory.DisposeScopeAsync(client);
+            _logger.LogDebug("Disposed a client: {Address}", client.Address);
+        }
+    }
 
     private void Client_Disposed(object? sender, EventArgs e)
     {

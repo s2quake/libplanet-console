@@ -1,28 +1,25 @@
 using LibplanetConsole.Common;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
 internal sealed class ConsoleHostedService(
+    IServiceProvider serviceProvider,
     SeedService seedService,
-    NodeCollection nodes,
-    ClientCollection clients,
-    IHostApplicationLifetime applicationLifetime,
-    ApplicationInfoProvider applicationInfoProvider,
-    ILogger<ConsoleHostedService> logger)
+    ConsoleHost console,
+    IHostApplicationLifetime applicationLifetime)
     : IHostedService
 {
     private CancellationTokenSource? _cancellationTokenSource;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        applicationLifetime.ApplicationStarted.Register(Initialize);
+        console.Contents = GetConsoleContents(serviceProvider);
+        applicationLifetime.ApplicationStarted.Register(
+            async () => await console.InitializeAsync());
         await seedService.StartAsync(cancellationToken);
-        await nodes.StartAsync(cancellationToken);
-        await clients.StartAsync(cancellationToken);
-
-        await Task.CompletedTask;
+        await console.StartAsync(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -34,27 +31,13 @@ internal sealed class ConsoleHostedService(
             _cancellationTokenSource = null;
         }
 
-        await clients.StopAsync(cancellationToken);
-        await nodes.StopAsync(cancellationToken);
+        await console.StopAsync(cancellationToken);
         await seedService.StopAsync(cancellationToken);
     }
 
-    private async void Initialize()
+    private static IConsoleContent[] GetConsoleContents(IServiceProvider serviceProvider)
     {
-        _cancellationTokenSource = new();
-        try
-        {
-            logger.LogDebug(JsonUtility.Serialize(applicationInfoProvider.Info));
-            await nodes.InitializeAsync(_cancellationTokenSource.Token);
-            await clients.InitializeAsync(_cancellationTokenSource.Token);
-        }
-        catch (OperationCanceledException e)
-        {
-            logger.LogDebug(e, "The console was canceled.");
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "An error occurred while starting the console.");
-        }
+        var contents = serviceProvider.GetServices<IConsoleContent>();
+        return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 }

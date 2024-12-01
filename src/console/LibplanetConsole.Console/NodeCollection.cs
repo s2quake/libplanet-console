@@ -8,7 +8,7 @@ namespace LibplanetConsole.Console;
 internal sealed class NodeCollection(
     IServiceProvider serviceProvider,
     IApplicationOptions options)
-    : IEnumerable<Node>, INodeCollection
+    : ConsoleContentBase("nodes"), IEnumerable<Node>, INodeCollection
 {
     private static readonly object LockObject = new();
     private readonly List<Node> _nodeList = new(options.Nodes.Length);
@@ -118,37 +118,6 @@ internal sealed class NodeCollection(
         await node.AttachAsync(cancellationToken);
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            for (var i = 0; i < _nodeList.Capacity; i++)
-            {
-                var node = NodeFactory.CreateNew(serviceProvider, options.Nodes[i]);
-                InsertNode(node);
-            }
-
-            Current = _nodeList.FirstOrDefault();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error occurred while starting nodes.");
-        }
-
-        await Task.CompletedTask;
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        for (var i = _nodeList.Count - 1; i >= 0; i--)
-        {
-            var node = _nodeList[i]!;
-            node.Disposed -= Node_Disposed;
-            await NodeFactory.DisposeScopeAsync(node);
-            _logger.LogDebug("Disposed a client: {Address}", node.Address);
-        }
-    }
-
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         for (var i = 0; i < _nodeList.Count; i++)
@@ -202,6 +171,37 @@ internal sealed class NodeCollection(
 
         var nodeIndex = Random.Shared.Next(Count);
         return _nodeList[nodeIndex];
+    }
+
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            for (var i = 0; i < _nodeList.Capacity; i++)
+            {
+                var node = NodeFactory.CreateNew(serviceProvider, options.Nodes[i]);
+                InsertNode(node);
+            }
+
+            Current = _nodeList.FirstOrDefault();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while starting nodes.");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    protected override async Task OnStopAsync(CancellationToken cancellationToken)
+    {
+        for (var i = _nodeList.Count - 1; i >= 0; i--)
+        {
+            var node = _nodeList[i]!;
+            node.Disposed -= Node_Disposed;
+            await NodeFactory.DisposeScopeAsync(node);
+            _logger.LogDebug("Disposed a client: {Address}", node.Address);
+        }
     }
 
     private void Node_Disposed(object? sender, EventArgs e)
