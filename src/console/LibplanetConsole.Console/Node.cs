@@ -107,7 +107,7 @@ internal sealed partial class Node : INode
         throw new InvalidOperationException("Service provider does not support keyed service.");
     }
 
-    public override string ToString() => $"{Address}: {EndPointUtility.ToString(EndPoint)}";
+    public override string ToString() => $"{Address}";
 
     public byte[] Sign(object obj) => Options.PrivateKey.Sign(obj);
 
