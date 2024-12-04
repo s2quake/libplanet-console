@@ -4,7 +4,6 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 
@@ -87,6 +86,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     }
 
     [CommandMethod]
+    [CommandMethodProperty(nameof(Address))]
     [CommandSummary("Gets or sets the current node")]
     public void Current()
     {
