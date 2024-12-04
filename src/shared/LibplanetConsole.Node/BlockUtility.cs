@@ -15,9 +15,9 @@ public static partial class BlockUtility
 
     public static Block LoadGenesisBlock(string genesisPath) => genesisPath switch
     {
-        { } path when Uri.TryCreate(path, UriKind.Absolute, out var uri)
+        { } path when Uri.TryCreate(path, UriKind.Absolute, out var uri) && uri.Scheme != "file"
             => LoadGenesisBlockFromUrl(uri),
-        { } path => LoadGenesisBlockFromFile(path),
+        { } path when File.Exists(path) => LoadGenesisBlockFromFile(path),
         _ => throw new NotSupportedException(),
     };
 
