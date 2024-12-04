@@ -169,7 +169,7 @@ internal sealed class InitializeCommand : CommandBase
             var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
             var genesis = BlockUtility.SerializeBlock(genesisBlock);
             var genesisString = ByteUtil.Hex(genesis);
-            File.WriteAllLines(genesisPath, [genesisString]);
+            File.WriteAllBytes(genesisPath, genesis);
             info.GenesisArguments = new
             {
                 GenesisKey = PrivateKeyUtility.ToString(genesisOptions.GenesisKey),

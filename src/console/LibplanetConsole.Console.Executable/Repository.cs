@@ -314,8 +314,7 @@ public sealed record class Repository
     private async Task SaveGenesisAsync(string genesisPath, CancellationToken cancellationToken)
     {
         var genesis = Genesis;
-        var hex = ByteUtil.Hex(genesis);
-        await File.WriteAllLinesAsync(genesisPath, [hex], cancellationToken);
+        await File.WriteAllBytesAsync(genesisPath, genesis, cancellationToken);
     }
 
     private async Task SaveAppProtocolVersionAsync(

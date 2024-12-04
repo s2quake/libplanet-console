@@ -74,8 +74,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     {
         if (GenesisPath != string.Empty)
         {
-            var lines = File.ReadAllLines(GenesisPath);
-            return BlockUtility.DeserializeBlock(ByteUtil.ParseHex(lines[0]));
+            return BlockUtility.LoadGenesisBlock(GenesisPath);
         }
 
         if (Genesis != string.Empty)
