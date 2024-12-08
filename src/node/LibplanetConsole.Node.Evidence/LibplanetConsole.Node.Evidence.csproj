@@ -6,8 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Evidence\**\*.cs" />
-    <Protobuf Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Evidence\Protos\*.proto" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Evidence\**\*.cs" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Evidence\Protos\*.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>
