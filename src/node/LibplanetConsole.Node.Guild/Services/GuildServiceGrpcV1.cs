@@ -4,7 +4,7 @@ using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Node.Guild.Services;
 
-internal sealed class GuildServiceGrpcV1(Guild guild)
+internal sealed class GuildServiceGrpcV1(IGuild guild)
     : GuildGrpcService.GuildGrpcServiceBase
 {
     public override async Task<CreateResponse> Create(

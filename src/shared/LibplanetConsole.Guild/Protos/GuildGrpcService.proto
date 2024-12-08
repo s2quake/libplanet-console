@@ -61,14 +61,14 @@ message MoveResponse {
 }
 
 message BanRequest {
-  string member_address = 1;  
+  string member_address = 1;
 }
 
 message BanResponse {
 }
 
 message UnbanRequest {
-  string member_address = 1;  
+  string member_address = 1;
 }
 
 message UnbanResponse {

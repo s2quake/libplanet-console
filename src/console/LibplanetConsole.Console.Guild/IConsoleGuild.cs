@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Console.Guild;
 
-public interface IGuild
+public interface IConsoleGuild
 {
     GuildInfo Info { get; }
 

@@ -11,7 +11,7 @@ namespace LibplanetConsole.Console.Delegation;
 internal sealed class NodeDelegation(
     [FromKeyedServices(INode.Key)] INode node,
     [FromKeyedServices(INode.Key)] INodeBank bank)
-    : NodeContentBase("node-validator"), INodeDelegation
+    : NodeContentBase("node-delegation"), INodeDelegation
 {
     private GrpcChannel? _channel;
     private NodeDelegationGrpcService.NodeDelegationGrpcServiceClient? _service;

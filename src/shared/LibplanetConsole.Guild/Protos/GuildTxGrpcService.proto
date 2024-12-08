@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Grpc.Guild";
+
+package libplanet.console.guild.v1;
+
+service GuildTxGrpcService {
+  rpc Create(CreateTxRequest) returns (CreateTxResponse);
+  rpc Delete(DeleteTxRequest) returns (DeleteTxResponse);
+  rpc Join(JoinTxRequest) returns (JoinTxResponse);
+  rpc Leave(LeaveTxRequest) returns (LeaveTxResponse);
+  rpc Move(MoveTxRequest) returns (MoveTxResponse);
+  rpc Ban(BanTxRequest) returns (BanTxResponse);
+  rpc Unban(UnbanTxRequest) returns (UnbanTxResponse);
+}
+
+message CreateTxRequest {
+  int64 nonce = 1;
+  string validator_address = 2;
+}
+
+message CreateTxResponse {
+  bytes tx_invoice = 1;
+}
+
+message DeleteTxRequest {
+  int64 nonce = 1;
+}
+
+message DeleteTxResponse {
+  bytes tx_invoice = 1;
+}
+
+message JoinTxRequest {
+  int64 nonce = 1;
+  string guild_address = 2;
+}
+
+message JoinTxResponse {
+  bytes tx_invoice = 1;
+}
+
+message LeaveTxRequest {
+  int64 nonce = 1;
+}
+
+message LeaveTxResponse {
+  bytes tx_invoice = 1;
+}
+
+message MoveTxRequest {
+  int64 nonce = 1;
+}
+
+message MoveTxResponse {
+  bytes tx_invoice = 1;
+}
+
+message BanTxRequest {
+  int64 nonce = 1;
+  string member_address = 2;
+}
+
+message BanTxResponse {
+  bytes tx_invoice = 1;
+}
+
+message UnbanTxRequest {
+  int64 nonce = 1;
+  string member_address = 2;
+}
+
+message UnbanTxResponse {
+  bytes tx_invoice = 1;
+}
