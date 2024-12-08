@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Logging\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Logging\**\*.cs" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\publish.props" />

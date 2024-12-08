@@ -20,8 +20,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Logging\**\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Console\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Logging\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Console\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

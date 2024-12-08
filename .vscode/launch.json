@@ -34,6 +34,7 @@
       "console": "integratedTerminal",
       "args": [
         "run",
+        // options
         "--node-count",
         "2",
         "--log-path",
@@ -48,6 +49,7 @@
       "console": "integratedTerminal",
       "args": [
         "run",
+        // options
         "--log-path",
         ".log",
         "--port",
@@ -68,6 +70,7 @@
       "args": [
         "init",
         ".node",
+        // options
         "--single-node"
       ]
     },
@@ -90,6 +93,7 @@
       "console": "integratedTerminal",
       "args": [
         "run",
+        // options
         "--single-node",
         "--port",
         "4000"
@@ -103,6 +107,7 @@
       "console": "integratedTerminal",
       "args": [
         "run",
+        // options
         "--log-path",
         ".log/node",
         "--port",
@@ -143,6 +148,7 @@
       "console": "integratedTerminal",
       "args": [
         "run",
+        // options
         "--node-end-point",
         "localhost:4000"
       ]
@@ -155,6 +161,7 @@
       "console": "integratedTerminal",
       "args": [
         "run",
+        // options
         "--log-path",
         ".log/client",
         "--port",
