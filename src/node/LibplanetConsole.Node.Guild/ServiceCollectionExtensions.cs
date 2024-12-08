@@ -16,7 +16,6 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICurrencyProvider, GuildGoldCurrencyProvider>();
         @this.AddSingleton<ICurrencyProvider, MeadCurrencyProvider>();
         @this.AddSingleton<NcgCurrencyProvider>()
-             .AddSingleton<INodeContent>(s => s.GetRequiredService<NcgCurrencyProvider>())
              .AddSingleton<ICurrencyProvider>(s => s.GetRequiredService<NcgCurrencyProvider>());
 
         @this.AddSingleton<ICommand, GuildCommand>();

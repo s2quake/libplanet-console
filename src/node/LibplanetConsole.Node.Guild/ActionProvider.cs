@@ -11,11 +11,12 @@ namespace LibplanetConsole.Node.Guild;
 
 internal sealed class ActionProvider : IActionProvider
 {
-    private static readonly BigInteger DefaultPower = 10_000_000_000_000_000_000;
+    private static readonly BigInteger DefaultPower = BigInteger.Pow(10, 20);
 
     public ImmutableArray<IAction> BeginBlockActions { get; } =
     [
         new SlashValidator(),
+        new AllocateGuildReward(),
         new AllocateReward(),
     ];
 
@@ -50,15 +51,16 @@ internal sealed class ActionProvider : IActionProvider
         return new AggregateTypedActionLoader(actionLoaders);
     }
 
-    public IAction[] GetGenesisActions(PrivateKey genesisKey, PublicKey[] validatorKeys)
+    public IAction[] GetGenesisActions(Address genesisAddress, PublicKey[] validatorKeys)
     {
         var validators = validatorKeys
-            .Select((item, i) => new Validator(item, i == 0 ? DefaultPower * 1000 : DefaultPower * 10))
+            .Select((item, i) => new Validator(item, i == 0 ? DefaultPower * 100 : DefaultPower))
             .ToArray();
         var action = new InitializeWorld
         {
             Validators = validators,
-            GoldCurrency = Currency.Uncapped("NCG", 2, genesisKey.Address),
+            GoldCurrency = Currency.Uncapped("NCG", 2, genesisAddress),
+            GenesisAddress = genesisAddress,
         };
 
         return [action];

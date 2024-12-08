@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Numerics;
 using Lib9c;
 using Libplanet.Action.State;
 using Nekoyume.Action;
@@ -10,6 +9,7 @@ using Nekoyume.Model.Stake;
 using Nekoyume.Model.State;
 using Nekoyume.Module;
 using Nekoyume.Module.Guild;
+using Nekoyume.Module.ValidatorDelegation;
 using Nekoyume.TypedAddress;
 using Nekoyume.ValidatorDelegation;
 using Serilog;
@@ -21,28 +21,31 @@ namespace LibplanetConsole.Node.Delegation.Actions;
 public sealed class StakeAction : GameAction
 {
     public const long MinimumRequiredGold = 100;
+    public const long RewardInterval = 2;
+    public const long LockupInterval = 4;
 
     public StakeAction()
     {
     }
 
-    public StakeAction(BigInteger amount)
+    public StakeAction(FungibleAssetValue ncg)
     {
-        Amount = amount >= 0
-            ? amount
-            : throw new ArgumentOutOfRangeException(nameof(amount));
+        Amount = ncg.Sign >= 0
+            ? ncg
+            : throw new ArgumentOutOfRangeException(nameof(ncg));
     }
 
-    internal BigInteger Amount { get; set; }
+    internal FungibleAssetValue Amount { get; set; }
 
     protected override IImmutableDictionary<string, IValue> PlainValueInternal =>
-        ImmutableDictionary<string, IValue>.Empty.Add(AmountKey, (IValue)(Integer)Amount);
+        ImmutableDictionary<string, IValue>.Empty.Add(AmountKey, Amount.Serialize());
 
     public override IWorld Execute(IActionContext context)
     {
         var started = DateTimeOffset.UtcNow;
         GasTracer.UseGas(1);
         IWorld states = context.PreviousState;
+        var currency = states.GetGoldCurrency();
 
         // NOTE: Restrict staking if there is a monster collection until now.
         if (states.GetAgentState(context.Signer) is { } agentState &&
@@ -56,41 +59,40 @@ public sealed class StakeAction : GameAction
         }
 
         // NOTE: When the amount is less than 0.
-        if (Amount < 0)
+        if (Amount.Sign < 0)
         {
             throw new InvalidOperationException("The amount must be greater than or equal to 0.");
         }
 
         var addressesHex = GetSignerAndOtherAddressesHex(context, context.Signer);
         var minimumRequiredGold = 100;
-        if (Amount != 0 && Amount < MinimumRequiredGold)
+        if (Amount.Sign != 0 && Amount < currency * MinimumRequiredGold)
         {
             throw new InvalidOperationException(
                 $"The amount must be greater than or equal to {minimumRequiredGold}.");
         }
 
         var stakeStateAddress = LegacyStakeState.DeriveAddress(context.Signer);
-        var currency = states.GetGoldCurrency();
         var currentBalance = states.GetBalance(context.Signer, currency);
         var stakedBalance = states.GetBalance(stakeStateAddress, currency);
-        var targetStakeBalance = currency * Amount;
+        var targetStakeBalance = Amount;
         if (currentBalance + stakedBalance < targetStakeBalance)
         {
             throw new NotEnoughFungibleAssetValueException(
                 context.Signer.ToHex(),
-                Amount,
+                Amount.RawValue,
                 currentBalance);
         }
 
         var latestStakeContract = new Contract(
             "StakeRegularFixedRewardSheet_V2",
             "StakeRegularRewardSheet_V2",
-            50400,
-            201600);
+            RewardInterval,
+            LockupInterval);
         if (!states.TryGetStakeState(context.Signer, out var stakeStateV2))
         {
             // NOTE: Cannot withdraw staking.
-            if (Amount == 0)
+            if (Amount.Sign == 0)
             {
                 throw new StateNullException(ReservedAddresses.LegacyAccount, stakeStateAddress);
             }
@@ -112,7 +114,13 @@ public sealed class StakeAction : GameAction
         // NOTE: Cannot anything if staking state is claimable.
         if (stakeStateV2.ClaimableBlockIndex <= context.BlockIndex)
         {
-            throw new StakeExistingClaimableException();
+            var validatorRepository = new ValidatorRepository(states, context);
+            var isValidator = validatorRepository.TryGetValidatorDelegatee(
+                context.Signer, out var validatorDelegatee);
+            if (!isValidator)
+            {
+                throw new StakeExistingClaimableException();
+            }
         }
 
         // NOTE: When the staking state is locked up.
@@ -151,7 +159,7 @@ public sealed class StakeAction : GameAction
     protected override void LoadPlainValueInternal(
         IImmutableDictionary<string, IValue> plainValue)
     {
-        Amount = plainValue[AmountKey].ToBigInteger();
+        Amount = new FungibleAssetValue(plainValue[AmountKey]);
     }
 
     private static IWorld ContractNewStake(

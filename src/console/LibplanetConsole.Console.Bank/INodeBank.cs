@@ -1,6 +1,6 @@
-namespace LibplanetConsole.Node.Bank;
+namespace LibplanetConsole.Console.Bank;
 
-public interface IBank
+public interface INodeBank
 {
     CurrencyCollection Currencies { get; }
 

@@ -1,5 +1,4 @@
 using JSSoft.Terminals;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Guild;
 

@@ -5,7 +5,7 @@ namespace LibplanetConsole.Node.Guild;
 
 internal sealed class GuildGoldCurrencyProvider : ICurrencyProvider
 {
-    public string Name => "gg";
+    public string Code => "gg";
 
     public Currency Currency => Currencies.GuildGold;
 }

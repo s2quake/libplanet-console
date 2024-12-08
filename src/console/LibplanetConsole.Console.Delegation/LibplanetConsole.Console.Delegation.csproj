@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Console\LibplanetConsole.Console.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console.Bank\LibplanetConsole.Console.Bank.csproj" />
     <ProjectReference Include="..\..\..\.submodules\lib9c\Lib9c\Lib9c.csproj" />
   </ItemGroup>
 
@@ -10,11 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Bank\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Delegation\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Bank\Protos\*.proto" GrpcServices="Client">
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Delegation\Protos\*.proto" GrpcServices="Client">
       <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
     </Protobuf>
   </ItemGroup>

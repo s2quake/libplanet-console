@@ -5,7 +5,7 @@ namespace LibplanetConsole.Node.Guild;
 
 internal sealed class MeadCurrencyProvider : ICurrencyProvider
 {
-    public string Name => "mead";
+    public string Code => "mead";
 
     public Currency Currency => Currencies.Mead;
 }

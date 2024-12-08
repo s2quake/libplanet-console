@@ -4,8 +4,6 @@ option csharp_namespace = "LibplanetConsole.Grpc.Guild";
 
 package libplanet.console.guild.v1;
 
-import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
-
 service GuildGrpcService {
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
   rpc Create(CreateRequest) returns (CreateResponse);
@@ -18,9 +16,9 @@ service GuildGrpcService {
 }
 
 message GuildInfoProto {
-  libplanet.console.types.v1.AddressProto address = 1;
-  libplanet.console.types.v1.AddressProto validator_address = 2;
-  libplanet.console.types.v1.AddressProto guild_master_address = 3;
+  string address = 1;
+  string validator_address = 2;
+  string guild_master_address = 3;
 }
 
 message GetInfoRequest {
@@ -30,7 +28,7 @@ message GetInfoResponse {
 }
 
 message CreateRequest {
-  libplanet.console.types.v1.AddressProto validator_address = 1;
+  string validator_address = 1;
 }
 
 message CreateResponse {
@@ -44,6 +42,7 @@ message DeleteResponse {
 }
 
 message JoinRequest {
+  string guild_address = 1;
 }
 
 message JoinResponse {
@@ -62,14 +61,14 @@ message MoveResponse {
 }
 
 message BanRequest {
-  libplanet.console.types.v1.AddressProto member_address = 1;  
+  string member_address = 1;  
 }
 
 message BanResponse {
 }
 
 message UnbanRequest {
-  libplanet.console.types.v1.AddressProto member_address = 1;  
+  string member_address = 1;  
 }
 
 message UnbanResponse {

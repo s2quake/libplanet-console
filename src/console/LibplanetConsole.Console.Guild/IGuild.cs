@@ -1,6 +1,3 @@
-using LibplanetConsole.Common;
-using LibplanetConsole.Guild;
-
 namespace LibplanetConsole.Console.Guild;
 
 public interface IGuild

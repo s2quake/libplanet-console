@@ -4,53 +4,38 @@ option csharp_namespace = "LibplanetConsole.Grpc.Bank";
 
 package libplanet.console.bank.v1;
 
-import "src/shared/LibplanetConsole.Grpc/Protos/Types.proto";
-
 service BankGrpcService {
-  rpc Mint(MintRequest) returns (MintResponse);
   rpc Transfer(TransferRequest) returns (TransferResponse);
-  rpc Burn(BurnRequest) returns (BurnResponse);
   rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+  rpc GetCurrencies(GetCurrenciesRequest) returns (GetCurrenciesResponse);
 }
 
 message CurrencyInfoProto {
-  string name = 1;
-  libplanet.console.types.v1.CurrencyProto currency = 2;
-}
-
-message MintRequest {
-  libplanet.console.types.v1.AddressProto address = 1;
-  libplanet.console.types.v1.FungibleAssetValueProto amount = 2;
-}
-
-message MintResponse {
-  libplanet.console.types.v1.FungibleAssetValueProto balance = 1;
+  string code = 1;
+  bytes currency = 2;
 }
 
 message TransferRequest {
-  libplanet.console.types.v1.AddressProto address = 1;
-  libplanet.console.types.v1.AddressProto target_address = 2;
-  libplanet.console.types.v1.FungibleAssetValueProto amount = 3;
+  string recipient_address = 1;
+  string amount = 2;
+  string memo = 3;
 }
 
 message TransferResponse {
-  libplanet.console.types.v1.FungibleAssetValueProto balance = 1;
-}
-
-message BurnRequest {
-  libplanet.console.types.v1.AddressProto address = 1;
-  libplanet.console.types.v1.FungibleAssetValueProto amount = 2;
-}
-
-message BurnResponse {
-  libplanet.console.types.v1.FungibleAssetValueProto balance = 1;
 }
 
 message GetBalanceRequest {
-  libplanet.console.types.v1.AddressProto address = 1;
-  libplanet.console.types.v1.CurrencyProto currency = 2;
+  string address = 1;
+  string currency = 2;
 }
 
 message GetBalanceResponse {
-  libplanet.console.types.v1.FungibleAssetValueProto balance = 1;
+  string balance = 1;
+}
+
+message GetCurrenciesRequest {
+}
+
+message GetCurrenciesResponse {
+  repeated CurrencyInfoProto currencies = 1;
 }

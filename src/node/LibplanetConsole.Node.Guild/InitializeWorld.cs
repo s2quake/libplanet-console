@@ -1,3 +1,4 @@
+using Lib9c;
 using Libplanet.Action.State;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common;
@@ -16,15 +17,18 @@ namespace LibplanetConsole.Node.Guild;
 [ActionType("initialize_world")]
 public sealed class InitializeWorld : ActionBase
 {
-    public Validator[] Validators { get; set; } = [];
+    public required Validator[] Validators { get; set; } = [];
 
-    public Currency GoldCurrency { get; set; }
+    public required Currency GoldCurrency { get; set; }
+
+    public required Address GenesisAddress { get; set; }
 
     protected override Dictionary OnInitialize(Dictionary values)
     {
         return values
             .Add("validator_set", new List(Validators.Select(item => item.Bencoded)))
-            .Add("gold_currency", GoldCurrency.Serialize());
+            .Add("gold_currency", GoldCurrency.Serialize())
+            .Add("genesis_address", GenesisAddress.Serialize());
     }
 
     protected override void OnLoadPlainValue(Dictionary values)
@@ -35,6 +39,7 @@ public sealed class InitializeWorld : ActionBase
         }
 
         GoldCurrency = new Currency(values["gold_currency"]);
+        GenesisAddress = new Address(values["genesis_address"]);
     }
 
     protected override IWorld OnExecute(IActionContext context)
@@ -43,9 +48,13 @@ public sealed class InitializeWorld : ActionBase
 
         var goldCurrency = GoldCurrency;
         var currencyState = new GoldCurrencyState(goldCurrency);
+        var adminState = new AdminState(GenesisAddress, long.MaxValue);
         world = world
             .SetLegacyState(GoldCurrencyState.Address, currencyState.Serialize())
             .SetLegacyState(Addresses.GoldDistribution, new List().Serialize())
+            .SetLegacyState(Addresses.Admin, adminState.Serialize())
+            .MintAsset(context, GoldCurrencyState.Address, Currencies.GuildGold * 100_000_000_000)
+            .MintAsset(context, GoldCurrencyState.Address, Currencies.Mead * 100_000_000_000)
             .SetDelegationMigrationHeight(0);
 
         if (currencyState.InitialSupply > 0)
@@ -59,10 +68,20 @@ public sealed class InitializeWorld : ActionBase
         var validators = Validators;
         foreach (var validator in validators)
         {
+            var validatorAddress = validator.OperatorAddress;
+            var validatorStakeAddress = StakeState.DeriveAddress(validatorAddress);
+            var stakeContract = new Contract(
+                "StakeRegularFixedRewardSheet_V2",
+                "StakeRegularRewardSheet_V2",
+                2,
+                4);
+            var stakeState = new StakeState(stakeContract, context.BlockIndex);
             var delegationFAV = FungibleAssetValue.FromRawValue(
                 ValidatorDelegatee.ValidatorDelegationCurrency, validator.Power);
-            world = world.MintAsset(
-                context, StakeState.DeriveAddress(validator.OperatorAddress), delegationFAV);
+            var balance = currencyState.Currency * 1000;
+            world = world
+                .MintAsset(context, validatorStakeAddress, delegationFAV)
+                .TransferAsset(context, GoldCurrencyState.Address, validatorAddress, balance);
 
             var validatorRepository = new ValidatorRepository(world, context);
             var validatorDelegatee = validatorRepository.CreateValidatorDelegatee(
@@ -76,6 +95,7 @@ public sealed class InitializeWorld : ActionBase
             var guildDelegator = guildRepository.GetGuildDelegator(validator.OperatorAddress);
             guildDelegator.Delegate(guildDelegatee, delegationFAV, context.BlockIndex);
             world = guildRepository.World;
+            world = world.SetLegacyState(validatorStakeAddress, stakeState.Serialize());
         }
 
         var repository = new ValidatorRepository(world, context);

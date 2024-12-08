@@ -1,117 +1,54 @@
-using System.Text.RegularExpressions;
 using Libplanet.Action.State;
-using LibplanetConsole.Bank.Actions;
 using Microsoft.Extensions.DependencyInjection;
+using Nekoyume.Action;
 
 namespace LibplanetConsole.Node.Bank;
 
-internal sealed class Bank(IServiceProvider serviceProvider, IBlockChain blockChain)
+internal sealed class Bank(IServiceProvider serviceProvider, INode node, IBlockChain blockChain)
     : NodeContentBase(nameof(Bank)), IBank
 {
-    private readonly Dictionary<string, ICurrencyProvider> _currencyInfos = [];
+    public CurrencyCollection Currencies { get; private set; } = CurrencyCollection.Empty;
 
-    public Currency GetCurrency(string name) => _currencyInfos[name].Currency;
-
-    public FungibleAssetValue ParseFungibleAssetValue(string text)
-    {
-        var match = Regex.Match(text, @"(?<value>\d+(\.\d+)?)(?<key>\w+)");
-        if (match.Success is false)
-        {
-            throw new ArgumentException("Invalid format.");
-        }
-
-        var key = match.Groups["key"].Value;
-        var value = match.Groups["value"].Value;
-        if (_currencyInfos.TryGetValue(key, out var currencyProvider))
-        {
-            return FungibleAssetValue.Parse(currencyProvider.Currency, value);
-        }
-
-        throw new ArgumentException("Invalid currency.");
-    }
-
-    public async Task<FungibleAssetValue> MintAsync(
-        Address address, FungibleAssetValue amount, CancellationToken cancellationToken)
-    {
-        var actions = new IAction[]
-        {
-            new MintAction
-            {
-                Address = address,
-                Amount = amount,
-            },
-        };
-        await blockChain.SendTransactionAsync(actions, cancellationToken);
-        return blockChain.GetWorldState().GetBalance(address, amount.Currency);
-    }
-
-    public async Task<FungibleAssetValue> TransferAsync(
-        Address address,
-        Address targetAddress,
+    public async Task TransferAsync(
+        Address recipientAddress,
         FungibleAssetValue amount,
+        string memo,
         CancellationToken cancellationToken)
     {
+        var senderAddress = node.Address;
         var actions = new IAction[]
         {
-            new TransferAction
-            {
-                Address = address,
-                TargetAddress = targetAddress,
-                Amount = amount,
-            },
+            new TransferAsset(senderAddress, recipientAddress, amount, memo),
         };
-        await blockChain.SendTransactionAsync(actions, cancellationToken);
-        return blockChain.GetWorldState().GetBalance(address, amount.Currency);
-    }
-
-    public async Task<FungibleAssetValue> BurnAsync(
-        Address address, FungibleAssetValue amount, CancellationToken cancellationToken)
-    {
-        var actions = new IAction[]
-        {
-            new BurnAction
-            {
-                Address = address,
-                Amount = amount,
-            },
-        };
-        await blockChain.SendTransactionAsync(actions, cancellationToken);
-        return blockChain.GetWorldState().GetBalance(address, amount.Currency);
+        await node.SendTransactionAsync(actions, cancellationToken);
     }
 
     public async Task<FungibleAssetValue> GetBalanceAsync(
-        Address address, Currency currency, CancellationToken cancellationToken)
+        Currency currency, CancellationToken cancellationToken)
     {
+        var address = node.Address;
         FungibleAssetValue Action()
             => blockChain.GetWorldState().GetBalance(address, currency);
 
-        return await Task.Run(Action);
+        return await Task.Run(Action, cancellationToken);
     }
-
-    public Task<CurrencyInfo[]> GetCurrenciesAsync(CancellationToken cancellationToken)
-        => Task.FromResult(_currencyInfos.Select(GetCurrencyInfo).ToArray());
 
     protected override Task OnStartAsync(CancellationToken cancellationToken)
     {
         var currencyProviders = serviceProvider.GetServices<ICurrencyProvider>();
-        foreach (var currencyProvider in currencyProviders)
+        var currencyInfos = currencyProviders.Select(item => new CurrencyInfo
         {
-            _currencyInfos.Add(currencyProvider.Name, currencyProvider);
-        }
+            Code = item.Code,
+            Currency = item.Currency,
+        }).ToArray();
+        Currencies = new CurrencyCollection(currencyInfos);
 
         return Task.CompletedTask;
     }
 
     protected override Task OnStopAsync(CancellationToken cancellationToken)
     {
-        _currencyInfos.Clear();
+        Currencies = CurrencyCollection.Empty;
         return Task.CompletedTask;
     }
-
-    private static CurrencyInfo GetCurrencyInfo(KeyValuePair<string, ICurrencyProvider> pair)
-        => new()
-        {
-            Name = pair.Key,
-            Currency = pair.Value.Currency,
-        };
 }

@@ -19,7 +19,7 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         var makeGuild = new MakeGuild(node.Address)
         {
         };
-        await blockChain.SendTransactionAsync([makeGuild], cancellationToken);
+        await node.SendTransactionAsync([makeGuild], cancellationToken);
         Info = GetGuildInfo();
         return Info;
     }
@@ -32,9 +32,19 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         {
         };
         var guildAddress = Info.Address;
-        await blockChain.SendTransactionAsync([removeGuild], cancellationToken);
+        await node.SendTransactionAsync([removeGuild], cancellationToken);
         Info = default;
         return guildAddress;
+    }
+
+    public async Task JoinAsync(Address guildAddress, CancellationToken cancellationToken)
+    {
+        ThrowIfNotRunning();
+
+        var joinGuild = new JoinGuild(new(guildAddress))
+        {
+        };
+        await node.SendTransactionAsync([joinGuild], cancellationToken);
     }
 
     public async Task LeaveAsync(CancellationToken cancellationToken)
@@ -44,7 +54,7 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         var quitGuild = new QuitGuild
         {
         };
-        await blockChain.SendTransactionAsync([quitGuild], cancellationToken);
+        await node.SendTransactionAsync([quitGuild], cancellationToken);
     }
 
     public async Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
@@ -54,7 +64,7 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         var banGuildMember = new BanGuildMember(new(memberAddress))
         {
         };
-        await blockChain.SendTransactionAsync([banGuildMember], cancellationToken);
+        await node.SendTransactionAsync([banGuildMember], cancellationToken);
     }
 
     public async Task UnbanMemberAsync(
@@ -65,7 +75,7 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         var unbanMemberGuild = new UnbanGuildMember(memberAddress)
         {
         };
-        await blockChain.SendTransactionAsync([unbanMemberGuild], cancellationToken);
+        await node.SendTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
     public Task<GuildInfo> GetGuildAsync(Address address, CancellationToken cancellationToken)

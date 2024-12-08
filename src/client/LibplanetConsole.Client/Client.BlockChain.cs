@@ -210,4 +210,22 @@ internal sealed partial class Client : IBlockChain
 
         throw new InvalidOperationException("Action not found.");
     }
+
+    public async Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetBalanceRequest
+        {
+            Address = ToGrpc(address),
+            Currency = ToGrpc(currency.Serialize()),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetBalanceAsync(request, callOptions);
+        return new FungibleAssetValue(ToIValue(response.Balance));
+    }
 }

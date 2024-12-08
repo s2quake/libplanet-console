@@ -21,14 +21,17 @@ internal sealed class GuildServiceGrpcV1(Guild guild)
         return new DeleteResponse();
     }
 
-    public override Task<JoinResponse> Join(JoinRequest request, ServerCallContext context)
+    public override async Task<JoinResponse> Join(JoinRequest request, ServerCallContext context)
     {
-        return base.Join(request, context);
+        var guildAddress = ToAddress(request.GuildAddress);
+        await guild.JoinAsync(guildAddress, context.CancellationToken);
+        return new JoinResponse();
     }
 
-    public override Task<LeaveResponse> Leave(LeaveRequest request, ServerCallContext context)
+    public override async Task<LeaveResponse> Leave(LeaveRequest request, ServerCallContext context)
     {
-        return base.Leave(request, context);
+        await guild.LeaveAsync(context.CancellationToken);
+        return new LeaveResponse();
     }
 
     public override async Task<BanResponse> Ban(BanRequest request, ServerCallContext context)

@@ -5,33 +5,27 @@ using Nekoyume.Model.State;
 namespace LibplanetConsole.Node.Guild;
 
 internal sealed class NcgCurrencyProvider(IBlockChain blockChain)
-    : NodeContentBase("ncg"), ICurrencyProvider
+    : ICurrencyProvider
 {
     private Currency? _currency;
 
-    public Currency Currency => _currency ?? throw new InvalidOperationException(
-        "There is no currency information.");
+    public Currency Currency => _currency ??= GetCurrency();
 
-    protected override async Task OnStartAsync(CancellationToken cancellationToken)
+    public string Code => "ncg";
+
+    private Currency GetCurrency()
     {
-        var value = await blockChain.GetStateAsync(
-            -1, ReservedAddresses.LegacyAccount, GoldCurrencyState.Address, cancellationToken);
-
+        var worldStae = blockChain.GetWorldState();
+        var accountState = worldStae.GetAccountState(ReservedAddresses.LegacyAccount);
+        var value = accountState.GetState(GoldCurrencyState.Address);
         if (value is Dictionary dictionary)
         {
             _currency = new GoldCurrencyState(dictionary).Currency;
+            return _currency.Value;
         }
-        else
-        {
-            throw new InvalidOperationException(
-                   "The states doesn't contain gold currency.\n" +
-                   "Check the genesis block.");
-        }
-    }
 
-    protected override Task OnStopAsync(CancellationToken cancellationToken)
-    {
-        _currency = null;
-        return Task.CompletedTask;
+        throw new InvalidOperationException(
+            "The states doesn't contain gold currency.\n" +
+            "Check the genesis block.");
     }
 }

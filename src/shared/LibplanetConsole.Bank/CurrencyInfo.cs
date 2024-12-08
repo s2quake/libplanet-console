@@ -13,7 +13,7 @@ namespace LibplanetConsole.Console.Bank;
 
 public readonly record struct CurrencyInfo
 {
-    public string Name { get; init; }
+    public string Code { get; init; }
 
     public Currency Currency { get; init; }
 
@@ -21,8 +21,8 @@ public readonly record struct CurrencyInfo
     {
         return new CurrencyInfo
         {
-            Name = currencyInfo.Name,
-            Currency = ToCurrency(currencyInfo.Currency),
+            Code = currencyInfo.Code,
+            Currency = new Currency(ToIValue(currencyInfo.Currency)),
         };
     }
 
@@ -30,8 +30,8 @@ public readonly record struct CurrencyInfo
     {
         return new CurrencyInfoProto
         {
-            Name = currencyInfo.Name,
-            Currency = ToGrpc(currencyInfo.Currency),
+            Code = currencyInfo.Code,
+            Currency = ToGrpc(currencyInfo.Currency.Serialize()),
         };
     }
 }

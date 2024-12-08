@@ -6,6 +6,8 @@ public interface IGuild
 
     Task<Address> DeleteAsync(CancellationToken cancellationToken);
 
+    Task JoinAsync(Address guildAddress, CancellationToken cancellationToken);
+
     Task LeaveAsync(CancellationToken cancellationToken);
 
     Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken);

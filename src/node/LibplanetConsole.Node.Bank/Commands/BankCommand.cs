@@ -2,77 +2,54 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Bank.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
-using Nekoyume.Model.State;
 
 namespace LibplanetConsole.Node.Bank.Commands;
 
 [CommandSummary("Bank Commands.")]
 [Category("Bank")]
-internal sealed class BankCommand(Bank bank, INode node) : CommandMethodBase
+internal sealed class BankCommand(IBank bank) : CommandMethodBase
 {
-    [CommandMethod]
-    public async Task MintAsync(
-        Address address,
-        [FungibleAssetValue]
-        string amount,
-        CancellationToken cancellationToken)
-    {
-        var amountValue = bank.ParseFungibleAssetValue(amount);
-        var balance = await bank.MintAsync(address, amountValue, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balance, cancellationToken);
-    }
+    private string[]? _codes;
 
     [CommandMethod]
     public async Task TransferAsync(
-        Address address,
-        Address targetAddress,
+        Address recipientAddress,
         [FungibleAssetValue] string amount,
-        CancellationToken cancellationToken)
+        string memo = "",
+        CancellationToken cancellationToken = default)
     {
-        var amountValue = bank.ParseFungibleAssetValue(amount);
-        var balance = await bank.TransferAsync(
-            address, targetAddress, amountValue, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balance, cancellationToken);
+        var currencies = bank.Currencies;
+        var amountValue = currencies.ToFungibleAssetValue(amount);
+        await bank.TransferAsync(
+            recipientAddress, amountValue, memo, cancellationToken);
     }
 
     [CommandMethod]
-    public async Task BurnAsync(
-        Address address,
-        [FungibleAssetValue]
-        string amount,
-        CancellationToken cancellationToken)
+    public async Task BalanceAsync(string currencyCode, CancellationToken cancellationToken)
     {
-        var amountValue = bank.ParseFungibleAssetValue(amount);
-        var balance = await bank.BurnAsync(address, amountValue, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balance, cancellationToken);
-    }
-
-    [CommandMethod]
-    public async Task BalanceAsync(
-        Address address, string currency, CancellationToken cancellationToken)
-    {
-        var currencyValue = bank.GetCurrency(currency);
-        var balance = await bank.GetBalanceAsync(address, currencyValue, cancellationToken);
+        var currencies = bank.Currencies;
+        var currency = currencies[currencyCode];
+        var balance = await bank.GetBalanceAsync(currency, cancellationToken);
         await Out.WriteLineAsJsonAsync(balance.ToString(), cancellationToken);
     }
 
     [CommandMethod]
-    public async Task CurrencyAsync(CancellationToken cancellationToken)
+    public void Currency(
+        [CommandParameterCompletion(nameof(GetCurrencyAliases))]
+        string code = "")
     {
-        var currencies = await bank.GetCurrenciesAsync(cancellationToken);
-        var currencyNames = currencies.Select(item => item.Name).ToArray();
-        await Out.WriteLineAsJsonAsync(currencyNames, cancellationToken);
+        var currencies = bank.Currencies;
+        if (code == string.Empty)
+        {
+            var currencyAliases = currencies.Aliases;
+            Out.WriteLineAsJson(currencyAliases);
+        }
+        else
+        {
+            var currency = currencies[code];
+            Out.WriteLineAsJson(currency);
+        }
     }
 
-    [CommandMethod]
-    public async Task StealAsync(
-        [FungibleAssetValue] string amount, CancellationToken cancellationToken)
-    {
-        var address = GoldCurrencyState.Address;
-        var targetAddress = node.Address;
-        var amountValue = bank.ParseFungibleAssetValue(amount);
-        var balance = await bank.TransferAsync(
-            address, targetAddress, amountValue, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balance, cancellationToken);
-    }
+    private string[] GetCurrencyAliases() => _codes ??= bank.Currencies.Aliases;
 }

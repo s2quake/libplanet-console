@@ -2,7 +2,7 @@ namespace LibplanetConsole.Node.Bank;
 
 public interface ICurrencyProvider
 {
-    string Name { get; }
+    string Code { get; }
 
     Currency Currency { get; }
 }
