@@ -5,6 +5,8 @@ namespace LibplanetConsole.Grpc;
 
 public static class TypeUtility
 {
+    private static readonly Codec _codec = new();
+
     public static string ToGrpc(Address address) => address.ToHex();
 
     public static string ToGrpc(BlockHash blockHash) => blockHash.ToString();
@@ -16,6 +18,8 @@ public static class TypeUtility
     public static string ToGrpc(HashDigest<SHA256> hashDigest) => hashDigest.ToString();
 
     public static ByteString ToGrpc(byte[] bytes) => ByteString.CopyFrom(bytes);
+
+    public static ByteString ToGrpc(IValue value) => ToGrpc(_codec.Encode(value));
 
     public static Address ToAddress(string address) => new(address);
 
@@ -29,4 +33,6 @@ public static class TypeUtility
         => HashDigest<SHA256>.FromString(hashDigest);
 
     public static byte[] ToByteArray(ByteString byteString) => byteString.ToByteArray();
+
+    public static IValue ToIValue(ByteString byteString) => _codec.Decode(ToByteArray(byteString));
 }

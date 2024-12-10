@@ -81,4 +81,15 @@ internal sealed partial class ConsoleHost : IBlockChain
 
         return _node.GetActionAsync<T>(txId, actionIndex, cancellationToken);
     }
+
+    public Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken)
+    {
+        if (IsRunning is false || _node is null)
+        {
+            throw new InvalidOperationException("BlockChain is not running.");
+        }
+
+        return _node.GetBalanceAsync(address, currency, cancellationToken);
+    }
 }

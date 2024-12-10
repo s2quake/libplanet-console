@@ -106,6 +106,15 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
     }
 
+    public override async Task<GetBalanceResponse> GetBalance(
+        GetBalanceRequest request, ServerCallContext context)
+    {
+        var address = ToAddress(request.Address);
+        var currency = new Currency(ToIValue(request.Currency));
+        var balance = await _node.GetBalanceAsync(address, currency, context.CancellationToken);
+        return new GetBalanceResponse { Balance = ToGrpc(balance.Serialize()) };
+    }
+
     public override async Task GetEventStream(
         GetEventStreamRequest request,
         IServerStreamWriter<GetEventStreamResponse> responseStream,
