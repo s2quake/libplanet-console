@@ -12,7 +12,11 @@
       "console": "integratedTerminal",
       "args": [
         "init",
-        ".data"
+        ".data",
+        "--client-count",
+        "0",
+        "--module-type",
+        "LibplanetConsole.Node.Guild.ActionProvider, LibplanetConsole.Node.Guild",
       ]
     },
     {
@@ -35,10 +39,14 @@
       "args": [
         "run",
         // options
-        "--node-count",
-        "2",
+        "--nodes",
+        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819,9cb1c6d0b19d8481bc5be6b50206e834232e13cc25cd7798a927f7bb1b6c1bc0",
+        "--client-count",
+        "0",
         "--log-path",
-        ".log"
+        ".log",
+        "--module-type",
+        "LibplanetConsole.Node.Guild.ActionProvider, LibplanetConsole.Node.Guild"
       ]
     },
     {
@@ -71,6 +79,8 @@
         "init",
         ".node",
         // options
+        "--module-type",
+        "LibplanetConsole.Node.Guild.ActionProvider, LibplanetConsole.Node.Guild",
         "--single-node"
       ]
     },
@@ -96,7 +106,11 @@
         // options
         "--single-node",
         "--port",
-        "4000"
+        "4000",
+        "--module-type",
+        "LibplanetConsole.Node.Guild.ActionProvider, LibplanetConsole.Node.Guild",
+        "--log-path",
+        ".log"
       ]
     },
     {
