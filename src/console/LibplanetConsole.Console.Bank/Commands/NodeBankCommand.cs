@@ -47,7 +47,7 @@ internal sealed partial class NodeBankCommand(
         var currencies = bank.Currencies;
         if (code == string.Empty)
         {
-            var currencyAliases = currencies.Aliases;
+            var currencyAliases = currencies.Codes;
             Out.WriteLineAsJson(currencyAliases);
         }
         else
@@ -59,5 +59,5 @@ internal sealed partial class NodeBankCommand(
 
     private string[] GetNodeAddresses() => [.. nodes.Select(node => node.Address.ToString())];
 
-    private string[] GetCurrencyAliases() => _codes ??= centralBank.Currencies.Aliases;
+    private string[] GetCurrencyAliases() => _codes ??= centralBank.Currencies.Codes;
 }

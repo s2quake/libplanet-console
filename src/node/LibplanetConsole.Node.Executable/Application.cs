@@ -4,6 +4,7 @@ using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Bank;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
+using LibplanetConsole.Node.Executable.Extensions;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
 using Serilog;
@@ -91,6 +92,8 @@ internal sealed class Application
         app.UseBank();
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
+
+        app.TryUseDefaultCurrency();
 
         await Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);

@@ -13,7 +13,7 @@ internal sealed class NodeBank([FromKeyedServices(INode.Key)] INode node)
     private GrpcChannel? _channel;
     private BankGrpcService.BankGrpcServiceClient? _service;
 
-    public CurrencyCollection Currencies { get; private set; } = CurrencyCollection.Empty;
+    public CurrencyCollection Currencies { get; private set; } = [];
 
     public async Task TransferAsync(
         Address recipientAddress,
@@ -46,7 +46,7 @@ internal sealed class NodeBank([FromKeyedServices(INode.Key)] INode node)
         var request = new GetBalanceRequest
         {
             Address = ToGrpc(node.Address),
-            Currency = currencies.GetCurrencyAliase(currency),
+            Currency = currencies.GetCurrencyCode(currency),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.GetBalanceAsync(request, callOptions);
@@ -67,7 +67,7 @@ internal sealed class NodeBank([FromKeyedServices(INode.Key)] INode node)
 
     protected override async Task OnStopAsync(CancellationToken cancellationToken)
     {
-        Currencies = CurrencyCollection.Empty;
+        Currencies = [];
         _channel?.Dispose();
         _channel = null;
 

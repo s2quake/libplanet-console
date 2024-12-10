@@ -1,13 +1,12 @@
 using Libplanet.Action.State;
 using LibplanetConsole.Bank.Actions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Bank;
 
-internal sealed class Bank(IServiceProvider serviceProvider, INode node, IBlockChain blockChain)
+internal sealed class Bank(INode node, IBlockChain blockChain)
     : NodeContentBase(nameof(Bank)), IBank
 {
-    public CurrencyCollection Currencies { get; private set; } = CurrencyCollection.Empty;
+    public CurrencyCollection Currencies { get; private set; } = [];
 
     public async Task TransferAsync(
         Address recipientAddress,
@@ -34,21 +33,11 @@ internal sealed class Bank(IServiceProvider serviceProvider, INode node, IBlockC
 
     protected override Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var currencyProviders = serviceProvider.GetServices<ICurrencyProvider>()
-            .OfType<ICurrencyProvider>();
-        var currencyInfos = currencyProviders.Select(item => new CurrencyInfo
-        {
-            Code = item.Code,
-            Currency = item.Currency,
-        }).ToArray();
-        Currencies = new CurrencyCollection(currencyInfos);
-
         return Task.CompletedTask;
     }
 
     protected override Task OnStopAsync(CancellationToken cancellationToken)
     {
-        Currencies = CurrencyCollection.Empty;
         return Task.CompletedTask;
     }
 }

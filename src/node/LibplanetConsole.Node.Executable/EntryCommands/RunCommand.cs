@@ -157,7 +157,6 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
                     _ => new ConsoleConfigureOptions(consoleEndPoint));
             }
 
-            services.TryAddCurrencyProvider();
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)

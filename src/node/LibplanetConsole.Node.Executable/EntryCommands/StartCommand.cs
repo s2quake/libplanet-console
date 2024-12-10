@@ -2,7 +2,6 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
-using LibplanetConsole.Node.Bank;
 using LibplanetConsole.Node.Executable.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -49,7 +48,6 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             var services = builder.Services;
             var application = new Application(builder);
             services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
-            services.TryAddCurrencyProvider();
 
             await application.RunAsync(cancellationToken);
         }

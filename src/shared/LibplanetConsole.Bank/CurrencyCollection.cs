@@ -16,20 +16,17 @@ namespace LibplanetConsole.Console.Bank;
 
 public sealed class CurrencyCollection : IEnumerable<Currency>
 {
-    private readonly CurrencyInfo[] _currencies;
     private readonly OrderedDictionary _currencyByCode;
     private readonly Dictionary<Currency, string> _codeByCurrency;
 
     public CurrencyCollection()
     {
-        _currencies = [];
         _currencyByCode = [];
         _codeByCurrency = [];
     }
 
     public CurrencyCollection(CurrencyInfo[] currencies)
     {
-        _currencies = currencies;
         _currencyByCode = new OrderedDictionary(currencies.Length);
         foreach (var currency in currencies)
         {
@@ -37,12 +34,11 @@ public sealed class CurrencyCollection : IEnumerable<Currency>
         }
 
         _codeByCurrency = currencies.ToDictionary(item => item.Currency, item => item.Code);
-        Aliases = currencies.Select(item => item.Code).ToArray();
     }
 
-    public static CurrencyCollection Empty { get; } = new CurrencyCollection();
+    public string[] Codes => [.. _codeByCurrency.Values];
 
-    public string[] Aliases { get; } = [];
+    public int Count => _currencyByCode.Count;
 
     public Currency this[int index]
         => (Currency)(_currencyByCode[index] ?? throw new UnreachableException("Cannot happen."));
@@ -60,7 +56,25 @@ public sealed class CurrencyCollection : IEnumerable<Currency>
         }
     }
 
+    public void Add(string code, Currency currency)
+    {
+        _currencyByCode.Add(code, currency);
+        _codeByCurrency.Add(currency, code);
+    }
+
     public bool Contains(string code) => _currencyByCode.Contains(code);
+
+    public bool Remove(string code)
+    {
+        if (_currencyByCode[code] is not Currency currency)
+        {
+            return false;
+        }
+
+        _currencyByCode.Remove(code);
+        _codeByCurrency.Remove(currency);
+        return true;
+    }
 
     public bool TryGetValue(string code, [MaybeNullWhen(false)] out Currency currency)
     {
@@ -100,26 +114,12 @@ public sealed class CurrencyCollection : IEnumerable<Currency>
             throw new ArgumentException("Invalid currency.");
         }
 
-        return $"{fav.GetQuantityString()}{code}";
+        return $"{fav.GetQuantityString()} {code}";
     }
 
-    public CurrencyInfo[] GetCurrencyInfos() => _currencies;
+    public CurrencyInfo[] GetCurrencyInfos() => [.. _codeByCurrency.Select(GetCurrencyInfo)];
 
-    public CurrencyInfo GetCurrencyInfo(string code)
-    {
-        if (_currencyByCode[code] is not { } currency)
-        {
-            throw new KeyNotFoundException("No such currency.");
-        }
-
-        return new CurrencyInfo
-        {
-            Code = code,
-            Currency = (Currency)currency,
-        };
-    }
-
-    public string GetCurrencyAliase(Currency currency)
+    public string GetCurrencyCode(Currency currency)
     {
         if (_codeByCurrency.TryGetValue(currency, out var code) is false)
         {
@@ -133,4 +133,7 @@ public sealed class CurrencyCollection : IEnumerable<Currency>
         => _currencyByCode.Values.OfType<Currency>().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => _currencyByCode.Values.GetEnumerator();
+
+    private static CurrencyInfo GetCurrencyInfo(KeyValuePair<Currency, string> pair)
+        => new() { Code = pair.Value, Currency = pair.Key, };
 }

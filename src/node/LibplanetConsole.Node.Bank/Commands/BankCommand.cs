@@ -9,8 +9,6 @@ namespace LibplanetConsole.Node.Bank.Commands;
 [Category("Bank")]
 internal sealed class BankCommand(IBank bank) : CommandMethodBase
 {
-    private string[]? _codes;
-
     [CommandMethod]
     public async Task TransferAsync(
         Address recipientAddress,
@@ -32,7 +30,7 @@ internal sealed class BankCommand(IBank bank) : CommandMethodBase
         var currencies = bank.Currencies;
         var currency = currencies[currencyCode];
         var balance = await bank.GetBalanceAsync(currency, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balance.ToString(), cancellationToken);
+        await Out.WriteLineAsync(currencies.ToString(balance));
     }
 
     [CommandMethod]
@@ -43,8 +41,8 @@ internal sealed class BankCommand(IBank bank) : CommandMethodBase
         var currencies = bank.Currencies;
         if (code == string.Empty)
         {
-            var currencyAliases = currencies.Aliases;
-            Out.WriteLineAsJson(currencyAliases);
+            var currencyCodes = currencies.Codes;
+            Out.WriteLineAsJson(currencyCodes);
         }
         else
         {
@@ -53,5 +51,5 @@ internal sealed class BankCommand(IBank bank) : CommandMethodBase
         }
     }
 
-    private string[] GetCurrencyAliases() => _codes ??= bank.Currencies.Aliases;
+    private string[] GetCurrencyAliases() => bank.Currencies.Codes;
 }

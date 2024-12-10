@@ -34,7 +34,7 @@ internal sealed class BankCommand(
         var currencies = bank.Currencies;
         if (code == string.Empty)
         {
-            var currencyAliases = currencies.Aliases;
+            var currencyAliases = currencies.Codes;
             Out.WriteLineAsJson(currencyAliases);
         }
         else
@@ -53,7 +53,7 @@ internal sealed class BankCommand(
         await Out.WriteLineAsJsonAsync(currencies.ToString(balance), cancellationToken);
     }
 
-    private string[] GetCurrencyAliases() => _codes ??= bank.Currencies.Aliases;
+    private string[] GetCurrencyAliases() => _codes ??= bank.Currencies.Codes;
 
     private string[] GetAddresses()
     {

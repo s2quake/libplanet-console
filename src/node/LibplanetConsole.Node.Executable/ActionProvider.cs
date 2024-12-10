@@ -1,14 +1,18 @@
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Reflection;
+using Libplanet.Action.State;
 using Libplanet.Types.Consensus;
+using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 
 namespace LibplanetConsole.Node.Executable;
 
 internal sealed class ActionProvider : IActionProvider
 {
-    public static ActionProvider Default { get; } = new();
+    public const string CurrencyCode = "won";
+
+    public static Currency Currency { get; } = Currency.Uncapped("KRW", 2, null);
 
     public ImmutableArray<IAction> BeginBlockActions { get; } = [];
 
@@ -29,6 +33,11 @@ internal sealed class ActionProvider : IActionProvider
             new Libplanet.Action.Sys.Initialize(
                 validatorSet: validatorSet,
                 states: ImmutableDictionary.Create<Address, IValue>()),
+            new MintAction
+            {
+                Recipient = genesisAddress,
+                Amount = Currency * 100_000_000_000,
+            },
         };
 
         return actions;
@@ -52,5 +61,33 @@ internal sealed class ActionProvider : IActionProvider
             .. files,
         ];
         return [.. paths.Distinct().Order().Select(Assembly.LoadFrom)];
+    }
+
+    [ActionType("mint_action")]
+    private sealed class MintAction : ActionBase
+    {
+        public Address Recipient { get; set; }
+
+        public FungibleAssetValue Amount { get; set; }
+
+        protected override void OnLoadPlainValue(Dictionary values)
+        {
+            Recipient = new Address(values["recipient"]);
+            Amount = new FungibleAssetValue(values["amount"]);
+        }
+
+        protected override Dictionary OnInitialize(Dictionary values)
+        {
+            return values.Add("recipient", Recipient.Bencoded)
+                .Add("amount", Amount.Serialize());
+        }
+
+        protected override IWorld OnExecute(IActionContext context)
+        {
+            var world = context.PreviousState;
+            var recipient = Recipient;
+            var amount = Amount;
+            return world.MintAsset(context, recipient, amount);
+        }
     }
 }
