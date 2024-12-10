@@ -1,6 +1,7 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
+using LibplanetConsole.Node.Bank;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
@@ -51,6 +52,7 @@ internal sealed class Application
         services.AddNode(configuration);
         services.AddExplorer(configuration);
         services.AddEvidence();
+        services.AddBank();
 
         services.AddGrpc(options =>
         {
@@ -86,6 +88,7 @@ internal sealed class Application
         app.UseNode();
         app.UseExplorer();
         app.UseEvidence();
+        app.UseBank();
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
 

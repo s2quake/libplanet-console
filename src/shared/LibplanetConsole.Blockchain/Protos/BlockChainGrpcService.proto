@@ -11,6 +11,7 @@ service BlockChainGrpcService {
   rpc GetState(GetStateRequest) returns (GetStateResponse);
   rpc GetBlockHash(GetBlockHashRequest) returns (GetBlockHashResponse);
   rpc GetAction(GetActionRequest) returns (GetActionResponse);
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
 
   rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
@@ -20,6 +21,7 @@ message BlockInfoProto {
   string hash = 2;
   string miner = 3;
 }
+
 message SendTransactionRequest {
   bytes transaction_data = 1;
 }
@@ -72,6 +74,15 @@ message GetActionRequest {
 
 message GetActionResponse {
   bytes action_data = 1;
+}
+
+message GetBalanceRequest {
+  string address = 1;
+  bytes currency = 2;
+}
+
+message GetBalanceResponse {
+  bytes balance = 1;
 }
 
 message BlockAppendedEvent {
