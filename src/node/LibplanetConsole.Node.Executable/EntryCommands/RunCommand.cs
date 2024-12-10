@@ -5,8 +5,11 @@ using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Node.Bank;
+using LibplanetConsole.Node.Executable.Extensions;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
+using Namotion.Reflection;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -126,6 +129,7 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
         options.NoREPL = NoREPL;
         options.ActionProviderModulePath = ActionProviderModulePath;
         options.ActionProviderType = ActionProviderType;
+        options.EnsureActionProviderType(typeof(ActionProvider));
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
@@ -153,6 +157,7 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
                     _ => new ConsoleConfigureOptions(consoleEndPoint));
             }
 
+            services.TryAddCurrencyProvider();
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)
