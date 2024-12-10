@@ -100,7 +100,7 @@ public sealed class CurrencyCollection : IEnumerable<Currency>
             throw new ArgumentException("Invalid currency.");
         }
 
-        return $"{fav.GetQuantityString()}{code}";
+        return $"{fav.GetQuantityString()} {code}";
     }
 
     public CurrencyInfo[] GetCurrencyInfos() => _currencies;

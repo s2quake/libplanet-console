@@ -32,7 +32,7 @@ internal sealed class BankCommand(IBank bank) : CommandMethodBase
         var currencies = bank.Currencies;
         var currency = currencies[currencyCode];
         var balance = await bank.GetBalanceAsync(currency, cancellationToken);
-        await Out.WriteLineAsJsonAsync(balance.ToString(), cancellationToken);
+        await Out.WriteLineAsync(currencies.ToString(balance));
     }
 
     [CommandMethod]
