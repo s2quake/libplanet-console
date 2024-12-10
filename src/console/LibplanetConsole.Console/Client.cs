@@ -308,6 +308,11 @@ internal sealed partial class Client : IClient
                 .ContinueWith(
                     task =>
                     {
+                        if (task.IsFaulted is true)
+                        {
+                            _logger.LogError(task.Exception, "Failed to run the client process.");
+                        }
+
                         _processTask = Task.CompletedTask;
                         _process = null;
                         _processCancellationTokenSource?.Dispose();

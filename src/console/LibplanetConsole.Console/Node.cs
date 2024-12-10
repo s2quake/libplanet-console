@@ -3,6 +3,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Blockchain;
@@ -312,6 +313,11 @@ internal sealed partial class Node : INode
                 .ContinueWith(
                     task =>
                     {
+                        if (task.IsFaulted is true)
+                        {
+                            _logger.LogError(task.Exception, "Failed to run the node process.");
+                        }
+
                         _processTask = Task.CompletedTask;
                         _process = null;
                         _processCancellationTokenSource?.Dispose();
@@ -444,10 +450,13 @@ internal sealed partial class Node : INode
         if (nodeOptions.RepositoryPath == string.Empty)
         {
             var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
-            process.ExtendedArguments.Add("--genesis");
-            process.ExtendedArguments.Add(BlockUtility.ToString(applicationOptions.GenesisBlock));
-            process.ExtendedArguments.Add("--apv");
-            process.ExtendedArguments.Add(applicationOptions.AppProtocolVersion.Token);
+            var genesisPath = TempFile.WriteAllBytes(
+                BlockUtility.SerializeBlock(applicationOptions.GenesisBlock));
+            var apvPath = TempFile.WriteAllText(applicationOptions.AppProtocolVersion.Token);
+            process.ExtendedArguments.Add("--genesis-path");
+            process.ExtendedArguments.Add(genesisPath);
+            process.ExtendedArguments.Add("--apv-path");
+            process.ExtendedArguments.Add(apvPath);
 
             if (applicationOptions.LogPath != string.Empty)
             {
