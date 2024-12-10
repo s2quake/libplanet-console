@@ -253,6 +253,7 @@ public abstract class ProcessBase
                 $"  do script \"{filename} {arguments}; exit\"",
                 $"-e",
                 $"end tell",
+                string.Empty,
             },
         };
     }

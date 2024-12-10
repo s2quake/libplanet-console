@@ -7,7 +7,7 @@
 
   <!-- $(LibplanetDirectory) does not exist. -->
   <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
-    <PackageReference Include="Libplanet.Explorer" Version="4.4.1" />
+    <PackageReference Include="Libplanet.Explorer" Version="$(LibplanetVersion)" />
   </ItemGroup>
 
   <ItemGroup>
