@@ -1,10 +1,10 @@
-﻿namespace LibplanetConsole.Node.Guild;
+namespace LibplanetConsole.Console.Guild;
 
 public interface IGuild
 {
-    Task<GuildInfo> CreateAsync(CancellationToken cancellationToken);
+    Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken);
 
-    Task<Address> DeleteAsync(CancellationToken cancellationToken);
+    Task DeleteAsync(CancellationToken cancellationToken);
 
     Task JoinAsync(Address guildAddress, CancellationToken cancellationToken);
 

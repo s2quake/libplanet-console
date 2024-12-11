@@ -5,4 +5,6 @@ public interface IConsole
     Address Address { get; }
 
     Task<TxId> SendTransactionAsync(IAction[] actions, CancellationToken cancellationToken);
+
+    Task<TxId> SendTransactionAsync(IValue[] actions, CancellationToken cancellationToken);
 }

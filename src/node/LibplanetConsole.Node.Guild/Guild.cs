@@ -78,7 +78,17 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         await node.SendTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
-    public Task<GuildInfo> GetGuildAsync(Address address, CancellationToken cancellationToken)
+    public async Task ClaimAsync(CancellationToken cancellationToken)
+    {
+        ThrowIfNotRunning();
+
+        var claimReward = new ClaimReward
+        {
+        };
+        await node.SendTransactionAsync([claimReward], cancellationToken);
+    }
+
+    public Task<GuildInfo> GetGuildAsync(CancellationToken cancellationToken)
         => Task.Run(GetGuildInfo);
 
     protected override Task OnStartAsync(CancellationToken cancellationToken)
