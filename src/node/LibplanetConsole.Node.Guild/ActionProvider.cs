@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Reflection;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common.Actions;
+using LibplanetConsole.Node.Guild.BlockActions;
 using Nekoyume;
 using Nekoyume.Action;
 using Nekoyume.Action.Loader;
@@ -25,6 +26,7 @@ internal sealed class ActionProvider : IActionProvider
 
     public ImmutableArray<IAction> BeginBlockActions { get; } =
     [
+        new TransferGoldToRewardPool(),
         new SlashValidator(),
         new AllocateGuildReward(),
         new AllocateReward(),

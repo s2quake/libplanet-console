@@ -34,7 +34,8 @@ internal sealed class Bank(IServiceProvider serviceProvider, INode node, IBlockC
 
     protected override Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var currencyProviders = serviceProvider.GetServices<ICurrencyProvider>();
+        var currencyProviders = serviceProvider.GetServices<ICurrencyProvider>()
+            .OfType<ICurrencyProvider>();
         var currencyInfos = currencyProviders.Select(item => new CurrencyInfo
         {
             Code = item.Code,
