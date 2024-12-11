@@ -1,29 +1,10 @@
-
-
-using Grpc.Core;
-using Grpc.Net.Client;
-using Lib9c;
-using LibplanetConsole.Common;
-using LibplanetConsole.Grpc.Guild;
-using Microsoft.Extensions.DependencyInjection;
-using static LibplanetConsole.Grpc.TypeUtility;
+using Nekoyume.Action.Guild;
 
 namespace LibplanetConsole.Console.Guild;
 
-internal sealed class Guild(IConsole console, INodeCollection nodes, IApplicationOptions options)
+internal sealed class Guild(IConsole console)
     : ConsoleContentBase("guild"), IGuild
 {
-    private static readonly Codec _codec = new();
-    private GrpcChannel? _channel;
-    private GuildTxGrpcService.GuildTxGrpcServiceClient? _service;
-    private INode? _node;
-    private IBlockChain? _blockChain;
-
-    public INode Node => _node ?? throw new InvalidOperationException("Node is not selected.");
-
-    public IBlockChain BlockChain
-        => _blockChain ?? throw new InvalidOperationException("Block chain is not selected.");
-
     public Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
@@ -31,38 +12,20 @@ internal sealed class Guild(IConsole console, INodeCollection nodes, IApplicatio
 
     public async Task ClaimAsync(CancellationToken cancellationToken)
     {
-        if (_service is null)
-        {
-            throw new InvalidOperationException("Bank service is not available.");
-        }
-
-        var request = new ClaimTxRequest
+        var claimReward = new ClaimReward
         {
         };
-        var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _service.ClaimAsync(request, callOptions);
-        var plainValue = _codec.Decode(response.PlainValue.ToByteArray());
-
-        await console.SendTransactionAsync([plainValue], cancellationToken);
+        await console.SendTransactionAsync([claimReward], cancellationToken);
     }
 
     public async Task CreateAsync(
         Address validatorAddress, CancellationToken cancellationToken)
     {
-        if (_service is null)
+        var makeGuild = new MakeGuild(validatorAddress)
         {
-            throw new InvalidOperationException("Bank service is not available.");
-        }
-
-        var request = new CreateTxRequest
-        {
-            ValidatorAddress = ToGrpc(validatorAddress),
         };
-        var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _service.CreateAsync(request, callOptions);
-        var plainValue = _codec.Decode(response.PlainValue.ToByteArray());
 
-        await console.SendTransactionAsync([plainValue], cancellationToken);
+        await console.SendTransactionAsync([makeGuild], cancellationToken);
     }
 
     public Task DeleteAsync(CancellationToken cancellationToken)
@@ -92,22 +55,11 @@ internal sealed class Guild(IConsole console, INodeCollection nodes, IApplicatio
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var index = Random.Shared.Next(nodes.Count);
-        var node = nodes[index];
-        var address = $"http://{EndPointUtility.ToString(node.EndPoint)}";
-        _channel = GrpcChannel.ForAddress(address);
-        _service = new GuildTxGrpcService.GuildTxGrpcServiceClient(_channel);
-        _node = node;
-        _blockChain = node.GetRequiredKeyedService<IBlockChain>(INode.Key);
-
         await Task.CompletedTask;
     }
 
     protected override async Task OnStopAsync(CancellationToken cancellationToken)
     {
-        _channel?.Dispose();
-        _channel = null;
-
         await Task.CompletedTask;
     }
 }

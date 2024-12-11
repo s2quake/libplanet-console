@@ -89,6 +89,7 @@ internal sealed class ActionProvider : IActionProvider
 
         MintSpec[] mintSpecs =
         [
+            new MintSpec(genesisAddress, ncg * 1_000, null),
             .. validatorKeys.Select(item => new MintSpec(item.Address, ncg * 1_000, null)),
         ];
         var mintAsset = new MintAssets(mintSpecs, "Initialize");

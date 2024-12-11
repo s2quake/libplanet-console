@@ -9,7 +9,6 @@ public static class NodeEndpointRouteBuilderExtensions
     public static IEndpointRouteBuilder UseGuild(this IEndpointRouteBuilder @this)
     {
         @this.MapGrpcService<GuildServiceGrpcV1>();
-        @this.MapGrpcService<GuildTxServiceGrpcV1>();
 
         return @this;
     }
