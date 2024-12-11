@@ -13,8 +13,6 @@ internal sealed class TransferGoldToRewardPool : BlockActionBase
         var goldCurrency = world.GetGoldCurrency();
         world = world.TransferAsset(
             context, Addresses.GoldCurrency, Addresses.RewardPool, goldCurrency * 1);
-        Console.WriteLine("TransferGoldToRewardPool");
-
         return world;
     }
 }
