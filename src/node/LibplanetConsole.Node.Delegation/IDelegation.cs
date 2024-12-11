@@ -18,5 +18,5 @@ public interface IDelegation
 
     Task ClaimAsync(CancellationToken cancellationToken);
 
-    Task<NodeDelegationInfo> GetInfoAsync(CancellationToken cancellationToken);
+    Task<DelegationInfo> GetInfoAsync(CancellationToken cancellationToken);
 }
