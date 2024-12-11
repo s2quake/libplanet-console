@@ -14,7 +14,7 @@ internal sealed class NodeDelegation(
     : NodeContentBase("node-delegation"), INodeDelegation
 {
     private GrpcChannel? _channel;
-    private NodeDelegationGrpcService.NodeDelegationGrpcServiceClient? _service;
+    private DelegationGrpcService.DelegationGrpcServiceClient? _service;
 
     public async Task StakeAsync(long ncg, CancellationToken cancellationToken)
     {
@@ -119,7 +119,7 @@ internal sealed class NodeDelegation(
         await _service.ClaimAsync(request, callOptions);
     }
 
-    public async Task<NodeDelegationInfo> GetInfoAsync(CancellationToken cancellationToken)
+    public async Task<DelegationInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         if (_service is null)
         {
@@ -137,7 +137,7 @@ internal sealed class NodeDelegation(
     {
         var address = $"http://{EndPointUtility.ToString(node.EndPoint)}";
         _channel = GrpcChannel.ForAddress(address);
-        _service = new NodeDelegationGrpcService.NodeDelegationGrpcServiceClient(_channel);
+        _service = new DelegationGrpcService.DelegationGrpcServiceClient(_channel);
         await Task.CompletedTask;
     }
 

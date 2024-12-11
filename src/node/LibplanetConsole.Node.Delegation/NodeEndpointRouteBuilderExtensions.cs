@@ -8,7 +8,7 @@ public static class NodeEndpointRouteBuilderExtensions
 {
     public static IEndpointRouteBuilder UseDelegation(this IEndpointRouteBuilder @this)
     {
-        @this.MapGrpcService<NodeDelegationServiceGrpcV1>();
+        @this.MapGrpcService<DelegationServiceGrpcV1>();
 
         return @this;
     }

@@ -64,7 +64,7 @@ internal sealed class Delegation(INode node, IBlockChain blockChain, IBank bank)
         await node.SendTransactionAsync([claimValidatorRewardSelfAction], cancellationToken);
     }
 
-    public Task<NodeDelegationInfo> GetInfoAsync(CancellationToken cancellationToken)
+    public Task<DelegationInfo> GetInfoAsync(CancellationToken cancellationToken)
     {
         var address = node.Address;
         var worldState = blockChain.GetWorldState();
@@ -83,7 +83,7 @@ internal sealed class Delegation(INode node, IBlockChain blockChain, IBank bank)
         var deposit = world.GetBalance(stakeStateAddress, currency);
         var guildGold = world.GetBalance(stakeStateAddress, Currencies.GuildGold);
 
-        var info = new NodeDelegationInfo
+        var info = new DelegationInfo
         {
             Power = BigIntegerUtility.ToString(delegatee.Power),
             TotalShare = BigIntegerUtility.ToString(delegatee.TotalShares),

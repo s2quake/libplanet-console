@@ -4,7 +4,7 @@ option csharp_namespace = "LibplanetConsole.Grpc.Delegation";
 
 package libplanet.console.delegation.v1;
 
-service NodeDelegationGrpcService {
+service DelegationGrpcService {
   rpc Stake(StakeRequest) returns (StakeResponse);
   rpc Promote(PromoteRequest) returns (PromoteResponse);
   rpc Unjail(UnjailRequest) returns (UnjailResponse);
@@ -13,6 +13,9 @@ service NodeDelegationGrpcService {
   rpc SetCommission(SetCommissionRequest) returns (SetCommissionResponse);
   rpc Claim(ClaimRequest) returns (ClaimResponse);
   rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+
+  rpc GetStakeInfo(GetStakeInfoRequest) returns (GetStakeInfoResponse);
+  rpc StakeTx(StakeTxRequest) returns (StakeTxResponse);
 }
 
 message StakeInfoProto {
@@ -23,7 +26,7 @@ message StakeInfoProto {
   string guild_gold = 5;
 }
 
-message NodeDelegationInfoProto {
+message DelegationInfoProto {
   string power = 1;
   string total_share = 2;
   bool is_jailed = 3;
@@ -85,5 +88,21 @@ message GetInfoRequest {
 }
 
 message GetInfoResponse {
-  NodeDelegationInfoProto delegation_info = 1;
+  DelegationInfoProto delegation_info = 1;
+}
+
+message GetStakeInfoRequest {
+  string address = 1;
+}
+
+message GetStakeInfoResponse {
+  StakeInfoProto stake_info = 1;
+}
+
+message StakeTxRequest {
+  int64 ncg = 1;
+}
+
+message StakeTxResponse {
+  bytes plain_value = 1;
 }

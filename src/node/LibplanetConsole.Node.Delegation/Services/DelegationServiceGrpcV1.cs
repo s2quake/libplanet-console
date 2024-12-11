@@ -6,8 +6,8 @@ using LibplanetConsole.Node.Bank;
 
 namespace LibplanetConsole.Node.Delegation.Services;
 
-internal sealed class NodeDelegationServiceGrpcV1(Delegation delegation, IBank bank)
-    : NodeDelegationGrpcService.NodeDelegationGrpcServiceBase
+internal sealed class DelegationServiceGrpcV1(IDelegation delegation, IBank bank)
+    : DelegationGrpcService.DelegationGrpcServiceBase
 {
     public override async Task<StakeResponse> Stake(StakeRequest request, ServerCallContext context)
     {
@@ -69,5 +69,11 @@ internal sealed class NodeDelegationServiceGrpcV1(Delegation delegation, IBank b
     {
         var info = await delegation.GetInfoAsync(context.CancellationToken);
         return new GetInfoResponse { DelegationInfo = info };
+    }
+
+    public override Task<GetStakeInfoResponse> GetStakeInfo(
+        GetStakeInfoRequest request, ServerCallContext context)
+    {
+        return base.GetStakeInfo(request, context);
     }
 }
