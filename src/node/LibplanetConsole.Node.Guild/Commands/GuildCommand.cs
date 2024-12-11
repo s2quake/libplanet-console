@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Guild.Commands;
 
@@ -41,5 +42,18 @@ internal sealed class GuildCommand(IGuild guild) : CommandMethodBase
     public async Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
     {
         await guild.UnbanMemberAsync(memberAddress, cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task ClaimAsync(CancellationToken cancellationToken)
+    {
+        await guild.ClaimAsync(cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task InfoAsync(CancellationToken cancellationToken)
+    {
+        var info = await guild.GetGuildAsync(cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 }

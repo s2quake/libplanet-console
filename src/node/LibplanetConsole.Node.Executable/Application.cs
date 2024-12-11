@@ -95,6 +95,7 @@ internal sealed class Application
         app.UseEvidence();
         app.UseBank();
         app.UseDelegation();
+        app.UseGuild();
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
 

@@ -114,12 +114,33 @@ internal sealed partial class ConsoleHost : IConsole, IDisposable
         var privateKey = _privateKey;
         var genesisHash = _genesisHash;
         var nonce = await _node.GetNextNonceAsync(privateKey.Address, cancellationToken);
-        var values = actions.Select(item => item.PlainValue).ToArray();
+        var values = actions.Select(action => action.PlainValue).ToArray();
         var transaction = Transaction.Create(
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisHash,
             actions: new TxActionList(values));
+
+        await _node.SendTransactionAsync(transaction, cancellationToken);
+        return transaction.Id;
+    }
+
+    public async Task<TxId> SendTransactionAsync(
+        IValue[] actions, CancellationToken cancellationToken)
+    {
+        if (IsRunning is false || _node is null)
+        {
+            throw new InvalidOperationException("BlockChain is not running.");
+        }
+
+        var privateKey = _privateKey;
+        var genesisHash = _genesisHash;
+        var nonce = await _node.GetNextNonceAsync(privateKey.Address, cancellationToken);
+        var transaction = Transaction.Create(
+            nonce: nonce,
+            privateKey: privateKey,
+            genesisHash: genesisHash,
+            actions: new TxActionList(actions));
 
         await _node.SendTransactionAsync(transaction, cancellationToken);
         return transaction.Id;

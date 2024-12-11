@@ -12,64 +12,65 @@ service GuildTxGrpcService {
   rpc Move(MoveTxRequest) returns (MoveTxResponse);
   rpc Ban(BanTxRequest) returns (BanTxResponse);
   rpc Unban(UnbanTxRequest) returns (UnbanTxResponse);
+  rpc Claim(ClaimTxRequest) returns (ClaimTxResponse);
 }
 
 message CreateTxRequest {
-  int64 nonce = 1;
-  string validator_address = 2;
+  string validator_address = 1;
 }
 
 message CreateTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
 }
 
 message DeleteTxRequest {
-  int64 nonce = 1;
 }
 
 message DeleteTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
 }
 
 message JoinTxRequest {
-  int64 nonce = 1;
-  string guild_address = 2;
+  string guild_address = 1;
 }
 
 message JoinTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
 }
 
 message LeaveTxRequest {
-  int64 nonce = 1;
 }
 
 message LeaveTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
 }
 
 message MoveTxRequest {
-  int64 nonce = 1;
 }
 
 message MoveTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
 }
 
 message BanTxRequest {
-  int64 nonce = 1;
-  string member_address = 2;
+  string member_address = 1;
 }
 
 message BanTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
 }
 
 message UnbanTxRequest {
-  int64 nonce = 1;
-  string member_address = 2;
+  string member_address = 1;
 }
 
 message UnbanTxResponse {
-  bytes tx_invoice = 1;
+  bytes plain_value = 1;
+}
+
+message ClaimTxRequest {
+}
+
+message ClaimTxResponse {
+  bytes plain_value = 1;
 }
