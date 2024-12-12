@@ -1,73 +1,65 @@
-
-
-using Grpc.Core;
-using Grpc.Net.Client;
-using Lib9c;
-using LibplanetConsole.Common;
-using LibplanetConsole.Grpc.Guild;
-using Microsoft.Extensions.DependencyInjection;
-using static LibplanetConsole.Grpc.TypeUtility;
+using Nekoyume.Action.Guild;
 
 namespace LibplanetConsole.Console.Guild;
 
-internal sealed class Guild(IConsole console, INodeCollection nodes, IApplicationOptions options)
+internal sealed class Guild(IConsole console)
     : ConsoleContentBase("guild"), IGuild
 {
-    private static readonly Codec _codec = new();
-    private GrpcChannel? _channel;
-    private GuildTxGrpcService.GuildTxGrpcServiceClient? _service;
-    private INode? _node;
-    private IBlockChain? _blockChain;
-
-    public INode Node => _node ?? throw new InvalidOperationException("Node is not selected.");
-
-    public IBlockChain BlockChain
-        => _blockChain ?? throw new InvalidOperationException("Block chain is not selected.");
-
-    public Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task CreateAsync(
+        Address validatorAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var makeGuild = new MakeGuild(validatorAddress)
+        {
+        };
+        await console.SendTransactionAsync([makeGuild], cancellationToken);
+    }
+
+    public async Task DeleteAsync(CancellationToken cancellationToken)
+    {
+        var removeGuild = new RemoveGuild
+        {
+        };
+        await console.SendTransactionAsync([removeGuild], cancellationToken);
+    }
+
+    public async Task JoinAsync(Address guildAddress, CancellationToken cancellationToken)
+    {
+        var joinGuild = new JoinGuild(new(guildAddress))
+        {
+        };
+        await console.SendTransactionAsync([joinGuild], cancellationToken);
+    }
+
+    public async Task LeaveAsync(CancellationToken cancellationToken)
+    {
+        var quitGuild = new QuitGuild
+        {
+        };
+        await console.SendTransactionAsync([quitGuild], cancellationToken);
+    }
+
+    public async Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    {
+        var banGuildMember = new BanGuildMember(new(memberAddress))
+        {
+        };
+        await console.SendTransactionAsync([banGuildMember], cancellationToken);
+    }
+
+    public async Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    {
+        var unbanMemberGuild = new UnbanGuildMember(memberAddress)
+        {
+        };
+        await console.SendTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
     public async Task ClaimAsync(CancellationToken cancellationToken)
     {
-        if (_service is null)
-        {
-            throw new InvalidOperationException("Bank service is not available.");
-        }
-
-        var request = new ClaimTxRequest
+        var claimReward = new ClaimReward
         {
         };
-        var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _service.ClaimAsync(request, callOptions);
-        var plainValue = _codec.Decode(response.PlainValue.ToByteArray());
-
-        await console.SendTransactionAsync([plainValue], cancellationToken);
-    }
-
-    public async Task CreateAsync(
-        Address validatorAddress, CancellationToken cancellationToken)
-    {
-        if (_service is null)
-        {
-            throw new InvalidOperationException("Bank service is not available.");
-        }
-
-        var request = new CreateTxRequest
-        {
-            ValidatorAddress = ToGrpc(validatorAddress),
-        };
-        var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _service.CreateAsync(request, callOptions);
-        var plainValue = _codec.Decode(response.PlainValue.ToByteArray());
-
-        await console.SendTransactionAsync([plainValue], cancellationToken);
-    }
-
-    public Task DeleteAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
+        await console.SendTransactionAsync([claimReward], cancellationToken);
     }
 
     public Task<GuildInfo> GetGuildAsync(CancellationToken cancellationToken)
@@ -75,39 +67,13 @@ internal sealed class Guild(IConsole console, INodeCollection nodes, IApplicatio
         throw new NotImplementedException();
     }
 
-    public Task JoinAsync(Address guildAddress, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task LeaveAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var index = Random.Shared.Next(nodes.Count);
-        var node = nodes[index];
-        var address = $"http://{EndPointUtility.ToString(node.EndPoint)}";
-        _channel = GrpcChannel.ForAddress(address);
-        _service = new GuildTxGrpcService.GuildTxGrpcServiceClient(_channel);
-        _node = node;
-        _blockChain = node.GetRequiredKeyedService<IBlockChain>(INode.Key);
-
         await Task.CompletedTask;
     }
 
     protected override async Task OnStopAsync(CancellationToken cancellationToken)
     {
-        _channel?.Dispose();
-        _channel = null;
-
         await Task.CompletedTask;
     }
 }

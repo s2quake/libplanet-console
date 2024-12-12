@@ -207,6 +207,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
         _logger.LogDebug("Node Contents are started: {Address}", Address);
+
+        _swarm.BlockChain.MakeTransaction(null, null);
         Started?.Invoke(this, EventArgs.Empty);
     }
 

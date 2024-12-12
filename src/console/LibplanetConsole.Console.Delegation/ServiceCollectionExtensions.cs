@@ -8,12 +8,16 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDelegation(this IServiceCollection @this)
     {
+        @this.AddSingleton<Delegation>()
+            .AddSingleton<IDelegation>(s => s.GetRequiredService<Delegation>())
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<Delegation>());
         @this.AddKeyedScoped<NodeDelegation>(INode.Key)
-             .AddKeyedScoped<INodeDelegation>(
+            .AddKeyedScoped<INodeDelegation>(
                 INode.Key, (s, k) => s.GetRequiredKeyedService<NodeDelegation>(k))
-             .AddKeyedScoped<INodeContent>(
+            .AddKeyedScoped<INodeContent>(
                 INode.Key, (s, k) => s.GetRequiredKeyedService<NodeDelegation>(k));
 
+        @this.AddSingleton<ICommand, DelegationCommand>();
         @this.AddSingleton<ICommand, NodeDelegationCommand>();
 
         return @this;
