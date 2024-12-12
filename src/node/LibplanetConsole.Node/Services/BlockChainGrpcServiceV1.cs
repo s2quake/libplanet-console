@@ -12,17 +12,20 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
     private static readonly Codec _codec = new();
     private readonly Node _node;
     private readonly IBlockChain _blockChain;
+    private readonly IAddressCollection _addresses;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<BlockChainGrpcServiceV1> _logger;
 
     public BlockChainGrpcServiceV1(
         Node node,
         IBlockChain blockChain,
+        IAddressCollection addresses,
         IHostApplicationLifetime applicationLifetime,
         ILogger<BlockChainGrpcServiceV1> logger)
     {
         _node = node;
         _blockChain = blockChain;
+        _addresses = addresses;
         _applicationLifetime = applicationLifetime;
         _logger = logger;
         _logger.LogDebug("BlockChainGrpcServiceV1 is created.");
@@ -104,6 +107,17 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
         var actionIndex = request.ActionIndex;
         var action = await _node.GetActionAsync(txId, actionIndex, context.CancellationToken);
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
+    }
+
+    public override Task<GetAddressesResponse> GetAddresses(
+        GetAddressesRequest request, ServerCallContext context)
+    {
+        var addresses = _addresses.Aliases.Select(item => new AddressInfoProto
+        {
+            Alias = item,
+            Address = ToGrpc(_addresses[item]),
+        });
+        return Task.FromResult(new GetAddressesResponse { Addresses = { addresses } });
     }
 
     public override async Task GetEventStream(
