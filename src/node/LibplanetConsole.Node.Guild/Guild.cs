@@ -1,11 +1,13 @@
 ﻿using Libplanet.Action.State;
+using LibplanetConsole.Node.Bank;
 using Nekoyume.Action.Guild;
 using Nekoyume.Model.Guild;
+using Nekoyume.Model.State;
 using Nekoyume.TypedAddress;
 
 namespace LibplanetConsole.Node.Guild;
 
-internal sealed class Guild(INode node, IBlockChain blockChain)
+internal sealed class Guild(INode node, IBlockChain blockChain, IBank bank)
     : NodeContentBase(nameof(Guild)), IGuild
 {
     public bool IsRunning { get; private set; }
@@ -91,10 +93,22 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
     public Task<GuildInfo> GetGuildAsync(CancellationToken cancellationToken)
         => Task.Run(GetGuildInfo);
 
-    protected override Task OnStartAsync(CancellationToken cancellationToken)
+    protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
+        var worldStae = blockChain.GetWorldState();
+        var accountState = worldStae.GetAccountState(ReservedAddresses.LegacyAccount);
+        var value = accountState.GetState(GoldCurrencyState.Address);
+        if (value is not Dictionary dictionary)
+        {
+            throw new InvalidOperationException(
+                "The states doesn't contain gold currency.\n" +
+                "Check the genesis block.");
+        }
+
+        var currency = new GoldCurrencyState(dictionary).Currency;
+        bank.Currencies.Add("ncg", currency);
         IsRunning = true;
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
     protected override Task OnStopAsync(CancellationToken cancellationToken)

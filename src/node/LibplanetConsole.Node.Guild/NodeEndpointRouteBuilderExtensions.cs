@@ -1,6 +1,9 @@
+using Lib9c;
+using LibplanetConsole.Node.Bank;
 using LibplanetConsole.Node.Guild.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Guild;
 
@@ -8,8 +11,12 @@ public static class NodeEndpointRouteBuilderExtensions
 {
     public static IEndpointRouteBuilder UseGuild(this IEndpointRouteBuilder @this)
     {
+        var services = @this.ServiceProvider;
+        var bank = services.GetRequiredService<IBank>();
+        bank.Currencies.Add("mead", Currencies.Mead);
+        bank.Currencies.Add("gg", Currencies.GuildGold);
+
         @this.MapGrpcService<GuildServiceGrpcV1>();
-        @this.MapGrpcService<GuildTxServiceGrpcV1>();
 
         return @this;
     }

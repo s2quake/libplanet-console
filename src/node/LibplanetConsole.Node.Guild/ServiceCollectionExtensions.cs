@@ -1,5 +1,4 @@
 using JSSoft.Commands;
-using LibplanetConsole.Node.Bank;
 using LibplanetConsole.Node.Guild.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,10 +12,6 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<Guild>()
              .AddSingleton<INodeContent>(s => s.GetRequiredService<Guild>())
              .AddSingleton<IGuild>(s => s.GetRequiredService<Guild>());
-        @this.AddSingleton<ICurrencyProvider, GuildGoldCurrencyProvider>();
-        @this.AddSingleton<ICurrencyProvider, MeadCurrencyProvider>();
-        @this.AddSingleton<NcgCurrencyProvider>()
-             .AddSingleton<ICurrencyProvider>(s => s.GetRequiredService<NcgCurrencyProvider>());
 
         @this.AddSingleton<ICommand, GuildCommand>();
 
