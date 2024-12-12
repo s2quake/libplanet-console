@@ -21,9 +21,9 @@ public abstract class NodeContentBase(string name) : INodeContent, IDisposable
     Task INodeContent.StopAsync(CancellationToken cancellationToken)
         => OnStopAsync(cancellationToken);
 
-    protected abstract Task OnStartAsync(CancellationToken cancellationToken);
+    protected virtual Task OnStartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-    protected abstract Task OnStopAsync(CancellationToken cancellationToken);
+    protected virtual Task OnStopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     protected virtual void OnDispose(bool disposing)
     {
