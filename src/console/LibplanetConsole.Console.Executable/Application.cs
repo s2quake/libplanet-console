@@ -55,6 +55,7 @@ internal sealed class Application
         services.AddGrpc(options =>
         {
             options.Interceptors.Add<LoggingInterceptor>();
+            options.MaxSendMessageSize = 10 * 1024 * 1024; // 10 MB
         });
         services.AddGrpcReflection();
 
