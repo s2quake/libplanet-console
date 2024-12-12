@@ -13,6 +13,7 @@ internal static class ConsoleChannel
     {
         ThrowOperationCanceledOnCancellation = true,
         MaxRetryAttempts = 10,
+        MaxReceiveMessageSize = 10 * 1024 * 1024, // 10 MB
         ServiceConfig = new()
         {
             MethodConfigs =
