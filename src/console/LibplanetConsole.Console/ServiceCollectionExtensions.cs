@@ -38,6 +38,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IConsole>(s => s.GetRequiredService<ConsoleHost>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
+        @this.AddSingleton<IAddressCollection, AddressCollection>();
 
         @this.AddHostedService<ConsoleHostedService>();
 
