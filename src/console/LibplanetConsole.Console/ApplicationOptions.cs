@@ -63,7 +63,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
         => NoProcess ? null : new ProcessOptions { Detach = Detach, NewWindow = NewWindow, };
 
     private PrivateKey ActualPrivateKey
-            => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
+        => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 
     private Block GetGenesisBlock()
     {
