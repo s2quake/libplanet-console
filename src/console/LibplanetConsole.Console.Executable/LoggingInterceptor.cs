@@ -4,7 +4,7 @@ using Grpc.Core.Interceptors;
 
 namespace LibplanetConsole.Console.Executable;
 
-internal class LoggingInterceptor(ILogger<LoggingInterceptor> logger) : Interceptor
+internal sealed class LoggingInterceptor(ILogger<LoggingInterceptor> logger) : Interceptor
 {
     public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(
         TRequest request,

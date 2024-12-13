@@ -7,8 +7,7 @@ using static LibplanetConsole.Grpc.TypeUtility;
 namespace LibplanetConsole.Client.Services;
 
 internal sealed class BlockChainGrpcServiceV1(
-    Client client,
-    IBlockChain blockChain,
+    ClientBlockChain blockChain,
     IHostApplicationLifetime applicationLifetime)
     : BlockChainGrpcService.BlockChainGrpcServiceBase
 {
@@ -18,7 +17,7 @@ internal sealed class BlockChainGrpcServiceV1(
         SendTransactionRequest request, ServerCallContext context)
     {
         var txData = request.TransactionData.ToByteArray();
-        var txId = await client.SendTransactionAsync(txData, context.CancellationToken);
+        var txId = await blockChain.SendTransactionAsync(txData, context.CancellationToken);
         return new SendTransactionResponse { TxId = ToGrpc(txId) };
     }
 
@@ -87,7 +86,7 @@ internal sealed class BlockChainGrpcServiceV1(
     {
         var txId = ToTxId(request.TxId);
         var actionIndex = request.ActionIndex;
-        var action = await client.GetActionAsync(txId, actionIndex, context.CancellationToken);
+        var action = await blockChain.GetActionAsync(txId, actionIndex, context.CancellationToken);
         return new GetActionResponse { ActionData = Google.Protobuf.ByteString.CopyFrom(action) };
     }
 

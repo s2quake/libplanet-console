@@ -6,8 +6,7 @@ namespace LibplanetConsole.Console;
 internal sealed class ConsoleBlockChain(NodeCollection nodes)
     : IConsoleContent, IBlockChain
 {
-    private IBlockChain? _blockChain;
-    private Node? _node;
+    private NodeBlockChain? _blockChain;
 
     public event EventHandler<BlockEventArgs>? BlockAppended;
 
@@ -26,15 +25,15 @@ internal sealed class ConsoleBlockChain(NodeCollection nodes)
     public Task SendTransactionAsync(
         Transaction transaction, CancellationToken cancellationToken)
     {
-        if (IsRunning is false || _node is null)
+        if (IsRunning is false || _blockChain is null)
         {
             throw new InvalidOperationException("BlockChain is not running.");
         }
 
-        return _node.SendTransactionAsync(transaction, cancellationToken);
+        return _blockChain.SendTransactionAsync(transaction, cancellationToken);
     }
 
-    Task<long> IBlockChain.GetNextNonceAsync(
+    public Task<long> GetNextNonceAsync(
         Address address, CancellationToken cancellationToken)
     {
         if (IsRunning is false || _blockChain is null)
@@ -149,8 +148,7 @@ internal sealed class ConsoleBlockChain(NodeCollection nodes)
             }
         }
 
-        _node = node;
-        _blockChain = node?.GetRequiredKeyedService<IBlockChain>(INode.Key);
+        _blockChain = node?.GetRequiredKeyedService<NodeBlockChain>(INode.Key);
 
         if (_blockChain is not null)
         {

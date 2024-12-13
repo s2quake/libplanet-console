@@ -23,11 +23,16 @@ public static class ServiceCollectionExtensions
 
         @this.AddSingleton(synchronizationContext);
         @this.AddSingleton<Client>()
-             .AddSingleton<IClient>(s => s.GetRequiredService<Client>())
-             .AddSingleton<IBlockChain>(s => s.GetRequiredService<Client>());
+            .AddSingleton<IClient>(s => s.GetRequiredService<Client>());
+        @this.AddSingleton<ClientBlockChain>()
+            .AddSingleton<IBlockChain>(s => s.GetRequiredService<ClientBlockChain>())
+            .AddSingleton<IClientContent>(s => s.GetRequiredService<ClientBlockChain>());
         @this.AddHostedService<ClientHostedService>();
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, ClientInfoProvider>();
+        @this.AddSingleton<AddressCollection>()
+            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>())
+            .AddSingleton<IClientContent>(s => s.GetRequiredService<AddressCollection>());
 
         @this.AddSingleton<ICommand, AddressCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();

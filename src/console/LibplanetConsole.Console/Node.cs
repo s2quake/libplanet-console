@@ -6,7 +6,6 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Services;
-using LibplanetConsole.Grpc.Blockchain;
 using LibplanetConsole.Grpc.Node;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -15,14 +14,13 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 
-internal sealed partial class Node : INode
+internal sealed class Node : INode
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly PrivateKey _privateKey;
     private readonly ILogger _logger;
     private readonly CriticalSection _criticalSection = new("Process");
-    private NodeService? _nodeService;
-    private BlockChainService? _blockChainService;
+    private NodeService? _service;
     private GrpcChannel? _channel;
     private NodeInfo _info;
     private bool _isDisposed;
@@ -116,14 +114,14 @@ internal sealed partial class Node : INode
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        if (_nodeService is null)
+        if (_service is null)
         {
             throw new InvalidOperationException("Node is not attached.");
         }
 
         var request = new GetInfoRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _nodeService.GetInfoAsync(request, callOptions);
+        var response = await _service.GetInfoAsync(request, callOptions);
         _info = response.NodeInfo;
         return _info;
     }
@@ -131,65 +129,59 @@ internal sealed partial class Node : INode
     public async Task AttachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-
+        using var scope = _criticalSection.Scope();
         if (IsAttached is true)
         {
             throw new InvalidOperationException("Node is already attached.");
         }
 
-        using var scope = _criticalSection.Scope();
         var channel = NodeChannel.CreateChannel(Options.EndPoint);
-        var nodeService = new NodeService(channel);
-        var blockChainService = new BlockChainService(channel);
-        nodeService.Started += NodeService_Started;
-        nodeService.Stopped += NodeService_Stopped;
-        nodeService.Disconnected += NodeService_Disconnected;
-        blockChainService.BlockAppended += BlockChainService_BlockAppended;
-        try
-        {
-            await nodeService.InitializeAsync(cancellationToken);
-            await blockChainService.InitializeAsync(cancellationToken);
-        }
-        catch
-        {
-            nodeService.Dispose();
-            blockChainService.Dispose();
-            throw;
-        }
+        var nodeService = await NodeService.CreateAsync(channel, cancellationToken);
 
         _channel = channel;
-        _nodeService = nodeService;
-        _blockChainService = blockChainService;
-        _info = await GetInfoAsync(cancellationToken);
+        _service = nodeService;
+        _service.Started += Service_Started;
+        _service.Stopped += Service_Stopped;
+        _service.Disconnected += Service_Disconnected;
+        _info = nodeService.Info;
         IsRunning = _info.IsRunning;
         IsAttached = true;
         _logger.LogDebug("Node is attached: {Address}", Address);
         Attached?.Invoke(this, EventArgs.Empty);
+        if (IsRunning is true)
+        {
+            _logger.LogDebug("Node is started in the Attach: {Address}", Address);
+            await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+            _logger.LogDebug("Node Contents are started in the Attach: {Address}", Address);
+            Started?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public async Task DetachAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
-
+        using var scope = _criticalSection.Scope();
         if (_channel is null)
         {
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        if (_nodeService is not null)
+        if (IsRunning is true)
         {
-            _nodeService.Started -= NodeService_Started;
-            _nodeService.Stopped -= NodeService_Stopped;
-            _nodeService.Disconnected -= NodeService_Disconnected;
-            _nodeService.Dispose();
-            _nodeService = null;
+            await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+            _logger.LogDebug("Node Contents are stopped in the Attach: {Address}", Address);
+            _info = NodeInfo.Empty;
+            _logger.LogDebug("Node is stopped in the Attach: {Address}", Address);
+            Stopped?.Invoke(this, EventArgs.Empty);
         }
 
-        if (_blockChainService is not null)
+        if (_service is not null)
         {
-            _blockChainService.BlockAppended -= BlockChainService_BlockAppended;
-            _blockChainService.Dispose();
-            _blockChainService = null;
+            _service.Started -= Service_Started;
+            _service.Stopped -= Service_Stopped;
+            _service.Disconnected -= Service_Disconnected;
+            _service.Dispose();
+            _service = null;
         }
 
         await _channel.ShutdownAsync();
@@ -204,12 +196,13 @@ internal sealed partial class Node : INode
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
+        using var scope = _criticalSection.Scope();
         if (IsRunning is true)
         {
             throw new InvalidOperationException("Node is already running.");
         }
 
-        if (_nodeService is null)
+        if (_service is null)
         {
             throw new InvalidOperationException("Node is not attached.");
         }
@@ -220,7 +213,7 @@ internal sealed partial class Node : INode
             SeedEndPoint = EndPointUtility.ToString(seedEndPoint),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _nodeService.StartAsync(request, callOptions);
+        var response = await _service.StartAsync(request, callOptions);
         _info = response.NodeInfo;
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
@@ -232,12 +225,13 @@ internal sealed partial class Node : INode
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
+        using var scope = _criticalSection.Scope();
         if (IsRunning is false)
         {
             throw new InvalidOperationException("Node is not running.");
         }
 
-        if (_nodeService is null)
+        if (_service is null)
         {
             throw new InvalidOperationException("Node is not attached.");
         }
@@ -247,7 +241,7 @@ internal sealed partial class Node : INode
 
         var request = new StopRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        await _nodeService.StopAsync(request, callOptions);
+        await _service.StopAsync(request, callOptions);
         _info = NodeInfo.Empty;
         IsRunning = false;
         _logger.LogDebug("Node is stopped: {Address}", Address);
@@ -269,20 +263,13 @@ internal sealed partial class Node : INode
             _processTask = Task.CompletedTask;
             _process = null;
 
-            if (_nodeService is not null)
+            if (_service is not null)
             {
-                _nodeService.Started -= NodeService_Started;
-                _nodeService.Stopped -= NodeService_Stopped;
-                _nodeService.Disconnected -= NodeService_Disconnected;
-                _nodeService.Dispose();
-                _nodeService = null;
-            }
-
-            if (_blockChainService is not null)
-            {
-                _blockChainService.BlockAppended -= BlockChainService_BlockAppended;
-                _blockChainService.Dispose();
-                _blockChainService = null;
+                _service.Started -= Service_Started;
+                _service.Stopped -= Service_Stopped;
+                _service.Disconnected -= Service_Disconnected;
+                _service.Dispose();
+                _service = null;
             }
 
             IsRunning = false;
@@ -360,6 +347,22 @@ internal sealed partial class Node : INode
         _process = null;
     }
 
+    public async Task<TxId> SendTransactionAsync(
+        IAction[] actions, CancellationToken cancellationToken)
+    {
+        var blockChain = _serviceProvider.GetRequiredKeyedService<NodeBlockChain>(INode.Key);
+        var address = _privateKey.Address;
+        var nonce = await blockChain.GetNextNonceAsync(address, cancellationToken);
+        var genesisHash = _info.GenesisHash;
+        var transaction = Transaction.Create(
+            nonce: nonce,
+            privateKey: _privateKey,
+            genesisHash: genesisHash,
+            actions: [.. actions.Select(item => item.PlainValue)]);
+        await blockChain.SendTransactionAsync(transaction, cancellationToken);
+        return transaction.Id;
+    }
+
     public string GetCommandLine()
     {
         if (_commandLine is null)
@@ -371,39 +374,31 @@ internal sealed partial class Node : INode
         return _commandLine ?? throw new UnreachableException("Process is not created.");
     }
 
-    private void NodeService_Started(object? sender, NodeEventArgs e)
+    private async void Service_Started(object? sender, NodeEventArgs e)
     {
         _info = e.NodeInfo;
         IsRunning = true;
+        await Task.WhenAll(Contents.Select(item => item.StartAsync(default)));
         Started?.Invoke(this, EventArgs.Empty);
     }
 
-    private void NodeService_Stopped(object? sender, EventArgs e)
+    private async void Service_Stopped(object? sender, EventArgs e)
     {
+        await Task.WhenAll(Contents.Select(item => item.StopAsync(default)));
+        _info = NodeInfo.Empty;
+        IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
     }
 
-    private void BlockChainService_BlockAppended(object? sender, BlockEventArgs e)
+    private async void Service_Disconnected(object? sender, EventArgs e)
     {
-        _info = _info with { Tip = e.BlockInfo };
-        BlockAppended?.Invoke(this, e);
-    }
-
-    private void NodeService_Disconnected(object? sender, EventArgs e)
-    {
-        if (sender is NodeService nodeService && _nodeService == nodeService)
+        if (sender is NodeService nodeService && _service == nodeService)
         {
-            _nodeService.Started -= NodeService_Started;
-            _nodeService.Stopped -= NodeService_Stopped;
-            _nodeService.Disconnected -= NodeService_Disconnected;
-            _nodeService.Dispose();
-            _nodeService = null;
-            if (_blockChainService is not null)
-            {
-                _blockChainService.BlockAppended -= BlockChainService_BlockAppended;
-                _blockChainService.Dispose();
-                _blockChainService = null;
-            }
+            _service.Started -= Service_Started;
+            _service.Stopped -= Service_Stopped;
+            _service.Disconnected -= Service_Disconnected;
+            _service.Dispose();
+            _service = null;
 
             if (_channel is not null)
             {
@@ -414,6 +409,8 @@ internal sealed partial class Node : INode
             if (IsRunning is true)
             {
                 IsRunning = false;
+                await Task.WhenAll(Contents.Select(item => item.StopAsync(default)));
+                _info = NodeInfo.Empty;
                 Stopped?.Invoke(this, EventArgs.Empty);
             }
 

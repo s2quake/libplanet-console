@@ -26,7 +26,8 @@ public static class ServiceCollectionExtensions
             .AddSingleton<INode>(s => s.GetRequiredService<Node>())
             .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
         @this.AddSingleton<AddressCollection>()
-            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>());
+            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>())
+            .AddSingleton<INodeContent>(s => s.GetRequiredService<AddressCollection>());
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
 

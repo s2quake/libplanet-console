@@ -179,7 +179,7 @@
       "configurations": [
         "C#: Libplanet Console - Concurrent Run",
         "C#: Libplanet Node - Concurrent Run",
-        "C#: Libplanet Client - Concurrent Run"
+        "C#: Libplanet Client - Concurrent Run",
       ]
     },
     {

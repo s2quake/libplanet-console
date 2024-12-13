@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.DependencyInjection;
 
 #if LIBPLANET_NODE
 namespace LibplanetConsole.Node;

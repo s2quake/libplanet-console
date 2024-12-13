@@ -48,14 +48,21 @@ public static class ServiceCollectionExtensions
 
         @this.AddKeyedScoped(INode.Key, NodeFactory.Create)
             .AddKeyedScoped<INode>(
-                INode.Key, (s, k) => s.GetRequiredKeyedService<Node>(k))
-            .AddKeyedScoped<IBlockChain>(
                 INode.Key, (s, k) => s.GetRequiredKeyedService<Node>(k));
+        @this.AddKeyedScoped<NodeBlockChain>(INode.Key)
+            .AddKeyedScoped<IBlockChain>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeBlockChain>(k))
+            .AddKeyedScoped<INodeContent>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeBlockChain>(k));
+
         @this.AddKeyedScoped(IClient.Key, ClientFactory.Create)
             .AddKeyedScoped<IClient>(
-                IClient.Key, (s, k) => s.GetRequiredKeyedService<Client>(k))
-            .AddKeyedScoped<IBlockChain>(
                 IClient.Key, (s, k) => s.GetRequiredKeyedService<Client>(k));
+        @this.AddKeyedScoped<ClientBlockChain>(INode.Key)
+            .AddKeyedScoped<IBlockChain>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<ClientBlockChain>(k))
+            .AddKeyedScoped<IClientContent>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<ClientBlockChain>(k));
 
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeApplicationProvider>();

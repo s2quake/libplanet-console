@@ -32,29 +32,23 @@ public readonly record struct NodeInfo
         Tip = BlockInfo.Empty,
     };
 
-    public static implicit operator NodeInfo(NodeInfoProto nodeInfo)
+    public static implicit operator NodeInfo(NodeInfoProto nodeInfo) => new()
     {
-        return new NodeInfo
-        {
-            ProcessId = nodeInfo.ProcessId,
-            AppProtocolVersion = nodeInfo.AppProtocolVersion,
-            Address = ToAddress(nodeInfo.Address),
-            GenesisHash = ToBlockHash(nodeInfo.GenesisHash),
-            Tip = nodeInfo.Tip,
-            IsRunning = nodeInfo.IsRunning,
-        };
-    }
+        ProcessId = nodeInfo.ProcessId,
+        AppProtocolVersion = nodeInfo.AppProtocolVersion,
+        Address = ToAddress(nodeInfo.Address),
+        GenesisHash = ToBlockHash(nodeInfo.GenesisHash),
+        Tip = nodeInfo.Tip,
+        IsRunning = nodeInfo.IsRunning,
+    };
 
-    public static implicit operator NodeInfoProto(NodeInfo nodeInfo)
+    public static implicit operator NodeInfoProto(NodeInfo nodeInfo) => new()
     {
-        return new NodeInfoProto
-        {
-            ProcessId = nodeInfo.ProcessId,
-            AppProtocolVersion = nodeInfo.AppProtocolVersion,
-            Address = ToGrpc(nodeInfo.Address),
-            GenesisHash = ToGrpc(nodeInfo.GenesisHash),
-            Tip = nodeInfo.Tip,
-            IsRunning = nodeInfo.IsRunning,
-        };
-    }
+        ProcessId = nodeInfo.ProcessId,
+        AppProtocolVersion = nodeInfo.AppProtocolVersion,
+        Address = ToGrpc(nodeInfo.Address),
+        GenesisHash = ToGrpc(nodeInfo.GenesisHash),
+        Tip = nodeInfo.Tip,
+        IsRunning = nodeInfo.IsRunning,
+    };
 }

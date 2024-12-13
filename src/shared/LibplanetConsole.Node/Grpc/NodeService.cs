@@ -10,11 +10,15 @@ using LibplanetConsole.Console;
 
 namespace LibplanetConsole.Grpc.Node;
 
-internal sealed class NodeService(GrpcChannel channel)
-    : NodeGrpcServiceClient(channel), IDisposable
+internal sealed class NodeService : NodeGrpcServiceClient, IDisposable
 {
     private StreamReceiver<GetEventStreamResponse>? _eventReceiver;
     private bool _isDisposed;
+
+    private NodeService(GrpcChannel channel)
+        : base(channel)
+    {
+    }
 
     public event EventHandler? Disconnected;
 
@@ -23,6 +27,22 @@ internal sealed class NodeService(GrpcChannel channel)
     public event EventHandler? Stopped;
 
     public NodeInfo Info { get; private set; }
+
+    public static async Task<NodeService> CreateAsync(
+        GrpcChannel channel, CancellationToken cancellationToken)
+    {
+        var service = new NodeService(channel);
+        try
+        {
+            await service.InitializeAsync(cancellationToken);
+            return service;
+        }
+        catch
+        {
+            service.Dispose();
+            throw;
+        }
+    }
 
     public void Dispose()
     {

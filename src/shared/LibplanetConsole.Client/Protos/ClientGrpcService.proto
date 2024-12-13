@@ -3,7 +3,6 @@ syntax = "proto3";
 option csharp_namespace = "LibplanetConsole.Grpc.Client";
 
 package libplanet.console.client.v1;
-import "src/shared/LibplanetConsole.Blockchain/Protos/BlockChainGrpcService.proto";
 
 service ClientGrpcService {
   rpc Ping(PingRequest) returns (PingResponse);
@@ -16,7 +15,7 @@ service ClientGrpcService {
 
 message ClientInfoProto {
   string address = 1;
-  libplanet.console.blockchain.v1.BlockInfoProto tip = 2;
+  string genesis_hash = 2;
   bool is_running = 3;
 }
 

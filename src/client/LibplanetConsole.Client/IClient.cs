@@ -10,8 +10,6 @@ public interface IClient : IVerifier
 
     ClientInfo Info { get; }
 
-    NodeInfo NodeInfo { get; }
-
     bool IsRunning { get; }
 
     PublicKey PublicKey { get; }

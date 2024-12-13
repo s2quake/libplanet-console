@@ -1,20 +1,29 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace LibplanetConsole.Node;
 
-internal sealed class AddressCollection : AddressCollectionBase
+internal sealed class AddressCollection(IEnumerable<IAddressProvider> addressProviders)
+    : AddressCollectionBase, INodeContent
 {
-    public AddressCollection()
-    {
-    }
+    private readonly IAddressProvider[] _addressProviders = [.. addressProviders];
 
-    public void Collect(IServiceProvider serviceProvider)
+    string INodeContent.Name => "addresses";
+
+    IEnumerable<INodeContent> INodeContent.Dependencies { get; } = [];
+
+    async Task INodeContent.StartAsync(CancellationToken cancellationToken)
     {
-        var addressProviders = serviceProvider.GetServices<IAddressProvider>();
-        var items = addressProviders.SelectMany(provider => provider.Addresses);
+        var items = _addressProviders.SelectMany(provider => provider.Addresses);
         foreach (var item in items)
         {
             Add(item.Alias, item.Address);
         }
+
+        await Task.CompletedTask;
+    }
+
+    async Task INodeContent.StopAsync(CancellationToken cancellationToken)
+    {
+        Clear();
+
+        await Task.CompletedTask;
     }
 }

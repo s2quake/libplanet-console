@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace LibplanetConsole.Console;
 
 internal sealed partial class ConsoleHost(
+    IServiceProvider serviceProvider,
     NodeCollection nodes,
     ClientCollection clients,
     IApplicationOptions options,
@@ -86,14 +87,14 @@ internal sealed partial class ConsoleHost(
     public async Task<TxId> SendTransactionAsync(
         IAction[] actions, CancellationToken cancellationToken)
     {
-        if (IsRunning is false || nodes.Current is not { } node)
+        if (IsRunning is false)
         {
             throw new InvalidOperationException("BlockChain is not running.");
         }
 
+        var blockChain = serviceProvider.GetRequiredService<ConsoleBlockChain>();
         var privateKey = _privateKey;
         var genesisHash = _genesisHash;
-        var blockChain = node.GetRequiredKeyedService<IBlockChain>(INode.Key);
         var nonce = await blockChain.GetNextNonceAsync(privateKey.Address, cancellationToken);
         var values = actions.Select(item => item.PlainValue).ToArray();
         var transaction = Transaction.Create(
@@ -102,7 +103,7 @@ internal sealed partial class ConsoleHost(
             genesisHash: genesisHash,
             actions: new TxActionList(values));
 
-        await node.SendTransactionAsync(transaction, cancellationToken);
+        await blockChain.SendTransactionAsync(transaction, cancellationToken);
         return transaction.Id;
     }
 }
