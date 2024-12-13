@@ -1,3 +1,4 @@
+using LibplanetConsole.Console.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -39,7 +40,7 @@ internal sealed partial class ConsoleHost(
         _cancellationTokenSource = new();
         IsRunning = true;
         logger.LogDebug("Console is started: {Address}", Address);
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        await Contents.StartAsync(cancellationToken);
         logger.LogDebug("Console Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -51,7 +52,7 @@ internal sealed partial class ConsoleHost(
             throw new InvalidOperationException("Node is not running.");
         }
 
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        await Contents.StopAsync(cancellationToken);
         logger.LogDebug("Console Contents are stopped: {Address}", Address);
 
         if (_cancellationTokenSource is not null)

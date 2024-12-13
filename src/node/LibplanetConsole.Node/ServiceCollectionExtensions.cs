@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StartCommand>();
         @this.AddSingleton<ICommand, StopCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
+        @this.AddSingleton<ICommand, NonceCommand>();
 
         return @this;
     }

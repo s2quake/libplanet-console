@@ -12,7 +12,7 @@ public sealed partial class NodeCommand(IServiceProvider serviceProvider, INodeC
     : CommandMethodBase, IExecutable
 {
     [CommandPropertyRequired(DefaultValue = "")]
-    [CommandSummary("Specifies the address of the client")]
+    [CommandSummary("Specifies the address of the node")]
     [CommandPropertyCompletion(nameof(GetNodeAddresses))]
     public static string Address { get; set; } = string.Empty;
 

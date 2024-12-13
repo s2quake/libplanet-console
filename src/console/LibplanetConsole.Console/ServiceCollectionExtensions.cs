@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IConsoleContent>(s => s.GetRequiredService<AddressCollection>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
+        @this.AddSingleton<RunningNode>();
 
         @this.AddHostedService<ConsoleHostedService>();
 

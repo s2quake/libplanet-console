@@ -5,6 +5,7 @@ using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Node.Executable.Extensions;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 
@@ -126,6 +127,7 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
         options.NoREPL = NoREPL;
         options.ActionProviderModulePath = ActionProviderModulePath;
         options.ActionProviderType = ActionProviderType;
+        options.EnsureActionProviderType(typeof(ActionProvider));
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;

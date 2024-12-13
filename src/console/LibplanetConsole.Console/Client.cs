@@ -4,6 +4,7 @@ using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Threading;
+using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -148,7 +149,7 @@ internal sealed class Client : IClient
         if (IsRunning is true)
         {
             _logger.LogDebug("Client is started in the Attach: {Address}", Address);
-            await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+            await Contents.StartAsync(cancellationToken);
             _logger.LogDebug("Client Contents are started in the Attach: {Address}", Address);
             Started?.Invoke(this, EventArgs.Empty);
         }
@@ -165,7 +166,7 @@ internal sealed class Client : IClient
 
         if (IsRunning is true)
         {
-            await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+            await Contents.StopAsync(cancellationToken);
             _logger.LogDebug("Client Contents are stopped in the Attach: {Address}", Address);
             _info = ClientInfo.Empty;
             _logger.LogDebug("Client is stopped in the Attach: {Address}", Address);
@@ -213,7 +214,8 @@ internal sealed class Client : IClient
         _info = response.ClientInfo;
         IsRunning = true;
         _logger.LogDebug("Client is started: {Address}", Address);
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        await Contents.StartAsync(cancellationToken);
+        await Contents.StartAsync(cancellationToken);
         _logger.LogDebug("Client Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -232,7 +234,7 @@ internal sealed class Client : IClient
             throw new InvalidOperationException("Client is not attached.");
         }
 
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        await Contents.StopAsync(cancellationToken);
         _logger.LogDebug("Client Contents are stopped: {Address}", Address);
 
         var request = new StopRequest();
@@ -376,13 +378,13 @@ internal sealed class Client : IClient
     {
         _info = e.ClientInfo;
         IsRunning = true;
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(default)));
+        await Contents.StartAsync(default);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
     private async void Service_Stopped(object? sender, EventArgs e)
     {
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(default)));
+        await Contents.StopAsync(default);
         _info = ClientInfo.Empty;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);

@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using LibplanetConsole.Client.Bank;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Common;
@@ -42,6 +43,7 @@ internal sealed class Application
                 .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
         services.AddClient(configuration);
+        services.AddBank();
 
         services.AddGrpc(options =>
         {
@@ -75,6 +77,7 @@ internal sealed class Application
         using var app = _builder.Build();
 
         app.UseClient();
+        app.UseBank();
         app.MapGet("/", () => "Libplanet-Client");
         app.MapGrpcReflectionService().AllowAnonymous();
 
