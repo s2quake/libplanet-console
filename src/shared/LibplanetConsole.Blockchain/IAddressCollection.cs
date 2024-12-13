@@ -25,4 +25,7 @@ public interface IAddressCollection : IEnumerable<Address>
     bool TryGetAddress(string alias, [MaybeNullWhen(false)] out Address address);
 
     string GetAlias(Address address);
+
+    AddressInfo[] GetAddressInfos()
+        => [.. Aliases.Select(item => new AddressInfo { Alias = item, Address = this[item] })];
 }

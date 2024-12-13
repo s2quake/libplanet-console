@@ -28,7 +28,6 @@ public static class ServiceCollectionExtensions
         @this.AddHostedService<ClientHostedService>();
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, ClientInfoProvider>();
-        @this.AddSingleton<IAddressCollection, AddressCollection>();
 
         @this.AddSingleton<ICommand, AddressCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();

@@ -34,11 +34,15 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IConsoleContent>(s => s.GetRequiredService<ClientCollection>())
             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>());
         @this.AddSingleton<ConsoleHost>()
-            .AddSingleton<IBlockChain>(s => s.GetRequiredService<ConsoleHost>())
             .AddSingleton<IConsole>(s => s.GetRequiredService<ConsoleHost>());
+        @this.AddSingleton<ConsoleBlockChain>()
+            .AddSingleton<IBlockChain>(s => s.GetRequiredService<ConsoleBlockChain>())
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<ConsoleBlockChain>());
+        @this.AddSingleton<AddressCollection>()
+            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>())
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<AddressCollection>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
-        @this.AddSingleton<IAddressCollection, AddressCollection>();
 
         @this.AddHostedService<ConsoleHostedService>();
 
@@ -74,6 +78,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StartClientProcessCommand>();
         @this.AddSingleton<ICommand, StopClientProcessCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
+        @this.AddSingleton<ICommand, AddressCommand>();
         return @this;
     }
 }

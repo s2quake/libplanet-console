@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 
 #if LIBPLANET_NODE
 namespace LibplanetConsole.Node;
@@ -13,26 +14,26 @@ namespace LibplanetConsole.Console;
 #error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
 #endif
 
-internal sealed class AddressCollection : IAddressCollection
+internal abstract class AddressCollectionBase : IAddressCollection
 {
     private readonly OrderedDictionary _addressByAlias;
     private readonly Dictionary<Address, string> _aliasByAddress;
 
-    public AddressCollection()
+    protected AddressCollectionBase()
     {
         _addressByAlias = [];
         _aliasByAddress = [];
     }
 
-    public AddressCollection(IEnumerable<KeyValuePair<string, Address>> addresses)
+    protected AddressCollectionBase(IEnumerable<AddressInfo> addresses)
     {
         _addressByAlias = new OrderedDictionary(addresses.Count());
         foreach (var address in addresses)
         {
-            _addressByAlias.Add(address.Key, address.Value);
+            _addressByAlias.Add(address.Alias, address.Address);
         }
 
-        _aliasByAddress = addresses.ToDictionary(item => item.Value, item => item.Key);
+        _aliasByAddress = addresses.ToDictionary(item => item.Address, item => item.Alias);
     }
 
     public string[] Aliases => [.. _aliasByAddress.Values];
@@ -114,8 +115,13 @@ internal sealed class AddressCollection : IAddressCollection
         return alias;
     }
 
+    public AddressInfo[] GetAddressInfos() => [.. _aliasByAddress.Select(GetAddressInfo)];
+
     IEnumerator<Address> IEnumerable<Address>.GetEnumerator()
         => _addressByAlias.Values.OfType<Address>().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => _addressByAlias.Values.GetEnumerator();
+
+    private static AddressInfo GetAddressInfo(KeyValuePair<Address, string> item)
+        => new() { Alias = item.Value, Address = item.Key };
 }

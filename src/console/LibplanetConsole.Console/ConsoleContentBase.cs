@@ -9,17 +9,25 @@ public abstract class ConsoleContentBase(string name) : IConsoleContent, IDispos
 
     public virtual IEnumerable<IConsoleContent> Dependencies => [];
 
+    public bool IsRunning { get; protected set; }
+
     void IDisposable.Dispose()
     {
         OnDispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
-    Task IConsoleContent.StartAsync(CancellationToken cancellationToken)
-        => OnStartAsync(cancellationToken);
+    async Task IConsoleContent.StartAsync(CancellationToken cancellationToken)
+    {
+        await OnStartAsync(cancellationToken);
+        IsRunning = true;
+    }
 
-    Task IConsoleContent.StopAsync(CancellationToken cancellationToken)
-        => OnStopAsync(cancellationToken);
+    async Task IConsoleContent.StopAsync(CancellationToken cancellationToken)
+    {
+        await OnStopAsync(cancellationToken);
+        IsRunning = false;
+    }
 
     protected virtual Task OnStartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 

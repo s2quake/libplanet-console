@@ -193,4 +193,17 @@ internal sealed partial class Node : IBlockChain
 
         throw new InvalidOperationException("Action not found.");
     }
+
+    public async Task<AddressInfo[]> GetAddressesAsync(CancellationToken cancellationToken)
+    {
+        if (_blockChainService is null)
+        {
+            throw new InvalidOperationException("BlockChainService is not initialized.");
+        }
+
+        var request = new GetAddressesRequest();
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _blockChainService.GetAddressesAsync(request, callOptions);
+        return [.. response.Addresses.Select(item => (AddressInfo)item)];
+    }
 }

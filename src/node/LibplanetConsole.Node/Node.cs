@@ -13,6 +13,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Seed;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
@@ -33,6 +34,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private readonly IActionProvider _actionProvider;
     private readonly int _blocksyncPort;
     private readonly int _consensusPort;
+    private readonly AddressCollection _addresses;
 
     private EndPoint? _seedEndPoint;
     private Swarm? _swarm;
@@ -60,6 +62,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _appProtocolVersion = options.AppProtocolVersion;
         _blocksyncPort = options.BlocksyncPort;
         _consensusPort = options.ConsensusPort;
+        _addresses = serviceProvider.GetRequiredService<AddressCollection>();
         UpdateNodeInfo();
         _logger.LogDebug("Node is created: {Address}", Address);
         _logger.LogDebug(JsonUtility.Serialize(Info));
@@ -207,6 +210,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         _logger.LogDebug("Node is started: {Address}", Address);
         await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
         _logger.LogDebug("Node Contents are started: {Address}", Address);
+        _addresses.Collect(_serviceProvider);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
@@ -218,6 +222,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             throw new InvalidOperationException("Node is not running.");
         }
 
+        _addresses.Clear();
         await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
         _logger.LogDebug("Node Contents are stopped: {Address}", Address);
 
