@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Libplanet.Action.State;
 using LibplanetConsole.Common.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
@@ -245,6 +246,17 @@ internal sealed partial class Node : IBlockChain
         }
 
         return Task.Run(GetAction, cancellationToken);
+    }
+
+    public Task<AddressInfo[]> GetAddressesAsync(CancellationToken cancellationToken)
+    {
+        AddressInfo[] GetAddresses()
+        {
+            var addresses = _serviceProvider.GetRequiredService<AddressCollection>();
+            return addresses.GetAddressInfos();
+        }
+
+        return Task.Run(GetAddresses, cancellationToken);
     }
 
     public IWorldState GetWorldState() => BlockChain.GetNextWorldState()

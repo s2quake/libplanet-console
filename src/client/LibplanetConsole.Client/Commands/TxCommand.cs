@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common.Actions;
-using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Commands;
 
@@ -18,6 +17,6 @@ internal sealed class TxCommand(IClient client) : CommandAsyncBase
             Value = Text,
         };
         await client.SendTransactionAsync([action], cancellationToken);
-        await Out.WriteLineAsync($"{client.Address.ToShortString()}: {Text}");
+        await Out.WriteLineAsync($"{client.Address}: {Text}");
     }
 }

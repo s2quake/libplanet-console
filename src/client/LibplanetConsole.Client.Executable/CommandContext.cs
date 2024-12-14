@@ -6,7 +6,7 @@ namespace LibplanetConsole.Client.Executable;
 
 [CommandSummary("Provides a prompt to input and execute commands")]
 [CommandDescription("REPL for libplanet client.")]
-internal class CommandContext(
+internal sealed class CommandContext(
     IEnumerable<ICommand> commands,
     HelpCommand helpCommand,
     VersionCommand versionCommand)

@@ -14,21 +14,29 @@ public abstract class NodeContentBase(string name) : INodeContent, IDisposable
 
     public virtual IEnumerable<INodeContent> Dependencies => [];
 
+    public bool IsRunning { get; protected set; }
+
     void IDisposable.Dispose()
     {
         OnDispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
-    Task INodeContent.StartAsync(CancellationToken cancellationToken)
-        => OnStartAsync(cancellationToken);
+    async Task INodeContent.StartAsync(CancellationToken cancellationToken)
+    {
+        await OnStartAsync(cancellationToken);
+        IsRunning = true;
+    }
 
-    Task INodeContent.StopAsync(CancellationToken cancellationToken)
-        => OnStopAsync(cancellationToken);
+    async Task INodeContent.StopAsync(CancellationToken cancellationToken)
+    {
+        await OnStopAsync(cancellationToken);
+        IsRunning = false;
+    }
 
-    protected abstract Task OnStartAsync(CancellationToken cancellationToken);
+    protected virtual Task OnStartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-    protected abstract Task OnStopAsync(CancellationToken cancellationToken);
+    protected virtual Task OnStopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     protected virtual void OnDispose(bool disposing)
     {

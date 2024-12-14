@@ -34,8 +34,13 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IConsoleContent>(s => s.GetRequiredService<ClientCollection>())
             .AddSingleton<IClientCollection>(s => s.GetRequiredService<ClientCollection>());
         @this.AddSingleton<ConsoleHost>()
-            .AddSingleton<IBlockChain>(s => s.GetRequiredService<ConsoleHost>())
             .AddSingleton<IConsole>(s => s.GetRequiredService<ConsoleHost>());
+        @this.AddSingleton<ConsoleBlockChain>()
+            .AddSingleton<IBlockChain>(s => s.GetRequiredService<ConsoleBlockChain>())
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<ConsoleBlockChain>());
+        @this.AddSingleton<AddressCollection>()
+            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>())
+            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<AddressCollection>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
 
@@ -43,14 +48,21 @@ public static class ServiceCollectionExtensions
 
         @this.AddKeyedScoped(INode.Key, NodeFactory.Create)
             .AddKeyedScoped<INode>(
-                INode.Key, (s, k) => s.GetRequiredKeyedService<Node>(k))
-            .AddKeyedScoped<IBlockChain>(
                 INode.Key, (s, k) => s.GetRequiredKeyedService<Node>(k));
+        @this.AddKeyedScoped<NodeBlockChain>(INode.Key)
+            .AddKeyedScoped<IBlockChain>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeBlockChain>(k))
+            .AddKeyedScoped<INodeContent>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeBlockChain>(k));
+
         @this.AddKeyedScoped(IClient.Key, ClientFactory.Create)
             .AddKeyedScoped<IClient>(
-                IClient.Key, (s, k) => s.GetRequiredKeyedService<Client>(k))
-            .AddKeyedScoped<IBlockChain>(
                 IClient.Key, (s, k) => s.GetRequiredKeyedService<Client>(k));
+        @this.AddKeyedScoped<ClientBlockChain>(INode.Key)
+            .AddKeyedScoped<IBlockChain>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<ClientBlockChain>(k))
+            .AddKeyedScoped<IClientContent>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<ClientBlockChain>(k));
 
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeApplicationProvider>();
@@ -73,6 +85,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StartClientProcessCommand>();
         @this.AddSingleton<ICommand, StopClientProcessCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
+        @this.AddSingleton<ICommand, AddressCommand>();
         return @this;
     }
 }

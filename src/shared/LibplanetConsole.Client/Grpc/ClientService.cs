@@ -6,11 +6,15 @@ using static LibplanetConsole.Grpc.Client.ClientGrpcService;
 
 namespace LibplanetConsole.Grpc.Client;
 
-internal sealed class ClientService(GrpcChannel channel)
-    : ClientGrpcServiceClient(channel), IDisposable
+internal sealed class ClientService : ClientGrpcServiceClient, IDisposable
 {
     private StreamReceiver<GetEventStreamResponse>? _eventReceiver;
     private bool _isDisposed;
+
+    private ClientService(GrpcChannel channel)
+        : base(channel)
+    {
+    }
 
     public event EventHandler? Disconnected;
 
@@ -19,6 +23,22 @@ internal sealed class ClientService(GrpcChannel channel)
     public event EventHandler? Stopped;
 
     public ClientInfo Info { get; private set; }
+
+    public static async Task<ClientService> CreateAsync(
+        GrpcChannel channel, CancellationToken cancellationToken)
+    {
+        var service = new ClientService(channel);
+        try
+        {
+            await service.InitializeAsync(cancellationToken);
+            return service;
+        }
+        catch
+        {
+            service.Dispose();
+            throw;
+        }
+    }
 
     public void Dispose()
     {

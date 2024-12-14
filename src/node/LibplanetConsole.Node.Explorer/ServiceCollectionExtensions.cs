@@ -1,4 +1,7 @@
+using JSSoft.Commands;
 using Libplanet.Explorer;
+using LibplanetConsole.Common;
+using LibplanetConsole.Node.Explorer.Commands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,7 +17,12 @@ public static class ServiceCollectionExtensions
         @this.AddEndpointsApiExplorer();
         @this.AddSingleton<BlockChainContext>();
         @this.AddSingleton(startup);
+        @this.AddSingleton<Explorer>()
+            .AddSingleton<IExplorer>(s => s.GetRequiredService<Explorer>())
+            .AddSingleton<INodeContent>(s => s.GetRequiredService<Explorer>());
+        @this.AddSingleton<IInfoProvider, ExplorerInfoProvider>();
 
+        @this.AddSingleton<ICommand, ExplorerCommand>();
         return @this;
     }
 }

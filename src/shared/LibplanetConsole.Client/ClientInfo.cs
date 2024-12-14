@@ -15,32 +15,21 @@ public readonly record struct ClientInfo
 
     public BlockHash GenesisHash { get; init; }
 
-    public BlockInfo Tip { get; init; }
-
     public bool IsRunning { get; init; }
 
-    public static ClientInfo Empty { get; } = new ClientInfo
+    public static ClientInfo Empty { get; } = new ClientInfo { };
+
+    public static implicit operator ClientInfo(ClientInfoProto clientInfo) => new()
     {
-        Tip = BlockInfo.Empty,
+        Address = ToAddress(clientInfo.Address),
+        GenesisHash = ToBlockHash(clientInfo.GenesisHash),
+        IsRunning = clientInfo.IsRunning,
     };
 
-    public static implicit operator ClientInfo(ClientInfoProto clientInfo)
+    public static implicit operator ClientInfoProto(ClientInfo clientInfo) => new()
     {
-        return new ClientInfo
-        {
-            Address = ToAddress(clientInfo.Address),
-            Tip = clientInfo.Tip,
-            IsRunning = clientInfo.IsRunning,
-        };
-    }
-
-    public static implicit operator ClientInfoProto(ClientInfo clientInfo)
-    {
-        return new ClientInfoProto
-        {
-            Address = ToGrpc(clientInfo.Address),
-            Tip = clientInfo.Tip,
-            IsRunning = clientInfo.IsRunning,
-        };
-    }
+        Address = ToGrpc(clientInfo.Address),
+        GenesisHash = ToGrpc(clientInfo.GenesisHash),
+        IsRunning = clientInfo.IsRunning,
+    };
 }

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 
-public interface IClient : IAddressable, IAsyncDisposable, IKeyedServiceProvider, ISigner
+public interface IClient : IAsyncDisposable, IKeyedServiceProvider, ISigner
 {
     const string Key = nameof(IClient);
 
@@ -28,6 +28,8 @@ public interface IClient : IAddressable, IAsyncDisposable, IKeyedServiceProvider
     ClientInfo Info { get; }
 
     PublicKey PublicKey { get; }
+
+    Address Address => PublicKey.Address;
 
     Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken);
 
