@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Node.Executable.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
@@ -24,23 +26,15 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
 
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
-        var directory = RepositoryPath;
-        var oldDirectory = Directory.GetCurrentDirectory();
-        try
-        {
-            Directory.SetCurrentDirectory(directory);
-            options.GenesisPath = GetFullPath(options.GenesisPath);
-            options.AppProtocolVersionPath = GetFullPath(options.AppProtocolVersionPath);
-            options.StorePath = GetFullPath(options.StorePath);
-            options.LogPath = GetFullPath(options.LogPath);
-            options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
-            options.ParentProcessId = ParentProcessId;
-            options.NoREPL = NoREPL;
-        }
-        finally
-        {
-            Directory.SetCurrentDirectory(oldDirectory);
-        }
+        using var scope = DirectoryUtility.SetScopedDirectory(RepositoryPath);
+        options.GenesisPath = GetFullPath(options.GenesisPath);
+        options.AppProtocolVersionPath = GetFullPath(options.AppProtocolVersionPath);
+        options.StorePath = GetFullPath(options.StorePath);
+        options.LogPath = GetFullPath(options.LogPath);
+        options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
+        options.ParentProcessId = ParentProcessId;
+        options.NoREPL = NoREPL;
+        options.EnsureActionProviderType(typeof(ActionProvider));
     }
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
@@ -54,6 +48,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             var services = builder.Services;
             var application = new Application(builder);
             services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
+
             await application.RunAsync(cancellationToken);
         }
         catch (CommandParsingException e)

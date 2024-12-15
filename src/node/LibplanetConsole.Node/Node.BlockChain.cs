@@ -259,6 +259,18 @@ internal sealed partial class Node : IBlockChain
         return Task.Run(GetAddresses, cancellationToken);
     }
 
+    public Task<FungibleAssetValue> GetBalanceAsync(
+        Address address, Currency currency, CancellationToken cancellationToken)
+    {
+        FungibleAssetValue GetBalance()
+        {
+            var worldState = GetWorldState();
+            return worldState.GetBalance(address, currency);
+        }
+
+        return Task.Run(GetBalance, cancellationToken);
+    }
+
     public IWorldState GetWorldState() => BlockChain.GetNextWorldState()
         ?? BlockChain.GetWorldState(BlockChain.Tip.Hash);
 

@@ -12,6 +12,7 @@ using Libplanet.Store.Trie;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Node.Extensions;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Logging;
 
@@ -205,7 +206,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         UpdateNodeInfo();
         _logger.LogDebug(JsonUtility.Serialize(Info));
         _logger.LogDebug("Node is started: {Address}", Address);
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        await Contents.StartAsync(cancellationToken);
         _logger.LogDebug("Node Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -218,7 +219,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             throw new InvalidOperationException("Node is not running.");
         }
 
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        await Contents.StopAsync(cancellationToken);
         _logger.LogDebug("Node Contents are stopped: {Address}", Address);
 
         if (_swarm is not null)

@@ -5,6 +5,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
+using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Node;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -151,7 +152,7 @@ internal sealed class Node : INode
         if (IsRunning is true)
         {
             _logger.LogDebug("Node is started in the Attach: {Address}", Address);
-            await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+            await Contents.StartAsync(cancellationToken);
             _logger.LogDebug("Node Contents are started in the Attach: {Address}", Address);
             Started?.Invoke(this, EventArgs.Empty);
         }
@@ -168,7 +169,7 @@ internal sealed class Node : INode
 
         if (IsRunning is true)
         {
-            await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+            await Contents.StopAsync(cancellationToken);
             _logger.LogDebug("Node Contents are stopped in the Attach: {Address}", Address);
             _info = NodeInfo.Empty;
             _logger.LogDebug("Node is stopped in the Attach: {Address}", Address);
@@ -217,7 +218,7 @@ internal sealed class Node : INode
         _info = response.NodeInfo;
         IsRunning = true;
         _logger.LogDebug("Node is started: {Address}", Address);
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        await Contents.StartAsync(cancellationToken);
         _logger.LogDebug("Node Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -236,7 +237,7 @@ internal sealed class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        await Contents.StopAsync(cancellationToken);
         _logger.LogDebug("Node Contents are stopped: {Address}", Address);
 
         var request = new StopRequest();
@@ -378,13 +379,13 @@ internal sealed class Node : INode
     {
         _info = e.NodeInfo;
         IsRunning = true;
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(default)));
+        await Contents.StartAsync(default);
         Started?.Invoke(this, EventArgs.Empty);
     }
 
     private async void Service_Stopped(object? sender, EventArgs e)
     {
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(default)));
+        await Contents.StopAsync(default);
         _info = NodeInfo.Empty;
         IsRunning = false;
         Stopped?.Invoke(this, EventArgs.Empty);
@@ -409,7 +410,7 @@ internal sealed class Node : INode
             if (IsRunning is true)
             {
                 IsRunning = false;
-                await Task.WhenAll(Contents.Select(item => item.StopAsync(default)));
+                await Contents.StopAsync(default);
                 _info = NodeInfo.Empty;
                 Stopped?.Invoke(this, EventArgs.Empty);
             }

@@ -1,4 +1,5 @@
 using Grpc.Net.Client;
+using LibplanetConsole.Client.Extensions;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
@@ -101,7 +102,7 @@ internal sealed class Client : IClient
         _logger.LogDebug(JsonUtility.Serialize(_info));
         _logger.LogDebug(
             "Client is started: {Address}->{NodeAddress}", Address, nodeService.Info.Address);
-        await Task.WhenAll(Contents.Select(item => item.StartAsync(cancellationToken)));
+        await Contents.StartAsync(cancellationToken);
         _logger.LogDebug("Client Contents are started: {Address}", Address);
         Started?.Invoke(this, EventArgs.Empty);
     }
@@ -113,7 +114,7 @@ internal sealed class Client : IClient
             throw new InvalidOperationException("The client is not running.");
         }
 
-        await Task.WhenAll(Contents.Select(item => item.StopAsync(cancellationToken)));
+        await Contents.StopAsync(cancellationToken);
         _logger.LogDebug("Client Contents are stopped: {Address}", Address);
 
         if (_cancellationTokenSource is not null)

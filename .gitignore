@@ -8,5 +8,4 @@ obj/
 .DS_Store
 .vs/
 .bin/
-.submodules/
 test-results.trx
