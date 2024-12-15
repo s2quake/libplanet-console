@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Grpc.Delegation";
+
+package libplanet.console.delegation.v1;
+
+service DelegationGrpcService {
+  rpc Stake(StakeRequest) returns (StakeResponse);
+  rpc Promote(PromoteRequest) returns (PromoteResponse);
+  rpc Unjail(UnjailRequest) returns (UnjailResponse);
+  rpc Delegate(DelegateRequest) returns (DelegateResponse);
+  rpc Undelegate(UndelegateRequest) returns (UndelegateResponse);
+  rpc SetCommission(SetCommissionRequest) returns (SetCommissionResponse);
+  rpc Claim(ClaimRequest) returns (ClaimResponse);
+  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+
+  rpc GetStakeInfo(GetStakeInfoRequest) returns (GetStakeInfoResponse);
+  rpc StakeTx(StakeTxRequest) returns (StakeTxResponse);
+}
+
+message StakeInfoProto {
+  int64 claimableBlockIndex = 1;
+  string deposit = 2;
+  int64 startedBlockIndex = 3;
+  int64 cancellableBlockIndex = 4;
+  string guild_gold = 5;
+}
+
+message DelegationInfoProto {
+  string power = 1;
+  string total_share = 2;
+  bool is_jailed = 3;
+  int64 jailed_until = 4;
+  int64 commission = 5;
+  bool tombstoned = 6;
+  bool is_active = 7;
+  StakeInfoProto stake_info = 8;
+}
+
+message StakeRequest {
+  int64 ncg = 1;
+}
+
+message StakeResponse {
+}
+
+message PromoteRequest {
+  string guild_gold = 1;
+}
+
+message PromoteResponse {
+}
+
+message UnjailRequest {
+}
+
+message UnjailResponse {
+}
+
+message DelegateRequest {
+  string guild_gold = 1;
+}
+
+message DelegateResponse {
+}
+
+message UndelegateRequest {
+  string share = 1;
+}
+
+message UndelegateResponse {
+}
+
+message SetCommissionRequest {
+  int64 commission = 1;
+}
+
+message SetCommissionResponse {
+}
+
+message ClaimRequest {
+}
+
+message ClaimResponse {
+}
+
+message GetInfoRequest {
+}
+
+message GetInfoResponse {
+  DelegationInfoProto delegation_info = 1;
+}
+
+message GetStakeInfoRequest {
+  string address = 1;
+}
+
+message GetStakeInfoResponse {
+  StakeInfoProto stake_info = 1;
+}
+
+message StakeTxRequest {
+  int64 ncg = 1;
+}
+
+message StakeTxResponse {
+  bytes plain_value = 1;
+}

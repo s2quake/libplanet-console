@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Bank;
 
-internal sealed class CurrencyCollection(IServiceProvider serviceProvider)
+internal sealed class CurrencyCollection(INode node)
     : CurrencyCollectionBase, INodeContent
 {
     string INodeContent.Name => "currencies";
@@ -13,20 +13,23 @@ internal sealed class CurrencyCollection(IServiceProvider serviceProvider)
 
     async Task INodeContent.StartAsync(CancellationToken cancellationToken)
     {
-        var currencyProviders = serviceProvider.GetServices<ICurrencyProvider>();
-        var items = currencyProviders.SelectMany(provider => provider.Currencies);
-        foreach (var item in items)
-        {
-            Add(item.Code, item.Currency);
-        }
-
+        node.Started += Node_Started;
         await Task.CompletedTask;
     }
 
     async Task INodeContent.StopAsync(CancellationToken cancellationToken)
     {
         Clear();
-
         await Task.CompletedTask;
+    }
+
+    private void Node_Started(object? sender, EventArgs e)
+    {
+        var currencyProviders = node.GetServices<ICurrencyProvider>();
+        var items = currencyProviders.SelectMany(provider => provider.Currencies);
+        foreach (var item in items)
+        {
+            Add(item.Code, item.Currency);
+        }
     }
 }

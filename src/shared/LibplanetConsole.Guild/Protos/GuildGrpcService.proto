@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Grpc.Guild";
+
+package libplanet.console.guild.v1;
+
+service GuildGrpcService {
+  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Join(JoinRequest) returns (JoinResponse);
+  rpc Leave(LeaveRequest) returns (LeaveResponse);
+  rpc Move(MoveRequest) returns (MoveResponse);
+  rpc Ban(BanRequest) returns (BanResponse);
+  rpc Unban(UnbanRequest) returns (UnbanResponse);
+}
+
+message GuildInfoProto {
+  string address = 1;
+  string validator_address = 2;
+  string guild_master_address = 3;
+}
+
+message GetInfoRequest {
+}
+
+message GetInfoResponse {
+}
+
+message CreateRequest {
+  string validator_address = 1;
+}
+
+message CreateResponse {
+  GuildInfoProto guild_info = 1;
+}
+
+message DeleteRequest {
+}
+
+message DeleteResponse {
+}
+
+message JoinRequest {
+  string guild_address = 1;
+}
+
+message JoinResponse {
+}
+
+message LeaveRequest {
+}
+
+message LeaveResponse {
+}
+
+message MoveRequest {
+}
+
+message MoveResponse {
+}
+
+message BanRequest {
+  string member_address = 1;
+}
+
+message BanResponse {
+}
+
+message UnbanRequest {
+  string member_address = 1;
+}
+
+message UnbanResponse {
+}
