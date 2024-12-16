@@ -28,7 +28,8 @@ internal sealed class NodeHostedService(
 
     private static INodeContent[] GetNodeContents(IServiceProvider serviceProvider)
     {
-        var contents = serviceProvider.GetServices<INodeContent>();
+        var contents = serviceProvider.GetServices<INodeContent>()
+            .OrderBy(item => item.Order);
         return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 }

@@ -5,9 +5,11 @@ namespace LibplanetConsole.Node.Bank;
 internal sealed class CurrencyCollection(IServiceProvider serviceProvider)
     : CurrencyCollectionBase, INodeContent
 {
-    string INodeContent.Name => "currencyes";
+    string INodeContent.Name => "currencies";
 
     IEnumerable<INodeContent> INodeContent.Dependencies { get; } = [];
+
+    int INodeContent.Order => int.MaxValue;
 
     async Task INodeContent.StartAsync(CancellationToken cancellationToken)
     {

@@ -6,6 +6,8 @@ public interface IClientContent
 
     IEnumerable<IClientContent> Dependencies { get; }
 
+    int Order => 0;
+
     Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);

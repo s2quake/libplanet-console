@@ -53,7 +53,8 @@ internal static class ClientFactory
 
     private static IClientContent[] GetClientContents(IServiceProvider serviceProvider, string key)
     {
-        var contents = serviceProvider.GetKeyedServices<IClientContent>(key);
+        var contents = serviceProvider.GetKeyedServices<IClientContent>(key)
+            .OrderBy(item => item.Order);
         return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 
