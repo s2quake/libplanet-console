@@ -53,7 +53,8 @@ internal static class NodeFactory
 
     private static INodeContent[] GetNodeContents(IServiceProvider serviceProvider, string key)
     {
-        var contents = serviceProvider.GetKeyedServices<INodeContent>(key);
+        var contents = serviceProvider.GetKeyedServices<INodeContent>(key)
+            .OrderBy(item => item.Order);
         return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 

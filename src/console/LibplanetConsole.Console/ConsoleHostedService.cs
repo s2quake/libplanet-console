@@ -37,7 +37,8 @@ internal sealed class ConsoleHostedService(
 
     private static IConsoleContent[] GetConsoleContents(IServiceProvider serviceProvider)
     {
-        var contents = serviceProvider.GetServices<IConsoleContent>();
+        var contents = serviceProvider.GetServices<IConsoleContent>()
+            .OrderBy(item => item.Order);
         return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 }

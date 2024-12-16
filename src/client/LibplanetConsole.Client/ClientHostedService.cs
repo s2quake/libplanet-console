@@ -28,7 +28,8 @@ internal sealed class ClientHostedService(
 
     private static IClientContent[] GetClientContents(IServiceProvider serviceProvider)
     {
-        var contents = serviceProvider.GetServices<IClientContent>();
+        var contents = serviceProvider.GetServices<IClientContent>()
+            .OrderBy(item => item.Order);
         return [.. DependencyUtility.TopologicalSort(contents, content => content.Dependencies)];
     }
 }
