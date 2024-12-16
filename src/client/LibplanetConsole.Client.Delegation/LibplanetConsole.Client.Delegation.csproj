@@ -10,11 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Guild\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Delegation\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Guild\Protos\*.proto" GrpcServices="Both">
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Delegation\Protos\*.proto" GrpcServices="Both">
       <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
     </Protobuf>
   </ItemGroup>

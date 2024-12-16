@@ -4,6 +4,7 @@ using Libplanet.Action.State;
 using LibplanetConsole.Node.Bank;
 using Nekoyume.Action;
 using Nekoyume.Action.ValidatorDelegation;
+using Nekoyume.Model.Guild;
 using Nekoyume.Model.Stake;
 using Nekoyume.Model.State;
 using Nekoyume.Module;
@@ -22,8 +23,8 @@ internal sealed class Delegation(
 
     public async Task StakeAsync(long ncg, CancellationToken cancellationToken)
     {
-        var stakeAction = new Stake(ncg);
-        await node.SendTransactionAsync([stakeAction], cancellationToken);
+        var stake = new Stake(ncg);
+        await node.SendTransactionAsync([stake], cancellationToken);
     }
 
     public async Task PromoteAsync(
@@ -65,9 +66,16 @@ internal sealed class Delegation(
         await node.SendTransactionAsync([claimValidatorRewardSelfAction], cancellationToken);
     }
 
-    public Task<DelegationInfo> GetInfoAsync(CancellationToken cancellationToken)
+    public Task<DelegateeInfo> GetDelegateeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+        => Task.FromResult(GetDelegateeInfo(address));
+
+    public Task<DelegatorInfo> GetDelegatorInfoAsync(
+        Address address, CancellationToken cancellationToken)
+        => Task.FromResult(GetDelegatorInfo(address));
+
+    public DelegateeInfo GetDelegateeInfo(Address address)
     {
-        var address = node.Address;
         var worldState = blockChain.GetWorldState();
         var world = new World(worldState);
         var repository = new ValidatorRepository(world, new DummayActionContext());
@@ -82,8 +90,12 @@ internal sealed class Delegation(
         var currency = currencies["ncg"];
         var deposit = world.GetBalance(stakeStateAddress, currency);
         var guildGold = world.GetBalance(stakeStateAddress, Currencies.GuildGold);
+        var claimableBlockIndex = stakeState.Contract != null ? stakeState.ClaimableBlockIndex : 0;
+        var startedBlockIndex = stakeState.Contract != null ? stakeState.StartedBlockIndex : 0;
+        var cancellableBlockIndex = stakeState.Contract != null
+            ? stakeState.CancellableBlockIndex : 0;
 
-        var info = new DelegationInfo
+        var delegateeInfo = new DelegateeInfo
         {
             Power = BigIntegerUtility.ToString(delegatee.Power),
             TotalShare = BigIntegerUtility.ToString(delegatee.TotalShares),
@@ -94,15 +106,55 @@ internal sealed class Delegation(
             IsActive = delegatee.IsActive,
             StakeInfo = new StakeInfo
             {
-                ClaimableBlockIndex = stakeState.ClaimableBlockIndex,
+                ClaimableBlockIndex = claimableBlockIndex,
                 Deposit = currencies.ToString(deposit),
-                StartedBlockIndex = stakeState.StartedBlockIndex,
-                CancellableBlockIndex = stakeState.CancellableBlockIndex,
+                StartedBlockIndex = startedBlockIndex,
+                CancellableBlockIndex = cancellableBlockIndex,
                 GuildGold = currencies.ToString(guildGold),
             },
         };
 
-        return Task.FromResult(info);
+        return delegateeInfo;
+    }
+
+    public DelegatorInfo GetDelegatorInfo(Address address)
+    {
+        var worldState = blockChain.GetWorldState();
+        var world = new World(worldState);
+        var guildRepository = new GuildRepository(world, new DummayActionContext());
+        var guildParticipant = guildRepository.GetGuildParticipant(address);
+        var guild = guildRepository.GetGuild(guildParticipant.GuildAddress);
+        var delegatee = guildRepository.GetDelegatee(guild.ValidatorAddress);
+        var stakeStateAddress = StakeState.DeriveAddress(address);
+        var bond = guildRepository.GetBond(delegatee, guildParticipant.Address);
+
+        if (world.TryGetStakeState(address, out var stakeState) is false)
+        {
+            stakeState = default;
+        }
+
+        var currency = currencies["ncg"];
+        var deposit = world.GetBalance(stakeStateAddress, currency);
+        var guildGold = world.GetBalance(stakeStateAddress, Currencies.GuildGold);
+        var claimableBlockIndex = stakeState.Contract != null ? stakeState.ClaimableBlockIndex : 0;
+        var startedBlockIndex = stakeState.Contract != null ? stakeState.StartedBlockIndex : 0;
+        var cancellableBlockIndex = stakeState.Contract != null
+            ? stakeState.CancellableBlockIndex : 0;
+        var stakeInfo = new StakeInfo
+        {
+            ClaimableBlockIndex = claimableBlockIndex,
+            Deposit = currencies.ToString(deposit),
+            StartedBlockIndex = startedBlockIndex,
+            CancellableBlockIndex = cancellableBlockIndex,
+            GuildGold = currencies.ToString(guildGold),
+        };
+
+        return new DelegatorInfo
+        {
+            LastDistributeHeight = bond.LastDistributeHeight ?? -1,
+            Share = BigIntegerUtility.ToString(bond.Share),
+            StakeInfo = stakeInfo,
+        };
     }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)

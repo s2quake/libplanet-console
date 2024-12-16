@@ -1,8 +1,8 @@
-using LibplanetConsole.Node.Guild.Services;
+using LibplanetConsole.Client.Guild.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 
-namespace LibplanetConsole.Node.Guild;
+namespace LibplanetConsole.Client.Guild;
 
 public static class NodeEndpointRouteBuilderExtensions
 {

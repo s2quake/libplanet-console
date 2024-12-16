@@ -19,23 +19,17 @@ public readonly record struct GuildInfo
 
     public Address GuildMasterAddress { get; init; }
 
-    public static implicit operator GuildInfo(GuildInfoProto guildInfo)
+    public static implicit operator GuildInfo(GuildInfoProto guildInfo) => new()
     {
-        return new GuildInfo
-        {
-            Address = ToAddress(guildInfo.Address),
-            ValidatorAddress = ToAddress(guildInfo.ValidatorAddress),
-            GuildMasterAddress = ToAddress(guildInfo.GuildMasterAddress),
-        };
-    }
+        Address = ToAddress(guildInfo.Address),
+        ValidatorAddress = ToAddress(guildInfo.ValidatorAddress),
+        GuildMasterAddress = ToAddress(guildInfo.GuildMasterAddress),
+    };
 
-    public static implicit operator GuildInfoProto(GuildInfo guildInfo)
+    public static implicit operator GuildInfoProto(GuildInfo guildInfo) => new()
     {
-        return new GuildInfoProto
-        {
-            Address = ToGrpc(guildInfo.Address),
-            ValidatorAddress = ToGrpc(guildInfo.ValidatorAddress),
-            GuildMasterAddress = ToGrpc(guildInfo.GuildMasterAddress),
-        };
-    }
+        Address = ToGrpc(guildInfo.Address),
+        ValidatorAddress = ToGrpc(guildInfo.ValidatorAddress),
+        GuildMasterAddress = ToGrpc(guildInfo.GuildMasterAddress),
+    };
 }

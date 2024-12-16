@@ -10,11 +10,13 @@ public interface IGuild
 
     Task LeaveAsync(CancellationToken cancellationToken);
 
-    Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken);
+    Task MoveAsync(Address guildAddress, CancellationToken cancellationToken);
 
-    Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken);
+    Task BanAsync(Address memberAddress, CancellationToken cancellationToken);
+
+    Task UnbanAsync(Address memberAddress, CancellationToken cancellationToken);
 
     Task ClaimAsync(CancellationToken cancellationToken);
 
-    Task<GuildInfo> GetGuildAsync(CancellationToken cancellationToken);
+    Task<GuildInfo> GetInfoAsync(Address memberAddress, CancellationToken cancellationToken);
 }

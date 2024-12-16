@@ -1,6 +1,6 @@
 namespace LibplanetConsole.Console.Delegation;
 
-public interface IDelegation
+public interface IClientDelegation
 {
     Task StakeAsync(long ncg, CancellationToken cancellationToken);
 

@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace LibplanetConsole.Console.Delegation.Commands;
 
 internal sealed partial class NodeDelegationCommand(
-    NodeCommand nodeCommand, 
+    NodeCommand nodeCommand,
     INodeCollection nodes,
     ICurrencyCollection currencies)
     : CommandMethodBase(nodeCommand, "delegation")
@@ -107,8 +107,8 @@ internal sealed partial class NodeDelegationCommand(
     {
         var address = Address;
         var node = nodes.GetNodeOrCurrent(address);
-        var validator = node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
-        var info = await validator.GetInfoAsync(cancellationToken);
+        var delegation = node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        var info = await delegation.GetDelegateeInfoAsync(node.Address, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 

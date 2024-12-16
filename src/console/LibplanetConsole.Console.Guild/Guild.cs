@@ -1,8 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using Nekoyume.Action.Guild;
 
 namespace LibplanetConsole.Console.Guild;
 
-internal sealed class Guild(IConsole console)
+internal sealed class Guild(IConsole console, RunningNode runningNode)
     : ConsoleContentBase("guild"), IGuild
 {
     public async Task CreateAsync(
@@ -38,7 +39,15 @@ internal sealed class Guild(IConsole console)
         await console.SendTransactionAsync([quitGuild], cancellationToken);
     }
 
-    public async Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task MoveAsync(Address guildAddress, CancellationToken cancellationToken)
+    {
+        var moveGuild = new MoveGuild(new(guildAddress))
+        {
+        };
+        await console.SendTransactionAsync([moveGuild], cancellationToken);
+    }
+
+    public async Task BanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
         var banGuildMember = new BanGuildMember(new(memberAddress))
         {
@@ -46,7 +55,7 @@ internal sealed class Guild(IConsole console)
         await console.SendTransactionAsync([banGuildMember], cancellationToken);
     }
 
-    public async Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task UnbanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
         var unbanMemberGuild = new UnbanGuildMember(memberAddress)
         {
@@ -62,18 +71,9 @@ internal sealed class Guild(IConsole console)
         await console.SendTransactionAsync([claimReward], cancellationToken);
     }
 
-    public Task<GuildInfo> GetGuildAsync(CancellationToken cancellationToken)
+    public Task<GuildInfo> GetInfoAsync(Address memberAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }
-
-    protected override async Task OnStartAsync(CancellationToken cancellationToken)
-    {
-        await Task.CompletedTask;
-    }
-
-    protected override async Task OnStopAsync(CancellationToken cancellationToken)
-    {
-        await Task.CompletedTask;
+        var guildNode = runningNode.Node.GetRequiredKeyedService<INodeGuild>(INode.Key);
+        return guildNode.GetInfoAsync(memberAddress, cancellationToken);
     }
 }

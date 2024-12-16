@@ -1,45 +1,92 @@
+using Grpc.Core;
+using Grpc.Net.Client;
+using LibplanetConsole.Common;
+using LibplanetConsole.Grpc.Guild;
+using Nekoyume.Action.Guild;
+using static LibplanetConsole.Grpc.TypeUtility;
+
 namespace LibplanetConsole.Client.Guild;
 
-internal sealed class Guild(IClient client, IBlockChain blockChain)
+internal sealed class Guild(IClient client)
     : ClientContentBase(nameof(Guild)), IGuild
 {
-    public Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var makeGuild = new MakeGuild(validatorAddress)
+        {
+        };
+        await client.SendTransactionAsync([makeGuild], cancellationToken);
     }
 
-    public Task<GuildInfo> CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
+    public async Task DeleteAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var removeGuild = new RemoveGuild
+        {
+        };
+        await client.SendTransactionAsync([removeGuild], cancellationToken);
     }
 
-    public Task<Address> DeleteAsync(CancellationToken cancellationToken)
+    public async Task JoinAsync(Address guildAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var joinGuild = new JoinGuild(new(guildAddress))
+        {
+        };
+        await client.SendTransactionAsync([joinGuild], cancellationToken);
     }
 
-    public Task<GuildInfo> GetGuildAsync(Address address, CancellationToken cancellationToken)
+    public async Task LeaveAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var quitGuild = new QuitGuild
+        {
+        };
+        await client.SendTransactionAsync([quitGuild], cancellationToken);
     }
 
-    public Task LeaveAsync(CancellationToken cancellationToken)
+    public async Task MoveAsync(Address guildAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var moveGuild = new MoveGuild(new(guildAddress))
+        {
+        };
+        await client.SendTransactionAsync([moveGuild], cancellationToken);
     }
 
-    public Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task BanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var banGuildMember = new BanGuildMember(new(memberAddress))
+        {
+        };
+        await client.SendTransactionAsync([banGuildMember], cancellationToken);
     }
 
-    protected override Task OnStartAsync(CancellationToken cancellationToken)
+    public async Task UnbanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var unbanMemberGuild = new UnbanGuildMember(memberAddress)
+        {
+        };
+        await client.SendTransactionAsync([unbanMemberGuild], cancellationToken);
     }
 
-    protected override Task OnStopAsync(CancellationToken cancellationToken)
+    public async Task ClaimAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var claimReward = new ClaimReward
+        {
+        };
+        await client.SendTransactionAsync([claimReward], cancellationToken);
+    }
+
+    public async Task<GuildInfo> GetInfoAsync(
+        Address memberAddress, CancellationToken cancellationToken)
+    {
+        var nodeEndPoint = client.NodeEndPoint;
+        var address = $"http://{EndPointUtility.ToString(nodeEndPoint)}";
+        using var channel = GrpcChannel.ForAddress(address);
+        var service = new GuildGrpcService.GuildGrpcServiceClient(channel);
+        var request = new GetInfoRequest
+        {
+            MemberAddress = ToGrpc(memberAddress),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await service.GetInfoAsync(request, callOptions);
+        return response.GuildInfo;
     }
 }

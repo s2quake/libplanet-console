@@ -1,6 +1,6 @@
-﻿namespace LibplanetConsole.Node.Guild;
+namespace LibplanetConsole.Console.Guild;
 
-public interface IGuild
+public interface INodeGuild
 {
     Task CreateAsync(CancellationToken cancellationToken);
 

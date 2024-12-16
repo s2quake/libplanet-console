@@ -3,6 +3,7 @@ using System.Numerics;
 using Grpc.Core;
 using LibplanetConsole.Grpc.Delegation;
 using LibplanetConsole.Node.Bank;
+using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Node.Delegation.Services;
 
@@ -63,16 +64,27 @@ internal sealed class DelegationServiceGrpcV1(
         return new ClaimResponse();
     }
 
-    public override async Task<GetInfoResponse> GetInfo(
-        GetInfoRequest request, ServerCallContext context)
+    public override async Task<GetDelegateeInfoResponse> GetDelegateeInfo(
+        GetDelegateeInfoRequest request, ServerCallContext context)
     {
-        var info = await delegation.GetInfoAsync(context.CancellationToken);
-        return new GetInfoResponse { DelegationInfo = info };
+        var address = ToAddress(request.Address);
+        var delegateeInfo = await delegation.GetDelegateeInfoAsync(
+            address, context.CancellationToken);
+        return new GetDelegateeInfoResponse
+        {
+            DelegateeInfo = delegateeInfo,
+        };
     }
 
-    public override Task<GetStakeInfoResponse> GetStakeInfo(
-        GetStakeInfoRequest request, ServerCallContext context)
+    public override async Task<GetDelegatorInfoResponse> GetDelegatorInfo(
+        GetDelegatorInfoRequest request, ServerCallContext context)
     {
-        return base.GetStakeInfo(request, context);
+        var address = ToAddress(request.Address);
+        var delegatorInfo = await delegation.GetDelegatorInfoAsync(
+            address, context.CancellationToken);
+        return new GetDelegatorInfoResponse
+        {
+            DelegatorInfo = delegatorInfo,
+        };
     }
 }

@@ -2,18 +2,14 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.Console.Guild.Commands;
+namespace LibplanetConsole.Client.Guild.Commands;
 
 [CommandSummary("Provides commands for the guild service.")]
 [Category(nameof(Guild))]
-internal sealed class GuildCommand(
-    IConsole console, IGuild guild, INodeCollection nodes) : CommandMethodBase
+internal sealed class GuildCommand(IClient client, IGuild guild) : CommandMethodBase
 {
     [CommandMethod]
-    public async Task CreateAsync(
-        [CommandParameterCompletion(nameof(GetNodeAddresses))]
-        Address validatorAddress,
-        CancellationToken cancellationToken)
+    public async Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
     {
         await guild.CreateAsync(validatorAddress, cancellationToken);
     }
@@ -55,12 +51,10 @@ internal sealed class GuildCommand(
     }
 
     [CommandMethod]
-    public async Task InfoAsync(CancellationToken cancellationToken)
+    public async Task InfoAsync(string address = "", CancellationToken cancellationToken = default)
     {
-        var memberAddress = console.Address;
+        var memberAddress = address == string.Empty ? client.Address : new Address(address);
         var info = await guild.GetInfoAsync(memberAddress, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
-
-    private string[] GetNodeAddresses() => [.. nodes.Select(item => item.Address.ToString())];
 }

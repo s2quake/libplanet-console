@@ -18,5 +18,7 @@ public interface INodeDelegation
 
     Task ClaimAsync(CancellationToken cancellationToken);
 
-    Task<DelegationInfo> GetInfoAsync(CancellationToken cancellationToken);
+    Task<DelegateeInfo> GetDelegateeInfoAsync(Address address, CancellationToken cancellationToken);
+
+    Task<DelegatorInfo> GetDelegatorInfoAsync(Address address, CancellationToken cancellationToken);
 }

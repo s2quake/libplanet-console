@@ -10,7 +10,7 @@ namespace LibplanetConsole.Console.Delegation;
 #error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
 #endif
 
-public readonly record struct DelegationInfo(
+public readonly record struct DelegateeInfo(
     string Power,
     string TotalShare,
     bool IsJailed,
@@ -20,9 +20,9 @@ public readonly record struct DelegationInfo(
     bool IsActive,
     StakeInfo StakeInfo)
 {
-    public static implicit operator DelegationInfo(DelegationInfoProto delegationInfo)
+    public static implicit operator DelegateeInfo(DelegateeInfoProto delegationInfo)
     {
-        return new DelegationInfo
+        return new DelegateeInfo
         {
             Power = delegationInfo.Power,
             TotalShare = delegationInfo.TotalShare,
@@ -35,9 +35,9 @@ public readonly record struct DelegationInfo(
         };
     }
 
-    public static implicit operator DelegationInfoProto(DelegationInfo delegationInfo)
+    public static implicit operator DelegateeInfoProto(DelegateeInfo delegationInfo)
     {
-        return new DelegationInfoProto
+        return new DelegateeInfoProto
         {
             Power = delegationInfo.Power,
             TotalShare = delegationInfo.TotalShare,

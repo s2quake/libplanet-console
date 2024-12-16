@@ -11,8 +11,20 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<Guild>()
              .AddSingleton<IGuild>(s => s.GetRequiredService<Guild>())
              .AddSingleton<IConsoleContent>(s => s.GetRequiredService<Guild>());
+        @this.AddKeyedScoped<NodeGuild>(INode.Key)
+            .AddKeyedScoped<INodeGuild>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeGuild>(k))
+            .AddKeyedScoped<INodeContent>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeGuild>(k));
+        @this.AddKeyedScoped<ClientGuild>(IClient.Key)
+            .AddKeyedScoped<IClientGuild>(
+                IClient.Key, (s, k) => s.GetRequiredKeyedService<ClientGuild>(k))
+            .AddKeyedScoped<IClientContent>(
+                IClient.Key, (s, k) => s.GetRequiredKeyedService<ClientGuild>(k));
 
         @this.AddSingleton<ICommand, GuildCommand>();
+        @this.AddSingleton<ICommand, NodeGuildCommand>();
+        @this.AddSingleton<ICommand, ClientGuildCommand>();
 
         return @this;
     }

@@ -16,9 +16,15 @@ public static class ServiceCollectionExtensions
                 INode.Key, (s, k) => s.GetRequiredKeyedService<NodeDelegation>(k))
             .AddKeyedScoped<INodeContent>(
                 INode.Key, (s, k) => s.GetRequiredKeyedService<NodeDelegation>(k));
+        @this.AddKeyedScoped<ClientDelegation>(IClient.Key)
+            .AddKeyedScoped<IClientDelegation>(
+                IClient.Key, (s, k) => s.GetRequiredKeyedService<ClientDelegation>(k))
+            .AddKeyedScoped<IClientContent>(
+                IClient.Key, (s, k) => s.GetRequiredKeyedService<ClientDelegation>(k));
 
         @this.AddSingleton<ICommand, DelegationCommand>();
         @this.AddSingleton<ICommand, NodeDelegationCommand>();
+        @this.AddSingleton<ICommand, ClientDelegationCommand>();
 
         return @this;
     }

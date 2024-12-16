@@ -14,8 +14,6 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
 
     public bool IsRunning { get; private set; }
 
-    public GuildInfo Info { get; private set; }
-
     IEnumerable<CurrencyInfo> ICurrencyProvider.Currencies
     {
         get
@@ -31,7 +29,7 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         }
     }
 
-    public async Task<GuildInfo> CreateAsync(CancellationToken cancellationToken)
+    public async Task CreateAsync(CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -39,21 +37,16 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         {
         };
         await node.SendTransactionAsync([makeGuild], cancellationToken);
-        Info = GetGuildInfo();
-        return Info;
     }
 
-    public async Task<Address> DeleteAsync(CancellationToken cancellationToken)
+    public async Task DeleteAsync(CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
         var removeGuild = new RemoveGuild
         {
         };
-        var guildAddress = Info.Address;
         await node.SendTransactionAsync([removeGuild], cancellationToken);
-        Info = default;
-        return guildAddress;
     }
 
     public async Task JoinAsync(Address guildAddress, CancellationToken cancellationToken)
@@ -76,7 +69,17 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         await node.SendTransactionAsync([quitGuild], cancellationToken);
     }
 
-    public async Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task MoveAsync(Address guildAddress, CancellationToken cancellationToken)
+    {
+        ThrowIfNotRunning();
+
+        var moveGuild = new MoveGuild(new(guildAddress))
+        {
+        };
+        await node.SendTransactionAsync([moveGuild], cancellationToken);
+    }
+
+    public async Task BanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
@@ -86,7 +89,7 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         await node.SendTransactionAsync([banGuildMember], cancellationToken);
     }
 
-    public async Task UnbanMemberAsync(
+    public async Task UnbanAsync(
         Address memberAddress, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
@@ -107,8 +110,11 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         await node.SendTransactionAsync([claimReward], cancellationToken);
     }
 
-    public Task<GuildInfo> GetGuildAsync(CancellationToken cancellationToken)
-        => Task.Run(GetGuildInfo);
+    public Task<GuildInfo> GetInfoAsync(Address memberAddress, CancellationToken cancellationToken)
+    {
+        var info = GetGuildInfo(memberAddress);
+        return Task.FromResult(info);
+    }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
@@ -133,13 +139,12 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         return Task.CompletedTask;
     }
 
-    private GuildInfo GetGuildInfo()
+    private GuildInfo GetGuildInfo(Address memberAddress)
     {
-        var nodeAddress = node.Address;
         var worldState = blockChain.GetWorldState();
         var world = new World(worldState);
         var guildRepository = new GuildRepository(world, new ActionContext());
-        var agentAddress = new AgentAddress(nodeAddress);
+        var agentAddress = new AgentAddress(memberAddress);
         var guildParticipant = guildRepository.GetGuildParticipant(agentAddress);
         var guild = guildRepository.GetGuild(guildParticipant.GuildAddress);
         return new GuildInfo

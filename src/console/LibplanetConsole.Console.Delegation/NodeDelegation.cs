@@ -5,12 +5,12 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Console.Bank;
 using LibplanetConsole.Grpc.Delegation;
 using Microsoft.Extensions.DependencyInjection;
+using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console.Delegation;
 
 internal sealed class NodeDelegation(
     [FromKeyedServices(INode.Key)] INode node,
-    [FromKeyedServices(INode.Key)] INodeBank bank,
     ICurrencyCollection currencies)
     : NodeContentBase("node-delegation"), INodeDelegation
 {
@@ -21,7 +21,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new StakeRequest
@@ -37,7 +37,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new PromoteRequest
@@ -53,7 +53,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new DelegateRequest
@@ -68,7 +68,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new UndelegateRequest
@@ -83,7 +83,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new UnjailRequest();
@@ -95,7 +95,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new SetCommissionRequest
@@ -110,7 +110,7 @@ internal sealed class NodeDelegation(
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
         var request = new ClaimRequest();
@@ -118,18 +118,38 @@ internal sealed class NodeDelegation(
         await _service.ClaimAsync(request, callOptions);
     }
 
-    public async Task<DelegationInfo> GetInfoAsync(CancellationToken cancellationToken)
+    public async Task<DelegateeInfo> GetDelegateeInfoAsync(
+        Address address, CancellationToken cancellationToken)
     {
         if (_service is null)
         {
-            throw new InvalidOperationException("Validator service is not available.");
+            throw new InvalidOperationException("Delegation service is not available.");
         }
 
-        var request = new GetInfoRequest();
+        var request = new GetDelegateeInfoRequest
+        {
+            Address = ToGrpc(address),
+        };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _service.GetInfoAsync(request, callOptions);
-        await _service.GetInfoAsync(request, callOptions);
-        return response.DelegationInfo;
+        var response = await _service.GetDelegateeInfoAsync(request, callOptions);
+        return response.DelegateeInfo;
+    }
+
+    public async Task<DelegatorInfo> GetDelegatorInfoAsync(
+        Address address, CancellationToken cancellationToken)
+    {
+        if (_service is null)
+        {
+            throw new InvalidOperationException("Delegation service is not available.");
+        }
+
+        var request = new GetDelegatorInfoRequest
+        {
+            Address = ToGrpc(address),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _service.GetDelegatorInfoAsync(request, callOptions);
+        return response.DelegatorInfo;
     }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)

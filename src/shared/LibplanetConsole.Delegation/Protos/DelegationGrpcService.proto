@@ -12,10 +12,9 @@ service DelegationGrpcService {
   rpc Undelegate(UndelegateRequest) returns (UndelegateResponse);
   rpc SetCommission(SetCommissionRequest) returns (SetCommissionResponse);
   rpc Claim(ClaimRequest) returns (ClaimResponse);
-  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
 
-  rpc GetStakeInfo(GetStakeInfoRequest) returns (GetStakeInfoResponse);
-  rpc StakeTx(StakeTxRequest) returns (StakeTxResponse);
+  rpc GetDelegateeInfo(GetDelegateeInfoRequest) returns (GetDelegateeInfoResponse);
+  rpc GetDelegatorInfo(GetDelegatorInfoRequest) returns (GetDelegatorInfoResponse);
 }
 
 message StakeInfoProto {
@@ -26,7 +25,7 @@ message StakeInfoProto {
   string guild_gold = 5;
 }
 
-message DelegationInfoProto {
+message DelegateeInfoProto {
   string power = 1;
   string total_share = 2;
   bool is_jailed = 3;
@@ -35,6 +34,12 @@ message DelegationInfoProto {
   bool tombstoned = 6;
   bool is_active = 7;
   StakeInfoProto stake_info = 8;
+}
+
+message DelegatorInfoProto {
+  int64 last_distribute_height = 1;
+  string share = 2;
+  StakeInfoProto stake_info = 3;
 }
 
 message StakeRequest {
@@ -84,25 +89,18 @@ message ClaimRequest {
 message ClaimResponse {
 }
 
-message GetInfoRequest {
-}
-
-message GetInfoResponse {
-  DelegationInfoProto delegation_info = 1;
-}
-
-message GetStakeInfoRequest {
+message GetDelegateeInfoRequest {
   string address = 1;
 }
 
-message GetStakeInfoResponse {
-  StakeInfoProto stake_info = 1;
+message GetDelegateeInfoResponse {
+  DelegateeInfoProto delegatee_info = 1;
 }
 
-message StakeTxRequest {
-  int64 ncg = 1;
+message GetDelegatorInfoRequest {
+  string address = 1;
 }
 
-message StakeTxResponse {
-  bytes plain_value = 1;
+message GetDelegatorInfoResponse {
+  DelegatorInfoProto delegator_info = 1;
 }

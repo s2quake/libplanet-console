@@ -4,7 +4,6 @@ using System.Reflection;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Node.Guild.BlockActions;
-using Nekoyume;
 using Nekoyume.Action;
 using Nekoyume.Action.Loader;
 using Nekoyume.Action.ValidatorDelegation;
@@ -87,13 +86,18 @@ internal sealed class ActionProvider : IActionProvider
             AssetMinters = ImmutableHashSet.Create(genesisAddress),
         };
 
-        MintSpec[] mintSpecs =
+        Address[] addresses =
         [
-            new MintSpec(genesisAddress, ncg * 1_00, null),
-            .. validatorKeys.Select(item => new MintSpec(item.Address, ncg * 1_000, null)),
+            genesisAddress,
+            new Address("56a75a25f0a8614bC119309cEb61BeA30e35FF9e"), // client 1
+            .. validatorKeys.Select(item => item.Address),
         ];
+
+        var mintSpecs = addresses.Select(CreateMintSpec).ToArray();
         var mintAsset = new MintAssets(mintSpecs, "Initialize");
         return [initializeStates, mintAsset];
+
+        MintSpec CreateMintSpec(Address address) => new MintSpec(address, ncg * 1_000_000, null);
     }
 
     private static IEnumerable<Assembly> GetAssemblies(Assembly assembly)

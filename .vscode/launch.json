@@ -40,9 +40,9 @@
         "run",
         // options
         "--nodes",
-        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819,9cb1c6d0b19d8481bc5be6b50206e834232e13cc25cd7798a927f7bb1b6c1bc0",
-        "--client-count",
-        "0",
+        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819",
+        "--clients",
+        "50050a029d594cdb2db6d9a939603d714e7860a9477d68ad2f36d54be30cfe71",
         "--log-path",
         ".log",
         "--module-type",

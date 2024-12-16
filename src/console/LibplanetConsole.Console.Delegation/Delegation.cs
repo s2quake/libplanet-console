@@ -1,28 +1,28 @@
+using Microsoft.Extensions.DependencyInjection;
 using Nekoyume.Action;
 
 namespace LibplanetConsole.Console.Delegation;
 
-internal sealed class Delegation(IConsole console)
+internal sealed class Delegation(IConsole console, RunningNode runningNode)
     : ConsoleContentBase("delegation"), IDelegation
 {
-    public Task<StakeInfo> GetInfoAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task StakeAsync(long ncg, CancellationToken cancellationToken)
     {
         var stakeAction = new Stake(ncg);
         await console.SendTransactionAsync([stakeAction], cancellationToken);
     }
 
-    protected override Task OnStartAsync(CancellationToken cancellationToken)
+    public Task<DelegateeInfo> GetDelegateeInfoAsync(
+        Address address, CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
+        var nodeDelegation = runningNode.Node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        return nodeDelegation.GetDelegateeInfoAsync(address, cancellationToken);
     }
 
-    protected override Task OnStopAsync(CancellationToken cancellationToken)
+    public Task<DelegatorInfo> GetDelegatorInfoAsync(
+        Address address, CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
+        var nodeDelegation = runningNode.Node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        return nodeDelegation.GetDelegatorInfoAsync(address, cancellationToken);
     }
 }

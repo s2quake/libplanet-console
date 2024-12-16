@@ -10,8 +10,8 @@ internal sealed class GuildServiceGrpcV1(IGuild guild)
     public override async Task<CreateResponse> Create(
         CreateRequest request, ServerCallContext context)
     {
-        var guildInfo = await guild.CreateAsync(context.CancellationToken);
-        return new CreateResponse { GuildInfo = guildInfo };
+        await guild.CreateAsync(context.CancellationToken);
+        return new CreateResponse();
     }
 
     public override async Task<DeleteResponse> Delete(
@@ -34,22 +34,38 @@ internal sealed class GuildServiceGrpcV1(IGuild guild)
         return new LeaveResponse();
     }
 
+    public override async Task<MoveResponse> Move(MoveRequest request, ServerCallContext context)
+    {
+        var guildAddress = ToAddress(request.GuildAddress);
+        await guild.MoveAsync(guildAddress, context.CancellationToken);
+        return new MoveResponse();
+    }
+
     public override async Task<BanResponse> Ban(BanRequest request, ServerCallContext context)
     {
         var memberAddress = ToAddress(request.MemberAddress);
-        await guild.BanMemberAsync(memberAddress, context.CancellationToken);
+        await guild.BanAsync(memberAddress, context.CancellationToken);
         return new BanResponse();
     }
 
     public override async Task<UnbanResponse> Unban(UnbanRequest request, ServerCallContext context)
     {
         var memberAddress = ToAddress(request.MemberAddress);
-        await guild.UnbanMemberAsync(memberAddress, context.CancellationToken);
+        await guild.UnbanAsync(memberAddress, context.CancellationToken);
         return new UnbanResponse();
     }
 
-    public override Task<MoveResponse> Move(MoveRequest request, ServerCallContext context)
+    public override async Task<ClaimResponse> Claim(ClaimRequest request, ServerCallContext context)
     {
-        return base.Move(request, context);
+        await guild.ClaimAsync(context.CancellationToken);
+        return new ClaimResponse();
+    }
+
+    public override async Task<GetInfoResponse> GetInfo(
+        GetInfoRequest request, ServerCallContext context)
+    {
+        var memberAddress = ToAddress(request.MemberAddress);
+        var info = await guild.GetInfoAsync(memberAddress, context.CancellationToken);
+        return new GetInfoResponse { GuildInfo = info };
     }
 }

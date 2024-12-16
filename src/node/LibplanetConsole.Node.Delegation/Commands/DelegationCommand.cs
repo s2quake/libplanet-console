@@ -10,7 +10,7 @@ namespace LibplanetConsole.Node.Delegation.Commands;
 [CommandSummary("Delegation Commands.")]
 [Category("Delegation")]
 internal sealed class DelegationCommand(
-    IDelegation delegation,
+    INode node, IDelegation delegation,
     ICurrencyCollection currencies) : CommandMethodBase
 {
     [CommandMethod]
@@ -69,9 +69,10 @@ internal sealed class DelegationCommand(
     }
 
     [CommandMethod]
-    public async Task InfoAsync(CancellationToken cancellationToken)
+    public async Task InfoAsync(string address = "", CancellationToken cancellationToken = default)
     {
-        var info = await delegation.GetInfoAsync(cancellationToken);
+        var delegateeAddress = address == string.Empty ? node.Address : new Address(address);
+        var info = await delegation.GetDelegateeInfoAsync(delegateeAddress, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 }

@@ -6,7 +6,7 @@ namespace LibplanetConsole.Node.Guild.Commands;
 
 [CommandSummary("Provides commands for the guild service.")]
 [Category(nameof(Guild))]
-internal sealed class GuildCommand(IGuild guild) : CommandMethodBase
+internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
 {
     [CommandMethod]
     public async Task CreateAsync(CancellationToken cancellationToken)
@@ -33,15 +33,15 @@ internal sealed class GuildCommand(IGuild guild) : CommandMethodBase
     }
 
     [CommandMethod]
-    public async Task BanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task BanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
-        await guild.BanMemberAsync(memberAddress, cancellationToken);
+        await guild.BanAsync(memberAddress, cancellationToken);
     }
 
     [CommandMethod]
-    public async Task UnbanMemberAsync(Address memberAddress, CancellationToken cancellationToken)
+    public async Task UnbanAsync(Address memberAddress, CancellationToken cancellationToken)
     {
-        await guild.UnbanMemberAsync(memberAddress, cancellationToken);
+        await guild.UnbanAsync(memberAddress, cancellationToken);
     }
 
     [CommandMethod]
@@ -51,9 +51,11 @@ internal sealed class GuildCommand(IGuild guild) : CommandMethodBase
     }
 
     [CommandMethod]
-    public async Task InfoAsync(CancellationToken cancellationToken)
+    public async Task InfoAsync(
+        string memberAddress = "", CancellationToken cancellationToken = default)
     {
-        var info = await guild.GetGuildAsync(cancellationToken);
+        var address = memberAddress == string.Empty ? node.Address : new Address(memberAddress);
+        var info = await guild.GetInfoAsync(address, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 }

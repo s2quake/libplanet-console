@@ -13,7 +13,13 @@ internal sealed class CurrencyCollection(INode node)
 
     async Task INodeContent.StartAsync(CancellationToken cancellationToken)
     {
-        node.Started += Node_Started;
+        var currencyProviders = node.GetServices<ICurrencyProvider>();
+        var items = currencyProviders.SelectMany(provider => provider.Currencies);
+        foreach (var item in items)
+        {
+            Add(item.Code, item.Currency);
+        }
+
         await Task.CompletedTask;
     }
 
@@ -21,15 +27,5 @@ internal sealed class CurrencyCollection(INode node)
     {
         Clear();
         await Task.CompletedTask;
-    }
-
-    private void Node_Started(object? sender, EventArgs e)
-    {
-        var currencyProviders = node.GetServices<ICurrencyProvider>();
-        var items = currencyProviders.SelectMany(provider => provider.Currencies);
-        foreach (var item in items)
-        {
-            Add(item.Code, item.Currency);
-        }
     }
 }
