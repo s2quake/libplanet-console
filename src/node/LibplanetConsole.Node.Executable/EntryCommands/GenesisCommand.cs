@@ -4,6 +4,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.DataAnnotations;
+using LibplanetConsole.Node.Executable.Extensions;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -60,7 +61,7 @@ public sealed class GenesisCommand : CommandBase
             Timestamp = dateTimeOffset,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
-        };
+        }.EnsureActionProviderType(typeof(ActionProvider));
         var genesisBlock = BlockUtility.CreateGenesisBlock(genesisOptions);
         var genesis = BlockUtility.SerializeBlock(genesisBlock);
         var hex = ByteUtil.Hex(genesis);
