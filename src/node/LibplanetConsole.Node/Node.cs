@@ -174,7 +174,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             ConsensusPort = consensusPort,
             ConsensusPrivateKey = privateKey,
             TargetBlockInterval = TimeSpan.FromSeconds(2),
-            ContextTimeoutOptions = new(),
+            ContextOption = new(),
         };
         var (keyValueStore, store, stateStore) = BlockChainUtility.GetStore(storePath);
         var blockChain = BlockChainUtility.CreateBlockChain(
