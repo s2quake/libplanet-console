@@ -10,7 +10,8 @@ internal sealed class GuildServiceGrpcV1(IGuild guild)
     public override async Task<CreateResponse> Create(
         CreateRequest request, ServerCallContext context)
     {
-        await guild.CreateAsync(context.CancellationToken);
+        var validatorAddress = ToAddress(request.ValidatorAddress);
+        await guild.CreateAsync(validatorAddress, context.CancellationToken);
         return new CreateResponse();
     }
 

@@ -14,7 +14,7 @@ namespace LibplanetConsole.Console.Delegation;
 public static class BigIntegerUtility
 {
     public static BigInteger Parse(string value)
-        => BigInteger.Parse(value, NumberStyles.AllowDecimalPoint);
+        => BigInteger.Parse(value, NumberStyles.Number);
 
     public static string ToString(BigInteger value)
         => value.ToString("N0");

@@ -25,4 +25,11 @@ internal sealed class Delegation(IConsole console, RunningNode runningNode)
         var nodeDelegation = runningNode.Node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
         return nodeDelegation.GetDelegatorInfoAsync(address, cancellationToken);
     }
+
+    public Task<StakeInfo> GetStakeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+    {
+        var nodeDelegation = runningNode.Node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        return nodeDelegation.GetStakeInfoAsync(address, cancellationToken);
+    }
 }

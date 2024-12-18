@@ -3,6 +3,7 @@ using Grpc.Net.Client;
 using LibplanetConsole.Common;
 using LibplanetConsole.Grpc.Delegation;
 using Microsoft.Extensions.DependencyInjection;
+using Nekoyume.Action;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console.Delegation;
@@ -61,6 +62,23 @@ internal sealed class ClientDelegation(
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.GetDelegatorInfoAsync(request, callOptions);
         return response.DelegatorInfo;
+    }
+
+    public async Task<StakeInfo> GetStakeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+    {
+        if (_service is null)
+        {
+            throw new InvalidOperationException("Delegation service is not available.");
+        }
+
+        var request = new GetStakeInfoRequest
+        {
+            Address = ToGrpc(address),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _service.GetStakeInfoAsync(request, callOptions);
+        return response.StakeInfo;
     }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)

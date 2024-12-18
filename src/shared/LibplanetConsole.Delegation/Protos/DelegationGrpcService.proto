@@ -15,6 +15,7 @@ service DelegationGrpcService {
 
   rpc GetDelegateeInfo(GetDelegateeInfoRequest) returns (GetDelegateeInfoResponse);
   rpc GetDelegatorInfo(GetDelegatorInfoRequest) returns (GetDelegatorInfoResponse);
+  rpc GetStakeInfo(GetStakeInfoRequest) returns (GetStakeInfoResponse);
 }
 
 message StakeInfoProto {
@@ -33,13 +34,11 @@ message DelegateeInfoProto {
   int64 commission = 5;
   bool tombstoned = 6;
   bool is_active = 7;
-  StakeInfoProto stake_info = 8;
 }
 
 message DelegatorInfoProto {
   int64 last_distribute_height = 1;
   string share = 2;
-  StakeInfoProto stake_info = 3;
 }
 
 message StakeRequest {
@@ -103,4 +102,12 @@ message GetDelegatorInfoRequest {
 
 message GetDelegatorInfoResponse {
   DelegatorInfoProto delegator_info = 1;
+}
+
+message GetStakeInfoRequest {
+  string address = 1;
+}
+
+message GetStakeInfoResponse {
+  StakeInfoProto stake_info = 1;
 }

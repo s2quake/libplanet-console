@@ -44,7 +44,7 @@ internal sealed class DelegationServiceGrpcV1(
     public override async Task<UndelegateResponse> Undelegate(
         UndelegateRequest request, ServerCallContext context)
     {
-        var share = BigInteger.Parse(request.Share, NumberStyles.AllowDecimalPoint);
+        var share = BigIntegerUtility.Parse(request.Share);
         await delegation.UndelegateAsync(share, context.CancellationToken);
         return new UndelegateResponse();
     }

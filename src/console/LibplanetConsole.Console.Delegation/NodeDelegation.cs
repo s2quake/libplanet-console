@@ -152,6 +152,23 @@ internal sealed class NodeDelegation(
         return response.DelegatorInfo;
     }
 
+    public async Task<StakeInfo> GetStakeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+    {
+        if (_service is null)
+        {
+            throw new InvalidOperationException("Delegation service is not available.");
+        }
+
+        var request = new GetStakeInfoRequest
+        {
+            Address = ToGrpc(address),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _service.GetStakeInfoAsync(request, callOptions);
+        return response.StakeInfo;
+    }
+
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         var address = $"http://{EndPointUtility.ToString(node.EndPoint)}";

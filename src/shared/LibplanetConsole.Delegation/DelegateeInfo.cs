@@ -17,36 +17,27 @@ public readonly record struct DelegateeInfo(
     long JailedUntil,
     long Commission,
     bool Tombstoned,
-    bool IsActive,
-    StakeInfo StakeInfo)
+    bool IsActive)
 {
-    public static implicit operator DelegateeInfo(DelegateeInfoProto delegationInfo)
+    public static implicit operator DelegateeInfo(DelegateeInfoProto delegationInfo) => new()
     {
-        return new DelegateeInfo
-        {
-            Power = delegationInfo.Power,
-            TotalShare = delegationInfo.TotalShare,
-            IsJailed = delegationInfo.IsJailed,
-            JailedUntil = delegationInfo.JailedUntil,
-            Commission = delegationInfo.Commission,
-            Tombstoned = delegationInfo.Tombstoned,
-            IsActive = delegationInfo.IsActive,
-            StakeInfo = delegationInfo.StakeInfo,
-        };
-    }
+        Power = delegationInfo.Power,
+        TotalShare = delegationInfo.TotalShare,
+        IsJailed = delegationInfo.IsJailed,
+        JailedUntil = delegationInfo.JailedUntil,
+        Commission = delegationInfo.Commission,
+        Tombstoned = delegationInfo.Tombstoned,
+        IsActive = delegationInfo.IsActive,
+    };
 
-    public static implicit operator DelegateeInfoProto(DelegateeInfo delegationInfo)
+    public static implicit operator DelegateeInfoProto(DelegateeInfo delegationInfo) => new()
     {
-        return new DelegateeInfoProto
-        {
-            Power = delegationInfo.Power,
-            TotalShare = delegationInfo.TotalShare,
-            IsJailed = delegationInfo.IsJailed,
-            JailedUntil = delegationInfo.JailedUntil,
-            Commission = delegationInfo.Commission,
-            Tombstoned = delegationInfo.Tombstoned,
-            IsActive = delegationInfo.IsActive,
-            StakeInfo = delegationInfo.StakeInfo,
-        };
-    }
+        Power = delegationInfo.Power,
+        TotalShare = delegationInfo.TotalShare,
+        IsJailed = delegationInfo.IsJailed,
+        JailedUntil = delegationInfo.JailedUntil,
+        Commission = delegationInfo.Commission,
+        Tombstoned = delegationInfo.Tombstoned,
+        IsActive = delegationInfo.IsActive,
+    };
 }

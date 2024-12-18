@@ -19,6 +19,23 @@ internal sealed class Delegation(IClient client)
         await client.SendTransactionAsync([stake], cancellationToken);
     }
 
+    public async Task<DelegateeInfo> GetDelegateeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+    {
+        if (_service is null)
+        {
+            throw new InvalidOperationException("The service is not initialized.");
+        }
+
+        var request = new GetDelegateeInfoRequest
+        {
+            Address = ToGrpc(address),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _service.GetDelegateeInfoAsync(request, callOptions);
+        return response.DelegateeInfo;
+    }
+
     public async Task<DelegatorInfo> GetDelegatorInfoAsync(
         Address address, CancellationToken cancellationToken)
     {
@@ -34,6 +51,23 @@ internal sealed class Delegation(IClient client)
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.GetDelegatorInfoAsync(request, callOptions);
         return response.DelegatorInfo;
+    }
+
+    public async Task<StakeInfo> GetStakeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+    {
+        if (_service is null)
+        {
+            throw new InvalidOperationException("The service is not initialized.");
+        }
+
+        var request = new GetStakeInfoRequest
+        {
+            Address = ToGrpc(address),
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        var response = await _service.GetStakeInfoAsync(request, callOptions);
+        return response.StakeInfo;
     }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)

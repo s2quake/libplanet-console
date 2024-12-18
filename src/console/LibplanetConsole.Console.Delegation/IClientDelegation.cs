@@ -7,4 +7,6 @@ public interface IClientDelegation
     Task<DelegateeInfo> GetDelegateeInfoAsync(Address address, CancellationToken cancellationToken);
 
     Task<DelegatorInfo> GetDelegatorInfoAsync(Address address, CancellationToken cancellationToken);
+
+    Task<StakeInfo> GetStakeInfoAsync(Address address, CancellationToken cancellationToken);
 }

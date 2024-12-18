@@ -17,27 +17,21 @@ public readonly record struct StakeInfo(
     long CancellableBlockIndex,
     string GuildGold)
 {
-    public static implicit operator StakeInfo(StakeInfoProto stakeInfo)
+    public static implicit operator StakeInfo(StakeInfoProto stakeInfo) => new()
     {
-        return new StakeInfo
-        {
-            ClaimableBlockIndex = stakeInfo.ClaimableBlockIndex,
-            Deposit = stakeInfo.Deposit,
-            StartedBlockIndex = stakeInfo.StartedBlockIndex,
-            CancellableBlockIndex = stakeInfo.CancellableBlockIndex,
-            GuildGold = stakeInfo.GuildGold,
-        };
-    }
+        ClaimableBlockIndex = stakeInfo.ClaimableBlockIndex,
+        Deposit = stakeInfo.Deposit,
+        StartedBlockIndex = stakeInfo.StartedBlockIndex,
+        CancellableBlockIndex = stakeInfo.CancellableBlockIndex,
+        GuildGold = stakeInfo.GuildGold,
+    };
 
-    public static implicit operator StakeInfoProto(StakeInfo stakeInfo)
+    public static implicit operator StakeInfoProto(StakeInfo stakeInfo) => new()
     {
-        return new StakeInfoProto
-        {
-            ClaimableBlockIndex = stakeInfo.ClaimableBlockIndex,
-            Deposit = stakeInfo.Deposit,
-            StartedBlockIndex = stakeInfo.StartedBlockIndex,
-            CancellableBlockIndex = stakeInfo.CancellableBlockIndex,
-            GuildGold = stakeInfo.GuildGold,
-        };
-    }
+        ClaimableBlockIndex = stakeInfo.ClaimableBlockIndex,
+        Deposit = stakeInfo.Deposit,
+        StartedBlockIndex = stakeInfo.StartedBlockIndex,
+        CancellableBlockIndex = stakeInfo.CancellableBlockIndex,
+        GuildGold = stakeInfo.GuildGold,
+    };
 }

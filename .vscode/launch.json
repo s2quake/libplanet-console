@@ -40,7 +40,7 @@
         "run",
         // options
         "--nodes",
-        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819",
+        "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819,65832f8e8ed34d21ae808c71b97bcc379779ba48ed9749fc9c2f329e5281fe1d",
         "--clients",
         "50050a029d594cdb2db6d9a939603d714e7860a9477d68ad2f36d54be30cfe71",
         "--log-path",

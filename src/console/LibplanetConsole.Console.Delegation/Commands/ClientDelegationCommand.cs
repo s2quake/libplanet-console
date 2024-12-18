@@ -11,31 +11,56 @@ internal sealed partial class ClientDelegationCommand(
     IClientCollection clients)
     : CommandMethodBase(clientCommand, "delegation")
 {
-    [CommandPropertyRequired(DefaultValue = "")]
+    [CommandProperty(InitValue = "")]
     [CommandSummary("The address of the client. If not specified, the current client is used.")]
     [CommandPropertyCompletion(nameof(GetClientAddresses))]
-    public static string Address { get; set; } = string.Empty;
+    public static string ClientAddress { get; set; } = string.Empty;
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
+    [CommandMethodProperty(nameof(ClientAddress))]
     public async Task StakeAsync(
         long ncg,
         CancellationToken cancellationToken)
     {
-        var address = Address;
+        var address = ClientAddress;
         var client = clients.GetClientOrCurrent(address);
         var delegation = client.GetRequiredKeyedService<IClientDelegation>(IClient.Key);
         await delegation.StakeAsync(ncg, cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
-    public async Task InfoAsync(CancellationToken cancellationToken)
+    [CommandMethodProperty(nameof(ClientAddress))]
+    public async Task DelegateeInfoAsync(
+        string address = "", CancellationToken cancellationToken = default)
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
-        var delegation = client.GetRequiredKeyedService<IClientDelegation>(IClient.Key);
-        var info = await delegation.GetDelegatorInfoAsync(client.Address, cancellationToken);
+        var client = clients.GetClientOrCurrent(ClientAddress);
+        var targetAddress = address == string.Empty ? client.Address : new Address(address);
+        var delegation = client.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        var info = await delegation.GetDelegateeInfoAsync(targetAddress, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandMethodProperty(nameof(ClientAddress))]
+    public async Task DelegatorInfoAsync(
+       string address = "", CancellationToken cancellationToken = default)
+    {
+        var client = clients.GetClientOrCurrent(ClientAddress);
+        var targetAddress = address == string.Empty ? client.Address : new Address(address);
+        var delegation = client.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        var info = await delegation.GetDelegatorInfoAsync(targetAddress, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandMethodProperty(nameof(ClientAddress))]
+    public async Task StakeInfoAsync(
+        string address = "", CancellationToken cancellationToken = default)
+    {
+        var client = clients.GetClientOrCurrent(ClientAddress);
+        var targetAddress = address == string.Empty ? client.Address : new Address(address);
+        var delegation = client.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        var info = await delegation.GetStakeInfoAsync(targetAddress, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 

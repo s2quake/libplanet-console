@@ -2,7 +2,7 @@
 
 public interface IGuild
 {
-    Task CreateAsync(CancellationToken cancellationToken);
+    Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken);
 
     Task DeleteAsync(CancellationToken cancellationToken);
 

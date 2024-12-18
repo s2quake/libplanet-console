@@ -14,6 +14,18 @@ internal sealed class DelegationServiceGrpcV1(IDelegation delegation)
         return new StakeResponse();
     }
 
+    public override async Task<GetDelegateeInfoResponse> GetDelegateeInfo(
+        GetDelegateeInfoRequest request, ServerCallContext context)
+    {
+        var address = ToAddress(request.Address);
+        var delegateeInfo = await delegation.GetDelegateeInfoAsync(
+            address, context.CancellationToken);
+        return new GetDelegateeInfoResponse
+        {
+            DelegateeInfo = delegateeInfo,
+        };
+    }
+
     public override async Task<GetDelegatorInfoResponse> GetDelegatorInfo(
         GetDelegatorInfoRequest request, ServerCallContext context)
     {
@@ -23,6 +35,18 @@ internal sealed class DelegationServiceGrpcV1(IDelegation delegation)
         return new GetDelegatorInfoResponse
         {
             DelegatorInfo = delegatorInfo,
+        };
+    }
+
+    public override async Task<GetStakeInfoResponse> GetStakeInfo(
+        GetStakeInfoRequest request, ServerCallContext context)
+    {
+        var address = ToAddress(request.Address);
+        var delegatorInfo = await delegation.GetStakeInfoAsync(
+            address, context.CancellationToken);
+        return new GetStakeInfoResponse
+        {
+            StakeInfo = delegatorInfo,
         };
     }
 }

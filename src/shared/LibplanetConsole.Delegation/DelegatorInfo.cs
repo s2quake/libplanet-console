@@ -12,26 +12,17 @@ namespace LibplanetConsole.Console.Delegation;
 
 public readonly record struct DelegatorInfo(
     long LastDistributeHeight,
-    string Share,
-    StakeInfo StakeInfo)
+    string Share)
 {
-    public static implicit operator DelegatorInfo(DelegatorInfoProto delegationInfo)
+    public static implicit operator DelegatorInfo(DelegatorInfoProto delegationInfo) => new()
     {
-        return new DelegatorInfo
-        {
-            LastDistributeHeight = delegationInfo.LastDistributeHeight,
-            Share = delegationInfo.Share,
-            StakeInfo = delegationInfo.StakeInfo,
-        };
-    }
+        LastDistributeHeight = delegationInfo.LastDistributeHeight,
+        Share = delegationInfo.Share,
+    };
 
-    public static implicit operator DelegatorInfoProto(DelegatorInfo delegationInfo)
+    public static implicit operator DelegatorInfoProto(DelegatorInfo delegationInfo) => new()
     {
-        return new DelegatorInfoProto
-        {
-            LastDistributeHeight = delegationInfo.LastDistributeHeight,
-            Share = delegationInfo.Share,
-            StakeInfo = delegationInfo.StakeInfo,
-        };
-    }
+        LastDistributeHeight = delegationInfo.LastDistributeHeight,
+        Share = delegationInfo.Share,
+    };
 }

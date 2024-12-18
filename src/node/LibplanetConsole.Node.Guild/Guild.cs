@@ -29,11 +29,11 @@ internal sealed class Guild(INode node, IBlockChain blockChain)
         }
     }
 
-    public async Task CreateAsync(CancellationToken cancellationToken)
+    public async Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
     {
         ThrowIfNotRunning();
 
-        var makeGuild = new MakeGuild(node.Address)
+        var makeGuild = new MakeGuild(validatorAddress)
         {
         };
         await node.SendTransactionAsync([makeGuild], cancellationToken);

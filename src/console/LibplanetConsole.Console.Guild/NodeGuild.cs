@@ -14,14 +14,17 @@ internal sealed class NodeGuild(
     private GrpcChannel? _channel;
     private GuildGrpcService.GuildGrpcServiceClient? _service;
 
-    public async Task CreateAsync(CancellationToken cancellationToken)
+    public async Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
     {
         if (_service is null)
         {
             throw new InvalidOperationException("The service is not initialized.");
         }
 
-        var request = new CreateRequest();
+        var request = new CreateRequest
+        {
+            ValidatorAddress = ToGrpc(validatorAddress),
+        };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         await _service.CreateAsync(request, callOptions);
     }

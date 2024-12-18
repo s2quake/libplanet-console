@@ -16,10 +16,28 @@ internal sealed class DelegationCommand(
     }
 
     [CommandMethod]
-    public async Task InfoAsync(string address = "", CancellationToken cancellationToken = default)
+    public async Task DelegateeInfoAsync(
+        string address = "", CancellationToken cancellationToken = default)
     {
-        var delegatorAddress = address == string.Empty ? console.Address : new Address(address);
-        var info = await delegation.GetDelegatorInfoAsync(delegatorAddress, cancellationToken);
+        var targetAddress = address == string.Empty ? console.Address : new Address(address);
+        var info = await delegation.GetDelegateeInfoAsync(targetAddress, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
+    }
+
+    [CommandMethod]
+    public async Task DelegatorInfoAsync(
+        string address = "", CancellationToken cancellationToken = default)
+    {
+        var targetAddress = address == string.Empty ? console.Address : new Address(address);
+        var info = await delegation.GetDelegatorInfoAsync(targetAddress, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
+    }
+
+    public async Task StakeInfoAsync(
+        string address = "", CancellationToken cancellationToken = default)
+    {
+        var targetAddress = address == string.Empty ? console.Address : new Address(address);
+        var info = await delegation.GetStakeInfoAsync(targetAddress, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 }

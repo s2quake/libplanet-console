@@ -5,6 +5,7 @@ using Libplanet.Types.Consensus;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Node.Guild.BlockActions;
 using Nekoyume.Action;
+using Nekoyume.Action.Guild;
 using Nekoyume.Action.Loader;
 using Nekoyume.Action.ValidatorDelegation;
 using Nekoyume.Model.State;

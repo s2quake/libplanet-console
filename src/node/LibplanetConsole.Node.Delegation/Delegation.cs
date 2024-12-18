@@ -75,26 +75,16 @@ internal sealed class Delegation(
         Address address, CancellationToken cancellationToken)
         => Task.FromResult(GetDelegatorInfo(address));
 
+    public Task<StakeInfo> GetStakeInfoAsync(
+        Address address, CancellationToken cancellationToken)
+        => Task.FromResult(GetStakeInfo(address));
+
     public DelegateeInfo GetDelegateeInfo(Address address)
     {
         var worldState = blockChain.GetWorldState();
         var world = new World(worldState);
         var repository = new ValidatorRepository(world, new DummayActionContext());
         var delegatee = repository.GetValidatorDelegatee(address);
-        var stakeStateAddress = StakeState.DeriveAddress(address);
-
-        if (world.TryGetStakeState(address, out var stakeState) is false)
-        {
-            stakeState = default;
-        }
-
-        var currency = currencies["ncg"];
-        var deposit = world.GetBalance(stakeStateAddress, currency);
-        var guildGold = world.GetBalance(stakeStateAddress, Currencies.GuildGold);
-        var claimableBlockIndex = stakeState.Contract != null ? stakeState.ClaimableBlockIndex : 0;
-        var startedBlockIndex = stakeState.Contract != null ? stakeState.StartedBlockIndex : 0;
-        var cancellableBlockIndex = stakeState.Contract != null
-            ? stakeState.CancellableBlockIndex : 0;
 
         var delegateeInfo = new DelegateeInfo
         {
@@ -105,14 +95,6 @@ internal sealed class Delegation(
             Commission = (long)delegatee.CommissionPercentage,
             Tombstoned = delegatee.Tombstoned,
             IsActive = delegatee.IsActive,
-            StakeInfo = new StakeInfo
-            {
-                ClaimableBlockIndex = claimableBlockIndex,
-                Deposit = currencies.ToString(deposit),
-                StartedBlockIndex = startedBlockIndex,
-                CancellableBlockIndex = cancellableBlockIndex,
-                GuildGold = currencies.ToString(guildGold),
-            },
         };
 
         return delegateeInfo;
@@ -123,7 +105,6 @@ internal sealed class Delegation(
         var worldState = blockChain.GetWorldState();
         var world = new World(worldState);
         var guildRepository = new GuildRepository(world, new DummayActionContext());
-        var stakeStateAddress = StakeState.DeriveAddress(address);
         var lastDistributeHeight = -1L;
         var share = new BigInteger(0L);
 
@@ -136,6 +117,19 @@ internal sealed class Delegation(
             share = bond.Share;
         }
 
+        return new DelegatorInfo
+        {
+            LastDistributeHeight = lastDistributeHeight,
+            Share = BigIntegerUtility.ToString(share),
+        };
+    }
+
+    public StakeInfo GetStakeInfo(Address address)
+    {
+        var worldState = blockChain.GetWorldState();
+        var world = new World(worldState);
+        var stakeStateAddress = StakeState.DeriveAddress(address);
+
         if (world.TryGetStakeState(address, out var stakeState) is false)
         {
             stakeState = default;
@@ -148,20 +142,13 @@ internal sealed class Delegation(
         var startedBlockIndex = stakeState.Contract != null ? stakeState.StartedBlockIndex : 0;
         var cancellableBlockIndex = stakeState.Contract != null
             ? stakeState.CancellableBlockIndex : 0;
-        var stakeInfo = new StakeInfo
+        return new StakeInfo
         {
             ClaimableBlockIndex = claimableBlockIndex,
             Deposit = currencies.ToString(deposit),
             StartedBlockIndex = startedBlockIndex,
             CancellableBlockIndex = cancellableBlockIndex,
             GuildGold = currencies.ToString(guildGold),
-        };
-
-        return new DelegatorInfo
-        {
-            LastDistributeHeight = lastDistributeHeight,
-            Share = BigIntegerUtility.ToString(share),
-            StakeInfo = stakeInfo,
         };
     }
 

@@ -9,9 +9,9 @@ namespace LibplanetConsole.Node.Guild.Commands;
 internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
 {
     [CommandMethod]
-    public async Task CreateAsync(CancellationToken cancellationToken)
+    public async Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
     {
-        await guild.CreateAsync(cancellationToken);
+        await guild.CreateAsync(validatorAddress, cancellationToken);
         var info = await guild.GetInfoAsync(node.Address, cancellationToken);
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }

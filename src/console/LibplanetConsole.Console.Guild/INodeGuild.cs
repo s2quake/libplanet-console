@@ -2,7 +2,7 @@ namespace LibplanetConsole.Console.Guild;
 
 public interface INodeGuild
 {
-    Task CreateAsync(CancellationToken cancellationToken);
+    Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken);
 
     Task DeleteAsync(CancellationToken cancellationToken);
 
