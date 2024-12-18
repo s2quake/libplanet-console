@@ -16,6 +16,8 @@ internal sealed class GuildCommand(
         CancellationToken cancellationToken)
     {
         await guild.CreateAsync(validatorAddress, cancellationToken);
+        var info = await guild.GetInfoAsync(console.Address, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 
     [CommandMethod]

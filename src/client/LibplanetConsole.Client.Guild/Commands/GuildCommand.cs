@@ -12,6 +12,8 @@ internal sealed class GuildCommand(IClient client, IGuild guild) : CommandMethod
     public async Task CreateAsync(Address validatorAddress, CancellationToken cancellationToken)
     {
         await guild.CreateAsync(validatorAddress, cancellationToken);
+        var info = await guild.GetInfoAsync(client.Address, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 
     [CommandMethod]

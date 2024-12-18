@@ -8,6 +8,7 @@ using Nekoyume.Model.Guild;
 using Nekoyume.Model.Stake;
 using Nekoyume.Model.State;
 using Nekoyume.Module;
+using Nekoyume.Module.Guild;
 using Nekoyume.ValidatorDelegation;
 
 namespace LibplanetConsole.Node.Delegation;
@@ -122,11 +123,18 @@ internal sealed class Delegation(
         var worldState = blockChain.GetWorldState();
         var world = new World(worldState);
         var guildRepository = new GuildRepository(world, new DummayActionContext());
-        var guildParticipant = guildRepository.GetGuildParticipant(address);
-        var guild = guildRepository.GetGuild(guildParticipant.GuildAddress);
-        var delegatee = guildRepository.GetDelegatee(guild.ValidatorAddress);
         var stakeStateAddress = StakeState.DeriveAddress(address);
-        var bond = guildRepository.GetBond(delegatee, guildParticipant.Address);
+        var lastDistributeHeight = -1L;
+        var share = new BigInteger(0L);
+
+        if (guildRepository.TryGetGuildParticipant(new(address), out var guildParticipant) is true)
+        {
+            var guild = guildRepository.GetGuild(guildParticipant.GuildAddress);
+            var delegatee = guildRepository.GetDelegatee(guild.ValidatorAddress);
+            var bond = guildRepository.GetBond(delegatee, guildParticipant.Address);
+            lastDistributeHeight = bond.LastDistributeHeight ?? -1;
+            share = bond.Share;
+        }
 
         if (world.TryGetStakeState(address, out var stakeState) is false)
         {
@@ -151,8 +159,8 @@ internal sealed class Delegation(
 
         return new DelegatorInfo
         {
-            LastDistributeHeight = bond.LastDistributeHeight ?? -1,
-            Share = BigIntegerUtility.ToString(bond.Share),
+            LastDistributeHeight = lastDistributeHeight,
+            Share = BigIntegerUtility.ToString(share),
             StakeInfo = stakeInfo,
         };
     }

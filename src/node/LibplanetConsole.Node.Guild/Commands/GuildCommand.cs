@@ -12,6 +12,8 @@ internal sealed class GuildCommand(INode node, IGuild guild) : CommandMethodBase
     public async Task CreateAsync(CancellationToken cancellationToken)
     {
         await guild.CreateAsync(cancellationToken);
+        var info = await guild.GetInfoAsync(node.Address, cancellationToken);
+        await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 
     [CommandMethod]

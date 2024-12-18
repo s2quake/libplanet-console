@@ -66,7 +66,7 @@ internal sealed class GuildServiceGrpcV1(IGuild guild)
         GetInfoRequest request, ServerCallContext context)
     {
         var memberAddress = ToAddress(request.MemberAddress);
-        await guild.GetInfoAsync(memberAddress, context.CancellationToken);
-        return new GetInfoResponse();
+        var info = await guild.GetInfoAsync(memberAddress, context.CancellationToken);
+        return new GetInfoResponse { GuildInfo = info };
     }
 }
