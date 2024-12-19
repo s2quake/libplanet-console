@@ -33,6 +33,7 @@ internal sealed class DelegationCommand(
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 
+    [CommandMethod]
     public async Task StakeInfoAsync(
         string address = "", CancellationToken cancellationToken = default)
     {

@@ -36,8 +36,9 @@ internal sealed class DelegationCommand(
         await Out.WriteLineAsJsonAsync(info, cancellationToken);
     }
 
+    [CommandMethod]
     public async Task StakeInfoAsync(
-        string address = "", CancellationToken cancellationToken = default)
+            string address = "", CancellationToken cancellationToken = default)
     {
         var targetAddress = address == string.Empty ? client.Address : new Address(address);
         var info = await delegation.GetStakeInfoAsync(targetAddress, cancellationToken);

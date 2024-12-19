@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Numerics;
 using Grpc.Core;
 using LibplanetConsole.Grpc.Delegation;
 using LibplanetConsole.Node.Bank;
@@ -85,6 +83,18 @@ internal sealed class DelegationServiceGrpcV1(
         return new GetDelegatorInfoResponse
         {
             DelegatorInfo = delegatorInfo,
+        };
+    }
+
+    public override async Task<GetStakeInfoResponse> GetStakeInfo(
+        GetStakeInfoRequest request, ServerCallContext context)
+    {
+        var address = ToAddress(request.Address);
+        var stakeInfo = await delegation.GetStakeInfoAsync(
+            address, context.CancellationToken);
+        return new GetStakeInfoResponse
+        {
+            StakeInfo = stakeInfo,
         };
     }
 }

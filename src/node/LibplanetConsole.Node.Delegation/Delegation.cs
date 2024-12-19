@@ -116,6 +116,13 @@ internal sealed class Delegation(
             lastDistributeHeight = bond.LastDistributeHeight ?? -1;
             share = bond.Share;
         }
+        else
+        {
+            var validatorRepository = new ValidatorRepository(world, new DummayActionContext());
+            var delegatee = validatorRepository.GetValidatorDelegatee(address);
+            var bond = guildRepository.GetBond(delegatee, address);
+
+        }
 
         return new DelegatorInfo
         {
