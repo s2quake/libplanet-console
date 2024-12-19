@@ -207,7 +207,7 @@ internal sealed class NodeBlockChain(
         var request = new GetAddressesRequest();
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _blockChainService.GetAddressesAsync(request, callOptions);
-        return [.. response.Addresses.Select(item => (AddressInfo)item)];
+        return [.. response.AddressInfos.Select(item => (AddressInfo)item)];
     }
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)

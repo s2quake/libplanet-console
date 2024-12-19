@@ -67,6 +67,8 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     public int ConsensusPort { get; set; }
 
+    public string Alias { get; set; } = string.Empty;
+
     private PrivateKey ActualPrivateKey
         => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);
 

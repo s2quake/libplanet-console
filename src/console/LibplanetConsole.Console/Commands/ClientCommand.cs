@@ -10,13 +10,13 @@ namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Provides client-related commands")]
 public sealed partial class ClientCommand(
-    IServiceProvider serviceProvider, IClientCollection clients)
-    : CommandMethodBase
+    IServiceProvider serviceProvider, IClientCollection clients, IAddressCollection addresses)
+    : CommandMethodBase, IExecutable
 {
-    [CommandPropertyRequired(DefaultValue = "")]
+    [CommandProperty("client", 'C', InitValue = "")]
+    [CommandSummary("Specifies the address of the client to use")]
     [CommandPropertyCompletion(nameof(GetClientAddresses))]
-    [CommandSummary("Specifies the address of the client.")]
-    public static string Address { get; set; } = string.Empty;
+    public static string ClientAddress { get; set; } = string.Empty;
 
     [CommandMethod]
     [CommandSummary("Displays the list of clients")]
@@ -25,11 +25,20 @@ public sealed partial class ClientCommand(
         var tsb = new TerminalStringBuilder();
         for (var i = 0; i < clients.Count; i++)
         {
-            var item = clients[i];
-            var isCurrent = clients.Current == item;
-            tsb.Foreground = GetForeground(client: item, isCurrent);
-            tsb.IsBold = item.IsRunning == true;
-            tsb.AppendLine($"{item}");
+            var client = clients[i];
+            var address = client.Address;
+            var isCurrent = clients.Current == client;
+            tsb.Foreground = GetForeground(client: client, isCurrent);
+            tsb.IsBold = client.IsRunning == true;
+            if (addresses.TryGetAlias(address, out var alias) is true)
+            {
+                tsb.AppendLine($"{client} ({alias})");
+            }
+            else
+            {
+                tsb.AppendLine($"{client}");
+            }
+
             tsb.ResetOptions();
             tsb.Append(string.Empty);
         }
@@ -38,66 +47,67 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Displays a client information")]
+    [CommandMethodProperty(nameof(ClientAddress))]
+    [CommandSummary("Displays the client information of the specified address")]
     public void Info()
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var client = clients.GetClientOrCurrent(clientAddress);
         var clientInfo = InfoUtility.GetInfo(serviceProvider, obj: client);
         Out.WriteLineAsJson(clientInfo);
     }
 
     [CommandMethod]
+    [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Attaches the client instance to the client process")]
-    [CommandMethodProperty(nameof(Address))]
     public async Task AttachAsync(CancellationToken cancellationToken = default)
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var client = clients.GetClientOrCurrent(clientAddress);
         await client.AttachAsync(cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
+    [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Detaches the client instance from the client process")]
     public async Task DetachAsync(CancellationToken cancellationToken = default)
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var client = clients.GetClientOrCurrent(clientAddress);
         await client.DetachAsync(cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
+    [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Starts the client")]
     public async Task StartAsync(
         string nodeAddress = "", CancellationToken cancellationToken = default)
     {
         var nodes = serviceProvider.GetRequiredService<NodeCollection>();
-        var address = Address;
-        var node = nodes.GetNodeOrCurrent(nodeAddress);
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var node = nodes.GetNodeOrCurrent(addresses.ToAddress(nodeAddress));
+        var client = clients.GetClientOrCurrent(clientAddress);
         await client.StartAsync(node, cancellationToken);
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
+    [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Stops the client")]
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var client = clients.GetClientOrCurrent(clientAddress);
         await client.StopAsync(cancellationToken);
     }
 
     [CommandMethod]
     [CommandSummary("Gets or sets the current client")]
-    [CommandMethodProperty(nameof(Address))]
-    public void Current()
+    public void Current(
+        [CommandSummary("The address of the client")]
+        string clientAddress = "")
     {
-        var address = Address;
-        if (address != string.Empty && clients.GetClientOrCurrent(address) is { } client)
+        var address = addresses.ToAddress(clientAddress);
+        if (address != default && clients.GetClientOrCurrent(address) is { } client)
         {
             clients.Current = client;
         }
@@ -113,27 +123,36 @@ public sealed partial class ClientCommand(
     }
 
     [CommandMethod]
-    [CommandMethodProperty(nameof(Address))]
+    [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Sends a transaction using a string")]
     public async Task TxAsync(
         [CommandSummary("Specifies the text to send")]
         string text,
         CancellationToken cancellationToken)
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var client = clients.GetClientOrCurrent(clientAddress);
         var action = new StringAction { Value = text };
         await client.SendTransactionAsync([action], cancellationToken);
         await Out.WriteLineAsync($"{client.Address.ToShortString()}: {text}");
     }
 
     [CommandMethod("command")]
+    [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Gets the command line to start a client")]
     public void GetCommandLine()
     {
-        var address = Address;
-        var client = clients.GetClientOrCurrent(address);
+        var clientAddress = addresses.ToAddress(ClientAddress);
+        var client = clients.GetClientOrCurrent(clientAddress);
         Out.WriteLine(client.GetCommandLine());
+    }
+
+    void IExecutable.Execute()
+    {
+        if (Context.HelpCommand is HelpCommandBase helpCommand)
+        {
+            helpCommand.PrintHelp(this);
+        }
     }
 
     private static TerminalColorType? GetForeground(IClient client, bool isCurrent)
@@ -146,6 +165,9 @@ public sealed partial class ClientCommand(
         return TerminalColorType.BrightBlack;
     }
 
-    private string[] GetClientAddresses()
-        => clients.Select(client => client.Address.ToString()).ToArray();
+    private string[] GetClientAddresses() =>
+    [
+        .. clients.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
+        .. clients.Select(node => $"{node.Address}"),
+    ];
 }

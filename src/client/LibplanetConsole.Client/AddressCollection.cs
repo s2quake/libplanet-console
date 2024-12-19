@@ -3,10 +3,12 @@ namespace LibplanetConsole.Client;
 internal sealed class AddressCollection : AddressCollectionBase, IClientContent
 {
     private readonly IBlockChain _blockChain;
+    private readonly IApplicationOptions _options;
 
-    public AddressCollection(IBlockChain blockChain)
+    public AddressCollection(IBlockChain blockChain, IApplicationOptions options)
     {
         _blockChain = blockChain;
+        _options = options;
         _blockChain.Started += BlockChain_Started;
         _blockChain.Stopped += BlockChain_Stopped;
     }
@@ -25,6 +27,11 @@ internal sealed class AddressCollection : AddressCollectionBase, IClientContent
         foreach (var addressInfo in addressInfos)
         {
             Add(addressInfo.Alias, addressInfo.Address);
+        }
+
+        if (_options.Alias != string.Empty)
+        {
+            Add(_options.Alias, _options.PrivateKey.Address);
         }
     }
 

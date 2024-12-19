@@ -10,13 +10,29 @@ internal sealed class ClientRepositoryProcess : ClientProcessBase
 
     public string OutputPath { get; set; } = string.Empty;
 
-    public override string[] Arguments =>
-    [
-       "init",
-        OutputPath,
-        "--private-key",
-        PrivateKeyUtility.ToString(PrivateKey),
-        "--port",
-        $"{Port}",
-    ];
+    public string Alias { get; set; } = string.Empty;
+
+    public override string[] Arguments
+    {
+        get
+        {
+            var argumentList = new List<string>
+            {
+                "init",
+                OutputPath,
+                "--private-key",
+                PrivateKeyUtility.ToString(PrivateKey),
+                "--port",
+                $"{Port}",
+            };
+
+            if (Alias != string.Empty)
+            {
+                argumentList.Add("--alias");
+                argumentList.Add(Alias);
+            }
+
+            return [.. argumentList];
+        }
+    }
 }

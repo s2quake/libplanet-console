@@ -27,7 +27,7 @@ internal sealed class AddressCommand(IAddressCollection addresses) : CommandBase
             var tableDataBuilder = new TableDataBuilder(2);
             foreach (var addressInfo in addressInfos)
             {
-                tableDataBuilder.Add([$"{addressInfo.Alias}:", addressInfo.Address]);
+                tableDataBuilder.Add([$"{addressInfo.Alias}", addressInfo.Address]);
             }
 
             Out.Print(tableDataBuilder);

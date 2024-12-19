@@ -11,4 +11,14 @@ public static class IClientCollectionExtensions
 
         return @this[new Address(address)];
     }
+
+    public static IClient GetClientOrCurrent(this IClientCollection @this, Address address)
+    {
+        if (address == default)
+        {
+            return @this.Current ?? throw new InvalidOperationException("No client is selected.");
+        }
+
+        return @this[address];
+    }
 }

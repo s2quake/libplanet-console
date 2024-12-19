@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -209,6 +210,12 @@ internal sealed class ClientCollection(
             var action = NotifyCollectionChangedAction.Add;
             var index = _clientList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
+            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
+            if (client.Alias != string.Empty)
+            {
+                addresses.Add(client.Alias, client.Address, "client");
+            }
+
             _clientList.Add(client);
             _logger.LogDebug("Client is inserted into the collection: {Address}", client.Address);
             client.Disposed += Client_Disposed;
@@ -223,7 +230,9 @@ internal sealed class ClientCollection(
             var action = NotifyCollectionChangedAction.Remove;
             var index = _clientList.IndexOf(client);
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
+            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
             client.Disposed -= Client_Disposed;
+            addresses.Remove(client.Alias);
             _clientList.RemoveAt(index);
             _logger.LogDebug("Client is removed from the collection: {Address}", client.Address);
             CollectionChanged?.Invoke(this, args);

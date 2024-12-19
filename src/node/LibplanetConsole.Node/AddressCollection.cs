@@ -14,7 +14,7 @@ internal sealed class AddressCollection(IEnumerable<IAddressProvider> addressPro
         var items = _addressProviders.SelectMany(provider => provider.Addresses);
         foreach (var item in items)
         {
-            Add(item.Alias, item.Address);
+            Add(item.Alias, item.Address, item.Category);
         }
 
         await Task.CompletedTask;

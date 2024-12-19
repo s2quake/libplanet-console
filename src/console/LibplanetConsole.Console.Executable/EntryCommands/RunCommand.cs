@@ -199,13 +199,14 @@ internal sealed class RunCommand
     {
         return [.. clientPrivateKeys.Select(CreateClientOptions)];
 
-        ClientOptions CreateClientOptions(PrivateKey privateKey)
+        ClientOptions CreateClientOptions(PrivateKey privateKey, int index)
         {
             var ports = portGenerator.Next();
             return new ClientOptions
             {
                 EndPoint = GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
+                Alias = $"client-{index}",
             };
         }
     }
@@ -215,7 +216,7 @@ internal sealed class RunCommand
     {
         return [.. nodePrivateKeys.Select(CreateNodeOptions)];
 
-        NodeOptions CreateNodeOptions(PrivateKey privateKey)
+        NodeOptions CreateNodeOptions(PrivateKey privateKey, int index)
         {
             var ports = portGenerator.Next();
             return new NodeOptions
@@ -226,6 +227,7 @@ internal sealed class RunCommand
                 ActionProviderType = ActionProviderType,
                 BlocksyncPort = ports[4],
                 ConsensusPort = ports[5],
+                Alias = $"node-{index}",
             };
         }
     }

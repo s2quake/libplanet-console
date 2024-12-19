@@ -38,6 +38,7 @@ internal sealed class Node : INode
         _privateKey = nodeOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Node>();
         PublicKey = nodeOptions.PrivateKey.PublicKey;
+        Alias = nodeOptions.Alias;
         _logger.LogDebug("Node is created: {Address}", Address);
     }
 
@@ -84,6 +85,8 @@ internal sealed class Node : INode
         get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
         set => _contents = value;
     }
+
+    public string Alias { get; }
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 

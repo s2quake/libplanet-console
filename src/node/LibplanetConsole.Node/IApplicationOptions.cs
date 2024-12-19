@@ -29,4 +29,6 @@ public interface IApplicationOptions
     int BlocksyncPort { get; }
 
     int ConsensusPort { get; }
+
+    string Alias { get; }
 }

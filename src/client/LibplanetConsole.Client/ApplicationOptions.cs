@@ -27,6 +27,8 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [EndPoint]
     public string NodeEndPoint { get; set; } = string.Empty;
 
+    public string Alias { get; set; } = string.Empty;
+
     EndPoint? IApplicationOptions.NodeEndPoint
         => _nodeEndPoint ??= EndPointUtility.ParseOrDefault(NodeEndPoint);
 

@@ -35,6 +35,7 @@ internal sealed class Client : IClient
         _privateKey = clientOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
+        Alias = clientOptions.Alias;
         _logger.LogDebug("Client is created: {Address}", Address);
     }
 
@@ -81,6 +82,8 @@ internal sealed class Client : IClient
         get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
         set => _contents = value;
     }
+
+    public string Alias { get; }
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 

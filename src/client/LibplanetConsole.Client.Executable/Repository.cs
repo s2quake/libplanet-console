@@ -19,6 +19,8 @@ public sealed record class Repository
 
     public string LogPath { get; init; } = string.Empty;
 
+    public string Alias { get; set; } = string.Empty;
+
     public dynamic Save(string repositoryPath)
     {
         if (Path.IsPathRooted(repositoryPath) is false)
@@ -57,6 +59,7 @@ public sealed record class Repository
                 PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
                 NodeEndPoint = EndPointUtility.ToString(NodeEndPoint),
+                Alias = Alias,
             },
             Kestrel = new
             {
