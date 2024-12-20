@@ -186,6 +186,15 @@
         "localhost:4000"
       ]
     },
+    {
+      "name": "C#: Query",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/query/QueryScript.Executable/bin/Debug/net8.0/QueryScript.Executable.dll",
+      "console": "integratedTerminal",
+      "args": [
+      ]
+    },
   ],
   "compounds": [
     {
