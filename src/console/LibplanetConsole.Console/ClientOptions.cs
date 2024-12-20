@@ -15,6 +15,8 @@ public sealed record class ClientOptions
 
     public string LogPath { get; init; } = string.Empty;
 
+    public string Alias { get; set; } = string.Empty;
+
     internal string RepositoryPath { get; private set; } = string.Empty;
 
     public static ClientOptions Load(string settingsPath)
@@ -48,6 +50,7 @@ public sealed record class ClientOptions
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
             NodeEndPoint = ParseOrDefault(applicationSettings.NodeEndPoint),
             RepositoryPath = repositoryPath,
+            Alias = applicationSettings.Alias,
         };
     }
 
@@ -76,5 +79,8 @@ public sealed record class ClientOptions
 
         [DefaultValue("")]
         public string NodeEndPoint { get; init; } = string.Empty;
+
+        [DefaultValue("")]
+        public string Alias { get; init; } = string.Empty;
     }
 }

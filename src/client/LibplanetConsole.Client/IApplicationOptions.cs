@@ -11,4 +11,6 @@ public interface IApplicationOptions
     string LogPath { get; }
 
     bool NoREPL { get; }
+
+    string Alias { get; }
 }

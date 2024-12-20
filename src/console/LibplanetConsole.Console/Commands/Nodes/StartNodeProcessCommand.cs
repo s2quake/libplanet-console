@@ -1,19 +1,13 @@
 using JSSoft.Commands;
-using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands.Nodes;
 
 [CommandSummary("Starts the node process")]
 internal sealed class StartNodeProcessCommand(
     NodeProcessCommand processCommand,
-    INodeCollection nodes)
-    : CommandAsyncBase(processCommand, "start")
+    IServiceProvider serviceProvider)
+    : NodeCommandAsyncBase(serviceProvider, processCommand, "start")
 {
-    [CommandPropertyRequired(DefaultValue = "")]
-    [CommandPropertyCompletion(nameof(GetNodeAddresses))]
-    [CommandSummary("Speifies the address of the node")]
-    public string Address { get; set; } = string.Empty;
-
     [CommandPropertySwitch]
     [CommandSummary("If set, the console does not attach to the target process after starting " +
                     "the node process")]
@@ -25,8 +19,7 @@ internal sealed class StartNodeProcessCommand(
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var address = Address;
-        var node = nodes.GetNodeOrCurrent(address);
+        var node = Node;
         var options = new ProcessOptions
         {
             Detach = Detach,
@@ -34,7 +27,4 @@ internal sealed class StartNodeProcessCommand(
         };
         await node.StartProcessAsync(options, cancellationToken);
     }
-
-    private string[] GetNodeAddresses()
-        => nodes.Select(node => node.Address.ToString()).ToArray();
 }

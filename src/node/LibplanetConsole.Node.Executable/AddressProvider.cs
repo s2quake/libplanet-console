@@ -1,12 +1,20 @@
 namespace LibplanetConsole.Node.Executable;
 
-internal sealed class AddressProvider : IAddressProvider
+internal sealed class AddressProvider(IApplicationOptions options) : IAddressProvider
 {
-    public IEnumerable<AddressInfo> Addresses
+    public IEnumerable<AddressInfo> AddressInfos
     {
         get
         {
-            yield return new AddressInfo { Alias = "default", Address = default };
+            yield return AddressInfo.Default;
+            if (options.Alias != string.Empty)
+            {
+                yield return new AddressInfo
+                {
+                    Alias = options.Alias,
+                    Address = options.PrivateKey.Address,
+                };
+            }
         }
     }
 }

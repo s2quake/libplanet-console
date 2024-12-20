@@ -24,7 +24,7 @@ internal sealed class AddressCollection : AddressCollectionBase, IConsoleContent
         var addressInfos = await _blockChain.GetAddressesAsync(default);
         foreach (var addressInfo in addressInfos)
         {
-            Add(addressInfo.Alias, addressInfo.Address);
+            Add(addressInfo);
         }
     }
 

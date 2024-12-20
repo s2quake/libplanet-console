@@ -112,12 +112,10 @@ internal sealed class BlockChainGrpcServiceV1 : BlockChainGrpcService.BlockChain
     public override Task<GetAddressesResponse> GetAddresses(
         GetAddressesRequest request, ServerCallContext context)
     {
-        var addresses = _addresses.Aliases.Select(item => new AddressInfoProto
-        {
-            Alias = item,
-            Address = ToGrpc(_addresses[item]),
-        });
-        return Task.FromResult(new GetAddressesResponse { Addresses = { addresses } });
+        var addressInfos = _addresses.GetAddressInfos()
+            .Where(item => item.IsCustom is false)
+            .Select(item => (AddressInfoProto)item);
+        return Task.FromResult(new GetAddressesResponse { AddressInfos = { addressInfos } });
     }
 
     public override async Task GetEventStream(

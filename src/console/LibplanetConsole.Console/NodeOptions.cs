@@ -26,6 +26,8 @@ public sealed record class NodeOptions
 
     public int ConsensusPort { get; init; }
 
+    public string Alias { get; set; } = string.Empty;
+
     internal string RepositoryPath { get; private set; } = string.Empty;
 
     public static NodeOptions Load(string settingsPath)
@@ -68,6 +70,7 @@ public sealed record class NodeOptions
             ConsensusPort = applicationSettings.ConsensusPort == 0
                 ? PortUtility.NextPort()
                 : applicationSettings.ConsensusPort,
+            Alias = applicationSettings.Alias,
         };
     }
 
@@ -114,5 +117,8 @@ public sealed record class NodeOptions
 
         [DefaultValue(0)]
         public int ConsensusPort { get; init; } = 0;
+
+        [DefaultValue("")]
+        public string Alias { get; init; } = string.Empty;
     }
 }

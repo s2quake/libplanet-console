@@ -11,40 +11,24 @@ namespace LibplanetConsole.Console;
 #error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
 #endif
 
-public readonly partial record struct BlockInfo
+public readonly partial record struct BlockInfo(long Height, BlockHash Hash, Address Miner)
 {
-    public BlockInfo()
-    {
-    }
-
-    public long Height { get; init; }
-
-    public BlockHash Hash { get; init; }
-
-    public Address Miner { get; init; }
-
     public static BlockInfo Empty { get; } = new BlockInfo
     {
         Height = -1,
     };
 
-    public static implicit operator BlockInfo(BlockInfoProto blockInfo)
+    public static implicit operator BlockInfo(BlockInfoProto blockInfo) => new()
     {
-        return new BlockInfo
-        {
-            Height = blockInfo.Height,
-            Hash = ToBlockHash(blockInfo.Hash),
-            Miner = ToAddress(blockInfo.Miner),
-        };
-    }
+        Height = blockInfo.Height,
+        Hash = ToBlockHash(blockInfo.Hash),
+        Miner = ToAddress(blockInfo.Miner),
+    };
 
-    public static implicit operator BlockInfoProto(BlockInfo blockInfo)
+    public static implicit operator BlockInfoProto(BlockInfo blockInfo) => new()
     {
-        return new BlockInfoProto
-        {
-            Height = blockInfo.Height,
-            Hash = ToGrpc(blockInfo.Hash),
-            Miner = ToGrpc(blockInfo.Miner),
-        };
-    }
+        Height = blockInfo.Height,
+        Hash = ToGrpc(blockInfo.Hash),
+        Miner = ToGrpc(blockInfo.Miner),
+    };
 }

@@ -39,6 +39,10 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("If set, the command does not output any information")]
     public bool Quiet { get; set; }
 
+    [CommandProperty]
+    [CommandSummary("Specifies the alias of the client address.")]
+    public string Alias { get; set; } = string.Empty;
+
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(OutputPath);
@@ -50,6 +54,7 @@ internal sealed class InitializeCommand : CommandBase
             Port = port,
             PrivateKey = privateKey,
             LogPath = logPath,
+            Alias = Alias,
         };
         using var writer = new ConditionalTextWriter(Out)
         {

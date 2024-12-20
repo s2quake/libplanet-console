@@ -31,6 +31,8 @@ public interface IClient : IAsyncDisposable, IKeyedServiceProvider, ISigner
 
     Address Address => PublicKey.Address;
 
+    string Alias { get; }
+
     Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken);
 
     Task StopProcessAsync(CancellationToken cancellationToken);

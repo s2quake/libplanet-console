@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
@@ -219,6 +220,12 @@ internal sealed class NodeCollection(
             var action = NotifyCollectionChangedAction.Add;
             var index = _nodeList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
+            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
+            if (node.Alias != string.Empty)
+            {
+                addresses.Add(node.Alias, node.Address, "node");
+            }
+
             _nodeList.Add(node);
             _logger.LogDebug("Node is inserted into the collection: {Address}", node.Address);
             node.Disposed += Node_Disposed;
@@ -233,7 +240,9 @@ internal sealed class NodeCollection(
             var action = NotifyCollectionChangedAction.Remove;
             var index = _nodeList.IndexOf(node);
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
+            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
             node.Disposed -= Node_Disposed;
+            addresses.Remove(node.Alias);
             _nodeList.RemoveAt(index);
             _logger.LogDebug("Node is removed from the collection: {Address}", node.Address);
             CollectionChanged?.Invoke(this, args);
