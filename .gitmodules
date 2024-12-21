@@ -1,0 +1,6 @@
+[submodule ".submodules/commands"]
+	path = .submodules/commands
+	url = https://github.com/s2quake/commands.git
+[submodule ".submodules/libplanet"]
+	path = .submodules/libplanet
+	url = https://github.com/planetarium/libplanet.git
