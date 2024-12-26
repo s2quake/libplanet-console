@@ -96,7 +96,9 @@
         // options
         "--single-node",
         "--port",
-        "4000"
+        "4000",
+        "--alias",
+        "node"
       ]
     },
     {
@@ -150,7 +152,9 @@
         "run",
         // options
         "--node-end-point",
-        "localhost:4000"
+        "localhost:4000",
+        "--alias",
+        "client"
       ]
     },
     {

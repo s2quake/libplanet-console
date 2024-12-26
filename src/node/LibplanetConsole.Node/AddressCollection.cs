@@ -11,10 +11,10 @@ internal sealed class AddressCollection(IEnumerable<IAddressProvider> addressPro
 
     async Task INodeContent.StartAsync(CancellationToken cancellationToken)
     {
-        var items = _addressProviders.SelectMany(provider => provider.Addresses);
-        foreach (var item in items)
+        var addressInfos = _addressProviders.SelectMany(provider => provider.AddressInfos);
+        foreach (var addressInfo in addressInfos)
         {
-            Add(item.Alias, item.Address);
+            Add(addressInfo);
         }
 
         await Task.CompletedTask;

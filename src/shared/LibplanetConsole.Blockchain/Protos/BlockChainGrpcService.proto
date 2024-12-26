@@ -25,6 +25,7 @@ message BlockInfoProto {
 message AddressInfoProto {
   string alias = 1;
   string address = 2;
+  repeated string tags = 3;
 }
 
 message SendTransactionRequest {
@@ -89,7 +90,7 @@ message GetAddressesRequest {
 }
 
 message GetAddressesResponse {
-  repeated AddressInfoProto addresses = 1;
+  repeated AddressInfoProto addressInfos = 1;
 }
 
 message GetEventStreamRequest {

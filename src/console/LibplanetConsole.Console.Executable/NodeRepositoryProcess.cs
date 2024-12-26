@@ -24,6 +24,8 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
 
     public int ConsensusPort { get; set; }
 
+    public string Alias { get; set; } = string.Empty;
+
     public override string[] Arguments
     {
         get
@@ -79,6 +81,12 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
             {
                 argumentList.Add("--consensus-port");
                 argumentList.Add($"{ConsensusPort}");
+            }
+
+            if (Alias != string.Empty)
+            {
+                argumentList.Add("--alias");
+                argumentList.Add(Alias);
             }
 
             return [.. argumentList];

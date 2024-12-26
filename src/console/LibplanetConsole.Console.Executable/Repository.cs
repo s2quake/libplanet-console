@@ -248,6 +248,7 @@ public sealed record class Repository
                 AppProtocolVersionPath = appProtocolVersionPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
                 ActionProviderType = node.ActionProviderType,
+                Alias = $"node-{i}",
             };
             var sb = new StringBuilder();
             using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
@@ -271,6 +272,7 @@ public sealed record class Repository
                 PrivateKey = privateKey,
                 Port = GetPort(client.EndPoint),
                 OutputPath = resolver.GetClientPath(clientsPath, privateKey.Address),
+                Alias = $"client-{i}",
             };
             var sb = new StringBuilder();
             using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);

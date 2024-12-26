@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using LibplanetConsole.Bank.DataAnnotations;
+using LibplanetConsole.Common;
 
 #if LIBPLANET_NODE
 namespace LibplanetConsole.Node.Bank;
@@ -115,10 +117,10 @@ internal abstract class CurrencyCollectionBase : ICurrencyCollection
         }
 
         var key = match.Groups["key"].Value;
-        var value = match.Groups["value"].Value;
+        var value = BigIntegerUtility.Parse(match.Groups["value"].Value);
         if (_currencyByCode[key] is { } currency)
         {
-            return FungibleAssetValue.Parse((Currency)currency, value);
+            return FungibleAssetValue.Parse((Currency)currency, $"{value}");
         }
 
         throw new ArgumentException("Invalid currency.");
@@ -132,7 +134,14 @@ internal abstract class CurrencyCollectionBase : ICurrencyCollection
             throw new ArgumentException("Invalid currency.");
         }
 
-        return $"{fav.GetQuantityString()} {code}";
+        var ss = fav.GetQuantityString().Split('.');
+        var s1 = BigInteger.Parse(ss[0]).ToString("N0");
+        if (ss.Length > 1)
+        {
+            return $"{s1}.{ss[1]} {code}";
+        }
+
+        return $"{s1} {code}";
     }
 
     public string GetCode(Currency currency)

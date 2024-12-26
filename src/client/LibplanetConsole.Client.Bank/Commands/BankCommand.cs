@@ -14,44 +14,46 @@ internal sealed class BankCommand(
     IAddressCollection addresses)
     : CommandMethodBase
 {
-    [CommandPropertyRequired(DefaultValue = "")]
+    [CommandProperty(InitValue = "")]
     [CommandSummary("Specifies the address")]
     [CommandPropertyCompletion(nameof(GetAddresses))]
     public static string Address { get; set; } = string.Empty;
 
     [CommandMethod]
     public async Task TransferAsync(
-        Address recipientAddress,
+        [CommandParameterCompletion(nameof(GetAddresses))]
+        string recipientAddress,
         [FungibleAssetValue] string amount,
         CancellationToken cancellationToken = default)
     {
         var amountValue = currencies.ToFungibleAssetValue(amount);
+        var recipientValue = addresses.ToAddress(recipientAddress);
         await bank.TransferAsync(
-            recipientAddress, amountValue, cancellationToken);
+            recipientValue, amountValue, cancellationToken);
     }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
     public async Task BalanceAsync(
-        [CommandParameterCompletion(nameof(GetCurrencyAliases))]
-        string currency,
+        [CommandParameterCompletion(nameof(GetCurrencyCodes))]
+        string currencyCode,
         CancellationToken cancellationToken)
     {
-        var address = Address == string.Empty ? client.Address : new Address(Address);
-        var currencyValue = currencies[currency];
-        var balance = await bank.GetBalanceAsync(address, currencyValue, cancellationToken);
+        var address = Address == string.Empty ? client.Address : addresses.ToAddress(Address);
+        var currency = currencies[currencyCode];
+        var balance = await bank.GetBalanceAsync(address, currency, cancellationToken);
         await Out.WriteLineAsJsonAsync(currencies.ToString(balance), cancellationToken);
     }
 
     [CommandMethod]
     public void Currency(
-        [CommandParameterCompletion(nameof(GetCurrencyAliases))]
+        [CommandParameterCompletion(nameof(GetCurrencyCodes))]
         string code = "")
     {
         if (code == string.Empty)
         {
-            var currencyAliases = currencies.Codes;
-            Out.WriteLineAsJson(currencyAliases);
+            var currencyCodes = currencies.Codes;
+            Out.WriteLineAsJson(currencyCodes);
         }
         else
         {
@@ -60,7 +62,7 @@ internal sealed class BankCommand(
         }
     }
 
-    private string[] GetCurrencyAliases() => currencies.Codes;
+    private string[] GetCurrencyCodes() => currencies.Codes;
 
     private string[] GetAddresses() => addresses.Aliases;
 }

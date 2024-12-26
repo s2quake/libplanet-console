@@ -49,6 +49,10 @@ internal sealed class RunCommand
     [EndPoint]
     public string ConsoleEndPoint { get; init; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("Specifies the alias of the client address.")]
+    public string Alias { get; init; } = string.Empty;
+
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
         var port = Port;
@@ -59,6 +63,7 @@ internal sealed class RunCommand
         options.NodeEndPoint = NodeEndPoint;
         options.LogPath = GetFullPath(LogPath);
         options.NoREPL = NoREPL;
+        options.Alias = Alias;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;

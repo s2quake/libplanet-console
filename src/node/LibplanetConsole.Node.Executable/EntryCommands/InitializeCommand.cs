@@ -121,6 +121,10 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("Specifies the port for the consensus of the node")]
     public int ConsensusPort { get; set; }
 
+    [CommandProperty]
+    [CommandSummary("Specifies the alias of the node address")]
+    public string Alias { get; set; } = string.Empty;
+
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
@@ -147,6 +151,7 @@ internal sealed class InitializeCommand : CommandBase
             BlocksyncPort = blocksyncPort,
             ConsensusPort = consensusPort,
             IsSingleNode = IsSingleNode,
+            Alias = Alias,
         };
         dynamic info = repository.Save(outputPath);
         using var writer = new ConditionalTextWriter(Out)

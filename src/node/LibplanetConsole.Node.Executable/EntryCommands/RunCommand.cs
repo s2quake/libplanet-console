@@ -99,6 +99,10 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
     [EndPoint]
     public string ConsoleEndPoint { get; init; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("Specifies the alias of the node address.")]
+    public string Alias { get; init; } = string.Empty;
+
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
         if (ConsoleEndPoint != string.Empty && GenesisPath != string.Empty)
@@ -121,6 +125,7 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
         options.ParentProcessId = ParentProcessId;
         options.SeedEndPoint = SeedEndPoint;
         options.IsSingleNode = IsSingleNode;
+        options.Alias = Alias;
 
         options.StorePath = GetFullPath(StorePath);
         options.LogPath = GetFullPath(LogPath);
