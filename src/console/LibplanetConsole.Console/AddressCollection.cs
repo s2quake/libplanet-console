@@ -3,10 +3,12 @@ namespace LibplanetConsole.Console;
 internal sealed class AddressCollection : AddressCollectionBase, IConsoleContent
 {
     private readonly IBlockChain _blockChain;
+    private readonly Address _consoleAddress;
 
-    public AddressCollection(IBlockChain blockChain)
+    public AddressCollection(IBlockChain blockChain, IApplicationOptions options)
     {
         _blockChain = blockChain;
+        _consoleAddress = options.PrivateKey.Address;
         _blockChain.Started += BlockChain_Started;
         _blockChain.Stopped += BlockChain_Stopped;
     }
@@ -26,6 +28,12 @@ internal sealed class AddressCollection : AddressCollectionBase, IConsoleContent
         {
             Add(addressInfo);
         }
+
+        Add(new AddressInfo
+        {
+            Alias = "console",
+            Address = _consoleAddress,
+        });
     }
 
     private void BlockChain_Stopped(object? sender, EventArgs e)
