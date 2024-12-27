@@ -37,9 +37,7 @@
     <RootPath Condition="'$(SolutionDir)' != ''">$(SolutionDir)</RootPath>
     <RootPath Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)\</RootPath>
     <LibplanetVersion>5.4.2</LibplanetVersion>
-    <JSSoftCommandsVersion>7.0.0</JSSoftCommandsVersion>
-    <JSSoftCommunicationVersion>2.0.6</JSSoftCommunicationVersion>
-    <JSSoftConfigurationsVersion>1.0.0</JSSoftConfigurationsVersion>
+    <JSSoftCommandsVersion>7.1.0-pr.48</JSSoftCommandsVersion>
     <UseRidGraph>true</UseRidGraph>
   </PropertyGroup>
 

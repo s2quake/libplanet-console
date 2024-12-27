@@ -66,8 +66,8 @@ internal sealed class SystemTerminal : SystemTerminalBase
         }
     }
 
-    protected override string[] GetCompletion(string[] items, string find)
-        => _commandContext.GetCompletion(items, find);
+    protected override string[] GetCompletions(string[] items, string find)
+        => _commandContext.GetCompletions(items, find);
 
     protected override Task OnExecuteAsync(string command, CancellationToken cancellationToken)
     {
