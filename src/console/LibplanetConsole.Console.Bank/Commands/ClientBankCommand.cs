@@ -3,23 +3,17 @@ using JSSoft.Commands;
 using LibplanetConsole.Bank.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Commands;
-using LibplanetConsole.Console.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank.Commands;
 
 internal sealed partial class ClientBankCommand(
+    IServiceProvider serviceProvider,
     ClientCommand clientCommand,
-    IClientCollection clients,
     ICurrencyCollection currencies,
     IAddressCollection addresses)
-    : CommandMethodBase(clientCommand, "bank")
+    : ClientCommandMethodBase(serviceProvider, clientCommand, "bank")
 {
-    [CommandProperty(InitValue = "")]
-    [CommandSummary("The address of the client. If not specified, the current client is used.")]
-    [CommandPropertyCompletion(nameof(GetClientAddresses))]
-    public static string ClientAddress { get; set; } = string.Empty;
-
     [CommandProperty(InitValue = "")]
     [CommandSummary("Specifies the address")]
     [CommandPropertyCompletion(nameof(GetAddresses))]
@@ -33,7 +27,7 @@ internal sealed partial class ClientBankCommand(
         [FungibleAssetValue] string amount,
         CancellationToken cancellationToken = default)
     {
-        var client = clients.GetClientOrCurrent(ClientAddress);
+        var client = GetClientOrCurrent(ClientAddress);
         var bank = client.GetRequiredKeyedService<IClientBank>(IClient.Key);
         var amountValue = currencies.ToFungibleAssetValue(amount);
         var recipientValue = addresses.ToAddress(recipientAddress);
@@ -43,6 +37,7 @@ internal sealed partial class ClientBankCommand(
 
     [CommandMethod]
     [CommandMethodProperty(nameof(ClientAddress))]
+    [CommandMethodProperty(nameof(Address))]
     [CommandSummary("Display balance of specific address.")]
     [Category("Bank")]
     public async Task BalanceAsync(
@@ -50,8 +45,8 @@ internal sealed partial class ClientBankCommand(
         string currencyCode,
         CancellationToken cancellationToken)
     {
-        var client = clients.GetClientOrCurrent(ClientAddress);
-        var address = ClientAddress == string.Empty ? client.Address : addresses.ToAddress(Address);
+        var client = GetClientOrCurrent(ClientAddress);
+        var address = Address == string.Empty ? client.Address : addresses.ToAddress(Address);
         var bank = client.GetRequiredKeyedService<IClientBank>(IClient.Key);
         var currency = currencies[currencyCode];
         var balance = await bank.GetBalanceAsync(address, currency, cancellationToken);
@@ -74,12 +69,6 @@ internal sealed partial class ClientBankCommand(
             Out.WriteLineAsJson(currency);
         }
     }
-
-    private string[] GetClientAddresses() =>
-    [
-        .. clients.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
-        .. clients.Select(item => item.Address.ToString())
-    ];
 
     private string[] GetCurrencyCodes() => currencies.Codes;
 

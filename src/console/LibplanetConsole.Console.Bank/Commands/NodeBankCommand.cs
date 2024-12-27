@@ -3,23 +3,17 @@ using JSSoft.Commands;
 using LibplanetConsole.Bank.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Commands;
-using LibplanetConsole.Console.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank.Commands;
 
 internal sealed partial class NodeBankCommand(
+    IServiceProvider serviceProvider,
     NodeCommand nodeCommand,
-    INodeCollection nodes,
     ICurrencyCollection currencies,
     IAddressCollection addresses)
-    : CommandMethodBase(nodeCommand, "bank")
+    : NodeCommandMethodBase(serviceProvider, nodeCommand, "bank")
 {
-    [CommandProperty("node", 'N', InitValue = "")]
-    [CommandSummary("The address of the node. If not specified, the current node is used.")]
-    [CommandPropertyCompletion(nameof(GetNodeAddresses))]
-    public static string NodeAddress { get; set; } = string.Empty;
-
     [CommandProperty(InitValue = "")]
     [CommandSummary("Specifies the address")]
     [CommandPropertyCompletion(nameof(GetAddresses))]
@@ -33,7 +27,7 @@ internal sealed partial class NodeBankCommand(
         [FungibleAssetValue] string amount,
         CancellationToken cancellationToken = default)
     {
-        var node = nodes.GetNodeOrCurrent(NodeAddress);
+        var node = GetNodeOrCurrent(NodeAddress);
         var bank = node.GetRequiredKeyedService<INodeBank>(INode.Key);
         var amountValue = currencies.ToFungibleAssetValue(amount);
         var recipientValue = addresses.ToAddress(recipientAddress);
@@ -43,6 +37,7 @@ internal sealed partial class NodeBankCommand(
 
     [CommandMethod]
     [CommandMethodProperty(nameof(NodeAddress))]
+    [CommandMethodProperty(nameof(Address))]
     [CommandSummary("Display balance of specific address.")]
     [Category("Bank")]
     public async Task BalanceAsync(
@@ -50,8 +45,8 @@ internal sealed partial class NodeBankCommand(
         string currencyCode,
         CancellationToken cancellationToken)
     {
-        var node = nodes.GetNodeOrCurrent(NodeAddress);
-        var address = NodeAddress == string.Empty ? node.Address : addresses.ToAddress(Address);
+        var node = GetNodeOrCurrent(NodeAddress);
+        var address = Address == string.Empty ? node.Address : addresses.ToAddress(Address);
         var bank = node.GetRequiredKeyedService<INodeBank>(INode.Key);
         var currencyValue = currencies[currencyCode];
         var balance = await bank.GetBalanceAsync(address, currencyValue, cancellationToken);
@@ -74,12 +69,6 @@ internal sealed partial class NodeBankCommand(
             Out.WriteLineAsJson(currency);
         }
     }
-
-    private string[] GetNodeAddresses() =>
-    [
-        .. nodes.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
-        .. nodes.Select(item => item.Address.ToString())
-    ];
 
     private string[] GetCurrencyCodes() => currencies.Codes;
 
