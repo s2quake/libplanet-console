@@ -1,9 +1,11 @@
 using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Bank;
+using LibplanetConsole.Console.Delegation;
 using LibplanetConsole.Console.Evidence;
 using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
+using LibplanetConsole.Console.Guild;
 using LibplanetConsole.Logging;
 using Serilog;
 
@@ -53,6 +55,8 @@ internal sealed class Application
         services.AddConsole(configuration);
         services.AddEvidence();
         services.AddBank();
+        services.AddDelegation();
+        services.AddGuild();
 
         services.AddGrpc(options =>
         {

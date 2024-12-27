@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Client\LibplanetConsole.Client.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Client.Bank\LibplanetConsole.Client.Bank.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Client.Delegation\LibplanetConsole.Client.Delegation.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Client.Guild\LibplanetConsole.Client.Guild.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
