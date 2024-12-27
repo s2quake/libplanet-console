@@ -9,6 +9,7 @@ import "google/protobuf/timestamp.proto";
 service EvidenceGrpcService {
   rpc AddEvidence(AddEvidenceRequest) returns (AddEvidenceResponse);
   rpc GetEvidence(GetEvidenceRequest) returns (GetEvidenceResponse);
+  rpc GetPendingEvidence(GetPendingEvidenceRequest) returns (GetPendingEvidenceResponse);
   rpc Violate(ViolateRequest) returns (ViolateResponse);
 }
 
@@ -27,18 +28,30 @@ message AddEvidenceRequest {
 }
 
 message AddEvidenceResponse {
-  EvidenceInfoProto EvidenceInfo = 1;
+  string evidence_id = 1;
 }
 
 message GetEvidenceRequest {
-  int64 height = 1;
+  oneof request {
+    int64 height = 1;
+    string evidence_id = 2;
+  }
 }
 
 message GetEvidenceResponse {
-  repeated EvidenceInfoProto EvidenceInfos = 1;
+  repeated EvidenceInfoProto evidence_infos = 1;
+}
+
+message GetPendingEvidenceRequest {
+  string evidence_id = 1;
+}
+
+message GetPendingEvidenceResponse {
+  repeated EvidenceInfoProto evidence_infos = 1;
 }
 
 message ViolateRequest {
+  string type = 1;
 }
 
 message ViolateResponse {

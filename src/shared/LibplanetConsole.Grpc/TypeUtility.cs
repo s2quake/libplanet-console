@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Google.Protobuf;
+using Libplanet.Types.Evidence;
 
 namespace LibplanetConsole.Grpc;
 
@@ -12,6 +13,8 @@ public static class TypeUtility
     public static string ToGrpc(BlockHash blockHash) => blockHash.ToString();
 
     public static string ToGrpc(TxId txId) => txId.ToHex();
+
+    public static string ToGrpc(EvidenceId evidenceId) => evidenceId.ToString();
 
     public static string ToGrpc(PublicKey publicKey) => publicKey.ToHex(compress: false);
 
@@ -26,6 +29,8 @@ public static class TypeUtility
     public static BlockHash ToBlockHash(string blockHash) => BlockHash.FromString(blockHash);
 
     public static TxId ToTxId(string txId) => TxId.FromHex(txId);
+
+    public static EvidenceId ToEvidenceId(string evidenceId) => EvidenceId.Parse(evidenceId);
 
     public static PublicKey ToPublicKey(string publicKey) => PublicKey.FromHex(publicKey);
 

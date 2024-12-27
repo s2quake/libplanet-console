@@ -8,13 +8,13 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddEvidence(this IServiceCollection @this)
     {
-        @this.AddKeyedScoped<Evidence>(INode.Key)
-             .AddKeyedScoped<IEvidence>(
-                INode.Key, (s, k) => s.GetRequiredKeyedService<Evidence>(k))
+        @this.AddKeyedScoped<NodeEvidence>(INode.Key)
+             .AddKeyedScoped<INodeEvidence>(
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeEvidence>(k))
              .AddKeyedScoped<INodeContent>(
-                INode.Key, (s, k) => s.GetRequiredKeyedService<Evidence>(k));
+                INode.Key, (s, k) => s.GetRequiredKeyedService<NodeEvidence>(k));
 
-        @this.AddSingleton<ICommand, EvidenceCommand>();
+        @this.AddSingleton<ICommand, NodeEvidenceCommand>();
 
         return @this;
     }

@@ -1,7 +1,7 @@
 using System.Globalization;
 using Libplanet.Types.Evidence;
 
-namespace LibplanetConsole.Evidence;
+namespace LibplanetConsole.Node.Evidence;
 
 public sealed class TestEvidence : EvidenceBase, IEquatable<TestEvidence>
 {
