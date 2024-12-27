@@ -6,7 +6,7 @@ namespace LibplanetConsole.Bank.DataAnnotations;
 public sealed class FungibleAssetValueAttribute : RegularExpressionAttribute
 {
     public const string RegularExpression
-        = @"(?<value>(?:\d{1,3}(,\d{3})*|\d+)(\.\d+)?)\s*(?<key>\w+)";
+        = @"(?<integer>\d{1,3}(,\d{3})*|\d+)(?<decimal>\.\d+)?\s*(?<code>\w+)";
 
     public FungibleAssetValueAttribute()
         : base($"^{RegularExpression}$")

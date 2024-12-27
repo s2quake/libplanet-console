@@ -110,17 +110,18 @@ internal abstract class CurrencyCollectionBase : ICurrencyCollection
 
     public FungibleAssetValue ToFungibleAssetValue(string amount)
     {
-        var match = Regex.Match(amount, FungibleAssetValueAttribute.RegularExpression);
+        var match = Regex.Match(amount, $"^{FungibleAssetValueAttribute.RegularExpression}$");
         if (match.Success is false)
         {
-            throw new ArgumentException("Invalid format.");
+            throw new ArgumentException($"Invalid format: {amount}", nameof(amount));
         }
 
-        var key = match.Groups["key"].Value;
-        var value = BigIntegerUtility.Parse(match.Groups["value"].Value);
-        if (_currencyByCode[key] is { } currency)
+        var code = match.Groups["code"].Value;
+        var integer = BigIntegerUtility.Parse(match.Groups["integer"].Value);
+        var @decimal = match.Groups["decimal"].Value;
+        if (_currencyByCode[code] is { } currency)
         {
-            return FungibleAssetValue.Parse((Currency)currency, $"{value}");
+            return FungibleAssetValue.Parse((Currency)currency, $"{integer}{@decimal}");
         }
 
         throw new ArgumentException("Invalid currency.");
