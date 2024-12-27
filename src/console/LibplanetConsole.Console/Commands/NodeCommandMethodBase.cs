@@ -42,8 +42,7 @@ public abstract class NodeCommandMethodBase : CommandMethodBase
     {
         var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
         var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        var address = addresses.ToAddress(nodeAddress);
-        return nodes.GetNodeOrCurrent(address);
+        return nodes.GetNodeOrCurrent(nodeAddress, addresses);
     }
 
     protected INode? GetNodeOrDefault(string nodeAddress)

@@ -79,7 +79,7 @@ public sealed partial class ClientCommand(
     {
         var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
         var clientAddress = addresses.ToAddress(ClientAddress);
-        var node = nodes.GetNodeOrCurrent(addresses.ToAddress(nodeAddress));
+        var node = nodes.GetNodeOrCurrent(nodeAddress, addresses);
         var client = clients.GetClientOrCurrent(clientAddress);
         await client.StartAsync(node, cancellationToken);
     }

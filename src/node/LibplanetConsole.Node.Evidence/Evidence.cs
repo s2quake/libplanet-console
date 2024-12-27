@@ -5,23 +5,19 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Evidence;
 
-internal sealed class Evidence(INode node) : IEvidence, INodeContent, IAsyncDisposable
+internal sealed class Evidence(INode node)
+    : NodeContentBase("evidence"), IEvidence, IAsyncDisposable
 {
-    private readonly DuplicateVoteViolator _duplicateVotePerpetrator = new(node);
+    private readonly DuplicateVoteExecutor _duplicateVoteExecutor = new(node);
 
-    public string Name => nameof(Evidence);
-
-    public IEnumerable<INodeContent> Dependencies => [];
-
-    public async Task<EvidenceInfo> AddEvidenceAsync(CancellationToken cancellationToken)
+    public Task<EvidenceId> AddEvidenceAsync(CancellationToken cancellationToken)
     {
         var blockChain = node.GetRequiredService<BlockChain>();
         var height = blockChain.Tip.Index;
         var validatorAddress = node.Address;
         var evidence = new TestEvidence(height, validatorAddress, DateTimeOffset.UtcNow);
         blockChain.AddEvidence(evidence);
-        await Task.CompletedTask;
-        return (EvidenceInfo)evidence;
+        return Task.FromResult(evidence.Id);
     }
 
     public async Task<EvidenceInfo[]> GetEvidenceAsync(
@@ -42,10 +38,10 @@ internal sealed class Evidence(INode node) : IEvidence, INodeContent, IAsyncDisp
     }
 
     public async Task<EvidenceInfo> GetEvidenceAsync(
-        string evidenceId, CancellationToken cancellationToken)
+        EvidenceId evidenceId, CancellationToken cancellationToken)
     {
         var blockChain = node.GetRequiredService<BlockChain>();
-        if (blockChain.GetCommittedEvidence(EvidenceId.Parse(evidenceId)) is { } evidence)
+        if (blockChain.GetCommittedEvidence(evidenceId) is { } evidence)
         {
             await Task.CompletedTask;
             return (EvidenceInfo)evidence;
@@ -65,10 +61,10 @@ internal sealed class Evidence(INode node) : IEvidence, INodeContent, IAsyncDisp
     }
 
     public async Task<EvidenceInfo> GetPendingEvidenceAsync(
-        string evidenceId, CancellationToken cancellationToken)
+        EvidenceId evidenceId, CancellationToken cancellationToken)
     {
         var blockChain = node.GetRequiredService<BlockChain>();
-        if (blockChain.GetPendingEvidence(EvidenceId.Parse(evidenceId)) is { } evidence)
+        if (blockChain.GetPendingEvidence(evidenceId) is { } evidence)
         {
             await Task.CompletedTask;
             return (EvidenceInfo)evidence;
@@ -79,35 +75,19 @@ internal sealed class Evidence(INode node) : IEvidence, INodeContent, IAsyncDisp
             paramName: nameof(evidenceId));
     }
 
-    public async Task ViolateAsync(CancellationToken cancellationToken)
+    public async Task ViolateAsync(string type, CancellationToken cancellationToken)
     {
-        await _duplicateVotePerpetrator.ViolateAsync(cancellationToken);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _duplicateVotePerpetrator.DisposeAsync();
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-        => Task.CompletedTask;
-
-    public Task StopAsync(CancellationToken cancellationToken)
-        => Task.CompletedTask;
-
-#if LIBPLANET_DPOS
-    public async Task UnjailAsync(CancellationToken cancellationToken)
-    {
-        var nodeAddress = node.Address;
-        var validatorAddress = Nekoyume.Action.DPoS.Model.Validator.DeriveAddress(nodeAddress);
-        var actions = new IAction[]
+        if (type == "duplicate_vote")
         {
-            new Nekoyume.Action.DPoS.Unjail
-            {
-                Validator = validatorAddress,
-            },
-        };
-        await node.AddTransactionAsync(actions, cancellationToken);
+            await _duplicateVoteExecutor.ExecuteAsync(cancellationToken);
+        }
+        else
+        {
+            throw new ArgumentException(
+                message: $"The violation type {type} is not supported.",
+                paramName: nameof(type));
+        }
     }
-#endif //LIBPLANET_DPOS
+
+    public async ValueTask DisposeAsync() => await _duplicateVoteExecutor.DisposeAsync();
 }

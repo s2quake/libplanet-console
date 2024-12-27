@@ -44,8 +44,7 @@ public abstract class NodeCommandBase : CommandBase
         {
             var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
             var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-            var address = addresses.ToAddress(NodeAddress);
-            return nodes.GetNodeOrCurrent(address);
+            return nodes.GetNodeOrCurrent(NodeAddress, addresses);
         }
     }
 

@@ -12,13 +12,14 @@ public static class INodeCollectionExtensions
         return @this[new Address(address)];
     }
 
-    public static INode GetNodeOrCurrent(this INodeCollection @this, Address address)
+    public static INode GetNodeOrCurrent(
+        this INodeCollection @this, string address, IAddressCollection addresses)
     {
-        if (address == default)
+        if (address == string.Empty)
         {
             return @this.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return @this[address];
+        return @this[addresses.ToAddress(address)];
     }
 }

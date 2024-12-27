@@ -10,16 +10,16 @@ using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Evidence;
 
-internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
+internal sealed class DuplicateVoteExecutor(INode node) : IAsyncDisposable
 {
     private const int Timeout = 5000;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly ILogger _logger = node.GetLogger<DuplicateVoteViolator>();
+    private readonly ILogger _logger = node.GetLogger<DuplicateVoteExecutor>();
     private bool _isDisposed;
 
     public bool IsRunning { get; private set; }
 
-    public async Task ViolateAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         if (IsRunning == true)
         {
@@ -92,9 +92,9 @@ internal sealed class DuplicateVoteViolator(INode node) : IAsyncDisposable
 
     private sealed class RunningScope : IDisposable
     {
-        private readonly DuplicateVoteViolator _obj;
+        private readonly DuplicateVoteExecutor _obj;
 
-        public RunningScope(DuplicateVoteViolator obj)
+        public RunningScope(DuplicateVoteExecutor obj)
         {
             _obj = obj;
             _obj.IsRunning = true;

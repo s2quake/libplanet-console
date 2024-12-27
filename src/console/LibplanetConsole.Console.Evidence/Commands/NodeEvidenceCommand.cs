@@ -2,29 +2,36 @@ using System.ComponentModel;
 using JSSoft.Commands;
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Console.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace LibplanetConsole.Node.Evidence.Commands;
+namespace LibplanetConsole.Console.Evidence.Commands;
 
 [CommandSummary("Provides evidence-related commands")]
 [Category("Evidence")]
-internal sealed class EvidenceCommand(INode node, IEvidence evidence)
-    : CommandMethodBase
+internal sealed class NodeEvidenceCommand(IServiceProvider serviceProvider, NodeCommand nodeCommand)
+    : NodeCommandMethodBase(serviceProvider, nodeCommand, "evidence")
 {
-    public override bool IsEnabled => node.IsRunning is true;
-
     [CommandMethod]
+    [CommandMethodProperty(nameof(NodeAddress))]
     [CommandSummary("Adds a new evidence")]
-    public async Task NewAsync(CancellationToken cancellationToken)
+    public async Task NewAsync(CancellationToken cancellationToken = default)
     {
+        var node = GetNodeOrCurrent(NodeAddress);
+        var evidence = node.GetRequiredKeyedService<INodeEvidence>(INode.Key);
         var evidenceInfo = await evidence.AddEvidenceAsync(cancellationToken);
         await Out.WriteLineAsJsonAsync(evidenceInfo, cancellationToken);
     }
 
     [CommandMethod]
+    [CommandMethodProperty(nameof(NodeAddress))]
     [CommandMethodStaticProperty(typeof(ViolateProperties))]
     [CommandSummary("Raises infraction")]
-    public async Task ViolateAsync(CancellationToken cancellationToken)
+    public async Task ViolateAsync(
+        CancellationToken cancellationToken = default)
     {
+        var node = GetNodeOrCurrent(NodeAddress);
+        var evidence = node.GetRequiredKeyedService<INodeEvidence>(INode.Key);
         if (ViolateProperties.DuplicateVote is true)
         {
             await evidence.ViolateAsync("duplicate_vote", cancellationToken);
@@ -37,10 +44,13 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     }
 
     [CommandMethod]
+    [CommandMethodProperty(nameof(NodeAddress))]
     [CommandMethodStaticProperty(typeof(ListProperties))]
     [CommandSummary("Gets the evidence list")]
     public async Task ListAsync(CancellationToken cancellationToken = default)
     {
+        var node = GetNodeOrCurrent(NodeAddress);
+        var evidence = node.GetRequiredKeyedService<INodeEvidence>(INode.Key);
         var height = ListProperties.Height;
         var isPending = ListProperties.IsPending;
         var evidenceInfos = isPending is true ?
@@ -50,10 +60,13 @@ internal sealed class EvidenceCommand(INode node, IEvidence evidence)
     }
 
     [CommandMethod]
+    [CommandMethodProperty(nameof(NodeAddress))]
     [CommandMethodStaticProperty(typeof(GetProperties))]
     [CommandSummary("Gets the evidence")]
     public async Task GetAsync(string evidenceId, CancellationToken cancellationToken)
     {
+        var node = GetNodeOrCurrent(NodeAddress);
+        var evidence = node.GetRequiredKeyedService<INodeEvidence>(INode.Key);
         var isPending = GetProperties.IsPending;
         var id = EvidenceId.Parse(evidenceId);
         var evidenceInfo = isPending is true ?

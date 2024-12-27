@@ -1,9 +1,9 @@
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Evidence;
 
-namespace LibplanetConsole.Node.Evidence;
+namespace LibplanetConsole.Console.Evidence;
 
-public interface IEvidence
+internal interface INodeEvidence
 {
     Task<EvidenceId> AddEvidenceAsync(CancellationToken cancellationToken);
 
