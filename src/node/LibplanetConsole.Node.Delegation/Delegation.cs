@@ -2,6 +2,7 @@ using System.Numerics;
 using Lib9c;
 using Libplanet.Action.State;
 using LibplanetConsole.Node.Bank;
+using LibplanetConsole.Node.Delegation.Actions;
 using Nekoyume.Action;
 using Nekoyume.Action.ValidatorDelegation;
 using Nekoyume.Model.Guild;
@@ -24,7 +25,7 @@ internal sealed class Delegation(
 
     public async Task StakeAsync(long ncg, CancellationToken cancellationToken)
     {
-        var stake = new Stake(ncg);
+        var stake = new Stake(ncg, default);
         await node.SendTransactionAsync([stake], cancellationToken);
     }
 
@@ -67,6 +68,12 @@ internal sealed class Delegation(
         await node.SendTransactionAsync([claimValidatorRewardSelfAction], cancellationToken);
     }
 
+    public async Task SlashAsync(long slashFactor, CancellationToken cancellationToken)
+    {
+        var slashAction = new SlashAction(slashFactor);
+        await node.SendTransactionAsync([slashAction], cancellationToken);
+    }
+
     public Task<DelegateeInfo> GetDelegateeInfoAsync(
         Address address, CancellationToken cancellationToken)
         => Task.FromResult(GetDelegateeInfo(address));
@@ -89,11 +96,11 @@ internal sealed class Delegation(
         var delegateeInfo = new DelegateeInfo
         {
             Power = BigIntegerUtility.ToString(delegatee.Power),
-            TotalShare = BigIntegerUtility.ToString(delegatee.TotalShares),
+            TotalShare = BigIntegerUtility.ToString(delegatee.Metadata.TotalShares),
             IsJailed = delegatee.Jailed,
-            JailedUntil = delegatee.JailedUntil,
+            JailedUntil = delegatee.Metadata.JailedUntil,
             Commission = (long)delegatee.CommissionPercentage,
-            Tombstoned = delegatee.Tombstoned,
+            Tombstoned = delegatee.Metadata.Tombstoned,
             IsActive = delegatee.IsActive,
         };
 

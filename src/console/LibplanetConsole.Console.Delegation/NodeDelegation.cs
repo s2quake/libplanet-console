@@ -80,6 +80,16 @@ internal sealed class NodeDelegation(
         await Service.ClaimAsync(request, callOptions);
     }
 
+    public async Task SlashAsync(long slashFactor, CancellationToken cancellationToken)
+    {
+        var request = new SlashRequest
+        {
+            SlashFactor = slashFactor,
+        };
+        var callOptions = new CallOptions(cancellationToken: cancellationToken);
+        await Service.SlashAsync(request, callOptions);
+    }
+
     public async Task<DelegateeInfo> GetDelegateeInfoAsync(
         Address address, CancellationToken cancellationToken)
     {

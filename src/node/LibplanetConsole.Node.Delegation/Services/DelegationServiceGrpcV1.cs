@@ -62,6 +62,14 @@ internal sealed class DelegationServiceGrpcV1(
         return new ClaimResponse();
     }
 
+    public override async Task<SlashResponse> Slash(
+        SlashRequest request, ServerCallContext context)
+    {
+        var slashFactor = request.SlashFactor;
+        await delegation.SlashAsync(slashFactor, context.CancellationToken);
+        return new SlashResponse();
+    }
+
     public override async Task<GetDelegateeInfoResponse> GetDelegateeInfo(
         GetDelegateeInfoRequest request, ServerCallContext context)
     {

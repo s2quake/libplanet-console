@@ -12,6 +12,7 @@ service DelegationGrpcService {
   rpc Undelegate(UndelegateRequest) returns (UndelegateResponse);
   rpc SetCommission(SetCommissionRequest) returns (SetCommissionResponse);
   rpc Claim(ClaimRequest) returns (ClaimResponse);
+  rpc Slash(SlashRequest) returns (SlashResponse);
 
   rpc GetDelegateeInfo(GetDelegateeInfoRequest) returns (GetDelegateeInfoResponse);
   rpc GetDelegatorInfo(GetDelegatorInfoRequest) returns (GetDelegatorInfoResponse);
@@ -86,6 +87,13 @@ message ClaimRequest {
 }
 
 message ClaimResponse {
+}
+
+message SlashRequest {
+  int64 slash_factor = 1;
+}
+
+message SlashResponse {
 }
 
 message GetDelegateeInfoRequest {

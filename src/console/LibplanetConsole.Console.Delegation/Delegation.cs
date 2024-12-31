@@ -8,7 +8,7 @@ internal sealed class Delegation(IConsole console, RunningNode runningNode)
 {
     public async Task StakeAsync(long ncg, CancellationToken cancellationToken)
     {
-        var stakeAction = new Stake(ncg);
+        var stakeAction = new Stake(ncg, default);
         await console.SendTransactionAsync([stakeAction], cancellationToken);
     }
 

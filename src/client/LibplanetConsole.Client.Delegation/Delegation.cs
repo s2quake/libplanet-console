@@ -15,7 +15,7 @@ internal sealed class Delegation(IClient client)
 
     public async Task StakeAsync(long ncg, CancellationToken cancellationToken)
     {
-        var stake = new Stake(ncg);
+        var stake = new Stake(ncg, default);
         await _client.SendTransactionAsync([stake], cancellationToken);
     }
 

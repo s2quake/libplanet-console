@@ -69,6 +69,13 @@ internal sealed class DelegationCommand(
     }
 
     [CommandMethod]
+    public async Task SlashAsync(
+        long slashFactor = 10, CancellationToken cancellationToken = default)
+    {
+        await delegation.SlashAsync(slashFactor, cancellationToken);
+    }
+
+    [CommandMethod]
     public async Task DelegateeInfoAsync(
         string address = "", CancellationToken cancellationToken = default)
     {

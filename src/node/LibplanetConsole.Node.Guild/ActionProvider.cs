@@ -97,7 +97,8 @@ internal sealed class ActionProvider : IActionProvider
         var mintSpecs = addresses.Select(CreateMintSpec).ToArray();
         var mintAsset = new MintAssets(mintSpecs, "Initialize");
         var makeGuild = new MakeGuild(validatorKeys[0].Address);
-        return [initializeStates, mintAsset, makeGuild];
+        var createAvatar = new CreateAvatar { name = "Console" };
+        return [initializeStates, mintAsset, makeGuild, createAvatar];
 
         MintSpec CreateMintSpec(Address address) => new(address, ncg * 1_000_000, null);
     }

@@ -18,6 +18,8 @@ public interface INodeDelegation
 
     Task ClaimAsync(CancellationToken cancellationToken);
 
+    Task SlashAsync(long slashFactor, CancellationToken cancellationToken);
+
     Task<DelegateeInfo> GetDelegateeInfoAsync(Address address, CancellationToken cancellationToken);
 
     Task<DelegatorInfo> GetDelegatorInfoAsync(Address address, CancellationToken cancellationToken);

@@ -105,6 +105,18 @@ internal sealed partial class NodeDelegationCommand(
 
     [CommandMethod]
     [CommandMethodProperty(nameof(NodeAddress))]
+    public async Task SlashAsync(
+        long slashFactor = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var address = NodeAddress;
+        var node = nodes.GetNodeOrCurrent(address);
+        var delegation = node.GetRequiredKeyedService<INodeDelegation>(INode.Key);
+        await delegation.SlashAsync(slashFactor, cancellationToken);
+    }
+
+    [CommandMethod]
+    [CommandMethodProperty(nameof(NodeAddress))]
     public async Task DelegateeInfoAsync(
         string address = "", CancellationToken cancellationToken = default)
     {
