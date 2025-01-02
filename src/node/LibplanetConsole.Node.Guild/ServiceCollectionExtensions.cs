@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<INodeContent>(s => s.GetRequiredService<Guild>())
             .AddSingleton<ICurrencyProvider>(s => s.GetRequiredService<Guild>());
         @this.AddSingleton<ICurrencyProvider, CurrencyProvider>();
+        @this.AddSingleton<IAddressProvider, AddressProvider>();
 
         @this.AddSingleton<ICommand, GuildCommand>();
 

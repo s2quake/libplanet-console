@@ -6,7 +6,6 @@ internal sealed class AddressProvider(IApplicationOptions options) : IAddressPro
     {
         get
         {
-            yield return AddressInfo.Default;
             if (options.Alias != string.Empty)
             {
                 yield return new AddressInfo
