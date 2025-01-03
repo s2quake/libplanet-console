@@ -18,12 +18,6 @@ public readonly partial record struct AddressInfo
     {
     }
 
-    public static AddressInfo Default { get; } = new AddressInfo
-    {
-        Alias = "default",
-        Address = default,
-    };
-
     public required string Alias { get; init; }
 
     public required Address Address { get; init; }
