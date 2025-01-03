@@ -6,13 +6,13 @@ internal sealed class AddressProvider(IApplicationOptions options) : IAddressPro
     {
         get
         {
-            yield return AddressInfo.Default;
             if (options.Alias != string.Empty)
             {
                 yield return new AddressInfo
                 {
                     Alias = options.Alias,
                     Address = options.PrivateKey.Address,
+                    Tags = ["custom"],
                 };
             }
         }
