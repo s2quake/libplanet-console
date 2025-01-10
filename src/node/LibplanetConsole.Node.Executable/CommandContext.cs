@@ -7,10 +7,11 @@ namespace LibplanetConsole.Node.Executable;
 [CommandSummary("Provides a prompt for input and execution of commands")]
 [CommandDescription("REPL for libplanet node.")]
 internal sealed class CommandContext(
+    IServiceProvider serviceProvider,
     IEnumerable<ICommand> commands,
     HelpCommand helpCommand,
     VersionCommand versionCommand)
-    : CommandContextBase(commands)
+    : CommandContextBase(commands, CreateSettings(serviceProvider))
 {
     protected override ICommand HelpCommand { get; } = helpCommand;
 
@@ -28,4 +29,9 @@ internal sealed class CommandContext(
         tsb.Append(string.Empty);
         Out.Write(tsb.ToString());
     }
+
+    private static CommandSettings CreateSettings(IServiceProvider serviceProvider) => new()
+    {
+        ServiceProvider = serviceProvider,
+    };
 }

@@ -14,22 +14,21 @@ internal sealed class BankCommand(
     IAddressCollection addresses)
     : CommandMethodBase
 {
-    [CommandProperty(InitValue = "")]
+    [CommandProperty]
     [CommandSummary("Specifies the address")]
     [CommandPropertyCompletion(nameof(GetAddresses))]
-    public static string Address { get; set; } = string.Empty;
+    public static Address Address { get; set; }
 
     [CommandMethod]
     public async Task TransferAsync(
         [CommandParameterCompletion(nameof(GetAddresses))]
-        string recipientAddress,
+        Address recipientAddress,
         [FungibleAssetValue] string amount,
         CancellationToken cancellationToken = default)
     {
         var amountValue = currencies.ToFungibleAssetValue(amount);
-        var recipientValue = addresses.ToAddress(recipientAddress);
         await bank.TransferAsync(
-            recipientValue, amountValue, cancellationToken);
+            recipientAddress, amountValue, cancellationToken);
     }
 
     [CommandMethod]
@@ -39,7 +38,7 @@ internal sealed class BankCommand(
         string currencyCode,
         CancellationToken cancellationToken)
     {
-        var address = Address == string.Empty ? node.Address : addresses.ToAddress(Address);
+        var address = Address == default ? node.Address : Address;
         var currency = currencies[currencyCode];
         var balance = await bank.GetBalanceAsync(address, currency, cancellationToken);
         await Out.WriteLineAsJsonAsync(currencies.ToString(balance), cancellationToken);

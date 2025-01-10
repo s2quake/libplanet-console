@@ -1,3 +1,4 @@
+using LibplanetConsole.Console.Converters;
 using LibplanetConsole.Console.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,11 @@ internal sealed partial class ConsoleHost(
     private readonly BlockHash _genesisHash = options.GenesisBlock.Hash;
     private IConsoleContent[]? _contents;
     private CancellationTokenSource? _cancellationTokenSource;
+
+    static ConsoleHost()
+    {
+        AddressTypeConverter.Register();
+    }
 
     public event EventHandler? Started;
 

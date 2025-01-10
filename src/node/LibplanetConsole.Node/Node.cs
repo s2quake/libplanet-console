@@ -12,6 +12,7 @@ using Libplanet.Store.Trie;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Node.Converters;
 using LibplanetConsole.Node.Extensions;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,11 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private Task _startTask = Task.CompletedTask;
     private INodeContent[]? _contents;
     private bool _isDisposed;
+
+    static Node()
+    {
+        AddressTypeConverter.Register();
+    }
 
     public Node(
         IServiceProvider serviceProvider,
