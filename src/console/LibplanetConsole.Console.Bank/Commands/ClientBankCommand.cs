@@ -14,25 +14,24 @@ internal sealed partial class ClientBankCommand(
     IAddressCollection addresses)
     : ClientCommandMethodBase(serviceProvider, clientCommand, "bank")
 {
-    [CommandProperty(InitValue = "")]
+    [CommandProperty]
     [CommandSummary("Specifies the address")]
     [CommandPropertyCompletion(nameof(GetAddresses))]
-    public static string Address { get; set; } = string.Empty;
+    public static Address Address { get; set; }
 
     [CommandMethod]
     [CommandMethodProperty(nameof(ClientAddress))]
     public async Task TransferAsync(
         [CommandParameterCompletion(nameof(GetAddresses))]
-        string recipientAddress,
+        Address recipientAddress,
         [FungibleAssetValue] string amount,
         CancellationToken cancellationToken = default)
     {
         var client = GetClientOrCurrent(ClientAddress);
         var bank = client.GetRequiredKeyedService<IClientBank>(IClient.Key);
         var amountValue = currencies.ToFungibleAssetValue(amount);
-        var recipientValue = addresses.ToAddress(recipientAddress);
         await bank.TransferAsync(
-            recipientValue, amountValue, cancellationToken);
+            recipientAddress, amountValue, cancellationToken);
     }
 
     [CommandMethod]
@@ -46,7 +45,7 @@ internal sealed partial class ClientBankCommand(
         CancellationToken cancellationToken)
     {
         var client = GetClientOrCurrent(ClientAddress);
-        var address = Address == string.Empty ? client.Address : addresses.ToAddress(Address);
+        var address = Address == default ? client.Address : Address;
         var bank = client.GetRequiredKeyedService<IClientBank>(IClient.Key);
         var currency = currencies[currencyCode];
         var balance = await bank.GetBalanceAsync(address, currency, cancellationToken);

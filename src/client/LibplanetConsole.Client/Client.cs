@@ -1,4 +1,5 @@
 using Grpc.Net.Client;
+using LibplanetConsole.Client.Converters;
 using LibplanetConsole.Client.Extensions;
 using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
@@ -20,6 +21,11 @@ internal sealed class Client : IClient
     private CancellationTokenSource? _cancellationTokenSource;
     private ClientInfo _info;
     private IClientContent[]? _contents;
+
+    static Client()
+    {
+        AddressTypeConverter.Register();
+    }
 
     public Client(
         IServiceProvider serviceProvider, IApplicationOptions options)
