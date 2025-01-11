@@ -33,39 +33,35 @@ public abstract class NodeCommandMethodBase : CommandMethodBase
         _serviceProvider = serviceProvider;
     }
 
-    [CommandProperty("node", 'N', InitValue = "")]
+    [CommandProperty("current", 'C')]
     [CommandSummary("Specifies the address of the node to use")]
     [CommandPropertyCompletion(nameof(GetNodeAddresses))]
-    public string NodeAddress { get; set; } = string.Empty;
+    public Address NodeAddress { get; set; }
 
-    protected INode GetNodeOrCurrent(string nodeAddress)
+    protected INode CurrentNode
     {
-        var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        return nodes.GetNodeOrCurrent(nodeAddress, addresses);
+        get
+        {
+            var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
+            return nodes.GetNodeOrCurrent(NodeAddress);
+        }
     }
 
-    protected INode? GetNodeOrDefault(string nodeAddress)
+    protected INode GetNodeOrCurrent(Address nodeAddress)
     {
-        if (nodeAddress == string.Empty)
+        var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
+        return nodes.GetNodeOrCurrent(nodeAddress);
+    }
+
+    protected INode? GetNodeOrDefault(Address nodeAddress)
+    {
+        if (nodeAddress == default)
         {
             return default;
         }
 
         var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        var address = addresses.ToAddress(nodeAddress);
-        return nodes[address];
-    }
-
-    protected string[] GetNodeAddresses()
-    {
-        var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
-        return
-        [
-            .. nodes.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
-            .. nodes.Select(node => $"{node.Address}"),
-        ];
+        return nodes[nodeAddress];
     }
 
     protected Address GetAddress(string address)
@@ -77,5 +73,13 @@ public abstract class NodeCommandMethodBase : CommandMethodBase
 
         var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
         return addresses.ToAddress(address);
+    }
+
+    protected string[] GetNodeAddresses() => GetAddresses(INode.Tag);
+
+    protected string[] GetAddresses(params string[] tags)
+    {
+        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
+        return addresses.GetAddresses(tags);
     }
 }

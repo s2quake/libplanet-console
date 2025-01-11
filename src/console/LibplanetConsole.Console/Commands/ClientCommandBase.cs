@@ -33,29 +33,23 @@ public abstract class ClientCommandBase : CommandBase
         _serviceProvider = serviceProvider;
     }
 
-    [CommandProperty("client", 'C', InitValue = "")]
+    [CommandProperty("current", 'C')]
     [CommandSummary("Specifies the address of the client to use")]
     [CommandPropertyCompletion(nameof(GetClientAddresses))]
-    public string ClientAddress { get; set; } = string.Empty;
+    public Address ClientAddress { get; set; }
 
     protected IClient Client
     {
         get
         {
             var clients = _serviceProvider.GetRequiredService<IClientCollection>();
-            var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-            var address = addresses.ToAddress(ClientAddress);
-            return clients.GetClientOrCurrent(address);
+            return clients.GetClientOrCurrent(ClientAddress);
         }
     }
 
     protected string[] GetClientAddresses()
     {
-        var clients = _serviceProvider.GetRequiredService<IClientCollection>();
-        return
-        [
-            .. clients.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
-            .. clients.Select(client => $"{client.Address}"),
-        ];
+        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
+        return addresses.GetAddresses(IClient.Tag);
     }
 }

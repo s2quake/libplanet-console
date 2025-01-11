@@ -223,7 +223,7 @@ internal sealed class NodeCollection(
             var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
             if (node.Alias != string.Empty)
             {
-                addresses.Add(node.Alias, node.Address, "node");
+                addresses.Add(node.Alias, node.Address, INode.Tag);
             }
 
             _nodeList.Add(node);

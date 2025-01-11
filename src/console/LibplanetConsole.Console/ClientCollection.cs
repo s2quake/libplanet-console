@@ -213,7 +213,7 @@ internal sealed class ClientCollection(
             var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
             if (client.Alias != string.Empty)
             {
-                addresses.Add(client.Alias, client.Address, "client");
+                addresses.Add(client.Alias, client.Address, IClient.Tag);
             }
 
             _clientList.Add(client);

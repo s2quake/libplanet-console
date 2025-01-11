@@ -146,7 +146,7 @@ internal abstract class AddressCollectionBase : IAddressCollection
         }
 
         var query = from addressInfo in _addressInfoByAlias.Values.OfType<AddressInfo>()
-                    where tags.Union(addressInfo.Tags).Any() is true
+                    where tags.Intersect(addressInfo.Tags).Any() is true
                     select addressInfo;
         return [.. query];
     }
