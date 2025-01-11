@@ -7,6 +7,8 @@ public interface INode : IAsyncDisposable, IKeyedServiceProvider, ISigner
 {
     const string Key = nameof(INode);
 
+    const string Tag = "node";
+
     event EventHandler? Attached;
 
     event EventHandler? Detached;

@@ -33,40 +33,35 @@ public abstract class ClientCommandMethodBase : CommandMethodBase
         _serviceProvider = serviceProvider;
     }
 
-    [CommandProperty("client", 'C', InitValue = "")]
+    [CommandProperty("current", 'C')]
     [CommandSummary("Specifies the address of the client to use")]
     [CommandPropertyCompletion(nameof(GetClientAddresses))]
-    public string ClientAddress { get; set; } = string.Empty;
+    public Address ClientAddress { get; set; }
 
-    protected IClient GetClientOrCurrent(string clientAddress)
+    public IClient CurrentClient
     {
-        var clients = _serviceProvider.GetRequiredService<IClientCollection>();
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        var address = addresses.ToAddress(clientAddress);
-        return clients.GetClientOrCurrent(address);
+        get
+        {
+            var clients = _serviceProvider.GetRequiredService<IClientCollection>();
+            return clients.GetClientOrCurrent(ClientAddress);
+        }
     }
 
-    protected IClient? GetClientOrDefault(string clientAddress)
+    protected IClient GetClientOrCurrent(Address clientAddress)
     {
-        if (clientAddress == string.Empty)
+        var clients = _serviceProvider.GetRequiredService<IClientCollection>();
+        return clients.GetClientOrCurrent(clientAddress);
+    }
+
+    protected IClient? GetClientOrDefault(Address clientAddress)
+    {
+        if (clientAddress == default)
         {
             return default;
         }
 
         var clients = _serviceProvider.GetRequiredService<IClientCollection>();
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        var address = addresses.ToAddress(clientAddress);
-        return clients[address];
-    }
-
-    protected string[] GetClientAddresses()
-    {
-        var clients = _serviceProvider.GetRequiredService<IClientCollection>();
-        return
-        [
-            .. clients.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
-            .. clients.Select(client => $"{client.Address}"),
-        ];
+        return clients[clientAddress];
     }
 
     protected Address GetAddress(string address)
@@ -78,5 +73,13 @@ public abstract class ClientCommandMethodBase : CommandMethodBase
 
         var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
         return addresses.ToAddress(address);
+    }
+
+    protected string[] GetClientAddresses() => GetAddresses(IClient.Tag);
+
+    protected string[] GetAddresses(params string[] tags)
+    {
+        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
+        return addresses.GetAddresses(tags);
     }
 }

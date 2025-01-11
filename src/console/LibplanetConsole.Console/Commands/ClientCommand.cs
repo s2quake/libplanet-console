@@ -75,12 +75,13 @@ public sealed partial class ClientCommand(
     [CommandMethodProperty(nameof(ClientAddress))]
     [CommandSummary("Starts the client")]
     public async Task StartAsync(
-        string nodeAddress = "", CancellationToken cancellationToken = default)
+        [CommandParameterCompletion(nameof(GetNodeAddresses))]
+        Address nodeAddress = default,
+        CancellationToken cancellationToken = default)
     {
         var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
-        var clientAddress = addresses.ToAddress(ClientAddress);
-        var node = nodes.GetNodeOrCurrent(nodeAddress, addresses);
-        var client = clients.GetClientOrCurrent(clientAddress);
+        var node = nodes.GetNodeOrCurrent(nodeAddress);
+        var client = GetClientOrCurrent(ClientAddress);
         await client.StartAsync(node, cancellationToken);
     }
 
@@ -98,7 +99,7 @@ public sealed partial class ClientCommand(
     public void Current(
         [CommandSummary("The address of the client")]
         [CommandParameterCompletion(nameof(GetClientAddresses))]
-        string clientAddress = "")
+        Address clientAddress = default)
     {
         var client = GetClientOrDefault(clientAddress);
         if (client is not null)
@@ -156,4 +157,6 @@ public sealed partial class ClientCommand(
 
         return TerminalColorType.BrightBlack;
     }
+
+    private string[] GetNodeAddresses() => GetAddresses(INode.Tag);
 }

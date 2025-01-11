@@ -10,7 +10,7 @@ internal sealed class StopNodeProcessCommand(
 {
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var node = Node;
+        var node = CurrentNode;
         await node.StopProcessAsync(cancellationToken);
     }
 }

@@ -56,4 +56,7 @@ public interface IAddressCollection : IEnumerable<Address>
                 paramName: nameof(text));
         }
     }
+
+    string[] GetAddresses(params string[] tags)
+        => GetAddressInfos(tags).Select(addressInfo => addressInfo.Address.ToString()).ToArray();
 }

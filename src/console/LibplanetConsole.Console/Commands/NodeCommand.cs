@@ -92,7 +92,7 @@ public sealed partial class NodeCommand(
     public void Current(
         [CommandSummary("The address of the node")]
         [CommandParameterCompletion(nameof(GetNodeAddresses))]
-        string nodeAddress = "")
+        Address nodeAddress = default)
     {
         var node = GetNodeOrDefault(nodeAddress);
         if (node is not null)

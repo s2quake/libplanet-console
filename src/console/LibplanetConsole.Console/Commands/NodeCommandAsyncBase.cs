@@ -33,28 +33,25 @@ public abstract class NodeCommandAsyncBase : CommandAsyncBase
         _serviceProvider = serviceProvider;
     }
 
-    [CommandProperty("node", 'N', InitValue = "")]
+    [CommandProperty("current", 'C')]
     [CommandSummary("Specifies the address of the node to use")]
     [CommandPropertyCompletion(nameof(GetNodeAddresses))]
-    public string NodeAddress { get; set; } = string.Empty;
+    public Address NodeAddress { get; set; }
 
-    protected INode Node
+    protected INode CurrentNode
     {
         get
         {
             var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
-            var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-            return nodes.GetNodeOrCurrent(NodeAddress, addresses);
+            return nodes.GetNodeOrCurrent(NodeAddress);
         }
     }
 
-    protected string[] GetNodeAddresses()
+    protected string[] GetNodeAddresses() => GetAddresses(INode.Tag);
+
+    protected string[] GetAddresses(params string[] tags)
     {
-        var nodes = _serviceProvider.GetRequiredService<INodeCollection>();
-        return
-        [
-            .. nodes.Where(item => item.Alias != string.Empty).Select(item => item.Alias),
-            .. nodes.Select(node => $"{node.Address}"),
-        ];
+        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
+        return addresses.GetAddresses(tags);
     }
 }

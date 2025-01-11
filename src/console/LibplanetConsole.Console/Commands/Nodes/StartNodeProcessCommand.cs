@@ -19,7 +19,7 @@ internal sealed class StartNodeProcessCommand(
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var node = Node;
+        var node = CurrentNode;
         var options = new ProcessOptions
         {
             Detach = Detach,

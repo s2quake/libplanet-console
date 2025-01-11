@@ -7,6 +7,8 @@ public interface IClient : IAsyncDisposable, IKeyedServiceProvider, ISigner
 {
     const string Key = nameof(IClient);
 
+    const string Tag = "client";
+
     event EventHandler? Attached;
 
     event EventHandler? Detached;

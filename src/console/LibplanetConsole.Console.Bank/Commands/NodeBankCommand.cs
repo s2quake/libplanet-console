@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank.Commands;
 
+[CommandSummary("Provides bank-related commands for the node.")]
+[Category("Bank")]
 internal sealed partial class NodeBankCommand(
     IServiceProvider serviceProvider,
     NodeCommand nodeCommand,
@@ -21,13 +23,14 @@ internal sealed partial class NodeBankCommand(
 
     [CommandMethod]
     [CommandMethodProperty(nameof(NodeAddress))]
+    [CommandSummary("Transfers the specified amount to the recipient address.")]
     public async Task TransferAsync(
         [CommandParameterCompletion(nameof(GetAddresses))]
         Address recipientAddress,
         [FungibleAssetValue] string amount,
         CancellationToken cancellationToken = default)
     {
-        var node = GetNodeOrCurrent(NodeAddress);
+        var node = CurrentNode;
         var bank = node.GetRequiredKeyedService<INodeBank>(INode.Key);
         var amountValue = currencies.ToFungibleAssetValue(amount);
         await bank.TransferAsync(
@@ -37,14 +40,14 @@ internal sealed partial class NodeBankCommand(
     [CommandMethod]
     [CommandMethodProperty(nameof(NodeAddress))]
     [CommandMethodProperty(nameof(Address))]
-    [CommandSummary("Display balance of specific address.")]
-    [Category("Bank")]
+    [CommandSummary("Gets the balance of the specified currency for the node or " +
+                    "specified address.")]
     public async Task BalanceAsync(
         [CommandParameterCompletion(nameof(GetCurrencyCodes))]
         string currencyCode,
         CancellationToken cancellationToken)
     {
-        var node = GetNodeOrCurrent(NodeAddress);
+        var node = CurrentNode;
         var address = Address == default ? node.Address : Address;
         var bank = node.GetRequiredKeyedService<INodeBank>(INode.Key);
         var currencyValue = currencies[currencyCode];
@@ -53,6 +56,7 @@ internal sealed partial class NodeBankCommand(
     }
 
     [CommandMethod]
+    [CommandSummary("Displays information about a specific currency or lists all currency codes.")]
     public void Currency(
         [CommandParameterCompletion(nameof(GetCurrencyCodes))]
         string code = "")

@@ -5,7 +5,7 @@ using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Bank.Commands;
 
-[CommandSummary("Bank Commands.")]
+[CommandSummary("Provides bank-related commands")]
 [Category("Bank")]
 internal sealed class BankCommand(
     INode node,
@@ -20,6 +20,7 @@ internal sealed class BankCommand(
     public static Address Address { get; set; }
 
     [CommandMethod]
+    [CommandSummary("Transfers the specified amount to the recipient address.")]
     public async Task TransferAsync(
         [CommandParameterCompletion(nameof(GetAddresses))]
         Address recipientAddress,
@@ -33,6 +34,8 @@ internal sealed class BankCommand(
 
     [CommandMethod]
     [CommandMethodProperty(nameof(Address))]
+    [CommandSummary("Gets the balance of the specified currency for the node or " +
+                    "specified address.")]
     public async Task BalanceAsync(
         [CommandParameterCompletion(nameof(GetCurrencyCodes))]
         string currencyCode,
@@ -45,6 +48,7 @@ internal sealed class BankCommand(
     }
 
     [CommandMethod]
+    [CommandSummary("Displays information about a specific currency or lists all currency codes.")]
     public void Currency(
         [CommandParameterCompletion(nameof(GetCurrencyCodes))]
         string code = "")
