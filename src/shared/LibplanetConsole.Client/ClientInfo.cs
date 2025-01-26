@@ -1,3 +1,4 @@
+#if LIBPLANET_CLIENT || LIBPLANET_CONSOLE
 using LibplanetConsole.Grpc.Client;
 using static LibplanetConsole.Grpc.TypeUtility;
 
@@ -33,3 +34,4 @@ public readonly record struct ClientInfo
         IsRunning = clientInfo.IsRunning,
     };
 }
+#endif // LIBPLANET_CLIENT || LIBPLANET_CONSOLE

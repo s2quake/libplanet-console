@@ -5,7 +5,6 @@ using LibplanetConsole.Console.Commands.Clients;
 using LibplanetConsole.Console.Commands.Nodes;
 using LibplanetConsole.Seed;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Console;

@@ -2,7 +2,6 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node.Commands;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node;

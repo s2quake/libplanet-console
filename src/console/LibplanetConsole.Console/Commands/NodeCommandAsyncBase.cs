@@ -1,6 +1,5 @@
 using JSSoft.Commands;
 using LibplanetConsole.Console.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 

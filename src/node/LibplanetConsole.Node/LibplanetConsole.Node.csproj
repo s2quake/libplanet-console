@@ -26,20 +26,17 @@
 
   <ItemGroup>
     <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
-    <Compile Include="$(SharedDirectory)LibplanetConsole.Blockchain\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.BlockChain\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Node\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Server">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Server">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Server">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.BlockChain\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>
 
 </Project>

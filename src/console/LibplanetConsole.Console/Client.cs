@@ -7,8 +7,6 @@ using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Client;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 

@@ -10,8 +10,6 @@ using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Node;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 

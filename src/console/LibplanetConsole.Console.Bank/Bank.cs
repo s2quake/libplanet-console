@@ -1,5 +1,4 @@
 using LibplanetConsole.Bank.Actions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank;
 

@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
 namespace LibplanetConsole.Common.Extensions;
 
 public static class ServiceProviderExtensions

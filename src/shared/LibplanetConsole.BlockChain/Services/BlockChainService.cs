@@ -1,14 +1,14 @@
-#if LIBPLANET_CONSOLE || LIBPLANET_CLIENT
+#if LIBPLANET_CLIENT || LIBPLANET_CONSOLE
 using Grpc.Net.Client;
-using static LibplanetConsole.Grpc.Blockchain.BlockChainGrpcService;
+using LibplanetConsole.Grpc;
+using LibplanetConsole.Grpc.BlockChain;
+using static LibplanetConsole.Grpc.BlockChain.BlockChainGrpcService;
 
-#if LIBPLANET_CONSOLE
-using LibplanetConsole.Console;
-#else
-using LibplanetConsole.Client;
+#if LIBPLANET_CLIENT
+namespace LibplanetConsole.Client.Services;
+#elif LIBPLANET_CONSOLE
+namespace LibplanetConsole.Console.Services;
 #endif
-
-namespace LibplanetConsole.Grpc.Blockchain;
 
 internal sealed class BlockChainService(GrpcChannel channel)
     : BlockChainGrpcServiceClient(channel), IDisposable

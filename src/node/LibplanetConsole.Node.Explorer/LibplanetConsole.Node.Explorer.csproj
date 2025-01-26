@@ -16,9 +16,8 @@
 
   <ItemGroup>
     <Compile Include="$(SharedDirectory)LibplanetConsole.Explorer\**\*.cs" />
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Explorer\Protos\*.proto" GrpcServices="Server">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Explorer\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>
 
   <ItemGroup>

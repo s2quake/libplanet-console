@@ -3,7 +3,7 @@ syntax = "proto3";
 option csharp_namespace = "LibplanetConsole.Grpc.Node";
 
 package libplanet.console.node.v1;
-import "src/shared/LibplanetConsole.Blockchain/Protos/BlockChainGrpcService.proto";
+import "src/shared/LibplanetConsole.BlockChain/Protos/BlockChainGrpcService.proto";
 
 service NodeGrpcService {
   rpc Ping(PingRequest) returns (PingResponse);

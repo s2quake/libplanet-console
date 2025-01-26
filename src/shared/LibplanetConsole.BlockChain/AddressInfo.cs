@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using LibplanetConsole.Grpc.Blockchain;
+using LibplanetConsole.Grpc.BlockChain;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 #if LIBPLANET_NODE

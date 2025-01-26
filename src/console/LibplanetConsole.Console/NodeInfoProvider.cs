@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using LibplanetConsole.Common;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 

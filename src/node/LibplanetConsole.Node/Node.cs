@@ -15,7 +15,6 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node.Converters;
 using LibplanetConsole.Node.Extensions;
 using LibplanetConsole.Seed;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 

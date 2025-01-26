@@ -1,7 +1,12 @@
+#if LIBPLANET_NODE || LIBPLANET_CONSOLE
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Grpc.Evidence;
 
-namespace LibplanetConsole.Evidence;
+#if LIBPLANET_NODE
+namespace LibplanetConsole.Node.Evidence;
+#elif LIBPLANET_CONSOLE
+namespace LibplanetConsole.Console.Evidence;
+#endif
 
 public readonly record struct EvidenceInfo
 {
@@ -15,40 +20,32 @@ public readonly record struct EvidenceInfo
 
     public DateTimeOffset Timestamp { get; init; }
 
-    public static explicit operator EvidenceInfo(EvidenceBase evidence)
+    public static explicit operator EvidenceInfo(EvidenceBase evidence) => new()
     {
-        return new EvidenceInfo
-        {
-            Type = evidence.GetType().Name,
-            Id = evidence.Id.ToString(),
-            Height = evidence.Height,
-            TargetAddress = evidence.TargetAddress,
-            Timestamp = evidence.Timestamp,
-        };
-    }
+        Type = evidence.GetType().Name,
+        Id = evidence.Id.ToString(),
+        Height = evidence.Height,
+        TargetAddress = evidence.TargetAddress,
+        Timestamp = evidence.Timestamp,
+    };
 
-    public static implicit operator EvidenceInfo(EvidenceInfoProto evidenceInfo)
+    public static implicit operator EvidenceInfo(EvidenceInfoProto evidenceInfo) => new()
     {
-        return new EvidenceInfo
-        {
-            Type = evidenceInfo.Type,
-            Id = evidenceInfo.Id,
-            TargetAddress = new Address(evidenceInfo.TargetAddress),
-            Height = evidenceInfo.Height,
-            Timestamp = evidenceInfo.Timestamp.ToDateTimeOffset(),
-        };
-    }
+        Type = evidenceInfo.Type,
+        Id = evidenceInfo.Id,
+        TargetAddress = new Address(evidenceInfo.TargetAddress),
+        Height = evidenceInfo.Height,
+        Timestamp = evidenceInfo.Timestamp.ToDateTimeOffset(),
+    };
 
-    public static implicit operator EvidenceInfoProto(EvidenceInfo evidenceInfo)
+    public static implicit operator EvidenceInfoProto(EvidenceInfo evidenceInfo) => new()
     {
-        return new EvidenceInfoProto
-        {
-            Type = evidenceInfo.Type,
-            Id = evidenceInfo.Id,
-            TargetAddress = evidenceInfo.TargetAddress.ToHex(),
-            Height = evidenceInfo.Height,
-            Timestamp = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTimeOffset(
+        Type = evidenceInfo.Type,
+        Id = evidenceInfo.Id,
+        TargetAddress = evidenceInfo.TargetAddress.ToHex(),
+        Height = evidenceInfo.Height,
+        Timestamp = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTimeOffset(
                 evidenceInfo.Timestamp),
-        };
-    }
+    };
 }
+#endif // LIBPLANET_NODE || LIBPLANET_CONSOLE

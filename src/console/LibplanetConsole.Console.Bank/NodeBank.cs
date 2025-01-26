@@ -1,7 +1,6 @@
 using Grpc.Core;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc.Bank;
-using Microsoft.Extensions.DependencyInjection;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console.Bank;

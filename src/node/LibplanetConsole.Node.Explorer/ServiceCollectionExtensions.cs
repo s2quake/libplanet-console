@@ -3,7 +3,6 @@ using Libplanet.Explorer;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node.Explorer.Commands;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Explorer;
 
