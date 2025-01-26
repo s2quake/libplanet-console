@@ -4,7 +4,6 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Commands;
 

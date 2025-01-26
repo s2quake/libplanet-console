@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using LibplanetConsole.Common;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console;
 

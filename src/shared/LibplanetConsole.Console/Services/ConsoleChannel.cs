@@ -1,16 +1,22 @@
+#if LIBPLANET_NODE || LIBPLANET_CLIENT
 using Grpc.Core;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console.Services;
+#if LIBPLANET_NODE
+namespace LibplanetConsole.Node.Services;
+#elif LIBPLANET_CLIENT
+namespace LibplanetConsole.Client.Services;
+#endif
 
-internal static class NodeChannel
+internal static class ConsoleChannel
 {
     private static readonly GrpcChannelOptions _channelOptions = new()
     {
         ThrowOperationCanceledOnCancellation = true,
         MaxRetryAttempts = 10,
+        MaxReceiveMessageSize = 10 * 1024 * 1024, // 10 MB
         ServiceConfig = new()
         {
             MethodConfigs =
@@ -21,8 +27,23 @@ internal static class NodeChannel
                     {
                         new MethodName
                         {
-                            Service = "libplanet.console.node.v1.NodeGrpcService",
-                            Method = "Ping",
+                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
+                            Method = "GetNodeSettings",
+                        },
+                        new MethodName
+                        {
+                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
+                            Method = "GetClientSettings",
+                        },
+                        new MethodName
+                        {
+                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
+                            Method = "AttachNode",
+                        },
+                        new MethodName
+                        {
+                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
+                            Method = "AttachClient",
                         },
                     },
                     RetryPolicy = new RetryPolicy
@@ -47,3 +68,4 @@ internal static class NodeChannel
         return GrpcChannel.ForAddress(address, _channelOptions);
     }
 }
+#endif // LIBPLANET_NODE || LIBPLANET_CLIENT

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Grpc.Blockchain";
+option csharp_namespace = "LibplanetConsole.Grpc.BlockChain";
 
 package libplanet.console.blockchain.v1;
 

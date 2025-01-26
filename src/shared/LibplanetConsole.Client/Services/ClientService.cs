@@ -2,9 +2,11 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Console;
+using LibplanetConsole.Grpc;
+using LibplanetConsole.Grpc.Client;
 using static LibplanetConsole.Grpc.Client.ClientGrpcService;
 
-namespace LibplanetConsole.Grpc.Client;
+namespace LibplanetConsole.Console.Services;
 
 internal sealed class ClientService : ClientGrpcServiceClient, IDisposable
 {

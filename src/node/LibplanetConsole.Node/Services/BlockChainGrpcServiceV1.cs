@@ -1,8 +1,7 @@
 using Grpc.Core;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Blockchain;
+using LibplanetConsole.Grpc.BlockChain;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Node.Services;

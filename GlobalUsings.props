@@ -11,6 +11,8 @@
     <Using Include="Bencodex" />
     <Using Include="Bencodex.Types" />
     <Using Include="System.Net" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
 </Project>

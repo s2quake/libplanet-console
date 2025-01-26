@@ -1,5 +1,4 @@
 using LibplanetConsole.Common;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Client;

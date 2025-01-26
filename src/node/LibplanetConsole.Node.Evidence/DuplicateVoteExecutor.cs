@@ -5,8 +5,6 @@ using Libplanet.Net.Messages;
 using Libplanet.Types.Consensus;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Node.Evidence.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Evidence;
 

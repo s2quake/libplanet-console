@@ -3,7 +3,6 @@ using JSSoft.Commands;
 using LibplanetConsole.Bank.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Commands;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Console.Bank.Commands;
 

@@ -1,14 +1,15 @@
 #if LIBPLANET_CLIENT || LIBPLANET_CONSOLE
 using Grpc.Core;
 using Grpc.Net.Client;
+using LibplanetConsole.Grpc;
+using LibplanetConsole.Grpc.Node;
 using static LibplanetConsole.Grpc.Node.NodeGrpcService;
-#if LIBPLANET_CLIENT
-using LibplanetConsole.Client;
-#else
-using LibplanetConsole.Console;
-#endif
 
-namespace LibplanetConsole.Grpc.Node;
+#if LIBPLANET_CLIENT
+namespace LibplanetConsole.Client.Services;
+#else
+namespace LibplanetConsole.Console.Services;
+#endif
 
 internal sealed class NodeService : NodeGrpcServiceClient, IDisposable
 {
@@ -184,4 +185,4 @@ internal sealed class NodeService : NodeGrpcServiceClient, IDisposable
         }
     }
 }
-#endif // LIBPLANET_CONSOLE || LIBPLANET_CLIENT
+#endif // LIBPLANET_CLIENT || LIBPLANET_CONSOLE

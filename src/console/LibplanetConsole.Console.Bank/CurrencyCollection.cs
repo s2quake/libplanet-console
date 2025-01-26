@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace LibplanetConsole.Console.Bank;
 
 internal sealed class CurrencyCollection : CurrencyCollectionBase, IConsoleContent

@@ -1,7 +1,5 @@
 using Libplanet.Blockchain;
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Evidence;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Evidence;
 

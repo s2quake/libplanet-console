@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace LibplanetConsole.Node.Bank;
 
 internal sealed class CurrencyCollection(IServiceProvider serviceProvider)

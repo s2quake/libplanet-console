@@ -1,5 +1,4 @@
 using Grpc.Core;
-using LibplanetConsole.Evidence;
 using LibplanetConsole.Grpc.Evidence;
 using static LibplanetConsole.Grpc.TypeUtility;
 

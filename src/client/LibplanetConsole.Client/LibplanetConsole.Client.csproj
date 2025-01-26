@@ -7,20 +7,19 @@
   <ItemGroup>
     <Compile Include="$(SharedDirectory)LibplanetConsole.Node\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Client\**\*.cs" />
-    <Compile Include="$(SharedDirectory)LibplanetConsole.Blockchain\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.BlockChain\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto" GrpcServices="Both">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Blockchain\Protos\*.proto" GrpcServices="Both">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto" GrpcServices="Server">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
-    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto" GrpcServices="Client">
-      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
-    </Protobuf>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Grpc\Protos\*.proto"
+      GrpcServices="Both" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.BlockChain\Protos\*.proto"
+      GrpcServices="Both" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto"
+      GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>
 
   <PropertyGroup>

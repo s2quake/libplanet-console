@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <DebugType Condition="'$(_IsPublishing)'=='true'">none</DebugType>
+    <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
   </PropertyGroup>
 
 </Project>

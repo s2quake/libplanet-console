@@ -3,7 +3,6 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Grpc;
 using LibplanetConsole.Grpc.Node;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node.Services;
 

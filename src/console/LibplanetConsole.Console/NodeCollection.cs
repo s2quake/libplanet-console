@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using LibplanetConsole.Common.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Console;
 

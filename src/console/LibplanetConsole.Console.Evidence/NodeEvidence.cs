@@ -1,9 +1,7 @@
 using Grpc.Core;
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Console.Services;
-using LibplanetConsole.Evidence;
 using LibplanetConsole.Grpc.Evidence;
-using Microsoft.Extensions.DependencyInjection;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console.Evidence;

@@ -1,9 +1,15 @@
+#if LIBPLANET_CLIENT || LIBPLANET_CONSOLE
 using Grpc.Core;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
+using static LibplanetConsole.Grpc.Node.NodeGrpcService;
 
+#if LIBPLANET_CLIENT
 namespace LibplanetConsole.Client.Services;
+#else
+namespace LibplanetConsole.Console.Services;
+#endif
 
 internal static class NodeChannel
 {
@@ -47,3 +53,4 @@ internal static class NodeChannel
         return GrpcChannel.ForAddress(address, _channelOptions);
     }
 }
+#endif // LIBPLANET_CLIENT || LIBPLANET_CONSOLE

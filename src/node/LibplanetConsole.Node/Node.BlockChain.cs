@@ -2,8 +2,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Libplanet.Action.State;
 using LibplanetConsole.Common.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LibplanetConsole.Node;
 

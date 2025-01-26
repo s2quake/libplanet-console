@@ -4,7 +4,6 @@ using Libplanet.Explorer.Indexing;
 using Libplanet.Explorer.Interfaces;
 using Libplanet.Net;
 using Libplanet.Store;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibplanetConsole.Node.Explorer;
 

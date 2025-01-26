@@ -1,8 +1,9 @@
 using System.Security.Cryptography;
 using Grpc.Core;
 using Grpc.Net.Client;
+using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
-using LibplanetConsole.Grpc.Blockchain;
+using LibplanetConsole.Grpc.BlockChain;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Client;
