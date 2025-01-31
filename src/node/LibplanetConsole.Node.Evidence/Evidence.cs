@@ -1,5 +1,5 @@
-using Libplanet.Blockchain;
 using Libplanet.Types.Evidence;
+using LibplanetConsole.Evidence;
 
 namespace LibplanetConsole.Node.Evidence;
 
@@ -10,7 +10,7 @@ internal sealed class Evidence(INode node)
 
     public Task<EvidenceId> AddEvidenceAsync(CancellationToken cancellationToken)
     {
-        var blockChain = node.GetRequiredService<BlockChain>();
+        var blockChain = node.GetRequiredService<Libplanet.Blockchain.BlockChain>();
         var height = blockChain.Tip.Index;
         var validatorAddress = node.Address;
         var evidence = new TestEvidence(height, validatorAddress, DateTimeOffset.UtcNow);
@@ -21,7 +21,7 @@ internal sealed class Evidence(INode node)
     public async Task<EvidenceInfo[]> GetEvidenceAsync(
         long height, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetRequiredService<BlockChain>();
+        var blockChain = node.GetRequiredService<Libplanet.Blockchain.BlockChain>();
         var block = height == -1 ? blockChain.Tip : blockChain[height];
         var evidences = block.Evidence.Select(item => new EvidenceInfo()
         {
@@ -38,7 +38,7 @@ internal sealed class Evidence(INode node)
     public async Task<EvidenceInfo> GetEvidenceAsync(
         EvidenceId evidenceId, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetRequiredService<BlockChain>();
+        var blockChain = node.GetRequiredService<Libplanet.Blockchain.BlockChain>();
         if (blockChain.GetCommittedEvidence(evidenceId) is { } evidence)
         {
             await Task.CompletedTask;
@@ -52,7 +52,7 @@ internal sealed class Evidence(INode node)
 
     public async Task<EvidenceInfo[]> GetPendingEvidenceAsync(CancellationToken cancellationToken)
     {
-        var blockChain = node.GetRequiredService<BlockChain>();
+        var blockChain = node.GetRequiredService<Libplanet.Blockchain.BlockChain>();
         var evidences = blockChain.GetPendingEvidence().Select(item => (EvidenceInfo)item);
         await Task.CompletedTask;
         return [.. evidences];
@@ -61,7 +61,7 @@ internal sealed class Evidence(INode node)
     public async Task<EvidenceInfo> GetPendingEvidenceAsync(
         EvidenceId evidenceId, CancellationToken cancellationToken)
     {
-        var blockChain = node.GetRequiredService<BlockChain>();
+        var blockChain = node.GetRequiredService<Libplanet.Blockchain.BlockChain>();
         if (blockChain.GetPendingEvidence(evidenceId) is { } evidence)
         {
             await Task.CompletedTask;

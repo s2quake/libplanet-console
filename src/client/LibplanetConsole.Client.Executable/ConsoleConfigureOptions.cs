@@ -1,5 +1,5 @@
-using LibplanetConsole.Client.Services;
-using LibplanetConsole.Grpc.Console;
+using LibplanetConsole.Console.Grpc;
+using LibplanetConsole.Console.Services;
 using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Client.Executable;

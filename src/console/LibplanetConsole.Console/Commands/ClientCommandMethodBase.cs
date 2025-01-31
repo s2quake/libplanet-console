@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using LibplanetConsole.BlockChain;
 using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands;

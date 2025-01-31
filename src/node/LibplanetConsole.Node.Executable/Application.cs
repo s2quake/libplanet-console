@@ -94,7 +94,7 @@ internal sealed class Application
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
 
-        await Console.Out.WriteLineAsync();
+        await System.Console.Out.WriteLineAsync();
         await app.RunAsync(cancellationToken);
     }
 }

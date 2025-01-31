@@ -8,6 +8,7 @@ using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Progresses;
 using LibplanetConsole.Console.Extensions;
+using LibplanetConsole.Node;
 using LibplanetConsole.Options;
 using static LibplanetConsole.Common.EndPointUtility;
 

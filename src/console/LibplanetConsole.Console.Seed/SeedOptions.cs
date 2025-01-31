@@ -1,6 +1,6 @@
-﻿namespace LibplanetConsole.Seed;
+﻿namespace LibplanetConsole.Console.Seed;
 
-public sealed record class SeedOptions
+internal sealed record class SeedOptions
 {
     public required PrivateKey PrivateKey { get; init; }
 

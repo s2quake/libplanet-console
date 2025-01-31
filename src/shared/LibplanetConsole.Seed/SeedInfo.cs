@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using LibplanetConsole.Grpc.Seed;
 using LibplanetConsole.Seed.Converters;
+using LibplanetConsole.Seed.Grpc;
 
 namespace LibplanetConsole.Seed;
 

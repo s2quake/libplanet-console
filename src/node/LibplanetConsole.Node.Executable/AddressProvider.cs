@@ -1,3 +1,5 @@
+using LibplanetConsole.BlockChain;
+
 namespace LibplanetConsole.Node.Executable;
 
 internal sealed class AddressProvider(IApplicationOptions options) : IAddressProvider

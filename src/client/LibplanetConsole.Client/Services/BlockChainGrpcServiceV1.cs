@@ -1,6 +1,7 @@
 using Grpc.Core;
+using LibplanetConsole.BlockChain;
+using LibplanetConsole.BlockChain.Grpc;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.BlockChain;
 using Microsoft.Extensions.Hosting;
 using static LibplanetConsole.Grpc.TypeUtility;
 

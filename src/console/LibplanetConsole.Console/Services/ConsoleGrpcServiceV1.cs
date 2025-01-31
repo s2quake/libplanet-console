@@ -1,7 +1,8 @@
 using Grpc.Core;
 using LibplanetConsole.Common;
+using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Console;
+using LibplanetConsole.Node;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
@@ -22,7 +23,7 @@ public sealed class ConsoleGrpcServiceV1(
         var genesis = BlockUtility.SerializeBlock(options.GenesisBlock);
         return Task.FromResult(new GetNodeSettingsResponse
         {
-            AppProtocolVersion = options.AppProtocolVersion.Token,
+            AppProtocolVersion = options.AppProtocolVersion,
             Genesis = TypeUtility.ToGrpc(genesis),
             ProcessId = Environment.ProcessId,
             SeedEndPoint = EndPointUtility.ToString(GetSeedEndPoint()),

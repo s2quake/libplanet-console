@@ -1,14 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Bank;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Bank;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Bank;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
+namespace LibplanetConsole.Bank;
 
 public interface ICurrencyCollection : IEnumerable<Currency>
 {

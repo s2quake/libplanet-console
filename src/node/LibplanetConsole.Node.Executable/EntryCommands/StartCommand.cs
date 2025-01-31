@@ -53,7 +53,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
         }
         catch (CommandParsingException e)
         {
-            e.Print(Console.Out);
+            e.Print(System.Console.Out);
             Environment.Exit(1);
         }
     }

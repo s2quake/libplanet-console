@@ -6,8 +6,9 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Extensions;
-using LibplanetConsole.Console.Services;
-using LibplanetConsole.Grpc.Node;
+using LibplanetConsole.Node;
+using LibplanetConsole.Node.Grpc;
+using LibplanetConsole.Node.Services;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
@@ -451,7 +452,7 @@ internal sealed class Node : INode
             var applicationOptions = _serviceProvider.GetRequiredService<IApplicationOptions>();
             var genesisPath = TempFile.WriteAllBytes(
                 BlockUtility.SerializeBlock(applicationOptions.GenesisBlock));
-            var apvPath = TempFile.WriteAllText(applicationOptions.AppProtocolVersion.Token);
+            var apvPath = TempFile.WriteAllText(applicationOptions.AppProtocolVersion);
             process.ExtendedArguments.Add("--genesis-path");
             process.ExtendedArguments.Add(genesisPath);
             process.ExtendedArguments.Add("--apv-path");

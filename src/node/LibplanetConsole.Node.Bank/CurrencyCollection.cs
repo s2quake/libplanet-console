@@ -1,3 +1,5 @@
+using LibplanetConsole.Bank;
+
 namespace LibplanetConsole.Node.Bank;
 
 internal sealed class CurrencyCollection(IServiceProvider serviceProvider)

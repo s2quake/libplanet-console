@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Grpc.Node";
+option csharp_namespace = "LibplanetConsole.Node.Grpc";
 
 package libplanet.console.node.v1;
 import "src/shared/LibplanetConsole.BlockChain/Protos/BlockChainGrpcService.proto";

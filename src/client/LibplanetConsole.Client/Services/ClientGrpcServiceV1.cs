@@ -1,7 +1,7 @@
 using Grpc.Core;
+using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Common;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Client;
 using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Client.Services;

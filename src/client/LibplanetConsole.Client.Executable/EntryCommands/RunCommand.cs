@@ -95,7 +95,7 @@ internal sealed class RunCommand
         }
         catch (CommandParsingException e)
         {
-            e.Print(Console.Out);
+            e.Print(System.Console.Out);
             Environment.Exit(1);
         }
     }

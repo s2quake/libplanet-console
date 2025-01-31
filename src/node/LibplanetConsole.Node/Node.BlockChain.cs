@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Libplanet.Action.State;
+using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Exceptions;
 
 namespace LibplanetConsole.Node;

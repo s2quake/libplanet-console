@@ -1,20 +1,19 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
-using Grpc.Net.Client;
-using Libplanet.Blockchain;
 using Libplanet.Blockchain.Renderers;
-using Libplanet.Net;
 using Libplanet.Net.Consensus;
 using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
+using LibplanetConsole.BlockChain;
+using LibplanetConsole.BlockChain.Converters;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Exceptions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Node.Converters;
 using LibplanetConsole.Node.Extensions;
 using LibplanetConsole.Seed;
+using LibplanetConsole.Seed.Services;
 
 namespace LibplanetConsole.Node;
 
@@ -85,7 +84,8 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
 
     public Address Address => PublicKey.Address;
 
-    public BlockChain BlockChain => _swarm?.BlockChain ?? throw new InvalidOperationException();
+    public Libplanet.Blockchain.BlockChain BlockChain
+        => _swarm?.BlockChain ?? throw new InvalidOperationException();
 
     public NodeInfo Info { get; private set; } = NodeInfo.Empty;
 
@@ -133,7 +133,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
             return _swarm;
         }
 
-        if (serviceType == typeof(BlockChain))
+        if (serviceType == typeof(Libplanet.Blockchain.BlockChain))
         {
             return BlockChain;
         }
@@ -319,13 +319,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         {
             logger.LogDebug(
                 "Getting seed info from {SeedEndPoint}", EndPointUtility.ToString(seedEndPoint));
-            var address = $"http://{EndPointUtility.ToString(seedEndPoint)}";
-            var channelOptions = new GrpcChannelOptions
-            {
-            };
-            using var channel = GrpcChannel.ForAddress(address, channelOptions);
-            var client = new Grpc.Seed.SeedGrpcService.SeedGrpcServiceClient(channel);
-            var request = new Grpc.Seed.GetSeedRequest
+            using var channel = SeedChannel.CreateChannel(seedEndPoint);
+            var client = new SeedService(channel);
+            var request = new Seed.Grpc.GetSeedRequest
             {
                 PublicKey = new PrivateKey().PublicKey.ToHex(compress: true),
             };

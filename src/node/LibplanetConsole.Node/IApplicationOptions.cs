@@ -1,5 +1,3 @@
-using Libplanet.Net;
-
 namespace LibplanetConsole.Node;
 
 public interface IApplicationOptions

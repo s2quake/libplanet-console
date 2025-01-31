@@ -3,10 +3,11 @@ using Libplanet.Net.Options;
 using Libplanet.Net.Transports;
 using Serilog;
 using static LibplanetConsole.Common.EndPointUtility;
+using ILogger = Serilog.ILogger;
 
-namespace LibplanetConsole.Seed;
+namespace LibplanetConsole.Console.Seed;
 
-public sealed class SeedNode(string name, SeedOptions seedOptions)
+internal sealed class SeedNode(string name, SeedOptions seedOptions)
 {
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 

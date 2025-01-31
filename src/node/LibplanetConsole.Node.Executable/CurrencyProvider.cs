@@ -1,3 +1,4 @@
+using LibplanetConsole.Bank;
 using LibplanetConsole.Node.Bank;
 
 namespace LibplanetConsole.Node.Executable;

@@ -1,4 +1,5 @@
 using JSSoft.Commands;
+using LibplanetConsole.Bank;
 using LibplanetConsole.Console.Bank.Commands;
 
 namespace LibplanetConsole.Console.Bank;

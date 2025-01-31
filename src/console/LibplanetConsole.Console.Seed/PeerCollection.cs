@@ -2,10 +2,11 @@
 using System.Collections.Concurrent;
 using Libplanet.Net.Transports;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
-namespace LibplanetConsole.Seed;
+namespace LibplanetConsole.Console.Seed;
 
-public sealed class PeerCollection : IEnumerable<Peer>
+internal sealed class PeerCollection : IEnumerable<Peer>
 {
     private readonly ConcurrentDictionary<Address, Peer> _infoByAddress = [];
     private readonly SeedOptions _seedOptions;

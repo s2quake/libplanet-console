@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
+using LibplanetConsole.Node;
 using LibplanetConsole.Options;
 
 namespace LibplanetConsole.Console;
@@ -15,7 +15,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     private PrivateKey? _privateKey;
     private Block? _genesisBlock;
-    private AppProtocolVersion? _appProtocolVersion;
+    private string? _appProtocolVersion;
 
     [PrivateKey]
     public string PrivateKey { get; set; } = string.Empty;
@@ -56,7 +56,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     Block IApplicationOptions.GenesisBlock => _genesisBlock ??= GetGenesisBlock();
 
-    AppProtocolVersion IApplicationOptions.AppProtocolVersion
+    string IApplicationOptions.AppProtocolVersion
         => _appProtocolVersion ??= GetAppProtocolVersion();
 
     ProcessOptions? IApplicationOptions.ProcessOptions
@@ -80,17 +80,17 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
         throw new NotSupportedException("Genesis is not set.");
     }
 
-    private AppProtocolVersion GetAppProtocolVersion()
+    private string GetAppProtocolVersion()
     {
         if (AppProtocolVersionPath != string.Empty)
         {
             var lines = File.ReadAllLines(AppProtocolVersionPath);
-            return Libplanet.Net.AppProtocolVersion.FromToken(lines[0]);
+            return lines[0];
         }
 
         if (AppProtocolVersion != string.Empty)
         {
-            return Libplanet.Net.AppProtocolVersion.FromToken(AppProtocolVersion);
+            return AppProtocolVersion;
         }
 
         throw new NotSupportedException("AppProtocolVersion is not set.");

@@ -2,14 +2,10 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Node;
-using static LibplanetConsole.Grpc.Node.NodeGrpcService;
+using LibplanetConsole.Node.Grpc;
+using static LibplanetConsole.Node.Grpc.NodeGrpcService;
 
-#if LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Services;
-#else
-namespace LibplanetConsole.Console.Services;
-#endif
+namespace LibplanetConsole.Node.Services;
 
 internal sealed class NodeService : NodeGrpcServiceClient, IDisposable
 {

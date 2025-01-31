@@ -1,7 +1,8 @@
 using Grpc.Core;
 using Libplanet.Types.Evidence;
 using LibplanetConsole.Console.Services;
-using LibplanetConsole.Grpc.Evidence;
+using LibplanetConsole.Evidence;
+using LibplanetConsole.Evidence.Grpc;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console.Evidence;

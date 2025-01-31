@@ -2,10 +2,11 @@
 using Libplanet.Net.Messages;
 using Libplanet.Net.Transports;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
-namespace LibplanetConsole.Seed;
+namespace LibplanetConsole.Console.Seed;
 
-public sealed class Peer
+internal sealed class Peer
 {
     private readonly ILogger _logger = Log.ForContext<SeedNode>();
 

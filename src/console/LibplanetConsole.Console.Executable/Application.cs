@@ -4,6 +4,7 @@ using LibplanetConsole.Console.Bank;
 using LibplanetConsole.Console.Evidence;
 using LibplanetConsole.Console.Executable.Commands;
 using LibplanetConsole.Console.Executable.Tracers;
+using LibplanetConsole.Console.Seed;
 using LibplanetConsole.Logging;
 using Serilog;
 
@@ -51,6 +52,7 @@ internal sealed class Application
         services.AddSingleton<ICommand, DeleteClientCommand>();
 
         services.AddConsole(configuration);
+        services.AddSeed();
         services.AddEvidence();
         services.AddBank();
 
@@ -90,6 +92,7 @@ internal sealed class Application
         using var app = _builder.Build();
 
         app.UseConsole();
+        app.UseSeed();
         app.MapGet("/", () => "Libplanet-Console");
         app.MapGrpcReflectionService().AllowAnonymous();
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
+using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Console;

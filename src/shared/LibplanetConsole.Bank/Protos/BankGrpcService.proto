@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "LibplanetConsole.Grpc.Bank";
+option csharp_namespace = "LibplanetConsole.Bank.Grpc";
 
 package libplanet.console.bank.v1;
 

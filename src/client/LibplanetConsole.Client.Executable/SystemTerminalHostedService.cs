@@ -31,9 +31,9 @@ internal sealed class SystemTerminalHostedService(
             await sw.WriteLineAsync();
             await commandContext.ExecuteAsync(args: [], cancellationToken);
             await sw.WriteSeparatorAsync(TerminalColorType.BrightGreen);
-            commandContext.Out = Console.Out;
+            commandContext.Out = System.Console.Out;
             await sw.WriteLineIfAsync(GetStartupCondition(options), GetStartupMessage());
-            await Console.Out.WriteAsync(sw.ToString());
+            await System.Console.Out.WriteAsync(sw.ToString());
 
             await terminal.StartAsync(cancellationToken);
             _terminal = terminal;
@@ -81,9 +81,10 @@ internal sealed class SystemTerminalHostedService(
     private async Task WaitInputAsync()
     {
         using var cancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = cancellationTokenSource.Token;
         applicationLifetime.ApplicationStopping.Register(cancellationTokenSource.Cancel);
-        await Console.Out.WriteLineAsync("Press any key to exit.");
-        await Task.Run(() => Console.ReadKey(intercept: true), cancellationTokenSource.Token);
+        await System.Console.Out.WriteLineAsync("Press any key to exit.");
+        await Task.Run(() => System.Console.ReadKey(intercept: true), cancellationToken);
         applicationLifetime.StopApplication();
     }
 

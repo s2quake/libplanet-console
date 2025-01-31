@@ -1,5 +1,4 @@
-﻿using System.Net;
-using LibplanetConsole.Common;
+﻿using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Seed;
 

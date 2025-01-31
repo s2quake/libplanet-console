@@ -1,7 +1,7 @@
-using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
+using LibplanetConsole.Console.Grpc;
+using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Console;
 
 namespace LibplanetConsole.Client.Executable;
 

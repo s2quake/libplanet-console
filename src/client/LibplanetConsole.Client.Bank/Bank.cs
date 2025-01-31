@@ -1,6 +1,7 @@
 using Grpc.Core;
+using LibplanetConsole.Bank;
+using LibplanetConsole.Bank.Grpc;
 using LibplanetConsole.Client.Services;
-using LibplanetConsole.Grpc.Bank;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Client.Bank;

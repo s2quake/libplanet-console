@@ -1,4 +1,6 @@
 using JSSoft.Commands;
+using LibplanetConsole.BlockChain;
+using LibplanetConsole.BlockChain.Commands;
 using LibplanetConsole.Client.Commands;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.Configuration;

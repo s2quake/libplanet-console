@@ -1,3 +1,4 @@
+using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Executable.Tracers;

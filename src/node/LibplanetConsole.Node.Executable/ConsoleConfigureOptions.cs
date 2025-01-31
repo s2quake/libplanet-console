@@ -1,7 +1,7 @@
 using Google.Protobuf;
+using LibplanetConsole.Console.Grpc;
+using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Console;
-using LibplanetConsole.Node.Services;
 using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable;

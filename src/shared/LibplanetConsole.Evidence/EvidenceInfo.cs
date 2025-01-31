@@ -1,12 +1,8 @@
 #if LIBPLANET_NODE || LIBPLANET_CONSOLE
 using Libplanet.Types.Evidence;
-using LibplanetConsole.Grpc.Evidence;
+using LibplanetConsole.Evidence.Grpc;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Evidence;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Evidence;
-#endif
+namespace LibplanetConsole.Evidence;
 
 public readonly record struct EvidenceInfo
 {

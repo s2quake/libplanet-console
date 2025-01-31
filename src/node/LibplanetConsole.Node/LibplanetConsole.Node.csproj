@@ -15,7 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\common\LibplanetConsole.Seed\LibplanetConsole.Seed.csproj" />
+    <Using Include="Libplanet.Crypto" />
+    <Using Include="Libplanet.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\common\LibplanetConsole.Options\LibplanetConsole.Options.csproj" />
   </ItemGroup>
 
@@ -28,6 +32,7 @@
     <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.BlockChain\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Node\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Seed\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +42,8 @@
       GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto"
       GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Seed\Protos\*.proto"
+      GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>
 
 </Project>

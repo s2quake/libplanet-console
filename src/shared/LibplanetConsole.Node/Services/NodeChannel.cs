@@ -3,13 +3,9 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
-using static LibplanetConsole.Grpc.Node.NodeGrpcService;
+using static LibplanetConsole.Node.Grpc.NodeGrpcService;
 
-#if LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Services;
-#else
-namespace LibplanetConsole.Console.Services;
-#endif
+namespace LibplanetConsole.Node.Services;
 
 internal static class NodeChannel
 {
