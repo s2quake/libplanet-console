@@ -1,9 +1,9 @@
 using Grpc.Net.Client;
-using LibplanetConsole.Client.Converters;
+using LibplanetConsole.BlockChain.Converters;
 using LibplanetConsole.Client.Extensions;
-using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
+using LibplanetConsole.Node.Services;
 
 namespace LibplanetConsole.Client;
 

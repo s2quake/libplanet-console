@@ -12,7 +12,7 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicatio
         {
             LogPath = options.LogPath,
             GenesisHash = options.GenesisBlock.Hash.ToString(),
-            AppProtocolVersion = options.AppProtocolVersion.Token,
+            AppProtocolVersion = options.AppProtocolVersion,
             NoProcess = options.NoProcess,
             Detach = options.Detach,
             NewWindow = options.NewWindow,

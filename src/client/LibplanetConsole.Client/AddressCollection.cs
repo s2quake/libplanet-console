@@ -1,3 +1,5 @@
+using LibplanetConsole.BlockChain;
+
 namespace LibplanetConsole.Client;
 
 internal sealed class AddressCollection : AddressCollectionBase, IClientContent

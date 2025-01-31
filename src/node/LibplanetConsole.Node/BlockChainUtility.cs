@@ -4,13 +4,12 @@ using Libplanet.Blockchain.Renderers;
 using Libplanet.RocksDBStore;
 using Libplanet.Store;
 using Libplanet.Store.Trie;
-using BlockChain = Libplanet.Blockchain.BlockChain;
 
 namespace LibplanetConsole.Node;
 
 internal static class BlockChainUtility
 {
-    public static BlockChain CreateBlockChain(
+    public static Libplanet.Blockchain.BlockChain CreateBlockChain(
         Block genesisBlock,
         IStore store,
         IStateStore stateStore,
@@ -36,7 +35,7 @@ internal static class BlockChainUtility
         var renderers = new IRenderer[] { renderer };
         if (store.GetCanonicalChainId() is null)
         {
-            return BlockChain.Create(
+            return Libplanet.Blockchain.BlockChain.Create(
                 policy: policy,
                 stagePolicy: stagePolicy,
                 store: store,
@@ -47,7 +46,7 @@ internal static class BlockChainUtility
                 blockChainStates: blockChainStates);
         }
 
-        return new BlockChain(
+        return new Libplanet.Blockchain.BlockChain(
             policy: policy,
             stagePolicy: stagePolicy,
             store: store,

@@ -3,15 +3,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
+namespace LibplanetConsole.BlockChain;
 
 internal abstract class AddressCollectionBase : IAddressCollection
 {

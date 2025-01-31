@@ -1,6 +1,7 @@
 using System.Text;
 using JSSoft.Commands.Extensions;
 using JSSoft.Terminals;
+using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Client.Executable;

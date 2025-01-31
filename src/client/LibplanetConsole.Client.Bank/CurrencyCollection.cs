@@ -1,3 +1,5 @@
+using LibplanetConsole.Bank;
+
 namespace LibplanetConsole.Client.Bank;
 
 internal sealed class CurrencyCollection(Bank bank) : CurrencyCollectionBase, IClientContent

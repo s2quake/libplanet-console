@@ -1,15 +1,8 @@
-using LibplanetConsole.Grpc.Node;
+using LibplanetConsole.BlockChain;
+using LibplanetConsole.Node.Grpc;
 using static LibplanetConsole.Grpc.TypeUtility;
 
-#if LIBPLANET_NODE
 namespace LibplanetConsole.Node;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
 
 public readonly record struct NodeInfo
 {

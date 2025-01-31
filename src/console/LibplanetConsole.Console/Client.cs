@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using Grpc.Core;
 using Grpc.Net.Client;
+using LibplanetConsole.Client;
+using LibplanetConsole.Client.Grpc;
+using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Console.Services;
-using LibplanetConsole.Grpc.Client;
 
 namespace LibplanetConsole.Console;
 

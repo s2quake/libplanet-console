@@ -1,15 +1,7 @@
-using LibplanetConsole.Grpc.BlockChain;
+using LibplanetConsole.BlockChain.Grpc;
 using static LibplanetConsole.Grpc.TypeUtility;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
+namespace LibplanetConsole.BlockChain;
 
 public readonly partial record struct BlockInfo(long Height, BlockHash Hash, Address Miner)
 {

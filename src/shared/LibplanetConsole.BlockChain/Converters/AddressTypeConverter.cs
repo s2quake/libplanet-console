@@ -1,15 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Converters;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Converters;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Converters;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
+namespace LibplanetConsole.BlockChain.Converters;
 
 internal sealed class AddressTypeConverter : TypeConverter
 {

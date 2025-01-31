@@ -1,12 +1,12 @@
 #if LIBPLANET_CONSOLE
 using Grpc.Core;
 using Grpc.Net.Client;
+using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Console;
 using LibplanetConsole.Grpc;
-using LibplanetConsole.Grpc.Client;
-using static LibplanetConsole.Grpc.Client.ClientGrpcService;
+using static LibplanetConsole.Client.Grpc.ClientGrpcService;
 
-namespace LibplanetConsole.Console.Services;
+namespace LibplanetConsole.Client.Services;
 
 internal sealed class ClientService : ClientGrpcServiceClient, IDisposable
 {

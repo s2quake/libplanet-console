@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.Bank;
 using LibplanetConsole.Bank.DataAnnotations;
+using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Console.Commands;
 

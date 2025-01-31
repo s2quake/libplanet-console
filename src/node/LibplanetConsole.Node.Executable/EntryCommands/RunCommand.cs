@@ -164,7 +164,7 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
         }
         catch (CommandParsingException e)
         {
-            e.Print(Console.Out);
+            e.Print(System.Console.Out);
             Environment.Exit(1);
         }
     }

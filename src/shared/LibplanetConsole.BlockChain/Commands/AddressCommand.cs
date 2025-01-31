@@ -2,15 +2,7 @@ using JSSoft.Commands;
 using JSSoft.Commands.Extensions;
 using LibplanetConsole.Common.Extensions;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Commands;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Commands;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Commands;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
+namespace LibplanetConsole.BlockChain.Commands;
 
 [CommandSummary("Prints the address of the node")]
 internal sealed class AddressCommand(IAddressCollection addresses) : CommandBase

@@ -1,5 +1,3 @@
-using Libplanet.Net;
-
 namespace LibplanetConsole.Console;
 
 public interface IApplicationOptions
@@ -12,7 +10,7 @@ public interface IApplicationOptions
 
     Block GenesisBlock { get; }
 
-    AppProtocolVersion AppProtocolVersion { get; }
+    string AppProtocolVersion { get; }
 
     string LogPath { get; }
 

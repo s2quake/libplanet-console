@@ -4,11 +4,7 @@ using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Services;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Services;
-#endif
+namespace LibplanetConsole.Console.Services;
 
 internal static class ConsoleChannel
 {

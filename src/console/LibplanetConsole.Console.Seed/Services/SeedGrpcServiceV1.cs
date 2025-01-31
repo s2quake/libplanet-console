@@ -1,10 +1,9 @@
 using Grpc.Core;
-using LibplanetConsole.Grpc.Seed;
-using LibplanetConsole.Seed;
+using LibplanetConsole.Seed.Grpc;
 
-namespace LibplanetConsole.Console.Services;
+namespace LibplanetConsole.Console.Seed.Services;
 
-public sealed class SeedGrpcServiceV1(ISeedService seedService)
+internal sealed class SeedGrpcServiceV1(ISeedService seedService)
     : SeedGrpcService.SeedGrpcServiceBase
 {
     public async override Task<GetSeedResponse> GetSeed(

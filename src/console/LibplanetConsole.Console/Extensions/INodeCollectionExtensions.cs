@@ -1,3 +1,5 @@
+using LibplanetConsole.BlockChain;
+
 namespace LibplanetConsole.Console.Extensions;
 
 public static class INodeCollectionExtensions

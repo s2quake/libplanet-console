@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Libplanet.Net;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Options;

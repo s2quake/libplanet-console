@@ -29,12 +29,12 @@ internal sealed class NodeEventTracer : IHostedService, IDisposable
     private void Node_Started(object? sender, EventArgs e)
     {
         var message = $"Node has been started.";
-        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
+        System.Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 
     private void Node_Stopped(object? sender, EventArgs e)
     {
         var message = $"Node has been stopped.";
-        Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
+        System.Console.Out.WriteColoredLine(message, TerminalColorType.BrightGreen);
     }
 }

@@ -1,15 +1,13 @@
 using LibplanetConsole.Common;
 using LibplanetConsole.Seed;
 
-namespace LibplanetConsole.Console;
+namespace LibplanetConsole.Console.Seed;
 
 internal sealed class SeedService(IApplicationOptions options) : ISeedService
 {
     private readonly PrivateKey _seedNodePrivateKey = new();
     private SeedNode? _blocksyncSeedNode;
     private SeedNode? _consensusSeedNode;
-
-    bool ISeedService.IsEnabled => true;
 
     public Task<SeedInfo> GetSeedAsync(
         PublicKey publicKey, CancellationToken cancellationToken)
@@ -32,21 +30,24 @@ internal sealed class SeedService(IApplicationOptions options) : ISeedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        var blocksyncPort = options.BlocksyncPort;
+        var consensusPort = options.ConsensusPort;
+        var appProtocolVersion = AppProtocolVersion.FromToken(options.AppProtocolVersion);
         _blocksyncSeedNode = new SeedNode(
             "Blocksync",
             new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                Port = options.BlocksyncPort is 0 ? PortUtility.NextPort() : options.BlocksyncPort,
-                AppProtocolVersion = options.AppProtocolVersion,
+                Port = blocksyncPort is 0 ? PortUtility.NextPort() : blocksyncPort,
+                AppProtocolVersion = appProtocolVersion,
             });
         _consensusSeedNode = new SeedNode(
             "Consensus",
             new()
             {
                 PrivateKey = _seedNodePrivateKey,
-                Port = options.ConsensusPort is 0 ? PortUtility.NextPort() : options.ConsensusPort,
-                AppProtocolVersion = options.AppProtocolVersion,
+                Port = consensusPort is 0 ? PortUtility.NextPort() : consensusPort,
+                AppProtocolVersion = appProtocolVersion,
             });
         await _blocksyncSeedNode.StartAsync(cancellationToken);
         await _consensusSeedNode.StartAsync(cancellationToken);

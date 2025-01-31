@@ -1,4 +1,4 @@
-using LibplanetConsole.Console.Converters;
+using LibplanetConsole.BlockChain.Converters;
 using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console;

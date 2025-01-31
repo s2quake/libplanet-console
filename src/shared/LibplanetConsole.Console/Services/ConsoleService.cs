@@ -1,12 +1,8 @@
 #if LIBPLANET_NODE || LIBPLANET_CLIENT
 using Grpc.Net.Client;
-using static LibplanetConsole.Grpc.Console.ConsoleGrpcService;
+using static LibplanetConsole.Console.Grpc.ConsoleGrpcService;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Services;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Services;
-#endif
+namespace LibplanetConsole.Console.Services;
 
 internal sealed class ConsoleService(GrpcChannel channel)
     : ConsoleGrpcServiceClient(channel)

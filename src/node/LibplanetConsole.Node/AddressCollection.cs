@@ -1,3 +1,5 @@
+using LibplanetConsole.BlockChain;
+
 namespace LibplanetConsole.Node;
 
 internal sealed class AddressCollection(IEnumerable<IAddressProvider> addressProviders)

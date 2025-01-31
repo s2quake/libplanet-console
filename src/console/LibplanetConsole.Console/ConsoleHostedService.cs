@@ -5,7 +5,6 @@ namespace LibplanetConsole.Console;
 
 internal sealed class ConsoleHostedService(
     IServiceProvider serviceProvider,
-    SeedService seedService,
     ConsoleHost console,
     IHostApplicationLifetime applicationLifetime)
     : IHostedService
@@ -17,7 +16,6 @@ internal sealed class ConsoleHostedService(
         console.Contents = GetConsoleContents(serviceProvider);
         applicationLifetime.ApplicationStarted.Register(
             async () => await console.InitializeAsync());
-        await seedService.StartAsync(cancellationToken);
         await console.StartAsync(cancellationToken);
     }
 
@@ -31,7 +29,6 @@ internal sealed class ConsoleHostedService(
         }
 
         await console.StopAsync(cancellationToken);
-        await seedService.StopAsync(cancellationToken);
     }
 
     private static IConsoleContent[] GetConsoleContents(IServiceProvider serviceProvider)

@@ -1,3 +1,5 @@
+using LibplanetConsole.BlockChain;
+
 namespace LibplanetConsole.Node;
 
 public interface IAddressProvider

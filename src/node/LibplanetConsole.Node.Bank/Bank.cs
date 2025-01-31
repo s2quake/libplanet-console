@@ -1,5 +1,6 @@
 using Libplanet.Action.State;
 using LibplanetConsole.Bank.Actions;
+using LibplanetConsole.BlockChain;
 
 namespace LibplanetConsole.Node.Bank;
 

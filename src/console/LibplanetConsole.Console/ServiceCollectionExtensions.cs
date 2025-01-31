@@ -1,9 +1,10 @@
 using JSSoft.Commands;
+using LibplanetConsole.BlockChain;
+using LibplanetConsole.BlockChain.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Commands;
 using LibplanetConsole.Console.Commands.Clients;
 using LibplanetConsole.Console.Commands.Nodes;
-using LibplanetConsole.Seed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -24,8 +25,6 @@ public static class ServiceCollectionExtensions
             s => s.GetRequiredService<IOptions<ApplicationOptions>>().Value);
 
         @this.AddSingleton(synchronizationContext);
-        @this.AddSingleton<SeedService>()
-            .AddSingleton<ISeedService>(s => s.GetRequiredService<SeedService>());
         @this.AddSingleton<NodeCollection>()
             .AddSingleton<IConsoleContent>(s => s.GetRequiredService<NodeCollection>())
             .AddSingleton<INodeCollection>(s => s.GetRequiredService<NodeCollection>());

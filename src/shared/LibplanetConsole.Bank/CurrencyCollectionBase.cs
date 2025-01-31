@@ -7,15 +7,7 @@ using System.Text.RegularExpressions;
 using LibplanetConsole.Bank.DataAnnotations;
 using LibplanetConsole.Common;
 
-#if LIBPLANET_NODE
-namespace LibplanetConsole.Node.Bank;
-#elif LIBPLANET_CLIENT
-namespace LibplanetConsole.Client.Bank;
-#elif LIBPLANET_CONSOLE
-namespace LibplanetConsole.Console.Bank;
-#else
-#error LIBPLANET_NODE, LIBPLANET_CLIENT, or LIBPLANET_CONSOLE must be defined.
-#endif
+namespace LibplanetConsole.Bank;
 
 internal abstract class CurrencyCollectionBase : ICurrencyCollection
 {

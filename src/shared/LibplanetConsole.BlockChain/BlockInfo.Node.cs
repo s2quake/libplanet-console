@@ -1,5 +1,5 @@
 #if LIBPLANET_NODE
-namespace LibplanetConsole.Node;
+namespace LibplanetConsole.BlockChain;
 
 public readonly partial record struct BlockInfo
 {

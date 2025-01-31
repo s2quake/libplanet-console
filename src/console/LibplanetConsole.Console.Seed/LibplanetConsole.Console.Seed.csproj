@@ -11,12 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LibplanetConsole.Common\LibplanetConsole.Common.csproj" />
+    <Using Include="Libplanet.Crypto" />
+    <Using Include="Libplanet.Net" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Libplanet.Crypto" />
-    <Using Include="Libplanet.Net" />
+    <ProjectReference Include="..\LibplanetConsole.Console\LibplanetConsole.Console.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,7 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\*.proto" GrpcServices="Both" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Seed\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Seed\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>
 
 </Project>

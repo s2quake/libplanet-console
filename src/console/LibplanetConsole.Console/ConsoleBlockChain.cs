@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using LibplanetConsole.BlockChain;
 
 namespace LibplanetConsole.Console;
 
