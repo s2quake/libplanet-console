@@ -11,7 +11,6 @@ service BlockChainGrpcService {
   rpc GetState(GetStateRequest) returns (GetStateResponse);
   rpc GetBlockHash(GetBlockHashRequest) returns (GetBlockHashResponse);
   rpc GetAction(GetActionRequest) returns (GetActionResponse);
-  rpc GetAddresses(GetAddressesRequest) returns (GetAddressesResponse);
 
   rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
@@ -20,12 +19,6 @@ message BlockInfoProto {
   int64 height = 1;
   string hash = 2;
   string miner = 3;
-}
-
-message AddressInfoProto {
-  string alias = 1;
-  string address = 2;
-  repeated string tags = 3;
 }
 
 message SendTransactionRequest {
@@ -84,13 +77,6 @@ message GetActionResponse {
 
 message BlockAppendedEvent {
   BlockInfoProto block_info = 1;
-}
-
-message GetAddressesRequest {
-}
-
-message GetAddressesResponse {
-  repeated AddressInfoProto addressInfos = 1;
 }
 
 message GetEventStreamRequest {

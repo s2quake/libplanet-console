@@ -1,5 +1,4 @@
 using Grpc.Core;
-using LibplanetConsole.Common;
 using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Grpc;
 using LibplanetConsole.Node;
@@ -15,7 +14,7 @@ public sealed class ConsoleGrpcServiceV1(
     IClientCollection clients)
     : ConsoleGrpcService.ConsoleGrpcServiceBase
 {
-    private EndPoint? _seedEndPoint;
+    private Uri? _seedUrl;
 
     public override Task<GetNodeSettingsResponse> GetNodeSettings(
         GetNodeSettingsRequest request, ServerCallContext context)
@@ -26,7 +25,7 @@ public sealed class ConsoleGrpcServiceV1(
             AppProtocolVersion = options.AppProtocolVersion,
             Genesis = TypeUtility.ToGrpc(genesis),
             ProcessId = Environment.ProcessId,
-            SeedEndPoint = EndPointUtility.ToString(GetSeedEndPoint()),
+            SeedUrl = GetSeedUrl().ToString(),
         });
     }
 
@@ -36,7 +35,7 @@ public sealed class ConsoleGrpcServiceV1(
         return Task.FromResult(new GetClientSettingsResponse
         {
             ProcessId = Environment.ProcessId,
-            NodeEndPoint = EndPointUtility.ToString(RandomNodeEndPoint()),
+            NodeUrl = RandomNodeUrl().ToString(),
         });
     }
 
@@ -46,7 +45,7 @@ public sealed class ConsoleGrpcServiceV1(
         var attachOptions = new AttachOptions
         {
             Address = TypeUtility.ToAddress(request.Address),
-            EndPoint = EndPointUtility.Parse(request.EndPoint),
+            Url = new Uri(request.Url),
             ProcessId = request.ProcessId,
         };
         await nodes.AttachAsync(attachOptions, context.CancellationToken);
@@ -59,32 +58,30 @@ public sealed class ConsoleGrpcServiceV1(
         var attachOptions = new AttachOptions
         {
             Address = TypeUtility.ToAddress(request.Address),
-            EndPoint = EndPointUtility.Parse(request.EndPoint),
+            Url = new Uri(request.Url),
             ProcessId = request.ProcessId,
         };
         await clients.AttachAsync(attachOptions, context.CancellationToken);
         return new AttachClientResponse();
     }
 
-    private EndPoint GetSeedEndPoint()
+    private Uri GetSeedUrl()
     {
-        if (_seedEndPoint is null)
+        if (_seedUrl is null)
         {
             var addressesFeature = server.Features.Get<IServerAddressesFeature>()
                 ?? throw new InvalidOperationException("ServerAddressesFeature is not available.");
             var address = addressesFeature.Addresses.First();
-            var url = new Uri(address);
-
-            _seedEndPoint = new DnsEndPoint(url.Host, url.Port);
+            _seedUrl = new Uri(address);
         }
 
-        return _seedEndPoint;
+        return _seedUrl;
     }
 
-    private EndPoint RandomNodeEndPoint()
+    private Uri RandomNodeUrl()
     {
         var nodeIndex = Random.Shared.Next(nodes.Count);
         var node = nodes[nodeIndex];
-        return node.EndPoint;
+        return node.Url;
     }
 }

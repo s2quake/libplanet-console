@@ -2,7 +2,6 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Services;
 
@@ -58,9 +57,9 @@ internal static class ConsoleChannel
         },
     };
 
-    public static GrpcChannel CreateChannel(EndPoint endPoint)
+    public static GrpcChannel CreateChannel(Uri url)
     {
-        var address = $"http://{EndPointUtility.ToString(endPoint)}";
+        var address = url.ToString();
         return GrpcChannel.ForAddress(address, _channelOptions);
     }
 }

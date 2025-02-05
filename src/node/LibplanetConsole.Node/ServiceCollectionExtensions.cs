@@ -1,6 +1,7 @@
 using JSSoft.Commands;
+using LibplanetConsole.Alias;
+using LibplanetConsole.Alias.Commands;
 using LibplanetConsole.BlockChain;
-using LibplanetConsole.BlockChain.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Node.Commands;
 using Microsoft.Extensions.Configuration;
@@ -26,15 +27,16 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<Node>()
             .AddSingleton<INode>(s => s.GetRequiredService<Node>())
             .AddSingleton<IBlockChain>(s => s.GetRequiredService<Node>());
-        @this.AddSingleton<AddressCollection>()
-            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>())
-            .AddSingleton<INodeContent>(s => s.GetRequiredService<AddressCollection>());
+        @this.AddSingleton<AliasCollection>()
+            .AddSingleton<IAliasCollection>(s => s.GetRequiredService<AliasCollection>())
+            .AddSingleton<INodeContent>(s => s.GetRequiredService<AliasCollection>());
         @this.AddSingleton<IInfoProvider, ApplicationInfoProvider>();
         @this.AddSingleton<IInfoProvider, NodeInfoProvider>();
 
         @this.AddHostedService<NodeHostedService>();
 
-        @this.AddSingleton<ICommand, AddressCommand>();
+        @this.AddSingleton<ICommand, AliasCommand>();
+        @this.AddSingleton<ICommand, AliasListCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();
         @this.AddSingleton<ICommand, InfoCommand>();
         @this.AddSingleton<ICommand, KeyCommand>();

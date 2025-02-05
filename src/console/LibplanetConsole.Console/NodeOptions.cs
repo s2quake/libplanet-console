@@ -2,17 +2,16 @@ using System.ComponentModel;
 using System.Diagnostics;
 using LibplanetConsole.Common;
 using Microsoft.Extensions.Configuration;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
 public sealed record class NodeOptions
 {
-    public required EndPoint EndPoint { get; init; }
+    public required Uri Url { get; init; }
 
     public required PrivateKey PrivateKey { get; init; }
 
-    public EndPoint? SeedEndPoint { get; init; }
+    public Uri? HubUrl { get; init; }
 
     public string StorePath { get; init; } = string.Empty;
 
@@ -25,8 +24,6 @@ public sealed record class NodeOptions
     public int BlocksyncPort { get; init; }
 
     public int ConsensusPort { get; init; }
-
-    public string Alias { get; set; } = string.Empty;
 
     internal string RepositoryPath { get; private set; } = string.Empty;
 
@@ -56,11 +53,11 @@ public sealed record class NodeOptions
 
         return new()
         {
-            EndPoint = new DnsEndPoint(url.Host, url.Port),
+            Url = url,
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             StorePath = Path.GetFullPath(applicationSettings.StorePath, repositoryPath),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            SeedEndPoint = ParseOrDefault(applicationSettings.SeedEndPoint),
+            HubUrl = UriUtility.ParseOrDefault(applicationSettings.SeedUrl),
             RepositoryPath = repositoryPath,
             ActionProviderModulePath = applicationSettings.ActionProviderModulePath,
             ActionProviderType = applicationSettings.ActionProviderType,
@@ -70,7 +67,6 @@ public sealed record class NodeOptions
             ConsensusPort = applicationSettings.ConsensusPort == 0
                 ? PortUtility.NextPort()
                 : applicationSettings.ConsensusPort,
-            Alias = applicationSettings.Alias,
         };
     }
 
@@ -104,7 +100,7 @@ public sealed record class NodeOptions
         public string LogPath { get; init; } = string.Empty;
 
         [DefaultValue("")]
-        public string SeedEndPoint { get; init; } = string.Empty;
+        public string SeedUrl { get; init; } = string.Empty;
 
         [DefaultValue("")]
         public string ActionProviderModulePath { get; init; } = string.Empty;
@@ -117,8 +113,5 @@ public sealed record class NodeOptions
 
         [DefaultValue(0)]
         public int ConsensusPort { get; init; } = 0;
-
-        [DefaultValue("")]
-        public string Alias { get; init; } = string.Empty;
     }
 }

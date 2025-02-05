@@ -48,7 +48,7 @@ internal sealed class NewNodeCommand(
                 application.RepositoryPath, privateKey, port, cancellationToken)
             : new NodeOptions
             {
-                EndPoint = EndPointUtility.GetLocalHost(port),
+                Url = UriUtility.GetLocalHost(port),
                 PrivateKey = privateKey,
                 ActionProviderModulePath = options.ActionProviderModulePath,
                 ActionProviderType = options.ActionProviderType,

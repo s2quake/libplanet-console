@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Grpc.Core;
 using Grpc.Net.Client;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.Common.Threading;
@@ -37,7 +36,6 @@ internal sealed class Node : INode
         _privateKey = nodeOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Node>();
         PublicKey = nodeOptions.PrivateKey.PublicKey;
-        Alias = nodeOptions.Alias;
         _logger.LogDebug("Node is created: {Address}", Address);
     }
 
@@ -63,9 +61,9 @@ internal sealed class Node : INode
 
     public NodeOptions Options { get; private set; }
 
-    public EndPoint EndPoint
+    public Uri Url
     {
-        get => Options.EndPoint;
+        get => Options.Url;
         set
         {
             if (IsAttached is true)
@@ -73,7 +71,7 @@ internal sealed class Node : INode
                 throw new InvalidOperationException("Node is attached.");
             }
 
-            Options = Options with { EndPoint = value };
+            Options = Options with { Url = value };
         }
     }
 
@@ -84,8 +82,6 @@ internal sealed class Node : INode
         get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
         set => _contents = value;
     }
-
-    public string Alias { get; }
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 
@@ -138,7 +134,7 @@ internal sealed class Node : INode
             throw new InvalidOperationException("Node is already attached.");
         }
 
-        var channel = NodeChannel.CreateChannel(Options.EndPoint);
+        var channel = NodeChannel.CreateChannel(Options.Url);
         var nodeService = await NodeService.CreateAsync(channel, cancellationToken);
 
         _channel = channel;
@@ -210,10 +206,10 @@ internal sealed class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        var seedEndPoint = GetSeedEndPoint();
+        var seedUrl = GetSeedUrl();
         var request = new StartRequest
         {
-            SeedEndPoint = EndPointUtility.ToString(seedEndPoint),
+            SeedUrl = seedUrl.ToString(),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.StartAsync(request, callOptions);
@@ -324,7 +320,7 @@ internal sealed class Node : INode
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && Options.SeedEndPoint is null)
+        if (IsAttached is true && Options.HubUrl is null)
         {
             await StartAsync(cancellationToken);
         }
@@ -422,20 +418,18 @@ internal sealed class Node : INode
         }
     }
 
-    private EndPoint GetSeedEndPoint()
+    private Uri GetSeedUrl()
     {
-        if (Options.SeedEndPoint is { } seedEndPoint)
+        if (Options.HubUrl is { } seedUrl)
         {
-            return seedEndPoint;
+            return seedUrl;
         }
 
         var server = _serviceProvider.GetRequiredService<IServer>();
         var addressesFeature = server.Features.Get<IServerAddressesFeature>()
             ?? throw new InvalidOperationException("ServerAddressesFeature is not available.");
         var address = addressesFeature.Addresses.First();
-        var url = new Uri(address);
-
-        return new DnsEndPoint(url.Host, url.Port);
+        return new Uri(address);
     }
 
     private NodeProcess CreateProcess(ProcessOptions options)

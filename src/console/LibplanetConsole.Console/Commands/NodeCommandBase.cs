@@ -1,5 +1,5 @@
 using JSSoft.Commands;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
@@ -51,7 +51,7 @@ public abstract class NodeCommandBase : CommandBase
 
     protected string[] GetAddresses(params string[] tags)
     {
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        return addresses.GetAddresses(tags);
+        var aliases = _serviceProvider.GetRequiredService<IAliasCollection>();
+        return aliases.GetAddresses(tags);
     }
 }

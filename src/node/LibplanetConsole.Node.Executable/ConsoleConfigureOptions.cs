@@ -1,4 +1,5 @@
 using Google.Protobuf;
+using LibplanetConsole.Common;
 using LibplanetConsole.Console.Grpc;
 using LibplanetConsole.Console.Services;
 using LibplanetConsole.Grpc;
@@ -6,22 +7,27 @@ using Microsoft.Extensions.Options;
 
 namespace LibplanetConsole.Node.Executable;
 
-internal sealed class ConsoleConfigureOptions(EndPoint consoleEndPoint)
+internal sealed class ConsoleConfigureOptions
     : IConfigureOptions<ApplicationOptions>
 {
+    public Uri? ConsoleUrl { get; private set; }
+
     public void Configure(ApplicationOptions options)
     {
-        using var channel = ConsoleChannel.CreateChannel(consoleEndPoint);
-        var service = new ConsoleService(channel);
-        var request = new GetNodeSettingsRequest();
-        var response = service.GetNodeSettings(
-            request: request,
-            deadline: DateTime.UtcNow.AddSeconds(5));
+        var hubUrl = UriUtility.ParseOrDefault(options.HubUrl);
+        if (options.ParentProcessId is 0 && hubUrl is not null)
+        {
+            using var channel = ConsoleChannel.CreateChannel(hubUrl);
+            var service = new ConsoleService(channel);
+            var request = new GetNodeSettingsRequest();
+            var response = service.GetNodeSettings(
+                request: request);
 
-        options.Genesis = GetGenesis(response.Genesis);
-        options.AppProtocolVersion = response.AppProtocolVersion;
-        options.ParentProcessId = response.ProcessId;
-        options.SeedEndPoint = response.SeedEndPoint;
+            options.Genesis = GetGenesis(response.Genesis);
+            options.AppProtocolVersion = response.AppProtocolVersion;
+            options.ParentProcessId = response.ProcessId;
+            ConsoleUrl = hubUrl;
+        }
     }
 
     private static string GetGenesis(ByteString genesisByteString)

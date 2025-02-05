@@ -25,15 +25,13 @@ public interface IClient : IAsyncDisposable, IKeyedServiceProvider, ISigner
 
     bool IsRunning { get; }
 
-    EndPoint EndPoint { get; set; }
+    Uri Url { get; set; }
 
     ClientInfo Info { get; }
 
     PublicKey PublicKey { get; }
 
     Address Address => PublicKey.Address;
-
-    string Alias { get; }
 
     Task StartProcessAsync(ProcessOptions options, CancellationToken cancellationToken);
 

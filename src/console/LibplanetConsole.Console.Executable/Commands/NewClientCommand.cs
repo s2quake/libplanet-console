@@ -46,7 +46,7 @@ internal sealed class NewClientCommand(
                 application.RepositoryPath, privateKey, port, cancellationToken)
             : new ClientOptions
             {
-                EndPoint = EndPointUtility.GetLocalHost(port),
+                Url = UriUtility.GetLocalHost(port),
                 PrivateKey = privateKey,
             };
         var addNewOptions = new AddNewClientOptions

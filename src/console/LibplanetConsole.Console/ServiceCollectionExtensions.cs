@@ -1,6 +1,7 @@
 using JSSoft.Commands;
+using LibplanetConsole.Alias;
+using LibplanetConsole.Alias.Commands;
 using LibplanetConsole.BlockChain;
-using LibplanetConsole.BlockChain.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Console.Commands;
 using LibplanetConsole.Console.Commands.Clients;
@@ -36,9 +37,8 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ConsoleBlockChain>()
             .AddSingleton<IBlockChain>(s => s.GetRequiredService<ConsoleBlockChain>())
             .AddSingleton<IConsoleContent>(s => s.GetRequiredService<ConsoleBlockChain>());
-        @this.AddSingleton<AddressCollection>()
-            .AddSingleton<IAddressCollection>(s => s.GetRequiredService<AddressCollection>())
-            .AddSingleton<IConsoleContent>(s => s.GetRequiredService<AddressCollection>());
+        @this.AddSingleton<AliasCollection>()
+            .AddSingleton<IAliasCollection>(s => s.GetRequiredService<AliasCollection>());
         @this.AddSingleton<ApplicationInfoProvider>()
             .AddSingleton<IInfoProvider>(s => s.GetRequiredService<ApplicationInfoProvider>());
         @this.AddSingleton<RunningNode>();
@@ -84,7 +84,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StartClientProcessCommand>();
         @this.AddSingleton<ICommand, StopClientProcessCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
-        @this.AddSingleton<ICommand, AddressCommand>();
+        @this.AddSingleton<ICommand, AliasCommand>();
         return @this;
     }
 }

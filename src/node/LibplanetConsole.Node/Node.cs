@@ -34,7 +34,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private readonly int _blocksyncPort;
     private readonly int _consensusPort;
 
-    private EndPoint? _seedEndPoint;
+    private Uri? _seedUrl;
     private Swarm? _swarm;
     private IKeyValueStore? _keyValueStore;
     private IStore? _store;
@@ -53,7 +53,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         IApplicationOptions options)
     {
         _serviceProvider = serviceProvider;
-        _seedEndPoint = options.SeedEndPoint;
+        _seedUrl = options.HubUrl;
         _privateKey = options.PrivateKey;
         _logger = serviceProvider.GetLogger<Node>();
         _logger.LogDebug("Node is creating...: {Address}", options.PrivateKey.Address);
@@ -110,9 +110,9 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
         }
     }
 
-    public EndPoint? SeedEndPoint
+    public Uri? SeedUrl
     {
-        get => _seedEndPoint;
+        get => _seedUrl;
         set
         {
             if (IsRunning == true)
@@ -120,7 +120,7 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
                 throw new InvalidOperationException("The client is running.");
             }
 
-            _seedEndPoint = value;
+            _seedUrl = value;
         }
     }
 
@@ -315,11 +315,11 @@ internal sealed partial class Node : IActionRenderer, INode, IAsyncDisposable
     private async Task<(BoundPeer? BlocksyncPeer, BoundPeer? ConsensusPeer)> GetSeedInfoAsync(
         ILogger logger, CancellationToken cancellationToken)
     {
-        if (_seedEndPoint is { } seedEndPoint)
+        if (_seedUrl is { } seedUrl)
         {
             logger.LogDebug(
-                "Getting seed info from {SeedEndPoint}", EndPointUtility.ToString(seedEndPoint));
-            using var channel = SeedChannel.CreateChannel(seedEndPoint);
+                "Getting seed info from {SeedUrl}", seedUrl);
+            using var channel = SeedChannel.CreateChannel(seedUrl);
             var client = new SeedService(channel);
             var request = new Seed.Grpc.GetSeedRequest
             {

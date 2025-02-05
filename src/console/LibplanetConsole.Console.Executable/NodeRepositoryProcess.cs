@@ -8,7 +8,7 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
 
     public required int Port { get; init; }
 
-    public string SeedEndPoint { get; init; } = string.Empty;
+    public string HubUrl { get; init; } = string.Empty;
 
     public string OutputPath { get; set; } = string.Empty;
 
@@ -23,8 +23,6 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
     public int BlocksyncPort { get; set; }
 
     public int ConsensusPort { get; set; }
-
-    public string Alias { get; set; } = string.Empty;
 
     public override string[] Arguments
     {
@@ -53,10 +51,10 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
                 "--apv-path",
                 AppProtocolVersionPath,
             };
-            if (SeedEndPoint != string.Empty)
+            if (HubUrl != string.Empty)
             {
-                argumentList.Add("--seed-end-point");
-                argumentList.Add(SeedEndPoint);
+                argumentList.Add("--hub-url");
+                argumentList.Add(HubUrl);
             }
 
             if (ActionProviderModulePath != string.Empty)
@@ -81,12 +79,6 @@ internal sealed class NodeRepositoryProcess : NodeProcessBase
             {
                 argumentList.Add("--consensus-port");
                 argumentList.Add($"{ConsensusPort}");
-            }
-
-            if (Alias != string.Empty)
-            {
-                argumentList.Add("--alias");
-                argumentList.Add(Alias);
             }
 
             return [.. argumentList];

@@ -9,6 +9,8 @@
     <Compile Include="$(SharedDirectory)LibplanetConsole.Client\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.BlockChain\**\*.cs" />
     <Compile Include="$(SharedDirectory)LibplanetConsole.Grpc\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Alias\**\*.cs" />
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Hub\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +21,10 @@
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Client\Protos\*.proto"
       GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Node\Protos\*.proto"
+      GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Alias\Protos\*.proto"
+      GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Hub\Protos\*.proto"
       GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>
 

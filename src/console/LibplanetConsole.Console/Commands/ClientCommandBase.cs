@@ -1,5 +1,5 @@
 using JSSoft.Commands;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
@@ -49,7 +49,7 @@ public abstract class ClientCommandBase : CommandBase
 
     protected string[] GetClientAddresses()
     {
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        return addresses.GetAddresses(IClient.Tag);
+        var aliases = _serviceProvider.GetRequiredService<IAliasCollection>();
+        return aliases.GetAddresses(IClient.Tag);
     }
 }

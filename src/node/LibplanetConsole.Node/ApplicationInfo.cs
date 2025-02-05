@@ -1,12 +1,8 @@
-using System.Text.Json.Serialization;
-using LibplanetConsole.Common.Converters;
-
 namespace LibplanetConsole.Node;
 
 public readonly record struct ApplicationInfo
 {
-    [JsonConverter(typeof(EndPointJsonConverter))]
-    public required EndPoint? SeedEndPoint { get; init; }
+    public required Uri? HubUrl { get; init; }
 
     public required string StorePath { get; init; }
 

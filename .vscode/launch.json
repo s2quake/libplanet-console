@@ -96,9 +96,7 @@
         // options
         "--single-node",
         "--port",
-        "4000",
-        "--alias",
-        "node"
+        "4000"
       ]
     },
     {
@@ -116,8 +114,8 @@
         "4010",
         "--private-key",
         "7cacdd32e4b1b224c2655ca923be6bbfd03bff7e2190a6978be0576e924a4819",
-        "--console-end-point",
-        "localhost:4000"
+        "--hub-url",
+        "http://localhost:4000"
       ]
     },
     {
@@ -151,10 +149,8 @@
       "args": [
         "run",
         // options
-        "--node-end-point",
-        "localhost:4000",
-        "--alias",
-        "client"
+        "--hub-url",
+        "http://localhost:4000"
       ]
     },
     {
@@ -172,8 +168,8 @@
         "4020",
         "--private-key",
         "9cb1c6d0b19d8481bc5be6b50206e834232e13cc25cd7798a927f7bb1b6c1bc0",
-        "--console-end-point",
-        "localhost:4000"
+        "--hub-url",
+        "http://localhost:4000"
       ]
     },
   ],
@@ -182,8 +178,7 @@
       "name": "Console - Concurrent Run",
       "configurations": [
         "C#: Libplanet Console - Concurrent Run",
-        "C#: Libplanet Node - Concurrent Run",
-        "C#: Libplanet Client - Concurrent Run",
+        "C#: Libplanet Node - Concurrent Run"
       ]
     },
     {

@@ -6,5 +6,5 @@ public sealed record class AttachOptions
 
     public required int ProcessId { get; init; }
 
-    public required EndPoint EndPoint { get; init; }
+    public required Uri Url { get; init; }
 }

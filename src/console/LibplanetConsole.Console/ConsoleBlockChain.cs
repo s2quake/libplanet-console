@@ -109,16 +109,6 @@ internal sealed class ConsoleBlockChain(NodeCollection nodes)
         return _blockChain.GetActionAsync<T>(txId, actionIndex, cancellationToken);
     }
 
-    Task<AddressInfo[]> IBlockChain.GetAddressesAsync(CancellationToken cancellationToken)
-    {
-        if (IsRunning is false || _blockChain is null)
-        {
-            throw new InvalidOperationException("BlockChain is not running.");
-        }
-
-        return _blockChain.GetAddressesAsync(cancellationToken);
-    }
-
     async Task IConsoleContent.StartAsync(CancellationToken cancellationToken)
     {
         SetNode(nodes.Current);

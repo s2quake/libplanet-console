@@ -1,5 +1,5 @@
 using JSSoft.Commands;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
@@ -71,15 +71,15 @@ public abstract class ClientCommandMethodBase : CommandMethodBase
             return default;
         }
 
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        return addresses.ToAddress(address);
+        var aliases = _serviceProvider.GetRequiredService<IAliasCollection>();
+        return aliases.ToAddress(address);
     }
 
     protected string[] GetClientAddresses() => GetAddresses(IClient.Tag);
 
     protected string[] GetAddresses(params string[] tags)
     {
-        var addresses = _serviceProvider.GetRequiredService<IAddressCollection>();
-        return addresses.GetAddresses(tags);
+        var aliases = _serviceProvider.GetRequiredService<IAliasCollection>();
+        return aliases.GetAddresses(tags);
     }
 }

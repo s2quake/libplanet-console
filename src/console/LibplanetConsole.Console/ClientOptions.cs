@@ -1,21 +1,19 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using LibplanetConsole.Common;
 using Microsoft.Extensions.Configuration;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
 public sealed record class ClientOptions
 {
-    public required EndPoint EndPoint { get; init; }
+    public required Uri Url { get; init; }
 
     public required PrivateKey PrivateKey { get; init; }
 
-    public EndPoint? NodeEndPoint { get; init; }
+    public Uri? NodeUrl { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
-
-    public string Alias { get; set; } = string.Empty;
 
     internal string RepositoryPath { get; private set; } = string.Empty;
 
@@ -45,12 +43,11 @@ public sealed record class ClientOptions
 
         return new()
         {
-            EndPoint = new DnsEndPoint(url.Host, url.Port),
+            Url = url,
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            NodeEndPoint = ParseOrDefault(applicationSettings.NodeEndPoint),
+            NodeUrl = UriUtility.ParseOrDefault(applicationSettings.NodeUrl),
             RepositoryPath = repositoryPath,
-            Alias = applicationSettings.Alias,
         };
     }
 
@@ -78,9 +75,6 @@ public sealed record class ClientOptions
         public string LogPath { get; init; } = string.Empty;
 
         [DefaultValue("")]
-        public string NodeEndPoint { get; init; } = string.Empty;
-
-        [DefaultValue("")]
-        public string Alias { get; init; } = string.Empty;
+        public string NodeUrl { get; init; } = string.Empty;
     }
 }

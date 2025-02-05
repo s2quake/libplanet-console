@@ -4,7 +4,6 @@ using Grpc.Net.Client;
 using LibplanetConsole.Client;
 using LibplanetConsole.Client.Grpc;
 using LibplanetConsole.Client.Services;
-using LibplanetConsole.Common;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Extensions;
@@ -35,7 +34,6 @@ internal sealed class Client : IClient
         _privateKey = clientOptions.PrivateKey;
         _logger = _serviceProvider.GetLogger<Client>();
         PublicKey = clientOptions.PrivateKey.PublicKey;
-        Alias = clientOptions.Alias;
         _logger.LogDebug("Client is created: {Address}", Address);
     }
 
@@ -61,9 +59,9 @@ internal sealed class Client : IClient
 
     public ClientOptions Options { get; private set; }
 
-    public EndPoint EndPoint
+    public Uri Url
     {
-        get => Options.EndPoint;
+        get => Options.Url;
         set
         {
             if (IsAttached is true)
@@ -71,7 +69,7 @@ internal sealed class Client : IClient
                 throw new InvalidOperationException("Client is attached.");
             }
 
-            Options = Options with { EndPoint = value };
+            Options = Options with { Url = value };
         }
     }
 
@@ -82,8 +80,6 @@ internal sealed class Client : IClient
         get => _contents ?? throw new InvalidOperationException("Contents is not initialized.");
         set => _contents = value;
     }
-
-    public string Alias { get; }
 
     public object? GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
 
@@ -136,7 +132,7 @@ internal sealed class Client : IClient
             throw new InvalidOperationException("Client is already attached.");
         }
 
-        var channel = ClientChannel.CreateChannel(Options.EndPoint);
+        var channel = ClientChannel.CreateChannel(Options.Url);
         var clientService = await ClientService.CreateAsync(channel, cancellationToken);
 
         _channel = channel;
@@ -210,7 +206,7 @@ internal sealed class Client : IClient
 
         var request = new StartRequest
         {
-            NodeEndPoint = EndPointUtility.ToString(node.EndPoint),
+            NodeUrl = node.Url.ToString(),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.StartAsync(request, callOptions);
@@ -322,7 +318,7 @@ internal sealed class Client : IClient
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && Options.NodeEndPoint is null)
+        if (IsAttached is true && Options.NodeUrl is null)
         {
             var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
             var node = nodes.RandomNode();

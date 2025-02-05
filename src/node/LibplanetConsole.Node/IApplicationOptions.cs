@@ -10,7 +10,7 @@ public interface IApplicationOptions
 
     int ParentProcessId { get; }
 
-    EndPoint? SeedEndPoint { get; }
+    Uri? HubUrl { get; }
 
     string StorePath { get; }
 
@@ -27,6 +27,4 @@ public interface IApplicationOptions
     int BlocksyncPort { get; }
 
     int ConsensusPort { get; }
-
-    string Alias { get; }
 }

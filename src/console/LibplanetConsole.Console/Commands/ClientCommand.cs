@@ -1,6 +1,6 @@
 using JSSoft.Commands;
 using JSSoft.Terminals;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
@@ -10,7 +10,7 @@ namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Provides client-related commands")]
 public sealed partial class ClientCommand(
-    IServiceProvider serviceProvider, IClientCollection clients, IAddressCollection addresses)
+    IServiceProvider serviceProvider, IClientCollection clients, IAliasCollection aliases)
     : ClientCommandMethodBase(serviceProvider), IExecutable
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
@@ -27,7 +27,7 @@ public sealed partial class ClientCommand(
             var isCurrent = clients.Current == client;
             tsb.Foreground = GetForeground(client: client, isCurrent);
             tsb.IsBold = client.IsRunning == true;
-            if (addresses.TryGetAlias(address, out var alias) is true)
+            if (aliases.TryGetAlias(address, out var alias) is true)
             {
                 tsb.AppendLine($"{client} ({alias})");
             }

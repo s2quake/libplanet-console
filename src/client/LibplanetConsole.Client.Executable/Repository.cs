@@ -15,11 +15,9 @@ public sealed record class Repository
 
     public required PrivateKey PrivateKey { get; init; }
 
-    public EndPoint? NodeEndPoint { get; init; }
+    public Uri? HubUrl { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
-
-    public string Alias { get; set; } = string.Empty;
 
     public dynamic Save(string repositoryPath)
     {
@@ -58,8 +56,7 @@ public sealed record class Repository
             {
                 PrivateKey = PrivateKeyUtility.ToString(privateKey),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
-                NodeEndPoint = EndPointUtility.ToString(NodeEndPoint),
-                Alias = Alias,
+                HubUrl = $"{HubUrl}",
             },
             Kestrel = new
             {

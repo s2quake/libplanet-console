@@ -4,6 +4,7 @@ using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
 using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace LibplanetConsole.Client.Executable;
@@ -36,6 +37,9 @@ internal sealed class Application
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
         services.AddSingleton<IInfoProvider, ServerInfoProvider>();
+        services.AddSingleton<ConsoleConfigureOptions>()
+            .AddSingleton<IConfigureOptions<ApplicationOptions>>(
+                s => s.GetRequiredService<ConsoleConfigureOptions>());
 
         services.AddSingleton<HelpCommand>()
                 .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
@@ -54,6 +58,7 @@ internal sealed class Application
         services.AddSingleton<IClientContent, ClientEventTracer>();
         services.AddHostedService<BlockChainEventTracer>();
         services.AddHostedService<SystemTerminalHostedService>();
+        services.AddHostedService<ConsoleHostedService>();
 
         services.PostConfigure<ApplicationOptions>(options =>
        {

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using JSSoft.Commands;
 using Libplanet.Net;
 using LibplanetConsole.Common;
@@ -26,16 +25,14 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console")]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Specifies the EndPoint of the seed node to connect to")]
+    [CommandSummary("Specifies the url of the seed node to connect to")]
     [CommandPropertyExclusion(nameof(IsSingleNode))]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
-    [EndPoint]
-    public string SeedEndPoint { get; init; } = string.Empty;
+    [Uri(AllowEmpty = true)]
+    public string HubUrl { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Specifies the directory path to store data")]
@@ -44,27 +41,23 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(Genesis))]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [CommandSummary("Specifies the file path to load the genesis block")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string GenesisPath { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandPropertyExclusion(nameof(GenesisPath))]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [CommandSummary("Specifies a hexadecimal genesis string")]
     public string Genesis { get; init; } = string.Empty;
 
     [CommandProperty("apv-path")]
     [CommandPropertyExclusion(nameof(AppProtocolVersion))]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [CommandSummary("Specifies the file path to load the AppProtocolVersion")]
     [Path(ExistsType = PathExistsType.Exist, AllowEmpty = true)]
     public string AppProtocolVersionPath { get; init; } = string.Empty;
 
     [CommandProperty("apv")]
     [CommandPropertyExclusion(nameof(AppProtocolVersionPath))]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [CommandSummary("Specifies the AppProtocolVersion")]
     [AppProtocolVersion]
     public string AppProtocolVersion { get; init; } = string.Empty;
@@ -79,8 +72,7 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
     public bool NoREPL { get; init; }
 
     [CommandPropertySwitch("single-node")]
-    [CommandPropertyExclusion(nameof(SeedEndPoint))]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
+    [CommandPropertyExclusion(nameof(HubUrl))]
     [CommandSummary("If set, the node runs as a single node")]
     public bool IsSingleNode { get; init; }
 
@@ -94,38 +86,16 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
     [CommandExample("--module-type 'LibplanetModule.SimpleActionProvider, LibplanetModule'")]
     public string ActionProviderType { get; init; } = string.Empty;
 
-    [CommandProperty]
-    [CommandSummary("Specifies the end-point of the console to connect to.")]
-    [EndPoint]
-    public string ConsoleEndPoint { get; init; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("Specifies the alias of the node address.")]
-    public string Alias { get; init; } = string.Empty;
-
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
-        if (ConsoleEndPoint != string.Empty && GenesisPath != string.Empty)
-        {
-            throw new UnreachableException(
-                "Both ConsoleEndPoint and GenesisPath cannot be specified at the same time.");
-        }
-
-        if (ConsoleEndPoint != string.Empty && Genesis != string.Empty)
-        {
-            throw new UnreachableException(
-                "Both ConsoleEndPoint and Genesis cannot be specified at the same time.");
-        }
-
         options.PrivateKey = PrivateKey;
         options.GenesisPath = GetFullPath(GenesisPath);
         options.Genesis = Genesis;
         options.AppProtocolVersionPath = GetFullPath(AppProtocolVersionPath);
         options.AppProtocolVersion = AppProtocolVersion;
         options.ParentProcessId = ParentProcessId;
-        options.SeedEndPoint = SeedEndPoint;
+        options.HubUrl = HubUrl;
         options.IsSingleNode = IsSingleNode;
-        options.Alias = Alias;
 
         options.StorePath = GetFullPath(StorePath);
         options.LogPath = GetFullPath(LogPath);
@@ -142,23 +112,14 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
     {
         try
         {
-            var builder = WebApplication.CreateBuilder();
-            var services = builder.Services;
+            var builder = CreateBuilder(this);
             var application = new Application(builder);
             var port = Port is 0 ? PortUtility.NextPort() : Port;
-            var consoleEndPoint = EndPointUtility.ParseOrDefault(ConsoleEndPoint);
             builder.WebHost.ConfigureKestrel(options =>
             {
                 options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
                 options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
-            services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
-            if (consoleEndPoint is not null)
-            {
-                services.AddHostedService<ConsoleHostedService>(s => new(s, port, consoleEndPoint));
-                services.AddSingleton<IConfigureOptions<ApplicationOptions>>(
-                    _ => new ConsoleConfigureOptions(consoleEndPoint));
-            }
 
             await application.RunAsync(cancellationToken);
         }
@@ -167,5 +128,13 @@ internal sealed class RunCommand : CommandAsyncBase, IConfigureOptions<Applicati
             e.Print(System.Console.Out);
             Environment.Exit(1);
         }
+    }
+
+    private static WebApplicationBuilder CreateBuilder(
+        IConfigureOptions<ApplicationOptions> configureOptions)
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddSingleton(configureOptions);
+        return builder;
     }
 }

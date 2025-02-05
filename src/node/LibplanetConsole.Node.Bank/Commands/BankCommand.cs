@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using JSSoft.Commands;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Bank;
 using LibplanetConsole.Bank.DataAnnotations;
-using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Node.Bank.Commands;
@@ -13,7 +13,7 @@ internal sealed class BankCommand(
     INode node,
     IBank bank,
     ICurrencyCollection currencies,
-    IAddressCollection addresses)
+    IAliasCollection aliases)
     : CommandMethodBase
 {
     [CommandProperty]
@@ -69,5 +69,5 @@ internal sealed class BankCommand(
 
     private string[] GetCurrencyCodes() => currencies.Codes;
 
-    private string[] GetAddresses() => addresses.Aliases;
+    private string[] GetAddresses() => aliases.Aliases;
 }

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Libplanet.Action.State;
+using LibplanetConsole.Alias;
 using LibplanetConsole.BlockChain;
 using LibplanetConsole.Common.Exceptions;
 
@@ -247,12 +248,12 @@ internal sealed partial class Node : IBlockChain
         return Task.Run(GetAction, cancellationToken);
     }
 
-    public Task<AddressInfo[]> GetAddressesAsync(CancellationToken cancellationToken)
+    public Task<AliasInfo[]> GetAddressesAsync(CancellationToken cancellationToken)
     {
-        AddressInfo[] GetAddresses()
+        AliasInfo[] GetAddresses()
         {
-            var addresses = _serviceProvider.GetRequiredService<AddressCollection>();
-            return addresses.GetAddressInfos();
+            var aliases = _serviceProvider.GetRequiredService<AliasCollection>();
+            return aliases.GetAliasInfos();
         }
 
         return Task.Run(GetAddresses, cancellationToken);

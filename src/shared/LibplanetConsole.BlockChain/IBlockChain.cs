@@ -39,8 +39,6 @@ public interface IBlockChain
     Task<T> GetActionAsync<T>(TxId txId, int actionIndex, CancellationToken cancellationToken)
         where T : IAction;
 
-    Task<AddressInfo[]> GetAddressesAsync(CancellationToken cancellationToken);
-
 #if LIBPLANET_NODE
     Libplanet.Action.State.IWorldState GetWorldState();
 

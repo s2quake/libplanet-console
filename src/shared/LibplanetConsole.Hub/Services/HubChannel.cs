@@ -1,11 +1,12 @@
+#if LIBPLANET_NODE || LIBPLANET_CLIENT
 using Grpc.Core;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Configuration;
 using LibplanetConsole.Common;
 
-namespace LibplanetConsole.Console.Services;
+namespace LibplanetConsole.Hub.Services;
 
-internal static class ClientChannel
+internal static class HubChannel
 {
     private static readonly GrpcChannelOptions _channelOptions = new()
     {
@@ -21,8 +22,8 @@ internal static class ClientChannel
                     {
                         new MethodName
                         {
-                            Service = "libplanet.console.client.v1.ClientGrpcService",
-                            Method = "Ping",
+                            Service = "libplanet.console.hub.v1.HubGrpcService",
+                            Method = "GetService",
                         },
                     },
                     RetryPolicy = new RetryPolicy
@@ -41,9 +42,15 @@ internal static class ClientChannel
         },
     };
 
-    public static GrpcChannel CreateChannel(EndPoint endPoint)
+    public static GrpcChannel CreateChannel(Uri url)
     {
-        var address = $"http://{EndPointUtility.ToString(endPoint)}";
+        var address = url.ToString();
+        return GrpcChannel.ForAddress(address, _channelOptions);
+    }
+
+    public static GrpcChannel CreateChannel(string address)
+    {
         return GrpcChannel.ForAddress(address, _channelOptions);
     }
 }
+#endif // LIBPLANET_NODE || LIBPLANET_CLIENT

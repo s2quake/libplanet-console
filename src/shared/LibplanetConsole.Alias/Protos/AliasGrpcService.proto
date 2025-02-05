@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Alias.Grpc";
+
+package libplanet.console.alias.v1;
+
+service AliasGrpcService {
+  rpc GetAliases(GetAliasesRequest) returns (GetAliasesResponse);
+
+  rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
+}
+
+message AliasInfoProto {
+  string alias = 1;
+  string address = 2;
+  repeated string tags = 3;
+}
+
+message GetAliasesRequest {
+}
+
+message GetAliasesResponse {
+  repeated AliasInfoProto aliasInfos = 1;
+}
+
+message AliasAddedEvent {
+  AliasInfoProto alias_info = 1;
+}
+
+message AliasUpdatedEvent {
+  string alias = 1;
+  AliasInfoProto alias_info = 2;
+}
+
+message AliasRemovedEvent {
+  string alias = 1;
+}
+
+message GetEventStreamRequest {
+}
+
+message GetEventStreamResponse {
+  oneof event {
+    AliasAddedEvent alias_added = 1;
+    AliasUpdatedEvent alias_updated = 2;
+    AliasRemovedEvent alias_removed = 3;
+  }
+}

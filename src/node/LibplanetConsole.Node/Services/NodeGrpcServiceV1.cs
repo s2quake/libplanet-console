@@ -1,5 +1,4 @@
 using Grpc.Core;
-using LibplanetConsole.Common;
 using LibplanetConsole.Grpc;
 using LibplanetConsole.Node.Grpc;
 using Microsoft.Extensions.Hosting;
@@ -29,7 +28,7 @@ internal sealed class NodeGrpcServiceV1 : NodeGrpcService.NodeGrpcServiceBase, I
 
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
-        _node.SeedEndPoint = EndPointUtility.Parse(request.SeedEndPoint);
+        _node.SeedUrl = new(request.SeedUrl);
         await _node.StartAsync(context.CancellationToken);
         return new StartResponse { NodeInfo = _node.Info };
     }

@@ -14,8 +14,8 @@ internal sealed class ClientApplicationProvider : InfoProviderBase<Client>
         var options = obj.Options;
         return new
         {
-            EndPoint = EndPointUtility.ToString(options.EndPoint),
-            NodeEndPoint = EndPointUtility.ToString(options.NodeEndPoint),
+            Url = options.Url.ToString(),
+            NodeUrl = options.NodeUrl?.ToString(),
             options.LogPath,
             options.RepositoryPath,
         };

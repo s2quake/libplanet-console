@@ -23,23 +23,8 @@ internal static class SeedChannel
                     {
                         new MethodName
                         {
-                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
-                            Method = "GetNodeSettings",
-                        },
-                        new MethodName
-                        {
-                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
-                            Method = "GetClientSettings",
-                        },
-                        new MethodName
-                        {
-                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
-                            Method = "AttachNode",
-                        },
-                        new MethodName
-                        {
-                            Service = "libplanet.console.console.v1.ConsoleGrpcService",
-                            Method = "AttachClient",
+                            Service = "libplanet.console.seed.v1.SeedGrpcService",
+                            Method = "GetSeed",
                         },
                     },
                     RetryPolicy = new RetryPolicy
@@ -58,9 +43,9 @@ internal static class SeedChannel
         },
     };
 
-    public static GrpcChannel CreateChannel(EndPoint endPoint)
+    public static GrpcChannel CreateChannel(Uri url)
     {
-        var address = $"http://{EndPointUtility.ToString(endPoint)}";
+        var address = url.ToString();
         return GrpcChannel.ForAddress(address, _channelOptions);
     }
 }

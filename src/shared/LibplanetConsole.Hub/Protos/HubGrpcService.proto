@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Hub.Grpc";
+
+package libplanet.console.hub.v1;
+
+service HubGrpcService {
+  rpc GetService(GetServiceRequest) returns (GetServiceResponse);
+}
+
+message GetServiceRequest {
+  string service_name = 1;
+}
+
+message GetServiceResponse {
+  string url = 1;
+}
