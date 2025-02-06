@@ -162,17 +162,6 @@ internal sealed class NodeCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _nodeList.GetEnumerator();
 
-    internal Node RandomNode()
-    {
-        if (Count == 0)
-        {
-            throw new InvalidOperationException("No node is available.");
-        }
-
-        var nodeIndex = Random.Shared.Next(Count);
-        return _nodeList[nodeIndex];
-    }
-
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         try
@@ -224,7 +213,7 @@ internal sealed class NodeCollection(
             {
                 Alias = $"node-{index}",
                 Address = node.Address,
-                Tags = ["node"],
+                Tags = ["node", "temp"],
             };
             aliases.Add(aliasInfo);
             _nodeList.Add(node);

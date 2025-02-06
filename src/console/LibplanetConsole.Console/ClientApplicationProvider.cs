@@ -15,7 +15,7 @@ internal sealed class ClientApplicationProvider : InfoProviderBase<Client>
         return new
         {
             Url = options.Url.ToString(),
-            NodeUrl = options.NodeUrl?.ToString(),
+            NodeUrl = options.HubUrl?.ToString(),
             options.LogPath,
             options.RepositoryPath,
         };

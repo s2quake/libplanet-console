@@ -147,6 +147,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
             AppProtocolVersion = Repository.CreateAppProtocolVersion(
                 apvPrivateKey, APVVersion, APVExtra),
             LogPath = "log",
+            AliasPath = "alias.json",
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
             BlocksyncPort = BlocksyncPort,

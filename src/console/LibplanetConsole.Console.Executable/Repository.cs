@@ -51,6 +51,8 @@ public sealed record class Repository
 
     public string LogPath { get; init; } = string.Empty;
 
+    public string AliasPath { get; init; } = string.Empty;
+
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
     public string ActionProviderType { get; set; } = string.Empty;
@@ -194,6 +196,7 @@ public sealed record class Repository
             AppProtocolVersionPath = PathUtility.GetRelativePath(
                 settingsPath, appProtocolVersionPath),
             LogPath = LogPath,
+            AliasPath = AliasPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
             BlocksyncPort = blocksyncPort,

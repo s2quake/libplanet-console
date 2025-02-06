@@ -35,8 +35,6 @@ public static class ServiceCollectionExtensions
 
         @this.AddHostedService<NodeHostedService>();
 
-        @this.AddSingleton<ICommand, AliasCommand>();
-        @this.AddSingleton<ICommand, AliasListCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();
         @this.AddSingleton<ICommand, InfoCommand>();
         @this.AddSingleton<ICommand, KeyCommand>();
@@ -44,6 +42,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StopCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
         @this.AddSingleton<ICommand, NonceCommand>();
+        @this.AddAliasCommands();
 
         return @this;
     }

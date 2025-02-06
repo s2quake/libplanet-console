@@ -26,7 +26,7 @@ public abstract class GrpcClientContentBase<T>(IClient client, string name)
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var nodeUrl = client.NodeUrl;
+        var nodeUrl = client.HubUrl;
         var address = nodeUrl.ToString();
         _channel = GrpcChannel.ForAddress(address);
         _service = CreateService(_channel);

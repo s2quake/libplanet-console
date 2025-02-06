@@ -83,6 +83,11 @@ internal sealed class RunCommand
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("Specifies the alias path")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
+    public string AliasPath { get; set; } = string.Empty;
+
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and client processes will not start.")]
     public bool NoProcess { get; set; }
@@ -125,6 +130,7 @@ internal sealed class RunCommand
         };
         options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
         options.LogPath = GetFullPath(LogPath);
+        options.AliasPath = GetFullPath(AliasPath);
         options.Nodes = repository.Nodes;
         options.Clients = repository.Clients;
         options.Genesis = Genesis;

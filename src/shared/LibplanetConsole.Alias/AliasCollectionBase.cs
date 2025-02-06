@@ -1,28 +1,16 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Alias;
 
-internal abstract class AliasCollectionBase : IAliasCollection
+internal abstract class AliasCollectionBase : IEnumerable<AliasInfo>
 {
     private readonly Dictionary<string, AliasInfo> _aliasInfoByAlias;
-    private readonly Dictionary<Address, string> _aliasByAddress;
 
     protected AliasCollectionBase()
     {
         _aliasInfoByAlias = [];
-        _aliasByAddress = [];
-    }
-
-    protected AliasCollectionBase(IEnumerable<AliasInfo> addressInfos)
-    {
-        _aliasInfoByAlias = new Dictionary<string, AliasInfo>(addressInfos.Count());
-        foreach (var aliasInfo in addressInfos)
-        {
-            _aliasInfoByAlias.Add(aliasInfo.Alias, aliasInfo);
-        }
-
-        _aliasByAddress = addressInfos.ToDictionary(item => item.Address, item => item.Alias);
     }
 
     public event EventHandler<AliasEventArgs>? Added;
@@ -31,49 +19,45 @@ internal abstract class AliasCollectionBase : IAliasCollection
 
     public event EventHandler<AliasRemovedEventArgs>? Removed;
 
-    public string[] Aliases => [.. _aliasByAddress.Values];
+    public string[] Aliases => [.. _aliasInfoByAlias.Keys];
 
     public int Count => _aliasInfoByAlias.Count;
 
     public AliasInfo this[string alias] => _aliasInfoByAlias[alias];
 
-    public string this[Address address] => _aliasByAddress[address];
+    public string[] this[Address address]
+    {
+        get
+        {
+            var query = from item in _aliasInfoByAlias
+                        where item.Value.Address == address
+                        select item.Key;
+            return [.. query];
+        }
+    }
 
     public void Add(AliasInfo aliasInfo)
     {
-        if (_aliasInfoByAlias.ContainsKey(aliasInfo.Alias))
+        var alias = aliasInfo.Alias;
+        if (_aliasInfoByAlias.ContainsKey(alias))
         {
-            throw new ArgumentException($"Alias '{aliasInfo.Alias}' already exists.");
-        }
-
-        if (_aliasByAddress.ContainsKey(aliasInfo.Address))
-        {
-            throw new ArgumentException($"Address '{aliasInfo.Address}' already exists.");
+            throw new ArgumentException($"Alias '{alias}' already exists.");
         }
 
         _aliasInfoByAlias.Add(aliasInfo.Alias, aliasInfo);
-        _aliasByAddress.Add(aliasInfo.Address, aliasInfo.Alias);
-        Added?.Invoke(this, new AliasEventArgs(aliasInfo));
+        OnAdded(new AliasEventArgs(aliasInfo));
     }
 
-    public void Update(string alias, AliasInfo aliasInfo)
+    public void Update(AliasInfo aliasInfo)
     {
-        if (_aliasInfoByAlias.TryGetValue(alias, out var oldAliasInfo) is false)
+        var alias = aliasInfo.Alias;
+        if (_aliasInfoByAlias.ContainsKey(alias) is false)
         {
             throw new KeyNotFoundException($"Alias '{alias}' not found.");
         }
 
-        if (_aliasInfoByAlias.TryGetValue(aliasInfo.Alias, out var newAliasInfo)
-            && newAliasInfo != oldAliasInfo)
-        {
-            throw new ArgumentException($"Alias '{aliasInfo.Alias}' already exists.");
-        }
-
-        _aliasByAddress.Remove(oldAliasInfo.Address);
-        _aliasInfoByAlias.Remove(alias);
-        _aliasInfoByAlias.Add(aliasInfo.Alias, aliasInfo);
-        _aliasByAddress.Add(aliasInfo.Address, aliasInfo.Alias);
-        Updated?.Invoke(this, new AliasUpdatedEventArgs(alias, aliasInfo));
+        _aliasInfoByAlias[alias] = aliasInfo;
+        OnUpdated(new AliasUpdatedEventArgs(alias, aliasInfo));
     }
 
     public bool Contains(string alias) => _aliasInfoByAlias.ContainsKey(alias);
@@ -85,29 +69,60 @@ internal abstract class AliasCollectionBase : IAliasCollection
             return false;
         }
 
-        _aliasInfoByAlias.Remove(alias);
-        _aliasByAddress.Remove(aliasInfo.Address);
-        Removed?.Invoke(this, new AliasRemovedEventArgs(alias));
-        return true;
+        var result = _aliasInfoByAlias.Remove(alias);
+        OnRemoved(new AliasRemovedEventArgs(alias));
+        return result;
     }
 
-    public bool Remove(Address address)
+    public void Remove(Address address)
     {
-        if (_aliasByAddress.TryGetValue(address, out var alias) is false)
+        var query = from item in _aliasInfoByAlias
+                    where item.Value.Address == address
+                    select item.Key;
+        foreach (var alias in query)
         {
-            return false;
+            _aliasInfoByAlias.Remove(alias);
+            OnRemoved(new AliasRemovedEventArgs(alias));
         }
-
-        _aliasByAddress.Remove(address);
-        _aliasInfoByAlias.Remove(alias);
-        Removed?.Invoke(this, new AliasRemovedEventArgs(alias));
-        return true;
     }
 
-    public void Clear()
+    public void Initialize(AliasInfo[] aliases)
+    {
+        foreach (var aliasInfo in aliases)
+        {
+            _aliasInfoByAlias.Add(aliasInfo.Alias, aliasInfo);
+        }
+    }
+
+    public void Release()
     {
         _aliasInfoByAlias.Clear();
-        _aliasByAddress.Clear();
+    }
+
+    public void Load(string path)
+    {
+        if (Count > 0)
+        {
+            throw new InvalidOperationException("The collection is not empty.");
+        }
+
+        if (File.Exists(path) is false)
+        {
+            throw new ArgumentException($"File '{path}' not found.", nameof(path));
+        }
+
+        var json = File.ReadAllText(path);
+        var aliases = JsonUtility.Deserialize<AliasInfo[]>(json);
+        Initialize(aliases);
+    }
+
+    public void Save(string path)
+    {
+        var query = from aliasInfo in _aliasInfoByAlias.Values
+                    where aliasInfo.Tags.Contains("temp") is false
+                    select aliasInfo;
+        var json = JsonUtility.Serialize(query.ToArray());
+        File.WriteAllText(path, json);
     }
 
     public bool TryGetValue(string alias, [MaybeNullWhen(false)] out AliasInfo aliasInfo)
@@ -122,25 +137,14 @@ internal abstract class AliasCollectionBase : IAliasCollection
         return false;
     }
 
-    public bool TryGetAlias(Address address, [MaybeNullWhen(false)] out string alias)
-    {
-        if (_aliasByAddress.TryGetValue(address, out alias) is false)
-        {
-            alias = default;
-            return false;
-        }
-
-        return true;
-    }
-
     public AliasInfo[] GetAliasInfos(params string[] tags)
     {
         if (tags.Length == 0)
         {
-            return [.. _aliasInfoByAlias.Values.OfType<AliasInfo>()];
+            return [.. _aliasInfoByAlias.Values];
         }
 
-        var query = from addressInfo in _aliasInfoByAlias.Values.OfType<AliasInfo>()
+        var query = from addressInfo in _aliasInfoByAlias.Values
                     where tags.Intersect(addressInfo.Tags).Any() is true
                     select addressInfo;
         return [.. query];
@@ -148,7 +152,7 @@ internal abstract class AliasCollectionBase : IAliasCollection
 
     IEnumerator<AliasInfo> IEnumerable<AliasInfo>.GetEnumerator()
     {
-        foreach (var addressInfo in _aliasInfoByAlias.Values.OfType<AliasInfo>())
+        foreach (var addressInfo in _aliasInfoByAlias.Values)
         {
             yield return addressInfo;
         }
@@ -160,5 +164,20 @@ internal abstract class AliasCollectionBase : IAliasCollection
         {
             yield return addressInfo;
         }
+    }
+
+    protected virtual void OnAdded(AliasEventArgs e)
+    {
+        Added?.Invoke(this, e);
+    }
+
+    protected virtual void OnRemoved(AliasRemovedEventArgs e)
+    {
+        Removed?.Invoke(this, e);
+    }
+
+    protected virtual void OnUpdated(AliasUpdatedEventArgs e)
+    {
+        Updated?.Invoke(this, e);
     }
 }

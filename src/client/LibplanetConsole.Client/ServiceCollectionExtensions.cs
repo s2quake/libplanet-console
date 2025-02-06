@@ -36,13 +36,13 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IAliasCollection>(s => s.GetRequiredService<AliasCollection>())
             .AddSingleton<IClientContent>(s => s.GetRequiredService<AliasCollection>());
 
-        @this.AddSingleton<ICommand, AliasCommand>();
         @this.AddSingleton<ICommand, ExitCommand>();
         @this.AddSingleton<ICommand, InfoCommand>();
         @this.AddSingleton<ICommand, KeyCommand>();
         @this.AddSingleton<ICommand, StartCommand>();
         @this.AddSingleton<ICommand, StopCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
+        @this.AddAliasCommands();
         return @this;
     }
 }

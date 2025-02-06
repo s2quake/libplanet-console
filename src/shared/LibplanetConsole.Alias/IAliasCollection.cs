@@ -12,13 +12,17 @@ public interface IAliasCollection : IEnumerable<AliasInfo>
 
     AliasInfo this[string alias] { get; }
 
-    string this[Address address] { get; }
+    string[] this[Address address] { get; }
+
+    Task AddAsync(AliasInfo aliasInfo, CancellationToken cancellationToken);
+
+    Task RemoveAsync(string alias, CancellationToken cancellationToken);
+
+    Task UpdateAsync(AliasInfo aliasInfo, CancellationToken cancellationToken);
 
     bool Contains(string alias);
 
     bool TryGetValue(string alias, [MaybeNullWhen(false)] out AliasInfo aliasInfo);
-
-    bool TryGetAlias(Address address, [MaybeNullWhen(false)] out string alias);
 
     AliasInfo[] GetAliasInfos(params string[] tags);
 

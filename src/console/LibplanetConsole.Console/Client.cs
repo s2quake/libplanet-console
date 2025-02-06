@@ -7,7 +7,8 @@ using LibplanetConsole.Client.Services;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.Threading;
 using LibplanetConsole.Console.Extensions;
-using LibplanetConsole.Console.Services;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 namespace LibplanetConsole.Console;
 
@@ -190,7 +191,7 @@ internal sealed class Client : IClient
         Detached?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task StartAsync(INode node, CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
         using var scope = _criticalSection.Scope();
@@ -204,9 +205,10 @@ internal sealed class Client : IClient
             throw new InvalidOperationException("Client is not attached.");
         }
 
+        var hubUrl = GetHubUrl();
         var request = new StartRequest
         {
-            NodeUrl = node.Url.ToString(),
+            HubUrl = hubUrl.ToString(),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.StartAsync(request, callOptions);
@@ -318,11 +320,9 @@ internal sealed class Client : IClient
             await AttachAsync(cancellationToken);
         }
 
-        if (IsAttached is true && Options.NodeUrl is null)
+        if (IsAttached is true && Options.HubUrl is null)
         {
-            var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
-            var node = nodes.RandomNode();
-            await StartAsync(node, cancellationToken);
+            await StartAsync(cancellationToken);
         }
     }
 
@@ -414,6 +414,20 @@ internal sealed class Client : IClient
             IsAttached = false;
             Detached?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private Uri GetHubUrl()
+    {
+        if (Options.HubUrl is { } hubUrl)
+        {
+            return hubUrl;
+        }
+
+        var server = _serviceProvider.GetRequiredService<IServer>();
+        var addressesFeature = server.Features.Get<IServerAddressesFeature>()
+            ?? throw new InvalidOperationException("ServerAddressesFeature is not available.");
+        var address = addressesFeature.Addresses.First();
+        return new Uri(address);
     }
 
     private ClientProcess CreateProcess(ProcessOptions options)

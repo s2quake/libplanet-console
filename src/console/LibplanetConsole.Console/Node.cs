@@ -206,10 +206,10 @@ internal sealed class Node : INode
             throw new InvalidOperationException("Node is not attached.");
         }
 
-        var seedUrl = GetSeedUrl();
+        var hubUrl = GetHubUrl();
         var request = new StartRequest
         {
-            SeedUrl = seedUrl.ToString(),
+            HubUrl = hubUrl.ToString(),
         };
         var callOptions = new CallOptions(cancellationToken: cancellationToken);
         var response = await _service.StartAsync(request, callOptions);
@@ -418,11 +418,11 @@ internal sealed class Node : INode
         }
     }
 
-    private Uri GetSeedUrl()
+    private Uri GetHubUrl()
     {
-        if (Options.HubUrl is { } seedUrl)
+        if (Options.HubUrl is { } hubUrl)
         {
-            return seedUrl;
+            return hubUrl;
         }
 
         var server = _serviceProvider.GetRequiredService<IServer>();

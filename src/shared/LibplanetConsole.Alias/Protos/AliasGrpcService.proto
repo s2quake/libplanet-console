@@ -6,6 +6,9 @@ package libplanet.console.alias.v1;
 
 service AliasGrpcService {
   rpc GetAliases(GetAliasesRequest) returns (GetAliasesResponse);
+  rpc AddAlias(AddAliasRequest) returns (AddAliasResponse);
+  rpc RemoveAlias(RemoveAliasRequest) returns (RemoveAliasResponse);
+  rpc UpdateAlias(UpdateAliasRequest) returns (UpdateAliasResponse);
 
   rpc GetEventStream(GetEventStreamRequest) returns (stream GetEventStreamResponse);
 }
@@ -21,6 +24,27 @@ message GetAliasesRequest {
 
 message GetAliasesResponse {
   repeated AliasInfoProto aliasInfos = 1;
+}
+
+message AddAliasRequest {
+  AliasInfoProto aliasInfo = 1;
+}
+
+message AddAliasResponse {
+}
+
+message RemoveAliasRequest {
+  string alias = 1;
+}
+
+message RemoveAliasResponse {
+}
+
+message UpdateAliasRequest {
+  AliasInfoProto aliasInfo = 1;
+}
+
+message UpdateAliasResponse {
 }
 
 message AliasAddedEvent {

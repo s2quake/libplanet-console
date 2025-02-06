@@ -214,7 +214,7 @@ internal sealed class ClientBlockChain(Client client) : ClientContentBase, IBloc
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var channel = BlockChainChannel.CreateChannel(client.NodeUrl);
+        var channel = BlockChainChannel.CreateChannel(client.HubUrl);
         var blockChainService = new BlockChainService(channel);
         _channel = channel;
         _blockChainService = blockChainService;

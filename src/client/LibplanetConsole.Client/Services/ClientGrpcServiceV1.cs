@@ -16,7 +16,7 @@ internal sealed class ClientGrpcServiceV1(
 
     public override async Task<StartResponse> Start(StartRequest request, ServerCallContext context)
     {
-        client.NodeUrl = new Uri(request.NodeUrl);
+        client.HubUrl = new Uri(request.HubUrl);
         await client.StartAsync(context.CancellationToken);
         return new StartResponse { ClientInfo = client.Info };
     }

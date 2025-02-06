@@ -25,6 +25,7 @@ internal sealed class StartCommand : CommandAsyncBase, IConfigureOptions<Applica
             options.GenesisPath = GetFullPath(options.GenesisPath);
             options.AppProtocolVersionPath = GetFullPath(options.AppProtocolVersionPath);
             options.LogPath = GetFullPath(options.LogPath);
+            options.AliasPath = GetFullPath(options.AliasPath);
             options.ActionProviderModulePath = GetFullPath(options.ActionProviderModulePath);
         }
         finally

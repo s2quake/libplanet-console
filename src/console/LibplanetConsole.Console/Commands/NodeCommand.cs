@@ -26,9 +26,9 @@ public sealed partial class NodeCommand(
             var isCurrent = nodes.Current == node;
             tsb.Foreground = GetForeground(node: node, isCurrent);
             tsb.IsBold = node.IsRunning == true;
-            if (aliases.TryGetAlias(address, out var alias) is true)
+            if (aliases[address] is { } ass && ass.Length > 0)
             {
-                tsb.AppendLine($"{node} ({alias})");
+                tsb.AppendLine($"{node} ({string.Join(", ", ass)})");
             }
             else
             {

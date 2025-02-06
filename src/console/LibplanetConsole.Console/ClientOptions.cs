@@ -11,7 +11,7 @@ public sealed record class ClientOptions
 
     public required PrivateKey PrivateKey { get; init; }
 
-    public Uri? NodeUrl { get; init; }
+    public Uri? HubUrl { get; init; }
 
     public string LogPath { get; init; } = string.Empty;
 
@@ -46,7 +46,7 @@ public sealed record class ClientOptions
             Url = url,
             PrivateKey = new PrivateKey(applicationSettings.PrivateKey),
             LogPath = Path.GetFullPath(applicationSettings.LogPath, repositoryPath),
-            NodeUrl = UriUtility.ParseOrDefault(applicationSettings.NodeUrl),
+            HubUrl = UriUtility.ParseOrDefault(applicationSettings.NodeUrl),
             RepositoryPath = repositoryPath,
         };
     }

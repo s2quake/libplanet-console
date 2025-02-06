@@ -15,7 +15,7 @@ internal sealed class ClientHostedService(
         client.Contents = GetClientContents(serviceProvider);
         if (options.HubUrl is { } hubUrl)
         {
-            client.NodeUrl = await GetNodeUrlAsync(hubUrl, cancellationToken);
+            client.HubUrl = await GetNodeUrlAsync(hubUrl, cancellationToken);
             await client.StartAsync(cancellationToken);
         }
     }

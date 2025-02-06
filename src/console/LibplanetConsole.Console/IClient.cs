@@ -41,7 +41,7 @@ public interface IClient : IAsyncDisposable, IKeyedServiceProvider, ISigner
 
     Task DetachAsync(CancellationToken cancellationToken);
 
-    Task StartAsync(INode node, CancellationToken cancellationToken);
+    Task StartAsync(CancellationToken cancellationToken);
 
     Task StopAsync(CancellationToken cancellationToken);
 

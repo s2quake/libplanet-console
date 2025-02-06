@@ -199,7 +199,7 @@ internal sealed class ClientBlockChain(
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        if (client.Options.NodeUrl is { } nodeUrl)
+        if (client.Options.HubUrl is { } nodeUrl)
         {
             var channel = BlockChainChannel.CreateChannel(nodeUrl);
             var blockChainService = new BlockChainService(channel);

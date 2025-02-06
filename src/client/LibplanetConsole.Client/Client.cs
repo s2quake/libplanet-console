@@ -56,10 +56,10 @@ internal sealed class Client : IClient
         set => _contents = value;
     }
 
-    public Uri NodeUrl
+    public Uri HubUrl
     {
         get => _nodeUrl ??
-            throw new InvalidOperationException($"{nameof(NodeUrl)} is not initialized.");
+            throw new InvalidOperationException($"{nameof(HubUrl)} is not initialized.");
         set
         {
             if (IsRunning == true)
@@ -86,7 +86,7 @@ internal sealed class Client : IClient
 
         if (_nodeUrl is null)
         {
-            throw new InvalidOperationException($"{nameof(NodeUrl)} is not initialized.");
+            throw new InvalidOperationException($"{nameof(HubUrl)} is not initialized.");
         }
 
         var channel = NodeChannel.CreateChannel(_nodeUrl);

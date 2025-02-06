@@ -84,7 +84,7 @@ public static class ServiceCollectionExtensions
         @this.AddSingleton<ICommand, StartClientProcessCommand>();
         @this.AddSingleton<ICommand, StopClientProcessCommand>();
         @this.AddSingleton<ICommand, TxCommand>();
-        @this.AddSingleton<ICommand, AliasCommand>();
+        @this.AddAliasCommands();
         return @this;
     }
 }

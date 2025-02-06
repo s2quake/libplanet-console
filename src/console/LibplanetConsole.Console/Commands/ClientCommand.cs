@@ -27,9 +27,9 @@ public sealed partial class ClientCommand(
             var isCurrent = clients.Current == client;
             tsb.Foreground = GetForeground(client: client, isCurrent);
             tsb.IsBold = client.IsRunning == true;
-            if (aliases.TryGetAlias(address, out var alias) is true)
+            if (aliases[address] is { } ass && ass.Length > 0)
             {
-                tsb.AppendLine($"{client} ({alias})");
+                tsb.AppendLine($"{client} ({string.Join(", ", ass)})");
             }
             else
             {
@@ -76,13 +76,10 @@ public sealed partial class ClientCommand(
     [CommandSummary("Starts the client")]
     public async Task StartAsync(
         [CommandParameterCompletion(nameof(GetNodeAddresses))]
-        Address nodeAddress = default,
         CancellationToken cancellationToken = default)
     {
-        var nodes = _serviceProvider.GetRequiredService<NodeCollection>();
-        var node = nodes.GetNodeOrCurrent(nodeAddress);
         var client = GetClientOrCurrent(ClientAddress);
-        await client.StartAsync(node, cancellationToken);
+        await client.StartAsync(cancellationToken);
     }
 
     [CommandMethod]

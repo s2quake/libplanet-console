@@ -47,7 +47,7 @@
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Seed\Protos\*.proto"
       GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Alias\Protos\*.proto"
-      GrpcServices="Client" ProtoRoot="$(ProtoRootDirectory)" />
+      GrpcServices="Both" ProtoRoot="$(ProtoRootDirectory)" />
     <Protobuf Include="$(SharedDirectory)LibplanetConsole.Hub\Protos\*.proto"
       GrpcServices="Both" ProtoRoot="$(ProtoRootDirectory)" />
   </ItemGroup>

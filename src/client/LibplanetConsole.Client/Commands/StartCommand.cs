@@ -14,8 +14,8 @@ internal sealed class StartCommand(Client client) : CommandAsyncBase
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var nodeUrl = UriUtility.ParseOrFallback(HubUrl, client.NodeUrl);
-        client.NodeUrl = nodeUrl;
+        var nodeUrl = UriUtility.ParseOrFallback(HubUrl, client.HubUrl);
+        client.HubUrl = nodeUrl;
         await client.StartAsync(cancellationToken);
     }
 }

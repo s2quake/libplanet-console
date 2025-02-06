@@ -26,7 +26,7 @@ message PingResponse {
 }
 
 message StartRequest {
-  string node_url = 1;
+  string hub_url = 1;
 }
 
 message StartResponse {

@@ -214,7 +214,7 @@ internal sealed class ClientCollection(
             {
                 Alias = $"client-{index}",
                 Address = client.Address,
-                Tags = ["client"],
+                Tags = ["client", "temp"],
             };
             aliases.Add(aliasInfo);
             _clientList.Add(client);

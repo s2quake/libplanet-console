@@ -39,7 +39,7 @@ internal sealed class ClientProcess(ClientOptions clientOptions)
                     argumentList.Add(clientOptions.LogPath);
                 }
 
-                if (clientOptions.NodeUrl is { } nodeUrl)
+                if (clientOptions.HubUrl is { } nodeUrl)
                 {
                     argumentList.Add("--node-url");
                     argumentList.Add(nodeUrl.ToString());
