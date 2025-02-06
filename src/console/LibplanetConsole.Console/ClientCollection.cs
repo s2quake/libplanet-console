@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Console;
@@ -115,7 +115,7 @@ internal sealed class ClientCollection(
             throw new InvalidOperationException("The node is already attached.");
         }
 
-        client.EndPoint = options.EndPoint;
+        client.Url = options.Url;
         await client.AttachAsync(cancellationToken);
     }
 
@@ -209,12 +209,14 @@ internal sealed class ClientCollection(
             var action = NotifyCollectionChangedAction.Add;
             var index = _clientList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
-            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
-            if (client.Alias != string.Empty)
+            var aliases = serviceProvider.GetRequiredService<AliasCollection>();
+            var aliasInfo = new AliasInfo
             {
-                addresses.Add(client.Alias, client.Address, IClient.Tag);
-            }
-
+                Alias = $"client-{index}",
+                Address = client.Address,
+                Tags = ["client", "temp"],
+            };
+            aliases.Add(aliasInfo);
             _clientList.Add(client);
             _logger.LogDebug("Client is inserted into the collection: {Address}", client.Address);
             client.Disposed += Client_Disposed;
@@ -229,10 +231,10 @@ internal sealed class ClientCollection(
             var action = NotifyCollectionChangedAction.Remove;
             var index = _clientList.IndexOf(client);
             var args = new NotifyCollectionChangedEventArgs(action, client, index);
-            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
+            var aliases = serviceProvider.GetRequiredService<AliasCollection>();
             client.Disposed -= Client_Disposed;
-            addresses.Remove(client.Alias);
             _clientList.RemoveAt(index);
+            aliases.Remove(client.Address);
             _logger.LogDebug("Client is removed from the collection: {Address}", client.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == client)

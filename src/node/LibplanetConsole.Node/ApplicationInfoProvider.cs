@@ -12,7 +12,7 @@ internal sealed class ApplicationInfoProvider : InfoProviderBase<IHostApplicatio
     {
         _info = new()
         {
-            SeedEndPoint = options.SeedEndPoint,
+            HubUrl = options.HubUrl,
             StorePath = options.StorePath,
             LogPath = options.LogPath,
             ParentProcessId = options.ParentProcessId,

@@ -2,7 +2,7 @@
   "profiles": {
     "LibplanetConsole.Client.Executable": {
       "commandName": "Project",
-      "commandLineArgs": "--seed-end-point 127.0.0.1:5353",
+      "commandLineArgs": "--hub-url http://127.0.0.1:5353",
       "workingDirectory": "$(SolutionDir)"
     }
   }

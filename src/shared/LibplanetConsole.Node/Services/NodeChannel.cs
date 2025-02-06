@@ -43,9 +43,9 @@ internal static class NodeChannel
         },
     };
 
-    public static GrpcChannel CreateChannel(EndPoint endPoint)
+    public static GrpcChannel CreateChannel(Uri url)
     {
-        var address = $"http://{EndPointUtility.ToString(endPoint)}";
+        var address = url.ToString();
         return GrpcChannel.ForAddress(address, _channelOptions);
     }
 }

@@ -11,7 +11,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public const string Position = "Application";
 
     private PrivateKey? _privateKey;
-    private EndPoint? _nodeEndPoint;
+    private Uri? _hubUrl;
 
     public int Port { get; set; }
 
@@ -24,13 +24,11 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [JsonIgnore]
     public int ParentProcessId { get; set; }
 
-    [EndPoint]
-    public string NodeEndPoint { get; set; } = string.Empty;
+    [Uri(AllowEmpty = true)]
+    public string HubUrl { get; set; } = string.Empty;
 
-    public string Alias { get; set; } = string.Empty;
-
-    EndPoint? IApplicationOptions.NodeEndPoint
-        => _nodeEndPoint ??= EndPointUtility.ParseOrDefault(NodeEndPoint);
+    Uri? IApplicationOptions.HubUrl
+        => _hubUrl ??= new Uri(HubUrl);
 
     public string LogPath { get; set; } = string.Empty;
 

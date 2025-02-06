@@ -4,7 +4,6 @@ using Grpc.Net.Client;
 using LibplanetConsole.BlockChain;
 using LibplanetConsole.BlockChain.Grpc;
 using LibplanetConsole.BlockChain.Services;
-using LibplanetConsole.Common;
 using static LibplanetConsole.Grpc.TypeUtility;
 
 namespace LibplanetConsole.Console;
@@ -198,23 +197,9 @@ internal sealed class NodeBlockChain(
         throw new InvalidOperationException("Action not found.");
     }
 
-    public async Task<AddressInfo[]> GetAddressesAsync(CancellationToken cancellationToken)
-    {
-        if (_blockChainService is null)
-        {
-            throw new InvalidOperationException("BlockChainService is not initialized.");
-        }
-
-        var request = new GetAddressesRequest();
-        var callOptions = new CallOptions(cancellationToken: cancellationToken);
-        var response = await _blockChainService.GetAddressesAsync(request, callOptions);
-        return [.. response.AddressInfos.Select(item => (AddressInfo)item)];
-    }
-
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var address = $"http://{EndPointUtility.ToString(node.EndPoint)}";
-        var channel = GrpcChannel.ForAddress(address);
+        var channel = BlockChainChannel.CreateChannel(node.Url);
         var blockChainService = new BlockChainService(channel);
         _channel = channel;
         _blockChainService = blockChainService;

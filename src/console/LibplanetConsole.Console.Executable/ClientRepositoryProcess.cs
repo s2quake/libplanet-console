@@ -10,8 +10,6 @@ internal sealed class ClientRepositoryProcess : ClientProcessBase
 
     public string OutputPath { get; set; } = string.Empty;
 
-    public string Alias { get; set; } = string.Empty;
-
     public override string[] Arguments
     {
         get
@@ -25,12 +23,6 @@ internal sealed class ClientRepositoryProcess : ClientProcessBase
                 "--port",
                 $"{Port}",
             };
-
-            if (Alias != string.Empty)
-            {
-                argumentList.Add("--alias");
-                argumentList.Add(Alias);
-            }
 
             return [.. argumentList];
         }

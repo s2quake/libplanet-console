@@ -24,15 +24,13 @@ internal sealed class RunCommand
 
     [CommandProperty("parent")]
     [CommandSummary("Reserved option used by libplanet-console")]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
     [Category]
     public int ParentProcessId { get; init; }
 
     [CommandProperty]
-    [CommandSummary("Specifies the end-point of the node to connect to")]
-    [CommandPropertyExclusion(nameof(ConsoleEndPoint))]
-    [EndPoint]
-    public string NodeEndPoint { get; init; } = string.Empty;
+    [CommandSummary("Specifies the hub url to connect")]
+    [Uri(AllowEmpty = true)]
+    public string HubUrl { get; init; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Specifies the file path to save logs")]
@@ -44,15 +42,6 @@ internal sealed class RunCommand
     [CommandSummary("If set, the application starts without REPL")]
     public bool NoREPL { get; init; }
 
-    [CommandProperty]
-    [CommandSummary("Specifies the end-point of the console to connect to.")]
-    [EndPoint]
-    public string ConsoleEndPoint { get; init; } = string.Empty;
-
-    [CommandProperty]
-    [CommandSummary("Specifies the alias of the client address.")]
-    public string Alias { get; init; } = string.Empty;
-
     void IConfigureOptions<ApplicationOptions>.Configure(ApplicationOptions options)
     {
         var port = Port;
@@ -60,10 +49,9 @@ internal sealed class RunCommand
         options.Port = port;
         options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
         options.ParentProcessId = ParentProcessId;
-        options.NodeEndPoint = NodeEndPoint;
+        options.HubUrl = HubUrl;
         options.LogPath = GetFullPath(LogPath);
         options.NoREPL = NoREPL;
-        options.Alias = Alias;
 
         static string GetFullPath(string path)
             => path != string.Empty ? Path.GetFullPath(path) : path;
@@ -73,23 +61,14 @@ internal sealed class RunCommand
     {
         try
         {
-            var builder = WebApplication.CreateBuilder();
-            var services = builder.Services;
+            var builder = CreateBuilder(this);
             var application = new Application(builder);
             var port = Port is 0 ? PortUtility.NextPort() : Port;
-            var consoleEndPoint = EndPointUtility.ParseOrDefault(ConsoleEndPoint);
             builder.WebHost.ConfigureKestrel(options =>
             {
                 options.ListenLocalhost(port, o => o.Protocols = HttpProtocols.Http2);
                 options.ListenLocalhost(port + 1, o => o.Protocols = HttpProtocols.Http1AndHttp2);
             });
-            services.AddSingleton<IConfigureOptions<ApplicationOptions>>(this);
-            if (consoleEndPoint is not null)
-            {
-                services.AddHostedService<ConsoleHostedService>(s => new(s, port, consoleEndPoint));
-                services.AddSingleton<IConfigureOptions<ApplicationOptions>>(
-                    _ => new ConsoleConfigureOptions(consoleEndPoint));
-            }
 
             await application.RunAsync(cancellationToken);
         }
@@ -98,5 +77,13 @@ internal sealed class RunCommand
             e.Print(System.Console.Out);
             Environment.Exit(1);
         }
+    }
+
+    private static WebApplicationBuilder CreateBuilder(
+        IConfigureOptions<ApplicationOptions> configureOptions)
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddSingleton(configureOptions);
+        return builder;
     }
 }

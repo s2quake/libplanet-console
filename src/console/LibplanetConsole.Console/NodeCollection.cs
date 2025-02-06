@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Common.Extensions;
 
 namespace LibplanetConsole.Console;
@@ -114,7 +114,7 @@ internal sealed class NodeCollection(
             throw new InvalidOperationException("The node is already attached.");
         }
 
-        node.EndPoint = options.EndPoint;
+        node.Url = options.Url;
         await node.AttachAsync(cancellationToken);
     }
 
@@ -162,17 +162,6 @@ internal sealed class NodeCollection(
     IEnumerator IEnumerable.GetEnumerator()
         => _nodeList.GetEnumerator();
 
-    internal Node RandomNode()
-    {
-        if (Count == 0)
-        {
-            throw new InvalidOperationException("No node is available.");
-        }
-
-        var nodeIndex = Random.Shared.Next(Count);
-        return _nodeList[nodeIndex];
-    }
-
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
         try
@@ -219,12 +208,14 @@ internal sealed class NodeCollection(
             var action = NotifyCollectionChangedAction.Add;
             var index = _nodeList.Count;
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
-            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
-            if (node.Alias != string.Empty)
+            var aliases = serviceProvider.GetRequiredService<AliasCollection>();
+            var aliasInfo = new AliasInfo
             {
-                addresses.Add(node.Alias, node.Address, INode.Tag);
-            }
-
+                Alias = $"node-{index}",
+                Address = node.Address,
+                Tags = ["node", "temp"],
+            };
+            aliases.Add(aliasInfo);
             _nodeList.Add(node);
             _logger.LogDebug("Node is inserted into the collection: {Address}", node.Address);
             node.Disposed += Node_Disposed;
@@ -239,10 +230,10 @@ internal sealed class NodeCollection(
             var action = NotifyCollectionChangedAction.Remove;
             var index = _nodeList.IndexOf(node);
             var args = new NotifyCollectionChangedEventArgs(action, node, index);
-            var addresses = serviceProvider.GetRequiredService<IAddressCollection>();
+            var aliases = serviceProvider.GetRequiredService<AliasCollection>();
             node.Disposed -= Node_Disposed;
-            addresses.Remove(node.Alias);
             _nodeList.RemoveAt(index);
+            aliases.Remove(node.Address);
             _logger.LogDebug("Node is removed from the collection: {Address}", node.Address);
             CollectionChanged?.Invoke(this, args);
             if (_current == node)

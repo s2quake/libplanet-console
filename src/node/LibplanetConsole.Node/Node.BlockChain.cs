@@ -247,17 +247,6 @@ internal sealed partial class Node : IBlockChain
         return Task.Run(GetAction, cancellationToken);
     }
 
-    public Task<AddressInfo[]> GetAddressesAsync(CancellationToken cancellationToken)
-    {
-        AddressInfo[] GetAddresses()
-        {
-            var addresses = _serviceProvider.GetRequiredService<AddressCollection>();
-            return addresses.GetAddressInfos();
-        }
-
-        return Task.Run(GetAddresses, cancellationToken);
-    }
-
     public Task<FungibleAssetValue> GetBalanceAsync(
         Address address, Currency currency, CancellationToken cancellationToken)
     {

@@ -6,7 +6,6 @@ using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Node.Executable.EntryCommands;
 
@@ -47,9 +46,9 @@ internal sealed class InitializeCommand : CommandBase
     public string LogPath { get; set; } = string.Empty;
 
     [CommandProperty]
-    [CommandSummary("Specifies the EndPoint of the seed node to connect to")]
-    [EndPoint]
-    public string SeedEndPoint { get; set; } = string.Empty;
+    [CommandSummary("Specifies the hub url to connect")]
+    [Uri(AllowEmpty = true)]
+    public string HubUrl { get; set; } = string.Empty;
 
     [CommandProperty]
     [CommandSummary("Specifies the file path of the genesis")]
@@ -121,10 +120,6 @@ internal sealed class InitializeCommand : CommandBase
     [CommandSummary("Specifies the port for the consensus of the node")]
     public int ConsensusPort { get; set; }
 
-    [CommandProperty]
-    [CommandSummary("Specifies the alias of the node address")]
-    public string Alias { get; set; } = string.Empty;
-
     protected override void OnExecute()
     {
         var outputPath = Path.GetFullPath(RepositoryPath);
@@ -143,7 +138,7 @@ internal sealed class InitializeCommand : CommandBase
             PrivateKey = privateKey,
             StorePath = storePath,
             LogPath = logPath,
-            SeedEndPoint = ParseOrDefault(SeedEndPoint),
+            HubUrl = UriUtility.ParseOrDefault(HubUrl),
             GenesisPath = genesisPath,
             AppProtocolVersionPath = appProtocolVersionPath,
             ActionProviderModulePath = ActionProviderModulePath,
@@ -151,7 +146,6 @@ internal sealed class InitializeCommand : CommandBase
             BlocksyncPort = blocksyncPort,
             ConsensusPort = consensusPort,
             IsSingleNode = IsSingleNode,
-            Alias = Alias,
         };
         dynamic info = repository.Save(outputPath);
         using var writer = new ConditionalTextWriter(Out)

@@ -6,7 +6,6 @@ using LibplanetConsole.Common.Extensions;
 using LibplanetConsole.Common.IO;
 using LibplanetConsole.DataAnnotations;
 using LibplanetConsole.Node;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
@@ -148,6 +147,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
             AppProtocolVersion = Repository.CreateAppProtocolVersion(
                 apvPrivateKey, APVVersion, APVExtra),
             LogPath = "log",
+            AliasPath = "alias.json",
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
             BlocksyncPort = BlocksyncPort,
@@ -184,11 +184,11 @@ internal sealed class InitializeCommand : CommandAsyncBase
             var ports = portGenerator.Next();
             var nodeOptions = new NodeOptions
             {
-                EndPoint = GetLocalHost(ports[0]),
+                Url = UriUtility.GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
                 StorePath = "store",
                 LogPath = "log",
-                SeedEndPoint = GetLocalHost(consolePorts[0]),
+                HubUrl = UriUtility.GetLocalHost(consolePorts[0]),
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
                 BlocksyncPort = ports[4],
@@ -209,7 +209,7 @@ internal sealed class InitializeCommand : CommandAsyncBase
             var ports = portGenerator.Next();
             var clientOptions = new ClientOptions
             {
-                EndPoint = GetLocalHost(ports[0]),
+                Url = UriUtility.GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
                 LogPath = "log",
             };

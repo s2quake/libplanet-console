@@ -16,7 +16,7 @@ public interface IClient : IVerifier
 
     Address Address { get; }
 
-    EndPoint NodeEndPoint { get; set; }
+    Uri HubUrl { get; set; }
 
     Task StartAsync(CancellationToken cancellationToken);
 

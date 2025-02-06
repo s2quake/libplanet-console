@@ -40,6 +40,8 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
 
     public string LogPath { get; set; } = string.Empty;
 
+    public string AliasPath { get; set; } = string.Empty;
+
     public bool NoProcess { get; set; }
 
     public bool Detach { get; set; }

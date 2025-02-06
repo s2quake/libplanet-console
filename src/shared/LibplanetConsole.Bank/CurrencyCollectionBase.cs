@@ -147,13 +147,13 @@ internal abstract class CurrencyCollectionBase : ICurrencyCollection
         return code;
     }
 
-    public CurrencyInfo[] GetCurrencyInfos() => [.. _codeByCurrency.Select(GetAddressInfo)];
+    public CurrencyInfo[] GetCurrencyInfos() => [.. _codeByCurrency.Select(GetAliasInfo)];
 
     IEnumerator<Currency> IEnumerable<Currency>.GetEnumerator()
         => _currencyByCode.Values.OfType<Currency>().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => _currencyByCode.Values.GetEnumerator();
 
-    private static CurrencyInfo GetAddressInfo(KeyValuePair<Currency, string> item)
+    private static CurrencyInfo GetAliasInfo(KeyValuePair<Currency, string> item)
         => new() { Code = item.Value, Currency = item.Key };
 }

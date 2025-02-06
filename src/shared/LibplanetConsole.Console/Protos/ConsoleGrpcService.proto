@@ -18,7 +18,7 @@ message GetNodeSettingsResponse {
   bytes genesis = 1;
   string app_protocol_version = 2;
   int32 process_id = 3;
-  string seed_end_point = 4;
+  string seed_url = 4;
 }
 
 message GetClientSettingsRequest {
@@ -26,13 +26,13 @@ message GetClientSettingsRequest {
 
 message GetClientSettingsResponse {
   int32 process_id = 1;
-  string node_end_point = 2;
+  string node_url = 2;
 }
 
 message AttachNodeRequest {
   int32 process_id = 1;
   string address = 2;
-  string end_point = 3;
+  string url = 3;
 }
 
 message AttachNodeResponse {
@@ -42,7 +42,7 @@ message AttachNodeResponse {
 message AttachClientRequest {
   int32 process_id = 1;
   string address = 2;
-  string end_point = 3;
+  string url = 3;
 }
 
 message AttachClientResponse {

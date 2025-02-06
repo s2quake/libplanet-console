@@ -12,7 +12,7 @@ internal sealed class Client : IClient
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;
     private readonly PrivateKey _privateKey;
-    private EndPoint? _nodeEndPoint;
+    private Uri? _nodeUrl;
     private NodeService? _nodeService;
     private GrpcChannel? _channel;
     private CancellationTokenSource? _cancellationTokenSource;
@@ -31,7 +31,7 @@ internal sealed class Client : IClient
         _logger = serviceProvider.GetRequiredService<ILogger<Client>>();
         _privateKey = options.PrivateKey;
         _logger.LogDebug("Client is creating...: {Address}", options.PrivateKey.Address);
-        _nodeEndPoint = options.NodeEndPoint;
+        _nodeUrl = options.HubUrl;
         _info = ClientInfo.Empty with { Address = options.PrivateKey.Address };
         PublicKey = options.PrivateKey.PublicKey;
         _logger.LogDebug("Client is created: {Address}", Address);
@@ -56,10 +56,10 @@ internal sealed class Client : IClient
         set => _contents = value;
     }
 
-    public EndPoint NodeEndPoint
+    public Uri HubUrl
     {
-        get => _nodeEndPoint ??
-            throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");
+        get => _nodeUrl ??
+            throw new InvalidOperationException($"{nameof(HubUrl)} is not initialized.");
         set
         {
             if (IsRunning == true)
@@ -67,7 +67,7 @@ internal sealed class Client : IClient
                 throw new InvalidOperationException("The client is running.");
             }
 
-            _nodeEndPoint = value;
+            _nodeUrl = value;
         }
     }
 
@@ -84,12 +84,12 @@ internal sealed class Client : IClient
             throw new InvalidOperationException("The client is already running.");
         }
 
-        if (_nodeEndPoint is null)
+        if (_nodeUrl is null)
         {
-            throw new InvalidOperationException($"{nameof(NodeEndPoint)} is not initialized.");
+            throw new InvalidOperationException($"{nameof(HubUrl)} is not initialized.");
         }
 
-        var channel = NodeChannel.CreateChannel(_nodeEndPoint);
+        var channel = NodeChannel.CreateChannel(_nodeUrl);
         var nodeService = await NodeService.CreateAsync(channel, cancellationToken);
 
         _logger.LogDebug(JsonUtility.Serialize(nodeService.Info));

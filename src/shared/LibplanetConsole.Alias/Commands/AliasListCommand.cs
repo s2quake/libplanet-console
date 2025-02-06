@@ -2,10 +2,11 @@ using JSSoft.Commands;
 using JSSoft.Commands.Extensions;
 using LibplanetConsole.Common.Extensions;
 
-namespace LibplanetConsole.BlockChain.Commands;
+namespace LibplanetConsole.Alias.Commands;
 
 [CommandSummary("Prints the address of the node")]
-internal sealed class AddressCommand(IAddressCollection addresses) : CommandBase
+internal sealed class AliasListCommand(AliasCommand aliasCommand, IAliasCollection aliases)
+    : CommandBase(aliasCommand, "ls")
 {
     [CommandPropertySwitch("raw")]
     [CommandSummary("If set, prints the address in raw format.")]
@@ -13,20 +14,20 @@ internal sealed class AddressCommand(IAddressCollection addresses) : CommandBase
 
     protected override void OnExecute()
     {
-        var addressInfos = addresses.GetAddressInfos();
+        var aliasInfos = aliases.GetAliasInfos();
         if (IsRaw is true)
         {
             var tableDataBuilder = new TableDataBuilder(2);
-            foreach (var addressInfo in addressInfos)
+            foreach (var aliasInfo in aliasInfos)
             {
-                tableDataBuilder.Add([$"{addressInfo.Alias}", addressInfo.Address]);
+                tableDataBuilder.Add([$"{aliasInfo.Alias}", aliasInfo.Address]);
             }
 
             Out.Print(tableDataBuilder);
         }
         else
         {
-            Out.WriteLineAsJson(addressInfos);
+            Out.WriteLineAsJson(aliasInfos);
         }
     }
 }

@@ -1,4 +1,7 @@
+using Grpc.Core;
 using LibplanetConsole.Common;
+using LibplanetConsole.Hub.Grpc;
+using LibplanetConsole.Hub.Services;
 using Microsoft.Extensions.Hosting;
 
 namespace LibplanetConsole.Node;
@@ -10,9 +13,22 @@ internal sealed class NodeHostedService(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         node.Contents = GetNodeContents(serviceProvider);
-        if (options.SeedEndPoint is not null || options.IsSingleNode is true)
+        if (options.HubUrl is { } hubUrl)
         {
-            node.SeedEndPoint = options.SeedEndPoint;
+            using var channel = HubChannel.CreateChannel(hubUrl);
+            var service = new HubService(channel);
+            var request = new GetServiceRequest
+            {
+                ServiceName = "libplanet.console.seed.v1",
+            };
+            var callOptions = new CallOptions(cancellationToken: cancellationToken);
+            var response = await service.GetServiceAsync(request, callOptions);
+            node.SeedUrl = new(response.Url);
+            await node.StartAsync(cancellationToken);
+        }
+        else if (options.IsSingleNode is true)
+        {
+            node.SeedUrl = null;
             await node.StartAsync(cancellationToken);
         }
     }

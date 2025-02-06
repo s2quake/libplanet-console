@@ -14,7 +14,7 @@ internal sealed class NodeApplicationProvider : InfoProviderBase<Node>
         var options = obj.Options;
         return new
         {
-            EndPoint = EndPointUtility.ToString(options.EndPoint),
+            options.Url,
             options.StorePath,
             options.LogPath,
             options.ActionProviderModulePath,

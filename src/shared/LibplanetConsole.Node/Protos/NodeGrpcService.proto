@@ -30,7 +30,7 @@ message PingResponse {
 }
 
 message StartRequest {
-  string seed_end_point = 1;
+  string hub_url = 1;
 }
 
 message StartResponse {

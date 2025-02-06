@@ -14,6 +14,8 @@ public interface IApplicationOptions
 
     string LogPath { get; }
 
+    string AliasPath { get; }
+
     ProcessOptions? ProcessOptions { get; }
 
     string ActionProviderModulePath { get; }

@@ -10,7 +10,6 @@ using LibplanetConsole.Common.Progresses;
 using LibplanetConsole.Console.Extensions;
 using LibplanetConsole.Node;
 using LibplanetConsole.Options;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable;
 
@@ -51,6 +50,8 @@ public sealed record class Repository
     }
 
     public string LogPath { get; init; } = string.Empty;
+
+    public string AliasPath { get; init; } = string.Empty;
 
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
@@ -195,6 +196,7 @@ public sealed record class Repository
             AppProtocolVersionPath = PathUtility.GetRelativePath(
                 settingsPath, appProtocolVersionPath),
             LogPath = LogPath,
+            AliasPath = AliasPath,
             ActionProviderModulePath = ActionProviderModulePath,
             ActionProviderType = ActionProviderType,
             BlocksyncPort = blocksyncPort,
@@ -243,13 +245,12 @@ public sealed record class Repository
             var process = new NodeRepositoryProcess
             {
                 PrivateKey = node.PrivateKey,
-                Port = GetPort(node.EndPoint),
+                Port = node.Url.Port,
                 OutputPath = resolver.GetNodePath(nodesPath, nodeAddress),
                 GenesisPath = resolver.GetGenesisPath(repositoryPath),
                 AppProtocolVersionPath = appProtocolVersionPath,
                 ActionProviderModulePath = node.ActionProviderModulePath,
                 ActionProviderType = node.ActionProviderType,
-                Alias = $"node-{i}",
             };
             var sb = new StringBuilder();
             using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
@@ -271,9 +272,8 @@ public sealed record class Repository
             var process = new ClientRepositoryProcess
             {
                 PrivateKey = privateKey,
-                Port = GetPort(client.EndPoint),
+                Port = client.Url.Port,
                 OutputPath = resolver.GetClientPath(clientsPath, privateKey.Address),
-                Alias = $"client-{i}",
             };
             var sb = new StringBuilder();
             using var processCancellationTokenSource = new CancellationTokenSource(DefaultTimeout);

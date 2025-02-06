@@ -1,4 +1,4 @@
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 
 namespace LibplanetConsole.Console.Extensions;
 
@@ -25,13 +25,13 @@ public static class INodeCollectionExtensions
     }
 
     public static INode GetNodeOrCurrent(
-        this INodeCollection @this, string address, IAddressCollection addresses)
+        this INodeCollection @this, string address, IAliasCollection aliases)
     {
         if (address == string.Empty)
         {
             return @this.Current ?? throw new InvalidOperationException("No node is selected.");
         }
 
-        return @this[addresses.ToAddress(address)];
+        return @this[aliases.ToAddress(address)];
     }
 }

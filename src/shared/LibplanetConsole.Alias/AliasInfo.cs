@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
-using LibplanetConsole.BlockChain.Grpc;
+using LibplanetConsole.Alias.Grpc;
 using static LibplanetConsole.Grpc.TypeUtility;
 
-namespace LibplanetConsole.BlockChain;
+namespace LibplanetConsole.Alias;
 
-public readonly partial record struct AddressInfo
+public readonly partial record struct AliasInfo
 {
-    public AddressInfo()
+    public AliasInfo()
     {
     }
 
@@ -19,14 +19,14 @@ public readonly partial record struct AddressInfo
     [JsonIgnore]
     public bool IsCustom => Tags.Contains("custom");
 
-    public static implicit operator AddressInfo(AddressInfoProto addressInfo) => new()
+    public static implicit operator AliasInfo(AliasInfoProto addressInfo) => new()
     {
         Alias = addressInfo.Alias,
         Address = ToAddress(addressInfo.Address),
         Tags = [.. addressInfo.Tags],
     };
 
-    public static implicit operator AddressInfoProto(AddressInfo addressInfo) => new()
+    public static implicit operator AliasInfoProto(AliasInfo addressInfo) => new()
     {
         Alias = addressInfo.Alias,
         Address = ToGrpc(addressInfo.Address),

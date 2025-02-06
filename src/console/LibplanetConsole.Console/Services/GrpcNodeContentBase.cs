@@ -1,6 +1,5 @@
 using Grpc.Core;
 using Grpc.Net.Client;
-using LibplanetConsole.Common;
 
 namespace LibplanetConsole.Console.Services;
 
@@ -26,7 +25,7 @@ public abstract class GrpcNodeContentBase<T>(INode node, string name) : NodeCont
 
     protected override async Task OnStartAsync(CancellationToken cancellationToken)
     {
-        var address = $"http://{EndPointUtility.ToString(node.EndPoint)}";
+        var address = node.Url.ToString();
         _channel = GrpcChannel.ForAddress(address);
         _service = CreateService(_channel);
 

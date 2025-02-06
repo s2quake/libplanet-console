@@ -64,7 +64,7 @@ internal sealed class SystemTerminalHostedService(
 
     private static bool GetStartupCondition(IApplicationOptions options)
     {
-        if (options.NodeEndPoint is not null)
+        if (options.HubUrl is not null)
         {
             return false;
         }

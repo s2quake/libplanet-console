@@ -5,12 +5,11 @@ using LibplanetConsole.Common.DataAnnotations;
 using LibplanetConsole.DataAnnotations;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console.Executable.EntryCommands;
 
 [CommandSummary("Runs the libplanet-console")]
-[CommandExample("run --end-point localhost:5000 --node-count 4 --client-count 2")]
+[CommandExample("run --port 5000 --node-count 4 --client-count 2")]
 internal sealed class RunCommand
     : CommandAsyncBase, IConfigureOptions<ApplicationOptions>
 {
@@ -84,6 +83,11 @@ internal sealed class RunCommand
     [Path(Type = PathType.Directory, AllowEmpty = true)]
     public string LogPath { get; set; } = string.Empty;
 
+    [CommandProperty]
+    [CommandSummary("Specifies the alias path")]
+    [Path(Type = PathType.File, AllowEmpty = true)]
+    public string AliasPath { get; set; } = string.Empty;
+
     [CommandPropertySwitch]
     [CommandSummary("If set, the node and client processes will not start.")]
     public bool NoProcess { get; set; }
@@ -126,6 +130,7 @@ internal sealed class RunCommand
         };
         options.PrivateKey = PrivateKeyUtility.ToString(privateKey);
         options.LogPath = GetFullPath(LogPath);
+        options.AliasPath = GetFullPath(AliasPath);
         options.Nodes = repository.Nodes;
         options.Clients = repository.Clients;
         options.Genesis = Genesis;
@@ -204,9 +209,8 @@ internal sealed class RunCommand
             var ports = portGenerator.Next();
             return new ClientOptions
             {
-                EndPoint = GetLocalHost(ports[0]),
+                Url = UriUtility.GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
-                Alias = $"client-{index}",
             };
         }
     }
@@ -221,13 +225,12 @@ internal sealed class RunCommand
             var ports = portGenerator.Next();
             return new NodeOptions
             {
-                EndPoint = GetLocalHost(ports[0]),
+                Url = UriUtility.GetLocalHost(ports[0]),
                 PrivateKey = privateKey,
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
                 BlocksyncPort = ports[4],
                 ConsensusPort = ports[5],
-                Alias = $"node-{index}",
             };
         }
     }

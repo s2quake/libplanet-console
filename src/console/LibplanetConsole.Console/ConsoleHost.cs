@@ -106,7 +106,7 @@ internal sealed partial class ConsoleHost(
             nonce: nonce,
             privateKey: privateKey,
             genesisHash: genesisHash,
-            actions: new TxActionList(values));
+            actions: [.. values]);
 
         await blockChain.SendTransactionAsync(transaction, cancellationToken);
         return transaction.Id;

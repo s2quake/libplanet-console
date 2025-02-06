@@ -10,6 +10,7 @@ public static class NodeEndpointRouteBuilderExtensions
     {
         @this.MapGrpcService<NodeGrpcServiceV1>();
         @this.MapGrpcService<BlockChainGrpcServiceV1>();
+        @this.MapGrpcService<HubGrpcServiceV1>();
 
         return @this;
     }

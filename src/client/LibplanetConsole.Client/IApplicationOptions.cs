@@ -6,11 +6,9 @@ public interface IApplicationOptions
 
     int ParentProcessId { get; }
 
-    EndPoint? NodeEndPoint { get; }
+    Uri? HubUrl { get; }
 
     string LogPath { get; }
 
     bool NoREPL { get; }
-
-    string Alias { get; }
 }

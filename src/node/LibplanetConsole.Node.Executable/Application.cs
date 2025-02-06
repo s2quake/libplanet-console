@@ -6,6 +6,7 @@ using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace LibplanetConsole.Node.Executable;
@@ -43,13 +44,15 @@ internal sealed class Application
         services.AddSingleton<CommandContext>();
         services.AddSingleton<SystemTerminal>();
         services.AddSingleton<IInfoProvider, ServerInfoProvider>();
-        services.AddSingleton<IAddressProvider, AddressProvider>();
         services.AddSingleton<ICurrencyProvider, CurrencyProvider>();
+        services.AddSingleton<ConsoleConfigureOptions>()
+            .AddSingleton<IConfigureOptions<ApplicationOptions>>(
+                s => s.GetRequiredService<ConsoleConfigureOptions>());
 
         services.AddSingleton<HelpCommand>()
-                .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
+            .AddSingleton<ICommand>(s => s.GetRequiredService<HelpCommand>());
         services.AddSingleton<VersionCommand>()
-                .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
+            .AddSingleton<ICommand>(s => s.GetRequiredService<VersionCommand>());
 
         services.AddNode(configuration);
         services.AddExplorer(configuration);
@@ -65,6 +68,7 @@ internal sealed class Application
         services.AddHostedService<BlockChainEventTracer>();
         services.AddHostedService<NodeEventTracer>();
         services.AddHostedService<SystemTerminalHostedService>();
+        services.AddHostedService<ConsoleHostedService>();
 
         services.PostConfigure<ApplicationOptions>(options =>
         {

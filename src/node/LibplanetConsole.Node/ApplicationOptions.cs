@@ -15,7 +15,7 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public const int SeedConsensusPortIncrement = 7;
 
     private PrivateKey? _privateKey;
-    private EndPoint? _seedEndPoint;
+    private Uri? _hubUrl;
     private Block? _genesisBlock;
     private AppProtocolVersion? _appProtocolVersion;
 
@@ -43,11 +43,11 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     [JsonIgnore]
     public int ParentProcessId { get; set; }
 
-    [EndPoint]
-    public string SeedEndPoint { get; set; } = string.Empty;
+    [Uri(AllowEmpty = true)]
+    public string HubUrl { get; set; } = string.Empty;
 
-    EndPoint? IApplicationOptions.SeedEndPoint
-        => _seedEndPoint ??= EndPointUtility.ParseOrDefault(SeedEndPoint);
+    Uri? IApplicationOptions.HubUrl
+        => _hubUrl ??= UriUtility.ParseOrDefault(HubUrl);
 
     public string StorePath { get; set; } = string.Empty;
 
@@ -65,8 +65,6 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public int BlocksyncPort { get; set; }
 
     public int ConsensusPort { get; set; }
-
-    public string Alias { get; set; } = string.Empty;
 
     private PrivateKey ActualPrivateKey
         => _privateKey ??= PrivateKeyUtility.ParseOrRandom(PrivateKey);

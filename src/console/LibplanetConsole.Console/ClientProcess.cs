@@ -1,5 +1,4 @@
 using LibplanetConsole.Common;
-using static LibplanetConsole.Common.EndPointUtility;
 
 namespace LibplanetConsole.Console;
 
@@ -22,14 +21,15 @@ internal sealed class ClientProcess(ClientOptions clientOptions)
             }
             else
             {
-                if (GetHost(clientOptions.EndPoint) is not "localhost")
+                var url = clientOptions.Url;
+                if (url.Host is not "localhost")
                 {
-                    throw new InvalidOperationException("EndPoint must be localhost.");
+                    throw new InvalidOperationException("Url must be localhost.");
                 }
 
                 argumentList.Add("run");
                 argumentList.Add("--port");
-                argumentList.Add($"{GetPort(clientOptions.EndPoint)}");
+                argumentList.Add($"{url.Port}");
                 argumentList.Add("--private-key");
                 argumentList.Add(PrivateKeyUtility.ToString(clientOptions.PrivateKey));
 
@@ -39,10 +39,10 @@ internal sealed class ClientProcess(ClientOptions clientOptions)
                     argumentList.Add(clientOptions.LogPath);
                 }
 
-                if (clientOptions.NodeEndPoint is { } nodeEndPoint)
+                if (clientOptions.HubUrl is { } nodeUrl)
                 {
-                    argumentList.Add("--node-end-point");
-                    argumentList.Add(EndPointUtility.ToString(nodeEndPoint));
+                    argumentList.Add("--node-url");
+                    argumentList.Add(nodeUrl.ToString());
                 }
             }
 

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using LibplanetConsole.Alias;
 
 namespace LibplanetConsole.BlockChain.Converters;
 
@@ -38,9 +39,9 @@ internal sealed class AddressTypeConverter : TypeConverter
         }
 
         if (value is string text
-            && context?.GetRequiredService<IAddressCollection>() is { } addresses)
+            && context?.GetRequiredService<IAliasCollection>() is { } aliases)
         {
-            return addresses.ToAddress(text);
+            return aliases.ToAddress(text);
         }
 
         return _originalConverter.ConvertFrom(context, culture, value);

@@ -1,6 +1,6 @@
 using JSSoft.Commands;
 using JSSoft.Terminals;
-using LibplanetConsole.BlockChain;
+using LibplanetConsole.Alias;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
@@ -9,7 +9,7 @@ namespace LibplanetConsole.Console.Commands;
 
 [CommandSummary("Provides node-related commands")]
 public sealed partial class NodeCommand(
-    IServiceProvider serviceProvider, INodeCollection nodes, IAddressCollection addresses)
+    IServiceProvider serviceProvider, INodeCollection nodes, IAliasCollection aliases)
     : NodeCommandMethodBase(serviceProvider), IExecutable
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
@@ -26,9 +26,9 @@ public sealed partial class NodeCommand(
             var isCurrent = nodes.Current == node;
             tsb.Foreground = GetForeground(node: node, isCurrent);
             tsb.IsBold = node.IsRunning == true;
-            if (addresses.TryGetAlias(address, out var alias) is true)
+            if (aliases[address] is { } ass && ass.Length > 0)
             {
-                tsb.AppendLine($"{node} ({alias})");
+                tsb.AppendLine($"{node} ({string.Join(", ", ass)})");
             }
             else
             {

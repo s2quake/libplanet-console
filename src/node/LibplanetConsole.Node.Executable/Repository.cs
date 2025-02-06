@@ -15,7 +15,7 @@ public sealed record class Repository
 
     public required PrivateKey PrivateKey { get; init; }
 
-    public EndPoint? SeedEndPoint { get; init; }
+    public Uri? HubUrl { get; init; }
 
     public string StorePath { get; init; } = string.Empty;
 
@@ -34,8 +34,6 @@ public sealed record class Repository
     public int ConsensusPort { get; set; }
 
     public bool IsSingleNode { get; set; }
-
-    public string Alias { get; set; } = string.Empty;
 
     public dynamic Save(string repositoryPath)
     {
@@ -77,13 +75,12 @@ public sealed record class Repository
                     repositoryPath, AppProtocolVersionPath),
                 StorePath = GetRelativePathFromDirectory(repositoryPath, StorePath),
                 LogPath = GetRelativePathFromDirectory(repositoryPath, LogPath),
-                SeedEndPoint = EndPointUtility.ToString(SeedEndPoint),
+                HubUrl = $"{HubUrl}",
                 ActionProviderModulePath = ActionProviderModulePath,
                 ActionProviderType = ActionProviderType,
                 BlocksyncPort = BlocksyncPort,
                 ConsensusPort = ConsensusPort,
                 IsSingleNode = IsSingleNode,
-                Alias = Alias,
             },
             Kestrel = new
             {
