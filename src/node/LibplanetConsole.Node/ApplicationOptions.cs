@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.DataAnnotations;
@@ -20,15 +21,18 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     private AppProtocolVersion? _appProtocolVersion;
 
     [PrivateKey]
+    [Description("Specifies the private key to use.")]
     public string PrivateKey { get; set; } = string.Empty;
 
     PrivateKey IApplicationOptions.PrivateKey => ActualPrivateKey;
 
+    [Description("Specifies the path to the genesis block file.")]
     public string GenesisPath { get; set; } = string.Empty;
 
     [JsonIgnore]
     public string Genesis { get; set; } = string.Empty;
 
+    [Description("Specifies the path to the app protocol version file.")]
     public string AppProtocolVersionPath { get; set; } = string.Empty;
 
     [JsonIgnore]
@@ -44,26 +48,34 @@ public sealed class ApplicationOptions : OptionsBase<ApplicationOptions>, IAppli
     public int ParentProcessId { get; set; }
 
     [Uri(AllowEmpty = true)]
+    [Description("Specifies the URL of the hub to connect to.")]
     public string HubUrl { get; set; } = string.Empty;
 
     Uri? IApplicationOptions.HubUrl
         => _hubUrl ??= UriUtility.ParseOrDefault(HubUrl);
 
+    [Description("Specifies the directory path to store the store files.")]
     public string StorePath { get; set; } = string.Empty;
 
+    [Description("Specifies the directory path to store the log files.")]
     public string LogPath { get; set; } = string.Empty;
 
     [JsonIgnore]
     public bool NoREPL { get; set; }
 
+    [Description("Specifies the port to bind to.")]
     public bool IsSingleNode { get; set; }
 
+    [Description("Specifies the path to the action provider module.")]
     public string ActionProviderModulePath { get; set; } = string.Empty;
 
+    [Description("Specifies the type of the action provider.")]
     public string ActionProviderType { get; set; } = string.Empty;
 
+    [Description("Specifies the port for the block sync of the swarm.")]
     public int BlocksyncPort { get; set; }
 
+    [Description("Specifies the port for the consensus of the swarm.")]
     public int ConsensusPort { get; set; }
 
     private PrivateKey ActualPrivateKey

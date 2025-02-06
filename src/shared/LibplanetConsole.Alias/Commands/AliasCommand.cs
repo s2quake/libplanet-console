@@ -2,7 +2,7 @@ using JSSoft.Commands;
 
 namespace LibplanetConsole.Alias.Commands;
 
-[CommandSummary("Prints the address of the node")]
+[CommandSummary("Provides commands related to alias")]
 internal sealed class AliasCommand : CommandMethodBase
 {
 }

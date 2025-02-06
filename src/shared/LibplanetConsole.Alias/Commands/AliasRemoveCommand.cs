@@ -2,12 +2,12 @@ using JSSoft.Commands;
 
 namespace LibplanetConsole.Alias.Commands;
 
-[CommandSummary("Prints the address of the node")]
+[CommandSummary("Removes an alias from the collection")]
 internal sealed class AliasRemoveCommand(AliasCommand aliasCommand, IAliasCollection aliases)
     : CommandAsyncBase(aliasCommand, "remove")
 {
     [CommandPropertyRequired]
-    [CommandSummary("If set, prints the address in raw format.")]
+    [CommandSummary("Specifies the alias to be removed.")]
     public string Alias { get; set; } = string.Empty;
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)

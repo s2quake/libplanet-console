@@ -2,18 +2,20 @@ using JSSoft.Commands;
 
 namespace LibplanetConsole.Alias.Commands;
 
-[CommandSummary("Prints the address of the node")]
+[CommandSummary("Updates the alias with a new address or tags.")]
 internal sealed class AliasUpdateCommand(AliasCommand aliasCommand, IAliasCollection aliases)
     : CommandAsyncBase(aliasCommand, "update")
 {
     [CommandPropertyRequired]
-    [CommandSummary("If set, prints the address in raw format.")]
+    [CommandSummary("Specifies the alias to be updated.")]
     public string Alias { get; set; } = string.Empty;
 
     [CommandProperty]
+    [CommandSummary("Specifies the new address to associate with the alias.")]
     public Address? Address { get; set; }
 
     [CommandProperty]
+    [CommandSummary("Specifies the new tags to associate with the alias.")]
     public string[]? Tags { get; set; } = [];
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
