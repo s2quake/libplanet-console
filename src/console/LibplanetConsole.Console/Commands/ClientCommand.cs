@@ -4,7 +4,6 @@ using LibplanetConsole.Alias;
 using LibplanetConsole.Common;
 using LibplanetConsole.Common.Actions;
 using LibplanetConsole.Common.Extensions;
-using LibplanetConsole.Console.Extensions;
 
 namespace LibplanetConsole.Console.Commands;
 

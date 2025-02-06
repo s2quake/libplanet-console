@@ -5,7 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CommandsDirectory>$(MSBuildThisFileDirectory).submodules\commands\</CommandsDirectory>
-    <LibplanetDirectory>$(MSBuildThisFileDirectory).submodules\libplanet\</LibplanetDirectory>
+    <LibplanetDirectory>$(MSBuildThisFileDirectory).submodules\lib9c\.Libplanet\</LibplanetDirectory>
+    <Lib9cDirectory>$(MSBuildThisFileDirectory).submodules\lib9c\</Lib9cDirectory>
     <SharedDirectory>$(MSBuildThisFileDirectory)src\shared\</SharedDirectory>
     <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
     <ProtoRootDirectory>$(SolutionDir)</ProtoRootDirectory>

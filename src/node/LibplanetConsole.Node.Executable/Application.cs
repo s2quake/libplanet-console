@@ -2,10 +2,12 @@ using JSSoft.Commands;
 using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using LibplanetConsole.Node.Bank;
+using LibplanetConsole.Node.Delegation;
 using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
+using LibplanetConsole.Node.Guild;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -58,6 +60,8 @@ internal sealed class Application
         services.AddExplorer(configuration);
         services.AddEvidence();
         services.AddBank();
+        services.AddGuild();
+        services.AddDelegation();
 
         services.AddGrpc(options =>
         {
@@ -95,6 +99,8 @@ internal sealed class Application
         app.UseExplorer();
         app.UseEvidence();
         app.UseBank();
+        app.UseDelegation();
+        app.UseGuild();
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
 

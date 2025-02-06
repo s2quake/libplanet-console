@@ -2,7 +2,7 @@ using LibplanetConsole.Bank;
 
 namespace LibplanetConsole.Node.Bank;
 
-internal sealed class CurrencyCollection(IServiceProvider serviceProvider)
+internal sealed class CurrencyCollection(INode node)
     : CurrencyCollectionBase, INodeContent
 {
     string INodeContent.Name => "currencies";
@@ -13,7 +13,7 @@ internal sealed class CurrencyCollection(IServiceProvider serviceProvider)
 
     async Task INodeContent.StartAsync(CancellationToken cancellationToken)
     {
-        var currencyProviders = serviceProvider.GetServices<ICurrencyProvider>();
+        var currencyProviders = node.GetServices<ICurrencyProvider>();
         var items = currencyProviders.SelectMany(provider => provider.Currencies);
         foreach (var item in items)
         {
@@ -26,7 +26,6 @@ internal sealed class CurrencyCollection(IServiceProvider serviceProvider)
     async Task INodeContent.StopAsync(CancellationToken cancellationToken)
     {
         Clear();
-
         await Task.CompletedTask;
     }
 }

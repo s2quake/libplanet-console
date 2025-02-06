@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Client\LibplanetConsole.Client.csproj" />
+    <ProjectReference Include="..\..\..\.submodules\lib9c\Lib9c\Lib9c.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\shared\LibplanetConsole.Delegation\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Delegation\Protos\*.proto" GrpcServices="Both">
+      <ProtoRoot>$(ProtoRootDirectory)</ProtoRoot>
+    </Protobuf>
+  </ItemGroup>
+
+</Project>

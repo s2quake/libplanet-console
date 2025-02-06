@@ -1,7 +1,9 @@
 using JSSoft.Commands;
 using LibplanetConsole.Client.Bank;
+using LibplanetConsole.Client.Delegation;
 using LibplanetConsole.Client.Executable.Commands;
 using LibplanetConsole.Client.Executable.Tracers;
+using LibplanetConsole.Client.Guild;
 using LibplanetConsole.Common;
 using LibplanetConsole.Logging;
 using Microsoft.Extensions.Options;
@@ -48,6 +50,8 @@ internal sealed class Application
 
         services.AddClient(configuration);
         services.AddBank();
+        services.AddDelegation();
+        services.AddGuild();
 
         services.AddGrpc(options =>
         {
@@ -83,6 +87,8 @@ internal sealed class Application
 
         app.UseClient();
         app.UseBank();
+        app.UseDelegation();
+        app.UseGuild();
         app.MapGet("/", () => "Libplanet-Client");
         app.MapGrpcReflectionService().AllowAnonymous();
 

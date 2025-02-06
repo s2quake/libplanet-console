@@ -6,6 +6,8 @@
     <ProjectReference Include="..\LibplanetConsole.Console.Seed\LibplanetConsole.Console.Seed.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Console.Evidence\LibplanetConsole.Console.Evidence.csproj" />
     <ProjectReference Include="..\LibplanetConsole.Console.Bank\LibplanetConsole.Console.Bank.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console.Delegation\LibplanetConsole.Console.Delegation.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Console.Guild\LibplanetConsole.Console.Guild.csproj" />
   </ItemGroup>
 
   <ItemGroup>
