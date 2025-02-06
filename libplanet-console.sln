@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Node.Bank"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Console.Seed", "src\console\LibplanetConsole.Console.Seed\LibplanetConsole.Console.Seed.csproj", "{B7C47731-7948-42E4-87FA-E82BDA26BC7D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibplanetConsole.Node.Hand", "src\node\LibplanetConsole.Node.Hand\LibplanetConsole.Node.Hand.csproj", "{06EF478F-A2E1-4E1C-BEB9-6463219472BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,6 +143,10 @@ Global
 		{B7C47731-7948-42E4-87FA-E82BDA26BC7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7C47731-7948-42E4-87FA-E82BDA26BC7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7C47731-7948-42E4-87FA-E82BDA26BC7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06EF478F-A2E1-4E1C-BEB9-6463219472BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06EF478F-A2E1-4E1C-BEB9-6463219472BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06EF478F-A2E1-4E1C-BEB9-6463219472BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06EF478F-A2E1-4E1C-BEB9-6463219472BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,6 +176,7 @@ Global
 		{12758854-4C5E-491B-B187-590D788C3B1A} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
 		{27D02D73-6D2C-4E69-8BB7-CFE206B7872C} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 		{B7C47731-7948-42E4-87FA-E82BDA26BC7D} = {CAB76DA9-6E57-4422-98C6-DD2D6299F675}
+		{06EF478F-A2E1-4E1C-BEB9-6463219472BE} = {4A8F8EE9-769C-4C97-89BC-19D038E69998}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3227501A-47F1-4FA6-A69C-B5801260FEC9}

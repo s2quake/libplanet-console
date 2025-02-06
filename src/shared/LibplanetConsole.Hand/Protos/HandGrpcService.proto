@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "LibplanetConsole.Hand.Grpc";
+
+package libplanet.console.hand.v1;
+
+service HandGrpcService {
+  rpc GetHand(GetHandRequest) returns (GetHandResponse);
+}
+
+message HandInfoProto {
+  string blocksyncHandPeer = 1;
+  string consensusHandPeer = 2;
+}
+
+message GetHandRequest {
+  string publicKey = 1;
+}
+
+message GetHandResponse {
+  HandInfoProto handResult = 1;
+}

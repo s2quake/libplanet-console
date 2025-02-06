@@ -6,6 +6,7 @@ using LibplanetConsole.Node.Evidence;
 using LibplanetConsole.Node.Executable.Commands;
 using LibplanetConsole.Node.Executable.Tracers;
 using LibplanetConsole.Node.Explorer;
+using LibplanetConsole.Node.Hand;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -58,6 +59,7 @@ internal sealed class Application
         services.AddExplorer(configuration);
         services.AddEvidence();
         services.AddBank();
+        services.AddHand();
 
         services.AddGrpc(options =>
         {
@@ -95,6 +97,7 @@ internal sealed class Application
         app.UseExplorer();
         app.UseEvidence();
         app.UseBank();
+        app.UseHand();
         app.MapGet("/", () => "Libplanet-Node");
         app.MapGrpcReflectionService().AllowAnonymous();
 

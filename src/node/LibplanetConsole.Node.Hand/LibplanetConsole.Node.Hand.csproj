@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
+    <ProjectReference Include="..\LibplanetConsole.Node.Bank\LibplanetConsole.Node.Bank.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(SharedDirectory)LibplanetConsole.Hand\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="$(SharedDirectory)LibplanetConsole.Hand\Protos\*.proto"
+      GrpcServices="Server" ProtoRoot="$(ProtoRootDirectory)" />
+  </ItemGroup>
+
+</Project>

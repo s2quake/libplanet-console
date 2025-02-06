@@ -96,7 +96,11 @@
         // options
         "--single-node",
         "--port",
-        "4000"
+        "4000",
+        "--module-type",
+        "LibplanetConsole.Node.Hand.ActionProvider, LibplanetConsole.Node.Hand",
+        "--log-path",
+        ".log"
       ]
     },
     {
