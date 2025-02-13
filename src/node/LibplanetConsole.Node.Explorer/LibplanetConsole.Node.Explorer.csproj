@@ -1,15 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- $(LibplanetDirectory) exists. -->
-  <ItemGroup Condition="Exists('$(LibplanetDirectory)')">
-    <ProjectReference Include="$(LibplanetDirectory)tools\Libplanet.Explorer\Libplanet.Explorer.csproj" />
-  </ItemGroup>
-
-  <!-- $(LibplanetDirectory) does not exist. -->
-  <ItemGroup Condition="!Exists('$(LibplanetDirectory)')">
-    <PackageReference Include="Libplanet.Explorer" Version="$(LibplanetVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\LibplanetConsole.Node\LibplanetConsole.Node.csproj" />
   </ItemGroup>
@@ -21,7 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0"/>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0 "/>
+    <PackageReference Include="GraphQL.AspNet" Version="1.4.2" />
+    <PackageReference Include="GraphQL.AspNet.Subscriptions" Version="1.4.2" />
   </ItemGroup>
 
 </Project>
